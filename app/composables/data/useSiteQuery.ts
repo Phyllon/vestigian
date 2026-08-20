@@ -1,3 +1,4 @@
+import { useDebounceFn } from '@vueuse/core'
 import type { SiteDetail, SiteSummary } from '#shared/types'
 
 /**

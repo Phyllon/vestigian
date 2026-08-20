@@ -23,6 +23,9 @@ importers:
       '@node-rs/argon2':
         specifier: ^2.0.2
         version: 2.1.0
+      '@vueuse/core':
+        specifier: 13.9.0
+        version: 13.9.0(vue@3.5.41(typescript@5.9.3))
       drizzle-orm:
         specifier: ^0.36.4
         version: 0.36.4(mysql2@3.23.4(@types/node@22.20.1))(postgres@3.4.9)
@@ -79,8 +82,8 @@ importers:
         specifier: ^2.4.6
         version: 2.4.11(@vue/compiler-dom@3.5.41)(@vue/server-renderer@3.5.41)(vue@3.5.41(typescript@5.9.3))
       '@vueuse/nuxt':
-        specifier: ^12.0.0
-        version: 12.8.2(magicast@0.5.4)(nuxt@4.5.2(@babel/plugin-syntax-jsx@7.29.7(@babel/core@7.29.7))(@babel/plugin-syntax-typescript@7.29.7(@babel/core@7.29.7))(@oxc-project/types@0.146.0)(@types/node@22.20.1)(@vue/compiler-sfc@3.5.41)(cac@6.7.14)(db0@0.3.4(drizzle-orm@0.36.4(mysql2@3.23.4(@types/node@22.20.1))(postgres@3.4.9))(mysql2@3.23.4(@types/node@22.20.1)))(drizzle-orm@0.36.4(mysql2@3.23.4(@types/node@22.20.1))(postgres@3.4.9))(esbuild@0.19.12)(ioredis@5.11.1)(lightningcss@1.33.0)(magicast@0.5.4)(mysql2@3.23.4(@types/node@22.20.1))(rolldown@1.2.5)(rollup-plugin-visualizer@7.1.1(rolldown@1.2.5)(rollup@4.62.4))(rollup@4.62.4)(srvx@0.11.22)(terser@5.50.0)(tsx@4.23.12)(typescript@5.9.3)(vite@8.2.2(@types/node@22.20.1)(esbuild@0.19.12)(jiti@2.7.0)(terser@5.50.0)(tsx@4.23.12)(yaml@2.9.0))(vue-tsc@2.2.12(typescript@5.9.3))(yaml@2.9.0))(typescript@5.9.3)
+        specifier: ^13.9.0
+        version: 13.9.0(magicast@0.5.4)(nuxt@4.5.2(@babel/plugin-syntax-jsx@7.29.7(@babel/core@7.29.7))(@babel/plugin-syntax-typescript@7.29.7(@babel/core@7.29.7))(@oxc-project/types@0.146.0)(@types/node@22.20.1)(@vue/compiler-sfc@3.5.41)(cac@6.7.14)(db0@0.3.4(drizzle-orm@0.36.4(mysql2@3.23.4(@types/node@22.20.1))(postgres@3.4.9))(mysql2@3.23.4(@types/node@22.20.1)))(drizzle-orm@0.36.4(mysql2@3.23.4(@types/node@22.20.1))(postgres@3.4.9))(esbuild@0.19.12)(ioredis@5.11.1)(lightningcss@1.33.0)(magicast@0.5.4)(mysql2@3.23.4(@types/node@22.20.1))(rolldown@1.2.5)(rollup-plugin-visualizer@7.1.1(rolldown@1.2.5)(rollup@4.62.4))(rollup@4.62.4)(srvx@0.11.22)(terser@5.50.0)(tsx@4.23.12)(typescript@5.9.3)(vite@8.2.2(@types/node@22.20.1)(esbuild@0.19.12)(jiti@2.7.0)(terser@5.50.0)(tsx@4.23.12)(yaml@2.9.0))(vue-tsc@2.2.12(typescript@5.9.3))(yaml@2.9.0))(vue@3.5.41(typescript@5.9.3))
       drizzle-kit:
         specifier: ^0.28.1
         version: 0.28.1
@@ -2420,10 +2423,11 @@ packages:
   '@vueuse/metadata@13.9.0':
     resolution: {integrity: sha512-1AFRvuiGphfF7yWixZa0KwjYH8ulyjDCC0aFgrGRz8+P4kvDFSdXLVfTk5xAN9wEuD1J6z4/myMoYbnHoX07zg==}
 
-  '@vueuse/nuxt@12.8.2':
-    resolution: {integrity: sha512-jDsMli+MmxlhzaMwu8a2varKlkiBTPCdb+I457F7bTb1GazC6HDbGbLmhkpVQ8bNA1FzqfhwhAsOEsESF7wOkw==}
+  '@vueuse/nuxt@13.9.0':
+    resolution: {integrity: sha512-n/9BRU3nLl2mVI6rYbB3jOctCmQD0xT799hXPCwCn1PyvK7r6O9Nt1dxfVCMfKCDAiCi8Fz2IqPC6Zs2Dv1pVA==}
     peerDependencies:
       nuxt: ^3.0.0 || ^4.0.0-0
+      vue: ^3.5.0
 
   '@vueuse/shared@10.11.1':
     resolution: {integrity: sha512-LHpC8711VFZlDaYUXEBbFBCQ7GS3dVU9mjOhhMhXP6txTV4EhYQg/KGnQuvt/sPAtoUKq7VVUnL6mVtFoL42sA==}
@@ -7918,17 +7922,16 @@ snapshots:
 
   '@vueuse/metadata@13.9.0': {}
 
-  '@vueuse/nuxt@12.8.2(magicast@0.5.4)(nuxt@4.5.2(@babel/plugin-syntax-jsx@7.29.7(@babel/core@7.29.7))(@babel/plugin-syntax-typescript@7.29.7(@babel/core@7.29.7))(@oxc-project/types@0.146.0)(@types/node@22.20.1)(@vue/compiler-sfc@3.5.41)(cac@6.7.14)(db0@0.3.4(drizzle-orm@0.36.4(mysql2@3.23.4(@types/node@22.20.1))(postgres@3.4.9))(mysql2@3.23.4(@types/node@22.20.1)))(drizzle-orm@0.36.4(mysql2@3.23.4(@types/node@22.20.1))(postgres@3.4.9))(esbuild@0.19.12)(ioredis@5.11.1)(lightningcss@1.33.0)(magicast@0.5.4)(mysql2@3.23.4(@types/node@22.20.1))(rolldown@1.2.5)(rollup-plugin-visualizer@7.1.1(rolldown@1.2.5)(rollup@4.62.4))(rollup@4.62.4)(srvx@0.11.22)(terser@5.50.0)(tsx@4.23.12)(typescript@5.9.3)(vite@8.2.2(@types/node@22.20.1)(esbuild@0.19.12)(jiti@2.7.0)(terser@5.50.0)(tsx@4.23.12)(yaml@2.9.0))(vue-tsc@2.2.12(typescript@5.9.3))(yaml@2.9.0))(typescript@5.9.3)':
+  '@vueuse/nuxt@13.9.0(magicast@0.5.4)(nuxt@4.5.2(@babel/plugin-syntax-jsx@7.29.7(@babel/core@7.29.7))(@babel/plugin-syntax-typescript@7.29.7(@babel/core@7.29.7))(@oxc-project/types@0.146.0)(@types/node@22.20.1)(@vue/compiler-sfc@3.5.41)(cac@6.7.14)(db0@0.3.4(drizzle-orm@0.36.4(mysql2@3.23.4(@types/node@22.20.1))(postgres@3.4.9))(mysql2@3.23.4(@types/node@22.20.1)))(drizzle-orm@0.36.4(mysql2@3.23.4(@types/node@22.20.1))(postgres@3.4.9))(esbuild@0.19.12)(ioredis@5.11.1)(lightningcss@1.33.0)(magicast@0.5.4)(mysql2@3.23.4(@types/node@22.20.1))(rolldown@1.2.5)(rollup-plugin-visualizer@7.1.1(rolldown@1.2.5)(rollup@4.62.4))(rollup@4.62.4)(srvx@0.11.22)(terser@5.50.0)(tsx@4.23.12)(typescript@5.9.3)(vite@8.2.2(@types/node@22.20.1)(esbuild@0.19.12)(jiti@2.7.0)(terser@5.50.0)(tsx@4.23.12)(yaml@2.9.0))(vue-tsc@2.2.12(typescript@5.9.3))(yaml@2.9.0))(vue@3.5.41(typescript@5.9.3))':
     dependencies:
       '@nuxt/kit': 3.21.11(magicast@0.5.4)
-      '@vueuse/core': 12.8.2(typescript@5.9.3)
-      '@vueuse/metadata': 12.8.2
+      '@vueuse/core': 13.9.0(vue@3.5.41(typescript@5.9.3))
+      '@vueuse/metadata': 13.9.0
       local-pkg: 1.2.1
       nuxt: 4.5.2(@babel/plugin-syntax-jsx@7.29.7(@babel/core@7.29.7))(@babel/plugin-syntax-typescript@7.29.7(@babel/core@7.29.7))(@oxc-project/types@0.146.0)(@types/node@22.20.1)(@vue/compiler-sfc@3.5.41)(cac@6.7.14)(db0@0.3.4(drizzle-orm@0.36.4(mysql2@3.23.4(@types/node@22.20.1))(postgres@3.4.9))(mysql2@3.23.4(@types/node@22.20.1)))(drizzle-orm@0.36.4(mysql2@3.23.4(@types/node@22.20.1))(postgres@3.4.9))(esbuild@0.19.12)(ioredis@5.11.1)(lightningcss@1.33.0)(magicast@0.5.4)(mysql2@3.23.4(@types/node@22.20.1))(rolldown@1.2.5)(rollup-plugin-visualizer@7.1.1(rolldown@1.2.5)(rollup@4.62.4))(rollup@4.62.4)(srvx@0.11.22)(terser@5.50.0)(tsx@4.23.12)(typescript@5.9.3)(vite@8.2.2(@types/node@22.20.1)(esbuild@0.19.12)(jiti@2.7.0)(terser@5.50.0)(tsx@4.23.12)(yaml@2.9.0))(vue-tsc@2.2.12(typescript@5.9.3))(yaml@2.9.0)
       vue: 3.5.41(typescript@5.9.3)
     transitivePeerDependencies:
       - magicast
-      - typescript
 
   '@vueuse/shared@10.11.1(vue@3.5.41(typescript@5.9.3))':
     dependencies:

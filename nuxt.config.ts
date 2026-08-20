@@ -27,6 +27,15 @@ export default defineNuxtConfig({
     '@nuxt/test-utils/module',
   ],
 
+  /**
+   * Composables are grouped into subdirectories (map, data, auth, ui) and Nuxt
+   * only scans the top level of composables/ by default, so without this every
+   * useSession()/useMapInstance() call is an undefined reference at runtime.
+   */
+  imports: {
+    dirs: ['composables/**'],
+  },
+
   css: [
     '@fontsource-variable/fraunces/index.css',
     '@fontsource/ibm-plex-sans/400.css',

@@ -1,3 +1,5 @@
+import { useMediaQuery } from '@vueuse/core'
+
 /**
  * One breakpoint, not five. The layout has exactly two states: a sheet that
  * rises over the map on handhelds, and a fixed panel beside it on wide screens.
