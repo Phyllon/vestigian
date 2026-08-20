@@ -1,0 +1,239 @@
+@import 'tailwindcss';
+@import '@nuxt/ui';
+
+@variant dark (&:where(.dark, .dark *));
+
+/**
+ * Vestigia — field notebook carried through Roman Europe.
+ *
+ * The palette is taken from the materials of a survey notebook rather than from
+ * a generic warm-cream template: laid paper that has yellowed unevenly, iron
+ * gall ink that has browned with age, an oxide red used for corrections, and
+ * the dulled bronze of an excavated fitting. Nothing here is a saturated
+ * screen colour; every hue sits below 60% chroma so that photographs of sites
+ * are the brightest thing on the page.
+ */
+@theme {
+  /* Ground — aged laid paper, cooler and greener than a cream default */
+  --color-paper-50: #faf7ef;
+  --color-paper-100: #f2ede1;
+  --color-paper-200: #e7dfcd;
+  --color-paper-300: #d6cbb2;
+  --color-paper-400: #b9ab8d;
+  --color-paper-500: #a1926f;
+  --color-paper-600: #857759;
+  --color-paper-700: #6b6047;
+  --color-paper-800: #4d4534;
+  --color-paper-900: #2f2a20;
+  --color-paper-950: #1c1912;
+
+  /* Ink — iron gall, browned. Never pure black. */
+  --color-ink-50: #f6f4f1;
+  --color-ink-100: #e9e5df;
+  --color-ink-200: #d2cabf;
+  --color-ink-300: #8c8271;
+  --color-ink-400: #74695a;
+  --color-ink-500: #635a4d;
+  --color-ink-600: #4e463b;
+  --color-ink-700: #3d362e;
+  --color-ink-800: #2b2621;
+  --color-ink-900: #1c1815;
+  --color-ink-950: #100e0c;
+
+  /* Oxide — the correction red. Used once per screen, never decoratively. */
+  --color-oxide-50: #fbf1ee;
+  --color-oxide-100: #f5dfd8;
+  --color-oxide-200: #e9bcae;
+  --color-oxide-300: #d38a72;
+  --color-oxide-400: #c06a4d;
+  --color-oxide-500: #b04d31;
+  --color-oxide-600: #9a3b22;
+  --color-oxide-700: #7d2e1c;
+  --color-oxide-800: #5e2316;
+  --color-oxide-900: #401810;
+  --color-oxide-950: #250d08;
+
+  /* Bronze — secondary accent for roads, routes and linear features */
+  --color-bronze-50: #f7f4ec;
+  --color-bronze-100: #ece6d5;
+  --color-bronze-200: #d8cdaa;
+  --color-bronze-300: #bfae7e;
+  --color-bronze-400: #9c8c62;
+  --color-bronze-500: #7a6c49;
+  --color-bronze-600: #66593b;
+  --color-bronze-700: #5d5237;
+  --color-bronze-800: #443c28;
+  --color-bronze-900: #2c271a;
+  --color-bronze-950: #17140e;
+
+  /* Verdigris — used only for approved and confirmed states */
+  --color-verdigris-50: #f0f5f2;
+  --color-verdigris-100: #dbe8e1;
+  --color-verdigris-200: #b8d0c3;
+  --color-verdigris-300: #7d9b8b;
+  --color-verdigris-400: #5f8371;
+  --color-verdigris-500: #4a6b5c;
+  --color-verdigris-600: #3d5a4d;
+  --color-verdigris-700: #32493f;
+  --color-verdigris-800: #24342d;
+  --color-verdigris-900: #17211c;
+  --color-verdigris-950: #0d130f;
+
+  /* Night notebook — the dark theme ground, warm charcoal not blue-grey */
+  --color-night-600: #3d362c;
+  --color-night-700: #2e2820;
+  --color-night-800: #211d17;
+  --color-night-900: #17140f;
+  --color-night-950: #0e0c09;
+
+  --font-display: 'Fraunces Variable', 'Fraunces', Georgia, serif;
+  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  --text-eyebrow: 0.6875rem;
+  --text-eyebrow--line-height: 1rem;
+  --text-eyebrow--letter-spacing: 0.14em;
+
+  --radius-notebook: 2px;
+  --shadow-leaf: 0 1px 2px rgb(28 24 21 / 0.06), 0 8px 24px -12px rgb(28 24 21 / 0.18);
+  --shadow-lifted: 0 2px 4px rgb(28 24 21 / 0.08), 0 20px 40px -20px rgb(28 24 21 / 0.28);
+
+  --ease-leaf: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* Nuxt UI semantic aliases so its components inherit the notebook palette. */
+@theme {
+  --ui-primary: var(--color-oxide-600);
+  --ui-secondary: var(--color-bronze-500);
+  --ui-success: var(--color-verdigris-600);
+  --ui-radius: var(--radius-notebook);
+}
+
+@layer base {
+  :root {
+    --surface: var(--color-paper-100);
+    --surface-raised: var(--color-paper-50);
+    --surface-sunken: var(--color-paper-200);
+    --rule: var(--color-paper-300);
+    --text-strong: var(--color-ink-900);
+    --text-body: var(--color-ink-700);
+    --text-muted: var(--color-ink-500);
+    --accent: var(--color-oxide-600);
+  }
+
+  .dark {
+    --surface: var(--color-night-900);
+    --surface-raised: var(--color-night-800);
+    --surface-sunken: var(--color-night-900);
+    --rule: var(--color-night-600);
+    --text-strong: var(--color-paper-100);
+    --text-body: var(--color-paper-200);
+    --text-muted: var(--color-paper-400);
+    --accent: var(--color-oxide-500);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    /* The map owns the viewport; the document itself never scrolls behind it. */
+    overscroll-behavior: none;
+  }
+
+  body {
+    background-color: var(--surface);
+    color: var(--text-body);
+    font-family: var(--font-sans);
+    font-feature-settings: 'kern', 'liga';
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    color: var(--text-strong);
+    /* Fraunces' optical size axis: raise contrast as type grows. */
+    font-variation-settings: 'SOFT' 0, 'WONK' 1, 'opsz' 24;
+    letter-spacing: -0.011em;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /**
+   * Signature element: the notebook margin. A single ruled line offset from the
+   * left edge of every panel, the way a surveyor's notebook reserves a column
+   * for annotations. It carries meaning — the margin is where provenance,
+   * licence and revision state live.
+   */
+  .leaf {
+    background-color: var(--surface-raised);
+    border-radius: var(--radius-notebook);
+    box-shadow: var(--shadow-leaf);
+    position: relative;
+  }
+
+  .leaf-margin {
+    padding-left: 3.25rem;
+  }
+
+  .leaf-margin::before {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    left: 2.5rem;
+    width: 1px;
+    background-color: var(--color-oxide-300);
+    opacity: 0.5;
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-eyebrow);
+    letter-spacing: var(--text-eyebrow--letter-spacing);
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* Coordinates, identifiers and measurements are always set in the mono face. */
+  .datum {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+  }
+}
+
+/* MapLibre's own chrome, restyled to sit inside the notebook rather than on it. */
+.maplibregl-ctrl-attrib {
+  background-color: color-mix(in srgb, var(--surface-raised) 88%, transparent) !important;
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.maplibregl-ctrl-attrib a {
+  color: var(--text-muted);
+}
+
+.maplibregl-popup-content {
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.maplibregl-popup-tip {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

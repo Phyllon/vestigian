@@ -1,0 +1,75 @@
+name: vestigia-dev
+
+services:
+  postgres:
+    image: postgis/postgis:17-3.5-alpine
+    environment:
+      POSTGRES_USER: vestigia
+      POSTGRES_PASSWORD: vestigia
+      POSTGRES_DB: vestigia
+    command:
+      # Tuned for the tile workload: the working set is small enough to sit in
+      # memory, so the planner should assume fast random reads.
+      - postgres
+      - -c
+      - shared_buffers=512MB
+      - -c
+      - work_mem=32MB
+      - -c
+      - random_page_cost=1.1
+      - -c
+      - max_connections=100
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U vestigia']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  valkey:
+    image: valkey/valkey:8-alpine
+    command: valkey-server --save '' --appendonly no --maxmemory 512mb --maxmemory-policy allkeys-lru
+    ports:
+      - '6379:6379'
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ':9001'
+    environment:
+      MINIO_ROOT_USER: vestigia
+      MINIO_ROOT_PASSWORD: vestigia-dev-secret
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    volumes:
+      - minio-data:/data
+
+  imgproxy:
+    image: darthsim/imgproxy:v3
+    environment:
+      IMGPROXY_USE_S3: 'true'
+      IMGPROXY_S3_ENDPOINT: http://minio:9000
+      IMGPROXY_S3_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: vestigia
+      AWS_SECRET_ACCESS_KEY: vestigia-dev-secret
+      IMGPROXY_MAX_SRC_RESOLUTION: '80'
+      IMGPROXY_ENFORCE_WEBP: 'true'
+      IMGPROXY_TTL: '2592000'
+    ports:
+      - '8080:8080'
+    depends_on:
+      - minio
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - '1025:1025'
+      - '8025:8025'
+
+volumes:
+  postgres-data:
+  minio-data:

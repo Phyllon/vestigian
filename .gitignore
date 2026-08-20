@@ -1,0 +1,12 @@
+node_modules
+.nuxt
+.output
+.data
+dist
+.env
+.env.*
+!.env.example
+.import/
+*.pmtiles
+coverage
+.DS_Store

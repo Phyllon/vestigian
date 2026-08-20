@@ -1,0 +1,16 @@
+{
+  "name": "Vestigia",
+  "short_name": "Vestigia",
+  "description": "An atlas of the traces antiquity left behind.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f2ede1",
+  "theme_color": "#f2ede1",
+  "categories": ["education", "travel", "reference"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/icon-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -1,0 +1,12 @@
+node_modules
+.nuxt
+.output
+.git
+.env
+.env.*
+!.env.example
+.import
+*.pmtiles
+coverage
+docker
+README.md

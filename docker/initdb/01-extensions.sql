@@ -1,0 +1,5 @@
+-- PostGIS carries the spatial types and the MVT functions; pg_trgm backs the
+-- fuzzy half of site search.
+CREATE EXTENSION IF NOT EXISTS postgis;
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE EXTENSION IF NOT EXISTS unaccent;

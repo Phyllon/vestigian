@@ -1,0 +1,120 @@
+name: vestigia
+
+services:
+  app:
+    image: ghcr.io/${GITHUB_REPOSITORY:-vestigia/vestigia}:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      NUXT_DATABASE_URL: postgres://vestigia:${POSTGRES_PASSWORD}@postgres:5432/vestigia
+      NUXT_REDIS_URL: redis://valkey:6379
+      NUXT_SESSION_PASSWORD: ${SESSION_PASSWORD}
+      NUXT_PUBLIC_SITE_URL: ${SITE_URL}
+      NUXT_PUBLIC_IMAGE_BASE_URL: ${IMAGE_BASE_URL}
+      NUXT_PUBLIC_BASEMAP_PROVIDER: pmtiles
+      NUXT_PUBLIC_BASEMAP_PMTILES_URL: ${PMTILES_URL}
+      NUXT_IMGPROXY_BASE_URL: ${IMAGE_BASE_URL}
+      NUXT_IMGPROXY_KEY: ${IMGPROXY_KEY}
+      NUXT_IMGPROXY_SALT: ${IMGPROXY_SALT}
+      NUXT_TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY}
+      NUXT_PUBLIC_TURNSTILE_SITE_KEY: ${TURNSTILE_SITE_KEY}
+      NUXT_STORAGE_ENDPOINT: ${R2_ENDPOINT}
+      NUXT_STORAGE_BUCKET: ${R2_BUCKET}
+      NUXT_STORAGE_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID}
+      NUXT_STORAGE_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY}
+      NUXT_MAIL_API_KEY: ${MAIL_API_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_started
+    labels:
+      traefik.enable: 'true'
+      traefik.http.routers.vestigia.rule: Host(`${SITE_HOST}`)
+      traefik.http.routers.vestigia.entrypoints: websecure
+      traefik.http.routers.vestigia.tls.certresolver: letsencrypt
+      traefik.http.services.vestigia.loadbalancer.server.port: '3000'
+      traefik.http.services.vestigia.loadbalancer.healthcheck.path: /api/ready
+    healthcheck:
+      test: ['CMD', 'node', '-e', "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+
+  postgres:
+    image: postgis/postgis:17-3.5-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: vestigia
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: vestigia
+    command:
+      - postgres
+      - -c
+      - shared_buffers=2GB
+      - -c
+      - effective_cache_size=6GB
+      - -c
+      - work_mem=64MB
+      - -c
+      - maintenance_work_mem=512MB
+      - -c
+      - random_page_cost=1.1
+      - -c
+      - max_connections=100
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U vestigia']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  valkey:
+    image: valkey/valkey:8-alpine
+    restart: unless-stopped
+    # Tiles are regenerable, so persistence buys nothing and costs disk I/O.
+    command: valkey-server --save '' --appendonly no --maxmemory 1gb --maxmemory-policy allkeys-lru
+    volumes:
+      - valkey-data:/data
+
+  imgproxy:
+    image: darthsim/imgproxy:v3
+    restart: unless-stopped
+    environment:
+      IMGPROXY_KEY: ${IMGPROXY_KEY}
+      IMGPROXY_SALT: ${IMGPROXY_SALT}
+      IMGPROXY_USE_S3: 'true'
+      IMGPROXY_S3_ENDPOINT: ${R2_ENDPOINT}
+      AWS_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY}
+      IMGPROXY_TTL: '2592000'
+      IMGPROXY_ENFORCE_WEBP: 'true'
+    labels:
+      traefik.enable: 'true'
+      traefik.http.routers.images.rule: Host(`${IMAGE_HOST}`)
+      traefik.http.routers.images.entrypoints: websecure
+      traefik.http.routers.images.tls.certresolver: letsencrypt
+      traefik.http.services.images.loadbalancer.server.port: '8080'
+
+  backup:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./backup.sh:/backup.sh:ro
+      - backup-data:/backups
+    entrypoint: ['/bin/sh', '/backup.sh']
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres-data:
+  valkey-data:
+  backup-data:
