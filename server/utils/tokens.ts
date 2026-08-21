@@ -20,8 +20,7 @@ export interface IssuedToken {
   expiresAt: Date
 }
 
-export const hashToken = (token: string): string =>
-  createHash('sha256').update(token).digest('hex')
+export const hashToken = (token: string): string => createHash('sha256').update(token).digest('hex')
 
 export const issueToken = (purpose: TokenPurpose, now = Date.now()): IssuedToken => {
   const token = randomBytes(32).toString('base64url')
@@ -64,11 +63,7 @@ export const tokenHashMatches = (candidate: string, stored: string): boolean => 
   return timingSafeEqual(a, b)
 }
 
-export const buildTokenLink = (
-  siteUrl: string,
-  purpose: TokenPurpose,
-  token: string,
-): string => {
+export const buildTokenLink = (siteUrl: string, purpose: TokenPurpose, token: string): string => {
   const path = purpose === 'verify-email' ? '/verify' : '/reset-password'
   return `${siteUrl.replace(/\/$/, '')}${path}?token=${encodeURIComponent(token)}`
 }

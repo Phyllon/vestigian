@@ -123,11 +123,7 @@ const insertSite = async (
  * silently breaks every inbound link is worse than a slug that no longer
  * matches its title exactly.
  */
-const updateSite = async (
-  tx: Transaction,
-  siteId: number,
-  payload: SitePayload,
-): Promise<void> => {
+const updateSite = async (tx: Transaction, siteId: number, payload: SitePayload): Promise<void> => {
   await tx`
     UPDATE sites SET
       title = ${payload.title},

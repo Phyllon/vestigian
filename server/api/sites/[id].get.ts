@@ -76,7 +76,7 @@ export default defineEventHandler(async (event): Promise<SiteDetail> => {
     modernPlace: site.modern_place,
     countryCode: site.country_code,
     position: { lon: site.lon, lat: site.lat },
-    updatedAt: site.updated_at.toISOString(),
+    updatedAt: site?.updated_at?.toISOString(),
     images: images
       .filter((image) => isPublishableLicence(image.licence))
       .map((image) => ({

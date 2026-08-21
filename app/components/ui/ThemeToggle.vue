@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { isDark, toggle, label } = useColorScheme()
+  const { isDark, toggle, label } = useColorScheme()
 </script>
 
 <template>

@@ -9,9 +9,7 @@ describe('slugify', () => {
   })
 
   it('collapses punctuation and trims stray separators', () => {
-    expect(slugify('  Villa Rustica (Ahrweiler) — Site 4 ')).toBe(
-      'villa-rustica-ahrweiler-site-4',
-    )
+    expect(slugify('  Villa Rustica (Ahrweiler) — Site 4 ')).toBe('villa-rustica-ahrweiler-site-4')
   })
 
   it('handles the German sharp s', () => {

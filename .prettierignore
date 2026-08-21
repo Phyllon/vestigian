@@ -1,0 +1,12 @@
+node_modules
+.nuxt
+.output
+.data
+.import
+dist
+coverage
+db_dumb
+image-archive
+pnpm-lock.yaml
+server/database/migrations/*.sql
+public

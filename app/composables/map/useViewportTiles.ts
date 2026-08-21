@@ -91,10 +91,14 @@ export const useViewportTiles = () => {
           'interpolate',
           ['linear'],
           ['get', 'site_count'],
-          1, 9,
-          10, 14,
-          100, 20,
-          1000, 28,
+          1,
+          9,
+          10,
+          14,
+          100,
+          20,
+          1000,
+          28,
         ],
       },
     })
@@ -124,11 +128,7 @@ export const useViewportTiles = () => {
         'circle-stroke-width': 1.5,
         'circle-radius': ['interpolate', ['linear'], ['zoom'], 9, 4, 18, 9],
         // Feature state drives hover and selection without a data round trip.
-        'circle-opacity': [
-          'case',
-          ['boolean', ['feature-state', 'selected'], false], 1,
-          0.9,
-        ],
+        'circle-opacity': ['case', ['boolean', ['feature-state', 'selected'], false], 1, 0.9],
       },
     })
 

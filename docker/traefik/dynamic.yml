@@ -8,4 +8,4 @@ http:
         referrerPolicy: strict-origin-when-cross-origin
         stsSeconds: 31536000
         stsIncludeSubdomains: true
-        permissionsPolicy: "geolocation=(self), camera=(), microphone=(), payment=()"
+        permissionsPolicy: 'geolocation=(self), camera=(), microphone=(), payment=()'

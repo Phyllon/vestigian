@@ -17,7 +17,14 @@ export default defineEventHandler(async (event): Promise<SiteSummary[]> => {
   const sql = useSql()
 
   const rows = await sql<
-    { id: number; slug: string; title: string; category: SiteSummary['category']; lon: number; lat: number }[]
+    {
+      id: number
+      slug: string
+      title: string
+      category: SiteSummary['category']
+      lon: number
+      lat: number
+    }[]
   >`
     SELECT s.id, s.slug, s.title, s.category, ST_X(s.geom) AS lon, ST_Y(s.geom) AS lat
     FROM sites s

@@ -1,32 +1,32 @@
 <script setup lang="ts">
-interface FieldChange {
-  field: string
-  kind: 'added' | 'removed' | 'changed'
-  before: string | null
-  after: string | null
-}
+  interface FieldChange {
+    field: string
+    kind: 'added' | 'removed' | 'changed'
+    before: string | null
+    after: string | null
+  }
 
-defineProps<{ changes: FieldChange[] }>()
+  defineProps<{ changes: FieldChange[] }>()
 
-const FIELD_LABELS: Record<string, string> = {
-  title: 'Name',
-  category: 'Type',
-  summary: 'Summary',
-  description: 'Description',
-  position: 'Position',
-  periodFrom: 'Period from',
-  periodTo: 'Period to',
-  geometry: 'Shape',
-  editSummary: 'Edit note',
-}
+  const FIELD_LABELS: Record<string, string> = {
+    title: 'Name',
+    category: 'Type',
+    summary: 'Summary',
+    description: 'Description',
+    position: 'Position',
+    periodFrom: 'Period from',
+    periodTo: 'Period to',
+    geometry: 'Shape',
+    editSummary: 'Edit note',
+  }
 
-const labelFor = (field: string): string => FIELD_LABELS[field] ?? field
+  const labelFor = (field: string): string => FIELD_LABELS[field] ?? field
 
-/** Long values are clipped: a diff is for scanning, not for reading in full. */
-const clip = (value: string | null): string => {
-  if (value === null) return '—'
-  return value.length > 220 ? `${value.slice(0, 220)}…` : value
-}
+  /** Long values are clipped: a diff is for scanning, not for reading in full. */
+  const clip = (value: string | null): string => {
+    if (value === null) return '—'
+    return value.length > 220 ? `${value.slice(0, 220)}…` : value
+  }
 </script>
 
 <template>

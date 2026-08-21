@@ -1,6 +1,6 @@
 <script setup lang="ts">
-definePageMeta({ layout: 'reading', middleware: 'moderator' })
-useHead({ title: 'Review queue' })
+  definePageMeta({ layout: 'reading', middleware: 'moderator' })
+  useHead({ title: 'Review queue' })
 </script>
 
 <template>

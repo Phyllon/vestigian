@@ -1,48 +1,48 @@
 <script setup lang="ts">
-import type { LonLat, SiteDetail } from '#shared/types'
+  import type { LonLat, SiteDetail } from '#shared/types'
 
-definePageMeta({ layout: 'reading', middleware: 'authenticated' })
+  definePageMeta({ layout: 'reading', middleware: 'authenticated' })
 
-const route = useRoute()
-const toast = useToast()
+  const route = useRoute()
+  const toast = useToast()
 
-const { data: site, refresh } = await useFetch<SiteDetail>(
-  () => `/api/sites/slug/${route.params.slug}`,
-)
+  const { data: site, refresh } = await useFetch<SiteDetail>(
+    () => `/api/sites/slug/${route.params.slug}`,
+  )
 
-if (!site.value) {
-  throw createError({ statusCode: 404, statusMessage: 'No site recorded under that name.' })
-}
+  if (!site.value) {
+    throw createError({ statusCode: 404, statusMessage: 'No site recorded under that name.' })
+  }
 
-useHead({ title: () => `Editing ${site.value?.title ?? ''}` })
+  useHead({ title: () => `Editing ${site.value?.title ?? ''}` })
 
-/**
- * Position is edited numerically here rather than by dragging a pin. Moving a
- * site is rare and consequential, and a text field makes it deliberate — the
- * map page is the right place for placing something new.
- */
-const position = ref<LonLat>({
-  lon: site.value.position.lon,
-  lat: site.value.position.lat,
-})
+  /**
+   * Position is edited numerically here rather than by dragging a pin. Moving a
+   * site is rare and consequential, and a text field makes it deliberate — the
+   * map page is the right place for placing something new.
+   */
+  const position = ref<LonLat>({
+    lon: site.value.position.lon,
+    lat: site.value.position.lat,
+  })
 
-const initial = computed(() => ({
-  title: site.value?.title,
-  category: site.value?.category,
-  summary: site.value?.summary ?? '',
-  description: site.value?.description ?? '',
-  periodFrom: site.value?.periodFrom ?? null,
-  periodTo: site.value?.periodTo ?? null,
-}))
+  const initial = computed(() => ({
+    title: site.value?.title,
+    category: site.value?.category,
+    summary: site.value?.summary ?? '',
+    description: site.value?.description ?? '',
+    periodFrom: site.value?.periodFrom ?? null,
+    periodTo: site.value?.periodTo ?? null,
+  }))
 
-const finish = async (): Promise<void> => {
-  await navigateTo(`/site/${route.params.slug}`)
-}
+  const finish = async (): Promise<void> => {
+    await navigateTo(`/site/${route.params.slug}`)
+  }
 
-const cancel = (): void => {
-  toast.add({ title: 'Nothing was changed.', color: 'neutral' })
-  void finish()
-}
+  const cancel = (): void => {
+    toast.add({ title: 'Nothing was changed.', color: 'neutral' })
+    void finish()
+  }
 </script>
 
 <template>

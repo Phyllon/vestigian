@@ -37,9 +37,15 @@ export default defineEventHandler(async (event) => {
 
   const file = form.find((part) => part.name === 'file' && part.filename)
   const siteIdRaw = form.find((part) => part.name === 'siteId')?.data.toString()
-  const caption = form.find((part) => part.name === 'caption')?.data.toString().slice(0, 500)
+  const caption = form
+    .find((part) => part.name === 'caption')
+    ?.data.toString()
+    .slice(0, 500)
   const licence = form.find((part) => part.name === 'licence')?.data.toString() ?? ''
-  const attribution = form.find((part) => part.name === 'attribution')?.data.toString().slice(0, 200)
+  const attribution = form
+    .find((part) => part.name === 'attribution')
+    ?.data.toString()
+    .slice(0, 200)
 
   const siteId = Number(siteIdRaw)
   if (!file || !Number.isInteger(siteId) || siteId <= 0) {

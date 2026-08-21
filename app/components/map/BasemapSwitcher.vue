@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import type { BasemapView } from '#shared/types'
+  import type { BasemapView } from '#shared/types'
 
-const { view, setView, availableViews } = useBasemapStyle()
-const isOpen = ref(false)
+  const { view, setView, availableViews } = useBasemapStyle()
+  const isOpen = ref(false)
 
-const choose = (next: BasemapView): void => {
-  setView(next)
-  isOpen.value = false
-}
+  const choose = (next: BasemapView): void => {
+    setView(next)
+    isOpen.value = false
+  }
 
-const activeLabel = computed(
-  () => availableViews.find((option) => option.value === view.value)?.label ?? 'Vestigia',
-)
+  const activeLabel = computed(
+    () => availableViews.find((option) => option.value === view.value)?.label ?? 'Vestigia',
+  )
 </script>
 
 <template>

@@ -74,10 +74,7 @@ export const resolveClientIdentifier = (event: H3Event): string => {
   return getRequestIP(event) ?? 'unknown'
 }
 
-export const enforceRateLimit = async (
-  event: H3Event,
-  name: RateLimitName,
-): Promise<void> => {
+export const enforceRateLimit = async (event: H3Event, name: RateLimitName): Promise<void> => {
   const policy = RATE_LIMITS[name]
   const now = Date.now()
   const key = buildRateLimitKey({

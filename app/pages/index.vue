@@ -1,19 +1,19 @@
 <script setup lang="ts">
-const { loggedIn } = useSession()
-const { selectSite } = useSiteQuery()
+  const { loggedIn } = useSession()
+  const { selectSite } = useSiteQuery()
 
-const isContributing = ref(false)
+  const isContributing = ref(false)
 
-useHead({ title: 'Map' })
+  useHead({ title: 'Map' })
 
-const startContributing = (): void => {
-  selectSite(null)
-  isContributing.value = true
-}
+  const startContributing = (): void => {
+    selectSite(null)
+    isContributing.value = true
+  }
 
-const stopContributing = (): void => {
-  isContributing.value = false
-}
+  const stopContributing = (): void => {
+    isContributing.value = false
+  }
 </script>
 
 <template>
@@ -27,7 +27,9 @@ const stopContributing = (): void => {
         <MapBasemapSwitcher class="ml-auto" />
       </div>
 
-      <div class="pointer-events-auto absolute bottom-4 right-3 flex flex-col items-end gap-2 md:right-4">
+      <div
+        class="pointer-events-auto absolute bottom-4 right-3 flex flex-col items-end gap-2 md:right-4"
+      >
         <MapGeolocateButton />
 
         <UButton

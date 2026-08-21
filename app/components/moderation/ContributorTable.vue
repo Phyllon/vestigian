@@ -1,81 +1,81 @@
 <script setup lang="ts">
-interface ContributorRow {
-  id: number
-  displayName: string
-  role: string
-  trustLevel: number
-  approvedContributions: number
-  trustRevoked: boolean
-  pendingCount: number
-  createdAt: string
-  lastSeenAt: string | null
-}
-
-const { currentUser } = useSession()
-const toast = useToast()
-
-const search = ref('')
-const busyUserId = ref<number | null>(null)
-
-const { data: contributors, refresh } = await useFetch<ContributorRow[]>(
-  '/api/moderation/users',
-  { query: { search } },
-)
-
-const isAdmin = computed(() => currentUser.value?.role === 'admin')
-
-const roleOptions = [
-  { label: 'Contributor', value: 'contributor' },
-  { label: 'Moderator', value: 'moderator' },
-  { label: 'Administrator', value: 'admin' },
-]
-
-const describeStanding = (row: ContributorRow): string => {
-  if (row.role !== 'contributor') return 'Publishes by role'
-  if (row.trustRevoked) return 'Suspended — every edit queued'
-  if (row.trustLevel >= 1) return 'Publishes immediately'
-  return `Queued — ${Math.max(2 - row.approvedContributions, 0)} to go`
-}
-
-const setTrust = async (row: ContributorRow, revoked: boolean): Promise<void> => {
-  busyUserId.value = row.id
-  try {
-    await $fetch('/api/moderation/trust', {
-      method: 'POST',
-      body: { userId: row.id, revoked },
-    })
-    toast.add({
-      title: revoked ? 'Automatic publishing suspended.' : 'Trust restored.',
-      color: revoked ? 'neutral' : 'success',
-    })
-    await refresh()
-  } catch (error) {
-    toast.add({
-      title: 'Could not change trust',
-      description: (error as { data?: { message?: string } }).data?.message ?? 'Try again.',
-      color: 'error',
-    })
-  } finally {
-    busyUserId.value = null
+  interface ContributorRow {
+    id: number
+    displayName: string
+    role: string
+    trustLevel: number
+    approvedContributions: number
+    trustRevoked: boolean
+    pendingCount: number
+    createdAt: string
+    lastSeenAt: string | null
   }
-}
 
-const setRole = async (row: ContributorRow, role: string): Promise<void> => {
-  busyUserId.value = row.id
-  try {
-    await $fetch('/api/moderation/role', { method: 'POST', body: { userId: row.id, role } })
-    toast.add({ title: `${row.displayName} is now a ${role}.`, color: 'success' })
-    await refresh()
-  } catch (error) {
-    toast.add({
-      title: 'Could not change role',
-      description: (error as { data?: { message?: string } }).data?.message ?? 'Try again.',
-      color: 'error',
-    })
-  } finally {
-    busyUserId.value = null
+  const { currentUser } = useSession()
+  const toast = useToast()
+
+  const search = ref('')
+  const busyUserId = ref<number | null>(null)
+
+  const { data: contributors, refresh } = await useFetch<ContributorRow[]>(
+    '/api/moderation/users',
+    { query: { search } },
+  )
+
+  const isAdmin = computed(() => currentUser.value?.role === 'admin')
+
+  const roleOptions = [
+    { label: 'Contributor', value: 'contributor' },
+    { label: 'Moderator', value: 'moderator' },
+    { label: 'Administrator', value: 'admin' },
+  ]
+
+  const describeStanding = (row: ContributorRow): string => {
+    if (row.role !== 'contributor') return 'Publishes by role'
+    if (row.trustRevoked) return 'Suspended — every edit queued'
+    if (row.trustLevel >= 1) return 'Publishes immediately'
+    return `Queued — ${Math.max(2 - row.approvedContributions, 0)} to go`
   }
-}
+
+  const setTrust = async (row: ContributorRow, revoked: boolean): Promise<void> => {
+    busyUserId.value = row.id
+    try {
+      await $fetch('/api/moderation/trust', {
+        method: 'POST',
+        body: { userId: row.id, revoked },
+      })
+      toast.add({
+        title: revoked ? 'Automatic publishing suspended.' : 'Trust restored.',
+        color: revoked ? 'neutral' : 'success',
+      })
+      await refresh()
+    } catch (error) {
+      toast.add({
+        title: 'Could not change trust',
+        description: (error as { data?: { message?: string } }).data?.message ?? 'Try again.',
+        color: 'error',
+      })
+    } finally {
+      busyUserId.value = null
+    }
+  }
+
+  const setRole = async (row: ContributorRow, role: string): Promise<void> => {
+    busyUserId.value = row.id
+    try {
+      await $fetch('/api/moderation/role', { method: 'POST', body: { userId: row.id, role } })
+      toast.add({ title: `${row.displayName} is now a ${role}.`, color: 'success' })
+      await refresh()
+    } catch (error) {
+      toast.add({
+        title: 'Could not change role',
+        description: (error as { data?: { message?: string } }).data?.message ?? 'Try again.',
+        color: 'error',
+      })
+    } finally {
+      busyUserId.value = null
+    }
+  }
 </script>
 
 <template>
@@ -87,11 +87,7 @@ const setRole = async (row: ContributorRow, role: string): Promise<void> => {
       class="w-full max-w-xs"
     />
 
-    <div
-      v-for="row in contributors ?? []"
-      :key="row.id"
-      class="leaf leaf-margin py-3 pr-4"
-    >
+    <div v-for="row in contributors ?? []" :key="row.id" class="leaf leaf-margin py-3 pr-4">
       <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
         <h3 class="text-base text-ink-900 dark:text-paper-100">{{ row.displayName }}</h3>
         <span v-if="row.role !== 'contributor'" class="eyebrow text-oxide-600 dark:text-oxide-300">

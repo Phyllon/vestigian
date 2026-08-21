@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import type { TracingDetail } from '~/composables/data/useSiteQuery'
+  import type { TracingDetail } from '~/composables/data/useSiteQuery'
 
-definePageMeta({ layout: 'reading' })
+  definePageMeta({ layout: 'reading' })
 
-const route = useRoute()
-const { loggedIn } = useSession()
+  const route = useRoute()
+  const { loggedIn } = useSession()
 
-const { data: tracing } = await useFetch<TracingDetail>(() => `/api/tracings/${route.params.id}`)
+  const { data: tracing } = await useFetch<TracingDetail>(() => `/api/tracings/${route.params.id}`)
 
-if (!tracing.value) {
-  throw createError({ statusCode: 404, statusMessage: 'No tracing with that identifier.' })
-}
+  if (!tracing.value) {
+    throw createError({ statusCode: 404, statusMessage: 'No tracing with that identifier.' })
+  }
 
-useHead({ title: () => tracing.value?.title })
+  useHead({ title: () => tracing.value?.title })
 
-const length = computed(() => formatLength(tracing.value?.lengthMetres ?? null))
+  const length = computed(() => formatLength(tracing.value?.lengthMetres ?? null))
 </script>
 
 <template>
@@ -23,7 +23,9 @@ const length = computed(() => formatLength(tracing.value?.lengthMetres ?? null))
       <p class="eyebrow">{{ tracing.kind === 'area' ? 'Traced area' : 'Traced route' }}</p>
       <h1 class="mt-2 text-4xl leading-tight">{{ tracing.title }}</h1>
 
-      <dl class="mt-6 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 border-y border-paper-200 py-3 dark:border-night-700">
+      <dl
+        class="mt-6 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 border-y border-paper-200 py-3 dark:border-night-700"
+      >
         <dt class="eyebrow pt-0.5">Type</dt>
         <dd class="text-sm text-ink-700 dark:text-paper-200">{{ tracing.category }}</dd>
 
@@ -33,7 +35,9 @@ const length = computed(() => formatLength(tracing.value?.lengthMetres ?? null))
         </template>
 
         <dt class="eyebrow pt-0.5">Credit</dt>
-        <dd class="datum">{{ tracing.attribution ?? 'Vestigia contributors' }} · {{ tracing.licence }}</dd>
+        <dd class="datum">
+          {{ tracing.attribution ?? 'Vestigia contributors' }} · {{ tracing.licence }}
+        </dd>
       </dl>
 
       <div
@@ -45,7 +49,9 @@ const length = computed(() => formatLength(tracing.value?.lengthMetres ?? null))
         </p>
       </div>
 
-      <footer class="mt-10 flex flex-wrap items-center gap-3 border-t border-paper-200 pt-4 dark:border-night-700">
+      <footer
+        class="mt-10 flex flex-wrap items-center gap-3 border-t border-paper-200 pt-4 dark:border-night-700"
+      >
         <UButton
           v-if="loggedIn"
           :to="`/tracing/${tracing.id}/edit`"
@@ -55,7 +61,8 @@ const length = computed(() => formatLength(tracing.value?.lengthMetres ?? null))
           Edit
         </UButton>
         <p class="datum ml-auto">
-          Last revised {{ new Date(tracing.updatedAt).toLocaleDateString('en-GB', { dateStyle: 'medium' }) }}
+          Last revised
+          {{ new Date(tracing.updatedAt).toLocaleDateString('en-GB', { dateStyle: 'medium' }) }}
         </p>
       </footer>
     </article>

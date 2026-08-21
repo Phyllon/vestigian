@@ -6,11 +6,7 @@ const ROLE_RANK: Record<UserRole, number> = {
   admin: 2,
 }
 
-export type RoleChangeRejection =
-  | 'not-admin'
-  | 'self'
-  | 'above-own-rank'
-  | 'last-admin'
+export type RoleChangeRejection = 'not-admin' | 'self' | 'above-own-rank' | 'last-admin'
 
 export interface RoleChangeCheck {
   allowed: boolean

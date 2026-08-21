@@ -9,7 +9,7 @@ Built on data contributed to [Vici.org](https://vici.org) by René Voorburg and 
 ```bash
 cp .env.example .env          # then set NUXT_SESSION_PASSWORD
 pnpm install
-pnpm stack:up                 # postgres+postgis, valkey, minio, imgproxy, mailpit
+pnpm stack:up                 # postgres+postgis, valkey, minio (+bucket), imgproxy, mailpit
 pnpm db:generate && pnpm db:migrate
 pnpm dev
 ```
@@ -18,20 +18,61 @@ The map runs against OpenFreeMap out of the box, so nothing needs an API key to 
 
 ## Importing the vici.org data
 
-The dumps are ~1 GB compressed and the image mirror is a multi-hour crawl, so this is three separate resumable steps rather than one command.
+Four resumable steps rather than one command, because the middle of it is a
+multi-hour crawl of someone else's server. Run them in order; each one is safe
+to re-run and picks up where it stopped.
 
 ```bash
+# The scratch MariaDB is NOT part of pnpm stack:up — the dumps are read once
+# and thrown away, so it lives outside the application's stack.
 docker run -d --name vici-mysql -p 3307:3306 \
   -e MARIADB_ROOT_PASSWORD=root mariadb:11
 
-pnpm import:fetch      # download the dumps, load into the scratch MariaDB
-pnpm import:convert    # transform into PostGIS
-pnpm import:images     # mirror originals into object storage
+pnpm import:fetch           # 1. dumps → scratch MariaDB
+pnpm import:convert         # 2. → sites, tracings, external_ids
+pnpm import:image-records   # 3. → site_images rows, no bytes fetched
+pnpm import:images          # 4. → photographs into object storage
+pnpm tiles:warm http://localhost:3000
 ```
 
-**Before running the image mirror at full scale, contact René Voorburg.** The licences permit reuse; the bandwidth is still his server's. The crawler waits 1.2 s between requests for the same reason.
+| Step                   | Reaches                                                                                                                                                | Cost                      |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------- |
+| `import:fetch`         | `vici` and `geo` loaded into MariaDB on port 3307                                                                                                      | ~105 MB download, minutes |
+| `import:convert`       | **61,272 sites, 11,720 tracings, 8,692 concordances** in PostGIS — the map is fully usable at this point                                               | ~10 minutes               |
+| `import:image-records` | 39,212 `site_images` rows over **36,216 distinct objects**, with resolved licences, attribution and source URLs. Touches nothing outside your database | ~2 minutes                |
+| `import:images`        | the photographs themselves in object storage                                                                                                           | **~12 hours, ~10 GB**     |
 
-Images whose licence string cannot be resolved to a known licence are imported but left unpublished. That is deliberate — an ambiguous licence should never quietly appear on the public map under a guessed one.
+Step 1 skips the download entirely if the dumps are already present — drop
+`vici.sql.gz` and `geo.sql.gz` into `db_dumb/` (or set `VICI_DUMP_DIR`) and it
+uses those. Files are validated by their gzip magic number, because GitHub
+answers a _page_ URL with a perfectly ordinary 200 and an HTML body.
+
+**Before running step 4 at full scale, contact René Voorburg.** The licences
+permit reuse; the bandwidth is his. Quote him the real numbers: **36,216
+requests** paced 1.2 s apart, roughly 10 GB. Prove the setup first with a short
+run — `MIRROR_LIMIT=5 pnpm import:images` — before committing his server to a day
+of traffic.
+
+### Where the photographs actually live
+
+Not on `vici.org`. That host answers any `/uploads/…` path with **HTTP 200 and an
+HTML body reading "404 - file not found"**, which reaches an image pipeline as a
+corrupt file rather than as a missing one. Photographs are served from
+`images.vici.org` through a transform service, and originals are not exposed
+there at all.
+
+The mirror therefore requests `https://images.vici.org/size/w{width}/uploads/{file}`
+— **width only**. `size/w2400xh2400` and `crop/w2400xh2400` both return exactly
+that box and distort or crop anything that is not square. The width is capped at
+each image's recorded width so a small original is never upscaled.
+
+One consequence worth knowing: **2400px is a permanent ceiling** for imported
+photographs, because true originals cannot be fetched. That is forced by the
+source, not chosen.
+
+Images whose licence string cannot be resolved to a known licence are imported
+but left unpublished. That is deliberate — an ambiguous licence should never
+quietly appear on the public map under a guessed one.
 
 ## How the map stays fast
 
@@ -61,7 +102,8 @@ server/
   database/       drizzle schema and migrations
   utils/          mvt · trust · permissions · ratelimit · images · argon (tests in __test__/)
 shared/types/     the vocabulary both sides share
-scripts/import/   the three-stage vici.org import
+scripts/import/   the four-stage vici.org import
+scripts/          snapshot-database · reconcile-images · warm-tiles
 docker/           Dockerfile, dev and production compose, Traefik
 ```
 
@@ -71,11 +113,11 @@ Components put `<script setup>` before `<template>`, use inline Tailwind, and ke
 
 One VPS, Docker Compose, orchestrated by [Dokploy](https://dokploy.com). Roughly €27/month including object storage:
 
-| | |
-|---|---|
-| Hetzner CPX41 | app, Postgres, Valkey, imgproxy, Traefik |
-| Cloudflare R2 | images and the PMTiles basemap, zero egress |
-| Cloudflare (free) | CDN and Turnstile |
+|                   |                                             |
+| ----------------- | ------------------------------------------- |
+| Hetzner CPX41     | app, Postgres, Valkey, imgproxy, Traefik    |
+| Cloudflare R2     | images and the PMTiles basemap, zero egress |
+| Cloudflare (free) | CDN and Turnstile                           |
 
 `docker/compose.prod.yml` is the deployment unit. GitHub Actions runs the tests, builds a multi-stage image to GHCR, and calls the Dokploy webhook.
 
@@ -127,6 +169,48 @@ Licences are chosen from a closed list at upload time, since an image with an un
 
 ## Operations
 
+### Backups — two stores, restored together
+
+The database and the object store are separate, and they fail apart. The records
+are reproducible (`import:convert` rebuilds them in minutes); **the mirrored
+photographs are not** — losing them means asking René's server for another 10 GB.
+That inverts the moment the first real contribution lands, since accounts,
+revisions and uploads exist nowhere else.
+
+```bash
+pnpm db:snapshot        # → .import/snapshots/vestigia-<stamp>.dump  (~15 MB)
+pnpm images:reconcile   # do the database and the bucket still agree?
+```
+
+`db:snapshot` uses `pg_dump` if it is installed and otherwise goes through the
+compose Postgres service, so the client version always matches the server. A
+dump that fails deletes its own file — a half-written dump that looks restorable
+is worse than none.
+
+`images:reconcile` exists for one silent failure: restore a database newer than
+the bucket, and rows sit at `approved` describing objects that are gone. The
+gallery renders broken images while every query reports health. It reports three
+states — `missing`, `unstored`, `orphan` — and `--repair` returns missing rows to
+`pending` so the mirror refetches them. Orphans are only reported: withdrawal is
+reversible by design here, and nothing in this project deletes bytes.
+
+To keep a portable copy of the photographs — the Docker volume only restores
+back into MinIO — mirror the bucket out as ordinary files:
+
+```bash
+docker run --rm --network container:vestigia-dev-minio-1 \
+  -v "$PWD/image-archive:/out" minio/mc:latest sh -c \
+  "mc alias set src http://127.0.0.1:9000 vestigia vestigia-dev-secret && mc mirror src/vestigia /out"
+```
+
+Reverse the arguments to restore into a fresh bucket. Add `image-archive/` to
+`.gitignore` first: at ~10 GB it must not go near git.
+
+Re-running `import:images` after a database rebuild does **not** re-download
+anything. An object already in storage is adopted — read back locally,
+re-measured, marked approved — with no request to vici.org and no pause between
+items.
+
 **After every deploy or bulk import, warm the tile cache:**
 
 ```bash
@@ -143,7 +227,7 @@ The atlas is no longer append-only.
 
 - **Edit** at `/site/[slug]/edit`, reachable from both the map panel and the full entry. Edits carry an optional note explaining the change, which is what makes the history readable later.
 - **History** on every site page: who changed what, when, and whether it was auto-published or reviewed. Each entry expands into a field-level diff.
-- **Revert** is a moderator action that writes a *new* revision restoring the earlier state, rather than deleting the offending one. History stays append-only, so the record of what was reverted and by whom survives.
+- **Revert** is a moderator action that writes a _new_ revision restoring the earlier state, rather than deleting the offending one. History stays append-only, so the record of what was reverted and by whom survives.
 - **Slugs never change on edit.** A renamed site keeps its URL, because inbound links and citations point at it.
 
 Two safeguards sit on top of the trust rule:
@@ -186,6 +270,13 @@ Honest list, so nothing here is a surprise:
 - **Full-text search across descriptions.** Search covers titles and summaries only.
 - **RDF / Pelagios output.** The GeoJSON feed exists; linked data does not.
 - **Image reordering and deletion** — `sort_order` exists and is unused.
-- **RDF / Pelagios output.** The GeoJSON feed is there; linked data is not.
 - **Offline tile caching.** The app is installable; it does not work without signal.
-- **External identifier import.** The `external_ids` table is defined and read by the API, but `02-mysql-to-postgres.ts` does not yet populate it from vici's concordance data.
+- **Off-box backups.** `docker/backup.sh` dumps Postgres nightly to a volume on the same VPS, and `pnpm db:snapshot` writes beside the database it copies. Neither leaves the machine yet.
+
+## memento!
+
+### save plain file images from MinIO object storage to disk
+
+docker run --rm --network container:vestigia-dev-minio-1 \
+-v "$PWD/image-archive:/out" minio/mc:latest sh -c \
+"mc alias set src http://127.0.0.1:9000 vestigia vestigia-dev-secret && mc mirror src/vestigia /out"

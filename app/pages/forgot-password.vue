@@ -1,28 +1,28 @@
 <script setup lang="ts">
-import { z } from 'zod'
-import type { FormSubmitEvent } from '@nuxt/ui'
+  import { z } from 'zod'
+  import type { FormSubmitEvent } from '@nuxt/ui'
 
-definePageMeta({ layout: 'reading' })
-useHead({ title: 'Reset your password' })
+  definePageMeta({ layout: 'reading' })
+  useHead({ title: 'Reset your password' })
 
-const schema = z.object({ email: z.string().email('That does not look like an email address.') })
-type ForgotState = z.output<typeof schema>
+  const schema = z.object({ email: z.string().email('That does not look like an email address.') })
+  type ForgotState = z.output<typeof schema>
 
-const state = reactive<Partial<ForgotState>>({ email: '' })
-const isSent = ref(false)
-const isSubmitting = ref(false)
+  const state = reactive<Partial<ForgotState>>({ email: '' })
+  const isSent = ref(false)
+  const isSubmitting = ref(false)
 
-const request = async (event: FormSubmitEvent<ForgotState>): Promise<void> => {
-  isSubmitting.value = true
-  try {
-    await $fetch('/api/auth/forgot-password', { method: 'POST', body: event.data })
-  } finally {
-    // The confirmation is shown either way, so this page cannot be used to
-    // discover which addresses have accounts.
-    isSent.value = true
-    isSubmitting.value = false
+  const request = async (event: FormSubmitEvent<ForgotState>): Promise<void> => {
+    isSubmitting.value = true
+    try {
+      await $fetch('/api/auth/forgot-password', { method: 'POST', body: event.data })
+    } finally {
+      // The confirmation is shown either way, so this page cannot be used to
+      // discover which addresses have accounts.
+      isSent.value = true
+      isSubmitting.value = false
+    }
   }
-}
 </script>
 
 <template>

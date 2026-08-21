@@ -70,9 +70,6 @@ const TEMPLATES: Record<TokenPurpose, (mail: TokenMail) => OutgoingMail> = {
   }),
 }
 
-export const sendTokenMail = async (
-  purpose: TokenPurpose,
-  mail: TokenMail,
-): Promise<void> => {
+export const sendTokenMail = async (purpose: TokenPurpose, mail: TokenMail): Promise<void> => {
   await deliver(TEMPLATES[purpose](mail))
 }

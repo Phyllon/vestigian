@@ -39,11 +39,7 @@ export const siteCategoryEnum = pgEnum('site_category', [
   'other',
 ])
 
-export const reviewStatusEnum = pgEnum('review_status', [
-  'pending',
-  'approved',
-  'rejected',
-])
+export const reviewStatusEnum = pgEnum('review_status', ['pending', 'approved', 'rejected'])
 
 export const geometryKindEnum = pgEnum('geometry_kind', ['point', 'line', 'area'])
 

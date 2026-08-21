@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import type { SiteSummary } from '#shared/types'
+  import type { SiteSummary } from '#shared/types'
 
-const map = useMapInstance()
-const { term, results, isSearching } = useSiteSearch()
-const { selectSite } = useSiteQuery()
+  const map = useMapInstance()
+  const { term, results, isSearching } = useSiteSearch()
+  const { selectSite } = useSiteQuery()
 
-const goToSite = (site: SiteSummary): void => {
-  map.value?.flyTo({
-    center: [site.position.lon, site.position.lat],
-    zoom: 15,
-    duration: 1200,
-    essential: true,
-  })
-  selectSite(site.id)
-  term.value = ''
-}
+  const goToSite = (site: SiteSummary): void => {
+    map.value?.flyTo({
+      center: [site.position.lon, site.position.lat],
+      zoom: 15,
+      duration: 1200,
+      essential: true,
+    })
+    selectSite(site.id)
+    term.value = ''
+  }
 </script>
 
 <template>
@@ -28,8 +28,12 @@ const goToSite = (site: SiteSummary): void => {
         class="w-full bg-transparent py-2.5 text-sm text-ink-900 outline-none placeholder:text-ink-300 dark:text-paper-100"
         autocomplete="off"
         spellcheck="false"
-      >
-      <UIcon v-if="isSearching" name="i-lucide-loader-circle" class="size-4 animate-spin text-ink-300" />
+      />
+      <UIcon
+        v-if="isSearching"
+        name="i-lucide-loader-circle"
+        class="size-4 animate-spin text-ink-300"
+      />
     </div>
 
     <ul

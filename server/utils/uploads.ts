@@ -16,10 +16,7 @@ export const detectImageFormat = (bytes: Buffer): AcceptedImageFormat | null => 
   const pngSignature = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]
   if (pngSignature.every((byte, index) => bytes[index] === byte)) return 'png'
 
-  if (
-    bytes.toString('ascii', 0, 4) === 'RIFF' &&
-    bytes.toString('ascii', 8, 12) === 'WEBP'
-  ) {
+  if (bytes.toString('ascii', 0, 4) === 'RIFF' && bytes.toString('ascii', 8, 12) === 'WEBP') {
     return 'webp'
   }
 
@@ -32,11 +29,7 @@ export interface UploadCandidate {
   filename: string | undefined
 }
 
-export type UploadRejection =
-  | 'too-small'
-  | 'too-large'
-  | 'unsupported-format'
-  | 'type-mismatch'
+export type UploadRejection = 'too-small' | 'too-large' | 'unsupported-format' | 'type-mismatch'
 
 export interface UploadVerdict {
   accepted: boolean

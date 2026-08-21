@@ -152,7 +152,10 @@
     font-family: var(--font-display);
     color: var(--text-strong);
     /* Fraunces' optical size axis: raise contrast as type grows. */
-    font-variation-settings: 'SOFT' 0, 'WONK' 1, 'opsz' 24;
+    font-variation-settings:
+      'SOFT' 0,
+      'WONK' 1,
+      'opsz' 24;
     letter-spacing: -0.011em;
   }
 

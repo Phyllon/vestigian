@@ -10,10 +10,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: [
-      'server/**/__test__/**/*.test.ts',
-      'app/composables/**/__test__/**/*.test.ts',
-    ],
+    include: ['server/**/__test__/**/*.test.ts', 'app/composables/**/__test__/**/*.test.ts'],
     coverage: {
       provider: 'v8',
       include: ['server/utils/**', 'app/composables/**'],

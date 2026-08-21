@@ -73,7 +73,9 @@ describe('tokenHashMatches', () => {
 describe('buildTokenLink', () => {
   it('routes each purpose to its own page', () => {
     expect(buildTokenLink('https://vestigia.org', 'verify-email', 'x')).toContain('/verify?token=')
-    expect(buildTokenLink('https://vestigia.org', 'reset-password', 'x')).toContain('/reset-password?token=')
+    expect(buildTokenLink('https://vestigia.org', 'reset-password', 'x')).toContain(
+      '/reset-password?token=',
+    )
   })
 
   it('tolerates a trailing slash on the site url', () => {
@@ -83,6 +85,8 @@ describe('buildTokenLink', () => {
   })
 
   it('escapes tokens containing url-significant characters', () => {
-    expect(buildTokenLink('https://vestigia.org', 'verify-email', 'a+b/c=')).toContain('a%2Bb%2Fc%3D')
+    expect(buildTokenLink('https://vestigia.org', 'verify-email', 'a+b/c=')).toContain(
+      'a%2Bb%2Fc%3D',
+    )
   })
 })

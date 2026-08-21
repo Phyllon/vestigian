@@ -15,13 +15,13 @@ const LICENCE_ALIASES: Record<string, string> = {
   'cc by': 'CC-BY-4.0',
   'cc-by': 'CC-BY-4.0',
   'cc by 4.0': 'CC-BY-4.0',
-  'cc0': 'CC0-1.0',
+  cc0: 'CC0-1.0',
   'cc-zero': 'CC0-1.0',
   'public domain': 'CC0-1.0',
-  'pd': 'CC0-1.0',
-  'gfdl': 'GFDL-1.3',
+  pd: 'CC0-1.0',
+  gfdl: 'GFDL-1.3',
   'all rights reserved': 'ARR',
-  'copyright': 'ARR',
+  copyright: 'ARR',
 }
 
 export const UNKNOWN_LICENCE = 'UNKNOWN'
@@ -53,9 +53,7 @@ export interface ImageRendition {
  * can be asserted in tests without touching the HMAC secret.
  */
 export const buildRenditionPath = (rendition: ImageRendition): string => {
-  const encoded = Buffer.from(rendition.storageKey)
-    .toString('base64url')
-    .replace(/=+$/, '')
+  const encoded = Buffer.from(rendition.storageKey).toString('base64url').replace(/=+$/, '')
   const resize = rendition.fit === 'cover' ? 'fill' : 'fit'
   return `/rs:${resize}:${rendition.width}:${rendition.height}/g:sm/q:82/${encoded}.webp`
 }

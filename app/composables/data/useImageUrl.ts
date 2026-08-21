@@ -2,7 +2,10 @@ import type { SiteImage } from '#shared/types'
 
 export type ImagePreset = 'thumb' | 'card' | 'full'
 
-const PRESET_SIZES: Record<ImagePreset, { width: number; height: number; fit: 'cover' | 'contain' }> = {
+const PRESET_SIZES: Record<
+  ImagePreset,
+  { width: number; height: number; fit: 'cover' | 'contain' }
+> = {
   thumb: { width: 160, height: 160, fit: 'cover' },
   card: { width: 720, height: 480, fit: 'cover' },
   full: { width: 1600, height: 1600, fit: 'contain' },

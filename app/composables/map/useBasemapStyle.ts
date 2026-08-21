@@ -71,8 +71,16 @@ interface StyleRequest {
 
 const buildVectorSource = (source: BasemapSource) =>
   source.provider === 'pmtiles'
-    ? { type: 'vector' as const, url: `pmtiles://${source.pmtilesUrl}`, attribution: '© OpenStreetMap contributors' }
-    : { type: 'vector' as const, url: 'https://tiles.openfreemap.org/planet', attribution: '© OpenStreetMap contributors' }
+    ? {
+        type: 'vector' as const,
+        url: `pmtiles://${source.pmtilesUrl}`,
+        attribution: '© OpenStreetMap contributors',
+      }
+    : {
+        type: 'vector' as const,
+        url: 'https://tiles.openfreemap.org/planet',
+        attribution: '© OpenStreetMap contributors',
+      }
 
 const buildBasemapLayers = (colours: StyleColours, roadOpacity: number): LayerSpecification[] => [
   {

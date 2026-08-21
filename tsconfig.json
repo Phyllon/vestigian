@@ -1,10 +1,19 @@
 {
-  "extends": "./.nuxt/tsconfig.json",
-  "compilerOptions": {
-    "strict": true,
-    "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true,
-    "verbatimModuleSyntax": true
-  },
-  "include": ["scripts/**/*.ts", "shared/**/*.ts", "vitest.config.ts", "drizzle.config.ts"]
+  // Nuxt 4 generates one tsconfig per environment, because the app, the Nitro
+  // server and the config file each see a different set of globals. Referencing
+  // them keeps those boundaries — a previous single config here set its own
+  // `include`, which replaces Nuxt's rather than extending it, and dropped both
+  // app/**/* and .nuxt/nuxt.d.ts from the project. That is what made every
+  // auto-imported composable (useHead, useRuntimeConfig, useSession) unresolved.
+  //
+  // Compiler options belong in nuxt.config's `typescript.tsConfig` so they reach
+  // all four generated configs; options set here would be ignored.
+  "files": [],
+  "references": [
+    { "path": "./.nuxt/tsconfig.app.json" },
+    { "path": "./.nuxt/tsconfig.server.json" },
+    { "path": "./.nuxt/tsconfig.shared.json" },
+    { "path": "./.nuxt/tsconfig.node.json" },
+    { "path": "./tsconfig.scripts.json" }
+  ]
 }

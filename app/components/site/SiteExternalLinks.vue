@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import type { ExternalIdentifier } from '#shared/types'
+  import type { ExternalIdentifier } from '#shared/types'
 
-defineProps<{ identifiers: ExternalIdentifier[] }>()
+  defineProps<{ identifiers: ExternalIdentifier[] }>()
 
-const SCHEME_LABELS: Record<string, string> = {
-  pleiades: 'Pleiades',
-  wikidata: 'Wikidata',
-  vici: 'Vici.org',
-  trismegistos: 'Trismegistos',
-}
+  const SCHEME_LABELS: Record<string, string> = {
+    pleiades: 'Pleiades',
+    wikidata: 'Wikidata',
+    vici: 'Vici.org',
+    trismegistos: 'Trismegistos',
+  }
 
-const labelFor = (scheme: string): string => SCHEME_LABELS[scheme] ?? scheme
+  const labelFor = (scheme: string): string => SCHEME_LABELS[scheme] ?? scheme
 </script>
 
 <template>

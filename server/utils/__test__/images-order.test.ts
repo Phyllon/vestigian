@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  applyReorder,
-  canManageImage,
-  nextSortOrder,
-  normaliseOrder,
-} from '../images-order'
+import { applyReorder, canManageImage, nextSortOrder, normaliseOrder } from '../images-order'
 import type { SessionUser } from '#shared/types'
 
 const orderOf = (images: { id: number; sortOrder: number }[]): number[] =>
@@ -75,7 +70,12 @@ describe('nextSortOrder', () => {
   })
 
   it('appends after the highest existing position', () => {
-    expect(nextSortOrder([{ id: 1, sortOrder: 0 }, { id: 2, sortOrder: 7 }])).toBe(8)
+    expect(
+      nextSortOrder([
+        { id: 1, sortOrder: 0 },
+        { id: 2, sortOrder: 7 },
+      ]),
+    ).toBe(8)
   })
 })
 

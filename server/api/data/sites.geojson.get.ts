@@ -19,9 +19,7 @@ export default defineEventHandler(async (event) => {
   const { bbox, category, limit } = await getValidatedQuery(event, querySchema.parse)
   const sql = useSql()
 
-  const [west, south, east, north] = bbox
-    ? bbox.split(',').map(Number)
-    : [-180, -85, 180, 85]
+  const [west, south, east, north] = bbox ? bbox.split(',').map(Number) : [-180, -85, 180, 85]
 
   const rows = await sql<
     {

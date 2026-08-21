@@ -12,8 +12,15 @@ const siteDraftSchema = z.object({
   entityId: z.number().int().positive().optional(),
   title: z.string().trim().min(3).max(240),
   category: z.enum([
-    'settlement', 'fortification', 'sanctuary', 'burial',
-    'infrastructure', 'villa', 'production', 'findspot', 'other',
+    'settlement',
+    'fortification',
+    'sanctuary',
+    'burial',
+    'infrastructure',
+    'villa',
+    'production',
+    'findspot',
+    'other',
   ]),
   summary: z.string().trim().max(400).optional(),
   description: z.string().trim().max(20000).optional(),
@@ -128,11 +135,7 @@ export default defineEventHandler(async (event) => {
   }
 })
 
-const buildOutcomeMessage = (
-  status: string,
-  isEdit: boolean,
-  requiresReview: boolean,
-): string => {
+const buildOutcomeMessage = (status: string, isEdit: boolean, requiresReview: boolean): string => {
   if (status === 'approved') {
     return isEdit ? 'Changes published.' : 'Published. Thank you.'
   }

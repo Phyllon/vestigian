@@ -1,6 +1,6 @@
 <script setup lang="ts">
-definePageMeta({ layout: 'reading' })
-useHead({ title: 'Create an account' })
+  definePageMeta({ layout: 'reading' })
+  useHead({ title: 'Create an account' })
 </script>
 
 <template>

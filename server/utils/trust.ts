@@ -27,8 +27,7 @@ export const evaluateTrust = (user: TrustInput): TrustEvaluation => {
   return { level: 0, autoApprove: false, reason: 'probation' }
 }
 
-export const resolveTrustLevel = (user: TrustInput): TrustLevel =>
-  evaluateTrust(user).level
+export const resolveTrustLevel = (user: TrustInput): TrustLevel => evaluateTrust(user).level
 
 /**
  * Contributions that count towards the threshold. Images are excluded on

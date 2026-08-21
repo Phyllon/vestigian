@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  buildStorageKey,
-  detectImageFormat,
-  inspectUpload,
-  MAX_UPLOAD_BYTES,
-} from '../uploads'
+import { buildStorageKey, detectImageFormat, inspectUpload, MAX_UPLOAD_BYTES } from '../uploads'
 
 const padded = (header: number[], size = 4096): Buffer => {
   const buffer = Buffer.alloc(size)
@@ -45,7 +40,9 @@ describe('inspectUpload', () => {
   })
 
   it('treats image/jpg and image/jpeg as the same declaration', () => {
-    expect(inspectUpload({ bytes: JPEG, declaredType: 'image/jpg', filename: 'a.jpg' }).accepted).toBe(true)
+    expect(
+      inspectUpload({ bytes: JPEG, declaredType: 'image/jpg', filename: 'a.jpg' }).accepted,
+    ).toBe(true)
   })
 
   it('refuses a file whose real format contradicts its declared type', () => {
@@ -56,12 +53,15 @@ describe('inspectUpload', () => {
   it('enforces the size ceiling', () => {
     const oversized = Buffer.alloc(MAX_UPLOAD_BYTES + 1)
     Buffer.from([0xff, 0xd8, 0xff]).copy(oversized)
-    expect(inspectUpload({ bytes: oversized, declaredType: 'image/jpeg', filename: 'a.jpg' }).reason)
-      .toBe('too-large')
+    expect(
+      inspectUpload({ bytes: oversized, declaredType: 'image/jpeg', filename: 'a.jpg' }).reason,
+    ).toBe('too-large')
   })
 
   it('accepts an upload with no declared type at all', () => {
-    expect(inspectUpload({ bytes: JPEG, declaredType: undefined, filename: undefined }).accepted).toBe(true)
+    expect(
+      inspectUpload({ bytes: JPEG, declaredType: undefined, filename: undefined }).accepted,
+    ).toBe(true)
   })
 })
 

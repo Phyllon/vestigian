@@ -15,10 +15,7 @@ const ARGON_OPTIONS = {
 export const hashPassword = async (password: string): Promise<string> =>
   hash(password, ARGON_OPTIONS)
 
-export const verifyPassword = async (
-  digest: string,
-  password: string,
-): Promise<boolean> => {
+export const verifyPassword = async (digest: string, password: string): Promise<boolean> => {
   try {
     return await verify(digest, password, ARGON_OPTIONS)
   } catch {

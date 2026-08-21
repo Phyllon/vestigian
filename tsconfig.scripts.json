@@ -1,0 +1,28 @@
+{
+  // The import pipeline and the maintenance scripts run under tsx as plain Node
+  // ESM. They are not part of the Nuxt app and see none of its auto-imports, so
+  // they get their own project rather than borrowing the app's.
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": ["ESNext"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "types": ["node"],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "verbatimModuleSyntax": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "noEmit": true
+  },
+  "include": [
+    "scripts/**/*.ts",
+    "drizzle.config.ts",
+    "vitest.config.ts",
+    // Reached from scripts/import/03-mirror-images.ts, which reuses the same
+    // magic-byte detection the upload endpoint uses.
+    "server/utils/uploads.ts"
+  ]
+}

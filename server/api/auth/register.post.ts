@@ -2,7 +2,12 @@ import { z } from 'zod'
 
 const registrationSchema = z.object({
   email: z.string().email().max(320),
-  displayName: z.string().trim().min(3).max(60).regex(/^[\p{L}\p{N} ._-]+$/u),
+  displayName: z
+    .string()
+    .trim()
+    .min(3)
+    .max(60)
+    .regex(/^[\p{L}\p{N} ._-]+$/u),
   password: z.string().min(12).max(200),
   turnstileToken: z.string().optional(),
   /** Honeypot. Real browsers leave it empty; most bots fill every field. */

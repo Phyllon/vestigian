@@ -19,6 +19,7 @@ export default defineNuxtConfig({
   devtools: { enabled: !isProduction },
 
   modules: [
+    '@nuxt/eslint',
     '@nuxt/ui',
     '@vueuse/nuxt',
     'nuxt-auth-utils',
@@ -37,6 +38,9 @@ export default defineNuxtConfig({
   },
 
   css: [
+    // MapLibre positions its canvas, controls and attribution from this sheet;
+    // without it the map renders but every control sits in the document flow.
+    'maplibre-gl/dist/maplibre-gl.css',
     '@fontsource-variable/fraunces/index.css',
     '@fontsource/ibm-plex-sans/400.css',
     '@fontsource/ibm-plex-sans/500.css',
@@ -98,8 +102,15 @@ export default defineNuxtConfig({
         'child-src': ["'self'", 'blob:'],
         'connect-src': ["'self'", ...mapAssetOrigins],
         'frame-src': ['https://challenges.cloudflare.com'],
+        /**
+         * Nuxt stamps a per-request nonce on the inline scripts that carry the
+         * runtime config and the pre-paint colour-mode switch. Without the
+         * matching 'nonce-{{nonce}}' token here the browser refuses those
+         * scripts and the client app never mounts at all.
+         */
         'script-src': [
           "'self'",
+          "'nonce-{{nonce}}'",
           "'wasm-unsafe-eval'",
           'https://challenges.cloudflare.com',
         ],
@@ -107,9 +118,7 @@ export default defineNuxtConfig({
         'font-src': ["'self'"],
       },
       crossOriginEmbedderPolicy: 'unsafe-none',
-      strictTransportSecurity: isProduction
-        ? { maxAge: 31536000, includeSubdomains: true }
-        : false,
+      strictTransportSecurity: isProduction ? { maxAge: 31536000, includeSubdomains: true } : false,
     },
     rateLimiter: false,
     corsHandler: {
@@ -128,8 +137,18 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
+    /**
+     * Headers only, deliberately no `cache`. Nitro's route cache serialises the
+     * response body, so a binary tile comes back out of it as
+     * `{"type":"Buffer","data":[...]}` — eight times the size, under a
+     * vector-tile content type, and MapLibre renders nothing while every status
+     * code still says 200. It only shows on the *second* request for a tile,
+     * which makes it look like a rendering bug rather than a caching one.
+     *
+     * Tiles are already cached in Valkey by the handler itself, keyed on the
+     * data version, which is the mechanism the whole design rests on.
+     */
     '/api/tiles/**': {
-      cache: { maxAge: 60 * 60 * 24, swr: true },
       headers: { 'cache-control': 'public, max-age=3600, stale-while-revalidate=86400' },
     },
     '/api/sites/**': {
@@ -145,8 +164,27 @@ export default defineNuxtConfig({
     '~~/server': fileURLToPath(new URL('./server', import.meta.url)),
   },
 
+  /**
+   * These reach every generated tsconfig. The root tsconfig.json only holds
+   * project references now, and compiler options placed there would be ignored.
+   */
   typescript: {
     strict: true,
     typeCheck: false,
+    tsConfig: {
+      compilerOptions: {
+        noUncheckedIndexedAccess: true,
+        noImplicitOverride: true,
+        verbatimModuleSyntax: true,
+      },
+    },
+  },
+
+  eslint: {
+    config: {
+      // Formatting is Prettier's job; ESLint keeps to correctness and to the
+      // conventions in CLAUDE.md that a formatter cannot express.
+      stylistic: false,
+    },
   },
 })

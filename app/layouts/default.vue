@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { loggedIn, currentUser, isModerator, signOut } = useSession()
+  const { loggedIn, currentUser, isModerator, signOut } = useSession()
 </script>
 
 <template>
@@ -11,7 +11,11 @@ const { loggedIn, currentUser, isModerator, signOut } = useSession()
         <!-- The wordmark is the only place Fraunces runs at full optical size. -->
         <span
           class="font-display text-xl leading-none text-ink-900 dark:text-paper-100"
-          style="font-variation-settings: 'opsz' 144, 'WONK' 1"
+          style="
+            font-variation-settings:
+              'opsz' 144,
+              'WONK' 1;
+          "
         >
           Vestigia
         </span>

@@ -33,9 +33,7 @@ describe('diffPayloads', () => {
 
   it('handles a first revision with nothing before it', () => {
     const changes = diffPayloads(null, { title: 'Fectio' })
-    expect(changes).toEqual([
-      { field: 'title', kind: 'added', before: null, after: 'Fectio' },
-    ])
+    expect(changes).toEqual([{ field: 'title', kind: 'added', before: null, after: 'Fectio' }])
   })
 
   it('ignores structural fields that carry no editorial meaning', () => {

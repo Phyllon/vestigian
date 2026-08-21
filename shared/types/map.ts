@@ -22,12 +22,7 @@ export interface CameraState {
 }
 
 export type GeolocationStatus =
-  | 'idle'
-  | 'prompting'
-  | 'locating'
-  | 'tracking'
-  | 'denied'
-  | 'unavailable'
+  'idle' | 'prompting' | 'locating' | 'tracking' | 'denied' | 'unavailable'
 
 export interface DevicePosition {
   coords: LonLat

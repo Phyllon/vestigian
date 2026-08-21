@@ -35,8 +35,7 @@ export const getSimplifyTolerance = (zoom: number): number => {
 }
 
 /** Cluster cell size in metres — about 48 screen pixels, tuned for touch. */
-export const getClusterGridSize = (zoom: number): number =>
-  (40075016.686 / (256 * 2 ** zoom)) * 48
+export const getClusterGridSize = (zoom: number): number => (40075016.686 / (256 * 2 ** zoom)) * 48
 
 export const planTileRender = (zoom: number): TileRenderPlan => ({
   strategy: zoom < CLUSTER_ZOOM_CEILING ? 'cluster' : 'feature',

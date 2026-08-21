@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import type { SiteImage } from '#shared/types'
+  import type { SiteImage } from '#shared/types'
 
-const props = defineProps<{ images: SiteImage[] }>()
+  const props = defineProps<{ images: SiteImage[] }>()
 
-const { buildUrl, buildCredit } = useImageUrl()
-const activeIndex = ref(0)
+  const { buildUrl, buildCredit } = useImageUrl()
+  const activeIndex = ref(0)
 
-const activeImage = computed(() => props.images[activeIndex.value] ?? null)
+  const activeImage = computed(() => props.images[activeIndex.value] ?? null)
 
-const show = (index: number): void => {
-  activeIndex.value = index
-}
+  const show = (index: number): void => {
+    activeIndex.value = index
+  }
 </script>
 
 <template>
@@ -23,7 +23,7 @@ const show = (index: number): void => {
         class="aspect-[3/2] w-full object-cover"
         loading="lazy"
         decoding="async"
-      >
+      />
     </div>
 
     <figcaption v-if="activeImage" class="mt-2 space-y-1">
@@ -41,11 +41,15 @@ const show = (index: number): void => {
         :key="image.id"
         type="button"
         class="size-14 shrink-0 overflow-hidden rounded-notebook border-2 transition"
-        :class="index === activeIndex ? 'border-oxide-600' : 'border-transparent opacity-70 hover:opacity-100'"
+        :class="
+          index === activeIndex
+            ? 'border-oxide-600'
+            : 'border-transparent opacity-70 hover:opacity-100'
+        "
         :aria-label="`Show image ${index + 1} of ${images.length}`"
         @click="show(index)"
       >
-        <img :src="buildUrl(image, 'thumb')" alt="" class="size-full object-cover" loading="lazy">
+        <img :src="buildUrl(image, 'thumb')" alt="" class="size-full object-cover" loading="lazy" />
       </button>
     </div>
   </figure>

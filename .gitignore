@@ -10,3 +10,4 @@ dist
 *.pmtiles
 coverage
 .DS_Store
+db_dumb

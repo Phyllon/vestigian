@@ -1,7 +1,13 @@
 import { z } from 'zod'
 import type { SiteDetail } from '#shared/types'
 
-const paramsSchema = z.object({ slug: z.string().min(1).max(160).regex(/^[a-z0-9-]+$/) })
+const paramsSchema = z.object({
+  slug: z
+    .string()
+    .min(1)
+    .max(160)
+    .regex(/^[a-z0-9-]+$/),
+})
 
 /**
  * Slug lookup for the shareable site page. Kept separate from the id route so

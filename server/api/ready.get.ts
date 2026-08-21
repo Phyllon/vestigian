@@ -8,12 +8,16 @@ export default defineEventHandler(async (event) => {
   try {
     await useSql()`SELECT 1`
     checks.database = true
-  } catch { /* reported below */ }
+  } catch {
+    /* reported below */
+  }
 
   try {
     await useRedis().ping()
     checks.cache = true
-  } catch { /* reported below */ }
+  } catch {
+    /* reported below */
+  }
 
   if (!checks.database) {
     setResponseStatus(event, 503)

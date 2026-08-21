@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import type { NuxtError } from '#app'
+  import type { NuxtError } from '#app'
 
-const props = defineProps<{ error: NuxtError }>()
+  const props = defineProps<{ error: NuxtError }>()
 
-const heading = computed(() => {
-  if (props.error.statusCode === 404) return 'Nothing recorded here'
-  if (props.error.statusCode === 403) return 'Not yours to open'
-  return 'Something gave way'
-})
+  const heading = computed(() => {
+    if (props.error.statusCode === 404) return 'Nothing recorded here'
+    if (props.error.statusCode === 403) return 'Not yours to open'
+    return 'Something gave way'
+  })
 
-const explanation = computed(() => {
-  if (props.error.statusCode === 404) return 'That page has no entry in the atlas.'
-  if (props.error.statusCode === 403) return 'This page is for moderators.'
-  return 'The page could not be loaded. Reloading usually settles it.'
-})
+  const explanation = computed(() => {
+    if (props.error.statusCode === 404) return 'That page has no entry in the atlas.'
+    if (props.error.statusCode === 403) return 'This page is for moderators.'
+    return 'The page could not be loaded. Reloading usually settles it.'
+  })
 </script>
 
 <template>
