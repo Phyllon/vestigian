@@ -19,7 +19,7 @@
 
 <template>
   <div v-if="tracing" class="space-y-6">
-    <article class="leaf leaf-margin py-8 pr-8">
+    <article class="leaf p-8">
       <p class="eyebrow">{{ tracing.kind === 'area' ? 'Traced area' : 'Traced route' }}</p>
       <h1 class="mt-2 text-4xl leading-tight">{{ tracing.title }}</h1>
 
@@ -67,7 +67,7 @@
       </footer>
     </article>
 
-    <div class="leaf leaf-margin py-6 pr-8">
+    <div class="leaf px-8 py-6">
       <UiRevisionHistory :entity-id="tracing.id" entity-type="tracing" />
     </div>
   </div>

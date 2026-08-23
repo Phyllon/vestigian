@@ -27,7 +27,7 @@ The agreed mood is **"a field notebook carried through Roman Europe."** Every vi
 - Bronze for linear features, verdigris only for approved/confirmed states.
 - Dark mode is a _night_ notebook, not an inverted one: warm charcoal, never blue-grey.
 - Type: Fraunces Variable (display, optical-size axis), IBM Plex Sans (body), IBM Plex Mono (coordinates, ids, licences). **All self-hosted via `@fontsource*` — never a runtime request to Google.**
-- Signature element: `.leaf-margin`, a ruled annotation column down the left of panels, where provenance, licence and revision state live.
+- Signature element: `.leaf`, a sheet of the notebook — raised ground, 2px corners, a shallow shadow. It once had a companion `.leaf-margin` that drew a ruled annotation column down the left of every panel; nothing was ever put in the column, so it read as a stray vertical line beside an oddly indented block and has been removed. If the ruled margin returns, it returns with provenance, licence and revision state actually in it.
 
 Tokens live in `app/assets/css/main.css` as Tailwind v4 `@theme` variables. Nuxt UI is pointed at those palettes in `app/app.config.ts`, so components inherit the palette rather than being restyled individually.
 
@@ -84,7 +84,7 @@ After any deploy or bulk import, run `pnpm tiles:warm <url>`.
 ## Security invariants — do not weaken these either
 
 - argon2id at OWASP parameters. Login always hashes (against `DUMMY_HASH` when no user matches) so timing cannot enumerate the user table.
-- Registration and `forgot-password` respond **identically** whether or not the address exists.
+- `forgot-password` responds **identically** whether or not the address exists. Registration no longer does: a duplicate email or display name is reported as a 409 so the person can try again. That was a deliberate trade of the enumeration guarantee for a form that is not a dead end — see the comment in `server/api/auth/register.post.ts`, which records what still throttles it and what the alternative was.
 - Only the SHA-256 **hash** of an email token is stored; comparison is constant-time.
 - Uploads: the declared content type is a hint. Format is read from **magic bytes** (`detectImageFormat`), and every image is **re-encoded through sharp**, which strips EXIF and guarantees the stored object is a plain JPEG. Storage keys derive from database ids, **never** from the uploaded filename.
 - Images with an unresolved licence (`UNKNOWN`) or `ARR` are never published.
@@ -288,3 +288,33 @@ To move from OpenFreeMap to self-hosted tiles: download a Europe + Mediterranean
 ## Working style for this project
 
 When something is uncertain, say so rather than guessing silently — several things here are inferred (the vici schema above) and were flagged as such deliberately. When a decision has a real trade-off, name the trade-off. Prefer fixing an unverified assumption over adding a feature: the codebase is broad and completely unexercised, so the highest-value work right now is making it run, not making it bigger.
+
+### Say it once, in the file
+
+When you write a docstring or comment explaining what something does, why it
+exists, or how it failed — **that is the explanation, and it does not get
+repeated in chat.** Reply with a pointer: what you did, and where the reasoning
+now lives. `Fixed the recursion; the ordering constraint is documented above
+attachOverlay.` Not a paragraph restating it.
+
+The chat transcript is thrown away; the file is read by whoever touches this
+next. If an explanation is worth writing, it is worth writing where it will be
+found — so when the urge to explain in the reply appears, extend the docstring
+instead. A reader who wants the detail opens the file.
+
+This does not apply to things that have no home in the source: what you
+verified and how, what is still unproven, a trade-off the user has to decide,
+or a finding that contradicts what they asked for. Those belong in the reply,
+because there is no file for them.
+
+### Mobile first
+ Every component has to be optimized for mobile use (e.g. fast load, perfect UX/UI etc.), desktop secondly but not to be neglected. <!-- Supported breakpoints start from 375px to <768px (phone), to <1000px (tablet) and above (desktop). -->
+
+### Performance, clean code, best practices
+When adding or changing some code/feature, make it run as fast as possible (performance) but keep an eye on clean code and stick to best modern practices.
+
+### Accessibility
+Take a11y into account every time and boost it where possible (ARIA etc.)
+
+### Clean and modern HTML
+Always use best suitable HTML tags when building components

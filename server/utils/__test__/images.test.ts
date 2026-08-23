@@ -33,6 +33,7 @@ describe('isPublishableLicence', () => {
 describe('buildRenditionPath', () => {
   it('encodes the key so slashes cannot escape the path', () => {
     const path = buildRenditionPath({
+      bucket: 'vestigia',
       storageKey: 'sites/4711/original.jpg',
       width: 800,
       height: 600,
@@ -43,8 +44,24 @@ describe('buildRenditionPath', () => {
     expect(path.endsWith('.webp')).toBe(true)
   })
 
+  /**
+   * imgproxy encodes a source URL, not an object key. Handed the bare key it
+   * answers `404 Invalid URL`, which reaches a gallery as a broken picture.
+   */
+  it('encodes an s3 source url rather than the object key alone', () => {
+    const path = buildRenditionPath({
+      bucket: 'vestigia',
+      storageKey: 'vici/14054.jpg',
+      width: 720,
+      height: 480,
+      fit: 'cover',
+    })
+    const encoded = path.split('/').pop()?.replace('.webp', '') ?? ''
+    expect(Buffer.from(encoded, 'base64url').toString()).toBe('s3://vestigia/vici/14054.jpg')
+  })
+
   it('distinguishes cover from contain', () => {
-    const base = { storageKey: 'a.jpg', width: 10, height: 10 } as const
+    const base = { bucket: 'vestigia', storageKey: 'a.jpg', width: 10, height: 10 } as const
     expect(buildRenditionPath({ ...base, fit: 'contain' })).toContain('rs:fit:')
   })
 })

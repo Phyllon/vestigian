@@ -42,6 +42,7 @@ export const isPublishableLicence = (licence: string): boolean =>
   licence !== UNKNOWN_LICENCE && licence !== 'ARR'
 
 export interface ImageRendition {
+  bucket: string
   storageKey: string
   width: number
   height: number
@@ -51,9 +52,15 @@ export interface ImageRendition {
 /**
  * imgproxy path, unsigned. Split out from the signing step so the path format
  * can be asserted in tests without touching the HMAC secret.
+ *
+ * What imgproxy encodes is a *source URL*, not an object key. Given the bare
+ * key it answers `404 Invalid URL` — a plain-text response with an image
+ * content type nowhere in sight, which in a gallery looks like a broken
+ * picture rather than a malformed request.
  */
 export const buildRenditionPath = (rendition: ImageRendition): string => {
-  const encoded = Buffer.from(rendition.storageKey).toString('base64url').replace(/=+$/, '')
+  const source = `s3://${rendition.bucket}/${rendition.storageKey}`
+  const encoded = Buffer.from(source).toString('base64url').replace(/=+$/, '')
   const resize = rendition.fit === 'cover' ? 'fill' : 'fit'
   return `/rs:${resize}:${rendition.width}:${rendition.height}/g:sm/q:82/${encoded}.webp`
 }
@@ -72,9 +79,9 @@ export const signRenditionPath = (path: string, key: string, salt: string): stri
   return `/${digest}${path}`
 }
 
-export const buildImageUrl = (rendition: ImageRendition): string => {
-  const { imgproxy } = useRuntimeConfig()
-  const path = buildRenditionPath(rendition)
+export const buildImageUrl = (rendition: Omit<ImageRendition, 'bucket'>): string => {
+  const { imgproxy, storage } = useRuntimeConfig()
+  const path = buildRenditionPath({ ...rendition, bucket: storage.bucket })
   if (!imgproxy.key || !imgproxy.salt) return `${imgproxy.baseUrl}/insecure${path}`
   return `${imgproxy.baseUrl}${signRenditionPath(path, imgproxy.key, imgproxy.salt)}`
 }

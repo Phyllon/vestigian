@@ -57,7 +57,7 @@
         </div>
       </div>
 
-      <article class="leaf-margin py-5 pr-5">
+      <article class="px-5 py-5">
         <h1 class="text-2xl leading-tight">{{ tracing.title }}</h1>
 
         <dl

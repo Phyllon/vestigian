@@ -1,29 +1,22 @@
-import type { SiteImage } from '#shared/types'
+import { IMAGE_PRESETS } from '#shared/types'
+import type { ImagePreset, SiteImage } from '#shared/types'
 
-export type ImagePreset = 'thumb' | 'card' | 'full'
-
-const PRESET_SIZES: Record<
-  ImagePreset,
-  { width: number; height: number; fit: 'cover' | 'contain' }
-> = {
-  thumb: { width: 160, height: 160, fit: 'cover' },
-  card: { width: 720, height: 480, fit: 'cover' },
-  full: { width: 1600, height: 1600, fit: 'contain' },
-}
+export type { ImagePreset }
 
 /**
  * Derivatives are produced by imgproxy on request, so only one original per
  * image is ever stored. The client asks for a preset rather than arbitrary
  * dimensions, which keeps the imgproxy cache small and predictable.
+ *
+ * The URL is same-origin and points at `/api/images/:id/:preset`, which
+ * redirects to the real rendition. The image server's address, the bucket and
+ * the object key are all things the browser has no business knowing, and the
+ * signature that keeps imgproxy from being an open proxy can only be made
+ * where the key lives.
  */
 export const useImageUrl = () => {
-  const config = useRuntimeConfig()
-
-  const buildUrl = (image: SiteImage, preset: ImagePreset): string => {
-    const size = PRESET_SIZES[preset]
-    const key = encodeURIComponent(image.storageKey)
-    return `${config.public.imageBaseUrl}/r/${preset}/${size.width}x${size.height}/${key}`
-  }
+  const buildUrl = (image: SiteImage, preset: ImagePreset): string =>
+    `/api/images/${image.id}/${preset}`
 
   /** Attribution line rendered under every image, as the licences require. */
   const buildCredit = (image: SiteImage): string => {
@@ -31,5 +24,5 @@ export const useImageUrl = () => {
     return parts.length > 0 ? parts.join(' · ') : 'Credit unknown'
   }
 
-  return { buildUrl, buildCredit, presets: PRESET_SIZES }
+  return { buildUrl, buildCredit, presets: IMAGE_PRESETS }
 }

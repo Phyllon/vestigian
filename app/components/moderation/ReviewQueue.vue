@@ -128,14 +128,14 @@
       <UButton size="xs" variant="ghost" color="neutral" @click="selectAll">Select all</UButton>
     </div>
 
-    <div v-else-if="!data?.items.length" class="leaf leaf-margin py-8 pr-6">
+    <div v-else-if="!data?.items.length" class="leaf px-6 py-8">
       <p class="text-lg">Nothing waiting.</p>
       <p class="mt-1 text-sm text-ink-500 dark:text-paper-400">
         New contributions from untrusted accounts will appear here.
       </p>
     </div>
 
-    <article v-for="item in data?.items ?? []" :key="item.id" class="leaf leaf-margin py-4 pr-5">
+    <article v-for="item in data?.items ?? []" :key="item.id" class="leaf px-5 py-4">
       <div class="flex flex-wrap items-baseline justify-between gap-2">
         <UCheckbox
           :model-value="selected.has(item.id)"

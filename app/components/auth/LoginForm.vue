@@ -16,6 +16,13 @@
 
   const state = reactive<Partial<CredentialsState>>({ email: '', password: '' })
 
+  /**
+   * Deliberately only checks that the two fields are filled in and that the
+   * address is well formed. The password policy is not applied here: an
+   * account made before a rule existed must still be able to sign in.
+   */
+  const isComplete = computed(() => schema.safeParse(state).success)
+
   const signIn = async (event: FormSubmitEvent<CredentialsState>): Promise<void> => {
     isSubmitting.value = true
     try {
@@ -55,7 +62,18 @@
       />
     </UFormField>
 
-    <UButton type="submit" :loading="isSubmitting" color="primary" block>Sign in</UButton>
+    <p class="-mt-2 text-right">
+      <NuxtLink
+        to="/forgot-password"
+        class="text-sm text-ink-500 underline underline-offset-2 dark:text-paper-400"
+      >
+        Forgotten your password?
+      </NuxtLink>
+    </p>
+
+    <UButton type="submit" :loading="isSubmitting" :disabled="!isComplete" color="primary" block>
+      Sign in
+    </UButton>
 
     <p class="text-sm text-ink-500 dark:text-paper-400">
       No account yet?

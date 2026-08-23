@@ -1,8 +1,10 @@
 <script setup lang="ts">
   import { z } from 'zod'
-  import type { FormSubmitEvent } from '@nuxt/ui'
+  import { passwordSchema } from '#shared/utils/password'
+  import type { Form, FormSubmitEvent } from '@nuxt/ui'
 
   const toast = useToast()
+  const form = useTemplateRef<Form<RegistrationState>>('form')
   const turnstileToken = ref('')
   const isSubmitting = ref(false)
   const isDone = ref(false)
@@ -11,7 +13,7 @@
     .object({
       displayName: z.string().trim().min(3, 'At least three characters.').max(60),
       email: z.string().email('That does not look like an email address.'),
-      password: z.string().min(12, 'Use at least twelve characters.'),
+      password: passwordSchema,
       passwordConfirmation: z.string(),
       /** Honeypot — hidden from people, irresistible to bots. */
       website: z.string().max(0).optional(),
@@ -31,6 +33,13 @@
     website: '',
   })
 
+  /**
+   * Gates the submit button. The schema covers every field including the
+   * confirmation match, so this is the same judgement the form itself makes on
+   * submit — the button simply refuses to offer an action that would fail.
+   */
+  const isComplete = computed(() => schema.safeParse(state).success)
+
   const register = async (event: FormSubmitEvent<RegistrationState>): Promise<void> => {
     isSubmitting.value = true
     try {
@@ -46,12 +55,21 @@
       })
       isDone.value = true
     } catch (error) {
-      toast.add({
-        title: 'Registration failed',
-        description:
-          (error as { data?: { message?: string } }).data?.message ?? 'Try again shortly.',
-        color: 'error',
-      })
+      const response = (error as { data?: { message?: string; data?: { field?: string } } }).data
+      const message = response?.message ?? 'Try again shortly.'
+
+      /**
+       * A conflict names the field it came from, so the message lands under
+       * the input that has to change rather than in a toast the reader has to
+       * hold in their head while they retype. The form keeps everything else
+       * they entered; only the offending field needs a second attempt.
+       */
+      if (response?.data?.field) {
+        form.value?.setErrors([{ name: response.data.field, message }], response.data.field)
+        return
+      }
+
+      toast.add({ title: 'Registration failed', description: message, color: 'error' })
     } finally {
       isSubmitting.value = false
     }
@@ -59,14 +77,23 @@
 </script>
 
 <template>
-  <div v-if="isDone" class="leaf leaf-margin py-6 pr-6">
+  <div v-if="isDone" class="leaf p-6">
     <h1 class="text-xl">Check your inbox</h1>
     <p class="mt-2 text-sm text-ink-700 dark:text-paper-200">
       Confirm your address to finish setting up the account. The link is good for one day.
     </p>
   </div>
 
-  <UForm v-else :schema="schema" :state="state" class="space-y-4" @submit="register">
+  <!-- No debounce: the requirement list has to answer the keystroke that changed it. -->
+  <UForm
+    v-else
+    ref="form"
+    :schema="schema"
+    :state="state"
+    :validate-on-input-delay="0"
+    class="space-y-4"
+    @submit="register"
+  >
     <header>
       <h1 class="text-2xl">Join Vestigia</h1>
       <p class="mt-1 text-sm text-ink-500 dark:text-paper-400">
@@ -83,17 +110,13 @@
       <UInput v-model="state.email" type="email" autocomplete="email" class="w-full" />
     </UFormField>
 
-    <UFormField label="Password" name="password" hint="Twelve characters or more" required>
-      <UInput v-model="state.password" type="password" autocomplete="new-password" class="w-full" />
+    <UFormField label="Password" name="password" required>
+      <AuthPasswordField v-model="state.password" autocomplete="new-password" />
+      <AuthPasswordRequirements :password="state.password ?? ''" />
     </UFormField>
 
     <UFormField label="Repeat password" name="passwordConfirmation" required>
-      <UInput
-        v-model="state.passwordConfirmation"
-        type="password"
-        autocomplete="new-password"
-        class="w-full"
-      />
+      <AuthPasswordField v-model="state.passwordConfirmation" autocomplete="new-password" />
     </UFormField>
 
     <!-- Kept out of the accessibility tree and off screen rather than display:none,
@@ -106,6 +129,14 @@
 
     <NuxtTurnstile v-model="turnstileToken" />
 
-    <UButton type="submit" :loading="isSubmitting" color="primary" block>Create account</UButton>
+    <UButton
+      type="submit"
+      :loading="isSubmitting"
+      :disabled="!isComplete"
+      color="primary"
+      block
+    >
+      Create account
+    </UButton>
   </UForm>
 </template>

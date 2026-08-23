@@ -1,9 +1,20 @@
 <script setup lang="ts">
+  /**
+   * The shell is `fixed inset-0`, not `h-dvh`.
+   *
+   * `dvh` is resolved once at first paint and is wrong at that moment in a
+   * device-emulated viewport: the map fills a taller box than the screen, and
+   * everything anchored to its bottom edge — geolocate, "Add to the atlas",
+   * the legend — sits below the fold until a resize forces a recompute.
+   *
+   * The usual objection to pinning is mobile URL bars, which do not apply
+   * here: that only bites a document that scrolls, and this one never does.
+   */
   const { loggedIn, currentUser, isModerator, signOut } = useSession()
 </script>
 
 <template>
-  <div class="flex h-dvh flex-col bg-paper-100 dark:bg-night-900">
+  <div class="fixed inset-0 flex flex-col bg-paper-100 dark:bg-night-900">
     <header
       class="z-40 flex shrink-0 items-center gap-3 border-b border-paper-200 bg-paper-50 px-4 py-2 dark:border-night-700 dark:bg-night-800"
     >

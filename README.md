@@ -280,3 +280,27 @@ Honest list, so nothing here is a surprise:
 docker run --rm --network container:vestigia-dev-minio-1 \
 -v "$PWD/image-archive:/out" minio/mc:latest sh -c \
 "mc alias set src http://127.0.0.1:9000 vestigia vestigia-dev-secret && mc mirror src/vestigia /out"
+
+### register -> brLMa34FghWLUFf
+
+### use a modern ORM instead of raw string queries
+
+### check whole HTML for structure and use best fitting HTML and ARIA tags
+
+### use package "concurrently" and apply it in package.json where suitable. If needed, merge similar commands into one command and use concurrently then
+
+### freshly reloading the page, clicking on some item -> no overlay
+
+### clicking username (top right corner) -> open overlay with useful information (which?) and logout button
+
+### remember the current position and zoom to be restored on new page load. If GPS is active, load this position directly instead
+
+### check work flow of "add to atlas" (logged-in)
+
+### optimize components for mobile use
+
+### check marked sites for additional information on the web (wikipedia or else) and enrich the markers' information table with it (e.g. using the "History" field underneath an entry), but only, if you can be sure about it (e.g. verify by location coordinates, name etc.)
+
+### forgot-password must send an email containing relevant information. Email must look appealing, using Vestigia's style
+
+### reduce the amount of data being loaded on page load where possible. you may use lazy loading of components or data where suitable for that.

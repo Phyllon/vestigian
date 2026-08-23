@@ -30,7 +30,7 @@
 </script>
 
 <template>
-  <div class="leaf leaf-margin mx-auto max-w-md py-8 pr-8">
+  <div class="leaf mx-auto max-w-md p-8">
     <template v-if="state === 'working'">
       <p class="eyebrow">Checking</p>
       <h1 class="mt-2 text-2xl">One moment</h1>

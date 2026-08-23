@@ -72,7 +72,7 @@
         <div class="h-4 w-4/5 animate-pulse rounded bg-paper-200 dark:bg-night-700" />
       </div>
 
-      <article v-else-if="site" class="leaf-margin py-5 pr-5">
+      <article v-else-if="site" class="px-5 py-5">
         <h1 class="text-2xl leading-tight">{{ site.title }}</h1>
 
         <p

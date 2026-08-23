@@ -1,5 +1,6 @@
 <script setup lang="ts">
   import { z } from 'zod'
+  import { passwordSchema } from '#shared/utils/password'
   import type { FormSubmitEvent } from '@nuxt/ui'
 
   definePageMeta({ layout: 'reading' })
@@ -11,7 +12,7 @@
 
   const schema = z
     .object({
-      password: z.string().min(12, 'Use at least twelve characters.'),
+      password: passwordSchema,
       passwordConfirmation: z.string(),
     })
     .refine((values) => values.password === values.passwordConfirmation, {
@@ -22,6 +23,8 @@
   type ResetState = z.output<typeof schema>
 
   const state = reactive<Partial<ResetState>>({ password: '', passwordConfirmation: '' })
+
+  const isComplete = computed(() => schema.safeParse(state).success)
 
   const submit = async (event: FormSubmitEvent<ResetState>): Promise<void> => {
     isSubmitting.value = true
@@ -47,30 +50,35 @@
 
 <template>
   <div class="mx-auto max-w-sm">
-    <UForm :schema="schema" :state="state" class="space-y-4" @submit="submit">
+    <UForm
+      :schema="schema"
+      :state="state"
+      :validate-on-input-delay="0"
+      class="space-y-4"
+      @submit="submit"
+    >
       <header>
         <h1 class="text-2xl">Set a new password</h1>
       </header>
 
-      <UFormField label="New password" name="password" hint="Twelve characters or more" required>
-        <UInput
-          v-model="state.password"
-          type="password"
-          autocomplete="new-password"
-          class="w-full"
-        />
+      <UFormField label="New password" name="password" required>
+        <AuthPasswordField v-model="state.password" autocomplete="new-password" />
+        <AuthPasswordRequirements :password="state.password ?? ''" />
       </UFormField>
 
       <UFormField label="Repeat it" name="passwordConfirmation" required>
-        <UInput
-          v-model="state.passwordConfirmation"
-          type="password"
-          autocomplete="new-password"
-          class="w-full"
-        />
+        <AuthPasswordField v-model="state.passwordConfirmation" autocomplete="new-password" />
       </UFormField>
 
-      <UButton type="submit" :loading="isSubmitting" color="primary" block>Save password</UButton>
+      <UButton
+        type="submit"
+        :loading="isSubmitting"
+        :disabled="!isComplete"
+        color="primary"
+        block
+      >
+        Save password
+      </UButton>
     </UForm>
   </div>
 </template>

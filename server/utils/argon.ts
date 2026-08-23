@@ -12,10 +12,10 @@ const ARGON_OPTIONS = {
   parallelism: 1,
 } as const
 
-export const hashPassword = async (password: string): Promise<string> =>
+export const hashPasswordArgon = async (password: string): Promise<string> =>
   hash(password, ARGON_OPTIONS)
 
-export const verifyPassword = async (digest: string, password: string): Promise<boolean> => {
+export const verifyPasswordArgon = async (digest: string, password: string): Promise<boolean> => {
   try {
     return await verify(digest, password, ARGON_OPTIONS)
   } catch {

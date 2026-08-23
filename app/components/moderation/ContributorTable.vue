@@ -87,7 +87,7 @@
       class="w-full max-w-xs"
     />
 
-    <div v-for="row in contributors ?? []" :key="row.id" class="leaf leaf-margin py-3 pr-4">
+    <div v-for="row in contributors ?? []" :key="row.id" class="leaf px-4 py-3">
       <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
         <h3 class="text-base text-ink-900 dark:text-paper-100">{{ row.displayName }}</h3>
         <span v-if="row.role !== 'contributor'" class="eyebrow text-oxide-600 dark:text-oxide-300">

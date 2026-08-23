@@ -38,7 +38,7 @@
 
 <template>
   <div>
-    <article v-if="site" class="leaf leaf-margin py-8 pr-8">
+    <article v-if="site" class="leaf p-8">
       <p class="eyebrow">{{ site.category }}</p>
       <h1 class="mt-2 text-4xl leading-tight">{{ site.title }}</h1>
 
@@ -91,7 +91,7 @@
       </footer>
     </article>
 
-    <div v-if="site" class="leaf leaf-margin mt-6 py-6 pr-8">
+    <div v-if="site" class="leaf mt-6 px-8 py-6">
       <UiRevisionHistory :entity-id="site.id" entity-type="site" />
     </div>
   </div>

@@ -18,7 +18,7 @@
 
 <template>
   <div class="grid min-h-dvh place-items-center bg-paper-100 px-6 dark:bg-night-900">
-    <div class="leaf leaf-margin max-w-md py-8 pr-8">
+    <div class="leaf max-w-md p-8">
       <p class="eyebrow">Error {{ error.statusCode }}</p>
       <h1 class="mt-2 text-2xl">{{ heading }}</h1>
       <p class="mt-2 text-sm text-ink-700 dark:text-paper-200">{{ explanation }}</p>

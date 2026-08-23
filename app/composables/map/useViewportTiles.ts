@@ -2,13 +2,15 @@ import type { Map as MapLibreMap, MapGeoJSONFeature } from 'maplibre-gl'
 
 export const OVERLAY_SOURCE_ID = 'vestigia-data'
 export const SITE_LAYER_ID = 'vestigia-sites'
+export const SITE_HALO_LAYER_ID = 'vestigia-site-halo'
 export const CLUSTER_LAYER_ID = 'vestigia-clusters'
 export const CLUSTER_COUNT_LAYER_ID = 'vestigia-cluster-count'
 export const TRACING_LAYER_ID = 'vestigia-tracings'
 export const SITE_LABEL_LAYER_ID = 'vestigia-site-labels'
 
-interface OverlayPalette {
-  site: string
+interface OverlayPalette extends SiteIconPalette {
+  /** Reserved for the selected site. The one oxide accent on this screen. */
+  selection: string
   siteHalo: string
   tracing: string
   cluster: string
@@ -18,7 +20,11 @@ interface OverlayPalette {
 }
 
 const LIGHT_OVERLAY: OverlayPalette = {
-  site: '#9a3b22',
+  ink: '#2b2621',
+  linear: '#66593b',
+  ground: '#faf7ef',
+  ring: '#857759',
+  selection: '#9a3b22',
   siteHalo: '#faf7ef',
   tracing: '#7a6c49',
   cluster: '#7d2e1c',
@@ -28,7 +34,11 @@ const LIGHT_OVERLAY: OverlayPalette = {
 }
 
 const DARK_OVERLAY: OverlayPalette = {
-  site: '#d38a72',
+  ink: '#e7dfcd',
+  linear: '#bfae7e',
+  ground: '#211d17',
+  ring: '#4d4534',
+  selection: '#d38a72',
   siteHalo: '#17140f',
   tracing: '#9c8c62',
   cluster: '#b04d31',
@@ -60,6 +70,21 @@ export const useViewportTiles = () => {
       attribution:
         'Site data CC BY-SA, contributed to <a href="https://vici.org">Vici.org</a> and Vestigia',
     })
+
+    /**
+     * After the source and before the layers, and both halves matter.
+     *
+     * Before the layers, because MapLibre draws nothing for a symbol whose icon
+     * is not in the registry and says nothing about it either.
+     *
+     * After the source, because `addImage` and `removeImage` each fire a
+     * `styledata` event, which is the event this overlay is rebuilt on. Adding
+     * the source first is what makes the guard at the top of this function true
+     * for that re-entrant call. Registered first instead, the icons re-enter
+     * before there is a source to find, and the second view the reader switches
+     * to dies in `Maximum call stack size exceeded`.
+     */
+    registerSiteIcons(map, colours)
 
     map.addLayer({
       id: TRACING_LAYER_ID,
@@ -117,18 +142,42 @@ export const useViewportTiles = () => {
       paint: { 'text-color': colours.clusterText },
     })
 
+    /**
+     * Selection is a ring drawn under the marker rather than a change to the
+     * marker itself, so the glyph still says what the site is while it is open.
+     * Feature state drives it without a data round trip.
+     */
     map.addLayer({
-      id: SITE_LAYER_ID,
+      id: SITE_HALO_LAYER_ID,
       type: 'circle',
       source: OVERLAY_SOURCE_ID,
       'source-layer': 'sites',
       paint: {
-        'circle-color': colours.site,
-        'circle-stroke-color': colours.siteHalo,
-        'circle-stroke-width': 1.5,
-        'circle-radius': ['interpolate', ['linear'], ['zoom'], 9, 4, 18, 9],
-        // Feature state drives hover and selection without a data round trip.
-        'circle-opacity': ['case', ['boolean', ['feature-state', 'selected'], false], 1, 0.9],
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 9, 11, 17, 17],
+        'circle-color': colours.selection,
+        'circle-opacity': ['case', ['boolean', ['feature-state', 'selected'], false], 0.16, 0],
+        'circle-stroke-color': colours.selection,
+        'circle-stroke-width': ['case', ['boolean', ['feature-state', 'selected'], false], 2, 0],
+      },
+    })
+
+    map.addLayer({
+      id: SITE_LAYER_ID,
+      type: 'symbol',
+      source: OVERLAY_SOURCE_ID,
+      'source-layer': 'sites',
+      layout: {
+        'icon-image': buildSiteIconExpression(),
+        // Full size only once the drawing is worth reading; smaller at the zoom
+        // where the map is about density rather than about individual records.
+        'icon-size': ['interpolate', ['linear'], ['zoom'], 9, 0.62, 13, 0.85, 17, 1],
+        /**
+         * Never let collision hide a marker. A dropped site is a record the
+         * reader has no way of knowing exists, and it cannot be tapped either
+         * — worse than an overlapping pair they can zoom apart.
+         */
+        'icon-allow-overlap': true,
+        'icon-ignore-placement': true,
       },
     })
 
@@ -142,7 +191,7 @@ export const useViewportTiles = () => {
         'text-field': ['get', 'title'],
         'text-font': ['Noto Sans Regular'],
         'text-size': 12,
-        'text-offset': [0, 1.1],
+        'text-offset': [0, 1.35],
         'text-anchor': 'top',
         'text-max-width': 9,
         'text-optional': true,

@@ -14,6 +14,19 @@ const mapAssetOrigins = [
   'https://elevation-tiles-prod.s3.amazonaws.com',
 ]
 
+/**
+ * Every picture on the site is an imgproxy derivative, so imgproxy's origin has
+ * to appear in `img-src` or the gallery is blocked outright. Declared once and
+ * used both for the header and for the public runtime default, because the two
+ * disagreeing is invisible until an image fails to load.
+ *
+ * Resolved at build time, like the CORS origin below: changing
+ * NUXT_PUBLIC_IMAGE_BASE_URL at runtime without rebuilding leaves this header
+ * naming the old host.
+ */
+const imageBaseUrl = process.env.NUXT_PUBLIC_IMAGE_BASE_URL ?? 'http://localhost:8080'
+const imageOrigin = new URL(imageBaseUrl).origin
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-01',
   devtools: { enabled: !isProduction },
@@ -50,6 +63,18 @@ export default defineNuxtConfig({
     '~/assets/css/main.css',
   ],
 
+  /**
+   * Icons are compiled into the client bundle instead of being fetched at
+   * runtime. Without this, `@nuxt/icon` resolves every `i-lucide-*` through a
+   * round trip to `/api/_nuxt_icon/lucide` after hydration, so icons arrive a
+   * beat after the controls they belong to and every cold page pays for it.
+   * `scan` walks the source for icon names at build time, so the set stays
+   * correct without a list to maintain here.
+   */
+  icon: {
+    clientBundle: { scan: true, includeCustomCollections: true },
+  },
+
   colorMode: {
     preference: 'system',
     fallback: 'light',
@@ -78,7 +103,7 @@ export default defineNuxtConfig({
     },
     public: {
       siteUrl: 'http://localhost:3000',
-      imageBaseUrl: 'http://localhost:8080',
+      imageBaseUrl,
       basemap: {
         /** 'openfreemap' for zero-setup development, 'pmtiles' for production. */
         provider: 'openfreemap',
@@ -97,7 +122,7 @@ export default defineNuxtConfig({
     headers: {
       contentSecurityPolicy: {
         'default-src': ["'self'"],
-        'img-src': ["'self'", 'data:', 'blob:', ...mapAssetOrigins],
+        'img-src': ["'self'", 'data:', 'blob:', imageOrigin, ...mapAssetOrigins],
         'worker-src': ["'self'", 'blob:'],
         'child-src': ["'self'", 'blob:'],
         'connect-src': ["'self'", ...mapAssetOrigins],
@@ -116,6 +141,16 @@ export default defineNuxtConfig({
         ],
         'style-src': ["'self'", "'unsafe-inline'"],
         'font-src': ["'self'"],
+        /**
+         * On in production, off in development, and the development half is
+         * not laziness. This directive rewrites every http:// subresource to
+         * https:// *before* the img-src check runs, so the imgproxy origin
+         * allowlisted above is not the origin the browser ends up asking for.
+         * The whole dev stack — imgproxy, MinIO, mailpit — speaks plain http
+         * and has no certificate to offer, so the upgraded request could not
+         * succeed even if the policy let it through.
+         */
+        'upgrade-insecure-requests': isProduction,
       },
       crossOriginEmbedderPolicy: 'unsafe-none',
       strictTransportSecurity: isProduction ? { maxAge: 31536000, includeSubdomains: true } : false,

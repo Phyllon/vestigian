@@ -57,7 +57,7 @@
       </NuxtLink>
     </header>
 
-    <div class="leaf leaf-margin py-6 pr-6">
+    <div class="leaf p-6">
       <ContributeSiteEditorForm
         :position="position"
         :site-id="site.id"
@@ -67,15 +67,15 @@
       />
     </div>
 
-    <section class="leaf leaf-margin py-6 pr-6">
+    <section class="leaf p-6">
       <SiteGalleryManager :site-id="site.id" :images="site.images" @changed="refresh" />
     </section>
 
-    <section class="leaf leaf-margin py-6 pr-6">
+    <section class="leaf p-6">
       <ContributeImageUploader :site-id="site.id" @uploaded="refresh" />
     </section>
 
-    <section class="leaf leaf-margin py-6 pr-6">
+    <section class="leaf p-6">
       <h2 class="eyebrow">Position</h2>
       <p class="mt-1 text-sm text-ink-500 dark:text-paper-400">
         Only change this if the recorded position is wrong. Moving a site is a substantial edit.

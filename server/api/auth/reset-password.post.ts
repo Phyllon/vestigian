@@ -1,8 +1,9 @@
 import { z } from 'zod'
+import { passwordSchema } from '#shared/utils/password'
 
 const bodySchema = z.object({
   token: z.string().min(10).max(200),
-  password: z.string().min(12).max(200),
+  password: passwordSchema,
 })
 
 export default defineEventHandler(async (event) => {
@@ -33,7 +34,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const passwordHash = await hashPassword(password)
+  const passwordHash = await hashPasswordArgon(password)
 
   await sql.begin(async (tx) => {
     await tx`UPDATE users SET password_hash = ${passwordHash} WHERE id = ${stored!.user_id}`
