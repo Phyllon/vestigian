@@ -70,13 +70,7 @@
         <AuthPasswordField v-model="state.passwordConfirmation" autocomplete="new-password" />
       </UFormField>
 
-      <UButton
-        type="submit"
-        :loading="isSubmitting"
-        :disabled="!isComplete"
-        color="primary"
-        block
-      >
+      <UButton type="submit" :loading="isSubmitting" :disabled="!isComplete" color="primary" block>
         Save password
       </UButton>
     </UForm>

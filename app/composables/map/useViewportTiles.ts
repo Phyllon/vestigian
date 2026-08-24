@@ -1,3 +1,4 @@
+import { LngLat } from 'maplibre-gl'
 import type { Map as MapLibreMap, MapGeoJSONFeature } from 'maplibre-gl'
 
 export const OVERLAY_SOURCE_ID = 'vestigia-data'
@@ -215,25 +216,90 @@ export const useViewportTiles = () => {
     })
   }
 
-  const findFeatureAtPoint = (
+  /**
+   * Everything under the tap, not just the topmost thing.
+   *
+   * `queryRenderedFeatures` returns hits in render order, so taking the first
+   * one hands the reader whichever marker happened to be drawn last — which is
+   * arbitrary from where they are sitting. Markers are drawn with
+   * `icon-allow-overlap`, so at a dense site several of them genuinely occupy
+   * the same few pixels, and some records share a coordinate exactly and can
+   * never be separated by zooming. The caller gets the whole list and asks.
+   *
+   * A feature that straddles a tile boundary is returned once per tile it
+   * appears in, hence the deduplication.
+   */
+  const findFeaturesAtPoint = (
     map: MapLibreMap,
     point: { x: number; y: number },
-  ): MapGeoJSONFeature | null => {
+  ): MapGeoJSONFeature[] => {
     // A generous touch target: 8px around the tap, since a finger is not a cursor.
     const box: [[number, number], [number, number]] = [
       [point.x - 8, point.y - 8],
       [point.x + 8, point.y + 8],
     ]
-    const [feature] = map.queryRenderedFeatures(box, {
-      layers: [SITE_LAYER_ID, CLUSTER_LAYER_ID, TRACING_LAYER_ID],
-    })
-    return feature ?? null
+
+    const seen = new Set<string>()
+
+    return map
+      .queryRenderedFeatures(box, {
+        layers: [SITE_LAYER_ID, CLUSTER_LAYER_ID, TRACING_LAYER_ID],
+      })
+      .filter((feature) => {
+        const key = `${feature.layer.id}:${feature.id}`
+        if (seen.has(key)) return false
+        seen.add(key)
+        return true
+      })
   }
 
   return {
     attachOverlay,
     keepOverlayThroughStyleChanges,
-    findFeatureAtPoint,
+    findFeaturesAtPoint,
     palette,
   }
+}
+
+export interface FeatureDescriptionRequest {
+  map: MapLibreMap
+  features: MapGeoJSONFeature[]
+  point: { x: number; y: number }
+}
+
+/**
+ * Turns raw tile features into something the picker can list: what kind of
+ * record it is, what it is called, and how far it actually sits from the tap.
+ *
+ * Distance is what makes the list usable — within an 8px box two entries are
+ * indistinguishable by position alone, and "at this point" versus "40 m away"
+ * is often the only thing that tells the reader which one they meant. Line
+ * features get no distance: the nearest point of a road to the tap says
+ * nothing useful about the road.
+ *
+ * Sorted nearest first, so a single confident hit stays at the top where a
+ * reader who taps and immediately picks the first row gets what they expected.
+ */
+export const describeFeatures = (request: FeatureDescriptionRequest): MapFeatureCandidate[] => {
+  const origin = request.map.unproject([request.point.x, request.point.y])
+
+  return request.features
+    .filter((feature) => feature.layer.id !== CLUSTER_LAYER_ID && typeof feature.id === 'number')
+    .map((feature) => {
+      const isPoint = feature.geometry.type === 'Point'
+      const [lon, lat] = isPoint ? (feature.geometry as GeoJSON.Point).coordinates : [0, 0]
+
+      return {
+        kind: feature.layer.id === TRACING_LAYER_ID ? ('tracing' as const) : ('site' as const),
+        id: feature.id as number,
+        title: String(feature.properties?.title ?? 'Untitled'),
+        category: String(feature.properties?.category ?? 'other'),
+        distanceMetres: isPoint ? origin.distanceTo(new LngLat(lon!, lat!)) : null,
+      }
+    })
+    .sort(
+      (a, b) =>
+        (a.distanceMetres ?? Number.MAX_SAFE_INTEGER) -
+        (b.distanceMetres ?? Number.MAX_SAFE_INTEGER),
+    )
 }

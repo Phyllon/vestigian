@@ -1,5 +1,12 @@
 <script setup lang="ts">
-  const { tracing, selectTracing, isTracingPanelOpen } = useSiteQuery()
+  const {
+    tracing,
+    selectTracing,
+    isTracingPanelOpen,
+    overlappingFeatures,
+    hasOverlappingFeatures,
+    returnToOverlappingFeatures,
+  } = useSiteQuery()
   const { loggedIn } = useSession()
   const { isCompact } = useBreakpoint()
 
@@ -43,17 +50,31 @@
       <div class="sticky top-0 z-10 bg-paper-50 pt-2 dark:bg-night-800 md:pt-0">
         <div class="mx-auto mb-1 h-1 w-10 rounded-full bg-paper-300 dark:bg-night-600 md:hidden" />
         <div
-          class="flex items-start justify-between gap-3 border-b border-paper-200 px-5 py-3 dark:border-night-700"
+          class="flex items-start gap-3 border-b border-paper-200 px-5 py-3 dark:border-night-700"
         >
           <p class="eyebrow pt-1">{{ tracing.kind === 'area' ? 'Area' : 'Route' }}</p>
-          <button
-            type="button"
-            class="grid size-8 shrink-0 place-items-center rounded-notebook text-ink-500 transition hover:bg-paper-200 dark:text-paper-400 dark:hover:bg-night-700"
-            aria-label="Close tracing details"
-            @click="close"
-          >
-            <UIcon name="i-lucide-x" class="size-4" />
-          </button>
+
+          <div class="ml-auto flex items-center gap-1">
+            <!-- See SiteDetailPanel: the list survives the choice made from it. -->
+            <button
+              v-if="hasOverlappingFeatures"
+              type="button"
+              class="flex items-center gap-1 rounded-notebook px-2 py-1 text-xs text-ink-500 transition hover:bg-paper-200 dark:text-paper-400 dark:hover:bg-night-700"
+              @click="returnToOverlappingFeatures"
+            >
+              <UIcon name="i-lucide-chevron-left" class="size-3.5" />
+              {{ overlappingFeatures.length }} records here
+            </button>
+
+            <button
+              type="button"
+              class="grid size-8 shrink-0 place-items-center rounded-notebook text-ink-500 transition hover:bg-paper-200 dark:text-paper-400 dark:hover:bg-night-700"
+              aria-label="Close tracing details"
+              @click="close"
+            >
+              <UIcon name="i-lucide-x" class="size-4" />
+            </button>
+          </div>
         </div>
       </div>
 

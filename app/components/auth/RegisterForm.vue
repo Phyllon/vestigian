@@ -129,13 +129,7 @@
 
     <NuxtTurnstile v-model="turnstileToken" />
 
-    <UButton
-      type="submit"
-      :loading="isSubmitting"
-      :disabled="!isComplete"
-      color="primary"
-      block
-    >
+    <UButton type="submit" :loading="isSubmitting" :disabled="!isComplete" color="primary" block>
       Create account
     </UButton>
   </UForm>

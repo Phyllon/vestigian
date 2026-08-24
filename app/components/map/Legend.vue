@@ -29,11 +29,7 @@
         <p class="eyebrow mb-2">What the marks mean</p>
 
         <ul class="grid grid-cols-2 gap-x-4 gap-y-1.5">
-          <li
-            v-for="category in SITE_CATEGORIES"
-            :key="category"
-            class="flex items-center gap-2"
-          >
+          <li v-for="category in SITE_CATEGORIES" :key="category" class="flex items-center gap-2">
             <svg
               viewBox="0 0 24 24"
               class="h-5 w-5 shrink-0"

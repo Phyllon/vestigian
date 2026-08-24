@@ -190,7 +190,8 @@ const checkBucketReachable = async (): Promise<void> => {
   } catch (error) {
     throw new Error(
       `Bucket '${BUCKET}' is not reachable at ${process.env.NUXT_STORAGE_ENDPOINT ?? 'http://127.0.0.1:9000'} ` +
-        `(${(error as Error).message}). Start the stack with pnpm stack:up, which now creates it.`, { cause: error },
+        `(${(error as Error).message}). Start the stack with pnpm stack:up, which now creates it.`,
+      { cause: error },
     )
   }
 }

@@ -8,8 +8,9 @@
 
   const { currentStyle } = useBasemapStyle()
   const { camera: _, restoreCamera, rememberCamera } = useCameraState()
-  const { attachOverlay, keepOverlayThroughStyleChanges, findFeatureAtPoint } = useViewportTiles()
-  const { selectSite, selectTracing, clearSelection, selectedSiteId } = useSiteQuery()
+  const { attachOverlay, keepOverlayThroughStyleChanges, findFeaturesAtPoint } = useViewportTiles()
+  const { chooseCandidate, offerOverlappingFeatures, clearSelection, selectedSiteId } =
+    useSiteQuery()
 
   provideMapInstance(map)
 
@@ -21,34 +22,42 @@
   })
 
   const handleFeatureTap = (instance: MapLibreMap, point: { x: number; y: number }): void => {
-    const feature = findFeatureAtPoint(instance, point)
+    const features = findFeaturesAtPoint(instance, point)
 
-    if (!feature) {
+    if (features.length === 0) {
       clearSelection()
       return
     }
 
-    // A cluster is an invitation to zoom, not a thing with a detail page.
-    if (feature.layer.id === CLUSTER_LAYER_ID) {
+    // A cluster is an invitation to zoom, not a thing with a detail page. It is
+    // checked first because clusters and sites are never drawn at the same
+    // zoom, so a cluster in the results means the tap was below zoom 9.
+    const cluster = features.find((feature) => feature.layer.id === CLUSTER_LAYER_ID)
+    if (cluster) {
       instance.easeTo({
-        center: (feature.geometry as GeoJSON.Point).coordinates as [number, number],
+        center: (cluster.geometry as GeoJSON.Point).coordinates as [number, number],
         zoom: Math.min(instance.getZoom() + 2.5, 18),
         duration: 500,
       })
       return
     }
 
-    const id = feature.properties?.id
-    if (typeof id !== 'number') return
+    const candidates = describeFeatures({ map: instance, features, point })
 
-    // Sites and tracings have independent id sequences, so which layer the tap
-    // landed on is the only thing that says what the id refers to.
-    if (feature.layer.id === TRACING_LAYER_ID) {
-      selectTracing(id)
+    if (candidates.length === 0) {
+      clearSelection()
       return
     }
 
-    selectSite(id)
+    // One record under the finger goes straight through; several are offered,
+    // because picking for the reader means picking wrong most of the time.
+    if (candidates.length === 1) {
+      clearSelection()
+      chooseCandidate(candidates[0]!)
+      return
+    }
+
+    offerOverlappingFeatures(candidates)
   }
 
   const highlightSelection = (instance: MapLibreMap, id: number | null): void => {
@@ -90,8 +99,8 @@
     instance.on('click', (event) => handleFeatureTap(instance, event.point))
 
     instance.on('mousemove', (event) => {
-      const feature = findFeatureAtPoint(instance, event.point)
-      instance.getCanvas().style.cursor = feature ? 'pointer' : ''
+      const hits = findFeaturesAtPoint(instance, event.point)
+      instance.getCanvas().style.cursor = hits.length > 0 ? 'pointer' : ''
     })
 
     map.value = instance

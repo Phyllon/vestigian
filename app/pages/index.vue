@@ -58,6 +58,7 @@
       />
     </div>
 
+    <MapFeaturePicker />
     <SiteDetailPanel />
     <TracingDetailPanel />
   </MapCanvas>

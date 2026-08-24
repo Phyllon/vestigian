@@ -22,12 +22,16 @@
         :name="rule.isMet ? 'i-lucide-check' : 'i-lucide-minus'"
         class="size-3.5 shrink-0"
         :class="
-          rule.isMet ? 'text-verdigris-600 dark:text-verdigris-300' : 'text-ink-300 dark:text-paper-600'
+          rule.isMet
+            ? 'text-verdigris-600 dark:text-verdigris-300'
+            : 'text-ink-300 dark:text-paper-600'
         "
       />
       <span
         :class="
-          rule.isMet ? 'text-verdigris-700 dark:text-verdigris-200' : 'text-ink-500 dark:text-paper-400'
+          rule.isMet
+            ? 'text-verdigris-700 dark:text-verdigris-200'
+            : 'text-ink-500 dark:text-paper-400'
         "
       >
         {{ rule.label }}

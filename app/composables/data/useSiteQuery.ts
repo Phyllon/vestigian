@@ -10,6 +10,14 @@ export const useSiteQuery = () => {
   const selectedSiteId = useState<number | null>('selected-site', () => null)
   const selectedTracingId = useState<number | null>('selected-tracing', () => null)
 
+  /**
+   * What was under the last tap, when it was more than one thing. Kept while a
+   * record from it is open so the reader can step back to the list — otherwise
+   * reaching the second of two overlapping markers means hitting the same
+   * pixel again, which is the problem this exists to solve.
+   */
+  const overlappingFeatures = useState<MapFeatureCandidate[]>('overlapping-features', () => [])
+
   const {
     data: site,
     status,
@@ -47,10 +55,35 @@ export const useSiteQuery = () => {
   const clearSelection = (): void => {
     selectedSiteId.value = null
     selectedTracingId.value = null
+    overlappingFeatures.value = []
+  }
+
+  /** A tap landed on several records. Offer them rather than guessing. */
+  const offerOverlappingFeatures = (candidates: MapFeatureCandidate[]): void => {
+    selectedSiteId.value = null
+    selectedTracingId.value = null
+    overlappingFeatures.value = candidates
+  }
+
+  const chooseCandidate = (candidate: MapFeatureCandidate): void => {
+    if (candidate.kind === 'tracing') selectTracing(candidate.id)
+    else selectSite(candidate.id)
+  }
+
+  /** Back to the list, without discarding it. */
+  const returnToOverlappingFeatures = (): void => {
+    selectedSiteId.value = null
+    selectedTracingId.value = null
   }
 
   const isPanelOpen = computed(() => selectedSiteId.value !== null)
   const isTracingPanelOpen = computed(() => selectedTracingId.value !== null)
+
+  const hasOverlappingFeatures = computed(() => overlappingFeatures.value.length > 1)
+
+  const isPickerOpen = computed(
+    () => hasOverlappingFeatures.value && !isPanelOpen.value && !isTracingPanelOpen.value,
+  )
 
   return {
     site,
@@ -64,7 +97,23 @@ export const useSiteQuery = () => {
     clearSelection,
     isPanelOpen,
     isTracingPanelOpen,
+    overlappingFeatures,
+    offerOverlappingFeatures,
+    chooseCandidate,
+    returnToOverlappingFeatures,
+    hasOverlappingFeatures,
+    isPickerOpen,
   }
+}
+
+/** One record under the tap, as the picker lists it. */
+export interface MapFeatureCandidate {
+  kind: 'site' | 'tracing'
+  id: number
+  title: string
+  category: string
+  /** Null for tracings: the nearest point of a road to a tap means nothing. */
+  distanceMetres: number | null
 }
 
 export interface TracingDetail {

@@ -25,7 +25,9 @@ describe('database clients', () => {
   })
 
   it('keeps parsing timestamps into dates after Drizzle has been constructed', () => {
-    const sql = useSql() as unknown as { options: { parsers: Record<number, (raw: string) => unknown> } }
+    const sql = useSql() as unknown as {
+      options: { parsers: Record<number, (raw: string) => unknown> }
+    }
     useDatabase()
 
     for (const oid of [1082, 1114, 1184]) {

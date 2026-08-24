@@ -100,12 +100,21 @@ interface FeatureTileQuery {
  * tracings. Properties are deliberately minimal — the client fetches the full
  * record from /api/sites/:id when a feature is opened, which keeps tiles small
  * and cacheable for far longer than the editable content would allow.
+ *
+ * Both layers pass `'id'` as `ST_AsMVT`'s feature_id_name, which promotes the
+ * column out of the property bag and into the tile feature's own id. That is
+ * the only identifier `setFeatureState` will accept: without it the call
+ * silently matches no feature, and hover and selection have no visible effect
+ * while every other part of the map behaves normally.
+ *
+ * It also makes the tile smaller — the id stops being a key/value pair in the
+ * layer's string table — so this is not a trade.
  */
 export const buildFeatureTileSql = (query: FeatureTileQuery): string => {
   const { tile, simplifyTolerance, includeTracings } = query
 
   const siteLayer = `
-    SELECT ST_AsMVT(s, 'sites', ${TILE_EXTENT}, 'geom') AS tile
+    SELECT ST_AsMVT(s, 'sites', ${TILE_EXTENT}, 'geom', 'id') AS tile
     FROM (
       SELECT
         sites.id,
@@ -124,7 +133,7 @@ export const buildFeatureTileSql = (query: FeatureTileQuery): string => {
   `
 
   const tracingLayer = `
-    SELECT ST_AsMVT(t, 'tracings', ${TILE_EXTENT}, 'geom') AS tile
+    SELECT ST_AsMVT(t, 'tracings', ${TILE_EXTENT}, 'geom', 'id') AS tile
     FROM (
       SELECT
         tracings.id,

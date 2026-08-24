@@ -1,5 +1,13 @@
 <script setup lang="ts">
-  const { site, status, selectSite, isPanelOpen } = useSiteQuery()
+  const {
+    site,
+    status,
+    selectSite,
+    isPanelOpen,
+    overlappingFeatures,
+    hasOverlappingFeatures,
+    returnToOverlappingFeatures,
+  } = useSiteQuery()
   const { loggedIn } = useSession()
   const { isCompact } = useBreakpoint()
 
@@ -52,17 +60,35 @@
       <div class="sticky top-0 z-10 bg-paper-50 pt-2 dark:bg-night-800 md:pt-0">
         <div class="mx-auto mb-1 h-1 w-10 rounded-full bg-paper-300 dark:bg-night-600 md:hidden" />
         <div
-          class="flex items-start justify-between gap-3 border-b border-paper-200 px-5 py-3 dark:border-night-700"
+          class="flex items-start gap-3 border-b border-paper-200 px-5 py-3 dark:border-night-700"
         >
           <p class="eyebrow pt-1">{{ site?.category ?? 'Loading' }}</p>
-          <button
-            type="button"
-            class="grid size-8 shrink-0 place-items-center rounded-notebook text-ink-500 transition hover:bg-paper-200 dark:text-paper-400 dark:hover:bg-night-700"
-            aria-label="Close site details"
-            @click="close"
-          >
-            <UIcon name="i-lucide-x" class="size-4" />
-          </button>
+
+          <div class="ml-auto flex items-center gap-1">
+            <!--
+            Only when the tap actually landed on a pile. The list is kept while
+            a record from it is open, so stepping back does not mean finding
+            the same pixel a second time.
+          -->
+            <button
+              v-if="hasOverlappingFeatures"
+              type="button"
+              class="flex items-center gap-1 rounded-notebook px-2 py-1 text-xs text-ink-500 transition hover:bg-paper-200 dark:text-paper-400 dark:hover:bg-night-700"
+              @click="returnToOverlappingFeatures"
+            >
+              <UIcon name="i-lucide-chevron-left" class="size-3.5" />
+              {{ overlappingFeatures.length }} records here
+            </button>
+
+            <button
+              type="button"
+              class="grid size-8 shrink-0 place-items-center rounded-notebook text-ink-500 transition hover:bg-paper-200 dark:text-paper-400 dark:hover:bg-night-700"
+              aria-label="Close site details"
+              @click="close"
+            >
+              <UIcon name="i-lucide-x" class="size-4" />
+            </button>
+          </div>
         </div>
       </div>
 

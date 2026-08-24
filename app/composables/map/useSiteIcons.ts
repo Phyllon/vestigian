@@ -18,8 +18,7 @@ export const SITE_ICON_PREFIX = 'vestigia-site-'
 
 export const SITE_ICON_PATHS: Record<SiteCategory, string> = {
   /** A skyline of roofs — several dwellings, which is what a town is. */
-  settlement:
-    'M5 18.5h14M7 18.5v-4.5l2.75-2.5 2.75 2.5v4.5M12.5 18.5v-6.25l2.75-2.5 2.75 2.5v6.25',
+  settlement: 'M5 18.5h14M7 18.5v-4.5l2.75-2.5 2.75 2.5v4.5M12.5 18.5v-6.25l2.75-2.5 2.75 2.5v6.25',
 
   /** Crenellations. The one silhouette nothing else on the map can be mistaken for. */
   fortification: 'M5 18.5V10h2.8v2.6h2.8V10h2.8v2.6h2.8V10h2.8v8.5',
@@ -31,7 +30,8 @@ export const SITE_ICON_PATHS: Record<SiteCategory, string> = {
   burial: 'M5.5 18.5h13M8.8 18.5v-5.4a3.2 3.2 0 0 1 6.4 0v5.4M10.6 15.2h2.8',
 
   /** An arcade under a deck — aqueduct, bridge and road all at once. */
-  infrastructure: 'M5 9.5h14M5 9.5v9M12 9.5v9M19 9.5v9M5 16a3.5 3.5 0 0 1 7 0M12 16a3.5 3.5 0 0 1 7 0',
+  infrastructure:
+    'M5 9.5h14M5 9.5v9M12 9.5v9M19 9.5v9M5 16a3.5 3.5 0 0 1 7 0M12 16a3.5 3.5 0 0 1 7 0',
 
   /** One dwelling with a wing, against the settlement's several roofs. */
   villa: 'M5 18.5h14M6.5 18.5v-5L10 10.5l3.5 3v5M13.5 18.5v-3.9h5v3.9',

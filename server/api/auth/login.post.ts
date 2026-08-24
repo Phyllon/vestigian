@@ -31,7 +31,10 @@ export default defineEventHandler(async (event) => {
   `
 
   // Always hash, even with no match, so timing does not reveal the user table.
-  const isValid = await verifyPasswordArgon(account?.password_hash ?? DUMMY_HASH, credentials.password)
+  const isValid = await verifyPasswordArgon(
+    account?.password_hash ?? DUMMY_HASH,
+    credentials.password,
+  )
 
   if (!account || !isValid) {
     throw createError({ statusCode: 401, message: 'That email and password do not match.' })
