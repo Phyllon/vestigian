@@ -61,6 +61,30 @@ interface ClusterTileQuery {
  * Low zoom: sites collapsed onto a Mercator grid and counted. Snapping in
  * projected space keeps cluster cells square on screen at every latitude,
  * which grid-snapping in degrees would not.
+ *
+ * The grid decides **which** sites belong together; it does not decide where
+ * the marker goes. `ST_SnapToGrid` returns the cell's grid node, and drawing
+ * the cluster there puts it up to half a cell diagonal from the sites it
+ * stands for — measured against this data at zoom 6, a mean of 13 screen
+ * pixels and a worst case of 34, with a lone site's "cluster" among the
+ * offenders. Clicking one then eases the camera to the node, so the sites
+ * arrive off-centre and the count appears to refer to empty ground.
+ *
+ * The marker is therefore drawn at the members' centre of mass, which is both
+ * where the reader expects it and what makes click-to-zoom land correctly.
+ * `ST_Centroid` of the collected points is the plain average; the geometric
+ * median would resist outliers better but costs an iterative solve per cell,
+ * on the hot path, for a marker that is an approximation by definition.
+ *
+ * A centroid, unlike a grid node, depends on *which* members were selected —
+ * so a cell whose members were clipped away would land somewhere different in
+ * each neighbouring tile and jitter along the seam. It cannot happen here, but
+ * only because the numbers work out: a cell reaches at most half a grid step
+ * from its node, the drawn region reaches TILE_BUFFER/TILE_EXTENT of a tile
+ * beyond the envelope, and 0.5 x 48/256 + 64/4096 = 0.109 of a tile is less
+ * than the 48/256 = 0.188 this query already expands by. Those ratios are
+ * zoom-independent, so it holds at every level — and it stops holding if the
+ * grid shrinks or the buffer grows.
  */
 export const buildClusterTileSql = (query: ClusterTileQuery): string => `
   WITH bounds AS (
@@ -68,25 +92,25 @@ export const buildClusterTileSql = (query: ClusterTileQuery): string => `
   ),
   clustered AS (
     SELECT
-      ST_SnapToGrid(ST_Transform(s.geom, 3857), ${query.gridSize}) AS cell,
+      ST_Centroid(ST_Collect(ST_Transform(s.geom, 3857))) AS centre,
       count(*)::int AS site_count,
       min(s.id) AS sample_id,
       min(s.title) AS sample_title
     FROM sites s, bounds b
     WHERE s.status = 'approved'
       AND ST_Transform(s.geom, 3857) && ST_Expand(b.env, ${query.gridSize})
-    GROUP BY cell
-  )
-  SELECT ST_AsMVT(t, 'clusters', ${TILE_EXTENT}, 'geom') AS tile
-  FROM (
+    GROUP BY ST_SnapToGrid(ST_Transform(s.geom, 3857), ${query.gridSize})
+  ),
+  projected AS (
     SELECT
       site_count,
       sample_id,
       sample_title,
-      ST_AsMVTGeom(cell, b.env, ${TILE_EXTENT}, ${TILE_BUFFER}, true) AS geom
+      ST_AsMVTGeom(centre, b.env, ${TILE_EXTENT}, ${TILE_BUFFER}, true) AS geom
     FROM clustered, bounds b
-    WHERE ST_AsMVTGeom(cell, b.env, ${TILE_EXTENT}, ${TILE_BUFFER}, true) IS NOT NULL
-  ) AS t
+  )
+  SELECT ST_AsMVT(t, 'clusters', ${TILE_EXTENT}, 'geom') AS tile
+  FROM (SELECT * FROM projected WHERE geom IS NOT NULL) AS t
 `
 
 interface FeatureTileQuery {
