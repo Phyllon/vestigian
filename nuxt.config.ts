@@ -50,18 +50,97 @@ export default defineNuxtConfig({
     dirs: ['composables/**'],
   },
 
+  /**
+   * Per-subset sheets, not the all-subset `400.css` / `500.css` / `600.css`.
+   *
+   * Those declare every subset the family ships — cyrillic, cyrillic-ext,
+   * greek, vietnamese — which put 758 KB of incompressible font data into the
+   * build for an atlas written in English. A scan of all 61,272 approved
+   * records settled which subsets earn their place: `latin-ext` carries 1,882
+   * of them (İzmir, Šibenik, Ryżanówka, Hagmatāna) and stays; greek and
+   * cyrillic carry 85 between them and go. Forty-five records in Arabic and
+   * Hebrew already render in a fallback face, because no subset for them was
+   * ever shipped — so that path was already in use before this change.
+   *
+   * Fraunces is left on `index.css`: `@fontsource-variable` publishes only
+   * axis-scoped sheets, never subset-scoped ones, so there is nothing narrower
+   * to point at. Its vietnamese face survives in the build and is never
+   * fetched, which is exactly what `unicode-range` is for.
+   */
   css: [
     // MapLibre positions its canvas, controls and attribution from this sheet;
     // without it the map renders but every control sits in the document flow.
     'maplibre-gl/dist/maplibre-gl.css',
     '@fontsource-variable/fraunces/index.css',
-    '@fontsource/ibm-plex-sans/400.css',
-    '@fontsource/ibm-plex-sans/500.css',
-    '@fontsource/ibm-plex-sans/600.css',
-    '@fontsource/ibm-plex-mono/400.css',
-    '@fontsource/ibm-plex-mono/500.css',
+    '@fontsource/ibm-plex-sans/latin-400.css',
+    '@fontsource/ibm-plex-sans/latin-ext-400.css',
+    '@fontsource/ibm-plex-sans/latin-500.css',
+    '@fontsource/ibm-plex-sans/latin-ext-500.css',
+    '@fontsource/ibm-plex-sans/latin-600.css',
+    '@fontsource/ibm-plex-sans/latin-ext-600.css',
+    '@fontsource/ibm-plex-mono/latin-400.css',
+    '@fontsource/ibm-plex-mono/latin-ext-400.css',
+    '@fontsource/ibm-plex-mono/latin-500.css',
+    '@fontsource/ibm-plex-mono/latin-ext-500.css',
     '~/assets/css/main.css',
   ],
+
+  /**
+   * `@nuxt/fonts` arrives uninvited — Nuxt UI registers it — and it will source
+   * a family from Google if it decides the app has not provided one.
+   *
+   * With the all-subset `@fontsource` sheets it stayed quiet, because every
+   * weight and subset it looked for was already declared. Narrowing those
+   * imports to latin and latin-ext read to it as a gap: it went to Google's
+   * catalogue for IBM Plex Sans and Mono and self-hosted **1.9 MB across 68
+   * files** into `.output/public/_fonts/`, reinstating the cyrillic and greek
+   * faces that had just been removed, plus bold and italic the app never uses.
+   * Nothing was requested at runtime, so this never tripped the no-Google rule
+   * — it simply undid the change while looking like it had worked.
+   *
+   * `provider: 'none'` is the module's own documented way of saying the family
+   * is already provided. It also stops the two `… Fallback: Arial` metric faces
+   * the module used to emit, which is a real if small loss — they size the
+   * fallback to match, so text reflows less when the webfont lands. The
+   * families here already declare concrete fallbacks (`--font-sans` and
+   * friends in main.css) and every face is `font-display: swap`, so the cost is
+   * a slight reflow rather than invisible text.
+   */
+  fonts: {
+    families: [
+      { name: 'Fraunces Variable', provider: 'none' },
+      { name: 'IBM Plex Sans', provider: 'none' },
+      { name: 'IBM Plex Mono', provider: 'none' },
+    ],
+  },
+
+  hooks: {
+    /**
+     * Fonts are removed from the resource hints entirely.
+     *
+     * `@font-face` with a `unicode-range` is already lazy by design: a browser
+     * fetches a face only when it has to render a character inside that range.
+     * A `<link rel="preload">` or `rel="prefetch"` overrides that judgement and
+     * downloads the file regardless, which is how this build came to pull all
+     * 61 font files — every subset, plus a legacy `.woff` beside every `.woff2`
+     * — on every single page load, 758 KB that no compression touches.
+     *
+     * Two of them were `preload`ed outright, so the highest-priority fonts on
+     * an English-only map were Cyrillic.
+     *
+     * `preload` and `prefetch` are declared fields on `ResourceMeta`, and Nuxt
+     * mutates this manifest through the same hook, so this is the intended
+     * seam rather than a trick. It is deliberate that nothing replaces the
+     * hints: the whole point is to let `unicode-range` decide.
+     */
+    'build:manifest': (manifest) => {
+      for (const chunk of Object.values(manifest)) {
+        if (chunk.resourceType !== 'font') continue
+        chunk.preload = false
+        chunk.prefetch = false
+      }
+    },
+  },
 
   /**
    * Icons are compiled into the client bundle instead of being fetched at

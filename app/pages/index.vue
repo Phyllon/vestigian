@@ -51,15 +51,29 @@
         </UButton>
       </div>
 
-      <ContributeContributionPanel
+      <!--
+        `Lazy`, and it is worth more than it looks. `v-if` decides what renders,
+        never what ships: the static chain from here through ContributionPanel
+        and TracingEditorForm reaches GeometryDrawTool, so terra-draw, its
+        MapLibre adapter, zod and ImageUploader were all being downloaded with
+        the map — for a panel a signed-out visitor cannot even open. The prefix
+        makes it an async chunk fetched when someone clicks to contribute.
+      -->
+      <LazyContributeContributionPanel
         v-if="isContributing"
         class="pointer-events-auto"
         @close="stopContributing"
       />
     </div>
 
-    <MapFeaturePicker />
-    <SiteDetailPanel />
-    <TracingDetailPanel />
+    <!--
+      Same reasoning, smaller prize. All three are instantiated on every load
+      but show nothing until a mark is tapped. Order matters: the picker sits
+      above the detail panels — see MapFeaturePicker.
+      "Lazy" left the modulepreload graph, so it's off the critical path rather than blocking. But it's still downloaded.
+    -->
+    <LazyMapFeaturePicker />
+    <LazySiteDetailPanel />
+    <LazyTracingDetailPanel />
   </MapCanvas>
 </template>

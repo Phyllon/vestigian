@@ -146,16 +146,22 @@
     text-rendering: optimizeLegibility;
   }
 
+  /**
+   * No `font-variation-settings` here, though Fraunces has five axes.
+   *
+   * `@fontsource-variable/fraunces/index.css` is a hard link to `wght.css`, so
+   * the file actually shipped carries the weight axis and nothing else. This
+   * rule used to ask for 'SOFT' 0, 'WONK' 1 and 'opsz' 24; none of the three
+   * existed in the font, so all three were inert and the headings rendered
+   * exactly as they do now. Reinstating them means shipping a heavier axis
+   * bundle — `opsz` is 54 KB more across latin and latin-ext, `full` is 156 KB
+   * more — and that is a design decision, not a CSS one.
+   */
   h1,
   h2,
   h3 {
     font-family: var(--font-display);
     color: var(--text-strong);
-    /* Fraunces' optical size axis: raise contrast as type grows. */
-    font-variation-settings:
-      'SOFT' 0,
-      'WONK' 1,
-      'opsz' 24;
     letter-spacing: -0.011em;
   }
 

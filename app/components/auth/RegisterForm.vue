@@ -65,7 +65,10 @@
        * they entered; only the offending field needs a second attempt.
        */
       if (response?.data?.field) {
-        form.value?.setErrors([{ name: response.data.field, message }], response.data.field)
+        // No second argument: submit only runs once the form validated, so
+        // there is no other error to preserve, and the field name coming back
+        // from the server is a plain string rather than a key of the schema.
+        form.value?.setErrors([{ name: response.data.field, message }])
         return
       }
 
