@@ -1,3 +1,4 @@
+import type postgres from 'postgres'
 export type ChangeKind = 'added' | 'removed' | 'changed'
 
 export interface FieldChange {
@@ -17,14 +18,23 @@ const asDisplayValue = (value: unknown): string | null => {
 }
 
 /**
+ * A revision payload as it round-trips through a `jsonb` column.
+ *
+ * Drizzle types `jsonb` as `unknown`, which is honest — the database will
+ * store whatever it is given. Naming the shape here, next to the code that
+ * reads it, means the cast happens once at each boundary instead of being
+ * re-invented at every call site. `postgres.JSONValue` rather than `unknown`
+ * because `sql.json()` insists on it, so that a symbol or a bigint cannot be
+ * handed to Postgres and silently serialised to nothing.
+ */
+export type StoredPayload = Record<string, postgres.JSONValue | undefined>
+
+/**
  * Compares two revision payloads field by field. A moderator reviewing an edit
  * needs to see what changed, not read two records and find the difference
  * themselves — which is how bad edits slip through a queue.
  */
-export const diffPayloads = (
-  before: Record<string, unknown> | null,
-  after: Record<string, unknown>,
-): FieldChange[] => {
+export const diffPayloads = (before: StoredPayload | null, after: StoredPayload): FieldChange[] => {
   const changes: FieldChange[] = []
   const fields = new Set([...Object.keys(before ?? {}), ...Object.keys(after)])
 

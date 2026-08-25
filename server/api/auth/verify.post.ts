@@ -1,4 +1,6 @@
 import { z } from 'zod'
+import { and, eq } from 'drizzle-orm'
+import { emailTokens, users } from '~~/server/database/schema'
 
 const bodySchema = z.object({ token: z.string().min(10).max(200) })
 
@@ -9,19 +11,23 @@ const bodySchema = z.object({ token: z.string().min(10).max(200) })
 export default defineEventHandler(async (event) => {
   await enforceRateLimit(event, 'login')
   const { token } = await readValidatedBody(event, bodySchema.parse)
-  const sql = useSql()
+  const database = useDatabase()
 
-  const [stored] = await sql<
-    { id: number; user_id: number; expires_at: Date; consumed_at: Date | null }[]
-  >`
-    SELECT id, user_id, expires_at, consumed_at
-    FROM email_tokens
-    WHERE token_hash = ${hashToken(token)} AND purpose = 'verify-email'
-    LIMIT 1
-  `
+  const [stored] = await database
+    .select({
+      id: emailTokens.id,
+      userId: emailTokens.userId,
+      expiresAt: emailTokens.expiresAt,
+      consumedAt: emailTokens.consumedAt,
+    })
+    .from(emailTokens)
+    .where(
+      and(eq(emailTokens.tokenHash, hashToken(token)), eq(emailTokens.purpose, 'verify-email')),
+    )
+    .limit(1)
 
   const check = checkToken(
-    stored ? { expiresAt: stored.expires_at, consumedAt: stored.consumed_at } : null,
+    stored ? { expiresAt: stored.expiresAt, consumedAt: stored.consumedAt } : null,
   )
 
   if (!check.valid) {
@@ -36,9 +42,12 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  await sql.begin(async (tx) => {
-    await tx`UPDATE email_tokens SET consumed_at = now() WHERE id = ${stored!.id}`
-    await tx`UPDATE users SET email_verified_at = now() WHERE id = ${stored!.user_id}`
+  // Consuming the token and marking the address verified are one fact, so they
+  // land together or not at all.
+  await database.transaction(async (tx) => {
+    const consumedAt = new Date()
+    await tx.update(emailTokens).set({ consumedAt }).where(eq(emailTokens.id, stored!.id))
+    await tx.update(users).set({ emailVerifiedAt: consumedAt }).where(eq(users.id, stored!.userId))
   })
 
   return { status: 'verified' }

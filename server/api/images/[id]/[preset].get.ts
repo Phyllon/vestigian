@@ -1,4 +1,6 @@
 import { z } from 'zod'
+import { and, eq } from 'drizzle-orm'
+import { siteImages } from '~~/server/database/schema'
 import { IMAGE_PRESETS } from '#shared/types'
 
 const paramsSchema = z.object({
@@ -20,14 +22,13 @@ const paramsSchema = z.object({
  */
 export default defineEventHandler(async (event) => {
   const { id, preset } = await getValidatedRouterParams(event, paramsSchema.parse)
-  const sql = useSql()
+  const database = useDatabase()
 
-  const [image] = await sql<{ storage_key: string; licence: string }[]>`
-    SELECT storage_key, licence
-    FROM site_images
-    WHERE id = ${id} AND status = 'approved'
-    LIMIT 1
-  `
+  const [image] = await database
+    .select({ storageKey: siteImages.storageKey, licence: siteImages.licence })
+    .from(siteImages)
+    .where(and(eq(siteImages.id, id), eq(siteImages.status, 'approved')))
+    .limit(1)
 
   if (!image || !isPublishableLicence(image.licence)) {
     throw createError({ statusCode: 404, message: 'No published image with that identifier.' })
@@ -45,7 +46,7 @@ export default defineEventHandler(async (event) => {
   return sendRedirect(
     event,
     buildImageUrl({
-      storageKey: image.storage_key,
+      storageKey: image.storageKey,
       width: size.width,
       height: size.height,
       fit: size.fit,

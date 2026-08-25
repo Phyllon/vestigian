@@ -1,4 +1,6 @@
 import { z } from 'zod'
+import { eq, inArray } from 'drizzle-orm'
+import { revisions } from '~~/server/database/schema'
 import type { SessionUser } from '#shared/types'
 
 const batchSchema = z.object({
@@ -25,11 +27,12 @@ interface BatchOutcome {
 export default defineEventHandler(async (event) => {
   const moderator = (await requireModerator(event)) as SessionUser
   const { revisionIds, decision, note } = await readValidatedBody(event, batchSchema.parse)
-  const sql = useSql()
+  const database = useDatabase()
 
-  const rows = await sql<{ id: number; author_id: number | null; status: string }[]>`
-    SELECT id, author_id, status FROM revisions WHERE id = ANY(${revisionIds})
-  `
+  const rows = await database
+    .select({ id: revisions.id, authorId: revisions.authorId, status: revisions.status })
+    .from(revisions)
+    .where(inArray(revisions.id, revisionIds))
 
   const found = new Map(rows.map((row) => [row.id, row]))
   const outcomes: BatchOutcome[] = []
@@ -48,18 +51,21 @@ export default defineEventHandler(async (event) => {
       continue
     }
 
-    if (!canReviewRevision(moderator, revision.author_id)) {
+    if (!canReviewRevision(moderator, revision.authorId)) {
       outcomes.push({ revisionId, status: 'skipped', reason: 'Your own contribution.' })
       continue
     }
 
     try {
-      await sql`
-        UPDATE revisions
-        SET status = ${decision}, reviewer_id = ${moderator.id},
-            review_note = ${note ?? null}, reviewed_at = now()
-        WHERE id = ${revisionId}
-      `
+      await database
+        .update(revisions)
+        .set({
+          status: decision,
+          reviewerId: moderator.id,
+          reviewNote: note ?? null,
+          reviewedAt: new Date(),
+        })
+        .where(eq(revisions.id, revisionId))
 
       if (decision === 'approved') {
         await applyRevision(revisionId)
@@ -70,10 +76,10 @@ export default defineEventHandler(async (event) => {
     } catch (error) {
       // Roll this one back to pending so it returns to the queue rather than
       // being lost in an ambiguous half-reviewed state.
-      await sql`
-        UPDATE revisions SET status = 'pending', reviewer_id = NULL, reviewed_at = NULL
-        WHERE id = ${revisionId}
-      `
+      await database
+        .update(revisions)
+        .set({ status: 'pending', reviewerId: null, reviewedAt: null })
+        .where(eq(revisions.id, revisionId))
       outcomes.push({
         revisionId,
         status: 'skipped',

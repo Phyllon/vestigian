@@ -1,4 +1,6 @@
 import { z } from 'zod'
+import { and, eq } from 'drizzle-orm'
+import { siteImages } from '~~/server/database/schema'
 import type { SessionUser } from '#shared/types'
 
 const paramsSchema = z.object({
@@ -19,15 +21,17 @@ export default defineEventHandler(async (event) => {
 
   const { id: siteId, imageId } = await getValidatedRouterParams(event, paramsSchema.parse)
   const patch = await readValidatedBody(event, bodySchema.parse)
-  const sql = useSql()
+  const database = useDatabase()
 
-  const [image] = await sql<{ created_by: number | null }[]>`
-    SELECT created_by FROM site_images WHERE id = ${imageId} AND site_id = ${siteId} LIMIT 1
-  `
+  const [image] = await database
+    .select({ createdBy: siteImages.createdBy })
+    .from(siteImages)
+    .where(and(eq(siteImages.id, imageId), eq(siteImages.siteId, siteId)))
+    .limit(1)
 
   if (!image) throw createError({ statusCode: 404, message: 'No such photograph on this site.' })
 
-  if (!canManageImage(user, image.created_by)) {
+  if (!canManageImage(user, image.createdBy)) {
     throw createError({ statusCode: 403, message: 'That photograph is not yours to edit.' })
   }
 
@@ -41,13 +45,22 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  await sql`
-    UPDATE site_images SET
-      caption = ${patch.caption === undefined ? sql`caption` : patch.caption},
-      attribution = ${patch.attribution === undefined ? sql`attribution` : patch.attribution},
-      licence = ${licence ?? sql`licence`}
-    WHERE id = ${imageId}
-  `
+  /**
+   * Only the fields that were sent. The raw version had to write
+   * `caption = caption` to mean "leave this one alone", which reads as a typo
+   * and hid the actual intent; an absent key says it directly. Drizzle refuses
+   * an empty `set`, so a request that changes nothing returns without a write
+   * rather than issuing `UPDATE ... SET` with no assignments.
+   */
+  const fields = {
+    ...(patch.caption !== undefined && { caption: patch.caption }),
+    ...(patch.attribution !== undefined && { attribution: patch.attribution }),
+    ...(licence !== undefined && { licence }),
+  }
+
+  if (Object.keys(fields).length === 0) return { imageId, status: 'unchanged' }
+
+  await database.update(siteImages).set(fields).where(eq(siteImages.id, imageId))
 
   return { imageId, status: 'updated' }
 })

@@ -1,5 +1,7 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import sharp from 'sharp'
+import { eq } from 'drizzle-orm'
+import { siteImages, users } from '~~/server/database/schema'
 import type { SessionUser } from '#shared/types'
 
 let storage: S3Client | undefined
@@ -77,30 +79,44 @@ export default defineEventHandler(async (event) => {
     .jpeg({ quality: 88, mozjpeg: true })
     .toBuffer()
 
-  const sql = useSql()
+  const database = useDatabase()
 
-  const trust = await sql<
-    { approved_contributions: number; trust_revoked: boolean; role: SessionUser['role'] }[]
-  >`SELECT approved_contributions, trust_revoked, role FROM users WHERE id = ${user.id}`
+  // Trust is re-read rather than taken from the session: a moderator may have
+  // revoked it since the visitor signed in.
+  const [trust] = await database
+    .select({
+      approvedContributions: users.approvedContributions,
+      trustRevoked: users.trustRevoked,
+      role: users.role,
+    })
+    .from(users)
+    .where(eq(users.id, user.id))
+    .limit(1)
 
   const status = evaluateTrust({
-    approvedContributions: trust[0]?.approved_contributions ?? 0,
-    trustRevoked: trust[0]?.trust_revoked ?? true,
-    role: trust[0]?.role ?? 'contributor',
+    approvedContributions: trust?.approvedContributions ?? 0,
+    trustRevoked: trust?.trustRevoked ?? true,
+    role: trust?.role ?? 'contributor',
   }).autoApprove
     ? 'approved'
     : 'pending'
 
-  const [image] = await sql<{ id: number }[]>`
-    INSERT INTO site_images (
-      site_id, storage_key, caption, licence, attribution, width, height, status, created_by
-    )
-    VALUES (
-      ${siteId}, '', ${caption ?? null}, ${normalisedLicence}, ${attribution ?? null},
-      ${metadata.width ?? 0}, ${metadata.height ?? 0}, ${status}, ${user.id}
-    )
-    RETURNING id
-  `
+  // Inserted with an empty key, because the key is derived from the row id the
+  // insert is about to hand back.
+  const [image] = await database
+    .insert(siteImages)
+    .values({
+      siteId,
+      storageKey: '',
+      caption: caption ?? null,
+      licence: normalisedLicence,
+      attribution: attribution ?? null,
+      width: metadata.width ?? 0,
+      height: metadata.height ?? 0,
+      status,
+      createdBy: user.id,
+    })
+    .returning({ id: siteImages.id })
 
   const storageKey = buildStorageKey(siteId, image!.id)
   const config = useRuntimeConfig()
@@ -115,7 +131,7 @@ export default defineEventHandler(async (event) => {
     }),
   )
 
-  await sql`UPDATE site_images SET storage_key = ${storageKey} WHERE id = ${image!.id}`
+  await database.update(siteImages).set({ storageKey }).where(eq(siteImages.id, image!.id))
 
   return {
     imageId: image!.id,

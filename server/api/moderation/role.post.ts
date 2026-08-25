@@ -1,5 +1,7 @@
 import { z } from 'zod'
-import type { SessionUser, UserRole } from '#shared/types'
+import { count, eq } from 'drizzle-orm'
+import { users } from '~~/server/database/schema'
+import type { SessionUser } from '#shared/types'
 
 const roleSchema = z.object({
   userId: z.number().int().positive(),
@@ -10,27 +12,28 @@ export default defineEventHandler(async (event) => {
   const session = await requireUserSession(event)
   const actor = session.user as SessionUser
   const { userId, role } = await readValidatedBody(event, roleSchema.parse)
-  const sql = useSql()
+  const database = useDatabase()
 
-  const [target] = await sql<{ id: number; role: UserRole }[]>`
-    SELECT id, role FROM users WHERE id = ${userId} LIMIT 1
-  `
+  const [target] = await database
+    .select({ id: users.id, role: users.role })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1)
 
   if (!target) throw createError({ statusCode: 404, message: 'No such account.' })
 
-  // `count(*)` always yields exactly one row; the array index signature cannot
-  // know that, so the assertion carries what the aggregate guarantees.
-  const [admins] = await sql<{ count: number }[]>`
-    SELECT count(*)::int AS count FROM users WHERE role = 'admin'
-  `
-  const count = admins!.count
+  // Counted so `checkRoleChange` can refuse to demote the last admin.
+  const [admins] = await database
+    .select({ total: count() })
+    .from(users)
+    .where(eq(users.role, 'admin'))
 
   const check = checkRoleChange({
     actor,
     targetUserId: userId,
     targetCurrentRole: target.role,
     nextRole: role,
-    adminCount: count!,
+    adminCount: admins!.total,
   })
 
   if (!check.allowed) {
@@ -40,7 +43,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  await sql`UPDATE users SET role = ${role}::user_role WHERE id = ${userId}`
+  await database.update(users).set({ role }).where(eq(users.id, userId))
 
   return { userId, role }
 })

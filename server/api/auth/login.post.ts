@@ -1,5 +1,7 @@
 import { z } from 'zod'
-import type { SessionUser, TrustLevel, UserRole } from '#shared/types'
+import { eq, sql } from 'drizzle-orm'
+import { users } from '~~/server/database/schema'
+import type { SessionUser } from '#shared/types'
 
 const credentialsSchema = z.object({
   email: z.string().email().max(320),
@@ -9,30 +11,34 @@ const credentialsSchema = z.object({
 export default defineEventHandler(async (event) => {
   await enforceRateLimit(event, 'login')
   const credentials = await readValidatedBody(event, credentialsSchema.parse)
-  const sql = useSql()
+  const database = useDatabase()
 
-  const [account] = await sql<
-    {
-      id: number
-      display_name: string
-      password_hash: string
-      role: UserRole
-      trust_level: TrustLevel
-      approved_contributions: number
-      trust_revoked: boolean
-      email_verified_at: Date | null
-    }[]
-  >`
-    SELECT id, display_name, password_hash, role, trust_level,
-           approved_contributions, trust_revoked, email_verified_at
-    FROM users
-    WHERE email = ${credentials.email.toLowerCase()}
-    LIMIT 1
-  `
+  /**
+   * Matched on `lower(email)`, not on `email`.
+   *
+   * The only index on the column is `users_email_idx ON users (lower(email))`,
+   * so a plain `email = $1` cannot use it — this was a sequential scan of the
+   * whole user table on every login attempt, including every failed one, which
+   * is precisely the query an attacker gets to repeat. `EXPLAIN` confirms the
+   * index scan now.
+   */
+  const [account] = await database
+    .select({
+      id: users.id,
+      displayName: users.displayName,
+      passwordHash: users.passwordHash,
+      role: users.role,
+      approvedContributions: users.approvedContributions,
+      trustRevoked: users.trustRevoked,
+      emailVerifiedAt: users.emailVerifiedAt,
+    })
+    .from(users)
+    .where(eq(sql`lower(${users.email})`, credentials.email.toLowerCase()))
+    .limit(1)
 
   // Always hash, even with no match, so timing does not reveal the user table.
   const isValid = await verifyPasswordArgon(
-    account?.password_hash ?? DUMMY_HASH,
+    account?.passwordHash ?? DUMMY_HASH,
     credentials.password,
   )
 
@@ -40,24 +46,24 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 401, message: 'That email and password do not match.' })
   }
 
-  if (!account.email_verified_at && !import.meta.dev) {
+  if (!account.emailVerifiedAt && !import.meta.dev) {
     throw createError({ statusCode: 403, message: 'Confirm your email address first.' })
   }
 
   const user: SessionUser = {
     id: account.id,
-    displayName: account.display_name,
+    displayName: account.displayName,
     role: account.role,
     trustLevel: evaluateTrust({
-      approvedContributions: account.approved_contributions,
-      trustRevoked: account.trust_revoked,
+      approvedContributions: account.approvedContributions,
+      trustRevoked: account.trustRevoked,
       role: account.role,
     }).level,
-    approvedContributions: account.approved_contributions,
+    approvedContributions: account.approvedContributions,
   }
 
   await setUserSession(event, { user, loggedInAt: Date.now() })
-  await sql`UPDATE users SET last_seen_at = now() WHERE id = ${account.id}`
+  await database.update(users).set({ lastSeenAt: new Date() }).where(eq(users.id, account.id))
 
   return { user }
 })

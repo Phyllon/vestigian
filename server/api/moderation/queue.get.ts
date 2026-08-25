@@ -1,4 +1,6 @@
 import { z } from 'zod'
+import { and, asc, eq, gt } from 'drizzle-orm'
+import { revisions, users } from '~~/server/database/schema'
 
 const querySchema = z.object({
   limit: z.coerce.number().int().min(1).max(50).default(20),
@@ -13,49 +15,46 @@ const querySchema = z.object({
 export default defineEventHandler(async (event) => {
   await requireModerator(event)
   const { limit, cursor } = await getValidatedQuery(event, querySchema.parse)
-  const sql = useSql()
+  const database = useDatabase()
 
-  const rows = await sql<
-    {
-      id: number
-      entity_type: string
-      entity_id: number | null
-      payload: Record<string, unknown>
-      previous_payload: Record<string, unknown> | null
-      edit_summary: string | null
-      created_at: Date
-      author_id: number | null
-      author_name: string | null
-      author_accepted: number | null
-    }[]
-  >`
-    SELECT r.id, r.entity_type, r.entity_id, r.payload, r.previous_payload,
-           r.edit_summary, r.created_at,
-           u.id AS author_id, u.display_name AS author_name,
-           u.approved_contributions AS author_accepted
-    FROM revisions r
-    LEFT JOIN users u ON u.id = r.author_id
-    WHERE r.status = 'pending' ${cursor ? sql`AND r.id > ${cursor}` : sql``}
-    ORDER BY r.id ASC
-    LIMIT ${limit}
-  `
+  const rows = await database
+    .select({
+      id: revisions.id,
+      entityType: revisions.entityType,
+      entityId: revisions.entityId,
+      payload: revisions.payload,
+      previousPayload: revisions.previousPayload,
+      editSummary: revisions.editSummary,
+      createdAt: revisions.createdAt,
+      authorName: users.displayName,
+      authorAccepted: users.approvedContributions,
+    })
+    .from(revisions)
+    // Left, not inner: a contribution outlives the account that made it.
+    .leftJoin(users, eq(users.id, revisions.authorId))
+    .where(and(eq(revisions.status, 'pending'), cursor ? gt(revisions.id, cursor) : undefined))
+    .orderBy(asc(revisions.id))
+    .limit(limit)
 
   const items = rows.map((row) => {
-    const changes = diffPayloads(row.previous_payload, row.payload)
+    const changes = diffPayloads(
+      row.previousPayload as StoredPayload | null,
+      row.payload as StoredPayload,
+    )
     return {
       id: row.id,
-      entity_type: row.entity_type,
-      entity_id: row.entity_id,
+      entity_type: row.entityType,
+      entity_id: row.entityId,
       payload: row.payload,
-      edit_summary: row.edit_summary,
+      edit_summary: row.editSummary,
       changes,
       // Surfaced so a moderator can triage: large rewrites and blanking edits
       // deserve a closer look than a corrected date.
       substantial: isSubstantialEdit(changes),
       blanking: isBlankingEdit(changes),
-      created_at: row.created_at.toISOString(),
-      author_name: row.author_name,
-      author_accepted: row.author_accepted ?? 0,
+      created_at: row.createdAt.toISOString(),
+      author_name: row.authorName,
+      author_accepted: row.authorAccepted ?? 0,
     }
   })
 

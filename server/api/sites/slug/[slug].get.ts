@@ -1,4 +1,6 @@
 import { z } from 'zod'
+import { and, eq } from 'drizzle-orm'
+import { sites } from '~~/server/database/schema'
 import type { SiteDetail } from '#shared/types'
 
 const paramsSchema = z.object({
@@ -16,11 +18,13 @@ const paramsSchema = z.object({
  */
 export default defineEventHandler(async (event): Promise<SiteDetail> => {
   const { slug } = await getValidatedRouterParams(event, paramsSchema.parse)
-  const sql = useSql()
+  const database = useDatabase()
 
-  const [row] = await sql<{ id: number }[]>`
-    SELECT id FROM sites WHERE slug = ${slug} AND status = 'approved' LIMIT 1
-  `
+  const [row] = await database
+    .select({ id: sites.id })
+    .from(sites)
+    .where(and(eq(sites.slug, slug), eq(sites.status, 'approved')))
+    .limit(1)
 
   if (!row) {
     throw createError({ statusCode: 404, message: 'No site recorded under that name.' })

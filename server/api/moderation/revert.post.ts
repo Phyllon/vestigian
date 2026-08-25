@@ -1,4 +1,6 @@
 import { z } from 'zod'
+import { and, eq, sql } from 'drizzle-orm'
+import { revisions } from '~~/server/database/schema'
 import type { SessionUser } from '#shared/types'
 
 const revertSchema = z.object({
@@ -16,25 +18,25 @@ const revertSchema = z.object({
 export default defineEventHandler(async (event) => {
   const moderator = (await requireModerator(event)) as SessionUser
   const { revisionId, reason } = await readValidatedBody(event, revertSchema.parse)
-  const sql = useSql()
+  const database = useDatabase()
 
-  const [target] = await sql<
-    {
-      id: number
-      entity_type: string
-      entity_id: number | null
-      previous_payload: Record<string, unknown> | null
-    }[]
-  >`
-    SELECT id, entity_type, entity_id, previous_payload
-    FROM revisions WHERE id = ${revisionId} AND status = 'approved' LIMIT 1
-  `
+  const [target] = await database
+    .select({
+      id: revisions.id,
+      entityType: revisions.entityType,
+      entityId: revisions.entityId,
+      payload: revisions.payload,
+      previousPayload: revisions.previousPayload,
+    })
+    .from(revisions)
+    .where(and(eq(revisions.id, revisionId), eq(revisions.status, 'approved')))
+    .limit(1)
 
   if (!target) {
     throw createError({ statusCode: 404, message: 'No published revision with that id.' })
   }
 
-  if (!target.previous_payload || !target.entity_id) {
+  if (!target.previousPayload || !target.entityId) {
     throw createError({
       statusCode: 400,
       message: 'That revision created the record, so there is no earlier state to restore.',
@@ -42,24 +44,32 @@ export default defineEventHandler(async (event) => {
   }
 
   const restored = {
-    ...target.previous_payload,
-    kind: target.entity_type,
-    entityId: target.entity_id,
+    ...(target.previousPayload as StoredPayload),
+    kind: target.entityType,
+    entityId: target.entityId,
   }
 
-  const [revision] = await sql<{ id: number }[]>`
-    INSERT INTO revisions (
-      entity_type, entity_id, payload, previous_payload, edit_summary,
-      status, author_id, reviewer_id, auto_approved, reverts_revision_id, reviewed_at
-    )
-    VALUES (
-      ${target.entity_type}, ${target.entity_id}, ${sql.json(restored)},
-      (SELECT payload FROM revisions WHERE id = ${revisionId}),
-      ${reason ?? `Reverted revision ${revisionId}`},
-      'approved', ${moderator.id}, ${moderator.id}, 0, ${revisionId}, now()
-    )
-    RETURNING id
-  `
+  /**
+   * `previousPayload` is what this revert replaces — the state the offending
+   * revision put there — so it is that revision's `payload`. It was read above
+   * rather than re-selected in a subquery, which is what the raw version did.
+   */
+  const [revision] = await database
+    .insert(revisions)
+    .values({
+      entityType: target.entityType,
+      entityId: target.entityId,
+      payload: restored,
+      previousPayload: target.payload,
+      editSummary: reason ?? `Reverted revision ${revisionId}`,
+      status: 'approved',
+      authorId: moderator.id,
+      reviewerId: moderator.id,
+      autoApproved: 0,
+      revertsRevisionId: revisionId,
+      reviewedAt: sql`now()`,
+    })
+    .returning({ id: revisions.id })
 
   await applyRevision(revision!.id)
   await bumpDataVersion()

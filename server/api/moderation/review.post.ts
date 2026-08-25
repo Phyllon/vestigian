@@ -1,4 +1,6 @@
 import { z } from 'zod'
+import { eq } from 'drizzle-orm'
+import { revisions } from '~~/server/database/schema'
 import type { SessionUser } from '#shared/types'
 
 const reviewSchema = z.object({
@@ -10,26 +12,31 @@ const reviewSchema = z.object({
 export default defineEventHandler(async (event) => {
   const moderator = (await requireModerator(event)) as SessionUser
   const { revisionId, decision, note } = await readValidatedBody(event, reviewSchema.parse)
-  const sql = useSql()
+  const database = useDatabase()
 
-  const [revision] = await sql<{ id: number; author_id: number | null; status: string }[]>`
-    SELECT id, author_id, status FROM revisions WHERE id = ${revisionId} LIMIT 1
-  `
+  const [revision] = await database
+    .select({ id: revisions.id, authorId: revisions.authorId, status: revisions.status })
+    .from(revisions)
+    .where(eq(revisions.id, revisionId))
+    .limit(1)
 
   if (!revision) throw createError({ statusCode: 404, message: 'Revision not found.' })
   if (revision.status !== 'pending') {
     throw createError({ statusCode: 409, message: 'This revision has already been reviewed.' })
   }
-  if (!canReviewRevision(moderator, revision.author_id)) {
+  if (!canReviewRevision(moderator, revision.authorId)) {
     throw createError({ statusCode: 403, message: 'You cannot review your own contribution.' })
   }
 
-  await sql`
-    UPDATE revisions
-    SET status = ${decision}, reviewer_id = ${moderator.id},
-        review_note = ${note ?? null}, reviewed_at = now()
-    WHERE id = ${revisionId}
-  `
+  await database
+    .update(revisions)
+    .set({
+      status: decision,
+      reviewerId: moderator.id,
+      reviewNote: note ?? null,
+      reviewedAt: new Date(),
+    })
+    .where(eq(revisions.id, revisionId))
 
   if (decision === 'approved') {
     await applyRevision(revisionId)

@@ -1,4 +1,6 @@
 import { z } from 'zod'
+import { and, asc, eq } from 'drizzle-orm'
+import { siteImages } from '~~/server/database/schema'
 import type { SessionUser } from '#shared/types'
 
 const paramsSchema = z.object({ id: z.coerce.number().int().positive() })
@@ -19,31 +21,39 @@ export default defineEventHandler(async (event) => {
 
   const { id: siteId } = await getValidatedRouterParams(event, paramsSchema.parse)
   const { imageId, targetIndex } = await readValidatedBody(event, bodySchema.parse)
-  const sql = useSql()
+  const database = useDatabase()
 
-  const rows = await sql<{ id: number; sort_order: number; created_by: number | null }[]>`
-    SELECT id, sort_order, created_by
-    FROM site_images
-    WHERE site_id = ${siteId} AND status = 'approved'
-    ORDER BY sort_order, id
-  `
+  const rows = await database
+    .select({
+      id: siteImages.id,
+      sortOrder: siteImages.sortOrder,
+      createdBy: siteImages.createdBy,
+    })
+    .from(siteImages)
+    .where(and(eq(siteImages.siteId, siteId), eq(siteImages.status, 'approved')))
+    .orderBy(asc(siteImages.sortOrder), asc(siteImages.id))
 
   const target = rows.find((row) => row.id === imageId)
   if (!target) throw createError({ statusCode: 404, message: 'No such photograph on this site.' })
 
-  if (!canManageImage(user, target.created_by)) {
+  if (!canManageImage(user, target.createdBy)) {
     throw createError({ statusCode: 403, message: 'That photograph is not yours to reorder.' })
   }
 
   const reordered = applyReorder(
-    rows.map((row) => ({ id: row.id, sortOrder: row.sort_order })),
+    rows.map((row) => ({ id: row.id, sortOrder: row.sortOrder })),
     imageId,
     targetIndex,
   )
 
-  await sql.begin(async (tx) => {
+  // One transaction for the whole sequence: a gallery half-renumbered is worse
+  // than one not renumbered at all.
+  await database.transaction(async (tx) => {
     for (const image of reordered) {
-      await tx`UPDATE site_images SET sort_order = ${image.sortOrder} WHERE id = ${image.id}`
+      await tx
+        .update(siteImages)
+        .set({ sortOrder: image.sortOrder })
+        .where(eq(siteImages.id, image.id))
     }
   })
 

@@ -1,4 +1,6 @@
 import { z } from 'zod'
+import { eq, sql } from 'drizzle-orm'
+import { emailTokens, users } from '~~/server/database/schema'
 
 const bodySchema = z.object({ email: z.string().email().max(320) })
 
@@ -10,24 +12,29 @@ const bodySchema = z.object({ email: z.string().email().max(320) })
 export default defineEventHandler(async (event) => {
   await enforceRateLimit(event, 'register')
   const { email } = await readValidatedBody(event, bodySchema.parse)
-  const sql = useSql()
+  const database = useDatabase()
   const config = useRuntimeConfig()
 
-  const [account] = await sql<{ id: number; display_name: string }[]>`
-    SELECT id, display_name FROM users WHERE email = ${email.toLowerCase()} LIMIT 1
-  `
+  // `lower(email)` to match the unique index — see the note in login.post.ts.
+  const [account] = await database
+    .select({ id: users.id, displayName: users.displayName })
+    .from(users)
+    .where(eq(sql`lower(${users.email})`, email.toLowerCase()))
+    .limit(1)
 
   if (account) {
     const issued = issueToken('reset-password')
 
-    await sql`
-      INSERT INTO email_tokens (user_id, token_hash, purpose, expires_at)
-      VALUES (${account.id}, ${issued.tokenHash}, 'reset-password', ${issued.expiresAt})
-    `
+    await database.insert(emailTokens).values({
+      userId: account.id,
+      tokenHash: issued.tokenHash,
+      purpose: 'reset-password',
+      expiresAt: issued.expiresAt,
+    })
 
     await sendTokenMail('reset-password', {
       to: email,
-      displayName: account.display_name,
+      displayName: account.displayName,
       link: buildTokenLink(config.public.siteUrl, 'reset-password', issued.token),
     })
   }

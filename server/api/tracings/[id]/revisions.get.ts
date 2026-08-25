@@ -1,45 +1,58 @@
 import { z } from 'zod'
+import { and, desc, eq } from 'drizzle-orm'
+import { alias } from 'drizzle-orm/pg-core'
+import { revisions, users } from '~~/server/database/schema'
 
 const paramsSchema = z.object({ id: z.coerce.number().int().positive() })
 
-/** The history of one tracing, in the same shape as a site's. */
+// The same table twice, so each join needs its own name.
+const author = alias(users, 'author')
+const reviewer = alias(users, 'reviewer')
+
+/**
+ * The history of one tracing. Public, because a record whose provenance cannot be
+ * inspected is a record no one should cite.
+ */
 export default defineEventHandler(async (event) => {
   const { id } = await getValidatedRouterParams(event, paramsSchema.parse)
-  const sql = useSql()
+  const database = useDatabase()
 
-  const rows = await sql<
-    {
-      id: number
-      payload: Record<string, unknown>
-      previous_payload: Record<string, unknown> | null
-      edit_summary: string | null
-      auto_approved: number
-      reverts_revision_id: number | null
-      created_at: Date
-      author_name: string | null
-      reviewer_name: string | null
-    }[]
-  >`
-    SELECT r.id, r.payload, r.previous_payload, r.edit_summary, r.auto_approved,
-           r.reverts_revision_id, r.created_at,
-           author.display_name AS author_name,
-           reviewer.display_name AS reviewer_name
-    FROM revisions r
-    LEFT JOIN users author ON author.id = r.author_id
-    LEFT JOIN users reviewer ON reviewer.id = r.reviewer_id
-    WHERE r.entity_type = 'tracing' AND r.entity_id = ${id} AND r.status = 'approved'
-    ORDER BY r.created_at DESC
-    LIMIT 100
-  `
+  const rows = await database
+    .select({
+      id: revisions.id,
+      payload: revisions.payload,
+      previousPayload: revisions.previousPayload,
+      editSummary: revisions.editSummary,
+      autoApproved: revisions.autoApproved,
+      revertsRevisionId: revisions.revertsRevisionId,
+      createdAt: revisions.createdAt,
+      authorName: author.displayName,
+      reviewerName: reviewer.displayName,
+    })
+    .from(revisions)
+    .leftJoin(author, eq(author.id, revisions.authorId))
+    .leftJoin(reviewer, eq(reviewer.id, revisions.reviewerId))
+    .where(
+      and(
+        eq(revisions.entityType, 'tracing'),
+        eq(revisions.entityId, id),
+        eq(revisions.status, 'approved'),
+      ),
+    )
+    .orderBy(desc(revisions.createdAt))
+    .limit(100)
 
   return rows.map((row) => ({
     id: row.id,
-    editSummary: row.edit_summary,
-    createdAt: row.created_at.toISOString(),
-    authorName: row.author_name,
-    reviewerName: row.reviewer_name,
-    autoApproved: row.auto_approved === 1,
-    isRevert: row.reverts_revision_id !== null,
-    changes: diffPayloads(row.previous_payload, row.payload),
+    editSummary: row.editSummary,
+    createdAt: row.createdAt.toISOString(),
+    authorName: row.authorName,
+    reviewerName: row.reviewerName,
+    autoApproved: row.autoApproved === 1,
+    isRevert: row.revertsRevisionId !== null,
+    changes: diffPayloads(
+      row.previousPayload as StoredPayload | null,
+      row.payload as StoredPayload,
+    ),
   }))
 })

@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { emailTokens, users } from '~~/server/database/schema'
 import { passwordSchema } from '#shared/utils/password'
 
 const registrationSchema = z.object({
@@ -26,23 +27,30 @@ export default defineEventHandler(async (event) => {
 
   await assertHumanVisitor(event, body.turnstileToken)
 
-  const sql = useSql()
+  const database = useDatabase()
   const config = useRuntimeConfig()
   const passwordHash = await hashPasswordArgon(body.password)
 
   try {
-    const [created] = await sql<{ id: number }[]>`
-      INSERT INTO users (email, display_name, password_hash)
-      VALUES (${body.email.toLowerCase()}, ${body.displayName}, ${passwordHash})
-      RETURNING id
-    `
+    const [created] = await database
+      .insert(users)
+      .values({
+        // Stored lowercased so the `lower(email)` unique index and every
+        // lookup that matches through it agree on one spelling.
+        email: body.email.toLowerCase(),
+        displayName: body.displayName,
+        passwordHash,
+      })
+      .returning({ id: users.id })
 
     const issued = issueToken('verify-email')
 
-    await sql`
-      INSERT INTO email_tokens (user_id, token_hash, purpose, expires_at)
-      VALUES (${created!.id}, ${issued.tokenHash}, 'verify-email', ${issued.expiresAt})
-    `
+    await database.insert(emailTokens).values({
+      userId: created!.id,
+      tokenHash: issued.tokenHash,
+      purpose: 'verify-email',
+      expiresAt: issued.expiresAt,
+    })
 
     await sendTokenMail('verify-email', {
       to: body.email,

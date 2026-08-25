@@ -1,4 +1,6 @@
 import { z } from 'zod'
+import { and, eq } from 'drizzle-orm'
+import { siteImages } from '~~/server/database/schema'
 import type { SessionUser } from '#shared/types'
 
 const paramsSchema = z.object({
@@ -21,20 +23,21 @@ export default defineEventHandler(async (event) => {
   const user = session.user as SessionUser
 
   const { id: siteId, imageId } = await getValidatedRouterParams(event, paramsSchema.parse)
-  const sql = useSql()
+  const database = useDatabase()
 
-  const [image] = await sql<{ id: number; created_by: number | null; status: string }[]>`
-    SELECT id, created_by, status FROM site_images
-    WHERE id = ${imageId} AND site_id = ${siteId} LIMIT 1
-  `
+  const [image] = await database
+    .select({ id: siteImages.id, createdBy: siteImages.createdBy, status: siteImages.status })
+    .from(siteImages)
+    .where(and(eq(siteImages.id, imageId), eq(siteImages.siteId, siteId)))
+    .limit(1)
 
   if (!image) throw createError({ statusCode: 404, message: 'No such photograph on this site.' })
 
-  if (!canManageImage(user, image.created_by)) {
+  if (!canManageImage(user, image.createdBy)) {
     throw createError({ statusCode: 403, message: 'That photograph is not yours to remove.' })
   }
 
-  await sql`UPDATE site_images SET status = 'rejected' WHERE id = ${imageId}`
+  await database.update(siteImages).set({ status: 'rejected' }).where(eq(siteImages.id, imageId))
   await bumpDataVersion()
 
   return { imageId, status: 'withdrawn' }

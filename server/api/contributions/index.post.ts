@@ -1,16 +1,5 @@
 import { z } from 'zod'
-import type postgres from 'postgres'
 import type { SessionUser } from '#shared/types'
-
-/**
- * The shape a payload has once it is round-tripped through a `jsonb` column.
- *
- * `Record<string, unknown>` would do for the diff, but not for `sql.json`,
- * which insists on `JSONValue` so that a symbol or a bigint cannot be handed
- * to Postgres and silently serialised to nothing. Saying so in the type is
- * cheaper than casting at each call.
- */
-type StoredPayload = Record<string, postgres.JSONValue | undefined>
 
 const positionSchema = z.object({
   lon: z.number().min(-180).max(180),
@@ -92,7 +81,7 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  const changes = diffPayloads(previousPayload, draft as unknown as Record<string, unknown>)
+  const changes = diffPayloads(previousPayload, draft as unknown as StoredPayload)
 
   if (draft.entityId && changes.length === 0) {
     throw createError({ statusCode: 400, message: 'Nothing was changed.' })

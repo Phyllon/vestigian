@@ -1,4 +1,6 @@
 import { z } from 'zod'
+import { and, asc, desc, eq, ilike, sql } from 'drizzle-orm'
+import { revisions, users } from '~~/server/database/schema'
 
 const querySchema = z.object({
   search: z.string().trim().max(80).optional(),
@@ -12,40 +14,33 @@ const querySchema = z.object({
 export default defineEventHandler(async (event) => {
   await requireModerator(event)
   const { search, limit } = await getValidatedQuery(event, querySchema.parse)
-  const sql = useSql()
+  const database = useDatabase()
 
-  const rows = await sql<
-    {
-      id: number
-      display_name: string
-      role: string
-      trust_level: number
-      approved_contributions: number
-      trust_revoked: boolean
-      pending_count: number
-      created_at: Date
-      last_seen_at: Date | null
-    }[]
-  >`
-    SELECT u.id, u.display_name, u.role::text AS role, u.trust_level,
-           u.approved_contributions, u.trust_revoked, u.created_at, u.last_seen_at,
-           (SELECT count(*)::int FROM revisions r
-             WHERE r.author_id = u.id AND r.status = 'pending') AS pending_count
-    FROM users u
-    ${search ? sql`WHERE u.display_name ILIKE ${'%' + search + '%'}` : sql``}
-    ORDER BY u.approved_contributions DESC, u.id ASC
-    LIMIT ${limit}
-  `
+  const rows = await database
+    .select({
+      id: users.id,
+      displayName: users.displayName,
+      role: users.role,
+      trustLevel: users.trustLevel,
+      approvedContributions: users.approvedContributions,
+      trustRevoked: users.trustRevoked,
+      createdAt: users.createdAt,
+      lastSeenAt: users.lastSeenAt,
+      // Correlated rather than joined: a join would multiply the user row by
+      // its pending revisions and need a GROUP BY to put it back together.
+      pendingCount: sql<number>`(
+        SELECT count(*)::int FROM ${revisions}
+        WHERE ${and(eq(revisions.authorId, users.id), eq(revisions.status, 'pending'))}
+      )`,
+    })
+    .from(users)
+    .where(search ? ilike(users.displayName, `%${search}%`) : undefined)
+    .orderBy(desc(users.approvedContributions), asc(users.id))
+    .limit(limit)
 
   return rows.map((row) => ({
-    id: row.id,
-    displayName: row.display_name,
-    role: row.role,
-    trustLevel: row.trust_level,
-    approvedContributions: row.approved_contributions,
-    trustRevoked: row.trust_revoked,
-    pendingCount: row.pending_count,
-    createdAt: row.created_at.toISOString(),
-    lastSeenAt: row.last_seen_at?.toISOString() ?? null,
+    ...row,
+    createdAt: row.createdAt.toISOString(),
+    lastSeenAt: row.lastSeenAt?.toISOString() ?? null,
   }))
 })

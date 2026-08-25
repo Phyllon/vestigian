@@ -1,5 +1,7 @@
 import { z } from 'zod'
-import type { SessionUser, UserRole } from '#shared/types'
+import { eq, sql } from 'drizzle-orm'
+import { users } from '~~/server/database/schema'
+import type { SessionUser } from '#shared/types'
 
 const trustSchema = z.object({
   userId: z.number().int().positive(),
@@ -17,11 +19,13 @@ const trustSchema = z.object({
 export default defineEventHandler(async (event) => {
   const moderator = (await requireModerator(event)) as SessionUser
   const { userId, revoked } = await readValidatedBody(event, trustSchema.parse)
-  const sql = useSql()
+  const database = useDatabase()
 
-  const [target] = await sql<{ id: number; role: UserRole }[]>`
-    SELECT id, role FROM users WHERE id = ${userId} LIMIT 1
-  `
+  const [target] = await database
+    .select({ id: users.id, role: users.role })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1)
 
   if (!target) throw createError({ statusCode: 404, message: 'No such account.' })
 
@@ -32,16 +36,17 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  await sql`
-    UPDATE users
-    SET trust_revoked = ${revoked},
-        trust_level = CASE
-          WHEN ${revoked} THEN 0
-          WHEN approved_contributions >= 2 THEN 1
-          ELSE 0
-        END
-    WHERE id = ${userId}
-  `
+  await database
+    .update(users)
+    .set({
+      trustRevoked: revoked,
+      // Recomputed from the count that revoking deliberately leaves alone, so
+      // restoring returns someone to the level they had earned.
+      trustLevel: revoked
+        ? 0
+        : sql`CASE WHEN ${users.approvedContributions} >= 2 THEN 1 ELSE 0 END`,
+    })
+    .where(eq(users.id, userId))
 
   return { userId, trustRevoked: revoked }
 })
