@@ -26,17 +26,27 @@
     it: 'Italian',
   }
 
+  const nameOf = (code: string): string => LANGUAGE_NAMES[code] ?? code.toUpperCase()
+
   /**
-   * Named only when it is not English. An extract in the interface language
-   * needs no label; one in another language does, because the alternative is a
-   * reader meeting German prose with no warning and no idea why. `lang` is set
-   * on the paragraph too, so a screen reader switches voice and the browser's
-   * own translation offer knows what it is looking at.
+   * What to say about the language, if anything.
+   *
+   * Three cases, and the middle one is the reason this exists. Text already in
+   * the interface language says nothing. Text a machine translated says so,
+   * naming the language it came from — a translation of a CC BY-SA article is
+   * still that article, and a reader should know a machine stood in between.
+   * Text left in its own language says which, so nobody meets German prose
+   * with no warning.
    */
-  const foreignLanguage = computed(() => {
-    const language = props.enrichment?.language
-    if (!language || language === 'en') return null
-    return LANGUAGE_NAMES[language] ?? language.toUpperCase()
+  const languageNote = computed(() => {
+    const enrichment = props.enrichment
+    if (!enrichment) return null
+
+    if (enrichment.isMachineTranslated) {
+      return `Machine-translated from ${nameOf(enrichment.originalLanguage)}`
+    }
+
+    return enrichment.language === 'en' ? null : `In ${nameOf(enrichment.language)}`
   })
 
   const ROUTE_LABELS: Record<SiteEnrichment['matchedVia'], string> = {
@@ -64,8 +74,8 @@
     </div>
 
     <template v-else-if="enrichment">
-      <p v-if="foreignLanguage" class="eyebrow mt-2 text-ink-500 dark:text-paper-400">
-        In {{ foreignLanguage }}
+      <p v-if="languageNote" class="eyebrow mt-2 text-ink-500 dark:text-paper-400">
+        {{ languageNote }}
       </p>
 
       <p

@@ -215,6 +215,15 @@ export default defineNuxtConfig({
       apiKey: '',
       from: 'Vestigia <no-reply@vestigia.example>',
     },
+    /**
+     * Self-hosted LibreTranslate. Server-side only, deliberately: the URL is
+     * private config, the browser never talks to it, and an empty value simply
+     * turns translation off rather than breaking anything.
+     */
+    translate: {
+      url: '',
+      target: 'en',
+    },
     public: {
       siteUrl: 'http://localhost:3000',
       imageBaseUrl,

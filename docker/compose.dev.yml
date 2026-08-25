@@ -82,6 +82,35 @@ services:
       - '1025:1025'
       - '8025:8025'
 
+  # Machine translation for borrowed article text, self-hosted so that reading a
+  # site never sends its content to a third party — the same reasoning that
+  # keeps the fonts local and imgproxy in-house.
+  #
+  # LT_LOAD_ONLY is not a nicety. Without it LibreTranslate loads every language
+  # pair it can find, which is gigabytes of models and minutes of startup; these
+  # five are the Wikipedias the enrichment endpoint reads. The volume keeps the
+  # download from happening again on every `stack:up`.
+  libretranslate:
+    image: libretranslate/libretranslate:latest
+    environment:
+      LT_LOAD_ONLY: 'en,nl,de,es,it'
+      LT_DISABLE_WEB_UI: 'true'
+      LT_THREADS: '2'
+    ports:
+      - '5050:5000'
+    volumes:
+      - libretranslate-models:/home/libretranslate/.local
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - python -c "import urllib.request; urllib.request.urlopen('http://localhost:5000/languages')"
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      # First boot downloads the models; nothing is wrong before that finishes.
+      start_period: 300s
+
 volumes:
   postgres-data:
   minio-data:
+  libretranslate-models:

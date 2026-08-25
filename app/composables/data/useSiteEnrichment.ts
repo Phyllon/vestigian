@@ -19,7 +19,7 @@ import type { SiteEnrichment } from '#shared/types'
 const STORAGE_KEY = 'vestigia-enrichment'
 
 /** Bumped when the shape changes, so an old cache is discarded rather than parsed. */
-const STORAGE_SCHEMA = 2
+const STORAGE_SCHEMA = 3
 
 const STORAGE_TTL_MS = 7 * 24 * 60 * 60 * 1000
 

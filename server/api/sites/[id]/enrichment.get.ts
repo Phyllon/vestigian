@@ -7,7 +7,7 @@ const paramsSchema = z.object({ id: z.coerce.number().int().positive() })
 const HIT_TTL_SECONDS = 604800
 const MISS_TTL_SECONDS = 86400
 
-const cacheKeyFor = (siteId: number): string => `enrich:v2:${siteId}`
+const cacheKeyFor = (siteId: number): string => `enrich:v3:${siteId}`
 
 /**
  * Borrowed prose about one site, or null.
@@ -121,11 +121,27 @@ const buildEnrichment = async (request: BuildRequest): Promise<SiteEnrichment | 
   const summary = await loadWikipediaSummary(facts.article)
   if (!summary) return null
 
+  /**
+   * Translated here rather than in the browser so it happens once for everyone
+   * and lands in the same cache entry as the extract. A visitor never waits on
+   * LibreTranslate twice for the same site, and never waits at all on a warm
+   * key.
+   */
+  const { translate } = useRuntimeConfig()
+  const target = translate.target || 'en'
+
+  const translated =
+    summary.language === target
+      ? null
+      : await translateText({ text: summary.extract, from: summary.language, to: target })
+
   return {
     title: summary.title,
-    extract: summary.extract,
+    extract: translated ?? summary.extract,
     articleUrl: summary.articleUrl,
-    language: summary.language,
+    language: translated ? target : summary.language,
+    originalLanguage: summary.language,
+    isMachineTranslated: translated !== null,
     source: 'Wikipedia',
     licence: 'CC BY-SA 4.0',
     matchedVia: resolved.matchedVia,

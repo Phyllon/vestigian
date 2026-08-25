@@ -91,13 +91,22 @@ export interface SiteEnrichment {
   extract: string
   articleUrl: string
   /**
-   * The Wikipedia the extract came from, as a language code. English is
-   * preferred and Dutch is the fallback — much of this atlas is Dutch ground,
-   * and `nl` carries an article where `en` has none for a quarter of the sites
-   * that can be matched at all. The panel labels anything that is not English
-   * rather than passing it off as translated.
+   * The language `extract` is actually in — after translation, if any. English
+   * is preferred, then `nl`, `de`, `es`, `it`, the languages this atlas is
+   * written over.
    */
   language: string
+  /**
+   * Where the words started, before any machine translation. Equal to
+   * `language` when nothing was translated.
+   */
+  originalLanguage: string
+  /**
+   * True when a machine put those words into `language`. Rendered, never
+   * hidden: a translation of a CC BY-SA text is still that text's derivative,
+   * and a reader deserves to know a machine stood between them and the source.
+   */
+  isMachineTranslated: boolean
   /** Attribution is rendered, never implied — the licence demands it. */
   source: string
   licence: string

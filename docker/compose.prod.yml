@@ -7,6 +7,10 @@ services:
     environment:
       NUXT_DATABASE_URL: postgres://vestigia:${POSTGRES_PASSWORD}@postgres:5432/vestigia
       NUXT_REDIS_URL: redis://valkey:6379
+      # Service name, not a public host: the app reaches the translator
+      # over the compose network and nothing else can.
+      NUXT_TRANSLATE_URL: http://libretranslate:5000/translate
+      NUXT_TRANSLATE_TARGET: en
       NUXT_SESSION_PASSWORD: ${SESSION_PASSWORD}
       NUXT_PUBLIC_SITE_URL: ${SITE_URL}
       NUXT_PUBLIC_IMAGE_BASE_URL: ${IMAGE_BASE_URL}
@@ -27,6 +31,9 @@ services:
         condition: service_healthy
       valkey:
         condition: service_started
+      # libretranslate is deliberately absent. It takes minutes to download its
+      # models on a cold volume, and translation fails open — holding every
+      # deploy behind an optional nicety would be the wrong trade.
     labels:
       traefik.enable: 'true'
       traefik.http.routers.vestigia.rule: Host(`${SITE_HOST}`)
@@ -107,6 +114,31 @@ services:
       traefik.http.routers.images.tls.certresolver: letsencrypt
       traefik.http.services.images.loadbalancer.server.port: '8080'
 
+  # Deliberately has no Traefik labels: this is reachable only from inside the
+  # compose network, by the app. Nothing about a site's text should leave the
+  # box to be translated, which is the whole reason for self-hosting it.
+  #
+  # LT_LOAD_ONLY confines it to the Wikipedias the enrichment endpoint reads.
+  # Without it, every available model is loaded — gigabytes, and minutes of
+  # startup on a one-VPS deployment that cannot spare either.
+  libretranslate:
+    image: libretranslate/libretranslate:latest
+    restart: unless-stopped
+    environment:
+      LT_LOAD_ONLY: 'en,nl,de,es,it'
+      LT_DISABLE_WEB_UI: 'true'
+      LT_THREADS: '2'
+    volumes:
+      - libretranslate-models:/home/libretranslate/.local
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - python -c "import urllib.request; urllib.request.urlopen('http://localhost:5000/languages')"
+      interval: 30s
+      timeout: 5s
+      retries: 10
+      start_period: 300s
+
   backup:
     image: postgres:17-alpine
     restart: unless-stopped
@@ -124,3 +156,4 @@ volumes:
   postgres-data:
   valkey-data:
   backup-data:
+  libretranslate-models:

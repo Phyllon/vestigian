@@ -53,6 +53,9 @@ importers:
       terra-draw-maplibre-gl-adapter:
         specifier: ^1.0.0
         version: 1.4.1(maplibre-gl@5.24.0)(terra-draw@1.32.3)
+      translate:
+        specifier: ^3.1.0
+        version: 3.1.0
       vue:
         specifier: ^3.5.13
         version: 3.5.41(typescript@5.9.3)
@@ -5778,6 +5781,9 @@ packages:
 
   tr46@0.0.3:
     resolution: {integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==}
+
+  translate@3.1.0:
+    resolution: {integrity: sha512-X0KKY1Zl9vXZAUj+jyjQox4NIeryAEKBZymtjEuA6jLIyKtAlAJGfdw2+W1PRMkyHydGMHFIkMyxv4kUxEvgBw==}
 
   tree-kill@1.2.2:
     resolution: {integrity: sha512-L0Orpi8qGpRG//Nd+H90vFB+3iHnue1zSSGmNOOCh1GLJ7rUKVwV2HvijphGQS2UmhUZewS9VgvxYIdgr+fG1A==}
@@ -12496,6 +12502,8 @@ snapshots:
   totalist@3.0.1: {}
 
   tr46@0.0.3: {}
+
+  translate@3.1.0: {}
 
   tree-kill@1.2.2: {}
 
