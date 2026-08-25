@@ -18,9 +18,12 @@ export default defineEventHandler(async (event) => {
 
   if (!target) throw createError({ statusCode: 404, message: 'No such account.' })
 
-  const [{ count }] = await sql<{ count: number }[]>`
+  // `count(*)` always yields exactly one row; the array index signature cannot
+  // know that, so the assertion carries what the aggregate guarantees.
+  const [admins] = await sql<{ count: number }[]>`
     SELECT count(*)::int AS count FROM users WHERE role = 'admin'
   `
+  const count = admins!.count
 
   const check = checkRoleChange({
     actor,

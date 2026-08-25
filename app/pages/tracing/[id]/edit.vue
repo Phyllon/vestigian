@@ -24,13 +24,23 @@
     const geometry = tracing.value?.geometry
     if (!geometry) return null
 
-    const coordinates =
+    /**
+     * A tracing is a line or an area, so those are the only two shapes worth
+     * reading. `GeoJSON.Geometry` also covers points, multi-geometries and
+     * collections, and a GeometryCollection carries no `coordinates` at all —
+     * which the cast that used to stand here quietly hid.
+     */
+    const ring =
       geometry.type === 'Polygon'
-        ? (geometry.coordinates[0] as [number, number][])
-        : (geometry?.coordinates as [number, number][])
+        ? geometry.coordinates[0]
+        : geometry.type === 'LineString'
+          ? geometry.coordinates
+          : null
 
-    const lons = coordinates.map((point) => point[0])
-    const lats = coordinates.map((point) => point[1])
+    if (!ring || ring.length === 0) return null
+
+    const lons = ring.map((point) => point[0]!)
+    const lats = ring.map((point) => point[1]!)
 
     return {
       lon: (Math.min(...lons) + Math.max(...lons)) / 2,

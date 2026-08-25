@@ -97,3 +97,7 @@ const main = async (): Promise<void> => {
 }
 
 await main()
+
+// This file has no imports, so without an export TypeScript treats it as a
+// script rather than a module and rejects the top-level await above.
+export {}

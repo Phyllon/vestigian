@@ -1,4 +1,5 @@
 import { countsTowardsTrust } from './trust'
+import type postgres from 'postgres'
 import type { ContributionKind } from '#shared/types'
 
 interface SitePayload {
@@ -91,7 +92,17 @@ export const applyRevision = async (revisionId: number): Promise<void> => {
   })
 }
 
-type Transaction = Parameters<Parameters<ReturnType<typeof useSql>['begin']>[0]>[0]
+/**
+ * Taken from postgres.js rather than derived from `sql.begin`.
+ *
+ * `begin` is overloaded — `(cb)` and `(options, cb)` — and `Parameters<T>`
+ * resolves to the *last* overload, so the obvious
+ * `Parameters<Parameters<...['begin']>[0]>[0]` picked up `options: string` and
+ * collapsed the whole alias to `never`. Every helper below then took a
+ * parameter nothing could satisfy, and the tagged-template calls inside them
+ * reported as "not callable" — nine errors, none of them where the mistake was.
+ */
+type Transaction = postgres.TransactionSql
 
 const insertSite = async (
   tx: Transaction,

@@ -97,7 +97,8 @@ export const enforceRateLimit = async (event: H3Event, name: RateLimitName): Pro
   const decision = evaluateRateLimit({ count, policy, now })
   if (decision.allowed) return
 
-  setResponseHeader(event, 'retry-after', String(decision.retryAfterSeconds))
+  // h3 types `retry-after` as a number; it stringifies the value itself.
+  setResponseHeader(event, 'retry-after', decision.retryAfterSeconds)
   throw createError({
     statusCode: 429,
     statusMessage: 'Too many requests',

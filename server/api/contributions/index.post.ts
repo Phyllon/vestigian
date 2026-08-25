@@ -1,5 +1,16 @@
 import { z } from 'zod'
+import type postgres from 'postgres'
 import type { SessionUser } from '#shared/types'
+
+/**
+ * The shape a payload has once it is round-tripped through a `jsonb` column.
+ *
+ * `Record<string, unknown>` would do for the diff, but not for `sql.json`,
+ * which insists on `JSONValue` so that a symbol or a bigint cannot be handed
+ * to Postgres and silently serialised to nothing. Saying so in the type is
+ * cheaper than casting at each call.
+ */
+type StoredPayload = Record<string, postgres.JSONValue | undefined>
 
 const positionSchema = z.object({
   lon: z.number().min(-180).max(180),
@@ -72,7 +83,7 @@ export default defineEventHandler(async (event) => {
   // An edit must name a record that exists and is published. Allowing edits to
   // pending or rejected rows would let the queue be used to resurrect content a
   // moderator has already removed.
-  let previousPayload: Record<string, unknown> | null = null
+  let previousPayload: StoredPayload | null = null
 
   if (draft.entityId) {
     previousPayload = await loadCurrentPayload(draft.kind, draft.entityId)
@@ -154,7 +165,7 @@ const buildOutcomeMessage = (status: string, isEdit: boolean, requiresReview: bo
 const loadCurrentPayload = async (
   kind: 'site' | 'tracing',
   entityId: number,
-): Promise<Record<string, unknown> | null> => {
+): Promise<StoredPayload | null> => {
   const sql = useSql()
 
   if (kind === 'site') {

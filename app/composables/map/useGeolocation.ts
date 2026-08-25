@@ -96,6 +96,22 @@ export const useGeolocation = () => {
 }
 
 /**
+ * A polygon that remembers its ring positions are `[lon, lat]` pairs.
+ *
+ * `GeoJSON.Polygon` types coordinates as `Position[][]`, and `Position` is
+ * `number[]` — a length the type system does not know. Returning the plain
+ * type therefore discards what this function certainly knows, and every reader
+ * has to assert it back. Narrowing here instead keeps callers, and the tests,
+ * free of assertions; it is still a `Feature<Polygon>` wherever one is wanted,
+ * because a `[number, number][][]` is a `Position[][]`.
+ */
+export interface AccuracyCircle {
+  type: 'Feature'
+  properties: GeoJSON.GeoJsonProperties
+  geometry: { type: 'Polygon'; coordinates: [number, number][][] }
+}
+
+/**
  * The accuracy halo is drawn as a real geographic circle rather than a fixed
  * pixel radius, so it stays truthful about precision at every zoom. Latitude
  * correction matters: at 60°N a degree of longitude is half its equatorial
@@ -105,7 +121,7 @@ export const buildAccuracyCircle = (
   centre: { lon: number; lat: number },
   radiusMetres: number,
   steps = 64,
-): GeoJSON.Feature<GeoJSON.Polygon> => {
+): AccuracyCircle => {
   const latitudeRadius = radiusMetres / 111320
   const longitudeRadius = latitudeRadius / Math.cos((centre.lat * Math.PI) / 180)
   const ring: [number, number][] = []

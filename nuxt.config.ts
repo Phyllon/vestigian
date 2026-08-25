@@ -39,6 +39,7 @@ export default defineNuxtConfig({
     'nuxt-security',
     '@nuxtjs/turnstile',
     '@nuxt/test-utils/module',
+
   ],
 
   /**
@@ -115,6 +116,41 @@ export default defineNuxtConfig({
   },
 
   hooks: {
+    /**
+     * Withdraws a Vue language-tools plugin that cannot load here.
+     *
+     * Nuxt 4.5 asks for `vue-router/volar/sfc-route-blocks`, which exists only
+     * in vue-router 5. This project resolves vue-router 4, because `@nuxt/ui`
+     * 3.3.7 pins its peer to `^4.5.0` while Nuxt depends on `^5.2.0`. Both are
+     * installed; Vite dedupes the runtime to the v4 copy, so the only casualty
+     * is the type plugin — `@vue/language-core` cannot require the missing
+     * subpath and every `pnpm typecheck` opened with two lines of failure.
+     *
+     * The plugin types `<route>` custom blocks in SFCs. Every page here uses
+     * `definePageMeta` and there is no `<route>` block in the codebase, so
+     * withdrawing the request costs nothing.
+     *
+     * Registered from `ready` rather than as a `prepare:types` entry in this
+     * same object, and that is the whole trick: hooks declared in `hooks` are
+     * registered before modules install, so such a handler runs *first* and
+     * the pages module appends the plugin again straight after. `ready` fires
+     * once every module is installed, so a handler registered from inside it
+     * is last in the chain.
+     *
+     * TODO: Delete this once `@nuxt/ui` and Nuxt agree on one vue-router major —
+     * `@nuxt/ui` 4.x already accepts `^4.5.0 || ^5.0.0`, but moving there is a
+     * major-version migration of every form and button in the app.
+     */
+    ready: (nuxt) => {
+      nuxt.hook('prepare:types', ({ tsConfig }) => {
+        const plugins = tsConfig.vueCompilerOptions?.plugins
+        if (!Array.isArray(plugins)) return
+        tsConfig.vueCompilerOptions!.plugins = plugins.filter(
+          (plugin) => plugin !== 'vue-router/volar/sfc-route-blocks',
+        )
+      })
+    },
+
     /**
      * Fonts are removed from the resource hints entirely.
      *

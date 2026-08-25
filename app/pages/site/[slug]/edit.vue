@@ -72,7 +72,9 @@
     </section>
 
     <section class="leaf p-6">
-      <ContributeImageUploader :site-id="site.id" @uploaded="refresh" />
+      <!-- Wrapped: `uploaded` carries the new image id, and refresh() reads its
+           first argument as async-data options. -->
+      <ContributeImageUploader :site-id="site.id" @uploaded="() => refresh()" />
     </section>
 
     <section class="leaf p-6">

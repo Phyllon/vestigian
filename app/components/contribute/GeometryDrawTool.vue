@@ -6,7 +6,6 @@
     TerraDrawSelectMode,
   } from 'terra-draw'
   import { TerraDrawMapLibreGLAdapter } from 'terra-draw-maplibre-gl-adapter'
-  import maplibregl from 'maplibre-gl'
 
   type DrawMode = 'linestring' | 'polygon' | 'select'
 
@@ -42,7 +41,10 @@
     if (!map.value) return
 
     draw = new TerraDraw({
-      adapter: new TerraDrawMapLibreGLAdapter({ map: map.value, lib: maplibregl }),
+      // No `lib` here. The adapter took one in 0.x; 1.x resolves MapLibre
+      // itself and the built adapter never reads the key, so passing it did
+      // nothing but drag the whole maplibre-gl namespace into this component.
+      adapter: new TerraDrawMapLibreGLAdapter({ map: map.value }),
       modes: [
         new TerraDrawLineStringMode({
           styles: { lineStringColor: '#9a3b22', lineStringWidth: 3 },
