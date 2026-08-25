@@ -24,6 +24,14 @@ export const RATE_LIMITS = {
   upload: { limit: 20, windowSeconds: 3600 },
   search: { limit: 120, windowSeconds: 60 },
   tiles: { limit: 1200, windowSeconds: 60 },
+  /**
+   * Generous, because a cache hit costs nothing and most requests are hits.
+   * The upstream services are the constraint, not us: Wikidata's search
+   * endpoint answered "You are making too many requests" after eight calls
+   * spaced 800ms apart, so a miss is throttled by the Valkey layer rather than
+   * by this number.
+   */
+  enrichment: { limit: 60, windowSeconds: 60 },
 } as const satisfies Record<string, RateLimitPolicy>
 
 export type RateLimitName = keyof typeof RATE_LIMITS

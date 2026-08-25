@@ -75,6 +75,36 @@ export interface ExternalIdentifier {
   url: string | null
 }
 
+/** Which concordance got us from a site to an external entity. */
+export type EnrichmentRoute = 'wikidata' | 'pleiades' | 'dare'
+
+/**
+ * Borrowed prose about a site, shown only when it is certainly the same place.
+ *
+ * `matchedVia` and `matchedWithinMetres` travel with the text on purpose. This
+ * is third-party content in a curated atlas, so the panel can say *why* it
+ * believes the two records describe one place rather than asking the reader to
+ * take it on trust.
+ */
+export interface SiteEnrichment {
+  title: string
+  extract: string
+  articleUrl: string
+  /**
+   * The Wikipedia the extract came from, as a language code. English is
+   * preferred and Dutch is the fallback — much of this atlas is Dutch ground,
+   * and `nl` carries an article where `en` has none for a quarter of the sites
+   * that can be matched at all. The panel labels anything that is not English
+   * rather than passing it off as translated.
+   */
+  language: string
+  /** Attribution is rendered, never implied — the licence demands it. */
+  source: string
+  licence: string
+  matchedVia: EnrichmentRoute
+  matchedWithinMetres: number
+}
+
 export interface SiteDraft {
   title: string
   category: SiteCategory

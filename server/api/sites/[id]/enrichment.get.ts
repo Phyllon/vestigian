@@ -1,0 +1,134 @@
+import { z } from 'zod'
+import type { SiteCategory, SiteEnrichment } from '#shared/types'
+
+const paramsSchema = z.object({ id: z.coerce.number().int().positive() })
+
+/** A week for an answer, a day for a refusal. */
+const HIT_TTL_SECONDS = 604800
+const MISS_TTL_SECONDS = 86400
+
+const cacheKeyFor = (siteId: number): string => `enrich:v2:${siteId}`
+
+/**
+ * Borrowed prose about one site, or null.
+ *
+ * Null is the ordinary answer. Only about 5% of the atlas can be matched to an
+ * outside record with any certainty — 3,489 sites carry a Wikidata id, another
+ * 1,168 are reachable through their Pleiades or DARE concordances, and a
+ * quarter of those are then refused because the two records disagree about
+ * where the place is or what it is. Every other site simply gets nothing, which
+ * is the honest result and not an error.
+ *
+ * This runs on the server rather than in the browser for three reasons, in
+ * order of weight: the CSP allows no Wikimedia origin and widening it is not
+ * worth a nice-to-have; one fetch here serves every visitor, where a browser
+ * fetch would have each of them asking Wikimedia separately; and visitors' IPs
+ * never reach a third party. Wikidata's search endpoint throttles after eight
+ * calls spaced 800ms apart, so the shared cache is not an optimisation — it is
+ * what makes the feature viable at all.
+ */
+export default defineEventHandler(async (event): Promise<SiteEnrichment | null> => {
+  const { id } = await getValidatedRouterParams(event, paramsSchema.parse)
+  await enforceRateLimit(event, 'enrichment')
+
+  const cacheKey = cacheKeyFor(id)
+
+  try {
+    const cached = await useRedis().get(cacheKey)
+    // An empty string is a cached refusal — distinct from a cache miss, so a
+    // site with no match is not re-asked upstream on every open.
+    if (cached !== null) return cached === '' ? null : (JSON.parse(cached) as SiteEnrichment)
+  } catch {
+    // Cache outage: fall through and answer from upstream.
+  }
+
+  const sql = useSql()
+
+  const [site] = await sql<{ category: SiteCategory; lon: number; lat: number }[]>`
+    SELECT s.category, ST_X(s.geom) AS lon, ST_Y(s.geom) AS lat
+    FROM sites s WHERE s.id = ${id} AND s.status = 'approved' LIMIT 1
+  `
+
+  if (!site)
+    throw createError({ statusCode: 404, message: 'No approved site with that identifier.' })
+
+  const identifiers = await sql<{ scheme: string; value: string }[]>`
+    SELECT scheme, value FROM external_ids
+    WHERE site_id = ${id} AND scheme IN ('wikidata', 'pleiades', 'dare')
+  `
+
+  const first = (scheme: string): string | null =>
+    identifiers.find((row) => row.scheme === scheme)?.value ?? null
+
+  const pleiadesId = first('pleiades')
+
+  const enrichment = await buildEnrichment({
+    site: { position: { lon: site.lon, lat: site.lat }, category: site.category },
+    identifiers: {
+      wikidataId: normaliseWikidataId(first('wikidata')),
+      pleiadesId,
+      dareId: first('dare'),
+    },
+  })
+
+  try {
+    await useRedis().set(
+      cacheKey,
+      enrichment ? JSON.stringify(enrichment) : '',
+      'EX',
+      enrichment ? HIT_TTL_SECONDS : MISS_TTL_SECONDS,
+    )
+  } catch {
+    // Non-fatal.
+  }
+
+  return enrichment
+})
+
+interface BuildRequest {
+  site: { position: { lon: number; lat: number }; category: SiteCategory }
+  identifiers: { wikidataId: string | null; pleiadesId: string | null; dareId: string | null }
+}
+
+/**
+ * Resolve, verify, then fetch the prose — in that order, so nothing is
+ * retrieved for a candidate that is about to be refused.
+ */
+const buildEnrichment = async (request: BuildRequest): Promise<SiteEnrichment | null> => {
+  const { site, identifiers } = request
+
+  // No concordance means no lead worth following. Searching by name and
+  // position was measured and produces modern towns and railway stations, so
+  // there is nothing to try here.
+  if (!identifiers.wikidataId && !identifiers.pleiadesId && !identifiers.dareId) return null
+
+  const resolved = await resolveWikidataEntity(identifiers)
+  if (!resolved) return null
+
+  const facts = await loadWikidataFacts(resolved.id)
+
+  const placeTypes = identifiers.pleiadesId
+    ? await loadPleiadesPlaceTypes(identifiers.pleiadesId)
+    : facts.placeTypes
+
+  const verdict = verifyEnrichmentMatch({
+    site,
+    candidate: { position: facts.position, placeTypes },
+  })
+
+  if (!verdict.accepted || !facts.article) return null
+
+  const summary = await loadWikipediaSummary(facts.article)
+  if (!summary) return null
+
+  return {
+    title: summary.title,
+    extract: summary.extract,
+    articleUrl: summary.articleUrl,
+    language: summary.language,
+    source: 'Wikipedia',
+    licence: 'CC BY-SA 4.0',
+    matchedVia: resolved.matchedVia,
+    matchedWithinMetres: Math.round(verdict.distanceMetres ?? 0),
+  }
+}

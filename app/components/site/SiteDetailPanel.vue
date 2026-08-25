@@ -8,6 +8,7 @@
     hasOverlappingFeatures,
     returnToOverlappingFeatures,
   } = useSiteQuery()
+  const { enrichment, isLoadingEnrichment } = useSiteEnrichment()
   const { loggedIn } = useSession()
   const { isCompact } = useBreakpoint()
 
@@ -126,6 +127,12 @@
             {{ paragraph }}
           </p>
         </div>
+
+        <SiteEnrichment
+          :enrichment="enrichment"
+          :is-loading="isLoadingEnrichment"
+          class="mt-6 block"
+        />
 
         <SiteExternalLinks
           v-if="site.externalIds.length > 0"

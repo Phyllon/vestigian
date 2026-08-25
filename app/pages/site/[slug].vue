@@ -9,6 +9,8 @@
 
   const { data: site } = await useFetch<SiteDetail>(() => `/api/sites/slug/${route.params.slug}`)
 
+  const { enrichment, isLoadingEnrichment } = useSiteEnrichment(() => site.value?.id ?? null)
+
   const period = computed(() =>
     site.value ? formatPeriod(site.value.periodFrom, site.value.periodTo) : '',
   )
@@ -64,6 +66,12 @@
           {{ paragraph }}
         </p>
       </div>
+
+      <SiteEnrichment
+        :enrichment="enrichment"
+        :is-loading="isLoadingEnrichment"
+        class="mt-8 block"
+      />
 
       <SiteExternalLinks
         v-if="site.externalIds.length > 0"
