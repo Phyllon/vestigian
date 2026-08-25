@@ -15,8 +15,10 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: pnpm }
       - run: pnpm install --frozen-lockfile
-      - run: pnpm test
-      - run: pnpm typecheck
+      # One gate, four checks in parallel. `pnpm install` has already run
+      # `nuxt prepare` through postinstall, so .nuxt exists before eslint
+      # reads the config Nuxt generates into it.
+      - run: pnpm check
 
   publish:
     needs: verify

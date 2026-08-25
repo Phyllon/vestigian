@@ -39,7 +39,6 @@ export default defineNuxtConfig({
     'nuxt-security',
     '@nuxtjs/turnstile',
     '@nuxt/test-utils/module',
-
   ],
 
   /**
