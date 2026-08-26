@@ -43,7 +43,7 @@ const DARE_PROPERTY = 'P1936'
  * The order is a preference, not a ranking of quality — the first language
  * with an article wins, and the reader is told which one they are reading.
  */
-const ARTICLE_LANGUAGES = ['en', 'nl', 'de', 'es', 'it'] as const
+const ARTICLE_LANGUAGES = ['en', 'nl', 'de', 'es', 'it', 'fr'] as const
 
 export type ArticleLanguage = (typeof ARTICLE_LANGUAGES)[number]
 

@@ -1,5 +1,6 @@
+import { and, eq, inArray, sql } from 'drizzle-orm'
 import { z } from 'zod'
-import type { SiteCategory, SiteEnrichment } from '#shared/types'
+import type { SiteEnrichment } from '#shared/types'
 
 const paramsSchema = z.object({ id: z.coerce.number().int().positive() })
 
@@ -42,20 +43,40 @@ export default defineEventHandler(async (event): Promise<SiteEnrichment | null> 
     // Cache outage: fall through and answer from upstream.
   }
 
-  const sql = useSql()
+  const database = useDatabase()
 
-  const [site] = await sql<{ category: SiteCategory; lon: number; lat: number }[]>`
-    SELECT s.category, ST_X(s.geom) AS lon, ST_Y(s.geom) AS lat
-    FROM sites s WHERE s.id = ${id} AND s.status = 'approved' LIMIT 1
-  `
+  /**
+   * Drizzle, with `ST_X`/`ST_Y` as raw expressions.
+   *
+   * The geometry accessors have no query-builder equivalent, but that is no
+   * reason to hand-write the whole statement. This way the table, the column
+   * names and the `status` literal are all checked against `database/schema`,
+   * and only the two PostGIS calls are not — where the raw version was one
+   * long `sql<...>` assertion the compiler took entirely on trust. `category`
+   * arrives typed as the enum rather than as a `string` claimed to be one.
+   */
+  const [site] = await database
+    .select({
+      category: schema.sites.category,
+      lon: sql<number>`ST_X(${schema.sites.geom})`,
+      lat: sql<number>`ST_Y(${schema.sites.geom})`,
+    })
+    .from(schema.sites)
+    .where(and(eq(schema.sites.id, id), eq(schema.sites.status, 'approved')))
+    .limit(1)
 
   if (!site)
     throw createError({ statusCode: 404, message: 'No approved site with that identifier.' })
 
-  const identifiers = await sql<{ scheme: string; value: string }[]>`
-    SELECT scheme, value FROM external_ids
-    WHERE site_id = ${id} AND scheme IN ('wikidata', 'pleiades', 'dare')
-  `
+  const identifiers = await database
+    .select({ scheme: schema.externalIds.scheme, value: schema.externalIds.value })
+    .from(schema.externalIds)
+    .where(
+      and(
+        eq(schema.externalIds.siteId, id),
+        inArray(schema.externalIds.scheme, ['wikidata', 'pleiades', 'dare']),
+      ),
+    )
 
   const first = (scheme: string): string | null =>
     identifiers.find((row) => row.scheme === scheme)?.value ?? null

@@ -125,7 +125,11 @@ services:
     image: libretranslate/libretranslate:latest
     restart: unless-stopped
     environment:
-      LT_LOAD_ONLY: 'en,nl,de,es,it'
+      LT_LOAD_ONLY: 'en,nl,de,es,it,fr'
+      # Without this, models are installed only when the volume is empty, so
+      # adding a language to LT_LOAD_ONLY silently does nothing on an existing
+      # deployment. The check is quick when nothing has changed.
+      LT_UPDATE_MODELS: 'true'
       LT_DISABLE_WEB_UI: 'true'
       LT_THREADS: '2'
     volumes:

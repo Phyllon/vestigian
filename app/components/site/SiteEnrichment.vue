@@ -24,6 +24,7 @@
     de: 'German',
     es: 'Spanish',
     it: 'Italian',
+    fr: 'French',
   }
 
   const nameOf = (code: string): string => LANGUAGE_NAMES[code] ?? code.toUpperCase()

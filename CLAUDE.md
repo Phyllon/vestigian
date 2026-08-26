@@ -26,7 +26,7 @@ The agreed mood is **"a field notebook carried through Roman Europe."** Every vi
 - One oxide red (`#9a3b22`) as accent, used **once per screen**, never decoratively.
 - Bronze for linear features, verdigris only for approved/confirmed states.
 - Dark mode is a _night_ notebook, not an inverted one: warm charcoal, never blue-grey.
-- Type: Fraunces Variable (display, optical-size axis), IBM Plex Sans (body), IBM Plex Mono (coordinates, ids, licences). **All self-hosted via `@fontsource*` — never a runtime request to Google.**
+- Type: Fraunces Variable (display), IBM Plex Sans (body), IBM Plex Mono (coordinates, ids, licences). **All self-hosted via `@fontsource*` — never a runtime request to Google.** Only `latin` and `latin-ext` are shipped, and only the **weight** axis of Fraunces: the brief once called for its optical-size axis, but `index.css` is a hard link to `wght.css`, so `'opsz'` was being set against a font that did not carry it and did nothing. Restoring it costs 54 KB across the two subsets — worth doing deliberately, not by leaving a dead declaration in the CSS.
 - Signature element: `.leaf`, a sheet of the notebook — raised ground, 2px corners, a shallow shadow. It once had a companion `.leaf-margin` that drew a ruled annotation column down the left of every panel; nothing was ever put in the column, so it read as a stray vertical line beside an oddly indented block and has been removed. If the ruled margin returns, it returns with provenance, licence and revision state actually in it.
 
 Tokens live in `app/assets/css/main.css` as Tailwind v4 `@theme` variables. Nuxt UI is pointed at those palettes in `app/app.config.ts`, so components inherit the palette rather than being restyled individually.
@@ -50,7 +50,7 @@ Tokens live in `app/assets/css/main.css` as Tailwind v4 `@theme` variables. Nuxt
 | **MapLibre GL JS v5**                    | Vector + GPU. Handles 20k sites via clustering and 1k tracings as styled LineStrings. Leaflet would thrash the DOM; OpenLayers (what vici uses) has a worse mobile feel; Mapbox GL charges per load. |
 | **PostGIS `ST_AsMVT`**                   | The viewport requirement is answered by _tiles_, not bbox GeoJSON queries. This is the single most important architectural decision in the project.                                                  |
 | **PMTiles basemap** (OpenFreeMap in dev) | Custom style = the app's character. A hosted MapTiler style would make it look like everything else. PMTiles is read by the browser over HTTP range requests — **no tile server process exists**.    |
-| **Drizzle + `postgres.js`**              | TS-first. Raw SQL used wherever PostGIS is involved, which is most of the hot path.                                                                                                                  |
+| **Drizzle + `postgres.js`**              | TS-first. Drizzle is the default for every query; raw SQL is kept for PostGIS only — six files, not "most of the hot path" as this table used to claim. See "Which client to reach for".             |
 | **Valkey**                               | Tile cache, sessions, rate limits. Redis-compatible, no licence question.                                                                                                                            |
 | **R2 + imgproxy**                        | One original stored per image; derivatives on the fly. Zero egress.                                                                                                                                  |
 | **terra-draw**                           | Framework-agnostic drawing that works with MapLibre.                                                                                                                                                 |
@@ -67,6 +67,34 @@ The app is strictly 12-factor (env-only config, no local disk writes, `/api/heal
 5. Empty tiles are cached for 24h — most of the pyramid is ocean.
 
 After any deploy or bulk import, run `pnpm tiles:warm <url>`.
+
+## Which client to reach for
+
+`useDatabase()` — Drizzle — is the default. Column names are checked against
+`server/database/schema` at compile time and rows are typed from the same
+place, which the raw client cannot do: `sql<{ id: number }[]>` is an assertion
+the compiler takes on trust, so a renamed column stays green until production.
+
+`useSql()` is for **PostGIS and nothing else** — eight files, each with a
+reason a query builder cannot answer: `ST_AsMVT` and its aggregates
+(`server/utils/mvt.ts`, via the tile route), `ST_AsMVTGeom`,
+`ST_SetSRID`/`ST_MakePoint`/`ST_GeomFromGeoJSON` on write, the `geography`
+casts behind proximity search, `ST_AsGeoJSON` on read, and the `SELECT 1` in
+`ready.get.ts`.
+
+A handful of geometry accessors is **not** such a reason. `sites/[id]/enrichment`
+reads `ST_X`/`ST_Y` through Drizzle, as `sql\`ST_X(${schema.sites.geom})\``inside a normal`.select()`: table, columns and enum literals stay checked, and
+only the two accessors are raw. Reach for `useSql()` when the _statement shape_
+is beyond the builder, not when one expression is.
+
+**The two hold separate connections, so a transaction cannot span them.**
+`server/utils/revisions.ts` is the reason it matters: `applyRevision()` writes
+geometry and bumps a trust counter inside one `sql.begin`, and splitting the
+counter onto Drizzle would put it outside that transaction while still looking
+atomic. A handler that needs one transaction picks one client for all of it.
+
+The split exists because `drizzle(client)` overwrites the timestamp parsers on
+whatever client it is handed — see the note in `server/utils/db.ts`.
 
 ## Governance model — do not weaken these
 
@@ -98,30 +126,35 @@ After any deploy or bulk import, run `pnpm tiles:warm <url>`.
 app/
   assets/css/main.css        design tokens (Tailwind v4 @theme)
   components/
-    map/       MapCanvas BasemapSwitcher GeolocateButton MapSearchField
-    site/      SiteDetailPanel SiteGallery SiteGalleryManager SiteMetaList SiteExternalLinks
+    map/       MapCanvas BasemapSwitcher GeolocateButton MapSearchField Legend FeaturePicker
+    site/      SiteDetailPanel SiteGallery SiteGalleryManager SiteMetaList
+               SiteExternalLinks SiteEnrichment
     tracing/   TracingDetailPanel
     contribute/ ContributionPanel SiteEditorForm TracingEditorForm GeometryDrawTool ImageUploader
-    auth/      LoginForm RegisterForm
+    auth/      LoginForm RegisterForm PasswordField PasswordRequirements
     moderation/ ReviewQueue RevisionDiff ContributorTable
     ui/        ThemeToggle RevisionHistory
   composables/
-    map/  useMapInstance useBasemapStyle useViewportTiles useGeolocation   (+__test__/)
-    data/ useSiteQuery useImageUrl                                          (+__test__/)
+    map/  useMapInstance useBasemapStyle useViewportTiles useGeolocation useSiteIcons (+__test__/)
+    data/ useSiteQuery useSiteEnrichment useImageUrl                                  (+__test__/)
     auth/ useSession
     ui/   useColorScheme useBreakpoint
   layouts/ default.vue (map shell) reading.vue (documents)
   middleware/ authenticated.ts moderator.ts
+  router.options.ts          scroll behaviour; the camera hash is not a selector
   pages/ index login register verify forgot-password reset-password
          site/[slug] site/[slug]/edit tracing/[id] tracing/[id]/edit
          moderation/index moderation/contributors
 server/
-  api/ tiles/[z]/[x]/[y]  sites/  tracings/  auth/  contributions/  moderation/  data/  health ready
+  api/ tiles/[z]/[x]/[y]  sites/  tracings/  auth/  contributions/  moderation/  data/
+       images/[id]/[preset]  sites/[id]/enrichment  health ready
   routes/ robots.txt sitemap.xml
   database/ schema/ migrations/ migrate.ts
   utils/ mvt trust permissions roles ratelimit images images-order uploads tokens mail diff
-         revisions slug db cache argon turnstile                            (+__test__/)
+         revisions slug db cache argon turnstile enrichment enrichment-sources translate
+                                                                            (+__test__/)
 shared/types/  vocabulary shared by both sides
+shared/utils/  password policy, shared by the forms and the endpoints        (+__test__/)
 scripts/import/  four-stage vici.org import + vici-licences.ts (shared vocabulary)
 scripts/warm-tiles.ts snapshot-database.ts reconcile-images.ts
 docker/  Dockerfile compose.dev.yml compose.prod.yml traefik/ backup.sh
@@ -137,13 +170,16 @@ application above the map: auth, contribution, moderation, revisions.
 2. `pnpm stack:up && pnpm db:migrate && pnpm dev`
 3. Import — see "Import pipeline" below. The map is populated after
    `import:convert`; photographs come later and cost someone else's bandwidth.
-4. `pnpm typecheck` — **still expect errors.** Most likely in Nuxt UI v3
-   component props (`UForm`, `USelect`, `UButton` colour/variant names changed
-   across betas), the MapLibre `StyleSpecification` strict types in
-   `useBasemapStyle.ts`, and the `Transaction` type alias in
-   `server/utils/revisions.ts`.
-5. `pnpm test` — the pure logic should pass; these files have no runtime
-   dependencies.
+4. `pnpm check` — lint, typecheck, tests and formatting, run in parallel by
+   `concurrently` and reported under one exit code. It is the same gate CI
+   runs. **It passes; treat any output as a regression rather than as the
+   backlog it used to be.** Typecheck in particular was 36 errors and is now
+   zero — the `Transaction` alias in `server/utils/revisions.ts` was most of
+   them, deriving its type from an overloaded `sql.begin` and collapsing to
+   `never`.
+5. `pnpm fix` applies what is mechanically fixable: `lint:fix` then `format`.
+   It is deliberately sequential — ESLint and Prettier both rewrite the same
+   files, so running them together would have them clobbering each other.
 
 Two things that had never run and silently broke everything, now fixed — worth
 knowing because both failed _invisibly_:
@@ -206,47 +242,44 @@ record and image stages so a licence cannot mean two things in one pipeline.
 
 ## Import pipeline
 
-Order matters and each step is resumable. The scratch MariaDB is **not** part of
-`pnpm stack:up` — it is read once and thrown away.
+Order matters; each step is resumable. The scratch MariaDB is **not** part of
+`pnpm stack:up` — read once, thrown away.
 
 ```bash
 docker run -d --name vici-mysql -p 3307:3306 -e MARIADB_ROOT_PASSWORD=root mariadb:11
 
-pnpm import:fetch           # dumps → scratch MariaDB (uses db_dumb/ if already downloaded)
+pnpm import:fetch           # dumps → scratch MariaDB (reuses db_dumb/ if present)
 pnpm import:convert         # → 61,272 sites, 11,720 tracings, 8,692 concordances
-pnpm import:image-records   # → 39,212 site_images rows over 36,216 objects; no bytes fetched
+pnpm import:image-records   # → 39,212 site_images rows over 36,216 objects; no bytes
 pnpm import:images          # → the photographs; ~12 hours, ~10 GB, resumable
 pnpm tiles:warm <url>
 ```
 
-The map is fully usable after `import:convert`. Everything after that is
-photographs.
+The map is fully usable after `import:convert`; everything after is photographs.
 
-**Contact René Voorburg before running the image mirror at scale.** The licences
-permit reuse; the bandwidth is his server's. Quote the real figures — **36,216
-requests** at 1.2 s apart, ~10 GB — and prove the setup first with
-`MIRROR_LIMIT=5 pnpm import:images`.
-
-Re-running the mirror after rebuilding the records does **not** re-download:
-an object already in storage is adopted (read back locally, re-measured, marked
-approved) with no request to vici.org and no pause. Without that, every rebuild
-of `site_images` would cost his server another 36,000 requests.
+**Contact René Voorburg before mirroring images at scale.** The licences permit
+reuse; the bandwidth is his server's. Quote real figures — **36,216 requests**
+at 1.2 s apart, ~10 GB — and prove the setup with `MIRROR_LIMIT=5
+pnpm import:images` first. Re-running after rebuilding records does **not**
+re-download: an object already in storage is adopted (read back, re-measured,
+marked approved) with no request and no pause. Without that, every rebuild of
+`site_images` would cost him another 36,000 requests.
 
 ### Where the photographs live — verified, and counter-intuitive
 
-- `vici.org/uploads/{file}` is a **soft 404**: HTTP 200 with an HTML body reading
-  "404 - file not found". It reaches an image pipeline as a corrupt file rather
-  than as a missing one, so `response.ok` proves nothing. The mirror checks
-  magic bytes with `detectImageFormat` for this reason.
-- Photographs are served from **`images.vici.org`**, and originals are not
-  exposed: `/uploads/{file}` there is a genuine 404. Everything must come
-  through a transform.
+- `vici.org/uploads/{file}` is a **soft 404**: HTTP 200 with an HTML body saying
+  "404 - file not found", so `response.ok` proves nothing and it reaches an
+  image pipeline as a corrupt file. Hence the `detectImageFormat` magic-byte
+  check in the mirror.
+- Photographs come from **`images.vici.org`**; originals are not exposed
+  (`/uploads/{file}` there is a real 404). Everything must go through a
+  transform.
 - Use **`/size/w{width}/uploads/{file}` — width only.** Both `size/w2400xh2400`
   and `crop/w2400xh2400` return exactly that box, distorting or cropping
-  anything non-square. Width is capped at the recorded `imgd_width` so small
+  anything non-square. Width is capped at the recorded `imgd_width`, so small
   originals are not upscaled.
-- Consequence: **2400px is a permanent ceiling** for imported photographs. The
-  "one original stored per image" principle cannot hold for this content.
+- Therefore **2400px is a permanent ceiling** for imported photographs, and
+  "one original stored per image" cannot hold for this content.
 
 ## Backups — two stores that fail apart
 
@@ -265,6 +298,53 @@ reported only — nothing in this project deletes bytes.
 Neither snapshot leaves the machine yet. That is the open gap.
 
 Data is CC BY-SA (text) / CC0 (metadata); **image licences vary per record**, which is why `licence` and `attribution` are non-null columns and attribution renders under every image rather than hiding behind an interaction.
+
+## Enrichment — borrowed prose, and how sure we are of it
+
+`/api/sites/:id/enrichment` returns a Wikipedia extract, or null. **Null is an
+ordinary answer.** A server proxy behind Valkey, not a browser fetch: the CSP
+allows no Wikimedia origin, one fetch serves every visitor, and Wikidata's
+search endpoint refused eight calls spaced 800 ms apart.
+
+Nothing is written to Postgres. Storage would be trivial (~7 MB); the objection
+is that the text is CC BY-SA and third-party, so a stored copy makes this a
+republisher rather than a linker, and nothing would ever invalidate it. Valkey
+keeps a hit 7 days and a refusal 1 day; the browser keeps its own 7 days.
+
+**A concordance is a lead, not a guarantee.** Across 30 sites with a Wikidata
+id, coordinates agreed to a median of 53 m — but p90 was 1,050 m and the worst
+35.8 km, a Q-id pointing at a modern municipality. A match therefore needs the
+identifier **and** a coordinate within 250 m **and** a place type that does not
+contradict `category`. That last check is what stops "Castellum Aardenburg"
+being described by the article for the _town_ of Aardenburg, and rejects the
+Pleiades join resolving to "Aardenburg (Samian Ware Discovery Site)" 1.2 km off.
+
+**Six Wikipedias**: `en`, then `nl`, `de`, `es`, `it`, `fr`. Over 60 random
+sites with a Q-id, English alone reached 77%, the set 87%; of 52 matches English
+served 46, German 4, Dutch 1, Spanish 1. On Dutch ground it matters far more —
+one slice of 14 went from 2 matches to 10.
+
+**Translation is a service we run.** `libretranslate` in both compose files,
+internal network only, driven by the `translate` package via
+`NUXT_TRANSLATE_URL` — self-hosted so reading a site tells no third party
+anything. `LT_LOAD_ONLY` pins the six languages (**1.2 GB of models**, plus an
+872 MB image; es→en alone is 302 MB, de 158 MB each way, nl/fr ~80 MB). Without
+it every available model loads. `LT_UPDATE_MODELS` is required or a language
+added to `LT_LOAD_ONLY` is silently ignored on an existing volume.
+
+Translation happens server-side, so it runs once per site into the same Valkey
+entry. **It fails open, and that is load-bearing**: with the container stopped,
+Dutch articles still arrive labelled `nl` in under 600 ms. The app deliberately
+does not `depends_on` it — a cold volume takes minutes and no deploy should wait
+on an optional nicety.
+
+Nothing is passed off as English that is not: translated text says
+"Machine-translated from Dutch", untranslated says "In Dutch", and the paragraph
+carries `lang` either way. A machine translation of a CC BY-SA article is still
+that article's derivative.
+
+Remaining losses are not fixable by loosening the threshold — no article in any
+of the six, genuinely too far, or no coordinate to check.
 
 ## Not built
 
@@ -287,34 +367,30 @@ To move from OpenFreeMap to self-hosted tiles: download a Europe + Mediterranean
 
 ## Working style for this project
 
-When something is uncertain, say so rather than guessing silently — several things here are inferred (the vici schema above) and were flagged as such deliberately. When a decision has a real trade-off, name the trade-off. Prefer fixing an unverified assumption over adding a feature: the codebase is broad and completely unexercised, so the highest-value work right now is making it run, not making it bigger.
+Say when something is uncertain rather than guessing silently — several things
+here are inferred and flagged as such. Name real trade-offs. Prefer fixing an
+unverified assumption over adding a feature.
 
-### Say it once, in the file
+**Say it once, in the file.** A docstring explaining what something does, why it
+exists or how it failed **is** the explanation; it does not get repeated in
+chat. Reply with a pointer — "fixed the recursion; the ordering constraint is
+documented above `attachOverlay`" — not a paragraph restating it. The transcript
+is thrown away, the file is read by whoever comes next, so when the urge to
+explain in the reply appears, extend the docstring instead.
 
-When you write a docstring or comment explaining what something does, why it
-exists, or how it failed — **that is the explanation, and it does not get
-repeated in chat.** Reply with a pointer: what you did, and where the reasoning
-now lives. `Fixed the recursion; the ordering constraint is documented above
-attachOverlay.` Not a paragraph restating it.
+Exceptions, because they have no home in the source: what you verified and how,
+what is still unproven, a trade-off the user must decide, and any finding that
+contradicts what they asked for. Those belong in the reply.
 
-The chat transcript is thrown away; the file is read by whoever touches this
-next. If an explanation is worth writing, it is worth writing where it will be
-found — so when the urge to explain in the reply appears, extend the docstring
-instead. A reader who wants the detail opens the file.
+**Also, always:**
 
-This does not apply to things that have no home in the source: what you
-verified and how, what is still unproven, a trade-off the user has to decide,
-or a finding that contradicts what they asked for. Those belong in the reply,
-because there is no file for them.
-
-### Mobile first
- Every component has to be optimized for mobile use (e.g. fast load, perfect UX/UI etc.), desktop secondly but not to be neglected. <!-- Supported breakpoints start from 375px to <768px (phone), to <1000px (tablet) and above (desktop). -->
-
-### Performance, clean code, best practices
-When adding or changing some code/feature, make it run as fast as possible (performance) but keep an eye on clean code and stick to best modern practices.
-
-### Accessibility
-Take a11y into account every time and boost it where possible (ARIA etc.)
-
-### Clean and modern HTML
-Always use best suitable HTML tags when building components
+- **Mobile first.** Every component optimised for phones (fast load, real UX),
+  desktop second but not neglected. Breakpoints: 375px–<768px phone, <1000px
+  tablet, above desktop.
+- **Fast, clean, modern.** Make it quick, keep it readable, use current best
+  practice, lazy-load where it helps.
+- **Accessibility every time** — ARIA and the rest, improved where possible.
+- **Semantic HTML** — the most fitting tag, always.
+- **Short answers in chat**, without dropping anything important.
+- **ORM over string queries.**
+- **Install type packages** whenever they exist, and use those types.
