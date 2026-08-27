@@ -1,0 +1,23 @@
+# What CrowdSec reads.
+#
+# The application's own logs rather than Traefik's, because they carry the
+# matched route pattern and the `audit` vocabulary — `auth.login`,
+# `auth.register`, `ratelimit.blocked` — which is far more precise than a status
+# code and a path. That only became possible once the access log started
+# carrying a client IP; before that nothing here could be attributed to anyone.
+source: docker
+container_name:
+  - vestigia-app-1
+  - vestigia-dev-app-1
+labels:
+  type: vestigia
+
+---
+# Traefik's access log as a second source, kept because it sees requests the app
+# never does — TLS errors, malformed HTTP, and anything refused before routing.
+# Harmless when the file is absent.
+source: file
+filenames:
+  - /var/log/traefik/access.log
+labels:
+  type: traefik

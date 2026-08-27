@@ -21,6 +21,7 @@ const paramsSchema = z.object({
  * approved, with a licence that permits publication.
  */
 export default defineEventHandler(async (event) => {
+  await enforceRateLimit(event, 'record')
   const { id, preset } = await getValidatedRouterParams(event, paramsSchema.parse)
   const database = useDatabase()
 

@@ -96,13 +96,13 @@ export const evaluateRateLimit = (input: RateLimitEvaluation): RateLimitDecision
 }
 
 export interface ClientIdentityRequest {
-  /** The peer we are actually talking to — a proxy, when there is one. */
+  /** The peer we are actually talking to — the CDN edge, when there is one. */
   socketAddress: string | null
-  forwardedFor: string | undefined
-  cloudflareIp: string | undefined
+  /** `x-real-ip`, which Bunny sets to the visitor address and nothing else. */
+  realIp: string | undefined
   /**
-   * Whether a proxy we control is known to sit in front and to overwrite these
-   * headers. False means they are attacker-controlled and must be ignored.
+   * Whether a proxy we control is known to sit in front and to overwrite that
+   * header. False means it is attacker-controlled and must be ignored.
    */
   behindTrustedProxy: boolean
 }
@@ -118,34 +118,35 @@ export interface ClientIdentityRequest {
  * four-per-hour on signup that the registration endpoint cites as its defence
  * against account farming.
  *
- * Forwarded headers are now believed only when something we control is known
- * to be in front and to overwrite them. Otherwise the socket address is the
- * only honest answer, even when it is a shared NAT address: over-counting a
- * handful of colleagues is a far smaller failure than counting nobody.
+ * The header is now believed only when something we control is known to be in
+ * front and to overwrite it. Otherwise the socket address is the only honest
+ * answer, even when it is a shared NAT address: over-counting a handful of
+ * colleagues is a far smaller failure than counting nobody.
  *
- * This still trusts the proxy chain itself. An attacker who bypasses
- * Cloudflare and reaches Traefik directly can forge the header again, so the
- * origin should accept connections only from the CDN's ranges. That is a
- * firewall concern, not one this function can answer.
+ * **`x-forwarded-for` is deliberately not consulted.** Under Bunny it carries
+ * the CDN address first and the visitor second — the reverse of the usual
+ * convention — so the familiar "leftmost entry is the client" reading would key
+ * every limit to a Bunny edge node and collapse every visitor behind one
+ * bucket. `x-real-ip` carries the visitor and only the visitor, so there is no
+ * position to get wrong.
+ *
+ * This still trusts the proxy chain itself. An attacker who bypasses the CDN
+ * and reaches Traefik directly can forge the header again, so the origin must
+ * accept connections only from the CDN's published ranges. That is a firewall
+ * concern, not one this function can answer.
  */
 export const resolveForwardedIdentifier = (request: ClientIdentityRequest): string => {
   const socketAddress = request.socketAddress ?? 'unknown'
 
   if (!request.behindTrustedProxy) return socketAddress
 
-  if (request.cloudflareIp) return request.cloudflareIp
-
-  // Only the leftmost entry is the original client; the rest of the chain is
-  // appended by intermediaries and is not ours to believe.
-  const firstForwarded = request.forwardedFor?.split(',')[0]?.trim()
-  return firstForwarded || socketAddress
+  return request.realIp?.trim() || socketAddress
 }
 
 export const resolveClientIdentifier = (event: H3Event): string =>
   resolveForwardedIdentifier({
     socketAddress: getRequestIP(event) ?? null,
-    forwardedFor: getRequestHeader(event, 'x-forwarded-for'),
-    cloudflareIp: getRequestHeader(event, 'cf-connecting-ip'),
+    realIp: getRequestHeader(event, 'x-real-ip'),
     behindTrustedProxy: useRuntimeConfig().behindTrustedProxy === true,
   })
 
@@ -189,6 +190,14 @@ export const enforceRateLimit = async (event: H3Event, name: RateLimitName): Pro
   }
 
   rateLimitDecisionsTotal().inc({ policy: name, outcome: 'blocked' })
+
+  // A refused request is the single most useful event a log-driven detector can
+  // read, and it used to be invisible: the 429 below lands in the error hook
+  // under 500, which logs `request refused` at `debug` without the policy name.
+  event.context.log?.warn(
+    { audit: 'ratelimit.blocked', policy: name, count, limit: policy.limit },
+    'rate limit exceeded',
+  )
 
   // h3 types `retry-after` as a number; it stringifies the value itself.
   setResponseHeader(event, 'retry-after', decision.retryAfterSeconds)

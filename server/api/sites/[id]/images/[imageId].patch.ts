@@ -19,6 +19,7 @@ const bodySchema = z.object({
 export default defineEventHandler(async (event) => {
   const session = await requireUserSession(event)
   const user = session.user as SessionUser
+  await enforceRateLimit(event, 'contribute')
 
   const { id: siteId, imageId } = await getValidatedRouterParams(event, paramsSchema.parse)
   const patch = await readValidatedBody(event, bodySchema.parse)

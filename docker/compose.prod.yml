@@ -16,10 +16,13 @@ services:
     environment:
       NUXT_DATABASE_URL: postgres://vestigia:${POSTGRES_PASSWORD}@postgres:5432/vestigia
       NUXT_REDIS_URL: redis://valkey:6379
-      # Traefik terminates TLS in front of this container and rewrites the
-      # forwarded headers, so they can be believed here. Keep the origin
-      # reachable only through the CDN — anything that can talk to Traefik
-      # directly can forge cf-connecting-ip again.
+      # Traefik terminates TLS in front of this container and Bunny sets
+      # x-real-ip in front of that, so the header can be believed here.
+      #
+      # This is only true while the Hetzner firewall refuses everything that is
+      # not a Bunny edge address. Without that rule anything reaching Traefik
+      # directly can forge x-real-ip per request and every limit in
+      # RATE_LIMITS becomes decorative — see server/utils/ratelimit.ts.
       NUXT_BEHIND_TRUSTED_PROXY: 'true'
       NUXT_ALTCHA_SECRET: ${ALTCHA_SECRET}
       # Traces go to Alloy, which batches and forwards to Tempo. An empty value
@@ -39,10 +42,10 @@ services:
       NUXT_IMGPROXY_BASE_URL: ${IMAGE_BASE_URL}
       NUXT_IMGPROXY_KEY: ${IMGPROXY_KEY}
       NUXT_IMGPROXY_SALT: ${IMGPROXY_SALT}
-      NUXT_STORAGE_ENDPOINT: ${R2_ENDPOINT}
-      NUXT_STORAGE_BUCKET: ${R2_BUCKET}
-      NUXT_STORAGE_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID}
-      NUXT_STORAGE_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY}
+      NUXT_STORAGE_ENDPOINT: ${BUNNY_S3_ENDPOINT}
+      NUXT_STORAGE_BUCKET: ${BUNNY_BUCKET}
+      NUXT_STORAGE_ACCESS_KEY_ID: ${BUNNY_ACCESS_KEY_ID}
+      NUXT_STORAGE_SECRET_ACCESS_KEY: ${BUNNY_SECRET_ACCESS_KEY}
       NUXT_MAIL_API_KEY: ${MAIL_API_KEY}
     depends_on:
       postgres:
@@ -134,9 +137,9 @@ services:
       IMGPROXY_KEY: ${IMGPROXY_KEY}
       IMGPROXY_SALT: ${IMGPROXY_SALT}
       IMGPROXY_USE_S3: 'true'
-      IMGPROXY_S3_ENDPOINT: ${R2_ENDPOINT}
-      AWS_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY}
+      IMGPROXY_S3_ENDPOINT: ${BUNNY_S3_ENDPOINT}
+      AWS_ACCESS_KEY_ID: ${BUNNY_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${BUNNY_SECRET_ACCESS_KEY}
       IMGPROXY_TTL: '2592000'
       IMGPROXY_ENFORCE_WEBP: 'true'
     labels:
@@ -321,6 +324,48 @@ services:
           memory: 384m
     logging: *default-logging
 
+  # ---------------------------------------------------------------------------
+  # CrowdSec: detection from logs, plus AppSec for the WAF rules.
+  #
+  # One engine under ~150 MB covering both slots. It reads the application's own
+  # structured logs — which carry the matched route and the `audit` vocabulary,
+  # not just a status code — and writes decisions that a bouncer enforces.
+  #
+  # **Detection is not enforcement.** A decision here does nothing until a
+  # bouncer reads it. The right place for this deployment is the CDN edge, so
+  # blocked traffic never reaches the box at all; see docker/security/README.md.
+  # ---------------------------------------------------------------------------
+
+  crowdsec:
+    image: crowdsecurity/crowdsec:v1.6.11
+    restart: unless-stopped
+    environment:
+      # AppSec is what makes this cover the WAF category: virtual patching for
+      # known CVEs, plus generic SQLi and XSS rules.
+      COLLECTIONS: >-
+        crowdsecurity/linux
+        crowdsecurity/traefik
+        crowdsecurity/appsec-virtual-patching
+        crowdsecurity/appsec-generic-rules
+      BOUNCER_KEY_traefik: ${CROWDSEC_BOUNCER_KEY}
+      # Community blocklist. Sharing signals is the point of the project; opting
+      # out still leaves local detection working.
+      DISABLE_ONLINE_API: 'false'
+    volumes:
+      - ./security/acquis.yaml:/etc/crowdsec/acquis.yaml:ro
+      - ./security/parsers:/etc/crowdsec/parsers/s01-parse/vestigia:ro
+      - ./security/scenarios:/etc/crowdsec/scenarios/vestigia:ro
+      # Read-only: CrowdSec discovers containers and reads their logs through
+      # the socket, exactly as Alloy does. It never writes through it.
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - crowdsec-config:/etc/crowdsec
+      - crowdsec-data:/var/lib/crowdsec/data
+    deploy:
+      resources:
+        limits:
+          memory: 384m
+    logging: *default-logging
+
 volumes:
   postgres-data:
   valkey-data:
@@ -332,3 +377,5 @@ volumes:
   prometheus-data:
   alertmanager-data:
   alloy-data:
+  crowdsec-config:
+  crowdsec-data:

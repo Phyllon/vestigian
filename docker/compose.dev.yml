@@ -227,6 +227,33 @@ services:
       - alloy-data:/var/lib/alloy/data
     depends_on: [loki, tempo, prometheus]
 
+  # CrowdSec, behind the same profile as the observability stack — it consumes
+  # those logs, so the two belong together. `pnpm stack:observability` starts
+  # both; `pnpm stack:up` starts neither.
+  #
+  # In development the app runs on the host rather than in a container, so the
+  # docker acquisition finds nothing to read. Point CrowdSec at a file instead
+  # when exercising a scenario locally:
+  #   pnpm dev 2>&1 | tee .import/app.log
+  crowdsec:
+    image: crowdsecurity/crowdsec:v1.6.11
+    profiles: [observability]
+    environment:
+      COLLECTIONS: >-
+        crowdsecurity/linux
+        crowdsecurity/appsec-virtual-patching
+        crowdsecurity/appsec-generic-rules
+      DISABLE_ONLINE_API: 'true'
+    ports:
+      - '8085:8080'
+    volumes:
+      - ./security/acquis.yaml:/etc/crowdsec/acquis.yaml:ro
+      - ./security/parsers:/etc/crowdsec/parsers/s01-parse/vestigia:ro
+      - ./security/scenarios:/etc/crowdsec/scenarios/vestigia:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - crowdsec-config:/etc/crowdsec
+      - crowdsec-data:/var/lib/crowdsec/data
+
 volumes:
   postgres-data:
   minio-data:
@@ -236,3 +263,5 @@ volumes:
   tempo-data:
   prometheus-data:
   alloy-data:
+  crowdsec-config:
+  crowdsec-data:

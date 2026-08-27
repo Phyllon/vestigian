@@ -1,0 +1,22 @@
+# Credential stuffing.
+#
+# `login.post.ts` answers identically whether the account exists or the password
+# was wrong — deliberately, so timing cannot enumerate the user table — which
+# means the only signal is the rate of refusals from one address. Ten in two
+# minutes is far past anyone mistyping a password.
+type: leaky
+name: vestigia/login-bruteforce
+description: 'Repeated login refusals from one address'
+filter: "evt.Meta.log_type == 'vestigia' && evt.Parsed.audit == 'auth.login' && evt.Parsed.message == 'login rejected'"
+leakspeed: 10s
+capacity: 10
+groupby: evt.Meta.source_ip
+blackhole: 5m
+labels:
+  service: http
+  confidence: 3
+  spoofable: 0
+  classification:
+    - attack.T1110
+  behavior: 'http:bruteforce'
+  remediation: true

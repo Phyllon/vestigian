@@ -1,20 +1,21 @@
 # Rate limiting
+
 two independent layers, and they're deliberately different in kind.
 
 App layer (server/utils/ratelimit.ts) — per-endpoint, per-IP counters in Valkey, applied by explicit enforceRateLimit(event, name) calls:
 
-policy - limit	- covers
-login	8 / 15 min	login, verify, reset-password
-register	4 / hour	signup
-passwordReset	5 / hour	forgot-password (newly split off register)
-challenge	20 / hour	ALTCHA challenge issuing (new)
-contribute	30 / hour	contributions
-upload	20 / hour	image upload
-search	120 / min	search, geojson feed
-record	300 / min	site/tracing records + revisions (new)
-expensive	30 / min	sitemap.xml, /api/ready (new)
-enrichment	60 / min	Wikipedia enrichment
-tiles	1200 / min	vector tiles
+policy - limit - covers
+login 8 / 15 min login, verify, reset-password
+register 4 / hour signup
+passwordReset 5 / hour forgot-password (newly split off register)
+challenge 20 / hour ALTCHA challenge issuing (new)
+contribute 30 / hour contributions
+upload 20 / hour image upload
+search 120 / min search, geojson feed
+record 300 / min site/tracing records + revisions (new)
+expensive 30 / min sitemap.xml, /api/ready (new)
+enrichment 60 / min Wikipedia enrichment
+tiles 1200 / min vector tiles
 Proxy layer (docker/traefik/dynamic.yml) — one coarse app-rate-limit middleware, 100/s average with 200 burst, attached to the app router.
 
 They're not redundant. The app layer is precise but lives in Valkey and fails open by design — a cache outage silently removes every limit above. The Traefik one is held in the proxy's own memory, costs nothing, and survives both a Valkey outage and an app restart. It catches floods; the app layer catches abuse of specific endpoints.

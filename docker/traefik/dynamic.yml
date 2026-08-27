@@ -22,7 +22,12 @@ http:
         burst: 200
         period: 1s
         sourceCriterion:
-          requestHeaderName: cf-connecting-ip
+          # Must stay the same header `resolveForwardedIdentifier` reads, or the
+          # two rate-limit layers count different things. Bunny sets `x-real-ip`
+          # to the visitor and nothing else; its `x-forwarded-for` puts the CDN
+          # address first, so that header is unusable here for the same reason
+          # it is unusable in the application.
+          requestHeaderName: x-real-ip
 
     # Attached to a dedicated, higher-priority router that matches
     # `/api/metrics` alone (see the labels in compose.prod.yml). Traefik applies

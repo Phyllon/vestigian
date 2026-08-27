@@ -18,6 +18,7 @@ const trustSchema = z.object({
  */
 export default defineEventHandler(async (event) => {
   const moderator = await requireModerator(event)
+  await enforceRateLimit(event, 'contribute')
   const { userId, revoked } = await readValidatedBody(event, trustSchema.parse)
   const database = useDatabase()
 

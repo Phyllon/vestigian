@@ -26,6 +26,7 @@ interface BatchOutcome {
  */
 export default defineEventHandler(async (event) => {
   const moderator = await requireModerator(event)
+  await enforceRateLimit(event, 'contribute')
   const { revisionIds, decision, note } = await readValidatedBody(event, batchSchema.parse)
   const database = useDatabase()
 

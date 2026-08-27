@@ -16,9 +16,10 @@ import type { SessionUser, UserRole } from '#shared/types'
  * `setUserSession` is called in exactly one place — `auth/login.post.ts` — and
  * nuxt-auth-utils seals the result into a stateless cookie that nothing
  * refreshes. Reading role from that cookie meant a demoted moderator kept
- * moderator access until they happened to log out, which with the default
- * session lifetime is up to a week. Demotion is one of the few levers the
- * governance model has; it has to bite on the next request.
+ * moderator access until they happened to log out — and since `maxAge` was
+ * unset, h3 sealed the session with `ttl: 0`, which means it never expired at
+ * all. Demotion is one of the few levers the governance model has; it has to
+ * bite on the next request.
  *
  * This is the same reasoning `contributions/images.post.ts` already applies to
  * trust, and the same cost: one primary-key lookup, on the handful of routes

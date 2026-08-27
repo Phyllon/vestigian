@@ -11,6 +11,7 @@ const reviewSchema = z.object({
 
 export default defineEventHandler(async (event) => {
   const moderator = await requireModerator(event)
+  await enforceRateLimit(event, 'contribute')
   const { revisionId, decision, note } = await readValidatedBody(event, reviewSchema.parse)
   const database = useDatabase()
 

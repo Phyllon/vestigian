@@ -1,9 +1,17 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import sharp from 'sharp'
-import { eq } from 'drizzle-orm'
-import { siteImages, users } from '~~/server/database/schema'
+import { and, eq } from 'drizzle-orm'
+import { siteImages, sites, users } from '~~/server/database/schema'
 import type { SessionUser } from '#shared/types'
 import { evaluateTrust } from '#shared/utils/authorization'
+
+/**
+ * The ceiling on decoded pixels, well above what a 2400px output needs and well
+ * below what the machine can be hurt by. sharp's own default is ~268 MP, which
+ * a compressible PNG under the 8 MB body limit can reach — roughly a gigabyte
+ * of resident memory per request.
+ */
+const MAX_DECODED_PIXELS = 50 * 1_000_000
 
 let storage: S3Client | undefined
 
@@ -73,14 +81,57 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: describeRejection(verdict.reason!) })
   }
 
-  const pipeline = sharp(file.data, { failOn: 'error' }).rotate()
-  const metadata = await pipeline.metadata()
-  const body = await pipeline
-    .resize({ width: 2400, height: 2400, fit: 'inside', withoutEnlargement: true })
-    .jpeg({ quality: 88, mozjpeg: true })
-    .toBuffer()
-
+  /**
+   * `limitInputPixels` is set rather than left at sharp's ~268 megapixel
+   * default, which is the difference between rejecting a decompression bomb and
+   * decoding one. A well-formed PNG comfortably under the 8 MB body limit can
+   * expand to roughly a gigabyte of resident memory, and `.rotate()` forces the
+   * full-resolution decode before `.resize()` ever runs. 50 MP is far more than
+   * a 2400px output needs and far less than the machine can be hurt by.
+   */
   const database = useDatabase()
+
+  // Checked before the re-encode, not after. Without this a bad id still paid
+  // for the full decode and then surfaced as an unhandled foreign-key violation
+  // — a 500 for what is plainly a bad request. A pending or rejected site is
+  // refused too: an unpublished record is not somewhere to attach photographs.
+  const [site] = await database
+    .select({ id: sites.id })
+    .from(sites)
+    .where(and(eq(sites.id, siteId), eq(sites.status, 'approved')))
+    .limit(1)
+
+  if (!site) {
+    throw createError({ statusCode: 404, message: 'No approved site with that identifier.' })
+  }
+
+  let metadata: sharp.Metadata
+  let body: Buffer
+
+  try {
+    const pipeline = sharp(file.data, {
+      failOn: 'error',
+      limitInputPixels: MAX_DECODED_PIXELS,
+    }).rotate()
+
+    metadata = await pipeline.metadata()
+    body = await pipeline
+      .resize({ width: 2400, height: 2400, fit: 'inside', withoutEnlargement: true })
+      .jpeg({ quality: 88, mozjpeg: true })
+      .toBuffer()
+  } catch (error) {
+    // Exceeding `limitInputPixels` throws, and so does a file that passed the
+    // magic-byte check but is malformed further in. Both are the uploader's
+    // problem, not the server's, so neither should read as a 500.
+    event.context.log.warn(
+      { siteId, bytes: file.data.length, err: { message: (error as Error).message } },
+      'upload rejected by the image pipeline',
+    )
+    throw createError({
+      statusCode: 400,
+      message: 'That image could not be processed. It may be corrupt or far too large.',
+    })
+  }
 
   // Trust is re-read rather than taken from the session: a moderator may have
   // revoked it since the visitor signed in.

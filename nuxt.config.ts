@@ -8,9 +8,13 @@ const isProduction = process.env.NODE_ENV === 'production'
  */
 const mapAssetOrigins = [
   'https://tiles.openfreemap.org',
-  'https://*.r2.dev',
-  'https://*.r2.cloudflarestorage.com',
-  'https://s3.amazonaws.com',
+  // Bunny: `*.b-cdn.net` is the pull zone the browser fetches from, and
+  // `storage.bunnycdn.com` is Edge Storage where the PMTiles extract lives.
+  // These replaced the Cloudflare R2 hosts when the edge moved into the EU —
+  // the CDN and the object store both terminate TLS, and doing that under EU
+  // law rather than the CLOUD Act is the whole point of the move.
+  'https://*.b-cdn.net',
+  'https://storage.bunnycdn.com',
   'https://elevation-tiles-prod.s3.amazonaws.com',
 ]
 
@@ -206,10 +210,36 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     /**
-     * Set only where a proxy we control sits in front and overwrites the
-     * forwarded headers. Off by default, so a direct-to-origin deployment
-     * cannot be talked into believing a spoofed `cf-connecting-ip`. See
-     * `resolveForwardedIdentifier`.
+     * Session lifetime, stated explicitly because the default is not what it
+     * looks like.
+     *
+     * With `maxAge` unset, nuxt-auth-utils falls through to h3's defaults and the
+     * iron seal is created with `ttl: 0` — which does not mean "expires
+     * immediately", it means **never expires** — while the cookie itself is
+     * written with no `Max-Age` at all. A captured `nuxt-session` cookie was
+     * therefore valid indefinitely, and the session is stateless so nothing can
+     * revoke it.
+     *
+     * A week is the trade: long enough that contributors are not signed out
+     * mid-edit, short enough that a leaked cookie stops working. Note this is
+     * about the cookie's lifetime only — `requireModerator`/`requireAdmin`
+     * already re-read role and trust from Postgres, so a demotion still takes
+     * effect on the next request regardless of how old the session is.
+     */
+    session: {
+      maxAge: 60 * 60 * 24 * 7,
+      cookie: {
+        sameSite: 'lax',
+      },
+    },
+
+    /**
+     * Set only where a CDN we control sits in front and overwrites `x-real-ip`.
+     * Off by default, so a direct-to-origin deployment cannot be talked into
+     * believing a spoofed header. See `resolveForwardedIdentifier` — and note
+     * that setting this true without an origin firewall is worse than leaving
+     * it false, because it makes every rate limit forgeable by anyone who finds
+     * the origin address.
      */
     behindTrustedProxy: false,
     /**

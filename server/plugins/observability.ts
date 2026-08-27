@@ -120,6 +120,16 @@ export default defineNitroPlugin((nitro) => {
         method: event.method,
         status: getResponseStatus(event),
         durationMs: Math.round(durationSeconds * 1000),
+        // The same identity the rate limiter counts against, resolved by the
+        // same function, so a log line and a 429 can never disagree about who
+        // made the request. This is also what a log-driven blocker needs —
+        // without it CrowdSec can see that something was refused but not by
+        // whom, which makes a decision impossible.
+        //
+        // It is personal data. `REDACTED_FIELDS` in `logger.ts` and Loki's
+        // retention are the whole of the position on that.
+        ip: resolveClientIdentifier(event),
+        userAgent: getRequestHeader(event, 'user-agent'),
         // Bytes matter here specifically: a tile is binary and its size is the
         // difference between an empty ocean tile and a dense one.
         bytes: body instanceof Buffer || body instanceof Uint8Array ? body.byteLength : undefined,

@@ -52,7 +52,7 @@ Tokens live in `app/assets/css/main.css` as Tailwind v4 `@theme` variables. Nuxt
 | **PMTiles basemap** (OpenFreeMap in dev) | Custom style = the app's character. A hosted MapTiler style would make it look like everything else. PMTiles is read by the browser over HTTP range requests — **no tile server process exists**.                                    |
 | **Drizzle + `postgres.js`**              | TS-first. Drizzle is the default for every query; raw SQL is kept for PostGIS only — six files, not "most of the hot path" as this table used to claim. See "Which client to reach for".                                             |
 | **Valkey**                               | Tile cache, sessions, rate limits. Redis-compatible, no licence question.                                                                                                                                                            |
-| **R2 + imgproxy**                        | One original stored per image; derivatives on the fly. Zero egress.                                                                                                                                                                  |
+| **Bunny.net + imgproxy**                 | One original stored per image; derivatives on the fly. Zero egress.                                                                                                                                                                  |
 | **terra-draw**                           | Framework-agnostic drawing that works with MapLibre.                                                                                                                                                                                 |
 | **Grafana + Loki + Tempo + Prometheus**  | One agent (Alloy) carries logs, traces and metrics; Vector carries no traces, and Alloy's built-in exporters replace four separate exporter containers. Promtail reached EOL in March 2026. All on local disk — see "Observability". |
 | **Dokploy on one Hetzner VPS**           | ~€27/month all-in vs ~€60–90 for managed k8s. Dokploy _is_ Docker Compose, so dev and prod are the same artifact.                                                                                                                    |
@@ -120,7 +120,10 @@ whatever client it is handed — see the note in `server/utils/db.ts`.
 - Uploads: the declared content type is a hint. Format is read from **magic bytes** (`detectImageFormat`), and every image is **re-encoded through sharp**, which strips EXIF and guarantees the stored object is a plain JPEG. Storage keys derive from database ids, **never** from the uploaded filename.
 - Images with an unresolved licence (`UNKNOWN`) or `ARR` are never published.
 - Signup: **self-hosted ALTCHA** proof of work + honeypot (positioned off-screen, not `display:none`) + per-IP rate limit + email verification. ALTCHA replaced Turnstile to remove the last third-party runtime dependency; it prices automated signup rather than detecting it, which is **weaker** against a funded attacker. That is acceptable only because login refuses unverified addresses and every new account is trust level 0, so a bot that solves the puzzle still earns nothing but a queued revision. The solved salt is burned in Valkey — `verifySolution` checks the HMAC and expiry, both of which a replay satisfies.
-- **Forwarded headers are believed only behind a trusted proxy** (`NUXT_BEHIND_TRUSTED_PROXY`). `cf-connecting-ip` used to be taken unconditionally, so anything reaching the origin could mint a fresh rate-limit bucket per request and every policy in `RATE_LIMITS` was decorative.
+- **Forwarded headers are believed only behind a trusted proxy** (`NUXT_BEHIND_TRUSTED_PROXY`). `cf-connecting-ip` used to be taken unconditionally, so anything reaching the origin could mint a fresh rate-limit bucket per request and every policy in `RATE_LIMITS` was decorative. The header is now `x-real-ip`, and **`x-forwarded-for` is deliberately never read**: Bunny sends the CDN address first and the visitor second, so the usual "leftmost is the client" reading would put every visitor in one bucket. Setting the flag without an origin firewall is worse than leaving it off.
+- **The session cookie expires.** `maxAge` was unset, which in h3 means the iron seal is sealed with `ttl: 0` — never expiring — and the cookie carries no `Max-Age`. A captured session was valid forever, with no server-side revocation because the session is stateless.
+- **sharp is given an explicit `limitInputPixels`.** Its ~268 MP default meant a compressible PNG under the 8 MB body limit could decode to about a gigabyte of resident memory, and `.rotate()` forces the full decode.
+- **Detection is not enforcement.** CrowdSec writes decisions; nothing applies them until a bouncer exists. See `docker/security/README.md`.
 - Rate limiting **fails open** — a cache outage must not lock everyone out.
 - CSP allows only the map asset origins listed in `nuxt.config.ts`.
 
@@ -453,6 +456,28 @@ of the six, genuinely too far, or no coordinate to check.
 - Off-box backups. `docker/backup.sh` writes nightly to a volume on the same VPS, and `pnpm db:snapshot` writes beside the database it copies. Neither survives losing the machine.
 - PWA icons. `public/manifest.webmanifest` references `/icons/icon-192.png`, `-512` and `-maskable`; none of them exist.
 
+## Security layer — detection, and where it is enforced
+
+CrowdSec reads the app's own structured logs (route pattern plus an `audit`
+vocabulary, which is far more precise than a status code and a path) and writes
+decisions. AppSec covers the WAF slot in the same ~150 MB engine — virtual
+patching plus generic SQLi/XSS rules — which is why no separate WAF container
+exists. Config and the full reasoning: `docker/security/README.md`.
+
+**Nothing is enforced yet.** A decision does nothing until a bouncer reads it,
+and the right place is the Bunny edge rather than this box: CrowdSec, Traefik's
+limiter and the Valkey limits all run _after_ a request has paid for a TCP
+connection and a TLS handshake. Hetzner's included DDoS protection covers L3/L4
+and explicitly not L7 HTTP floods, so those can only be absorbed at the edge.
+
+Rejected, with reasons, so they are not revisited by default: **fingerprinting**
+(EDPB 2024 puts it under GDPR _and_ ePrivacy, and it duplicates ALTCHA plus
+email verification plus trust 0); **fail2ban** (behind any CDN it bans edge
+addresses); **SafeLine** (2 vCPU / 4 GB, and it would replace Traefik);
+**Coraza** (the WASM Traefik plugin ships no CRS; the fast one is Traefik Hub);
+**KrakenD** (an API gateway, not a WAF); **Wazuh** (6–16 GB for the indexer);
+**Zeek/Snort/Suricata** (network IDS, and the traffic is TLS).
+
 ## Deployment
 
 `docker/compose.prod.yml` is the deployment unit. GitHub Actions runs tests, builds a multi-stage image to GHCR, calls a Dokploy webhook. Traefik terminates TLS. Nightly `pg_dump` kept 14 days.
@@ -494,6 +519,6 @@ contradicts what they asked for. Those belong in the reply.
   writing the logic yourself directly. Then ask for decision
 - **Agents** may be used, but ask for permission before
 - **Planning mode** while in planning mode, instead of writing the plan to a temporary file, save it under
-  ".claude/plans" automatically and open it.
+  ".plans" automatically and open it.
 - **Completed tasks** when having completed a task, never print the achieved goals to the chat, keep it clean
 - **EU/GDPR compliance** all packages or code dealing with user data must be GDPR compliant

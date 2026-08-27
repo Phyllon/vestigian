@@ -10,6 +10,7 @@ const roleSchema = z.object({
 
 export default defineEventHandler(async (event) => {
   const actor = await requireAdmin(event)
+  await enforceRateLimit(event, 'contribute')
   const { userId, role } = await readValidatedBody(event, roleSchema.parse)
   const database = useDatabase()
 

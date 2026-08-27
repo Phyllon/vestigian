@@ -16,6 +16,7 @@ const revertSchema = z.object({
  */
 export default defineEventHandler(async (event) => {
   const moderator = await requireModerator(event)
+  await enforceRateLimit(event, 'contribute')
   const { revisionId, reason } = await readValidatedBody(event, revertSchema.parse)
   const database = useDatabase()
 

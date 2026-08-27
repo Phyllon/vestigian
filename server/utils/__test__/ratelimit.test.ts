@@ -57,50 +57,58 @@ describe('evaluateRateLimit', () => {
 describe('resolveForwardedIdentifier', () => {
   const spoofed = {
     socketAddress: '198.51.100.7',
-    forwardedFor: '203.0.113.1, 70.41.3.18',
-    cloudflareIp: '203.0.113.99',
+    realIp: '203.0.113.99',
   }
 
   /**
    * The bug this function exists to close. `cf-connecting-ip` used to be taken
    * whenever present, so anything able to reach the origin could send a fresh
    * value per request and get an unlimited supply of clean rate-limit buckets.
+   * `x-real-ip` replaced it and inherits exactly the same requirement.
    */
-  it('ignores forwarded headers when nothing trustworthy is in front', () => {
+  it('ignores the forwarded header when nothing trustworthy is in front', () => {
     expect(resolveForwardedIdentifier({ ...spoofed, behindTrustedProxy: false })).toBe(
       '198.51.100.7',
     )
   })
 
   it('counts two forged headers from one socket as the same caller', () => {
-    const from = (cloudflareIp: string) =>
-      resolveForwardedIdentifier({ ...spoofed, cloudflareIp, behindTrustedProxy: false })
+    const from = (realIp: string) =>
+      resolveForwardedIdentifier({ ...spoofed, realIp, behindTrustedProxy: false })
 
     expect(from('203.0.113.1')).toBe(from('203.0.113.2'))
   })
 
-  it('believes the headers once a proxy we control is in front', () => {
+  it('believes the header once a proxy we control is in front', () => {
     expect(resolveForwardedIdentifier({ ...spoofed, behindTrustedProxy: true })).toBe(
       '203.0.113.99',
     )
   })
 
-  it('falls back to the leftmost forwarded entry, never the rest of the chain', () => {
-    expect(
-      resolveForwardedIdentifier({
-        ...spoofed,
-        cloudflareIp: undefined,
-        behindTrustedProxy: true,
-      }),
-    ).toBe('203.0.113.1')
+  /**
+   * Bunny sends `x-forwarded-for` as *CDN address first, visitor second* — the
+   * reverse of the usual convention. Reading the leftmost entry, which is what
+   * this function used to do, would key every limit to a Bunny edge node and
+   * put every visitor in one bucket. The header is not consulted at all, and
+   * this test is what stops it being reintroduced as a "fallback".
+   */
+  it('does not consult x-forwarded-for, whatever it contains', () => {
+    const withChain = {
+      socketAddress: '198.51.100.7',
+      realIp: undefined,
+      behindTrustedProxy: true,
+      // Present on the object but not in the type — deliberately unread.
+      forwardedFor: '203.0.113.1, 70.41.3.18',
+    } as Parameters<typeof resolveForwardedIdentifier>[0]
+
+    expect(resolveForwardedIdentifier(withChain)).toBe('198.51.100.7')
   })
 
   it('never yields an empty identifier', () => {
     expect(
       resolveForwardedIdentifier({
         socketAddress: null,
-        forwardedFor: undefined,
-        cloudflareIp: undefined,
+        realIp: undefined,
         behindTrustedProxy: true,
       }),
     ).toBe('unknown')
@@ -108,8 +116,7 @@ describe('resolveForwardedIdentifier', () => {
     expect(
       resolveForwardedIdentifier({
         socketAddress: '198.51.100.7',
-        forwardedFor: '   ',
-        cloudflareIp: undefined,
+        realIp: '   ',
         behindTrustedProxy: true,
       }),
     ).toBe('198.51.100.7')

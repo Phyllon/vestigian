@@ -31,5 +31,11 @@ export default defineEventHandler(async (event): Promise<SiteDetail> => {
     throw createError({ statusCode: 404, message: 'No site recorded under that name.' })
   }
 
-  return $fetch<SiteDetail>(`/api/sites/${row.id}`)
+  const site = await loadSiteDetail(row.id)
+
+  if (!site) {
+    throw createError({ statusCode: 404, message: 'No site recorded under that name.' })
+  }
+
+  return site
 })

@@ -1,0 +1,22 @@
+# Scanning.
+#
+# Every request that matches no route is logged with the literal route
+# `unmatched`, so a sweep for admin panels and `.env` files is one filter rather
+# than a path regex. Bounded by construction: `unmatched` is a constant, not a
+# user-supplied path.
+type: leaky
+name: vestigia/route-scanning
+description: 'Bursts of requests matching no route'
+filter: "evt.Meta.log_type == 'vestigia' && evt.Meta.http_path == 'unmatched'"
+leakspeed: 10s
+capacity: 15
+groupby: evt.Meta.source_ip
+blackhole: 10m
+labels:
+  service: http
+  confidence: 3
+  spoofable: 0
+  classification:
+    - attack.T1595
+  behavior: 'http:scan'
+  remediation: true

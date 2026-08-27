@@ -13,6 +13,7 @@ const querySchema = z.object({
  */
 export default defineEventHandler(async (event) => {
   await requireModerator(event)
+  await enforceRateLimit(event, 'record')
   const { search, limit } = await getValidatedQuery(event, querySchema.parse)
   const database = useDatabase()
 

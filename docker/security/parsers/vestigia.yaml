@@ -1,0 +1,39 @@
+# Turns a Pino JSON line into the fields CrowdSec reasons about.
+#
+# The whole point is `meta.source_ip`: without it a detection cannot become a
+# decision, because there is nobody to decide about. Everything else here exists
+# to let scenarios filter precisely rather than by substring.
+onsuccess: next_stage
+name: vestigia/access-log
+description: "Parse Vestigia's structured application log"
+filter: "evt.Line.Labels.type == 'vestigia'"
+nodes:
+  - filter: "evt.Line.Raw startsWith '{'"
+    onsuccess: next_stage
+    statics:
+      - meta: log_type
+        value: vestigia
+      - parsed: message
+        expression: "JsonExtract(evt.Line.Raw, 'msg')"
+      - parsed: level
+        expression: "JsonExtract(evt.Line.Raw, 'level')"
+      - parsed: audit
+        expression: "JsonExtract(evt.Line.Raw, 'audit')"
+      - parsed: route
+        expression: "JsonExtract(evt.Line.Raw, 'route')"
+      - parsed: status
+        expression: "JsonExtract(evt.Line.Raw, 'status')"
+      - parsed: policy
+        expression: "JsonExtract(evt.Line.Raw, 'policy')"
+      - parsed: outcome
+        expression: "JsonExtract(evt.Line.Raw, 'outcome')"
+      # The identity the rate limiter counted against, so a ban lands on the
+      # same address the application was already throttling.
+      - meta: source_ip
+        expression: "JsonExtract(evt.Line.Raw, 'ip')"
+      - meta: http_path
+        expression: "JsonExtract(evt.Line.Raw, 'route')"
+      - meta: http_status
+        expression: "JsonExtract(evt.Line.Raw, 'status')"
+      - meta: http_user_agent
+        expression: "JsonExtract(evt.Line.Raw, 'userAgent')"
