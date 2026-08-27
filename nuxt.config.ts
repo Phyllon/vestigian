@@ -37,7 +37,6 @@ export default defineNuxtConfig({
     '@vueuse/nuxt',
     'nuxt-auth-utils',
     'nuxt-security',
-    '@nuxtjs/turnstile',
     '@nuxt/test-utils/module',
   ],
 
@@ -48,6 +47,15 @@ export default defineNuxtConfig({
    */
   imports: {
     dirs: ['composables/**'],
+  },
+
+  vue: {
+    compilerOptions: {
+      // `<altcha-widget>` is a web component from the `altcha` package, not a
+      // Vue component. Without this the compiler treats it as an unresolved
+      // component and warns on every render of the signup form.
+      isCustomElement: (tag) => tag.startsWith('altcha-'),
+    },
   },
 
   /**
@@ -197,6 +205,19 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
+    /**
+     * Set only where a proxy we control sits in front and overwrites the
+     * forwarded headers. Off by default, so a direct-to-origin deployment
+     * cannot be talked into believing a spoofed `cf-connecting-ip`. See
+     * `resolveForwardedIdentifier`.
+     */
+    behindTrustedProxy: false,
+    /**
+     * HMAC secret for the ALTCHA signup challenge. Server-side only, and the
+     * whole of what the challenge needs — no container, no datastore, no third
+     * party. Empty means signup refuses with a 503 that names this variable.
+     */
+    altchaSecret: '',
     databaseUrl: '',
     redisUrl: '',
     sessionPassword: '',
@@ -236,11 +257,6 @@ export default defineNuxtConfig({
     },
   },
 
-  turnstile: {
-    siteKey: process.env.NUXT_PUBLIC_TURNSTILE_SITE_KEY ?? '',
-    addValidateEndpoint: false,
-  },
-
   security: {
     headers: {
       contentSecurityPolicy: {
@@ -249,19 +265,13 @@ export default defineNuxtConfig({
         'worker-src': ["'self'", 'blob:'],
         'child-src': ["'self'", 'blob:'],
         'connect-src': ["'self'", ...mapAssetOrigins],
-        'frame-src': ['https://challenges.cloudflare.com'],
         /**
          * Nuxt stamps a per-request nonce on the inline scripts that carry the
          * runtime config and the pre-paint colour-mode switch. Without the
          * matching 'nonce-{{nonce}}' token here the browser refuses those
          * scripts and the client app never mounts at all.
          */
-        'script-src': [
-          "'self'",
-          "'nonce-{{nonce}}'",
-          "'wasm-unsafe-eval'",
-          'https://challenges.cloudflare.com',
-        ],
+        'script-src': ["'self'", "'nonce-{{nonce}}'", "'wasm-unsafe-eval'"],
         'style-src': ["'self'", "'unsafe-inline'"],
         'font-src': ["'self'"],
         /**

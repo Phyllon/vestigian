@@ -14,6 +14,7 @@ const reviewer = alias(users, 'reviewer')
  * inspected is a record no one should cite.
  */
 export default defineEventHandler(async (event) => {
+  await enforceRateLimit(event, 'record')
   const { id } = await getValidatedRouterParams(event, paramsSchema.parse)
   const database = useDatabase()
 

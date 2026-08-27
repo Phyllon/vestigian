@@ -17,6 +17,7 @@ const paramsSchema = z.object({
  * the shape of its parameter.
  */
 export default defineEventHandler(async (event): Promise<SiteDetail> => {
+  await enforceRateLimit(event, 'record')
   const { slug } = await getValidatedRouterParams(event, paramsSchema.parse)
   const database = useDatabase()
 

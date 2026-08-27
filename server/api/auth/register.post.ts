@@ -11,7 +11,7 @@ const registrationSchema = z.object({
     .max(60)
     .regex(/^[\p{L}\p{N} ._-]+$/u),
   password: passwordSchema,
-  turnstileToken: z.string().optional(),
+  altcha: z.string().optional(),
   /** Honeypot. Real browsers leave it empty; most bots fill every field. */
   website: z.string().max(0).optional(),
 })
@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
     return { status: 'pending-verification' }
   }
 
-  await assertHumanVisitor(event, body.turnstileToken)
+  await assertHumanVisitor(event, body.altcha)
 
   const database = useDatabase()
   const config = useRuntimeConfig()
@@ -75,12 +75,17 @@ export default defineEventHandler(async (event) => {
      * dead end for the person who has simply forgotten they signed up.
      *
      * What keeps it from being a free oracle is what runs before this point:
-     * Turnstile on every attempt, and a limit of four attempts per hour per
-     * address (`enforceRateLimit`). Enumeration costs a solved challenge per
-     * address and caps out at four an hour. If that trade is ever revisited,
-     * the alternative is to answer identically here and put the disclosure in
-     * the email instead — "someone tried to register with your address" — so
-     * only the mailbox owner learns anything.
+     * a solved proof-of-work challenge on every attempt, and a limit of four
+     * attempts per hour (`enforceRateLimit`). That limit only became real when
+     * `resolveForwardedIdentifier` stopped believing an unverified
+     * `cf-connecting-ip` — before that, an attacker could mint a fresh bucket
+     * per request and the cap was decorative.
+     *
+     * The challenge is weaker than the Turnstile check it replaced: it prices
+     * enumeration rather than detecting it, and a determined attacker pays. If
+     * that trade is ever revisited, the alternative is to answer identically
+     * here and put the disclosure in the email instead — "someone tried to
+     * register with your address" — so only the mailbox owner learns anything.
      */
     const isDisplayNameConflict = violation.constraint_name === 'users_display_name_idx'
 

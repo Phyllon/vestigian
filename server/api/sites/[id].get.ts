@@ -9,6 +9,7 @@ const paramsSchema = z.object({ id: z.coerce.number().int().positive() })
  * filtered out here rather than at render time.
  */
 export default defineEventHandler(async (event): Promise<SiteDetail> => {
+  await enforceRateLimit(event, 'record')
   const { id } = await getValidatedRouterParams(event, paramsSchema.parse)
   const sql = useSql()
 

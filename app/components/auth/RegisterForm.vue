@@ -5,7 +5,8 @@
 
   const toast = useToast()
   const form = useTemplateRef<Form<RegistrationState>>('form')
-  const turnstileToken = ref('')
+  const altchaWidget = useTemplateRef<HTMLElement & { reset?: () => void }>('altchaWidget')
+  const altchaPayload = ref('')
   const isSubmitting = ref(false)
   const isDone = ref(false)
 
@@ -38,7 +39,23 @@
    * confirmation match, so this is the same judgement the form itself makes on
    * submit — the button simply refuses to offer an action that would fail.
    */
-  const isComplete = computed(() => schema.safeParse(state).success)
+  const isComplete = computed(() => schema.safeParse(state).success && altchaPayload.value !== '')
+
+  /**
+   * A solution is spent once the server accepts it, and the server refuses a
+   * replay. Without this the widget would keep offering the same used payload,
+   * so every retry after a failure failed again for a reason invisible to the
+   * person retrying.
+   */
+  const resetChallenge = (): void => {
+    altchaPayload.value = ''
+    altchaWidget.value?.reset?.()
+  }
+
+  const rememberSolution = (event: Event): void => {
+    const detail = (event as CustomEvent<{ payload?: string; state?: string }>).detail
+    altchaPayload.value = detail?.state === 'verified' ? (detail.payload ?? '') : ''
+  }
 
   const register = async (event: FormSubmitEvent<RegistrationState>): Promise<void> => {
     isSubmitting.value = true
@@ -50,7 +67,7 @@
           email: event.data.email,
           password: event.data.password,
           website: event.data.website,
-          turnstileToken: turnstileToken.value,
+          altcha: altchaPayload.value,
         },
       })
       isDone.value = true
@@ -64,6 +81,8 @@
        * hold in their head while they retype. The form keeps everything else
        * they entered; only the offending field needs a second attempt.
        */
+      resetChallenge()
+
       if (response?.data?.field) {
         // No second argument: submit only runs once the form validated, so
         // there is no other error to preserve, and the field name coming back
@@ -77,6 +96,16 @@
       isSubmitting.value = false
     }
   }
+
+  /**
+   * Loaded here rather than as a plugin so it stays in the register chunk —
+   * a web component nothing else on the site renders. The import is dynamic
+   * because `altcha` registers a custom element against `window` as a side
+   * effect, which would throw during server rendering.
+   */
+  onMounted(async () => {
+    await import('altcha')
+  })
 </script>
 
 <template>
@@ -130,7 +159,17 @@
       /></label>
     </div>
 
-    <NuxtTurnstile v-model="turnstileToken" />
+    <!--
+      Self-hosted proof of work, in place of Turnstile. `challengeurl` points at
+      our own endpoint, so the signup page loads nothing from a third party and
+      no visitor signal leaves the box.
+    -->
+    <altcha-widget
+      ref="altchaWidget"
+      challengeurl="/api/auth/challenge"
+      hidefooter
+      @statechange="rememberSolution"
+    />
 
     <UButton type="submit" :loading="isSubmitting" :disabled="!isComplete" color="primary" block>
       Create account

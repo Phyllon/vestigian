@@ -7,6 +7,7 @@ const paramsSchema = z.object({ id: z.coerce.number().int().positive() })
  * the existing shape rather than making the contributor redraw it.
  */
 export default defineEventHandler(async (event) => {
+  await enforceRateLimit(event, 'record')
   const { id } = await getValidatedRouterParams(event, paramsSchema.parse)
   const sql = useSql()
 

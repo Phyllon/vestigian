@@ -10,6 +10,7 @@ import { sql } from 'drizzle-orm'
  * take traffic that fails on the half nothing checked.
  */
 export default defineEventHandler(async (event) => {
+  await enforceRateLimit(event, 'expensive')
   const checks = { database: false, cache: false }
 
   try {

@@ -9,6 +9,7 @@ import { sites } from '~~/server/database/schema'
 const MAX_ENTRIES = 50000
 
 export default defineEventHandler(async (event) => {
+  await enforceRateLimit(event, 'expensive')
   const config = useRuntimeConfig()
   const database = useDatabase()
 

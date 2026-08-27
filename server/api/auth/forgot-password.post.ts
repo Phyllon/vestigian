@@ -10,7 +10,7 @@ const bodySchema = z.object({ email: z.string().email().max(320) })
  * registered here.
  */
 export default defineEventHandler(async (event) => {
-  await enforceRateLimit(event, 'register')
+  await enforceRateLimit(event, 'passwordReset')
   const { email } = await readValidatedBody(event, bodySchema.parse)
   const database = useDatabase()
   const config = useRuntimeConfig()

@@ -9,3 +9,17 @@ http:
         stsSeconds: 31536000
         stsIncludeSubdomains: true
         permissionsPolicy: 'geolocation=(self), camera=(), microphone=(), payment=()'
+
+    # A coarse backstop in front of the app's own per-endpoint limits.
+    #
+    # The app limits are precise but live in Valkey and fail open, so a cache
+    # outage removes them entirely. This one is held by Traefik, costs nothing,
+    # and survives an app restart. It is deliberately loose — a busy map pans
+    # through a lot of tiles — so it catches floods, not enthusiasm.
+    app-rate-limit:
+      rateLimit:
+        average: 100
+        burst: 200
+        period: 1s
+        sourceCriterion:
+          requestHeaderName: cf-connecting-ip

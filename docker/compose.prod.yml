@@ -7,6 +7,12 @@ services:
     environment:
       NUXT_DATABASE_URL: postgres://vestigia:${POSTGRES_PASSWORD}@postgres:5432/vestigia
       NUXT_REDIS_URL: redis://valkey:6379
+      # Traefik terminates TLS in front of this container and rewrites the
+      # forwarded headers, so they can be believed here. Keep the origin
+      # reachable only through the CDN — anything that can talk to Traefik
+      # directly can forge cf-connecting-ip again.
+      NUXT_BEHIND_TRUSTED_PROXY: 'true'
+      NUXT_ALTCHA_SECRET: ${ALTCHA_SECRET}
       # Service name, not a public host: the app reaches the translator
       # over the compose network and nothing else can.
       NUXT_TRANSLATE_URL: http://libretranslate:5000/translate
@@ -19,8 +25,6 @@ services:
       NUXT_IMGPROXY_BASE_URL: ${IMAGE_BASE_URL}
       NUXT_IMGPROXY_KEY: ${IMGPROXY_KEY}
       NUXT_IMGPROXY_SALT: ${IMGPROXY_SALT}
-      NUXT_TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY}
-      NUXT_PUBLIC_TURNSTILE_SITE_KEY: ${TURNSTILE_SITE_KEY}
       NUXT_STORAGE_ENDPOINT: ${R2_ENDPOINT}
       NUXT_STORAGE_BUCKET: ${R2_BUCKET}
       NUXT_STORAGE_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID}
@@ -39,6 +43,7 @@ services:
       traefik.http.routers.vestigia.rule: Host(`${SITE_HOST}`)
       traefik.http.routers.vestigia.entrypoints: websecure
       traefik.http.routers.vestigia.tls.certresolver: letsencrypt
+      traefik.http.routers.vestigia.middlewares: app-rate-limit@file
       traefik.http.services.vestigia.loadbalancer.server.port: '3000'
       traefik.http.services.vestigia.loadbalancer.healthcheck.path: /api/ready
     healthcheck:

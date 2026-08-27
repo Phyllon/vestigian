@@ -32,6 +32,32 @@ export const RATE_LIMITS = {
    * by this number.
    */
   enrichment: { limit: 60, windowSeconds: 60 },
+  /**
+   * Signup challenges. Generous enough to survive a reload or three, tight
+   * enough that the endpoint is not a free source of solvable puzzles.
+   */
+  challenge: { limit: 20, windowSeconds: 3600 },
+  /**
+   * Password reset, split out of the `register` bucket it used to share.
+   * Four signup attempts should not also exhaust someone's ability to recover
+   * their account.
+   */
+  passwordReset: { limit: 5, windowSeconds: 3600 },
+  /**
+   * Full records: `sites/:id`, `sites/slug/:slug`, the revision lists and both
+   * tracing routes. These had no limit at all, which made them the widest
+   * scraping surface in the app — the complete text of a record, addressed by
+   * sequential integer ids, with every slug published in the sitemap. High
+   * enough that browsing the map never notices; low enough that enumerating
+   * 61,272 records takes days rather than minutes.
+   */
+  record: { limit: 300, windowSeconds: 60 },
+  /**
+   * Endpoints that cost more than they look. `sitemap.xml` re-runs a
+   * 50,000-row query and `ready` makes two Postgres round trips plus a Redis
+   * ping — both unauthenticated, both trivially amplified.
+   */
+  expensive: { limit: 30, windowSeconds: 60 },
 } as const satisfies Record<string, RateLimitPolicy>
 
 export type RateLimitName = keyof typeof RATE_LIMITS
@@ -69,18 +95,59 @@ export const evaluateRateLimit = (input: RateLimitEvaluation): RateLimitDecision
   }
 }
 
-/**
- * Identify the caller. Behind Traefik or Cloudflare the socket address is the
- * proxy, so the forwarded header is preferred — but only its first entry, since
- * the rest is client-supplied and trivially spoofed.
- */
-export const resolveClientIdentifier = (event: H3Event): string => {
-  const forwarded = getRequestHeader(event, 'x-forwarded-for')
-  const real = getRequestHeader(event, 'cf-connecting-ip')
-  if (real) return real
-  if (forwarded) return forwarded.split(',')[0]!.trim()
-  return getRequestIP(event) ?? 'unknown'
+export interface ClientIdentityRequest {
+  /** The peer we are actually talking to — a proxy, when there is one. */
+  socketAddress: string | null
+  forwardedFor: string | undefined
+  cloudflareIp: string | undefined
+  /**
+   * Whether a proxy we control is known to sit in front and to overwrite these
+   * headers. False means they are attacker-controlled and must be ignored.
+   */
+  behindTrustedProxy: boolean
 }
+
+/**
+ * Who to count a request against.
+ *
+ * This used to take `cf-connecting-ip` whenever it was present, which is only
+ * safe if the request genuinely arrived through Cloudflare. Nothing checked
+ * that. Any client that could reach the origin could set the header to a fresh
+ * value per request and mint itself an unlimited supply of clean rate-limit
+ * buckets — which made every policy in `RATE_LIMITS` advisory, including the
+ * four-per-hour on signup that the registration endpoint cites as its defence
+ * against account farming.
+ *
+ * Forwarded headers are now believed only when something we control is known
+ * to be in front and to overwrite them. Otherwise the socket address is the
+ * only honest answer, even when it is a shared NAT address: over-counting a
+ * handful of colleagues is a far smaller failure than counting nobody.
+ *
+ * This still trusts the proxy chain itself. An attacker who bypasses
+ * Cloudflare and reaches Traefik directly can forge the header again, so the
+ * origin should accept connections only from the CDN's ranges. That is a
+ * firewall concern, not one this function can answer.
+ */
+export const resolveForwardedIdentifier = (request: ClientIdentityRequest): string => {
+  const socketAddress = request.socketAddress ?? 'unknown'
+
+  if (!request.behindTrustedProxy) return socketAddress
+
+  if (request.cloudflareIp) return request.cloudflareIp
+
+  // Only the leftmost entry is the original client; the rest of the chain is
+  // appended by intermediaries and is not ours to believe.
+  const firstForwarded = request.forwardedFor?.split(',')[0]?.trim()
+  return firstForwarded || socketAddress
+}
+
+export const resolveClientIdentifier = (event: H3Event): string =>
+  resolveForwardedIdentifier({
+    socketAddress: getRequestIP(event) ?? null,
+    forwardedFor: getRequestHeader(event, 'x-forwarded-for'),
+    cloudflareIp: getRequestHeader(event, 'cf-connecting-ip'),
+    behindTrustedProxy: useRuntimeConfig().behindTrustedProxy === true,
+  })
 
 export const enforceRateLimit = async (event: H3Event, name: RateLimitName): Promise<void> => {
   const policy = RATE_LIMITS[name]
