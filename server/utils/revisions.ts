@@ -1,4 +1,4 @@
-import { countsTowardsTrust } from './trust'
+import { countsTowardsTrust } from '#shared/utils/authorization'
 import type postgres from 'postgres'
 import type { ContributionKind } from '#shared/types'
 
@@ -78,14 +78,13 @@ export const applyRevision = async (revisionId: number): Promise<void> => {
     const isRevert = revision.reverts_revision_id !== null
 
     if (revision.author_id && !isRevert && countsTowardsTrust(revision.entity_type)) {
+      // Only the count is written. The level it implies is `evaluateTrust`'s
+      // to decide, and used to be transcribed into this statement with the
+      // threshold inline — a second copy of the governance rule, in SQL, where
+      // no test could reach it.
       await tx`
         UPDATE users
-        SET approved_contributions = approved_contributions + 1,
-            trust_level = CASE
-              WHEN trust_revoked THEN 0
-              WHEN approved_contributions + 1 >= 2 THEN 1
-              ELSE 0
-            END
+        SET approved_contributions = approved_contributions + 1
         WHERE id = ${revision.author_id}
       `
     }

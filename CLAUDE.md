@@ -100,12 +100,14 @@ whatever client it is handed — see the note in `server/utils/db.ts`.
 
 - Every change to a site or tracing is written to `revisions` **before** any live table is touched.
 - `applyRevision()` in `server/utils/revisions.ts` is the **only** place a live row is written. Automatic approval, moderator approval and revert all go through it. Do not add a second path.
+- **Every authorization rule lives in `shared/utils/authorization.ts`** and nowhere else — both sides import it, and the guards that throw are the only thing left in `server/utils/permissions.ts`. Casbin, CASL and Cerbos were assessed as replacements and rejected: three roles fixed in a `pgEnum` buy nothing from a runtime policy engine, and the rules that actually matter here are not the subject/action/resource shape they model. `users.trust_level` was dropped for the same reason — a derived column written by two hand-transcribed SQL copies of the threshold.
 - **Trust:** new accounts are queued. After **2 accepted contributions** (`evaluateTrust`), edits publish immediately. Moderators can revoke. Images do not count toward trust — uploading two photos is a weaker signal than two records surviving review.
 - **A moderator cannot approve their own contribution** (`canReviewRevision`).
 - **An edit that removes more than it adds is queued regardless of trust** (`isBlankingEdit`). This deliberately overrides the trust rule; a wrong auto-approval on a blanking edit costs far more than a moderator glance.
 - **Revert writes a new revision** restoring the prior state. Never delete a revision. History is append-only.
 - **Reverts do not increment the moderator's trust counter** — housekeeping is not contribution.
-- **The last admin cannot be demoted** (`checkRoleChange`), and nobody can change their own role.
+- **Nobody can change their own role** (`checkRoleChange`), which is also what keeps an instance from losing its last admin — that rule's own `last-admin` branch cannot be reached, since removing the final admin requires being them. See the comments in the function.
+- **Role and trust are re-read from the database inside every guard.** The session cookie is sealed at login and nothing refreshes it, so reading a role from it let a demoted moderator keep moderating until they logged out. `requireModerator`/`requireAdmin` cost one primary-key lookup and are the reason a demotion bites on the next request.
 - **Slugs never change on edit.** Inbound links, citations and the sitemap point at them.
 - Suspension leaves `approved_contributions` untouched, so restoring trust returns someone exactly where they were.
 
@@ -116,7 +118,8 @@ whatever client it is handed — see the note in `server/utils/db.ts`.
 - Only the SHA-256 **hash** of an email token is stored; comparison is constant-time.
 - Uploads: the declared content type is a hint. Format is read from **magic bytes** (`detectImageFormat`), and every image is **re-encoded through sharp**, which strips EXIF and guarantees the stored object is a plain JPEG. Storage keys derive from database ids, **never** from the uploaded filename.
 - Images with an unresolved licence (`UNKNOWN`) or `ARR` are never published.
-- Signup: Turnstile + honeypot (positioned off-screen, not `display:none`) + per-IP rate limit + email verification.
+- Signup: **self-hosted ALTCHA** proof of work + honeypot (positioned off-screen, not `display:none`) + per-IP rate limit + email verification. ALTCHA replaced Turnstile to remove the last third-party runtime dependency; it prices automated signup rather than detecting it, which is **weaker** against a funded attacker. That is acceptable only because login refuses unverified addresses and every new account is trust level 0, so a bot that solves the puzzle still earns nothing but a queued revision. The solved salt is burned in Valkey — `verifySolution` checks the HMAC and expiry, both of which a replay satisfies.
+- **Forwarded headers are believed only behind a trusted proxy** (`NUXT_BEHIND_TRUSTED_PROXY`). `cf-connecting-ip` used to be taken unconditionally, so anything reaching the origin could mint a fresh rate-limit bucket per request and every policy in `RATE_LIMITS` was decorative.
 - Rate limiting **fails open** — a cache outage must not lock everyone out.
 - CSP allows only the map asset origins listed in `nuxt.config.ts`.
 
@@ -150,11 +153,11 @@ server/
        images/[id]/[preset]  sites/[id]/enrichment  health ready
   routes/ robots.txt sitemap.xml
   database/ schema/ migrations/ migrate.ts
-  utils/ mvt trust permissions roles ratelimit images images-order uploads tokens mail diff
-         revisions slug db cache argon turnstile enrichment enrichment-sources translate
+  utils/ mvt permissions ratelimit images images-order uploads tokens mail diff
+         revisions slug db cache argon altcha enrichment enrichment-sources translate
                                                                             (+__test__/)
 shared/types/  vocabulary shared by both sides
-shared/utils/  password policy, shared by the forms and the endpoints        (+__test__/)
+shared/utils/  password policy + authorization rules, shared by both sides   (+__test__/)
 scripts/import/  four-stage vici.org import + vici-licences.ts (shared vocabulary)
 scripts/warm-tiles.ts snapshot-database.ts reconcile-images.ts
 docker/  Dockerfile compose.dev.yml compose.prod.yml traefik/ backup.sh
@@ -394,3 +397,5 @@ contradicts what they asked for. Those belong in the reply.
 - **Short answers in chat**, without dropping anything important.
 - **ORM over string queries.**
 - **Install type packages** whenever they exist, and use those types.
+- **Open source** look for established open source projects to solve some problem first instead of
+  writing the logic yourself directly. Then ask for decision

@@ -7,11 +7,20 @@ export type UserRole = 'contributor' | 'moderator' | 'admin'
  */
 export type TrustLevel = 0 | 1
 
+/**
+ * What the sealed session cookie carries.
+ *
+ * Deliberately the *inputs* to the trust rule rather than its result: the
+ * client computes `evaluateTrust` itself, so the rule is stated once. Note that
+ * every field here is frozen at login — the server re-reads role and trust from
+ * the database before any decision that matters, and this copy only decides
+ * which controls a page offers.
+ */
 export interface SessionUser {
   id: number
   displayName: string
   role: UserRole
-  trustLevel: TrustLevel
+  trustRevoked: boolean
   approvedContributions: number
 }
 

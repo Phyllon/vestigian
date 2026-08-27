@@ -3,6 +3,7 @@ import sharp from 'sharp'
 import { eq } from 'drizzle-orm'
 import { siteImages, users } from '~~/server/database/schema'
 import type { SessionUser } from '#shared/types'
+import { evaluateTrust } from '#shared/utils/authorization'
 
 let storage: S3Client | undefined
 

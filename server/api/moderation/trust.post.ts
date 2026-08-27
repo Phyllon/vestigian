@@ -1,7 +1,7 @@
 import { z } from 'zod'
-import { eq, sql } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 import { users } from '~~/server/database/schema'
-import type { SessionUser } from '#shared/types'
+import { canRevokeTrust } from '#shared/utils/authorization'
 
 const trustSchema = z.object({
   userId: z.number().int().positive(),
@@ -17,7 +17,7 @@ const trustSchema = z.object({
  * standing — a suspension, not a punishment that compounds.
  */
 export default defineEventHandler(async (event) => {
-  const moderator = (await requireModerator(event)) as SessionUser
+  const moderator = await requireModerator(event)
   const { userId, revoked } = await readValidatedBody(event, trustSchema.parse)
   const database = useDatabase()
 
@@ -36,17 +36,11 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  await database
-    .update(users)
-    .set({
-      trustRevoked: revoked,
-      // Recomputed from the count that revoking deliberately leaves alone, so
-      // restoring returns someone to the level they had earned.
-      trustLevel: revoked
-        ? 0
-        : sql`CASE WHEN ${users.approvedContributions} >= 2 THEN 1 ELSE 0 END`,
-    })
-    .where(eq(users.id, userId))
+  // Only the flag is written. The level itself is derived by `evaluateTrust`
+  // wherever it is needed, from the contribution count that revoking
+  // deliberately leaves alone — so restoring returns someone to the standing
+  // they had earned without this endpoint having to recompute it.
+  await database.update(users).set({ trustRevoked: revoked }).where(eq(users.id, userId))
 
   return { userId, trustRevoked: revoked }
 })

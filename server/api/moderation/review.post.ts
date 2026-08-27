@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { eq } from 'drizzle-orm'
 import { revisions } from '~~/server/database/schema'
-import type { SessionUser } from '#shared/types'
+import { canReviewRevision } from '#shared/utils/authorization'
 
 const reviewSchema = z.object({
   revisionId: z.number().int().positive(),
@@ -10,7 +10,7 @@ const reviewSchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-  const moderator = (await requireModerator(event)) as SessionUser
+  const moderator = await requireModerator(event)
   const { revisionId, decision, note } = await readValidatedBody(event, reviewSchema.parse)
   const database = useDatabase()
 

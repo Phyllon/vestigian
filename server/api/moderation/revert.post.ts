@@ -1,7 +1,6 @@
 import { z } from 'zod'
 import { and, eq, sql } from 'drizzle-orm'
 import { revisions } from '~~/server/database/schema'
-import type { SessionUser } from '#shared/types'
 
 const revertSchema = z.object({
   revisionId: z.number().int().positive(),
@@ -16,7 +15,7 @@ const revertSchema = z.object({
  * whom survives — which is the whole point of keeping revisions at all.
  */
 export default defineEventHandler(async (event) => {
-  const moderator = (await requireModerator(event)) as SessionUser
+  const moderator = await requireModerator(event)
   const { revisionId, reason } = await readValidatedBody(event, revertSchema.parse)
   const database = useDatabase()
 

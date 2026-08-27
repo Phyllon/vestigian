@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { eq, inArray } from 'drizzle-orm'
 import { revisions } from '~~/server/database/schema'
-import type { SessionUser } from '#shared/types'
+import { canReviewRevision } from '#shared/utils/authorization'
 
 const batchSchema = z.object({
   revisionIds: z.array(z.number().int().positive()).min(1).max(50),
@@ -25,7 +25,7 @@ interface BatchOutcome {
  * not go through.
  */
 export default defineEventHandler(async (event) => {
-  const moderator = (await requireModerator(event)) as SessionUser
+  const moderator = await requireModerator(event)
   const { revisionIds, decision, note } = await readValidatedBody(event, batchSchema.parse)
   const database = useDatabase()
 

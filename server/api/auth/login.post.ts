@@ -50,15 +50,15 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 403, message: 'Confirm your email address first.' })
   }
 
+  // The session carries the *inputs* to the trust rule, not its result, so the
+  // browser can apply `evaluateTrust` itself. Every one of these is a snapshot
+  // taken now: the server re-reads role and trust before any decision that
+  // matters, and this copy only decides which controls a page offers.
   const user: SessionUser = {
     id: account.id,
     displayName: account.displayName,
     role: account.role,
-    trustLevel: evaluateTrust({
-      approvedContributions: account.approvedContributions,
-      trustRevoked: account.trustRevoked,
-      role: account.role,
-    }).level,
+    trustRevoked: account.trustRevoked,
     approvedContributions: account.approvedContributions,
   }
 

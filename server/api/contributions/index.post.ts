@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import type { SessionUser } from '#shared/types'
+import { evaluateTrust } from '#shared/utils/authorization'
 
 const positionSchema = z.object({
   lon: z.number().min(-180).max(180),

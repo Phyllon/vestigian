@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { count, eq } from 'drizzle-orm'
 import { users } from '~~/server/database/schema'
-import type { SessionUser } from '#shared/types'
+import { checkRoleChange, describeRoleChangeRejection } from '#shared/utils/authorization'
 
 const roleSchema = z.object({
   userId: z.number().int().positive(),
@@ -9,8 +9,7 @@ const roleSchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-  const session = await requireUserSession(event)
-  const actor = session.user as SessionUser
+  const actor = await requireAdmin(event)
   const { userId, role } = await readValidatedBody(event, roleSchema.parse)
   const database = useDatabase()
 

@@ -88,7 +88,7 @@ The viewport requirement is answered by vector tiles generated in Postgres, not 
 
 Every change is written to `revisions` before it touches a live table. New accounts are queued; after **two accepted contributions** an account's edits publish immediately. A moderator can revoke that at any time, and no moderator can approve their own submission.
 
-Signup is protected by Cloudflare Turnstile, a honeypot field, per-IP rate limiting and email verification. Registration responds identically whether or not an address already exists, so it cannot be used to enumerate accounts.
+Signup is protected by a self-hosted ALTCHA proof-of-work challenge, a honeypot field, per-IP rate limiting and email verification. Registration reports a duplicate email or display name as a 409 so the form is not a dead end — a deliberate trade of the enumeration guarantee, throttled by the challenge and the rate limit.
 
 ## Architecture
 
@@ -117,7 +117,7 @@ One VPS, Docker Compose, orchestrated by [Dokploy](https://dokploy.com). Roughly
 | ----------------- | ------------------------------------------- |
 | Hetzner CPX41     | app, Postgres, Valkey, imgproxy, Traefik    |
 | Cloudflare R2     | images and the PMTiles basemap, zero egress |
-| Cloudflare (free) | CDN and Turnstile                           |
+| Cloudflare (free) | CDN                                         |
 
 `docker/compose.prod.yml` is the deployment unit. GitHub Actions runs the tests, builds a multi-stage image to GHCR, and calls the Dokploy webhook.
 
@@ -283,24 +283,28 @@ docker run --rm --network container:vestigia-dev-minio-1 \
 
 ### register -> brLMa34FghWLUFf
 
-### use a modern ORM instead of raw string queries
+### pin versions in package.json to only update fixes
 
-### check whole HTML for structure and use best fitting HTML and ARIA tags
+### check whole HTML for structure and use best fitting HTML and ARIA tags -> heavy
 
-### use package "concurrently" and apply it in package.json where suitable. If needed, merge similar commands into one command and use concurrently then
-
-### freshly reloading the page, clicking on some item -> no overlay
+### use package "concurrently" and apply it in package.json where suitable. If needed, merge similar commands into one command and use concurrently then -> fixed
 
 ### clicking username (top right corner) -> open overlay with useful information (which?) and logout button
 
-### remember the current position and zoom to be restored on new page load. If GPS is active, load this position directly instead
+### remember the current position and zoom to be restored on new page load. If GPS is active, load this position zoomed-in directly instead
 
 ### check work flow of "add to atlas" (logged-in)
 
-### optimize components for mobile use
+### optimize components for mobile use -> heavy
 
-### check marked sites for additional information on the web (wikipedia or else) and enrich the markers' information table with it (e.g. using the "History" field underneath an entry), but only, if you can be sure about it (e.g. verify by location coordinates, name etc.)
+### button showing available map types has to be extended by a choice that, when activated, shows an ancient map as on DARE (https://imperium.ahlfeldt.se/, Digital Atlas of the Roman Empire). Where can such a map be obtained/copied from? If not, can it be built?
 
 ### forgot-password must send an email containing relevant information. Email must look appealing, using Vestigia's style
 
-### reduce the amount of data being loaded on page load where possible. you may use lazy loading of components or data where suitable for that.
+### how to login as an admin? How to self-grant admin rights?
+
+
+## TODO important
+### sitemap.xml is capped at 50,000 entries against 61,272 approved sites, so ~11,000 are silently unlisted. Unrelated to this work, but it is a real bug.
+
+### Nothing in compose.prod.yml mounts docker/traefik/ into a container — Dokploy supplies Traefik, so whether it reads these repo files is not determinable from here. Worth confirming on the box.

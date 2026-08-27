@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { applyReorder, canManageImage, nextSortOrder, normaliseOrder } from '../images-order'
-import type { SessionUser } from '#shared/types'
+import { applyReorder, nextSortOrder, normaliseOrder } from '../images-order'
 
 const orderOf = (images: { id: number; sortOrder: number }[]): number[] =>
   [...images].sort((a, b) => a.sortOrder - b.sortOrder).map((image) => image.id)
@@ -76,32 +75,5 @@ describe('nextSortOrder', () => {
         { id: 2, sortOrder: 7 },
       ]),
     ).toBe(8)
-  })
-})
-
-describe('canManageImage', () => {
-  const user = (id: number, role: SessionUser['role']): SessionUser => ({
-    id,
-    role,
-    displayName: 'Tester',
-    trustLevel: 1,
-    approvedContributions: 3,
-  })
-
-  it('lets the uploader withdraw their own photograph', () => {
-    expect(canManageImage(user(5, 'contributor'), 5)).toBe(true)
-  })
-
-  it('stops a contributor touching someone else’s photograph', () => {
-    expect(canManageImage(user(5, 'contributor'), 6)).toBe(false)
-  })
-
-  it('lets a moderator manage any photograph', () => {
-    expect(canManageImage(user(5, 'moderator'), 6)).toBe(true)
-  })
-
-  it('handles an image whose uploader account was deleted', () => {
-    expect(canManageImage(user(5, 'contributor'), null)).toBe(false)
-    expect(canManageImage(user(5, 'admin'), null)).toBe(true)
   })
 })

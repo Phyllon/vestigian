@@ -1,14 +1,21 @@
 <script setup lang="ts">
+  import { checkRoleChange, evaluateTrust, TRUST_THRESHOLD } from '#shared/utils/authorization'
+  import type { TrustEvaluation, UserRole } from '#shared/types'
+
   interface ContributorRow {
     id: number
     displayName: string
-    role: string
-    trustLevel: number
+    role: UserRole
     approvedContributions: number
     trustRevoked: boolean
     pendingCount: number
     createdAt: string
     lastSeenAt: string | null
+  }
+
+  interface ContributorList {
+    adminCount: number
+    contributors: ContributorRow[]
   }
 
   const { currentUser } = useSession()
@@ -17,12 +24,11 @@
   const search = ref('')
   const busyUserId = ref<number | null>(null)
 
-  const { data: contributors, refresh } = await useFetch<ContributorRow[]>(
-    '/api/moderation/users',
-    { query: { search } },
-  )
+  const { data, refresh } = await useFetch<ContributorList>('/api/moderation/users', {
+    query: { search },
+  })
 
-  const isAdmin = computed(() => currentUser.value?.role === 'admin')
+  const contributors = computed(() => data.value?.contributors ?? [])
 
   const roleOptions = [
     { label: 'Contributor', value: 'contributor' },
@@ -30,12 +36,37 @@
     { label: 'Administrator', value: 'admin' },
   ]
 
-  const describeStanding = (row: ContributorRow): string => {
-    if (row.role !== 'contributor') return 'Publishes by role'
-    if (row.trustRevoked) return 'Suspended — every edit queued'
-    if (row.trustLevel >= 1) return 'Publishes immediately'
-    return `Queued — ${Math.max(2 - row.approvedContributions, 0)} to go`
+  /**
+   * One phrase per reason `evaluateTrust` can give, so the branch order is the
+   * server's rather than something a reader has to check against it by eye.
+   */
+  const STANDING_BY_REASON: Record<TrustEvaluation['reason'], (row: ContributorRow) => string> = {
+    moderator: () => 'Publishes by role',
+    revoked: () => 'Suspended — every edit queued',
+    earned: () => 'Publishes immediately',
+    probation: (row) =>
+      `Queued — ${Math.max(TRUST_THRESHOLD - row.approvedContributions, 0)} to go`,
   }
+
+  const describeStanding = (row: ContributorRow): string =>
+    STANDING_BY_REASON[evaluateTrust(row).reason](row)
+
+  /**
+   * Mirrors `checkRoleChange` rather than restating a subset of it, so the
+   * select is absent in exactly the cases the endpoint would refuse — including
+   * the last admin, which this component used to offer and then 403 on.
+   */
+  const mayChangeRole = (row: ContributorRow): boolean =>
+    currentUser.value !== null &&
+    checkRoleChange({
+      actor: currentUser.value,
+      targetUserId: row.id,
+      targetCurrentRole: row.role,
+      // The demotion is the case that can be refused; asking about it is what
+      // reveals whether this row is the last admin.
+      nextRole: 'contributor',
+      adminCount: data.value?.adminCount ?? 0,
+    }).allowed
 
   const setTrust = async (row: ContributorRow, revoked: boolean): Promise<void> => {
     busyUserId.value = row.id
@@ -87,7 +118,7 @@
       class="w-full max-w-xs"
     />
 
-    <div v-for="row in contributors ?? []" :key="row.id" class="leaf px-4 py-3">
+    <div v-for="row in contributors" :key="row.id" class="leaf px-4 py-3">
       <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
         <h3 class="text-base text-ink-900 dark:text-paper-100">{{ row.displayName }}</h3>
         <span v-if="row.role !== 'contributor'" class="eyebrow text-oxide-600 dark:text-oxide-300">
@@ -116,7 +147,7 @@
         </UButton>
 
         <USelect
-          v-if="isAdmin && row.id !== currentUser?.id"
+          v-if="mayChangeRole(row)"
           :model-value="row.role"
           :items="roleOptions"
           size="xs"
@@ -126,6 +157,6 @@
       </div>
     </div>
 
-    <p v-if="(contributors ?? []).length === 0" class="datum">No contributors match that.</p>
+    <p v-if="contributors.length === 0" class="datum">No contributors match that.</p>
   </div>
 </template>

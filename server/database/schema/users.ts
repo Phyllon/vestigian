@@ -5,7 +5,6 @@ import {
   pgEnum,
   pgTable,
   serial,
-  smallint,
   timestamp,
   uniqueIndex,
   varchar,
@@ -22,8 +21,6 @@ export const users = pgTable(
     /** argon2id. Never logged, never returned by any endpoint. */
     passwordHash: varchar('password_hash', { length: 255 }).notNull(),
     role: userRoleEnum('role').notNull().default('contributor'),
-    /** 0 = every contribution queued, 1 = auto-approved. */
-    trustLevel: smallint('trust_level').notNull().default(0),
     approvedContributions: integer('approved_contributions').notNull().default(0),
     /** Set by a moderator to pin a user at level 0 regardless of their count. */
     trustRevoked: boolean('trust_revoked').notNull().default(false),

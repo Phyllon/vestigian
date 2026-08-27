@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { and, asc, eq } from 'drizzle-orm'
 import { siteImages } from '~~/server/database/schema'
+import { canManageImage } from '#shared/utils/authorization'
 import type { SessionUser } from '#shared/types'
 
 const paramsSchema = z.object({ id: z.coerce.number().int().positive() })

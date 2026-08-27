@@ -1,5 +1,3 @@
-import type { SessionUser } from '#shared/types'
-
 export interface OrderableImage {
   id: number
   sortOrder: number
@@ -43,13 +41,3 @@ export const applyReorder = (
 /** Where a newly uploaded image lands: at the end, never displacing a choice. */
 export const nextSortOrder = (images: OrderableImage[]): number =>
   images.length === 0 ? 0 : Math.max(...images.map((image) => image.sortOrder)) + 1
-
-/**
- * Who may unpublish or re-order a photograph.
- *
- * The uploader keeps control of their own image, which matters because someone
- * who uploads a photograph they did not have the right to share must be able to
- * withdraw it without waiting on a moderator.
- */
-export const canManageImage = (user: SessionUser, uploaderId: number | null): boolean =>
-  user.role === 'moderator' || user.role === 'admin' || user.id === uploaderId
