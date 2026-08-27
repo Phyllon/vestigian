@@ -114,7 +114,125 @@ services:
       # First boot downloads the models; nothing is wrong before that finishes.
       start_period: 300s
 
+  # ---------------------------------------------------------------------------
+  # Observability, behind a profile so it is opt-in.
+  #
+  # `pnpm stack:up` is unchanged and still costs six containers; these six only
+  # start on `pnpm stack:observability`. The fast development loop is Pino
+  # pretty-printing to the terminal, and that stays true — this profile exists
+  # to test dashboards, alert rules and traces before they reach production,
+  # not to replace reading stdout.
+  #
+  # Note that `nuxt dev` runs on the host, not in a container, so Alloy's Docker
+  # discovery does not see the app's own logs here. Container logs (Postgres,
+  # Valkey, LibreTranslate) do arrive, and traces and metrics work fully because
+  # the app pushes and Alloy scrapes across the host boundary.
+  # ---------------------------------------------------------------------------
+
+  grafana:
+    image: grafana/grafana:11.6.1
+    profiles: [observability]
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_AUTH_ANONYMOUS_ENABLED: 'false'
+      GF_ANALYTICS_REPORTING_ENABLED: 'false'
+      GF_ANALYTICS_CHECK_FOR_UPDATES: 'false'
+      GF_NEWS_NEWS_FEED_ENABLED: 'false'
+    ports:
+      - '3001:3000'
+    volumes:
+      - ./observability/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./observability/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    depends_on: [loki, tempo, prometheus]
+
+  loki:
+    image: grafana/loki:3.4.2
+    profiles: [observability]
+    command: -config.file=/etc/loki/loki.yml
+    ports:
+      - '3100:3100'
+    volumes:
+      - ./observability/loki.yml:/etc/loki/loki.yml:ro
+      - loki-data:/loki
+
+  tempo:
+    image: grafana/tempo:2.7.1
+    profiles: [observability]
+    command: -config.file=/etc/tempo/tempo.yml
+    ports:
+      - '3200:3200'
+      - '4318:4318'
+      - '4317:4317'
+    volumes:
+      - ./observability/tempo.yml:/etc/tempo/tempo.yml:ro
+      - tempo-data:/var/tempo
+
+  prometheus:
+    image: prom/prometheus:v3.2.1
+    profiles: [observability]
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=15d
+      # Alloy remote-writes rather than Prometheus scraping the app directly,
+      # which this flag is what enables.
+      - --web.enable-remote-write-receiver
+    ports:
+      - '9090:9090'
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./observability/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus-data:/prometheus
+
+  alertmanager:
+    image: prom/alertmanager:v0.28.1
+    profiles: [observability]
+    environment:
+      # Development sends nothing; the receiver exists so the routing tree and
+      # the rules can be exercised without a mail provider.
+      ALERT_FROM: alerts@localhost
+      ALERT_TO: operator@localhost
+      MAIL_API_KEY: unset
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+      - --storage.path=/alertmanager
+    ports:
+      - '9093:9093'
+    volumes:
+      - ./observability/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+
+  alloy:
+    image: grafana/alloy:v1.7.5
+    profiles: [observability]
+    command:
+      - run
+      - --server.http.listen-addr=0.0.0.0:12345
+      - --storage.path=/var/lib/alloy/data
+      - /etc/alloy/config.alloy
+    environment:
+      POSTGRES_DSN: postgresql://vestigia:vestigia@postgres:5432/vestigia?sslmode=disable
+      REDIS_ADDR: valkey:6379
+      # `nuxt dev` runs on the host, so Alloy reaches it back out through the
+      # gateway rather than over the compose network.
+      APP_ADDR: host.docker.internal:3000
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    ports:
+      - '12345:12345'
+    volumes:
+      - ./observability/alloy.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /:/rootfs:ro
+      - alloy-data:/var/lib/alloy/data
+    depends_on: [loki, tempo, prometheus]
+
 volumes:
   postgres-data:
   minio-data:
   libretranslate-models:
+  grafana-data:
+  loki-data:
+  tempo-data:
+  prometheus-data:
+  alloy-data:

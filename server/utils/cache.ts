@@ -11,7 +11,9 @@ export const useRedis = (): Redis => {
       lazyConnect: false,
     })
     // A cache outage must degrade performance, never availability.
-    redis.on('error', (error) => console.error('[cache]', error.message))
+    redis.on('error', (error) =>
+      useLogger().error({ err: { message: error.message } }, 'cache connection error'),
+    )
   }
   return redis
 }
@@ -22,7 +24,14 @@ export const getDataVersion = async (): Promise<number> => {
   try {
     const raw = await useRedis().get(DATA_VERSION_KEY)
     return raw ? Number(raw) : 1
-  } catch {
+  } catch (error) {
+    // Falling back to version 1 means every tile key resolves to the version
+    // the cache held when it was empty, so readers can be served tiles built
+    // before edits they should already be seeing.
+    useLogger().warn(
+      { err: { message: (error as Error).message } },
+      'data version unreadable, serving tiles as version 1',
+    )
     return 1
   }
 }
@@ -34,7 +43,15 @@ export const getDataVersion = async (): Promise<number> => {
 export const bumpDataVersion = async (): Promise<number> => {
   try {
     return await useRedis().incr(DATA_VERSION_KEY)
-  } catch {
+  } catch (error) {
+    // This is the quiet one. An approval that cannot bump the counter leaves
+    // every cached tile keyed to the old version, so the contribution is live
+    // in Postgres and invisible on the map until something else bumps it — with
+    // no error surfaced to the moderator who approved it.
+    useLogger().error(
+      { err: { message: (error as Error).message } },
+      'tile cache not invalidated: approved changes may not reach the map',
+    )
     return 1
   }
 }

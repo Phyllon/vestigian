@@ -127,6 +127,24 @@ export default defineEventHandler(async (event) => {
     entityId = applied?.entity_id ?? null
   }
 
+  contributionRevisionsTotal().inc({ kind: draft.kind, status })
+  event.context.log.info(
+    {
+      audit: 'contribution.submitted',
+      revisionId: revision!.id,
+      kind: draft.kind,
+      entityId,
+      status,
+      isEdit: Boolean(draft.entityId),
+      // The one case where trust was overridden by the shape of the edit
+      // rather than by the contributor's standing.
+      queuedForBlanking: requiresReview,
+      trustReason: trust.reason,
+      authorId: user.id,
+    },
+    'contribution submitted',
+  )
+
   return {
     revisionId: revision!.id,
     entityId,

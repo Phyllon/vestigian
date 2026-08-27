@@ -164,13 +164,31 @@ export const enforceRateLimit = async (event: H3Event, name: RateLimitName): Pro
     const redis = useRedis()
     count = await redis.incr(key)
     if (count === 1) await redis.expire(key, policy.windowSeconds)
-  } catch {
+  } catch (error) {
     // Fail open: a cache outage should not lock every visitor out of the site.
+    //
+    // Which means that for as long as Valkey is unreachable, *every* policy in
+    // `RATE_LIMITS` is absent — including the four signups an hour that
+    // `register.post.ts` names as its defence against account farming. That was
+    // previously a bare `catch {}` and left no trace anywhere; this line and
+    // the `failed_open` counter are the only evidence it ever happened, and the
+    // `RateLimiterFailingOpen` alert watches the counter.
+    rateLimitDecisionsTotal().inc({ policy: name, outcome: 'failed_open' })
+    useLogger().error(
+      { policy: name, err: { message: (error as Error).message } },
+      'rate limit not applied: cache unreachable',
+    )
     return
   }
 
   const decision = evaluateRateLimit({ count, policy, now })
-  if (decision.allowed) return
+
+  if (decision.allowed) {
+    rateLimitDecisionsTotal().inc({ policy: name, outcome: 'allowed' })
+    return
+  }
+
+  rateLimitDecisionsTotal().inc({ policy: name, outcome: 'blocked' })
 
   // h3 types `retry-after` as a number; it stringifies the value itself.
   setResponseHeader(event, 'retry-after', decision.retryAfterSeconds)

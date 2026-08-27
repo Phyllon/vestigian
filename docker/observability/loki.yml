@@ -1,0 +1,54 @@
+# Loki in monolithic mode against the local filesystem.
+#
+# Object storage (R2) was considered and refused: at this volume the chunk and
+# index write pattern is Class-A-operation heavy for no durability that matters,
+# since the database and the images this deployment actually cannot lose are
+# already backed up separately. Logs are diagnostic, not a record of record.
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+  grpc_listen_port: 9096
+  log_level: warn
+
+common:
+  instance_addr: 127.0.0.1
+  path_prefix: /loki
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks
+      rules_directory: /loki/rules
+  replication_factor: 1
+  ring:
+    kvstore:
+      store: inmemory
+
+schema_config:
+  configs:
+    - from: 2024-01-01
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+limits_config:
+  # 30 days. Long enough to answer "was this happening last month", short enough
+  # that a single VPS disk is never the binding constraint.
+  retention_period: 720h
+  reject_old_samples: true
+  reject_old_samples_max_age: 168h
+  # A guard against one runaway container filling the disk, not a target.
+  ingestion_rate_mb: 8
+  ingestion_burst_size_mb: 16
+  max_query_series: 5000
+
+compactor:
+  working_directory: /loki/compactor
+  delete_request_store: filesystem
+  # Without this, retention_period above is advisory and nothing ever deletes.
+  retention_enabled: true
+
+analytics:
+  reporting_enabled: false

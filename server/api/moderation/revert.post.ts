@@ -73,5 +73,16 @@ export default defineEventHandler(async (event) => {
   await applyRevision(revision!.id)
   await bumpDataVersion()
 
+  moderationActionsTotal().inc({ action: 'revert' })
+  event.context.log.info(
+    {
+      audit: 'moderation.revert',
+      revisionId: revision!.id,
+      revertedRevisionId: revisionId,
+      moderatorId: moderator.id,
+    },
+    'revision reverted',
+  )
+
   return { revisionId: revision!.id, revertedRevisionId: revisionId, status: 'reverted' }
 })

@@ -23,3 +23,30 @@ http:
         period: 1s
         sourceCriterion:
           requestHeaderName: cf-connecting-ip
+
+    # Attached to a dedicated, higher-priority router that matches
+    # `/api/metrics` alone (see the labels in compose.prod.yml). Traefik applies
+    # middleware per router rather than per path, so restricting one endpoint
+    # takes a second router rather than another rule on the main one.
+    #
+    # `/api/metrics` is a Prometheus scrape target, read by Alloy over the
+    # compose network — it never needs to arrive through Traefik at all. What it
+    # exposes is route names and traffic volumes rather than any data, but it is
+    # also a free way to make the process do work on demand.
+    #
+    # The ranges below are private, so anything arriving from the internet is
+    # refused: behind Cloudflare, Traefik's peer is a Cloudflare address, which
+    # is not in this list.
+    #
+    # The caveat that applies to every middleware in this file applies here too
+    # — nothing in compose.prod.yml mounts this directory, so whether the
+    # Traefik that Dokploy supplies reads it is unconfirmed. Until it is, treat
+    # `/api/metrics` as potentially public; the handler's own `expensive` rate
+    # limit is the part that does not depend on this file.
+    deny-external:
+      ipAllowList:
+        sourceRange:
+          - '127.0.0.1/32'
+          - '10.0.0.0/8'
+          - '172.16.0.0/12'
+          - '192.168.0.0/16'

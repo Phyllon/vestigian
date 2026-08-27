@@ -1,0 +1,33 @@
+# Resend over SMTP, reusing the credential the app already holds rather than
+# introducing a second mail path. SMTP_* are supplied by the environment.
+global:
+  resolve_timeout: 5m
+  smtp_from: '${ALERT_FROM}'
+  smtp_smarthost: 'smtp.resend.com:587'
+  smtp_auth_username: 'resend'
+  smtp_auth_password: '${MAIL_API_KEY}'
+
+route:
+  receiver: operator
+  group_by: [alertname]
+  group_wait: 30s
+  group_interval: 5m
+  # Twelve hours, because this reaches one person's inbox. An alert that repeats
+  # hourly is one that gets filtered, and a filtered alert is worse than none.
+  repeat_interval: 12h
+  routes:
+    - matchers: [severity = "critical"]
+      receiver: operator
+      repeat_interval: 2h
+
+receivers:
+  - name: operator
+    email_configs:
+      - to: '${ALERT_TO}'
+        send_resolved: true
+
+inhibit_rules:
+  # If the app is down, everything downstream of it is also down. Say it once.
+  - source_matchers: [alertname = "AppDown"]
+    target_matchers: [severity =~ "warning|critical"]
+    equal: [job]

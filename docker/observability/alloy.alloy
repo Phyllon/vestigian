@@ -1,0 +1,171 @@
+// Grafana Alloy: logs, traces and metrics in one agent.
+//
+// Chosen over Vector for two reasons. Vector carries no traces at all, and
+// Alloy's built-in prometheus.exporter.* components replace four separate
+// exporter containers (node, cadvisor, postgres, redis) — which on a single
+// 16 GB VPS already running Postgres, Valkey, LibreTranslate and imgproxy is
+// the difference between six new containers and ten.
+//
+// Promtail, the other obvious choice, reached end of life in March 2026.
+
+logging {
+  level  = "warn"
+  format = "logfmt"
+}
+
+// ---------------------------------------------------------------- logs -----
+
+// Every container on the box, found by asking Docker rather than by listing
+// them here — a service added to compose is collected without touching Alloy.
+discovery.docker "containers" {
+  host             = "unix:///var/run/docker.sock"
+  refresh_interval = "30s"
+}
+
+discovery.relabel "containers" {
+  targets = discovery.docker.containers.targets
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+    target_label  = "service"
+  }
+}
+
+loki.source.docker "containers" {
+  host       = "unix:///var/run/docker.sock"
+  targets    = discovery.relabel.containers.output
+  labels     = { job = "docker" }
+  forward_to = [loki.process.app.receiver]
+}
+
+// The app writes Pino JSON; everything else writes plain text. Parsing the
+// JSON promotes `level` to a label so `{level="error"}` works across services,
+// and drops the rest into the line rather than into labels — a label per field
+// would multiply Loki's stream count by the cardinality of requestId.
+loki.process "app" {
+  stage.match {
+    selector = "{service=\"app\"}"
+
+    stage.json {
+      expressions = {
+        level   = "level",
+        msg     = "msg",
+        audit   = "audit",
+        route   = "route",
+        status  = "status",
+      }
+    }
+
+    stage.labels {
+      values = {
+        level = "",
+        // `audit` is a small fixed vocabulary — revision.applied,
+        // moderation.review, auth.login — so it is safe as a label and makes
+        // the governance trail queryable on its own.
+        audit = "",
+      }
+    }
+  }
+
+  forward_to = [loki.write.default.receiver]
+}
+
+loki.write "default" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
+
+// -------------------------------------------------------------- traces -----
+
+otelcol.receiver.otlp "default" {
+  http { endpoint = "0.0.0.0:4318" }
+  grpc { endpoint = "0.0.0.0:4317" }
+
+  output {
+    traces = [otelcol.processor.batch.default.input]
+  }
+}
+
+otelcol.processor.batch "default" {
+  output {
+    traces = [otelcol.exporter.otlp.tempo.input]
+  }
+}
+
+otelcol.exporter.otlp "tempo" {
+  client {
+    endpoint = "tempo:4317"
+    tls { insecure = true }
+  }
+}
+
+// ------------------------------------------------------------- metrics -----
+
+// The host itself: CPU, memory, disk. `/rootfs` is the bind mount below.
+prometheus.exporter.unix "host" {
+  rootfs_path = "/rootfs"
+  procfs_path = "/rootfs/proc"
+  sysfs_path  = "/rootfs/sys"
+}
+
+// Per-container CPU and memory, which is how the memory limits in the compose
+// files are checked against reality rather than against an estimate.
+prometheus.exporter.cadvisor "containers" {
+  docker_host = "unix:///var/run/docker.sock"
+}
+
+prometheus.exporter.postgres "database" {
+  data_source_names = [sys.env("POSTGRES_DSN")]
+}
+
+prometheus.exporter.redis "cache" {
+  redis_addr = sys.env("REDIS_ADDR")
+}
+
+prometheus.scrape "host" {
+  targets    = prometheus.exporter.unix.host.targets
+  forward_to = [prometheus.remote_write.default.receiver]
+  job_name   = "node"
+}
+
+prometheus.scrape "containers" {
+  targets         = prometheus.exporter.cadvisor.containers.targets
+  forward_to      = [prometheus.remote_write.default.receiver]
+  job_name        = "cadvisor"
+  scrape_interval = "60s"
+}
+
+prometheus.scrape "database" {
+  targets    = prometheus.exporter.postgres.database.targets
+  forward_to = [prometheus.remote_write.default.receiver]
+  job_name   = "postgres"
+}
+
+prometheus.scrape "cache" {
+  targets    = prometheus.exporter.redis.cache.targets
+  forward_to = [prometheus.remote_write.default.receiver]
+  job_name   = "redis"
+}
+
+// The application's own metrics. `/api/metrics` is reachable here over the
+// compose network and denied on the public router.
+prometheus.scrape "app" {
+  targets = [
+    { __address__ = sys.env("APP_ADDR"), __metrics_path__ = "/api/metrics" },
+  ]
+  forward_to = [prometheus.remote_write.default.receiver]
+  job_name   = "vestigia-app"
+}
+
+prometheus.remote_write "default" {
+  endpoint {
+    url = "http://prometheus:9090/api/v1/write"
+  }
+}

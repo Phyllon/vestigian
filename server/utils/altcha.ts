@@ -175,6 +175,15 @@ const burnChallenge = async (event: H3Event, salt: string): Promise<void> => {
   } catch (error) {
     if ((error as { statusCode?: number }).statusCode === 400) throw error
 
+    // The 503 deliberately says nothing specific to the caller, which also
+    // means a Valkey outage and a replayed puzzle are indistinguishable from
+    // outside. Signup being closed is worth knowing about immediately, so the
+    // real cause is recorded here rather than discarded.
+    useLogger().error(
+      { err: { message: (error as Error).message } },
+      'signup challenge unverifiable: cache unreachable',
+    )
+
     throw createError({
       statusCode: 503,
       message: 'Verification is temporarily unavailable. Try again shortly.',

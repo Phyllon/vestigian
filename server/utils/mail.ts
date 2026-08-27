@@ -15,7 +15,26 @@ const deliver = async (message: OutgoingMail): Promise<void> => {
   const { mail } = useRuntimeConfig()
 
   if (!mail.apiKey) {
-    console.info(`\n[mail → ${message.to}] ${message.subject}\n${message.text}\n`)
+    if (import.meta.dev) {
+      // The whole message, recipient and body, on purpose: nothing in this
+      // project speaks SMTP, so this line is how a verification link is
+      // retrieved when walking the signup flow locally. `recipient` rather than
+      // `email` so the logger's redaction does not censor the one field that
+      // makes it useful.
+      useLogger().info(
+        { recipient: message.to, subject: message.subject, text: message.text },
+        'mail not sent: no api key, printing instead',
+      )
+      return
+    }
+
+    // In production an unset key is a misconfiguration that silently swallows
+    // every verification and password-reset mail, which presents to the user as
+    // an account they can never sign in to.
+    useLogger().error(
+      { email: message.to, subject: message.subject },
+      'mail not sent: NUXT_MAIL_API_KEY is unset',
+    )
     return
   }
 

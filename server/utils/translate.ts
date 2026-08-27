@@ -65,12 +65,35 @@ export const translateText = async (request: TranslationRequest): Promise<string
       new Promise<null>((resolve) => setTimeout(() => resolve(null), TRANSLATE_TIMEOUT_MS)),
     ])
 
-    if (typeof translated !== 'string' || translated.trim().length === 0) return null
+    // The timeout resolves to `null` rather than rejecting, so a container that
+    // is down is indistinguishable here from a model with nothing to say —
+    // except that it costs ten seconds every time. Counting it is the only way
+    // that shows up as anything other than a slow site.
+    if (translated === null) {
+      translationRequestsTotal().inc({ outcome: 'timeout' })
+      useLogger().warn(
+        { from: request.from, to: request.to, timeoutMs: TRANSLATE_TIMEOUT_MS },
+        'translation timed out',
+      )
+      return null
+    }
+
+    if (typeof translated !== 'string' || translated.trim().length === 0) {
+      translationRequestsTotal().inc({ outcome: 'empty' })
+      return null
+    }
+
+    translationRequestsTotal().inc({ outcome: 'ok' })
 
     // A model that has nothing to offer sometimes echoes the input back.
     // Presenting that as a translation would be a lie about what happened.
     return translated.trim() === request.text.trim() ? null : translated
-  } catch {
+  } catch (error) {
+    translationRequestsTotal().inc({ outcome: 'failed' })
+    useLogger().warn(
+      { from: request.from, to: request.to, err: { message: (error as Error).message } },
+      'translation failed',
+    )
     return null
   }
 }

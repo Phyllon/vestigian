@@ -52,7 +52,11 @@ export interface ArticleReference {
   title: string
 }
 
-const request = async <T>(url: string): Promise<T | null> => {
+/**
+ * `source` is a fixed vocabulary — `wikidata`, `pleiades`, `wikipedia` — so it
+ * is safe as a metric label. The URL never is.
+ */
+const request = async <T>(url: string, source: string): Promise<T | null> => {
   try {
     // Native `fetch`, not `$fetch`: ofetch's typing is built around Nitro's own
     // routes and tries to match a string URL against every one of them, which
@@ -63,11 +67,27 @@ const request = async <T>(url: string): Promise<T | null> => {
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     })
 
-    if (!response.ok) return null
+    if (!response.ok) {
+      // A non-2xx returns here without ever entering the catch below, which is
+      // why it needs its own line: Wikidata answering 429 to everything looks
+      // exactly like "no article exists for this site" from the caller's side,
+      // and the two want opposite responses from whoever is reading.
+      enrichmentRequestsTotal().inc({ source, outcome: 'refused' })
+      useLogger().warn({ source, status: response.status }, 'enrichment upstream refused')
+      return null
+    }
+
+    enrichmentRequestsTotal().inc({ source, outcome: 'ok' })
     return (await response.json()) as T
-  } catch {
+  } catch (error) {
     // An upstream that is slow, throttling or down means no enrichment for
     // this site right now. It never means the site fails to open.
+    const timedOut = (error as Error).name === 'TimeoutError'
+    enrichmentRequestsTotal().inc({ source, outcome: timedOut ? 'timeout' : 'failed' })
+    useLogger().warn(
+      { source, err: { message: (error as Error).message } },
+      'enrichment upstream unreachable',
+    )
     return null
   }
 }
@@ -84,6 +104,7 @@ const findByStatement = async (property: string, value: string): Promise<string 
   const query = encodeURIComponent(`haswbstatement:${property}=${value}`)
   const data = await request<{ query?: { search?: { title: string }[] } }>(
     `https://www.wikidata.org/w/api.php?action=query&list=search&srsearch=${query}&format=json&origin=*`,
+    'wikidata',
   )
 
   const hits = data?.query?.search ?? []
@@ -145,6 +166,7 @@ export const loadWikidataFacts = async (
   const data = await request<{ entities?: Record<string, WikidataEntity> }>(
     `https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${wikidataId}` +
       `&props=claims%7Csitelinks&sitefilter=${encodeURIComponent(sitefilter)}&format=json&origin=*`,
+    'wikidata',
   )
 
   const entity = data?.entities?.[wikidataId]
@@ -173,6 +195,7 @@ export const loadWikidataFacts = async (
 export const loadPleiadesPlaceTypes = async (pleiadesId: string): Promise<string[]> => {
   const data = await request<{ placeTypes?: string[] }>(
     `https://pleiades.stoa.org/places/${pleiadesId}/json`,
+    'pleiades',
   )
   return data?.placeTypes ?? []
 }
@@ -194,7 +217,7 @@ export const loadWikipediaSummary = async (
     extract?: string
     type?: string
     content_urls?: { desktop?: { page?: string } }
-  }>(`${host}/api/rest_v1/page/summary/${encodeURIComponent(article.title)}`)
+  }>(`${host}/api/rest_v1/page/summary/${encodeURIComponent(article.title)}`, 'wikipedia')
 
   // Disambiguation pages resolve and read as prose but describe nothing.
   if (!data?.extract || !data.title || data.type === 'disambiguation') return null

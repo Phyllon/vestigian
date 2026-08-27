@@ -80,6 +80,13 @@ export default defineEventHandler(async (event) => {
         .update(revisions)
         .set({ status: 'pending', reviewerId: null, reviewedAt: null })
         .where(eq(revisions.id, revisionId))
+      // The moderator sees this truncated to 120 characters and nothing
+      // persists it, so a revision that consistently fails to apply leaves no
+      // record of why once they close the tab.
+      event.context.log.error(
+        { revisionId, err: { message: (error as Error).message, stack: (error as Error).stack } },
+        'batch review could not apply revision',
+      )
       outcomes.push({
         revisionId,
         status: 'skipped',

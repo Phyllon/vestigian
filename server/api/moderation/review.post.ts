@@ -43,5 +43,17 @@ export default defineEventHandler(async (event) => {
     await bumpDataVersion()
   }
 
+  moderationActionsTotal().inc({ action: decision })
+  event.context.log.info(
+    {
+      audit: 'moderation.review',
+      revisionId,
+      decision,
+      moderatorId: moderator.id,
+      authorId: revision.authorId,
+    },
+    'revision reviewed',
+  )
+
   return { revisionId, status: decision }
 })

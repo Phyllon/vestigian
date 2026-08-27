@@ -1,0 +1,26 @@
+# Prometheus stores and evaluates. It does not scrape the application itself —
+# Alloy does all discovery and remote-writes here, so scrape configuration lives
+# in one file rather than being split across two that drift apart.
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+  external_labels:
+    deployment: vestigia
+
+rule_files:
+  - /etc/prometheus/alerts.yml
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager:9093']
+
+scrape_configs:
+  # Prometheus watching itself, and Alloy so a collector that has stopped
+  # forwarding is visible rather than looking like a quiet system.
+  - job_name: prometheus
+    static_configs:
+      - targets: ['localhost:9090']
+  - job_name: alloy
+    static_configs:
+      - targets: ['alloy:12345']

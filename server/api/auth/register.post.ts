@@ -22,6 +22,9 @@ export default defineEventHandler(async (event) => {
 
   if (body.website) {
     // Answer as though it succeeded so the bot learns nothing from the response.
+    authEventsTotal().inc({ event: 'register', outcome: 'accepted' })
+    event.context.log.info({ audit: 'auth.register' }, 'account registered, verification sent')
+
     return { status: 'pending-verification' }
   }
 
@@ -88,6 +91,18 @@ export default defineEventHandler(async (event) => {
      * register with your address" — so only the mailbox owner learns anything.
      */
     const isDisplayNameConflict = violation.constraint_name === 'users_display_name_idx'
+
+    // Which field collided is recorded, the value is not — the address is the
+    // thing this endpoint has already decided to disclose over HTTP but has no
+    // reason to also accumulate in a log.
+    authEventsTotal().inc({
+      event: 'register',
+      outcome: isDisplayNameConflict ? 'display_name_taken' : 'email_taken',
+    })
+    event.context.log.warn(
+      { audit: 'auth.register', field: isDisplayNameConflict ? 'displayName' : 'email' },
+      'registration refused: already exists',
+    )
 
     throw createError({
       statusCode: 409,

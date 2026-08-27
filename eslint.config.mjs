@@ -62,10 +62,12 @@ export default withNuxt(
   },
 
   {
-    // The import pipeline and maintenance scripts report progress on stdout —
-    // that is their interface, not a debugging leftover.
+    // The import pipeline, the maintenance scripts and the migration runner
+    // report progress on stdout — that is their interface, not a debugging
+    // leftover. They are one-shot processes that exit, so they have no logger
+    // and nothing would collect it if they did.
     name: 'vestigia/scripts',
-    files: ['scripts/**/*.ts'],
+    files: ['scripts/**/*.ts', 'server/database/migrate.ts'],
     rules: {
       'no-console': 'off',
     },

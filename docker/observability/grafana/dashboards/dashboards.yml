@@ -1,0 +1,13 @@
+apiVersion: 1
+
+providers:
+  - name: vestigia
+    orgId: 1
+    type: file
+    disableDeletion: false
+    # Dashboards live in git and are provisioned read-only, so an edit made in
+    # the UI at 2am cannot become the only copy of it.
+    allowUiUpdates: false
+    options:
+      path: /etc/grafana/provisioning/dashboards
+      foldersFromFilesStructure: false

@@ -43,12 +43,26 @@ export default defineEventHandler(async (event) => {
   )
 
   if (!account || !isValid) {
+    // Deliberately does not record which of the two failed, or the address
+    // tried. The endpoint hashes against DUMMY_HASH precisely so that a missing
+    // account and a wrong password are indistinguishable; a log line that told
+    // them apart would reintroduce the enumeration oracle in the log instead of
+    // over HTTP.
+    authEventsTotal().inc({ event: 'login', outcome: 'rejected' })
+    event.context.log.warn({ audit: 'auth.login' }, 'login rejected')
     throw createError({ statusCode: 401, message: 'That email and password do not match.' })
   }
 
   if (!account.emailVerifiedAt && !import.meta.dev) {
+    authEventsTotal().inc({ event: 'login', outcome: 'unverified' })
+    event.context.log.warn(
+      { audit: 'auth.login', userId: account.id },
+      'login refused: email not verified',
+    )
     throw createError({ statusCode: 403, message: 'Confirm your email address first.' })
   }
+
+  authEventsTotal().inc({ event: 'login', outcome: 'accepted' })
 
   // The session carries the *inputs* to the trust rule, not its result, so the
   // browser can apply `evaluateTrust` itself. Every one of these is a snapshot
@@ -61,6 +75,11 @@ export default defineEventHandler(async (event) => {
     trustRevoked: account.trustRevoked,
     approvedContributions: account.approvedContributions,
   }
+
+  event.context.log.info(
+    { audit: 'auth.login', userId: account.id, role: account.role },
+    'signed in',
+  )
 
   await setUserSession(event, { user, loggedInAt: Date.now() })
   await database.update(users).set({ lastSeenAt: new Date() }).where(eq(users.id, account.id))

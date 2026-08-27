@@ -89,6 +89,22 @@ export const applyRevision = async (revisionId: number): Promise<void> => {
       `
     }
   })
+
+  // The governance audit line. `applyRevision` is the only path by which a live
+  // row is ever written — automatic approval, moderator approval and revert all
+  // arrive here — so one line at this point records every change the atlas has
+  // ever published, without needing one at each of the three call sites.
+  useLogger().info(
+    {
+      audit: 'revision.applied',
+      revisionId,
+      entityType: revision.entity_type,
+      entityId: targetId,
+      authorId: revision.author_id,
+      revertsRevisionId: revision.reverts_revision_id,
+    },
+    'revision applied',
+  )
 }
 
 /**

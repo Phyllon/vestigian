@@ -45,16 +45,17 @@ Tokens live in `app/assets/css/main.css` as Tailwind v4 `@theme` variables. Nuxt
 
 ## Stack and why
 
-| Choice                                   | Reason it was chosen over the alternative                                                                                                                                                            |
-| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **MapLibre GL JS v5**                    | Vector + GPU. Handles 20k sites via clustering and 1k tracings as styled LineStrings. Leaflet would thrash the DOM; OpenLayers (what vici uses) has a worse mobile feel; Mapbox GL charges per load. |
-| **PostGIS `ST_AsMVT`**                   | The viewport requirement is answered by _tiles_, not bbox GeoJSON queries. This is the single most important architectural decision in the project.                                                  |
-| **PMTiles basemap** (OpenFreeMap in dev) | Custom style = the app's character. A hosted MapTiler style would make it look like everything else. PMTiles is read by the browser over HTTP range requests — **no tile server process exists**.    |
-| **Drizzle + `postgres.js`**              | TS-first. Drizzle is the default for every query; raw SQL is kept for PostGIS only — six files, not "most of the hot path" as this table used to claim. See "Which client to reach for".             |
-| **Valkey**                               | Tile cache, sessions, rate limits. Redis-compatible, no licence question.                                                                                                                            |
-| **R2 + imgproxy**                        | One original stored per image; derivatives on the fly. Zero egress.                                                                                                                                  |
-| **terra-draw**                           | Framework-agnostic drawing that works with MapLibre.                                                                                                                                                 |
-| **Dokploy on one Hetzner VPS**           | ~€27/month all-in vs ~€60–90 for managed k8s. Dokploy _is_ Docker Compose, so dev and prod are the same artifact.                                                                                    |
+| Choice                                   | Reason it was chosen over the alternative                                                                                                                                                                                            |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **MapLibre GL JS v5**                    | Vector + GPU. Handles 20k sites via clustering and 1k tracings as styled LineStrings. Leaflet would thrash the DOM; OpenLayers (what vici uses) has a worse mobile feel; Mapbox GL charges per load.                                 |
+| **PostGIS `ST_AsMVT`**                   | The viewport requirement is answered by _tiles_, not bbox GeoJSON queries. This is the single most important architectural decision in the project.                                                                                  |
+| **PMTiles basemap** (OpenFreeMap in dev) | Custom style = the app's character. A hosted MapTiler style would make it look like everything else. PMTiles is read by the browser over HTTP range requests — **no tile server process exists**.                                    |
+| **Drizzle + `postgres.js`**              | TS-first. Drizzle is the default for every query; raw SQL is kept for PostGIS only — six files, not "most of the hot path" as this table used to claim. See "Which client to reach for".                                             |
+| **Valkey**                               | Tile cache, sessions, rate limits. Redis-compatible, no licence question.                                                                                                                                                            |
+| **R2 + imgproxy**                        | One original stored per image; derivatives on the fly. Zero egress.                                                                                                                                                                  |
+| **terra-draw**                           | Framework-agnostic drawing that works with MapLibre.                                                                                                                                                                                 |
+| **Grafana + Loki + Tempo + Prometheus**  | One agent (Alloy) carries logs, traces and metrics; Vector carries no traces, and Alloy's built-in exporters replace four separate exporter containers. Promtail reached EOL in March 2026. All on local disk — see "Observability". |
+| **Dokploy on one Hetzner VPS**           | ~€27/month all-in vs ~€60–90 for managed k8s. Dokploy _is_ Docker Compose, so dev and prod are the same artifact.                                                                                                                    |
 
 The app is strictly 12-factor (env-only config, no local disk writes, `/api/health` + `/api/ready`), so moving to Kubernetes later is a translation, not a rewrite.
 
@@ -149,18 +150,22 @@ app/
          site/[slug] site/[slug]/edit tracing/[id] tracing/[id]/edit
          moderation/index moderation/contributors
 server/
+  plugins/ observability.ts   the only per-request hook: id, access log, span
   api/ tiles/[z]/[x]/[y]  sites/  tracings/  auth/  contributions/  moderation/  data/
-       images/[id]/[preset]  sites/[id]/enrichment  health ready
+       images/[id]/[preset]  sites/[id]/enrichment  health ready metrics
   routes/ robots.txt sitemap.xml
   database/ schema/ migrations/ migrate.ts
   utils/ mvt permissions ratelimit images images-order uploads tokens mail diff
          revisions slug db cache argon altcha enrichment enrichment-sources translate
+         logger metrics tracing
                                                                             (+__test__/)
 shared/types/  vocabulary shared by both sides
 shared/utils/  password policy + authorization rules, shared by both sides   (+__test__/)
 scripts/import/  four-stage vici.org import + vici-licences.ts (shared vocabulary)
 scripts/warm-tiles.ts snapshot-database.ts reconcile-images.ts
 docker/  Dockerfile compose.dev.yml compose.prod.yml traefik/ backup.sh
+  observability/  alloy.alloy loki.yml tempo.yml prometheus.yml alerts.yml
+                  alertmanager.yml grafana/{datasources,dashboards}
 ```
 
 ## Start here (in this order)
@@ -180,7 +185,8 @@ application above the map: auth, contribution, moderation, revisions.
    zero — the `Transaction` alias in `server/utils/revisions.ts` was most of
    them, deriving its type from an overloaded `sql.begin` and collapsing to
    `never`.
-5. `pnpm fix` applies what is mechanically fixable: `lint:fix` then `format`.
+5. `pnpm stack:observability` when you need Grafana — see "Observability".
+6. `pnpm fix` applies what is mechanically fixable: `lint:fix` then `format`.
    It is deliberately sequential — ESLint and Prettier both rewrite the same
    files, so running them together would have them clobbering each other.
 
@@ -283,6 +289,93 @@ marked approved) with no request and no pause. Without that, every rebuild of
   originals are not upscaled.
 - Therefore **2400px is a permanent ceiling** for imported photographs, and
   "one original stored per image" cannot hold for this content.
+
+## Observability — what the silence used to hide
+
+Six containers: Grafana, Loki, Tempo, Prometheus, Alertmanager and **Alloy**,
+which carries logs, traces and metrics in one agent. Vector was the initial
+choice and carries no traces; Alloy also has built-in
+`prometheus.exporter.{unix,cadvisor,postgres,redis}`, which is four exporter
+containers not run. Promtail, the other candidate, reached EOL in March 2026.
+
+**Everything is on local disk.** R2 was considered and refused: Loki and Tempo
+write often enough for Class A operations to be a real line item, and telemetry
+is diagnostic rather than a record of record. Retention is 15d metrics, 30d
+logs, 7d traces — under 20 GB of the 240 GB disk, and roughly 1.6 GB of RAM.
+
+**Grafana has no Traefik router and binds to loopback.** It holds request logs
+containing visitor IPs and the moderation trail. Reach it with
+`ssh -L 3001:localhost:3001 <vps>`.
+
+### Why the point was never the dashboards
+
+The app fails open in eight places, every one of them formerly silent. The
+worst is `enforceRateLimit`: a Valkey outage removes **every** policy in
+`RATE_LIMITS`, including the four signups an hour that `register.post.ts` names
+as its defence against account farming, and nothing recorded it.
+`rate_limit_decisions_total{outcome="failed_open"}` and the
+`RateLimiterFailingOpen` alert exist for that one case. `ready` now counts the
+cache too, so the same outage takes the container out of the load balancer
+instead of reporting healthy.
+
+### Three traps, all found by running it
+
+- **Sampling must key on `url.path`, not the span name.** Sampling happens at
+  span creation, which in Nitro is _before_ routing — `matchedRoute` is
+  undefined there, so every span is named `unmatched` at that moment. Keying on
+  the name matched nothing and traced every tile at full rate. The span is
+  renamed to the route pattern in `beforeResponse`.
+- **Child spans need the parent passed explicitly** (`withSpan({ parent })`).
+  The server span opens in `request` and closes in `beforeResponse` — two
+  callbacks, so there is no call stack to wrap and nothing ambient to inherit.
+  Without it, sixty tile requests produced sixty orphaned `postgis.render_tile`
+  root traces that also escaped sampling.
+- **Never label a metric with an identifier.** Route _patterns_ only:
+  `/api/sites/:id`, never `/api/sites/61272`. Sixty thousand sites would
+  otherwise be sixty thousand series.
+
+Two PromQL habits the alerts depend on: `or vector(0)` on a division's
+numerator, because an empty vector makes an alert unable to fire in exactly the
+case it exists for; and excluding read-only filesystems from the disk alert,
+since a read-only image mount reports 0% free by definition and fires forever.
+
+### Tracing is manual, deliberately
+
+No `auto-instrumentations-node`. ESM auto-instrumentation needs a loader hook
+before any instrumented module loads (`node --import`), but the runtime image
+ships only `.output`, so a root-level bootstrap has no `node_modules` to resolve
+against. `postgres.js` has no OTel instrumentation package regardless — `pg`
+does, and this project does not use `pg`. Spans exist only where `withSpan` is
+called, which is the cost; no loader hook and no Dockerfile change is the gain.
+
+**Pino ships no transport in production.** Its transports run in a worker
+thread, which Rollup cannot bundle — Nitro tree-shakes the target out and the
+process dies at startup looking for a module that was never emitted. Plain JSON
+to stdout is what Docker's json-file driver and Alloy want anyway. `pino-pretty`
+is guarded behind `import.meta.dev`, where nothing is bundled.
+
+### Reaching the logs
+
+**Development**: `pnpm dev` pretty-prints to the terminal, and that stays the
+fast loop. `pnpm stack:observability` adds Grafana on `localhost:3001` when a
+dashboard or alert rule needs testing. Traces and metrics work fully; **the
+app's own logs do not reach Loki**, because `nuxt dev` runs on the host and
+Alloy discovers containers. Container logs do arrive.
+
+**Production**: Pino → stdout → json-file → Alloy → Loki → Grafana over the SSH
+tunnel. `docker compose logs -f` still works and is the fallback for when Loki
+is itself the broken thing.
+
+### Unresolved
+
+- Nothing mounts `docker/traefik/`, so `deny-external@file` — which keeps
+  `/api/metrics` off the public router — rests on the same unconfirmed
+  mechanism as `app-rate-limit@file`. Until that is checked on the box, treat
+  `/api/metrics` as reachable; it leaks route names and volumes, not data.
+- Alertmanager sends through Resend SMTP, reusing `MAIL_API_KEY`. The README
+  notes an intent to move to Lettermint; that would move this too.
+- Request logs contain IP addresses. 30 days on an EU box is the position, and
+  `REDACTED_FIELDS` in `server/utils/logger.ts` is the rest of it.
 
 ## Backups — two stores that fail apart
 
@@ -399,3 +492,8 @@ contradicts what they asked for. Those belong in the reply.
 - **Install type packages** whenever they exist, and use those types.
 - **Open source** look for established open source projects to solve some problem first instead of
   writing the logic yourself directly. Then ask for decision
+- **Agents** may be used, but ask for permission before
+- **Planning mode** while in planning mode, instead of writing the plan to a temporary file, save it under
+  ".claude/plans" automatically and open it.
+- **Completed tasks** when having completed a task, never print the achieved goals to the chat, keep it clean
+- **EU/GDPR compliance** all packages or code dealing with user data must be GDPR compliant

@@ -218,6 +218,27 @@ export default defineNuxtConfig({
      * party. Empty means signup refuses with a 503 that names this variable.
      */
     altchaSecret: '',
+    /**
+     * Telemetry. All three are server-side: the browser never speaks to the
+     * observability stack, and `connect-src` in the CSP below would refuse it
+     * if it tried.
+     *
+     * An empty `otlpEndpoint` disables tracing outright rather than retrying
+     * against nothing — the collector is optional infrastructure, and the app
+     * must start and serve without it exactly as it does without LibreTranslate.
+     */
+    telemetry: {
+      serviceName: 'vestigia',
+      otlpEndpoint: '',
+      /** `debug` | `info` | `warn` | `error`. */
+      logLevel: 'info',
+      /**
+       * Fraction of tile requests that get a trace. Tiles are the hot path and
+       * would otherwise be almost all of the trace volume while being the least
+       * interesting thing in it. Everything else is sampled at 100%.
+       */
+      tileSampleRatio: 0.05,
+    },
     databaseUrl: '',
     redisUrl: '',
     sessionPassword: '',
@@ -326,6 +347,18 @@ export default defineNuxtConfig({
 
   vite: {
     optimizeDeps: { include: ['maplibre-gl', 'pmtiles'] },
+    /**
+     * Vite refuses requests whose Host header it does not recognise, which in
+     * development means Alloy's metrics scrape — it reaches the dev server as
+     * `host.docker.internal:3000` and got a 403 that reads like an application
+     * error rather than a dev-server guard.
+     *
+     * Development only: production serves the built output with no Vite in the
+     * process at all, and Alloy reaches the app as an ordinary compose service.
+     */
+    server: {
+      allowedHosts: ['host.docker.internal'],
+    },
   },
 
   alias: {

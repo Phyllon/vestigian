@@ -42,5 +42,11 @@ export default defineEventHandler(async (event) => {
   // they had earned without this endpoint having to recompute it.
   await database.update(users).set({ trustRevoked: revoked }).where(eq(users.id, userId))
 
+  moderationActionsTotal().inc({ action: 'trust' })
+  event.context.log.info(
+    { audit: 'moderation.trust', targetUserId: userId, revoked, moderatorId: moderator.id },
+    revoked ? 'automatic publishing suspended' : 'trust restored',
+  )
+
   return { userId, trustRevoked: revoked }
 })

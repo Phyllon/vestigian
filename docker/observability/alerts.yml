@@ -1,0 +1,114 @@
+groups:
+  - name: vestigia
+    rules:
+      # The alert this whole exercise justifies.
+      #
+      # `enforceRateLimit` fails open when Valkey is unreachable, which silently
+      # removes every policy in RATE_LIMITS — including the four signups an hour
+      # that register.post.ts names as its defence against account farming.
+      # Before this counter existed there was no signal of any kind that it had
+      # happened.
+      - alert: RateLimiterFailingOpen
+        expr: increase(rate_limit_decisions_total{outcome="failed_open"}[5m]) > 0
+        for: 0m
+        labels: { severity: critical }
+        annotations:
+          summary: 'Rate limiting is not being applied'
+          description: 'Valkey is unreachable from enforceRateLimit, so every limit in RATE_LIMITS is absent. Signup and login are unthrottled.'
+
+      - alert: AppDown
+        expr: up{job="vestigia-app"} == 0
+        for: 2m
+        labels: { severity: critical }
+        annotations:
+          summary: 'The application is not being scraped'
+
+      - alert: HighServerErrorRate
+        expr: |
+          (sum(rate(http_requests_total{status=~"5.."}[10m])) or vector(0))
+            / clamp_min(sum(rate(http_requests_total[10m])), 0.001) > 0.05
+        for: 10m
+        labels: { severity: critical }
+        annotations:
+          summary: 'Over 5% of requests are failing'
+
+      # Tiles are the hot path and are supposed to be answered by Valkey. A
+      # collapsed hit rate means every tile in every viewport is now a PostGIS
+      # aggregate, which is survivable briefly and not for long.
+      # `or vector(0)` on the numerator is load-bearing. With no cache hits at
+      # all the inner sum returns an empty vector, the division yields nothing,
+      # and the alert silently cannot fire — precisely in the case it exists to
+      # catch. The denominator is clamped for the same class of reason: no tile
+      # traffic must read as "nothing to say", not as a division by zero.
+      - alert: TileCacheHitRateLow
+        expr: |
+          (sum(rate(tile_requests_total{cache="hit"}[15m])) or vector(0))
+            / clamp_min(sum(rate(tile_requests_total[15m])), 0.001) < 0.5
+          and sum(rate(tile_requests_total[15m])) > 0.01
+        for: 15m
+        labels: { severity: warning }
+        annotations:
+          summary: 'Tile cache hit rate below 50%'
+
+      - alert: TileRenderSlow
+        expr: histogram_quantile(0.95, sum(rate(tile_render_duration_seconds_bucket[10m])) by (le, strategy)) > 1
+        for: 10m
+        labels: { severity: warning }
+        annotations:
+          summary: 'p95 tile render above 1s ({{ $labels.strategy }})'
+
+      - alert: PostgresDown
+        expr: pg_up == 0
+        for: 2m
+        labels: { severity: critical }
+        annotations: { summary: 'Postgres is unreachable' }
+
+      - alert: ValkeyDown
+        expr: redis_up == 0
+        for: 2m
+        labels: { severity: critical }
+        annotations:
+          summary: 'Valkey is unreachable'
+          description: 'Tiles fall through to PostGIS and rate limiting fails open. See RateLimiterFailingOpen.'
+
+      # Deliberately not pinned to a mountpoint. `/rootfs` is where the host
+      # filesystem is bind-mounted, but what node_exporter labels it depends on
+      # the host's own mount table, and an alert keyed to a name that does not
+      # exist there is an alert that never fires.
+      #
+      # Read-only filesystems are excluded, which is not a detail: a read-only
+      # image mount reports 0% available by definition, so `min()` across
+      # everything selects it every time and the alert fires permanently — which
+      # is the same as not having one.
+      - alert: DiskFillingUp
+        expr: |
+          min(
+            (
+              node_filesystem_avail_bytes{fstype!~"tmpfs|overlay|squashfs|ramfs|devtmpfs|erofs|iso9660"}
+                / node_filesystem_size_bytes{fstype!~"tmpfs|overlay|squashfs|ramfs|devtmpfs|erofs|iso9660"}
+            )
+            and on (instance, device, mountpoint) node_filesystem_readonly == 0
+          ) < 0.15
+        for: 30m
+        labels: { severity: warning }
+        annotations:
+          summary: 'Less than 15% disk free'
+          description: 'Prometheus, Loki and Tempo all write here, as do the nightly pg_dumps kept for fourteen days.'
+
+      # Translation and enrichment both fail open by design, so a dead upstream
+      # costs latency and silence rather than errors.
+      - alert: TranslationFailing
+        expr: increase(translation_requests_total{outcome=~"timeout|failed"}[15m]) > 5
+        for: 15m
+        labels: { severity: warning }
+        annotations:
+          summary: 'LibreTranslate is timing out'
+          description: 'Each timeout costs 10s. Translation fails open, so this shows up as a slow site rather than an error.'
+
+      - alert: EnrichmentUpstreamRefusing
+        expr: increase(enrichment_requests_total{outcome="refused"}[30m]) > 20
+        for: 15m
+        labels: { severity: warning }
+        annotations:
+          summary: 'Enrichment upstream is refusing requests ({{ $labels.source }})'
+          description: 'Likely throttling. Indistinguishable from "no article exists" without this counter.'

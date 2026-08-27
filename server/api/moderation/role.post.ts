@@ -44,5 +44,17 @@ export default defineEventHandler(async (event) => {
 
   await database.update(users).set({ role }).where(eq(users.id, userId))
 
+  moderationActionsTotal().inc({ action: 'role' })
+  event.context.log.info(
+    {
+      audit: 'moderation.role',
+      targetUserId: userId,
+      previousRole: target.role,
+      nextRole: role,
+      actorId: actor.id,
+    },
+    'role changed',
+  )
+
   return { userId, role }
 })

@@ -169,7 +169,36 @@ Licences are chosen from a closed list at upload time, since an image with an un
 
 ## Operations
 
-### Backups — two stores, restored together
+### Observability
+
+Six containers — Grafana, Loki, Tempo, Prometheus, Alertmanager and Alloy —
+all writing to local disk. About 1.6 GB of RAM and under 20 GB of the 240 GB
+disk, on the same CPX41. No additional hosting cost.
+
+Grafana is **not** exposed publicly. It holds request logs, which contain
+visitor IP addresses, so it binds to loopback and is reached over SSH:
+
+```bash
+ssh -L 3001:localhost:3001 <vps>   # then http://localhost:3001
+```
+
+Locally it is opt-in, because the fast loop is Pino pretty-printing to the
+terminal rather than a browser tab:
+
+```bash
+pnpm stack:observability        # grafana :3001, loki, tempo, prometheus, alloy
+pnpm stack:observability:down
+```
+
+Retention is 15 days of metrics, 30 days of logs and 7 days of traces. Tile
+requests are traced at 5% — a single map pan is dozens of them — and everything
+else at 100%.
+
+The alert worth knowing about is `RateLimiterFailingOpen`. Rate limiting lives
+in Valkey and fails open, so a cache outage silently removes every limit in
+`RATE_LIMITS`; that counter is the only evidence it happened.
+
+## Backups — two stores, restored together
 
 The database and the object store are separate, and they fail apart. The records
 are reproducible (`import:convert` rebuilds them in minutes); **the mirrored
@@ -299,12 +328,20 @@ docker run --rm --network container:vestigia-dev-minio-1 \
 
 ### button showing available map types has to be extended by a choice that, when activated, shows an ancient map as on DARE (https://imperium.ahlfeldt.se/, Digital Atlas of the Roman Empire). Where can such a map be obtained/copied from? If not, can it be built?
 
-### forgot-password must send an email containing relevant information. Email must look appealing, using Vestigia's style
+### forgot-password must send an email containing relevant information.
+
+Email must look appealing, using Vestigia's style. Use Lettermint (EU) instead of resend
 
 ### how to login as an admin? How to self-grant admin rights?
 
-
 ## TODO important
+
 ### sitemap.xml is capped at 50,000 entries against 61,272 approved sites, so ~11,000 are silently unlisted. Unrelated to this work, but it is a real bug.
 
 ### Nothing in compose.prod.yml mounts docker/traefik/ into a container — Dokploy supplies Traefik, so whether it reads these repo files is not determinable from here. Worth confirming on the box.
+
+### check claude.md for unnecessary information. If new contexts don't have to get the information,
+
+write it to ./ARCHITECTURE.md instead.
+
+### package.json: prom-client has been replaced by @prometheus-io/client

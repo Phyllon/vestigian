@@ -32,17 +32,26 @@ export default defineEventHandler(async (event) => {
     'x-data-version': String(dataVersion),
   })
 
+  const plan = planTileRender(tile.z)
+
   try {
     const cached = await redis.getBuffer(cacheKey)
     if (cached) {
       setResponseHeader(event, 'x-tile-cache', 'hit')
+      tileRequestsTotal().inc({ strategy: plan.strategy, cache: 'hit' })
       return cached
     }
-  } catch {
-    // Cache miss by outage — fall through to the database.
+  } catch (error) {
+    // Cache miss by outage — fall through to the database. Logged because the
+    // difference between a cold cache and an unreachable one is invisible in
+    // the hit rate alone, and the second means every tile in the viewport is
+    // now a PostGIS aggregate.
+    event.context.log?.warn(
+      { err: { message: (error as Error).message } },
+      'tile cache unreadable, falling through to postgres',
+    )
   }
 
-  const plan = planTileRender(tile.z)
   const sql = useSql()
 
   const statement =
@@ -54,17 +63,36 @@ export default defineEventHandler(async (event) => {
           includeTracings: plan.includeTracings,
         })
 
-  const rows = await sql.unsafe<{ tile: Buffer | null }[]>(statement)
+  const renderStartedAt = performance.now()
+  const rows = await withSpan(
+    'postgis.render_tile',
+    () => sql.unsafe<{ tile: Buffer | null }[]>(statement),
+    // Zoom is bucketed by the strategy it selects, never recorded as a
+    // coordinate: `z/x/y` as attributes would make every tile its own trace
+    // dimension.
+    {
+      attributes: { strategy: plan.strategy, zoom: tile.z },
+      parent: event.context.span,
+    },
+  )
+  tileRenderDuration().observe(
+    { strategy: plan.strategy },
+    (performance.now() - renderStartedAt) / 1000,
+  )
+
   const body = rows[0]?.tile ?? Buffer.alloc(0)
 
   // An empty tile is still worth caching: most of the pyramid is ocean.
   try {
     await redis.set(cacheKey, body, 'EX', body.length === 0 ? 86400 : 3600)
-  } catch {
-    // Non-fatal.
+  } catch (error) {
+    // Non-fatal, but it means the next request for this tile pays the same
+    // PostGIS cost again.
+    event.context.log?.warn({ err: { message: (error as Error).message } }, 'tile not cached')
   }
 
   setResponseHeader(event, 'x-tile-cache', 'miss')
+  tileRequestsTotal().inc({ strategy: plan.strategy, cache: 'miss' })
 
   if (body.length === 0) {
     setResponseStatus(event, 204)
