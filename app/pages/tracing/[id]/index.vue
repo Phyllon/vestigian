@@ -62,7 +62,7 @@
         </UButton>
         <p class="datum ml-auto">
           Last revised
-          {{ new Date(tracing.updatedAt).toLocaleDateString('en-GB', { dateStyle: 'medium' }) }}
+          <time :datetime="tracing.updatedAt">{{ formatDate(tracing.updatedAt) }}</time>
         </p>
       </footer>
     </article>

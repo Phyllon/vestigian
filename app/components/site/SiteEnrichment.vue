@@ -97,7 +97,8 @@
         class="mt-2 inline-flex items-center gap-1.5 rounded-notebook border border-paper-300 px-2.5 py-1 text-xs text-ink-700 transition hover:border-oxide-600 hover:text-oxide-600 dark:border-night-600 dark:text-paper-200 dark:hover:border-oxide-300 dark:hover:text-oxide-300"
       >
         {{ enrichment.title }}
-        <UIcon name="i-lucide-arrow-up-right" class="size-3" />
+        <span class="sr-only">(opens in a new tab)</span>
+        <UIcon name="i-lucide-arrow-up-right" class="size-3" aria-hidden="true" />
       </a>
     </template>
   </section>

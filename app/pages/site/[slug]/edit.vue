@@ -52,9 +52,11 @@
         :to="`/site/${site.slug}`"
         class="eyebrow inline-flex items-center gap-1 hover:text-oxide-600"
       >
-        <UIcon name="i-lucide-arrow-left" class="size-3" />
+        <UIcon name="i-lucide-arrow-left" class="size-3" aria-hidden="true" />
         Back to the entry
       </NuxtLink>
+      <!-- The page's own heading. The form below it heads its section at h2. -->
+      <h1 class="mt-2 text-3xl leading-tight">{{ site.title }}</h1>
     </header>
 
     <div class="leaf p-6">

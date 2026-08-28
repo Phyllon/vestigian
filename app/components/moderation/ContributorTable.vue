@@ -114,48 +114,61 @@
     <UInput
       v-model="search"
       placeholder="Find a contributor"
+      aria-label="Find a contributor"
       icon="i-lucide-search"
       class="w-full max-w-xs"
     />
 
-    <div v-for="row in contributors" :key="row.id" class="leaf px-4 py-3">
-      <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <h3 class="text-base text-ink-900 dark:text-paper-100">{{ row.displayName }}</h3>
-        <span v-if="row.role !== 'contributor'" class="eyebrow text-oxide-600 dark:text-oxide-300">
-          {{ row.role }}
-        </span>
-        <span class="datum ml-auto">
-          {{ row.approvedContributions }} accepted
-          <template v-if="row.pendingCount > 0"> · {{ row.pendingCount }} waiting</template>
-        </span>
-      </div>
+    <!--
+      A list of people, not a stack of panels: the count and the position in it
+      are announced, which is what makes a long roll navigable by keyboard.
+    -->
+    <ul class="space-y-4">
+      <li v-for="row in contributors" :key="row.id" class="leaf px-4 py-3">
+        <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <h2 class="text-base text-ink-900 dark:text-paper-100">{{ row.displayName }}</h2>
+          <span
+            v-if="row.role !== 'contributor'"
+            class="eyebrow text-oxide-600 dark:text-oxide-300"
+          >
+            {{ row.role }}
+          </span>
+          <span class="datum ml-auto">
+            {{ row.approvedContributions }} accepted
+            <template v-if="row.pendingCount > 0"> · {{ row.pendingCount }} waiting</template>
+          </span>
+        </div>
 
-      <p class="mt-0.5 text-sm text-ink-500 dark:text-paper-400">
-        {{ describeStanding(row) }}
-      </p>
+        <p class="mt-0.5 text-sm text-ink-500 dark:text-paper-400">
+          {{ describeStanding(row) }}
+        </p>
 
-      <div class="mt-3 flex flex-wrap items-center gap-2">
-        <UButton
-          v-if="row.role === 'contributor'"
-          size="xs"
-          :variant="row.trustRevoked ? 'solid' : 'ghost'"
-          :color="row.trustRevoked ? 'success' : 'error'"
-          :loading="busyUserId === row.id"
-          @click="setTrust(row, !row.trustRevoked)"
-        >
-          {{ row.trustRevoked ? 'Restore trust' : 'Suspend publishing' }}
-        </UButton>
+        <div class="mt-3 flex flex-wrap items-center gap-2">
+          <!-- Every control here repeats per row, so each names its person. -->
+          <UButton
+            v-if="row.role === 'contributor'"
+            size="xs"
+            :variant="row.trustRevoked ? 'solid' : 'ghost'"
+            :color="row.trustRevoked ? 'success' : 'error'"
+            :loading="busyUserId === row.id"
+            :aria-label="`${row.trustRevoked ? 'Restore trust for' : 'Suspend publishing for'} ${row.displayName}`"
+            @click="setTrust(row, !row.trustRevoked)"
+          >
+            {{ row.trustRevoked ? 'Restore trust' : 'Suspend publishing' }}
+          </UButton>
 
-        <USelect
-          v-if="mayChangeRole(row)"
-          :model-value="row.role"
-          :items="roleOptions"
-          size="xs"
-          class="w-40"
-          @update:model-value="(value: string) => setRole(row, value)"
-        />
-      </div>
-    </div>
+          <USelect
+            v-if="mayChangeRole(row)"
+            :model-value="row.role"
+            :items="roleOptions"
+            :aria-label="`Role for ${row.displayName}`"
+            size="xs"
+            class="w-40"
+            @update:model-value="(value: string) => setRole(row, value)"
+          />
+        </div>
+      </li>
+    </ul>
 
     <p v-if="contributors.length === 0" class="datum">No contributors match that.</p>
   </div>

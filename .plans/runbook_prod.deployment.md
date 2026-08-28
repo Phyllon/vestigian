@@ -8,13 +8,13 @@ Server, keine Produktion.
 
 Was stattdessen vorliegt, geprüft:
 
-| | |
-| --- | --- |
-| Objekte in lokalem MinIO | **28.630, 15 GiB** |
-| `storage_key` in der DB | 36.216 distinct |
-| davon `approved` (= gespiegelt) | 28.629 |
-| davon `pending` (= noch nicht geladen) | **7.527** |
-| PMTiles-Basemap | **existiert nicht**, `BASEMAP_PROVIDER=openfreemap` |
+|                                        |                                                     |
+| -------------------------------------- | --------------------------------------------------- |
+| Objekte in lokalem MinIO               | **28.630, 15 GiB**                                  |
+| `storage_key` in der DB                | 36.216 distinct                                     |
+| davon `approved` (= gespiegelt)        | 28.629                                              |
+| davon `pending` (= noch nicht geladen) | **7.527**                                           |
+| PMTiles-Basemap                        | **existiert nicht**, `BASEMAP_PROVIDER=openfreemap` |
 
 Daraus folgen zwei Befunde, die beide gewichtiger sind als die gestrichene
 Migration.
@@ -53,11 +53,11 @@ dessen DB-Zeile ich gelöscht habe. Unkritisch, nichts löscht Bytes.
 
 Bunnys S3-API ist seit Juli 2026 **Public Preview**, nicht stabil. Deshalb:
 
-| Komponente | Weg |
-| --- | --- |
-| Upload aus der App (`images.post.ts`) | S3-Preview über den vorhandenen `@aws-sdk/client-s3` — schreibt selten, Fehler sind sichtbar und wiederholbar |
-| **imgproxy** | **nicht** S3, sondern die Pull-Zone per HTTPS. `IMGPROXY_USE_S3` aus. Umgeht die Preview-API im Lesepfad — und das ist der Hot Path |
-| `reconcile-images.ts` | S3-Preview, liest nur Objektlisten |
+| Komponente                            | Weg                                                                                                                                 |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Upload aus der App (`images.post.ts`) | S3-Preview über den vorhandenen `@aws-sdk/client-s3` — schreibt selten, Fehler sind sichtbar und wiederholbar                       |
+| **imgproxy**                          | **nicht** S3, sondern die Pull-Zone per HTTPS. `IMGPROXY_USE_S3` aus. Umgeht die Preview-API im Lesepfad — und das ist der Hot Path |
+| `reconcile-images.ts`                 | S3-Preview, liest nur Objektlisten                                                                                                  |
 
 ```bash
 # Storage Zone in Bunny anlegen (Falkenstein), Pull Zone davor.
@@ -137,8 +137,8 @@ Beides muss stimmen, dann `NUXT_BEHIND_TRUSTED_PROXY=true`.
 
 ## 5. CrowdSec-Bouncer
 
-CrowdSec ist zweigeteilt: die Engine *erkennt* und schreibt eine Entscheidung,
-ein *Bouncer* liest sie und blockiert. Aktuell läuft nur die erste Hälfte —
+CrowdSec ist zweigeteilt: die Engine _erkennt_ und schreibt eine Entscheidung,
+ein _Bouncer_ liest sie und blockiert. Aktuell läuft nur die erste Hälfte —
 `cscli decisions list` zeigt Bans, der Client wird weiter bedient. Bewusst: erst
 beobachten, welche Szenarien real feuern, dann scharfschalten.
 
@@ -176,12 +176,12 @@ Mechanismus setzen.
 
 0 → 1 → 2 → 3 → 4 → 5, einzeln deployen.
 
-| Schritt | Rollback |
-| --- | --- |
-| 1 Upload | nichts zu tun, MinIO bleibt unangetastet |
-| 3 Deployment | Env zurück, redeploy |
-| 4 Firewall | Regel löschen, `BEHIND_TRUSTED_PROXY=false` |
-| 5 Bouncer | Middleware vom Router nehmen, Erkennung läuft weiter |
+| Schritt      | Rollback                                             |
+| ------------ | ---------------------------------------------------- |
+| 1 Upload     | nichts zu tun, MinIO bleibt unangetastet             |
+| 3 Deployment | Env zurück, redeploy                                 |
+| 4 Firewall   | Regel löschen, `BEHIND_TRUSTED_PROXY=false`          |
+| 5 Bouncer    | Middleware vom Router nehmen, Erkennung läuft weiter |
 
 ## Offen
 

@@ -81,15 +81,21 @@
         class="max-h-40 rounded-notebook object-contain"
       />
       <template v-else>
-        <UIcon name="i-lucide-image-plus" class="size-6 text-ink-300" />
+        <UIcon name="i-lucide-image-plus" class="size-6 text-ink-300" aria-hidden="true" />
         <span class="text-sm text-ink-500 dark:text-paper-400">
           JPEG, PNG or WebP, up to 15 MB
         </span>
       </template>
+      <!--
+        The label's own content becomes the picture once one is chosen, which
+        leaves the control named "Selected photograph". The name is set here so
+        it says what the control does in both states.
+      -->
       <input
         ref="fileInput"
         type="file"
         accept="image/jpeg,image/png,image/webp"
+        aria-label="Choose a photograph — JPEG, PNG or WebP, up to 15 MB"
         class="sr-only"
         @change="choose"
       />

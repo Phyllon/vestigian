@@ -131,7 +131,7 @@
         v-if="!isReady"
         class="pointer-events-none absolute inset-0 grid place-items-center bg-paper-100 dark:bg-night-900"
       >
-        <p class="eyebrow animate-pulse">Unfolding the map</p>
+        <p class="eyebrow animate-pulse" role="status">Unfolding the map</p>
       </div>
     </Transition>
 

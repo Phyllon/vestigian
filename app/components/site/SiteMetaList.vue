@@ -30,13 +30,19 @@
 
     <dt class="eyebrow pt-0.5">Position</dt>
     <dd>
+      <!-- The copy affordance only appears on hover, so the name has to carry it. -->
       <button
         type="button"
         class="datum group inline-flex items-center gap-1.5 transition hover:text-oxide-600 dark:hover:text-oxide-300"
+        :aria-label="`Copy the coordinates ${coordinates}`"
         @click="copyCoordinates"
       >
         {{ coordinates }}
-        <UIcon name="i-lucide-copy" class="size-3 opacity-0 transition group-hover:opacity-100" />
+        <UIcon
+          name="i-lucide-copy"
+          class="size-3 opacity-0 transition group-hover:opacity-100"
+          aria-hidden="true"
+        />
       </button>
     </dd>
   </dl>

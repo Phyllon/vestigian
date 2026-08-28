@@ -41,9 +41,6 @@
     expanded.value = expanded.value === id ? null : id
   }
 
-  const formatWhen = (iso: string): string =>
-    new Date(iso).toLocaleDateString('en-GB', { dateStyle: 'medium' })
-
   const revert = async (revisionId: number): Promise<void> => {
     reverting.value = revisionId
     try {
@@ -79,6 +76,7 @@
           type="button"
           class="flex w-full items-baseline gap-2 py-1 text-left"
           :aria-expanded="expanded === revision.id"
+          :aria-controls="`revision-${revision.id}`"
           @click="toggle(revision.id)"
         >
           <span class="text-sm text-ink-900 dark:text-paper-100">
@@ -88,11 +86,16 @@
             revert
           </span>
           <span class="datum ml-auto shrink-0">
-            {{ revision.authorName ?? 'Unknown' }} · {{ formatWhen(revision.createdAt) }}
+            {{ revision.authorName ?? 'Unknown' }} ·
+            <time :datetime="revision.createdAt">{{ formatDate(revision.createdAt) }}</time>
           </span>
         </button>
 
-        <div v-if="expanded === revision.id" class="mt-2 space-y-3 pb-2">
+        <div
+          v-if="expanded === revision.id"
+          :id="`revision-${revision.id}`"
+          class="mt-2 space-y-3 pb-2"
+        >
           <ModerationRevisionDiff :changes="revision.changes" />
 
           <p class="datum">

@@ -12,6 +12,13 @@
   const draftCaption = ref('')
   const draftAttribution = ref('')
 
+  /**
+   * Four controls repeat per photograph, so "Edit" and "Withdraw" alone read as
+   * a wall of identical names. Every one of them says which picture it acts on.
+   */
+  const describe = (image: SiteImage, index: number): string =>
+    image.caption?.trim() || `photograph ${index + 1}`
+
   const move = async (image: SiteImage, direction: -1 | 1): Promise<void> => {
     const currentIndex = props.images.findIndex((candidate) => candidate.id === image.id)
     const targetIndex = currentIndex + direction
@@ -104,10 +111,17 @@
 
         <div class="min-w-0 flex-1">
           <template v-if="editingId === image.id">
-            <UInput v-model="draftCaption" placeholder="Caption" size="xs" class="w-full" />
+            <UInput
+              v-model="draftCaption"
+              placeholder="Caption"
+              aria-label="Caption"
+              size="xs"
+              class="w-full"
+            />
             <UInput
               v-model="draftAttribution"
               placeholder="Who took it"
+              aria-label="Who took it"
               size="xs"
               class="mt-1 w-full"
             />
@@ -141,7 +155,7 @@
                 color="neutral"
                 icon="i-lucide-arrow-up"
                 :disabled="index === 0 || busyImageId === image.id"
-                aria-label="Move earlier"
+                :aria-label="`Move ${describe(image, index)} earlier`"
                 @click="move(image, -1)"
               />
               <UButton
@@ -150,10 +164,16 @@
                 color="neutral"
                 icon="i-lucide-arrow-down"
                 :disabled="index === images.length - 1 || busyImageId === image.id"
-                aria-label="Move later"
+                :aria-label="`Move ${describe(image, index)} later`"
                 @click="move(image, 1)"
               />
-              <UButton size="xs" variant="ghost" color="neutral" @click="startEditing(image)">
+              <UButton
+                size="xs"
+                variant="ghost"
+                color="neutral"
+                :aria-label="`Edit the caption and credit of ${describe(image, index)}`"
+                @click="startEditing(image)"
+              >
                 Edit
               </UButton>
               <UButton
@@ -161,6 +181,7 @@
                 variant="ghost"
                 color="error"
                 :loading="busyImageId === image.id"
+                :aria-label="`Withdraw ${describe(image, index)}`"
                 @click="withdraw(image)"
               >
                 Withdraw

@@ -109,7 +109,7 @@
 </script>
 
 <template>
-  <div v-if="isDone" class="leaf p-6">
+  <div v-if="isDone" class="leaf p-6" role="status">
     <h1 class="text-xl">Check your inbox</h1>
     <p class="mt-2 text-sm text-ink-700 dark:text-paper-200">
       Confirm your address to finish setting up the account. The link is good for one day.
@@ -160,13 +160,21 @@
     </div>
 
     <!--
-      Self-hosted proof of work, in place of Turnstile. `challengeurl` points at
+      Self-hosted proof of work, in place of Turnstile. `challenge` points at
       our own endpoint, so the signup page loads nothing from a third party and
       no visitor signal leaves the box.
     -->
+    <!--
+      `challenge`, not `challengeurl`. ALTCHA v3 renamed the attribute, and the
+      old name is not rejected — it is ignored, so the widget silently falls
+      back to fetching the form's own action. It then receives the register
+      page's HTML, reports "invalid content-type", and never produces a
+      payload: the submit button stays disabled and **nobody can sign up**.
+      A 200 everywhere, nothing in the logs. Found by `e2e/auth.spec.ts`.
+    -->
     <altcha-widget
       ref="altchaWidget"
-      challengeurl="/api/auth/challenge"
+      challenge="/api/auth/challenge"
       hidefooter
       @statechange="rememberSolution"
     />

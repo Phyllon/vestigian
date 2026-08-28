@@ -15,6 +15,18 @@
 
 <template>
   <div class="fixed inset-0 flex flex-col bg-paper-100 dark:bg-night-900">
+    <!--
+      First in the tab order, visible only once focused. Without it a keyboard
+      or screen-reader visitor crosses the whole header on every route before
+      reaching the atlas itself.
+    -->
+    <a
+      href="#main"
+      class="sr-only rounded-notebook focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-50 focus:bg-paper-50 focus:px-3 focus:py-2 focus:text-sm focus:text-ink-900 focus:shadow-lifted dark:focus:bg-night-800 dark:focus:text-paper-100"
+    >
+      Skip to the map
+    </a>
+
     <header
       class="z-40 flex shrink-0 items-center gap-3 border-b border-paper-200 bg-paper-50 px-4 py-2 dark:border-night-700 dark:bg-night-800"
     >
@@ -33,7 +45,7 @@
         <span class="eyebrow hidden sm:inline">traces of antiquity</span>
       </NuxtLink>
 
-      <div class="ml-auto flex items-center gap-1">
+      <nav class="ml-auto flex items-center gap-1" aria-label="Main">
         <NuxtLink
           v-if="isModerator"
           to="/moderation"
@@ -45,9 +57,15 @@
         <UiThemeToggle />
 
         <template v-if="loggedIn">
+          <!--
+            The visible label is the account name, which on its own describes
+            who is signed in rather than what the control does. The accessible
+            name says both.
+          -->
           <button
             type="button"
             class="rounded-notebook px-3 py-1.5 text-sm text-ink-700 transition hover:bg-paper-200 dark:text-paper-200 dark:hover:bg-night-700"
+            :aria-label="`Sign out, signed in as ${currentUser?.displayName}`"
             @click="signOut"
           >
             {{ currentUser?.displayName }}
@@ -60,10 +78,11 @@
         >
           Sign in
         </NuxtLink>
-      </div>
+      </nav>
     </header>
 
-    <main class="relative min-h-0 flex-1">
+    <!-- `tabindex="-1"` so the skip link can move focus here, not only scroll. -->
+    <main id="main" tabindex="-1" class="relative min-h-0 flex-1 focus:outline-none">
       <slot />
     </main>
   </div>

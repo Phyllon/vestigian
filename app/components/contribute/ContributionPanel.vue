@@ -71,6 +71,7 @@
         <UIcon
           name="i-lucide-map-pin"
           class="mt-0.5 size-5 shrink-0 text-oxide-600 dark:text-oxide-300"
+          aria-hidden="true"
         />
         <span>
           <span class="block font-medium text-ink-900 dark:text-paper-100">A place</span>
@@ -88,6 +89,7 @@
         <UIcon
           name="i-lucide-spline"
           class="mt-0.5 size-5 shrink-0 text-oxide-600 dark:text-oxide-300"
+          aria-hidden="true"
         />
         <span>
           <span class="block font-medium text-ink-900 dark:text-paper-100">A route or line</span>
@@ -119,6 +121,7 @@
       <template v-else>
         <div
           class="rounded-notebook bg-verdigris-50 px-3 py-2 text-sm text-verdigris-700 dark:bg-verdigris-900 dark:text-verdigris-200"
+          role="status"
         >
           Site published. Add photographs while you are here, or close this panel.
         </div>

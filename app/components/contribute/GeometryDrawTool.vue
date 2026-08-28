@@ -99,11 +99,13 @@
 </script>
 
 <template>
-  <div class="leaf flex items-center gap-1 p-1">
+  <div class="leaf flex items-center gap-1 p-1" role="toolbar" aria-label="Drawing tools">
+    <!-- Which mode is active is otherwise carried by the fill colour alone. -->
     <button
       v-for="mode in modes"
       :key="mode.value"
       type="button"
+      :aria-pressed="activeMode === mode.value"
       class="grid size-9 place-items-center rounded-notebook transition"
       :class="
         activeMode === mode.value
@@ -114,10 +116,10 @@
       :title="mode.label"
       @click="setMode(mode.value)"
     >
-      <UIcon :name="mode.icon" class="size-4" />
+      <UIcon :name="mode.icon" class="size-4" aria-hidden="true" />
     </button>
 
-    <span class="mx-1 h-6 w-px bg-paper-300 dark:bg-night-600" />
+    <span class="mx-1 h-6 w-px bg-paper-300 dark:bg-night-600" aria-hidden="true" />
 
     <UButton size="xs" color="primary" @click="finish">Use this shape</UButton>
     <UButton size="xs" variant="ghost" color="neutral" @click="clear">Clear</UButton>

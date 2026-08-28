@@ -51,21 +51,23 @@
     <aside
       v-if="isPickerOpen"
       class="pointer-events-auto fixed inset-x-0 bottom-0 z-30 max-h-[78vh] overflow-y-auto rounded-t-lg bg-paper-50 shadow-lifted md:inset-y-0 md:left-auto md:right-0 md:max-h-none md:w-[26rem] md:rounded-none md:border-l md:border-paper-200 dark:bg-night-800 dark:md:border-night-700"
-      aria-label="Records at this point"
+      aria-labelledby="feature-picker-heading"
     >
       <div class="sticky top-0 z-10 bg-paper-50 pt-2 dark:bg-night-800 md:pt-0">
         <div class="mx-auto mb-1 h-1 w-10 rounded-full bg-paper-300 dark:bg-night-600 md:hidden" />
         <div
           class="flex items-start justify-between gap-3 border-b border-paper-200 px-5 py-3 dark:border-night-700"
         >
-          <p class="eyebrow pt-1">{{ overlappingFeatures.length }} records here</p>
+          <h2 id="feature-picker-heading" class="eyebrow pt-1">
+            {{ overlappingFeatures.length }} records here
+          </h2>
           <button
             type="button"
             class="grid size-8 shrink-0 place-items-center rounded-notebook text-ink-500 transition hover:bg-paper-200 dark:text-paper-400 dark:hover:bg-night-700"
-            aria-label="Dismiss"
+            aria-label="Dismiss the list of records here"
             @click="clearSelection"
           >
-            <UIcon name="i-lucide-x" class="size-4" />
+            <UIcon name="i-lucide-x" class="size-4" aria-hidden="true" />
           </button>
         </div>
       </div>
@@ -115,6 +117,7 @@
             <UIcon
               name="i-lucide-chevron-right"
               class="size-4 shrink-0 text-ink-300 dark:text-paper-600"
+              aria-hidden="true"
             />
           </button>
         </li>

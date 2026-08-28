@@ -94,7 +94,7 @@
         </UButton>
         <p class="datum ml-auto">
           Last revised
-          {{ new Date(site.updatedAt).toLocaleDateString('en-GB', { dateStyle: 'medium' }) }}
+          <time :datetime="site.updatedAt">{{ formatDate(site.updatedAt) }}</time>
         </p>
       </footer>
     </article>

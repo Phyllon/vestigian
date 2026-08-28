@@ -24,9 +24,10 @@
     >
       <div
         v-if="isOpen"
+        id="map-legend"
         class="rounded-notebook border border-paper-300 bg-paper-50/95 p-3 shadow-leaf backdrop-blur-sm dark:border-night-600 dark:bg-night-800/95"
       >
-        <p class="eyebrow mb-2">What the marks mean</p>
+        <h2 class="eyebrow mb-2">What the marks mean</h2>
 
         <ul class="grid grid-cols-2 gap-x-4 gap-y-1.5">
           <li v-for="category in SITE_CATEGORIES" :key="category" class="flex items-center gap-2">
@@ -71,6 +72,7 @@
       icon="i-lucide-key-round"
       class="shadow-leaf"
       :aria-expanded="isOpen"
+      aria-controls="map-legend"
       @click="toggle"
     >
       {{ isOpen ? 'Hide key' : 'Key' }}

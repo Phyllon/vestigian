@@ -27,7 +27,7 @@
 
 <template>
   <div class="mx-auto max-w-sm">
-    <div v-if="isSent" class="leaf p-6">
+    <div v-if="isSent" class="leaf p-6" role="status">
       <h1 class="text-xl">Check your inbox</h1>
       <p class="mt-2 text-sm text-ink-700 dark:text-paper-200">
         If that address has an account, a reset link is on its way. It works for one hour.

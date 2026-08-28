@@ -57,9 +57,13 @@
      rather than sitting in the reading layout. -->
 <template>
   <MapCanvas v-if="tracing">
+    <!-- The map fills the page; the heading it needs has nowhere visible to go. -->
+    <h1 class="sr-only">Edit {{ tracing.title }}</h1>
+
     <div class="pointer-events-none absolute inset-0">
       <aside
         class="pointer-events-auto absolute inset-x-0 bottom-0 max-h-[70vh] overflow-y-auto rounded-t-lg bg-paper-50 p-5 shadow-lifted md:inset-y-0 md:left-auto md:right-0 md:w-[26rem] md:rounded-none dark:bg-night-800"
+        aria-label="Tracing editor"
       >
         <ContributeTracingEditorForm
           :tracing-id="tracing.id"

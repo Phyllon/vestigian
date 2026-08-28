@@ -9,6 +9,10 @@
    * `aria-live="polite"` because the list changing is the feedback — without
    * it a screen reader announces the rules once and never mentions again that
    * they have been satisfied.
+   *
+   * The tick and the colour are the only thing separating a met rule from an
+   * unmet one on screen, and neither survives being read aloud or seen without
+   * colour, so each rule carries its state in text as well.
    */
   const props = defineProps<{ password: string }>()
 
@@ -21,6 +25,7 @@
       <UIcon
         :name="rule.isMet ? 'i-lucide-check' : 'i-lucide-minus'"
         class="size-3.5 shrink-0"
+        aria-hidden="true"
         :class="
           rule.isMet
             ? 'text-verdigris-600 dark:text-verdigris-300'
@@ -36,6 +41,7 @@
       >
         {{ rule.label }}
       </span>
+      <span class="sr-only">{{ rule.isMet ? '— met' : '— not yet met' }}</span>
     </li>
   </ul>
 </template>

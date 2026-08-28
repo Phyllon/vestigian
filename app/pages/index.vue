@@ -18,6 +18,13 @@
 
 <template>
   <MapCanvas>
+    <!--
+      The map is the page, so the page's only heading has nothing to draw. It
+      is still the first thing a screen reader looks for, and the record panels
+      below it are headed at level two on the strength of it.
+    -->
+    <h1 class="sr-only">Vestigia — an atlas of the ancient world</h1>
+
     <!-- Controls float over the map; the map itself never scrolls or reflows. -->
     <div class="pointer-events-none absolute inset-0 p-3 md:p-4">
       <div class="pointer-events-auto flex items-start gap-2">

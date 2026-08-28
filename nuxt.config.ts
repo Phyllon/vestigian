@@ -55,10 +55,21 @@ export default defineNuxtConfig({
 
   vue: {
     compilerOptions: {
-      // `<altcha-widget>` is a web component from the `altcha` package, not a
-      // Vue component. Without this the compiler treats it as an unresolved
-      // component and warns on every render of the signup form.
-      isCustomElement: (tag) => tag.startsWith('altcha-'),
+      /**
+       * Two tags the compiler would otherwise try to resolve as components.
+       *
+       * `<altcha-widget>` is a web component from the `altcha` package, not a
+       * Vue component. Without this the compiler treats it as an unresolved
+       * component and warns on every render of the signup form.
+       *
+       * `<search>` is a native element — the landmark wrapper around the map's
+       * search field — but Vue's list of known HTML tags predates it and has
+       * not caught up, so it was compiled as a component, resolved to nothing
+       * and left the built page hydrating over markup the client did not
+       * produce. Visible only as "Hydration completed but contains mismatches"
+       * in the production console.
+       */
+      isCustomElement: (tag) => tag.startsWith('altcha-') || tag === 'search',
     },
   },
 

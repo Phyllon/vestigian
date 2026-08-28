@@ -15,7 +15,7 @@
         class="mt-3 inline-flex items-center gap-1 text-sm text-oxide-600 underline underline-offset-2 dark:text-oxide-300"
       >
         Contributors
-        <UIcon name="i-lucide-arrow-right" class="size-3" />
+        <UIcon name="i-lucide-arrow-right" class="size-3" aria-hidden="true" />
       </NuxtLink>
     </header>
 

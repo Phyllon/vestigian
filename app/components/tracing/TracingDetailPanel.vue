@@ -62,7 +62,7 @@
               class="flex items-center gap-1 rounded-notebook px-2 py-1 text-xs text-ink-500 transition hover:bg-paper-200 dark:text-paper-400 dark:hover:bg-night-700"
               @click="returnToOverlappingFeatures"
             >
-              <UIcon name="i-lucide-chevron-left" class="size-3.5" />
+              <UIcon name="i-lucide-chevron-left" class="size-3.5" aria-hidden="true" />
               {{ overlappingFeatures.length }} records here
             </button>
 
@@ -72,14 +72,14 @@
               aria-label="Close tracing details"
               @click="close"
             >
-              <UIcon name="i-lucide-x" class="size-4" />
+              <UIcon name="i-lucide-x" class="size-4" aria-hidden="true" />
             </button>
           </div>
         </div>
       </div>
 
       <article class="px-5 py-5">
-        <h1 class="text-2xl leading-tight">{{ tracing.title }}</h1>
+        <h2 class="text-2xl leading-tight">{{ tracing.title }}</h2>
 
         <dl
           class="mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 border-y border-paper-200 py-3 dark:border-night-700"

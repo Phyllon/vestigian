@@ -95,13 +95,17 @@
 
 <template>
   <div class="space-y-4">
-    <div v-if="status === 'pending'" class="datum">Loading the queue…</div>
+    <p v-if="status === 'pending'" class="datum" role="status">Loading the queue…</p>
 
     <div
       v-else-if="selected.size > 0"
       class="leaf sticky top-2 z-10 flex flex-wrap items-center gap-2 px-4 py-2"
+      role="group"
+      aria-label="Actions for the selected revisions"
     >
-      <p class="text-sm text-ink-700 dark:text-paper-200">{{ selected.size }} selected</p>
+      <p class="text-sm text-ink-700 dark:text-paper-200" role="status">
+        {{ selected.size }} selected
+      </p>
       <div class="ml-auto flex gap-2">
         <UButton
           size="xs"
@@ -135,7 +139,12 @@
       </p>
     </div>
 
-    <article v-for="item in data?.items ?? []" :key="item.id" class="leaf px-5 py-4">
+    <article
+      v-for="item in data?.items ?? []"
+      :key="item.id"
+      :aria-labelledby="`revision-title-${item.id}`"
+      class="leaf px-5 py-4"
+    >
       <div class="flex flex-wrap items-baseline justify-between gap-2">
         <UCheckbox
           :model-value="selected.has(item.id)"
@@ -150,7 +159,7 @@
         </p>
       </div>
 
-      <h2 class="mt-1 text-lg">{{ item.payload.title }}</h2>
+      <h2 :id="`revision-title-${item.id}`" class="mt-1 text-lg">{{ item.payload.title }}</h2>
 
       <p
         v-if="item.blanking"
@@ -175,10 +184,12 @@
       </div>
 
       <div class="mt-4 flex gap-2">
+        <!-- One pair per queued revision, so the name says which one. -->
         <UButton
           size="sm"
           color="success"
           :loading="reviewing === item.id"
+          :aria-label="`Publish ${item.payload.title}`"
           @click="decide(item.id, 'approved')"
         >
           Publish
@@ -188,6 +199,7 @@
           variant="ghost"
           color="error"
           :loading="reviewing === item.id"
+          :aria-label="`Reject ${item.payload.title}`"
           @click="decide(item.id, 'rejected')"
         >
           Reject

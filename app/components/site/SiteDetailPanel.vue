@@ -77,7 +77,7 @@
               class="flex items-center gap-1 rounded-notebook px-2 py-1 text-xs text-ink-500 transition hover:bg-paper-200 dark:text-paper-400 dark:hover:bg-night-700"
               @click="returnToOverlappingFeatures"
             >
-              <UIcon name="i-lucide-chevron-left" class="size-3.5" />
+              <UIcon name="i-lucide-chevron-left" class="size-3.5" aria-hidden="true" />
               {{ overlappingFeatures.length }} records here
             </button>
 
@@ -87,7 +87,7 @@
               aria-label="Close site details"
               @click="close"
             >
-              <UIcon name="i-lucide-x" class="size-4" />
+              <UIcon name="i-lucide-x" class="size-4" aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -100,7 +100,7 @@
       </div>
 
       <article v-else-if="site" class="px-5 py-5">
-        <h1 class="text-2xl leading-tight">{{ site.title }}</h1>
+        <h2 class="text-2xl leading-tight">{{ site.title }}</h2>
 
         <p
           v-if="site.summary"
@@ -158,7 +158,7 @@
           </NuxtLink>
           <p class="datum ml-auto">
             Revised
-            {{ new Date(site.updatedAt).toLocaleDateString('en-GB', { dateStyle: 'medium' }) }}
+            <time :datetime="site.updatedAt">{{ formatDate(site.updatedAt) }}</time>
           </p>
         </div>
       </article>

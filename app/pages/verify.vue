@@ -6,6 +6,11 @@
   const state = ref<'working' | 'done' | 'failed'>('working')
   const message = ref('')
 
+  /**
+   * The card is rewritten in place once the token comes back — same heading
+   * slot, different outcome — so `aria-live` on the card is what turns a
+   * redraw into something a screen reader reports.
+   */
   const verify = async (): Promise<void> => {
     const token = route.query.token as string | undefined
     if (!token) {
@@ -30,7 +35,7 @@
 </script>
 
 <template>
-  <div class="leaf mx-auto max-w-md p-8">
+  <div class="leaf mx-auto max-w-md p-8" aria-live="polite">
     <template v-if="state === 'working'">
       <p class="eyebrow">Checking</p>
       <h1 class="mt-2 text-2xl">One moment</h1>

@@ -178,6 +178,14 @@ export const useSiteSearch = () => {
 }
 
 /**
+ * The reading form of a timestamp. Every date rendered from one of these is
+ * wrapped in a `<time datetime>` carrying the ISO string it came from, so this
+ * is only ever the half a person reads.
+ */
+export const formatDate = (iso: string): string =>
+  new Date(iso).toLocaleDateString('en-GB', { dateStyle: 'medium' })
+
+/**
  * Formats a date range the way an archaeological label reads it. Years are
  * plain integers in the database, with negatives meaning BC, so the era suffix
  * is derived rather than stored.
