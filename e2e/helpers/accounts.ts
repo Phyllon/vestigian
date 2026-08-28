@@ -20,6 +20,8 @@ export interface TestAccount {
   role: 'contributor' | 'moderator' | 'admin'
   /** Zero keeps every contribution queued; two or more publishes immediately. */
   approvedContributions: number
+  /** Defaults to confirmed. Only the account testing the resend is not. */
+  emailVerified?: boolean
 }
 
 export const ACCOUNTS = {
@@ -36,6 +38,17 @@ export const ACCOUNTS = {
     displayName: 'E2E Trusted',
     role: 'contributor',
     approvedContributions: 5,
+  },
+  /**
+   * Never confirmed its address, so `login` refuses it and re-sends the link.
+   * Nothing else may sign in as this account.
+   */
+  unverified: {
+    email: 'unverified@e2e.local',
+    displayName: 'E2E Unverified',
+    role: 'contributor',
+    approvedContributions: 0,
+    emailVerified: false,
   },
   moderator: {
     email: 'moderator@e2e.local',
@@ -63,7 +76,8 @@ const connect = () =>
  * Idempotent: deletes any leftovers first, so a suite interrupted halfway
  * through leaves nothing that changes the next run's outcome. `email_verified_at`
  * is set because `login.post.ts` refuses unverified addresses outside
- * development, and this suite runs against a production build.
+ * development, and this suite runs against a production build — except for the
+ * one account whose whole purpose is to be refused.
  */
 export const seedAccounts = async (): Promise<void> => {
   const sql = connect()
@@ -83,7 +97,8 @@ export const seedAccounts = async (): Promise<void> => {
         INSERT INTO users (email, display_name, password_hash, role,
                            approved_contributions, email_verified_at)
         VALUES (${account.email}, ${account.displayName}, ${passwordHash},
-                ${account.role}::user_role, ${account.approvedContributions}, now())
+                ${account.role}::user_role, ${account.approvedContributions},
+                ${(account as TestAccount).emailVerified === false ? null : new Date()})
       `
     }
   } finally {

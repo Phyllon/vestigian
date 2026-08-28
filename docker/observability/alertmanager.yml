@@ -1,10 +1,12 @@
-# Resend over SMTP, reusing the credential the app already holds rather than
-# introducing a second mail path. SMTP_* are supplied by the environment.
+# Lettermint over SMTP, reusing the credential the app already holds rather than
+# introducing a second mail path. The username is the literal string
+# `lettermint`; the password is the project token, the same one the app sends as
+# `x-lettermint-token`. Port 587 is STARTTLS. ALERT_* come from the environment.
 global:
   resolve_timeout: 5m
   smtp_from: '${ALERT_FROM}'
-  smtp_smarthost: 'smtp.resend.com:587'
-  smtp_auth_username: 'resend'
+  smtp_smarthost: 'smtp.lettermint.co:587'
+  smtp_auth_username: 'lettermint'
   smtp_auth_password: '${MAIL_API_KEY}'
 
 route:

@@ -29,6 +29,17 @@
   const selected = ref<Set<number>>(new Set())
   const isBatchRunning = ref(false)
 
+  /**
+   * What the moderator wants to say, kept per revision and once for the batch.
+   *
+   * Both endpoints have always accepted a note and nothing ever sent one, which
+   * did not matter while the decision was only visible in the queue. It matters
+   * now that the decision is emailed: without this, every rejection reached its
+   * author saying that it was refused and nothing about why.
+   */
+  const notes = reactive<Record<number, string>>({})
+  const batchNote = ref('')
+
   const toggleSelection = (revisionId: number): void => {
     const next = new Set(selected.value)
     if (next.has(revisionId)) next.delete(revisionId)
@@ -49,13 +60,21 @@
     try {
       const result = await $fetch<{ succeeded: number; skipped: number }>(
         '/api/moderation/review-batch',
-        { method: 'POST', body: { revisionIds: [...selected.value], decision } },
+        {
+          method: 'POST',
+          body: {
+            revisionIds: [...selected.value],
+            decision,
+            note: batchNote.value.trim() || undefined,
+          },
+        },
       )
       toast.add({
         title: `${result.succeeded} ${decision}.`,
         description: result.skipped > 0 ? `${result.skipped} skipped.` : undefined,
         color: result.skipped > 0 ? 'warning' : 'success',
       })
+      batchNote.value = ''
       clearSelection()
       await refresh()
     } catch (error) {
@@ -74,8 +93,9 @@
     try {
       await $fetch('/api/moderation/review', {
         method: 'POST',
-        body: { revisionId, decision },
+        body: { revisionId, decision, note: notes[revisionId]?.trim() || undefined },
       })
+      notes[revisionId] = ''
       toast.add({
         title: decision === 'approved' ? 'Published' : 'Rejected',
         color: decision === 'approved' ? 'success' : 'neutral',
@@ -106,6 +126,14 @@
       <p class="text-sm text-ink-700 dark:text-paper-200" role="status">
         {{ selected.size }} selected
       </p>
+
+      <UInput
+        v-model="batchNote"
+        placeholder="Note, sent to every author (optional)"
+        aria-label="Note sent to the author of every selected revision"
+        size="xs"
+        class="w-full sm:w-72"
+      />
       <div class="ml-auto flex gap-2">
         <UButton
           size="xs"
@@ -183,7 +211,20 @@
         <ModerationRevisionDiff :changes="item.changes" />
       </div>
 
-      <div class="mt-4 flex gap-2">
+      <UFormField
+        :label="`Note to ${item.author_name ?? 'the contributor'}`"
+        hint="Emailed with the decision"
+        class="mt-4"
+      >
+        <UTextarea
+          v-model="notes[item.id]"
+          :rows="2"
+          placeholder="Why — especially if this is a rejection. A contributor cannot see the queue."
+          class="w-full"
+        />
+      </UFormField>
+
+      <div class="mt-3 flex gap-2">
         <!-- One pair per queued revision, so the name says which one. -->
         <UButton
           size="sm"

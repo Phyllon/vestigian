@@ -24,6 +24,16 @@
   const search = ref('')
   const busyUserId = ref<number | null>(null)
 
+  /**
+   * Suspension asks for a reason before it happens; restoring does not.
+   *
+   * Two steps rather than one because the endpoint now emails the contributor:
+   * the reason is the only part of a suspension they can act on, and a control
+   * that fires on the first click would send that mail with nothing in it.
+   */
+  const suspendingUserId = ref<number | null>(null)
+  const suspensionReason = ref('')
+
   const { data, refresh } = await useFetch<ContributorList>('/api/moderation/users', {
     query: { search },
   })
@@ -68,17 +78,38 @@
       adminCount: data.value?.adminCount ?? 0,
     }).allowed
 
-  const setTrust = async (row: ContributorRow, revoked: boolean): Promise<void> => {
-    busyUserId.value = row.id
+  const startSuspension = (row: ContributorRow): void => {
+    suspendingUserId.value = row.id
+    suspensionReason.value = ''
+  }
+
+  const cancelSuspension = (): void => {
+    suspendingUserId.value = null
+  }
+
+  interface TrustChange {
+    row: ContributorRow
+    revoked: boolean
+    reason?: string
+  }
+
+  const setTrust = async (change: TrustChange): Promise<void> => {
+    busyUserId.value = change.row.id
     try {
       await $fetch('/api/moderation/trust', {
         method: 'POST',
-        body: { userId: row.id, revoked },
+        body: {
+          userId: change.row.id,
+          revoked: change.revoked,
+          reason: change.reason?.trim() || undefined,
+        },
       })
       toast.add({
-        title: revoked ? 'Automatic publishing suspended.' : 'Trust restored.',
-        color: revoked ? 'neutral' : 'success',
+        title: change.revoked ? 'Automatic publishing suspended.' : 'Trust restored.',
+        description: `${change.row.displayName} has been told by email.`,
+        color: change.revoked ? 'neutral' : 'success',
       })
+      suspendingUserId.value = null
       await refresh()
     } catch (error) {
       toast.add({
@@ -146,19 +177,29 @@
         <div class="mt-3 flex flex-wrap items-center gap-2">
           <!-- Every control here repeats per row, so each names its person. -->
           <UButton
-            v-if="row.role === 'contributor'"
+            v-if="row.role === 'contributor' && row.trustRevoked"
             size="xs"
-            :variant="row.trustRevoked ? 'solid' : 'ghost'"
-            :color="row.trustRevoked ? 'success' : 'error'"
+            color="success"
             :loading="busyUserId === row.id"
-            :aria-label="`${row.trustRevoked ? 'Restore trust for' : 'Suspend publishing for'} ${row.displayName}`"
-            @click="setTrust(row, !row.trustRevoked)"
+            :aria-label="`Restore trust for ${row.displayName}`"
+            @click="setTrust({ row, revoked: false })"
           >
-            {{ row.trustRevoked ? 'Restore trust' : 'Suspend publishing' }}
+            Restore trust
+          </UButton>
+
+          <UButton
+            v-else-if="row.role === 'contributor' && suspendingUserId !== row.id"
+            size="xs"
+            variant="ghost"
+            color="error"
+            :aria-label="`Suspend publishing for ${row.displayName}`"
+            @click="startSuspension(row)"
+          >
+            Suspend publishing
           </UButton>
 
           <USelect
-            v-if="mayChangeRole(row)"
+            v-if="mayChangeRole(row) && suspendingUserId !== row.id"
             :model-value="row.role"
             :items="roleOptions"
             :aria-label="`Role for ${row.displayName}`"
@@ -166,6 +207,34 @@
             class="w-40"
             @update:model-value="(value: string) => setRole(row, value)"
           />
+        </div>
+
+        <div v-if="suspendingUserId === row.id" class="mt-3">
+          <UFormField
+            :label="`Why is ${row.displayName} being suspended?`"
+            hint="Emailed to them, verbatim"
+          >
+            <UInput
+              v-model="suspensionReason"
+              placeholder="Three edits removed sourced text without saying why."
+              class="w-full"
+            />
+          </UFormField>
+
+          <div class="mt-2 flex flex-wrap items-center gap-2">
+            <UButton
+              size="xs"
+              color="error"
+              :loading="busyUserId === row.id"
+              @click="setTrust({ row, revoked: true, reason: suspensionReason })"
+            >
+              Suspend publishing
+            </UButton>
+            <UButton size="xs" variant="ghost" color="neutral" @click="cancelSuspension">
+              Cancel
+            </UButton>
+            <p class="datum">Their accepted contributions are untouched.</p>
+          </div>
         </div>
       </li>
     </ul>

@@ -1,12 +1,74 @@
 import { z } from 'zod'
-import { eq, sql } from 'drizzle-orm'
-import { users } from '~~/server/database/schema'
+import { and, desc, eq, isNull, sql } from 'drizzle-orm'
+import { emailTokens, users } from '~~/server/database/schema'
 import type { SessionUser } from '#shared/types'
 
 const credentialsSchema = z.object({
   email: z.string().email().max(320),
   password: z.string().min(1).max(200),
 })
+
+/** One fresh link per quarter of an hour, however often signing in is retried. */
+const CONFIRMATION_RESEND_INTERVAL = 15 * 60 * 1000
+
+/**
+ * Sends a new confirmation link to an account that has never confirmed one.
+ *
+ * Without this the flow dead-ends: the first mail is worth nothing after a day,
+ * login refuses an unverified address, and there is no other way to ask for
+ * another link — a lost or expired mail meant an account nobody could ever
+ * reach. It runs only after the password has already been verified, so it adds
+ * no way to discover which addresses are registered, and it is the reason this
+ * branch has to sit below the credential check rather than beside it.
+ *
+ * `email_tokens` records no issue time, so the throttle reads it off the
+ * expiry, which is the issue time plus a fixed lifetime. That avoids a
+ * migration for a column with one use.
+ */
+interface UnverifiedAccount {
+  userId: number
+  displayName: string
+  email: string
+}
+
+const resendConfirmationLink = async (account: UnverifiedAccount): Promise<boolean> => {
+  const database = useDatabase()
+  const config = useRuntimeConfig()
+
+  const [latest] = await database
+    .select({ expiresAt: emailTokens.expiresAt })
+    .from(emailTokens)
+    .where(
+      and(
+        eq(emailTokens.userId, account.userId),
+        eq(emailTokens.purpose, 'verify-email'),
+        isNull(emailTokens.consumedAt),
+      ),
+    )
+    .orderBy(desc(emailTokens.expiresAt))
+    .limit(1)
+
+  const issuedAfter = Date.now() + TOKEN_LIFETIMES['verify-email'] - CONFIRMATION_RESEND_INTERVAL
+  if (latest && latest.expiresAt.getTime() > issuedAfter) return false
+
+  const issued = issueToken('verify-email')
+
+  await database.insert(emailTokens).values({
+    userId: account.userId,
+    tokenHash: issued.tokenHash,
+    purpose: 'verify-email',
+    expiresAt: issued.expiresAt,
+  })
+
+  await sendTokenMail('verify-email', {
+    to: account.email,
+    displayName: account.displayName,
+    link: buildTokenLink(config.public.siteUrl, 'verify-email', issued.token),
+    expiresAt: issued.expiresAt,
+  })
+
+  return true
+}
 
 export default defineEventHandler(async (event) => {
   await enforceRateLimit(event, 'login')
@@ -54,12 +116,23 @@ export default defineEventHandler(async (event) => {
   }
 
   if (!account.emailVerifiedAt && !import.meta.dev) {
+    const resent = await resendConfirmationLink({
+      userId: account.id,
+      displayName: account.displayName,
+      email: credentials.email,
+    })
+
     authEventsTotal().inc({ event: 'login', outcome: 'unverified' })
     event.context.log.warn(
-      { audit: 'auth.login', userId: account.id },
+      { audit: 'auth.login', userId: account.id, resent },
       'login refused: email not verified',
     )
-    throw createError({ statusCode: 403, message: 'Confirm your email address first.' })
+    throw createError({
+      statusCode: 403,
+      message: resent
+        ? 'Confirm your email address first. A fresh link is on its way.'
+        : 'Confirm your email address first. A link was sent recently — check your inbox, and the spam folder.',
+    })
   }
 
   authEventsTotal().inc({ event: 'login', outcome: 'accepted' })

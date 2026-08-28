@@ -99,6 +99,25 @@ export default defineEventHandler(async (event) => {
   // One invalidation for the whole batch, not one per revision.
   if (appliedAny) await bumpDataVersion()
 
+  /**
+   * In parallel, and only for the ones that were actually decided. Fifty
+   * sequential provider round trips would add ten seconds to a moderator's
+   * click; `notifyReviewDecision` swallows its own failures, so
+   * `allSettled` here is belt and braces rather than the guard.
+   */
+  await Promise.allSettled(
+    outcomes
+      .filter((outcome) => outcome.status !== 'skipped')
+      .map((outcome) =>
+        notifyReviewDecision({
+          revisionId: outcome.revisionId,
+          decision: outcome.status as 'approved' | 'rejected',
+          note: note ?? null,
+          moderatorName: moderator.displayName,
+        }),
+      ),
+  )
+
   const succeeded = outcomes.filter((outcome) => outcome.status !== 'skipped').length
 
   return {

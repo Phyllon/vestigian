@@ -44,6 +44,15 @@ export default defineEventHandler(async (event) => {
     await bumpDataVersion()
   }
 
+  // After the decision is written and applied, never before: the author is told
+  // what happened, and a failure here cannot undo what already did.
+  await notifyReviewDecision({
+    revisionId,
+    decision,
+    note: note ?? null,
+    moderatorName: moderator.displayName,
+  })
+
   moderationActionsTotal().inc({ action: decision })
   event.context.log.info(
     {

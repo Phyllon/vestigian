@@ -36,6 +36,7 @@ export default defineEventHandler(async (event) => {
       to: email,
       displayName: account.displayName,
       link: buildTokenLink(config.public.siteUrl, 'reset-password', issued.token),
+      expiresAt: issued.expiresAt,
     })
   }
 

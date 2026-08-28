@@ -77,12 +77,13 @@ addresses end in `@e2e.local`; published records are titled `E2E …`. The suite
 writes real contributions, so without the teardown the moderation queue fills
 with revisions a human would have to dismiss.
 
-| Account     | Standing                              |
-| ----------- | ------------------------------------- |
-| `newcomer`  | trust 0 — everything queued           |
-| `trusted`   | five accepted — publishes immediately |
-| `moderator` | reviews the queue                     |
-| `admin`     | changes roles                         |
+| Account      | Standing                                                             |
+| ------------ | -------------------------------------------------------------------- |
+| `newcomer`   | trust 0 — everything queued                                          |
+| `unverified` | never confirmed its address — login refuses it and re-sends the link |
+| `trusted`    | five accepted — publishes immediately                                |
+| `moderator`  | reviews the queue                                                    |
+| `admin`      | changes roles                                                        |
 
 ## Known environment mismatch
 

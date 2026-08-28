@@ -13,14 +13,19 @@ export default defineEventHandler(async (event) => {
   const { token, password } = await readValidatedBody(event, bodySchema.parse)
   const database = useDatabase()
 
+  // Joined rather than looked up afterwards: the confirmation mail below needs
+  // the address and the name, and the token row already identifies the account.
   const [stored] = await database
     .select({
       id: emailTokens.id,
       userId: emailTokens.userId,
       expiresAt: emailTokens.expiresAt,
       consumedAt: emailTokens.consumedAt,
+      email: users.email,
+      displayName: users.displayName,
     })
     .from(emailTokens)
+    .innerJoin(users, eq(users.id, emailTokens.userId))
     .where(
       and(eq(emailTokens.tokenHash, hashToken(token)), eq(emailTokens.purpose, 'reset-password')),
     )
@@ -57,6 +62,19 @@ export default defineEventHandler(async (event) => {
           isNull(emailTokens.consumedAt),
         ),
       )
+  })
+
+  /**
+   * The one message nobody asks for and everybody needs. A password reset is
+   * the last step of an account takeover as well as of a forgotten password,
+   * and this is the only point at which the real owner finds out — the reset
+   * link itself went to an inbox the attacker may already control, but this
+   * lands after the fact and says what to do about it.
+   */
+  await sendAccountMail('password-changed', {
+    to: stored!.email,
+    displayName: stored!.displayName,
+    siteUrl: useRuntimeConfig().public.siteUrl,
   })
 
   // The session is not created here on purpose: resetting a password should end

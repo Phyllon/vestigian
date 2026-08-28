@@ -47,6 +47,9 @@ services:
       NUXT_STORAGE_ACCESS_KEY_ID: ${BUNNY_ACCESS_KEY_ID}
       NUXT_STORAGE_SECRET_ACCESS_KEY: ${BUNNY_SECRET_ACCESS_KEY}
       NUXT_MAIL_API_KEY: ${MAIL_API_KEY}
+      # The envelope sender has to be an address on a domain verified with
+      # Lettermint, or every message is refused at the API rather than bounced.
+      NUXT_MAIL_FROM: ${MAIL_FROM}
     depends_on:
       postgres:
         condition: service_healthy
@@ -283,7 +286,7 @@ services:
     environment:
       ALERT_FROM: ${ALERT_FROM}
       ALERT_TO: ${ALERT_TO}
-      # Resend over SMTP, reusing the key the app already holds rather than
+      # Lettermint over SMTP, reusing the key the app already holds rather than
       # standing up a second mail path.
       MAIL_API_KEY: ${MAIL_API_KEY}
     command:

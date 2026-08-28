@@ -19,7 +19,7 @@ const trustSchema = z.object({
 export default defineEventHandler(async (event) => {
   const moderator = await requireModerator(event)
   await enforceRateLimit(event, 'contribute')
-  const { userId, revoked } = await readValidatedBody(event, trustSchema.parse)
+  const { userId, revoked, reason } = await readValidatedBody(event, trustSchema.parse)
   const database = useDatabase()
 
   const [target] = await database
@@ -42,6 +42,18 @@ export default defineEventHandler(async (event) => {
   // deliberately leaves alone — so restoring returns someone to the standing
   // they had earned without this endpoint having to recompute it.
   await database.update(users).set({ trustRevoked: revoked }).where(eq(users.id, userId))
+
+  /**
+   * Suspension is the one moderation outcome with nothing to see: the account
+   * still works, the map is unchanged, and edits simply stop appearing. Told
+   * nothing, a contributor reads that as the site being broken.
+   */
+  await notifyTrustChange({
+    userId,
+    revoked,
+    reason: reason ?? null,
+    moderatorName: moderator.displayName,
+  })
 
   moderationActionsTotal().inc({ action: 'trust' })
   event.context.log.info(

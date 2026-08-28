@@ -54,6 +54,7 @@ Tokens live in `app/assets/css/main.css` as Tailwind v4 `@theme` variables. Nuxt
 | **Drizzle + `postgres.js`**              | TS-first. Drizzle is the default for every query; raw SQL is kept for PostGIS only — six files, not "most of the hot path" as this table used to claim. See "Which client to reach for".                                             |
 | **Valkey**                               | Tile cache, sessions, rate limits. Redis-compatible, no licence question.                                                                                                                                                            |
 | **Bunny.net + imgproxy**                 | One original stored per image; derivatives on the fly. Zero egress.                                                                                                                                                                  |
+| **Lettermint**                           | Transactional mail, hosted in the EU. Replaced Resend, whose only fault was being US-hosted for data — addresses, display names — that the CDN and object-store moves had already brought back inside the EU.                        |
 | **terra-draw**                           | Framework-agnostic drawing that works with MapLibre.                                                                                                                                                                                 |
 | **Grafana + Loki + Tempo + Prometheus**  | One agent (Alloy) carries logs, traces and metrics; Vector carries no traces, and Alloy's built-in exporters replace four separate exporter containers. Promtail reached EOL in March 2026. All on local disk — see "Observability". |
 | **Dokploy on one Hetzner VPS**           | ~€27/month all-in vs ~€60–90 for managed k8s. Dokploy _is_ Docker Compose, so dev and prod are the same artifact.                                                                                                                    |
@@ -108,6 +109,16 @@ whatever client it is handed — see the note in `server/utils/db.ts`.
 - **An edit that removes more than it adds is queued regardless of trust** (`isBlankingEdit`). This deliberately overrides the trust rule; a wrong auto-approval on a blanking edit costs far more than a moderator glance.
 - **Revert writes a new revision** restoring the prior state. Never delete a revision. History is append-only.
 - **Reverts do not increment the moderator's trust counter** — housekeeping is not contribution.
+- **A decision reaches the person it was made about.** `review`, `review-batch`
+  and `trust` mail the author or the account after the write, never before, and
+  a mail failure can never undo a decision that has already been applied — see
+  `server/utils/notifications.ts`. A revert is excluded: its author is the
+  moderator, so the mail would report someone's housekeeping back to them.
+  The review queue and the contributor list send the moderator's own words with
+  it — the note per revision, the reason for a suspension. Both are optional and
+  the copy adapts, but a rejection with nothing in it is a decision the author
+  cannot act on, which is why suspending is now two clicks with a field between
+  them.
 - **Nobody can change their own role** (`checkRoleChange`), which is also what keeps an instance from losing its last admin — that rule's own `last-admin` branch cannot be reached, since removing the final admin requires being them. See the comments in the function.
 - **Role and trust are re-read from the database inside every guard.** The session cookie is sealed at login and nothing refreshes it, so reading a role from it let a demoted moderator keep moderating until they logged out. `requireModerator`/`requireAdmin` cost one primary-key lookup and are the reason a demotion bites on the next request.
 - **Slugs never change on edit.** Inbound links, citations and the sitemap point at them.
@@ -118,6 +129,22 @@ whatever client it is handed — see the note in `server/utils/db.ts`.
 - argon2id at OWASP parameters. Login always hashes (against `DUMMY_HASH` when no user matches) so timing cannot enumerate the user table.
 - `forgot-password` responds **identically** whether or not the address exists. Registration no longer does: a duplicate email or display name is reported as a 409 so the person can try again. That was a deliberate trade of the enumeration guarantee for a form that is not a dead end — see the comment in `server/api/auth/register.post.ts`, which records what still throttles it and what the alternative was.
 - Only the SHA-256 **hash** of an email token is stored; comparison is constant-time.
+- **A password reset tells the owner it happened.** The reset link goes to an
+  inbox an attacker may already hold; this message lands afterwards and is the
+  only point at which the real owner finds out, so it names the recovery route
+  rather than merely confirming.
+- **An unverified login re-sends the confirmation link**, at most one per
+  quarter of an hour. It sits _below_ the credential check on purpose: after a
+  correct password there is nothing left to enumerate. Without it the flow dead
+  ends — the first link is worth nothing after a day, login refuses an
+  unconfirmed address, and nothing else issues another.
+- **Mail delivery never throws.** A provider outage that propagated would make
+  `forgot-password` answer 500 for a registered address and 200 for an unknown
+  one — the exact oracle the identical-response rule exists to close. Failures
+  land in the log and in `mail_deliveries_total{outcome="failed"}` instead.
+- **Nothing a user typed reaches an inbox as markup.** Display names and the
+  submitted address are escaped by `renderTokenEmail`; that is what
+  `mail-template`'s tests are for.
 - Uploads: the declared content type is a hint. Format is read from **magic bytes** (`detectImageFormat`), and every image is **re-encoded through sharp**, which strips EXIF and guarantees the stored object is a plain JPEG. Storage keys derive from database ids, **never** from the uploaded filename.
 - Images with an unresolved licence (`UNKNOWN`) or `ARR` are never published.
 - Signup: **self-hosted ALTCHA** proof of work + honeypot (positioned off-screen, not `display:none`) + per-IP rate limit + email verification. ALTCHA replaced Turnstile to remove the last third-party runtime dependency; it prices automated signup rather than detecting it, which is **weaker** against a funded attacker. That is acceptable only because login refuses unverified addresses and every new account is trust level 0, so a bot that solves the puzzle still earns nothing but a queued revision. The solved salt is burned in Valkey — `verifySolution` checks the HMAC and expiry, both of which a replay satisfies.
@@ -160,7 +187,8 @@ server/
        images/[id]/[preset]  sites/[id]/enrichment  health ready metrics
   routes/ robots.txt sitemap.xml
   database/ schema/ migrations/ migrate.ts
-  utils/ mvt permissions ratelimit images images-order uploads tokens mail diff
+  utils/ mvt permissions ratelimit images images-order uploads tokens diff
+         mail mail-template notifications
          site-record validation
          revisions slug db cache argon altcha enrichment enrichment-sources translate
          logger metrics tracing
@@ -378,8 +406,6 @@ is itself the broken thing.
   `/api/metrics` off the public router — rests on the same unconfirmed
   mechanism as `app-rate-limit@file`. Until that is checked on the box, treat
   `/api/metrics` as reachable; it leaks route names and volumes, not data.
-- Alertmanager sends through Resend SMTP, reusing `MAIL_API_KEY`. The README
-  notes an intent to move to Lettermint; that would move this too.
 - Request logs contain IP addresses. 30 days on an EU box is the position, and
   `REDACTED_FIELDS` in `server/utils/logger.ts` is the rest of it.
 
@@ -451,7 +477,11 @@ of the six, genuinely too far, or no coordinate to check.
 ## Not built
 
 - Purging withdrawn images from object storage (withdrawal is reversible by design — nothing deletes bytes).
-- Notifications — a contributor learns an edit was accepted by looking.
+- Notifications beyond mail. A review decision and a trust change now reach the
+  person by email (`server/utils/notifications.ts`); a role change and a revert
+  still do not, and there is nothing in the interface itself. There is also no
+  preference to turn any of it off, which is defensible only while every message
+  is about the reader's own account or their own contribution.
 - Full-text search across descriptions (titles and summaries only).
 - RDF / Pelagios linked data. The GeoJSON feed at `/api/data/sites.geojson` exists.
 - Offline tile caching. The app is installable as a PWA but needs signal.
@@ -525,3 +555,4 @@ contradicts what they asked for. Those belong in the reply.
   ".plans" automatically and open it.
 - **Completed tasks** when having completed a task, never print the achieved goals to the chat, keep it clean
 - **EU/GDPR compliance** all packages or code dealing with user data or which are user-related must be GDPR compliant
+- **e2e-tests** add e2e-tests when new critical features were added

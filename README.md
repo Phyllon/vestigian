@@ -150,11 +150,26 @@ Site text and descriptions: CC BY-SA. Metadata: CC0. Images carry their own lice
 
 ## Accounts and email
 
-Registration issues a hashed, single-use token and emails a confirmation link. Without `NUXT_MAIL_API_KEY` the message is written to the server log instead, so the whole flow works locally without configuring a provider.
+Registration issues a hashed, single-use token and emails a confirmation link. Mail goes through **Lettermint**, hosted in the EU — the same reasoning that moved the CDN and the object store there. `NUXT_MAIL_API_KEY` is a Lettermint project token.
+
+Both messages — confirmation and password reset — are rendered as a sheet from the notebook: the wordmark, one oxide button, and the facts that matter set in the mono face (which account, when it was requested, when the link expires, that it works once). Every message carries a plain-text half saying the same things.
+
+In development no key is needed. Mail is posted to **Mailpit**, which `pnpm stack:up` already starts; read it at <http://localhost:8025>, styling and all. With Mailpit down the message is written to the server log instead, so the flow still works with nothing running but the app.
+
+Six messages exist, and every one of them reports something about the reader's own account:
+
+| When                                       | What it says                                                         |
+| ------------------------------------------ | -------------------------------------------------------------------- |
+| Registration                               | Confirm this address; the link lasts a day                           |
+| Forgotten password                         | Set a new one; the link lasts an hour and works once                 |
+| Password reset completed                   | It was changed, and how to take the account back if that was not you |
+| Signing in before confirming               | A fresh confirmation link, at most one per quarter of an hour        |
+| A contribution reviewed                    | Published or not, with the moderator's note and a link to the record |
+| Automatic publishing suspended or restored | What changed, and that accepted contributions are untouched          |
 
 - Verification links last a day; password reset links last an hour and void every other outstanding link for that account.
 - Only the SHA-256 hash of a token is stored, and comparison is constant-time.
-- `forgot-password` answers identically whether or not the address exists.
+- `forgot-password` answers identically whether or not the address exists, and a mail provider outage cannot break that: delivery failures are logged and counted, never thrown.
 - Resetting a password does not sign you in — that is deliberate.
 
 ## Uploads
@@ -314,8 +329,6 @@ docker run --rm --network container:vestigia-dev-minio-1 \
 
 ### pin versions in package.json to only update fixes
 
-### check whole HTML for structure and use best fitting HTML and ARIA tags -> heavy
-
 ### clicking username (top right corner) -> open overlay with useful information (which?) and logout button
 
 ### remember the current position and zoom to be restored on new page load. If GPS is active, load this position zoomed-in directly instead
@@ -324,9 +337,11 @@ docker run --rm --network container:vestigia-dev-minio-1 \
 
 ### optimize components for mobile use -> heavy
 
-### button showing available map types has to be extended by a choice that, when activated, shows an ancient map as on DARE (https://imperium.ahlfeldt.se/, Digital Atlas of the Roman Empire). Where can such a map be obtained/copied from? If not, can it be built?
+### button showing available map types has to be extended by a choice that, when activated, shows an ancient map as on DARE (https://imperium.ahlfeldt.se/, Digital Atlas of the Roman Empire). Where can such a map be legally obtained/copied from? If not, can it be built?
 
-### forgot-password must send an email containing relevant information. Email must look appealing, using Vestigia's style. Use Lettermint (EU) instead of resend (US)
+### github says after a push "Run failed: build and deploy / e2e failed in 33 seconds, verify failed in 8 seconds, publish skipped". Analyse why
+
+### add two-factor auth for security
 
 ### how to login as an admin? How to self-grant admin rights?
 
@@ -337,3 +352,5 @@ docker run --rm --network container:vestigia-dev-minio-1 \
 ### Nothing in compose.prod.yml mounts docker/traefik/ into a container — Dokploy supplies Traefik, so whether it reads these repo files is not determinable from here. Worth confirming on the box.
 
 ### check claude.md for unnecessary information. If new contexts don't have to get the information (irrelevant), write it to ./ARCHITECTURE.md instead.
+
+### buy domain for Lettermint mail testing

@@ -148,6 +148,22 @@ export const contributionRevisionsTotal = define(
     }),
 )
 
+/**
+ * Delivery is deliberately swallowed by `sendTokenMail` — a provider outage
+ * must not turn `forgot-password` into an oracle that answers 500 for a
+ * registered address and 200 for an unknown one. This counter is the only
+ * thing left that says the mail never went out.
+ */
+export const mailDeliveriesTotal = define(
+  (registers) =>
+    new Counter({
+      name: 'mail_deliveries_total',
+      help: 'Transactional mail by purpose, transport and outcome.',
+      labelNames: ['purpose', 'transport', 'outcome'] as const,
+      registers,
+    }),
+)
+
 export const authEventsTotal = define(
   (registers) =>
     new Counter({

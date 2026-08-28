@@ -48,6 +48,38 @@ test.describe('signing in', () => {
     expect(unknown.status()).toBe(wrongPassword.status())
     expect(await unknown.json()).toMatchObject({ message: (await wrongPassword.json()).message })
   })
+
+  /**
+   * The dead end this closed: an account that never confirmed its address could
+   * not sign in, the first link was worth nothing after a day, and nothing else
+   * issued another. The second attempt proves the throttle, which is the reason
+   * the branch cannot be used to send mail at somebody — and it only runs at
+   * all once the password has already matched, so it reveals nothing a wrong
+   * password would not.
+   */
+  test('re-sends the confirmation link to an unconfirmed account, once', async ({ request }) => {
+    const first = await request.post('/api/auth/login', {
+      data: { email: ACCOUNTS.unverified.email, password: E2E_PASSWORD },
+    })
+    const second = await request.post('/api/auth/login', {
+      data: { email: ACCOUNTS.unverified.email, password: E2E_PASSWORD },
+    })
+
+    expect(first.status()).toBe(403)
+    expect((await first.json()).message).toMatch(/fresh link/i)
+
+    expect(second.status()).toBe(403)
+    expect((await second.json()).message).toMatch(/sent recently/i)
+  })
+
+  test('does not re-send anything when the password is wrong', async ({ request }) => {
+    const response = await request.post('/api/auth/login', {
+      data: { email: ACCOUNTS.unverified.email, password: 'Definitely-Not-It-9!' },
+    })
+
+    expect(response.status()).toBe(401)
+    expect((await response.json()).message).not.toMatch(/link/i)
+  })
 })
 
 test.describe('route guards', () => {

@@ -59,6 +59,7 @@ export default defineEventHandler(async (event) => {
       to: body.email,
       displayName: body.displayName,
       link: buildTokenLink(config.public.siteUrl, 'verify-email', issued.token),
+      expiresAt: issued.expiresAt,
     })
   } catch (error) {
     const violation = error as { code?: string; constraint_name?: string }

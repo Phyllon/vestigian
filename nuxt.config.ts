@@ -294,9 +294,20 @@ export default defineNuxtConfig({
       key: '',
       salt: '',
     },
+    /**
+     * Lettermint (Amsterdam), not Resend: the addresses and display names in
+     * transactional mail are the last personal data that was still leaving the
+     * EU after the CDN and object store moved. `apiKey` is a Lettermint
+     * project token.
+     *
+     * `devInboxUrl` is Mailpit's HTTP API, which the dev stack already runs.
+     * It is read only when no API key is set and only in development — see
+     * `server/utils/mail.ts` — so a production box can never post mail to it.
+     */
     mail: {
       apiKey: '',
       from: 'Vestigia <no-reply@vestigia.example>',
+      devInboxUrl: 'http://127.0.0.1:8025',
     },
     /**
      * Self-hosted LibreTranslate. Server-side only, deliberately: the URL is
