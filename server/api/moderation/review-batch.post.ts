@@ -4,7 +4,7 @@ import { revisions } from '~~/server/database/schema'
 import { canReviewRevision } from '#shared/utils/authorization'
 
 const batchSchema = z.object({
-  revisionIds: z.array(z.number().int().positive()).min(1).max(50),
+  revisionIds: z.array(databaseIdentifier).min(1).max(50),
   decision: z.enum(['approved', 'rejected']),
   note: z.string().trim().max(1000).optional(),
 })

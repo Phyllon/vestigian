@@ -316,8 +316,6 @@ docker run --rm --network container:vestigia-dev-minio-1 \
 
 ### check whole HTML for structure and use best fitting HTML and ARIA tags -> heavy
 
-### use package "concurrently" and apply it in package.json where suitable. If needed, merge similar commands into one command and use concurrently then -> fixed
-
 ### clicking username (top right corner) -> open overlay with useful information (which?) and logout button
 
 ### remember the current position and zoom to be restored on new page load. If GPS is active, load this position zoomed-in directly instead
@@ -328,9 +326,7 @@ docker run --rm --network container:vestigia-dev-minio-1 \
 
 ### button showing available map types has to be extended by a choice that, when activated, shows an ancient map as on DARE (https://imperium.ahlfeldt.se/, Digital Atlas of the Roman Empire). Where can such a map be obtained/copied from? If not, can it be built?
 
-### forgot-password must send an email containing relevant information.
-
-Email must look appealing, using Vestigia's style. Use Lettermint (EU) instead of resend
+### forgot-password must send an email containing relevant information. Email must look appealing, using Vestigia's style. Use Lettermint (EU) instead of resend (US)
 
 ### how to login as an admin? How to self-grant admin rights?
 
@@ -340,8 +336,4 @@ Email must look appealing, using Vestigia's style. Use Lettermint (EU) instead o
 
 ### Nothing in compose.prod.yml mounts docker/traefik/ into a container — Dokploy supplies Traefik, so whether it reads these repo files is not determinable from here. Worth confirming on the box.
 
-### check claude.md for unnecessary information. If new contexts don't have to get the information,
-
-write it to ./ARCHITECTURE.md instead.
-
-### package.json: prom-client has been replaced by @prometheus-io/client
+### check claude.md for unnecessary information. If new contexts don't have to get the information (irrelevant), write it to ./ARCHITECTURE.md instead.

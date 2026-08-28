@@ -2,7 +2,7 @@ import { and, eq, inArray, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import type { SiteEnrichment } from '#shared/types'
 
-const paramsSchema = z.object({ id: z.coerce.number().int().positive() })
+const paramsSchema = z.object({ id: routeIdentifier })
 
 /** A week for an answer, a day for a refusal. */
 const HIT_TTL_SECONDS = 604800

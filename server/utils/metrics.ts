@@ -1,4 +1,4 @@
-import { Counter, Histogram, Registry, collectDefaultMetrics } from 'prom-client'
+import { Counter, Histogram, Registry, collectDefaultMetrics } from '@prometheus-io/client'
 
 /**
  * Every metric the app exports, declared in one place so the cardinality of the

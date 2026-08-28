@@ -3,7 +3,7 @@ import { and, desc, eq } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
 import { revisions, users } from '~~/server/database/schema'
 
-const paramsSchema = z.object({ id: z.coerce.number().int().positive() })
+const paramsSchema = z.object({ id: routeIdentifier })
 
 // The same table twice, so each join needs its own name.
 const author = alias(users, 'author')

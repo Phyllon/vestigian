@@ -3,7 +3,7 @@ import { and, eq, sql } from 'drizzle-orm'
 import { revisions } from '~~/server/database/schema'
 
 const revertSchema = z.object({
-  revisionId: z.number().int().positive(),
+  revisionId: databaseIdentifier,
   reason: z.string().trim().max(300).optional(),
 })
 

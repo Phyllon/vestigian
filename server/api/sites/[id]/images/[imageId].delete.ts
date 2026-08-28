@@ -5,8 +5,8 @@ import { canManageImage } from '#shared/utils/authorization'
 import type { SessionUser } from '#shared/types'
 
 const paramsSchema = z.object({
-  id: z.coerce.number().int().positive(),
-  imageId: z.coerce.number().int().positive(),
+  id: routeIdentifier,
+  imageId: routeIdentifier,
 })
 
 /**

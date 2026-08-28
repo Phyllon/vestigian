@@ -39,6 +39,7 @@ Tokens live in `app/assets/css/main.css` as Tailwind v4 `@theme` variables. Nuxt
 - **Vue SFC order: `<script setup>` first, `<template>` second.** No `<style>` blocks — Tailwind inline only.
 - **Nuxt lifecycle hooks (`onMounted`, `onBeforeUnmount`) go at the bottom of the script block**, after all other declarations.
 - **Unit tests live in `__test__/` subfolders beside the code they test** — for composables and server utils only. **Components have no `__test__` folders and no tests.**
+- **End-to-end tests live in `./e2e`** and run under Playwright against the **production build**, never `nuxt dev` — two of this project's worst bugs existed only in the built output. `pnpm test:e2e`, separate from `pnpm test`. Read `e2e/README.md` before adding one: every anti-flake rule there was a real failure first.
 - **Components and composables are grouped into folders by meaning** (`map`, `site`, `contribute`, `auth`, `moderation`, `ui` / `data`).
 - **Prefer established open Vue/Nuxt components over hand-rolling.** Nuxt UI v3 (built on Reka UI) covers forms, inputs, buttons, selects, toasts, checkboxes. Do not write a custom form control.
 - Tests cover **critical logic only** — tile planning, trust, permissions, rate limiting, licences, diffing, ordering. Not glue.
@@ -130,6 +131,7 @@ whatever client it is handed — see the note in `server/utils/db.ts`.
 ## Layout
 
 ```
+e2e/                         Playwright, against the production build (+README)
 app/
   assets/css/main.css        design tokens (Tailwind v4 @theme)
   components/
@@ -159,6 +161,7 @@ server/
   routes/ robots.txt sitemap.xml
   database/ schema/ migrations/ migrate.ts
   utils/ mvt permissions ratelimit images images-order uploads tokens mail diff
+         site-record validation
          revisions slug db cache argon altcha enrichment enrichment-sources translate
          logger metrics tracing
                                                                             (+__test__/)
@@ -518,7 +521,7 @@ contradicts what they asked for. Those belong in the reply.
 - **Open source** look for established open source projects to solve some problem first instead of
   writing the logic yourself directly. Then ask for decision
 - **Agents** may be used, but ask for permission before
-- **Planning mode** while in planning mode, instead of writing the plan to a temporary file, save it under
+- **Planning mode** while in planning mode, instead of writing the plan to a temporary file or chat, save it under
   ".plans" automatically and open it.
 - **Completed tasks** when having completed a task, never print the achieved goals to the chat, keep it clean
-- **EU/GDPR compliance** all packages or code dealing with user data must be GDPR compliant
+- **EU/GDPR compliance** all packages or code dealing with user data or which are user-related must be GDPR compliant

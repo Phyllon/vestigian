@@ -1,0 +1,95 @@
+import { expect, test } from './helpers/fixtures'
+import { watchForProblems } from './helpers/console'
+import { openMap, waitForMapReady, waitForTiles } from './helpers/map'
+
+/**
+ * The map is the application. If this file fails, nothing else matters — and
+ * these are the assertions no unit test can make, because every bug they cover
+ * was a browser-side failure with a healthy server behind it.
+ */
+test.describe('the map', () => {
+  test('boots, mounts Vue and clears its placeholder', async ({ page }) => {
+    const problems = watchForProblems(page)
+
+    await page.goto('/')
+    await waitForMapReady(page)
+
+    // The regression that matters: a CSP without a nonce token refused the
+    // inline script carrying the runtime config, Vue never mounted, and the
+    // server-rendered placeholder stayed up forever behind a 200.
+    expect(problems.cspViolations, 'the page reported CSP violations').toEqual([])
+    expect(problems.pageErrors, 'the page threw during boot').toEqual([])
+  })
+
+  test('serves vector tiles as binary, not as serialised JSON', async ({ page }) => {
+    const tileResponses: { status: number; type: string; bytes: number }[] = []
+
+    page.on('response', async (response) => {
+      if (!response.url().includes('/api/tiles/')) return
+      const type = response.headers()['content-type'] ?? ''
+      const length = Number(response.headers()['content-length'] ?? 0)
+      tileResponses.push({ status: response.status(), type, bytes: length })
+    })
+
+    await openMap(page)
+
+    expect(tileResponses.length, 'the map requested no tiles at all').toBeGreaterThan(0)
+
+    // Nitro's route cache once serialised tile buffers into
+    // `{"type":"Buffer","data":[…]}` — eight times the size, still a 200, and
+    // MapLibre silently rendered nothing.
+    for (const tile of tileResponses) {
+      expect([200, 204]).toContain(tile.status)
+      if (tile.status === 200) {
+        expect(tile.type).toContain('application/vnd.mapbox-vector-tile')
+      }
+    }
+  })
+
+  test('answers tiles from cache on a second visit', async ({ page }) => {
+    await openMap(page)
+
+    const cacheHeaders: string[] = []
+    page.on('response', (response) => {
+      if (!response.url().includes('/api/tiles/')) return
+      const header = response.headers()['x-tile-cache']
+      if (header) cacheHeaders.push(header)
+    })
+
+    await page.reload()
+    await waitForMapReady(page)
+    await waitForTiles(page)
+
+    // Warmed by the first visit. A cache that never hits means the whole tile
+    // design — one Valkey lookup instead of a PostGIS aggregate — is not
+    // working, which is invisible in any single response.
+    expect(cacheHeaders.length, 'no tile carried an x-tile-cache header').toBeGreaterThan(0)
+    expect(cacheHeaders, 'no tile was served from cache on reload').toContain('hit')
+  })
+
+  test('writes the camera into the hash once the map is moved', async ({ page }) => {
+    await openMap(page)
+
+    // The hash is written on `moveend`, not on load — a map that has never been
+    // touched deliberately leaves the URL clean. So move it.
+    const canvas = page.getByRole('application', { name: 'Map of archaeological sites' })
+    const box = await canvas.boundingBox()
+    expect(box).not.toBeNull()
+
+    await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(box!.x + box!.width / 2 - 180, box!.y + box!.height / 2 - 120, {
+      steps: 12,
+    })
+    await page.mouse.up()
+
+    await page.waitForFunction(() => window.location.hash.startsWith('#map='), null, {
+      timeout: 10_000,
+    })
+
+    // `#map=<zoom×2dp>/<lat×5dp>/<lon×5dp>`, which `router.options.ts` must not
+    // treat as a scroll selector — an invalid-selector warning here was a real
+    // bug once.
+    expect(new URL(page.url()).hash).toMatch(/^#map=\d+\.\d{2}\/-?\d+\.\d{5}\/-?\d+\.\d{5}$/)
+  })
+})

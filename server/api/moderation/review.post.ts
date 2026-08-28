@@ -4,7 +4,7 @@ import { revisions } from '~~/server/database/schema'
 import { canReviewRevision } from '#shared/utils/authorization'
 
 const reviewSchema = z.object({
-  revisionId: z.number().int().positive(),
+  revisionId: databaseIdentifier,
   decision: z.enum(['approved', 'rejected']),
   note: z.string().trim().max(1000).optional(),
 })

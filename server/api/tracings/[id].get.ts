@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-const paramsSchema = z.object({ id: z.coerce.number().int().positive() })
+const paramsSchema = z.object({ id: routeIdentifier })
 
 /**
  * Full record for one tracing, including its geometry so the edit tool can load

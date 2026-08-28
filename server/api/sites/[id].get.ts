@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import type { SiteDetail } from '#shared/types'
 
-const paramsSchema = z.object({ id: z.coerce.number().int().positive() })
+const paramsSchema = z.object({ id: routeIdentifier })
 
 /**
  * Full record for one site. Tiles carry only an identifier and a label, so this

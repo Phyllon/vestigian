@@ -4,7 +4,7 @@ import { users } from '~~/server/database/schema'
 import { checkRoleChange, describeRoleChangeRejection } from '#shared/utils/authorization'
 
 const roleSchema = z.object({
-  userId: z.number().int().positive(),
+  userId: databaseIdentifier,
   role: z.enum(['contributor', 'moderator', 'admin']),
 })
 

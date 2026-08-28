@@ -20,8 +20,51 @@ jobs:
       # reads the config Nuxt generates into it.
       - run: pnpm check
 
+  # End-to-end against the production build, with the real stack behind it.
+  # Separate from `verify` because it needs Postgres, Valkey and a build —
+  # roughly two minutes against twenty seconds — and because a unit-test failure
+  # should be reported without waiting for a browser.
+  e2e:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:17-3.5-alpine
+        env:
+          POSTGRES_USER: vestigia
+          POSTGRES_PASSWORD: vestigia
+          POSTGRES_DB: vestigia
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U vestigia" --health-interval 5s
+          --health-timeout 3s --health-retries 20
+      valkey:
+        image: valkey/valkey:8-alpine
+        ports: ['6379:6379']
+    env:
+      NUXT_DATABASE_URL: postgres://vestigia:vestigia@127.0.0.1:5432/vestigia
+      NUXT_REDIS_URL: redis://127.0.0.1:6379
+      NUXT_SESSION_PASSWORD: ci-session-password-at-least-32-chars
+      NUXT_ALTCHA_SECRET: ci-altcha-secret-value-for-tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: psql "$NUXT_DATABASE_URL" -f docker/initdb/01-extensions.sql
+      - run: pnpm db:migrate
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
   publish:
-    needs: verify
+    needs: [verify, e2e]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:

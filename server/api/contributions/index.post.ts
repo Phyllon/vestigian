@@ -10,7 +10,7 @@ const positionSchema = z.object({
 const siteDraftSchema = z.object({
   kind: z.literal('site'),
   /** Present when editing an existing site, absent when recording a new one. */
-  entityId: z.number().int().positive().optional(),
+  entityId: databaseIdentifier.optional(),
   title: z.string().trim().min(3).max(240),
   category: z.enum([
     'settlement',
@@ -34,7 +34,7 @@ const siteDraftSchema = z.object({
 
 const tracingDraftSchema = z.object({
   kind: z.literal('tracing'),
-  entityId: z.number().int().positive().optional(),
+  entityId: databaseIdentifier.optional(),
   title: z.string().trim().min(3).max(240),
   category: z.enum(['infrastructure', 'fortification', 'other']),
   description: z.string().trim().max(20000).optional(),

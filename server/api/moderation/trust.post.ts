@@ -4,7 +4,7 @@ import { users } from '~~/server/database/schema'
 import { canRevokeTrust } from '#shared/utils/authorization'
 
 const trustSchema = z.object({
-  userId: z.number().int().positive(),
+  userId: databaseIdentifier,
   revoked: z.boolean(),
   reason: z.string().trim().max(300).optional(),
 })

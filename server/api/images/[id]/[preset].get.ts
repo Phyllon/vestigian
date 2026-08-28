@@ -4,7 +4,7 @@ import { siteImages } from '~~/server/database/schema'
 import { IMAGE_PRESETS } from '#shared/types'
 
 const paramsSchema = z.object({
-  id: z.coerce.number().int().positive(),
+  id: routeIdentifier,
   preset: z.enum(['thumb', 'card', 'full']),
 })
 

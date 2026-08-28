@@ -4,10 +4,10 @@ import { siteImages } from '~~/server/database/schema'
 import { canManageImage } from '#shared/utils/authorization'
 import type { SessionUser } from '#shared/types'
 
-const paramsSchema = z.object({ id: z.coerce.number().int().positive() })
+const paramsSchema = z.object({ id: routeIdentifier })
 
 const bodySchema = z.object({
-  imageId: z.number().int().positive(),
+  imageId: databaseIdentifier,
   targetIndex: z.number().int().min(0).max(200),
 })
 
