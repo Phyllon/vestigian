@@ -6,7 +6,14 @@
   const map = shallowRef<MapLibreMap | null>(null)
   const isReady = ref(false)
 
-  const { currentStyle } = useBasemapStyle()
+  const { currentStyle, view, isDark } = useBasemapStyle()
+
+  /**
+   * An antiquity sheet is parchment in both themes — filtering the raster would
+   * misrepresent someone else's cartography — so at night the surround does the
+   * work instead: the sheet is left as printed and read as paper under a lamp.
+   */
+  const isLampLit = computed(() => isDark.value && isAntiquityView(view.value))
   const { camera: _, restoreCamera, rememberCamera } = useCameraState()
   const { attachOverlay, keepOverlayThroughStyleChanges, findFeaturesAtPoint } = useViewportTiles()
   const { chooseCandidate, offerOverlappingFeatures, clearSelection, selectedSiteId } =
@@ -119,6 +126,12 @@
       class="h-full w-full bg-paper-100 dark:bg-night-900"
       role="application"
       aria-label="Map of archaeological sites"
+    />
+
+    <div
+      v-if="isLampLit"
+      class="pointer-events-none absolute inset-0 shadow-[inset_0_0_9rem_2rem_var(--color-night-900)]"
+      aria-hidden="true"
     />
 
     <Transition

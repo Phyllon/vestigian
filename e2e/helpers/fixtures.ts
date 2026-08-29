@@ -42,10 +42,30 @@ export const test = base.extend<Fixtures>({
     await use(nextTestAddress())
   },
 
-  context: async ({ browser, clientAddress }, use) => {
+  context: async ({ browser, baseURL, clientAddress }, use) => {
     const context = await browser.newContext({
       extraHTTPHeaders: { 'x-real-ip': clientAddress },
     })
+
+    /**
+     * `extraHTTPHeaders` is set per context, not per origin, so it rides along
+     * on requests to third parties too. A custom header makes a cross-origin
+     * request non-simple, and the browser sends a preflight that a plain tile
+     * server has no reason to answer — every basemap request then fails on
+     * "x-real-ip is not allowed by Access-Control-Allow-Headers", which looks
+     * exactly like a broken application. The header exists for this app's rate
+     * limiter; nobody else should be told the test's address either.
+     */
+    const appOrigin = new URL(baseURL ?? 'http://127.0.0.1:3111').origin
+    await context.route(
+      (url) => url.origin !== appOrigin,
+      async (route) => {
+        const headers = { ...route.request().headers() }
+        delete headers['x-real-ip']
+        await route.continue({ headers })
+      },
+    )
+
     await use(context)
     await context.close()
   },

@@ -36,6 +36,39 @@ export const getDataVersion = async (): Promise<number> => {
   }
 }
 
+const ATLAS_VERSION_KEY = 'vestigia:atlas-version'
+
+/**
+ * The antiquity atlas has its own generation because it changes on a completely
+ * different clock: a moderator approving a photograph must not throw away a
+ * pyramid of coastline and Roman road tiles that nothing touched.
+ */
+export const getAtlasVersion = async (): Promise<number> => {
+  try {
+    const raw = await useRedis().get(ATLAS_VERSION_KEY)
+    return raw ? Number(raw) : 1
+  } catch (error) {
+    useLogger().warn(
+      { err: { message: (error as Error).message } },
+      'atlas version unreadable, serving atlas tiles as version 1',
+    )
+    return 1
+  }
+}
+
+/** Called by `pnpm import:atlas` once a rebuild has finished. */
+export const bumpAtlasVersion = async (): Promise<number> => {
+  try {
+    return await useRedis().incr(ATLAS_VERSION_KEY)
+  } catch (error) {
+    useLogger().error(
+      { err: { message: (error as Error).message } },
+      'atlas cache not invalidated: a rebuilt atlas may not reach the map',
+    )
+    return 1
+  }
+}
+
 /**
  * Called whenever a revision is approved. Bumping one counter invalidates every
  * cached tile, which is the right trade: approvals are rare, tile reads are not.

@@ -47,13 +47,27 @@ const isCommandAvailable = async (command: string): Promise<boolean> => {
 }
 
 /**
+ * The antiquity atlas is excluded — its rows, not its schema.
+ *
+ * It is 75 MB of third-party reference cartography that nobody here can edit,
+ * rebuilt in full by `pnpm import:atlas` from AWMC and Pleiades. Keeping it
+ * would put a gigabyte of borrowed coastline across the fourteen snapshots this
+ * script retains, to protect data that a single command reproduces exactly.
+ * A restore therefore comes up with the tables present and empty, and the
+ * antiquity basemap blank until the import is re-run.
+ */
+const EXCLUDED_TABLE_DATA = 'antiquity_*'
+
+/**
  * pg_dump is rarely installed on the machine running this, and the version has
  * to match the server anyway. Falling back through compose uses the same
  * Postgres image the data lives in, which removes both problems.
  */
 const buildDumpCommand = async (target: DatabaseTarget): Promise<[string, string[]]> => {
+  const options = ['--format=custom', `--exclude-table-data=${EXCLUDED_TABLE_DATA}`]
+
   if (await isCommandAvailable('pg_dump')) {
-    return ['pg_dump', ['--format=custom', DATABASE_URL]]
+    return ['pg_dump', [...options, DATABASE_URL]]
   }
 
   return [
@@ -68,7 +82,7 @@ const buildDumpCommand = async (target: DatabaseTarget): Promise<[string, string
       'pg_dump',
       '--username',
       target.user,
-      '--format=custom',
+      ...options,
       target.database,
     ],
   ]

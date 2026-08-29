@@ -16,6 +16,11 @@ const mapAssetOrigins = [
   'https://*.b-cdn.net',
   'https://storage.bunnycdn.com',
   'https://elevation-tiles-prod.s3.amazonaws.com',
+  // DARE's tile server, needed only until the mirror is populated and
+  // NUXT_PUBLIC_BASEMAP_ANTIQUITY_DARE_URL points at the pull zone. It stays in
+  // the list because the unset-env fallback is what makes a fresh clone work.
+  // The other antiquity sheet needs no entry: it is served from this origin.
+  'https://dh.gu.se',
 ]
 
 /**
@@ -326,6 +331,24 @@ export default defineNuxtConfig({
         provider: 'openfreemap',
         pmtilesUrl: '',
         terrainUrl: 'https://elevation-tiles-prod.s3.amazonaws.com/terrarium/{z}/{x}/{y}.png',
+        /**
+         * The mirrored DARE pyramid. Empty means "ask Gothenburg's own server",
+         * which is right for development and wrong for production — see
+         * `pnpm import:basemap` and the note in `.env.example`.
+         */
+        antiquityDareUrl: '',
+        /**
+         * The antiquity atlas is served by this application from its own
+         * PostGIS, so this is a path rather than a third-party origin.
+         */
+        atlasTilesUrl: '/api/tiles/antiquity',
+        /**
+         * Label glyphs ship with the app rather than being fetched from a font
+         * server, for the same reason `@fontsource` is used for the interface:
+         * reading the map should tell no third party that you did. Same-origin,
+         * so `default-src 'self'` already covers it.
+         */
+        glyphsUrl: '/fonts/{fontstack}/{range}.pbf',
       },
     },
   },

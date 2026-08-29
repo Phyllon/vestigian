@@ -71,6 +71,67 @@ The app is strictly 12-factor (env-only config, no local disk writes, `/api/heal
 
 After any deploy or bulk import, run `pnpm tiles:warm <url>`.
 
+## Antiquity basemaps — one borrowed, one built
+
+The switcher offers five views in two groups. Three are recolourings of one
+modern vector source; the two **antiquity** views replace it outright.
+
+**Antiquity (DARE)** is raster, from `dh.gu.se/tiles/imperium` — Johan Åhlfeldt,
+Gothenburg. CC BY-SA 3.0 with attribution and a link, per his terms page. **But**
+DARE's own legend credits two inputs as CC BY-NC 3.0 and CC BY-NC-SA, which the
+blanket BY-SA cannot cover: the rendered tiles bake in layers DARE itself calls
+non-commercial. Acceptable while nothing here is sold; the wrong dependency the
+day it is. Mirrored with `pnpm import:basemap dare` — z3–z10 over Europe and the
+Mediterranean, **29,593 tiles** at a measured 40 KB mean (~1.2 GB), one request
+every 1.2 s. **Tell Åhlfeldt before the full run** (johan.ahlfeldt@lir.gu.se) and
+quote that number, exactly as with René Voorburg's photographs; ask about the
+NC-credited inputs in the same message. Until
+`NUXT_PUBLIC_BASEMAP_ANTIQUITY_DARE_URL` is set the app falls back to his server.
+
+**Antiquity (Barrington)** is ours, and the more interesting one. The CAWM tile
+server that was going to supply it publishes _physical relief only_ — no roads,
+no names, no settlements — so mirroring it would have bought a beautiful empty
+map. What makes it an atlas is published separately as open data, so the data is
+imported and this project draws the sheet itself:
+
+| Layer                    | Source                                               | Rows   |
+| ------------------------ | ---------------------------------------------------- | ------ |
+| Ancient coastline        | AWMC `shoreline`                                     | 9,901  |
+| Sea and inland water     | AWMC `open_water` (10 of 20 regions), `inland_water` | 13,907 |
+| Roads                    | AWMC, from the Barrington Atlas                      | 3,166  |
+| Aqueducts, canals, walls | AWMC                                                 | 477    |
+| Urban extents            | AWMC                                                 | 95     |
+| Regions and peoples      | AWMC `regional_name_linework`                        | 2,618  |
+| Places                   | Pleiades                                             | 38,002 |
+
+`pnpm import:atlas`, which downloads to `.import/atlas/`, replaces each layer
+wholesale and bumps the atlas cache generation itself. `ATLAS_SKIP_OPEN_WATER=1`
+omits the 240 MB of sea polygons and still gives a usable sheet. ~75 MB in
+Postgres.
+
+**AWMC is ODbL 1.0 and Pleiades is CC BY 3.0, which is why every row lives in
+its own `antiquity_*` table and is never joined to `sites`.** ODbL's share-alike
+attaches to a derivative _database_: folding these into the tables behind
+`/api/data/sites.geojson` would arguably pull that feed under ODbL and
+contradict the CC BY-SA / CC0 the contributed data carries. Rendered tiles are a
+Produced Work and need only the attribution the style carries. Do not merge them.
+
+Four things about these views that are not obvious:
+
+1. **The overlay follows the _sheet_, not the theme** (`resolveSheetTone`).
+   Parchment is parchment at midnight, and the night palette — pale ink on a
+   dark disc — drawn on it makes every site marker vanish with nothing logged.
+   Dark mode dims the surround instead, so the sheet reads as paper under a lamp.
+2. **Tile URLs must be absolute.** MapLibre builds requests inside a worker,
+   where a root-relative path has no base: `new Request('/api/tiles/…')` throws
+   and the source silently loads nothing while the rest of the style renders.
+3. **Atlas tile filters compare in 4326**, against the tile envelope transformed
+   into it — never `ST_Transform(geom, 3857) && env`, which cannot use the GiST
+   index and measured 1.1–2.6 s per tile against 3–60 ms.
+4. **The atlas has its own cache generation**, and `getAtlasVersion` reads an
+   unset key as 1 — so the first `INCR` by hand is a no-op. The import clears
+   the key and the stale tiles itself; do not do it manually.
+
 ## Which client to reach for
 
 `useDatabase()` — Drizzle — is the default. Column names are checked against
@@ -183,11 +244,12 @@ app/
          moderation/index moderation/contributors
 server/
   plugins/ observability.ts   the only per-request hook: id, access log, span
-  api/ tiles/[z]/[x]/[y]  sites/  tracings/  auth/  contributions/  moderation/  data/
+  api/ tiles/[z]/[x]/[y]  tiles/antiquity/[z]/[x]/[y]
+       sites/  tracings/  auth/  contributions/  moderation/  data/
        images/[id]/[preset]  sites/[id]/enrichment  health ready metrics
   routes/ robots.txt sitemap.xml
-  database/ schema/ migrations/ migrate.ts
-  utils/ mvt permissions ratelimit images images-order uploads tokens diff
+  database/ schema/ (users sites geo atlas) migrations/ migrate.ts
+  utils/ mvt atlas permissions ratelimit images images-order uploads tokens diff
          mail mail-template notifications
          site-record validation
          revisions slug db cache argon altcha enrichment enrichment-sources translate
@@ -196,7 +258,9 @@ server/
 shared/types/  vocabulary shared by both sides
 shared/utils/  password policy + authorization rules, shared by both sides   (+__test__/)
 scripts/import/  four-stage vici.org import + vici-licences.ts (shared vocabulary)
-scripts/warm-tiles.ts snapshot-database.ts reconcile-images.ts
+                 04-mirror-basemap-tiles.ts 05-antiquity-atlas.ts
+scripts/warm-tiles.ts snapshot-database.ts reconcile-images.ts build-glyphs.ts
+public/fonts/    self-hosted SDF label glyphs + the font's OFL
 docker/  Dockerfile compose.dev.yml compose.prod.yml traefik/ backup.sh
   observability/  alloy.alloy loki.yml tempo.yml prometheus.yml alerts.yml
                   alertmanager.yml grafana/{datasources,dashboards}
@@ -295,6 +359,8 @@ pnpm import:fetch           # dumps → scratch MariaDB (reuses db_dumb/ if pres
 pnpm import:convert         # → 61,272 sites, 11,720 tracings, 8,692 concordances
 pnpm import:image-records   # → 39,212 site_images rows over 36,216 objects; no bytes
 pnpm import:images          # → the photographs; ~12 hours, ~10 GB, resumable
+pnpm import:basemap dare    # → the DARE sheet; ~10 hours, ~1.2 GB, resumable
+pnpm import:atlas           # → the Barrington sheet: AWMC + Pleiades into PostGIS
 pnpm tiles:warm <url>
 ```
 

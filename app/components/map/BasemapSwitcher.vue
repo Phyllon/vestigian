@@ -1,27 +1,52 @@
 <script setup lang="ts">
-  import type { BasemapView } from '#shared/types'
+  import { onClickOutside } from '@vueuse/core'
+  import type { BasemapGroup, BasemapView } from '#shared/types'
 
   const { view, setView, availableViews } = useBasemapStyle()
   const isOpen = ref(false)
+  const root = useTemplateRef('root')
+  const trigger = useTemplateRef('trigger')
+
+  const groups: BasemapGroup[] = ['today', 'antiquity']
+
+  const viewsInGroup = (group: BasemapGroup) =>
+    availableViews.filter((option) => option.group === group)
+
+  const close = (): void => {
+    isOpen.value = false
+  }
+
+  /**
+   * Closing by keyboard has to hand focus back. Without it the reader is
+   * returned to the top of the document and has to walk the whole control row
+   * again to reach the button they just used.
+   */
+  const dismiss = (): void => {
+    close()
+    trigger.value?.focus()
+  }
 
   const choose = (next: BasemapView): void => {
     setView(next)
-    isOpen.value = false
+    close()
   }
 
   const activeLabel = computed(
     () => availableViews.find((option) => option.value === view.value)?.label ?? 'Vestigia',
   )
+
+  onClickOutside(root, close)
 </script>
 
 <template>
-  <div class="relative">
+  <div ref="root" class="relative" @keydown.esc="dismiss">
     <!--
       The label is hidden below `sm`, which is where most of the traffic is, so
       the accessible name cannot come from it: on a phone this was a button
       with no name at all, announced as "button".
     -->
     <button
+      ref="trigger"
       type="button"
       class="leaf flex items-center gap-2 px-3 py-2 text-sm text-ink-700 transition hover:bg-paper-200 dark:text-paper-200 dark:hover:bg-night-700"
       :aria-expanded="isOpen"
@@ -44,34 +69,52 @@
       enter-from-class="opacity-0 translate-y-1"
       leave-to-class="opacity-0 translate-y-1"
     >
+      <!--
+        Capped against the viewport rather than sized to the content: five
+        entries in two groups is taller than a phone in landscape, and a menu
+        that runs off the bottom of the screen has no way back.
+      -->
       <div
         v-if="isOpen"
         id="basemap-choices"
         role="menu"
         aria-label="Basemap"
-        class="leaf absolute right-0 top-full z-20 mt-2 w-60 overflow-hidden shadow-lifted"
+        class="leaf absolute right-0 top-full z-20 mt-2 max-h-[70vh] w-64 overflow-y-auto shadow-lifted"
       >
-        <button
-          v-for="option in availableViews"
-          :key="option.value"
-          type="button"
-          role="menuitemradio"
-          :aria-checked="option.value === view"
-          class="flex w-full flex-col items-start gap-0.5 border-b border-paper-200 px-4 py-3 text-left transition last:border-b-0 hover:bg-paper-100 dark:border-night-700 dark:hover:bg-night-700"
-          :class="option.value === view ? 'bg-paper-100 dark:bg-night-700' : ''"
-          @click="choose(option.value)"
+        <div
+          v-for="group in groups"
+          :key="group"
+          role="group"
+          :aria-label="BASEMAP_GROUP_LABELS[group]"
         >
-          <span class="flex w-full items-center justify-between">
-            <span class="font-medium text-ink-900 dark:text-paper-100">{{ option.label }}</span>
-            <UIcon
-              v-if="option.value === view"
-              name="i-lucide-check"
-              class="size-4 text-oxide-600 dark:text-oxide-300"
-              aria-hidden="true"
-            />
-          </span>
-          <span class="text-xs text-ink-500 dark:text-paper-400">{{ option.hint }}</span>
-        </button>
+          <p
+            class="eyebrow border-b border-paper-200 px-4 pb-1 pt-3 text-ink-500 dark:border-night-700 dark:text-paper-400"
+          >
+            {{ BASEMAP_GROUP_LABELS[group] }}
+          </p>
+
+          <button
+            v-for="option in viewsInGroup(group)"
+            :key="option.value"
+            type="button"
+            role="menuitemradio"
+            :aria-checked="option.value === view"
+            class="flex w-full flex-col items-start gap-0.5 border-b border-paper-200 px-4 py-3 text-left transition last:border-b-0 hover:bg-paper-100 dark:border-night-700 dark:hover:bg-night-700"
+            :class="option.value === view ? 'bg-paper-100 dark:bg-night-700' : ''"
+            @click="choose(option.value)"
+          >
+            <span class="flex w-full items-center justify-between gap-2">
+              <span class="font-medium text-ink-900 dark:text-paper-100">{{ option.label }}</span>
+              <UIcon
+                v-if="option.value === view"
+                name="i-lucide-check"
+                class="size-4 shrink-0 text-oxide-600 dark:text-oxide-300"
+                aria-hidden="true"
+              />
+            </span>
+            <span class="text-xs text-ink-500 dark:text-paper-400">{{ option.hint }}</span>
+          </button>
+        </div>
       </div>
     </Transition>
   </div>

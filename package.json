@@ -38,6 +38,9 @@
     "stack:observability": "docker compose -f docker/compose.dev.yml --profile observability up -d",
     "stack:observability:down": "docker compose -f docker/compose.dev.yml --profile observability down",
     "images:reconcile": "tsx --env-file-if-exists=.env scripts/reconcile-images.ts",
+    "import:basemap": "tsx --env-file-if-exists=.env scripts/import/04-mirror-basemap-tiles.ts",
+    "import:atlas": "tsx --env-file-if-exists=.env scripts/import/05-antiquity-atlas.ts",
+    "glyphs:build": "tsx scripts/build-glyphs.ts",
     "tiles:warm": "tsx --env-file-if-exists=.env scripts/warm-tiles.ts"
   },
   "dependencies": {
@@ -81,9 +84,11 @@
     "@vue/test-utils": "^2.4.6",
     "@vueuse/nuxt": "^13.9.0",
     "concurrently": "^10.0.5",
+    "csv-parse": "^7.0.2",
     "drizzle-kit": "^0.28.1",
     "eslint": "^10.8.1",
     "eslint-config-prettier": "^10.1.8",
+    "fontnik": "^0.7.7",
     "happy-dom": "^15.11.7",
     "mysql2": "^3.11.5",
     "nuxt-auth-utils": "^0.5.7",

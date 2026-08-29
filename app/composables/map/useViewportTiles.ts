@@ -55,9 +55,16 @@ const DARK_OVERLAY: OverlayPalette = {
  * on screen. This is what makes the viewport feel instant at continental zoom.
  */
 export const useViewportTiles = () => {
-  const { isDark } = useBasemapStyle()
+  const { sheetTone } = useBasemapStyle()
 
-  const palette = computed<OverlayPalette>(() => (isDark.value ? DARK_OVERLAY : LIGHT_OVERLAY))
+  /**
+   * Keyed on the sheet, not the theme. Over an antiquity raster the ground is
+   * parchment whatever the reader chose, and the night palette drawn there is a
+   * pale marker on a pale sheet — the overlay vanishes with nothing logged.
+   */
+  const palette = computed<OverlayPalette>(() =>
+    sheetTone.value === 'dark' ? DARK_OVERLAY : LIGHT_OVERLAY,
+  )
 
   const attachOverlay = (map: MapLibreMap): void => {
     if (map.getSource(OVERLAY_SOURCE_ID)) return
@@ -136,7 +143,7 @@ export const useViewportTiles = () => {
       'source-layer': 'clusters',
       layout: {
         'text-field': ['to-string', ['get', 'site_count']],
-        'text-font': ['Noto Sans Regular'],
+        'text-font': [MAP_LABEL_FONT],
         'text-size': 12,
         'text-allow-overlap': true,
       },
@@ -190,7 +197,7 @@ export const useViewportTiles = () => {
       minzoom: 12,
       layout: {
         'text-field': ['get', 'title'],
-        'text-font': ['Noto Sans Regular'],
+        'text-font': [MAP_LABEL_FONT],
         'text-size': 12,
         'text-offset': [0, 1.35],
         'text-anchor': 'top',
