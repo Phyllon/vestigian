@@ -1,18 +1,24 @@
 import type { LonLat } from './site'
 
 /**
- * The views offered by the basemap switcher, in two families. The first three
- * are recolourings of one modern vector source: 'vestigia' suppresses modern
- * infrastructure, 'modern' is a conventional road map, 'terrain' adds
- * hillshade. The two 'antiquity-*' views replace that source outright with a
- * raster reconstruction of the ancient world.
+ * The views offered by the basemap switcher, in two families. The first two are
+ * recolourings of one modern vector source: 'vestigia' suppresses modern
+ * infrastructure, 'modern' is a conventional road map. The two 'antiquity-*'
+ * views replace that source outright with a reconstruction of the ancient world.
+ *
+ * There was a third modern view, 'terrain', which was the 'vestigia' palette
+ * with one hillshade layer spliced in. It was removed rather than kept: the
+ * same elevation source does better work as `atlas-hillshade` under the
+ * Barrington sheet, so the relief it offered is still on the map and the option
+ * was only a fourth way to look at the same roads. `BasemapSource.terrainUrl`
+ * stays for that reason — the tiles are still fetched, just not by a view.
  */
-export type BasemapView = 'vestigia' | 'modern' | 'terrain' | 'antiquity-dare' | 'antiquity-awmc'
+export type BasemapView = 'vestigia' | 'modern' | 'antiquity-dare' | 'antiquity-awmc'
 
 export type BasemapProvider = 'openfreemap' | 'pmtiles'
 
 /**
- * Which half of the switcher an option belongs to. Five flat entries read as a
+ * Which half of the switcher an option belongs to. Four flat entries read as a
  * list to be worked through; two named groups say what the choice is actually
  * between — the ground as it is now, or the ground as it was.
  */
@@ -38,6 +44,8 @@ export interface BasemapSource {
   terrainUrl: string
   antiquityDareUrl: string
   atlasTilesUrl: string
+  /** The frontier layers, added to the Barrington sheet when it is switched on. */
+  limesTilesUrl: string
   glyphsUrl: string
 }
 

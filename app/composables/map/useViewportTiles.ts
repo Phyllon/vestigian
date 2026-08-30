@@ -1,5 +1,5 @@
 import { LngLat } from 'maplibre-gl'
-import type { Map as MapLibreMap, MapGeoJSONFeature } from 'maplibre-gl'
+import type { FilterSpecification, Map as MapLibreMap, MapGeoJSONFeature } from 'maplibre-gl'
 
 export const OVERLAY_SOURCE_ID = 'vestigia-data'
 export const SITE_LAYER_ID = 'vestigia-sites'
@@ -8,6 +8,8 @@ export const CLUSTER_LAYER_ID = 'vestigia-clusters'
 export const CLUSTER_COUNT_LAYER_ID = 'vestigia-cluster-count'
 export const TRACING_LAYER_ID = 'vestigia-tracings'
 export const SITE_LABEL_LAYER_ID = 'vestigia-site-labels'
+/** Contributed fortifications, drawn as frontier plans while the limes is on. */
+export const LIMES_FORT_LAYER_ID = 'vestigia-limes-forts'
 
 interface OverlayPalette extends SiteIconPalette {
   /** Reserved for the selected site. The one oxide accent on this screen. */
@@ -55,7 +57,7 @@ const DARK_OVERLAY: OverlayPalette = {
  * on screen. This is what makes the viewport feel instant at continental zoom.
  */
 export const useViewportTiles = () => {
-  const { sheetTone } = useBasemapStyle()
+  const { sheetTone, isFollowingLimes } = useBasemapStyle()
 
   /**
    * Keyed on the sheet, not the theme. Over an antiquity raster the ground is
@@ -94,6 +96,7 @@ export const useViewportTiles = () => {
      */
     registerSiteIcons(map, colours)
     registerAtlasIcons(map, colours)
+    registerLimesIcons(map, colours)
 
     map.addLayer({
       id: TRACING_LAYER_ID,
@@ -118,7 +121,10 @@ export const useViewportTiles = () => {
       'source-layer': 'clusters',
       paint: {
         'circle-color': colours.cluster,
-        'circle-opacity': 0.85,
+        // Counted clusters are the loudest thing on the sheet below zoom 9, and
+        // the frontier has to be the loudest thing while it is showing. They
+        // still say where the records are; they stop shouting it.
+        'circle-opacity': isFollowingLimes.value ? 0.35 : 0.85,
         'circle-stroke-color': colours.siteHalo,
         'circle-stroke-width': 1.5,
         'circle-radius': [
@@ -148,7 +154,10 @@ export const useViewportTiles = () => {
         'text-size': 12,
         'text-allow-overlap': true,
       },
-      paint: { 'text-color': colours.clusterText },
+      paint: {
+        'text-color': colours.clusterText,
+        'text-opacity': isFollowingLimes.value ? 0.45 : 1,
+      },
     })
 
     /**
@@ -175,6 +184,14 @@ export const useViewportTiles = () => {
       type: 'symbol',
       source: OVERLAY_SOURCE_ID,
       'source-layer': 'sites',
+      /**
+       * While the frontier is showing, the fortifications are drawn by the
+       * layer below instead. Without this they are drawn by both and every fort
+       * on the Rhine carries two stacked glyphs.
+       */
+      ...(isFollowingLimes.value
+        ? { filter: ['!=', ['get', 'category'], 'fortification'] as FilterSpecification }
+        : {}),
       layout: {
         'icon-image': buildSiteIconExpression(),
         // Full size only once the drawing is worth reading; smaller at the zoom
@@ -185,6 +202,38 @@ export const useViewportTiles = () => {
          * reader has no way of knowing exists, and it cannot be tapped either
          * — worse than an overlapping pair they can zoom apart.
          */
+        'icon-allow-overlap': true,
+        'icon-ignore-placement': true,
+      },
+    })
+
+    /**
+     * The contributed frontier posts, drawn as plans instead of crenellations.
+     *
+     * A separate layer rather than a branch inside `vestigia-sites`, because
+     * the two differ in more than their icon: this one comes forward, sits
+     * above the frontier line, and is the reason a reader can tell 6,914
+     * watchtowers from 5,551 forts along the Rhine at a glance.
+     *
+     * Its visibility is read here rather than watched. Every change to the
+     * switch changes the style, `setStyle` fires `styledata`, and
+     * `keepOverlayThroughStyleChanges` runs this function again — so the value
+     * is always current at the moment the layer is added, and a watcher would
+     * be a second mechanism doing the same job one tick later.
+     */
+    map.addLayer({
+      id: LIMES_FORT_LAYER_ID,
+      type: 'symbol',
+      source: OVERLAY_SOURCE_ID,
+      'source-layer': 'sites',
+      minzoom: 7,
+      filter: ['==', ['get', 'category'], 'fortification'],
+      layout: {
+        visibility: isFollowingLimes.value ? 'visible' : 'none',
+        'icon-image': buildLimesRecordIconExpression(),
+        // Larger than the general site marker. These are plans rather than
+        // silhouettes, so they need the room to be read as plans.
+        'icon-size': ['interpolate', ['linear'], ['zoom'], 7, 0.65, 11, 1, 16, 1.3],
         'icon-allow-overlap': true,
         'icon-ignore-placement': true,
       },
@@ -251,7 +300,11 @@ export const useViewportTiles = () => {
 
     return map
       .queryRenderedFeatures(box, {
-        layers: [SITE_LAYER_ID, CLUSTER_LAYER_ID, TRACING_LAYER_ID],
+        // The frontier layer has to be listed too. While the limes is showing
+        // it is the only layer drawing fortifications, so leaving it out makes
+        // every fort on the frontier untappable — and it is a hidden layer the
+        // rest of the time, which `queryRenderedFeatures` skips on its own.
+        layers: [SITE_LAYER_ID, LIMES_FORT_LAYER_ID, CLUSTER_LAYER_ID, TRACING_LAYER_ID],
       })
       .filter((feature) => {
         const key = `${feature.layer.id}:${feature.id}`

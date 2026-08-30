@@ -22,11 +22,11 @@ test.describe('the basemap switcher', () => {
     const antiquity = page.getByRole('group', { name: 'Antiquity' })
     await expect(antiquity.getByRole('menuitemradio')).toHaveCount(2)
     await expect(page.getByRole('group', { name: 'Today' }).getByRole('menuitemradio')).toHaveCount(
-      3,
+      2,
     )
 
     // The panel has to be dismissable without choosing something, which it was
-    // not before it grew to five entries in two groups.
+    // not before it grew to four entries in two groups.
     await page.keyboard.press('Escape')
     await expect(page.getByRole('menu', { name: 'Basemap' })).toBeHidden()
   })

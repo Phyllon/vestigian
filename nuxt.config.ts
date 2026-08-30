@@ -330,7 +330,13 @@ export default defineNuxtConfig({
         /** 'openfreemap' for zero-setup development, 'pmtiles' for production. */
         provider: 'openfreemap',
         pmtilesUrl: '',
-        terrainUrl: 'https://elevation-tiles-prod.s3.amazonaws.com/terrarium/{z}/{x}/{y}.png',
+        /**
+         * Elevation for the hillshade under the Barrington sheet. Empty means
+         * "use the Mapzen tiles on AWS Open Data" — the default lives in
+         * `useBasemapStyle` beside the DARE one, so that an env file which sets
+         * this to nothing gets the working default rather than a blank sheet.
+         */
+        terrainUrl: '',
         /**
          * The mirrored DARE pyramid. Empty means "ask Gothenburg's own server",
          * which is right for development and wrong for production — see
@@ -342,6 +348,12 @@ export default defineNuxtConfig({
          * PostGIS, so this is a path rather than a third-party origin.
          */
         atlasTilesUrl: '/api/tiles/antiquity',
+        /**
+         * The frontier, from the same PostGIS. Its own endpoint rather than two
+         * more layers on the atlas tile: most readers never switch it on, and
+         * folding it in would charge them for it on every tile.
+         */
+        limesTilesUrl: '/api/tiles/limes',
         /**
          * Label glyphs ship with the app rather than being fetched from a font
          * server, for the same reason `@fontsource` is used for the interface:

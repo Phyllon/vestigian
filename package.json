@@ -40,6 +40,7 @@
     "images:reconcile": "tsx --env-file-if-exists=.env scripts/reconcile-images.ts",
     "import:basemap": "tsx --env-file-if-exists=.env scripts/import/04-mirror-basemap-tiles.ts",
     "import:atlas": "tsx --env-file-if-exists=.env scripts/import/05-antiquity-atlas.ts",
+    "import:limes": "tsx --env-file-if-exists=.env scripts/import/06-limes.ts",
     "glyphs:build": "tsx scripts/build-glyphs.ts",
     "tiles:warm": "tsx --env-file-if-exists=.env scripts/warm-tiles.ts"
   },

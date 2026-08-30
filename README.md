@@ -327,8 +327,6 @@ docker run --rm --network container:vestigia-dev-minio-1 \
 
 ### register -> brLMa34FghWLUFf
 
-### pin versions in package.json to only update fixes
-
 ### clicking username (top right corner) -> open overlay with useful information (which?) and logout button
 
 ### remember the current position and zoom to be restored on new page load. If GPS is active, load this position zoomed-in directly instead
@@ -336,8 +334,6 @@ docker run --rm --network container:vestigia-dev-minio-1 \
 ### check work flow of "add to atlas" (logged-in)
 
 ### optimize components for mobile use -> heavy
-
-### button showing available map types has to be extended by a choice that, when activated, shows an ancient map as on DARE (https://imperium.ahlfeldt.se/, Digital Atlas of the Roman Empire). Where can such a map be legally obtained/copied from? If not, can it be built?
 
 ### github says after a push "Run failed: build and deploy / e2e failed in 33 seconds, verify failed in 8 seconds, publish skipped". Analyse why
 

@@ -7,8 +7,20 @@
    * that covers a quarter of it to explain nine glyphs is a poor trade until
    * the reader asks for it.
    */
-  const { view } = useBasemapStyle()
+  const { view, isFollowingLimes } = useBasemapStyle()
   const isOpen = ref(false)
+
+  /**
+   * The three line treatments, kept beside the paths they describe rather than
+   * imported from the style: these are eight-pixel swatches on a legend, not
+   * the map's own dash arrays, and matching them exactly would make the key
+   * unreadable at this size.
+   */
+  const LIMES_LINE_KEY = [
+    { kind: 'barrier', label: 'Wall, rampart or ditch', dashes: 'none' },
+    { kind: 'river', label: 'River frontier, held from the bank', dashes: '7 3' },
+    { kind: 'notional', label: 'Frontier without built works', dashes: '3 2.5' },
+  ]
 
   const toggle = (): void => {
     isOpen.value = !isOpen.value
@@ -77,6 +89,48 @@
           The same marks drawn as thin outlines, without a disc, are places referenced from the
           Barrington Atlas and Pleiades — not records contributed here.
         </p>
+
+        <!--
+          The frontier's own key, added rather than substituted: the note above
+          is still true while it is showing, and the plans below replace the
+          crenellation only for fortifications on the line.
+        -->
+        <template v-if="isFollowingLimes">
+          <h2 class="eyebrow mb-2 mt-3 border-t border-paper-300 pt-2.5 dark:border-night-600">
+            The frontier
+          </h2>
+
+          <ul class="flex flex-col gap-1.5">
+            <li v-for="line in LIMES_LINE_KEY" :key="line.kind" class="flex items-center gap-2">
+              <svg class="h-2 w-8 shrink-0" viewBox="0 0 32 8" aria-hidden="true">
+                <path
+                  d="M0 4h32"
+                  stroke="#9a3b22"
+                  stroke-width="2.5"
+                  :stroke-dasharray="line.dashes"
+                />
+              </svg>
+              <span class="text-xs text-ink-700 dark:text-paper-200">{{ line.label }}</span>
+            </li>
+          </ul>
+
+          <ul class="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5">
+            <li v-for="mark in LIMES_MARKS" :key="mark" class="flex items-center gap-2">
+              <svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  :d="LIMES_ICON_PATHS[mark]"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              <span class="text-xs text-ink-700 dark:text-paper-200">
+                {{ LIMES_MARK_LABELS[mark] }}
+              </span>
+            </li>
+          </ul>
+        </template>
       </div>
     </Transition>
 

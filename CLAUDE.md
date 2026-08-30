@@ -73,8 +73,13 @@ After any deploy or bulk import, run `pnpm tiles:warm <url>`.
 
 ## Antiquity basemaps — one borrowed, one built
 
-The switcher offers five views in two groups. Three are recolourings of one
-modern vector source; the two **antiquity** views replace it outright.
+The switcher offers four views in two groups. Two are recolourings of one
+modern vector source; the two **antiquity** views replace it outright. A third
+modern view, `terrain`, was deleted: it was the `vestigia` palette with one
+hillshade layer spliced in, and the same elevation source does better work as
+`atlas-hillshade` under the Barrington sheet — so the relief is still on the
+map and the option was a fourth way of looking at the same roads.
+`NUXT_PUBLIC_BASEMAP_TERRAIN_URL` stays; the tiles are still fetched.
 
 **Antiquity (DARE)** is raster, from `dh.gu.se/tiles/imperium` — Johan Åhlfeldt,
 Gothenburg. CC BY-SA 3.0 with attribution and a link, per his terms page. **But**
@@ -117,7 +122,7 @@ does a place Pleiades declines to locate: `unlocated` and `related` rows carry a
 representative point that is a filing convenience, and 8,545 of them are dropped
 rather than drawn.
 
-Relief comes from the elevation tiles the terrain view already uses. CAWM's
+Relief comes from the elevation tiles at `NUXT_PUBLIC_BASEMAP_TERRAIN_URL`. CAWM's
 raster sheet is exactly that and nothing else, and mirroring it would have cost
 3.2 GB and thirty thousand requests to Iowa for imagery carrying no information
 this map does not already draw. Where the ground genuinely has changed — a
@@ -151,6 +156,76 @@ Four things about these views that are not obvious:
 4. **The atlas has its own cache generation**, and `getAtlasVersion` reads an
    unset key as 1 — so the first `INCR` by hand is a no-op. The import clears
    the key and the stale tiles itself; do not do it manually.
+
+## The limes — a switch on the Barrington sheet
+
+Not a fifth view. **Follow the limes** is a switch inside the antiquity group of
+the basemap switcher, shown only when the Barrington sheet is chosen, and
+`buildAtlasStyle(source, { limes })` is the same function either way — forking
+it would have left two copies of a hundred layer specs to drift. There is a test
+asserting the switch-off layer list is byte-for-byte what it was.
+
+**There is no open dataset of "the limes".** There is one of where the empire
+ended, which is the same thing: the boundary of AWMC's
+`roman_empire_ce_200_extent` polygon, minus a 6 km buffer around the ancient
+shoreline already in `antiquity_lines`. Measured, not assumed —
+**5,123 km in 11 runs** over Europe and the Mediterranean, ~12,000 km over the
+whole empire, against UNESCO's "over 5,000 km". The built works come from the 92
+rows of `antiquity_lines.kind = 'wall'` the atlas import already loads.
+
+`shared/utils/limes.ts` is the one editorial input: **names, dates, prose and a
+bounding box** for seventeen sectors. Every metre of geometry is AWMC's. The
+import reports every run and wall no sector claimed — deliberately including
+~2,200 km of southern Egyptian desert edge, which was a provincial boundary and
+not a frontier system, and the city and isthmus walls in AWMC's `walls` layer.
+
+`pnpm import:limes`, after `pnpm import:atlas`. One 553 KB download and about a
+minute of PostGIS; ~2 MB in Postgres. It rides the **atlas** cache generation
+rather than a third counter and clears `limes:v*` alongside `atlas:v*`.
+
+Seven things that are not obvious, five of them found by running it:
+
+1. **`line-dasharray` is not data-driven.** A `match` on the segment's kind is
+   the obvious way to draw a wall solid and a river dashed, and MapLibre accepts
+   the style without complaint — the property is cross-faded, so the expression
+   is ignored and every stretch comes out solid. One layer per kind.
+2. **`ST_Union` then `ST_LineMerge` does not give you a course.** A sector's
+   stretches cross constantly — Hadrian's Wall is the derived province edge plus
+   ten pieces of wall linework running through it — and unioning nodes every
+   crossing. The merged result was a four-point line that went 35 km west and
+   came back, and every fort on the wall then located to the same point on it.
+   Merge each stretch on its own and take the longest.
+3. **`ST_LineLocatePoint` clamps.** Everything past either end of the path
+   projects onto its first or last vertex, so a dozen forts beyond the western
+   terminus opened the roll all reading "at the start". Anything that clamps
+   from further out than `TERMINUS_METRES` is past the end of the stretch, not
+   on it.
+4. **Sector bounds overlap, so claiming must be exclusive.** A stretch is
+   clipped into every sector it crosses — one Danube run legitimately spans
+   Noricum, Pannonia and Moesia — but where two sectors accepting the same kind
+   share ground, the earlier subtracts from the later. 209 km was in the
+   database twice before `claimLimesSectors` did this.
+5. **`Shape_Area` in AWMC's extent files lies.** Britain's polygon carries
+   `Shape_Area: 0.0` in the 200 CE file, so filtering mainland masses on it
+   dropped the entire British frontier while the import reported success. The
+   filter measures the polygon's own extent instead.
+6. **Two source populations, drawn apart.** Contributed fortifications get the
+   plan marks with a disc; Pleiades military places get the same marks as
+   annotation. Each layer excludes what the other draws, or every tower on the
+   wall carries two glyphs stacked on one point.
+7. **`sites.subcategory` is why turrets read as turrets.** `CATEGORY_BY_KIND`
+   collapses vici's `fort`, `watchtower` and `camp` into one `fortification`
+   category; the column keeps the source's own word beside it. Re-running
+   `import:convert` fills it through `ON CONFLICT … DO UPDATE … WHERE
+subcategory IS NULL`, which is the only column a re-run may overwrite.
+   12,804 fortifications split into 6,914 watchtowers, 5,551 forts, 339 camps.
+
+**Licence:** the sector tables are ODbL, like `antiquity_*`, and are never
+joined to `sites`. The one judgement call is `offsetMetres` in
+`/api/limes/sectors/:slug` — a position measured against ODbL geometry for
+records that are not ODbL. It is computed **on read and never stored**, and
+`/api/data/sites.geojson` gains no field from it, so what leaves is a Produced
+Work with both attributions attached. See the docstring on that endpoint.
 
 ## Which client to reach for
 
@@ -250,35 +325,39 @@ app/
     contribute/ ContributionPanel SiteEditorForm TracingEditorForm GeometryDrawTool ImageUploader
     auth/      LoginForm RegisterForm PasswordField PasswordRequirements
     moderation/ ReviewQueue RevisionDiff ContributorTable
+    limes/     LimesPanel
     ui/        ThemeToggle RevisionHistory
   composables/
     map/  useMapInstance useBasemapStyle useViewportTiles useGeolocation useSiteIcons (+__test__/)
     data/ useSiteQuery useSiteEnrichment useImageUrl                                  (+__test__/)
     auth/ useSession
+    limes/ useLimes
     ui/   useColorScheme useBreakpoint
   layouts/ default.vue (map shell) reading.vue (documents)
   middleware/ authenticated.ts moderator.ts
   router.options.ts          scroll behaviour; the camera hash is not a selector
   pages/ index login register verify forgot-password reset-password
          site/[slug] site/[slug]/edit tracing/[id] tracing/[id]/edit
+         limes/index limes/[slug]
          moderation/index moderation/contributors
 server/
   plugins/ observability.ts   the only per-request hook: id, access log, span
   api/ tiles/[z]/[x]/[y]  tiles/antiquity/[z]/[x]/[y]
-       sites/  tracings/  auth/  contributions/  moderation/  data/
+       tiles/limes/[z]/[x]/[y]
+       sites/  tracings/  auth/  contributions/  moderation/  data/  limes/
        images/[id]/[preset]  sites/[id]/enrichment  health ready metrics
   routes/ robots.txt sitemap.xml
   database/ schema/ (users sites geo atlas) migrations/ migrate.ts
-  utils/ mvt atlas permissions ratelimit images images-order uploads tokens diff
+  utils/ mvt atlas limes permissions ratelimit images images-order uploads tokens diff
          mail mail-template notifications
          site-record validation
          revisions slug db cache argon altcha enrichment enrichment-sources translate
          logger metrics tracing
                                                                             (+__test__/)
 shared/types/  vocabulary shared by both sides
-shared/utils/  password policy + authorization rules, shared by both sides   (+__test__/)
+shared/utils/  password policy, authorization rules, the limes gazetteer     (+__test__/)
 scripts/import/  four-stage vici.org import + vici-licences.ts (shared vocabulary)
-                 04-mirror-basemap-tiles.ts 05-antiquity-atlas.ts
+                 04-mirror-basemap-tiles.ts 05-antiquity-atlas.ts 06-limes.ts
 scripts/warm-tiles.ts snapshot-database.ts reconcile-images.ts build-glyphs.ts
 public/fonts/    self-hosted SDF label glyphs + the font's OFL
 docker/  Dockerfile compose.dev.yml compose.prod.yml traefik/ backup.sh
@@ -381,6 +460,7 @@ pnpm import:image-records   # → 39,212 site_images rows over 36,216 objects; n
 pnpm import:images          # → the photographs; ~12 hours, ~10 GB, resumable
 pnpm import:basemap dare    # → the DARE sheet; ~10 hours, ~1.2 GB, resumable
 pnpm import:atlas           # → the Barrington sheet: AWMC + Pleiades into PostGIS
+pnpm import:limes           # → the frontier, derived from the atlas; ~1 minute
 pnpm tiles:warm <url>
 ```
 

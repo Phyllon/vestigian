@@ -2,7 +2,8 @@
   import { onClickOutside } from '@vueuse/core'
   import type { BasemapGroup, BasemapView } from '#shared/types'
 
-  const { view, setView, availableViews } = useBasemapStyle()
+  const { view, setView, availableViews, canFollowLimes, isFollowingLimes, setLimesActive } =
+    useBasemapStyle()
   const isOpen = ref(false)
   const root = useTemplateRef('root')
   const trigger = useTemplateRef('trigger')
@@ -29,6 +30,16 @@
   const choose = (next: BasemapView): void => {
     setView(next)
     close()
+  }
+
+  /**
+   * The menu deliberately stays open. The switch changes the sheet behind it
+   * rather than navigating anywhere, so closing would hide the only feedback
+   * that anything happened — and a reader who wanted it off again would have to
+   * reopen the menu to find out whether it was on.
+   */
+  const toggleLimes = (): void => {
+    setLimesActive(!isFollowingLimes.value)
   }
 
   const activeLabel = computed(
@@ -70,9 +81,10 @@
       leave-to-class="opacity-0 translate-y-1"
     >
       <!--
-        Capped against the viewport rather than sized to the content: five
-        entries in two groups is taller than a phone in landscape, and a menu
-        that runs off the bottom of the screen has no way back.
+        Capped against the viewport rather than sized to the content: four
+        entries in two groups plus the frontier switch is taller than a phone in
+        landscape, and a menu that runs off the bottom of the screen has no way
+        back.
       -->
       <div
         v-if="isOpen"
@@ -113,6 +125,50 @@
               />
             </span>
             <span class="text-xs text-ink-500 dark:text-paper-400">{{ option.hint }}</span>
+          </button>
+
+          <!--
+            The frontier is a reading of the Barrington sheet, not a sixth
+            sheet, so it is a switch nested under that option rather than
+            another radio beside it — and it only exists once that sheet is
+            chosen, because there is nothing for it to be drawn on otherwise.
+
+            `menuitemcheckbox` rather than `switch`: inside a `menu` this is the
+            role that belongs there, and it is the one screen readers announce
+            with the checked state alongside the radios above it.
+          -->
+          <button
+            v-if="group === 'antiquity' && canFollowLimes"
+            type="button"
+            role="menuitemcheckbox"
+            :aria-checked="isFollowingLimes"
+            class="flex w-full items-center gap-3 border-t border-paper-200 bg-paper-100/60 px-4 py-3 text-left transition hover:bg-paper-200 dark:border-night-700 dark:bg-night-700/50 dark:hover:bg-night-700"
+            @click="toggleLimes"
+          >
+            <span
+              class="flex h-5 w-9 shrink-0 items-center rounded-full border transition"
+              :class="
+                isFollowingLimes
+                  ? 'justify-end border-oxide-600 bg-oxide-600/20 dark:border-oxide-300'
+                  : 'justify-start border-paper-300 bg-paper-200 dark:border-night-600 dark:bg-night-800'
+              "
+              aria-hidden="true"
+            >
+              <span
+                class="mx-0.5 size-4 rounded-full transition"
+                :class="
+                  isFollowingLimes
+                    ? 'bg-oxide-600 dark:bg-oxide-300'
+                    : 'bg-paper-50 dark:bg-night-600'
+                "
+              />
+            </span>
+            <span class="flex flex-col gap-0.5">
+              <span class="font-medium text-ink-900 dark:text-paper-100">Follow the limes</span>
+              <span class="text-xs text-ink-500 dark:text-paper-400">
+                The frontier, its walls and its forts
+              </span>
+            </span>
           </button>
         </div>
       </div>

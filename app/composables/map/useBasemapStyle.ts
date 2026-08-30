@@ -1,17 +1,18 @@
 import { Protocol } from 'pmtiles'
 import maplibregl from 'maplibre-gl'
-import type { LayerSpecification, StyleSpecification } from 'maplibre-gl'
+import type { FilterSpecification, LayerSpecification, StyleSpecification } from 'maplibre-gl'
 // Imported explicitly rather than through Nuxt's auto-imports: this is called
 // while the style is built, so the unit tests — which import this module
 // directly — would otherwise fail on an undefined reference that the running
 // application never sees.
-import { buildAtlasIconExpression } from './useSiteIcons'
+import { buildAtlasIconExpression, buildLimesReferenceIconExpression } from './useSiteIcons'
 import type {
   BasemapGroup,
   BasemapOption,
   BasemapSheetTone,
   BasemapSource,
   BasemapView,
+  LimesSegmentKind,
 } from '#shared/types'
 
 let protocolRegistered = false
@@ -74,6 +75,15 @@ const DARE_ATTRIBUTION =
  */
 const ATLAS_ATTRIBUTION =
   'Antiquity data © <a href="https://github.com/AWMC/geodata" target="_blank" rel="noopener">Ancient World Mapping Center</a> (ODbL 1.0) and <a href="https://pleiades.stoa.org" target="_blank" rel="noopener">Pleiades</a> (CC BY 3.0)'
+
+/**
+ * The same sources, plus what the frontier actually is.
+ *
+ * "Derived from" rather than a bare credit, because the line is not a dataset
+ * anyone published: it is the boundary of AWMC's extent of the empire with the
+ * coast taken out of it. A reader is owed that before they cite it.
+ */
+const LIMES_ATTRIBUTION = `${ATLAS_ATTRIBUTION}. Frontier derived from AWMC's extent of the empire at 200 CE`
 
 /** Neither antiquity view is a recolouring of the modern vector source. */
 export type AntiquityView = Extract<BasemapView, 'antiquity-dare' | 'antiquity-awmc'>
@@ -142,6 +152,8 @@ interface StyleRequest {
   view: BasemapView
   isDark: boolean
   source: BasemapSource
+  /** Only the Barrington sheet reads this; every other view ignores it. */
+  isFollowingLimes?: boolean
 }
 
 const buildVectorSource = (source: BasemapSource) =>
@@ -250,6 +262,21 @@ const buildBasemapLayers = (colours: StyleColours, roadOpacity: number): LayerSp
  * development session, which is why `.env.example` says to set this in
  * production and the mirror script exists.
  */
+/**
+ * Mapzen's terrarium tiles on AWS Open Data, which is the only elevation source
+ * this map has ever used. Kept here rather than in `nuxt.config.ts` for the
+ * same reason as the DARE fallback below: a deployment whose env file sets the
+ * variable to nothing then gets a working sheet instead of a flat one, and the
+ * failure mode of a missing hillshade is that nobody notices.
+ *
+ * A different host has to be added to `mapAssetOrigins` in `nuxt.config.ts` or
+ * the production build's CSP refuses it silently.
+ */
+const TERRAIN_TILES = 'https://elevation-tiles-prod.s3.amazonaws.com/terrarium/{z}/{x}/{y}.png'
+
+const resolveTerrainUrl = (source: BasemapSource): string =>
+  source.terrainUrl.length > 0 ? source.terrainUrl : TERRAIN_TILES
+
 const resolveDareUrl = (source: BasemapSource): string =>
   source.antiquityDareUrl.length > 0 ? source.antiquityDareUrl : DARE_TILES
 
@@ -315,6 +342,181 @@ const ATLAS_COLOURS: AtlasColours = {
 }
 
 /**
+ * The frontier's own palette. Only two colours, and one of them is the accent
+ * the rest of the interface spends once per screen.
+ */
+/**
+ * One line layer per kind, because `line-dasharray` is not data-driven.
+ *
+ * A `match` on the feature's kind is the obvious way to write this and MapLibre
+ * accepts the style without complaint — `line-dasharray` is a cross-faded
+ * property, so a data expression is simply ignored and every stretch comes out
+ * solid. Three layers is the supported form, and it also makes the ordering
+ * explicit: the built barriers draw last and win where a wall meets a river.
+ */
+const LIMES_LINE_KINDS: { kind: LimesSegmentKind; dashes: [number, number] | null }[] = [
+  /** A line the sources agree on with no structure to point at. */
+  { kind: 'notional', dashes: [1.6, 1.4] },
+  /** Held from the bank, not built across: a long dash reads as a patrol, not a wall. */
+  { kind: 'river', dashes: [4, 1.6] },
+  /** A rampart, a palisade, a ditch. The only one drawn solid. */
+  { kind: 'barrier', dashes: null },
+]
+
+const LIMES_COLOURS = {
+  /** Oxide red. The frontier, and on this view the only thing wearing it. */
+  line: '#9a3b22',
+  /**
+   * The casing under it. Paper rather than white: the line crosses sea, land,
+   * hillshade and urban fill along its length, and a casing that matches the
+   * sheet reads as the line being lifted off the page rather than as a second
+   * line drawn beside it.
+   */
+  casing: '#faf7ef',
+  label: '#7a2d19',
+  labelHalo: '#faf7ef',
+}
+
+/**
+ * The frontier, drawn over the atlas sheet.
+ *
+ * ## Three kinds, three treatments
+ *
+ * The map would be lying if it drew a river the way it draws a wall. A
+ * `barrier` is a built work and gets the solid line; a `river` frontier was a
+ * watercourse patrolled from its bank, so it gets a long dash that reads as
+ * "held, not built"; a `notional` frontier is a line the sources agree on with
+ * no structure to point at, and gets a short dash that reads as an assertion
+ * rather than a thing. All three are the same colour and weight, because they
+ * are the same frontier.
+ *
+ * ## Why a casing
+ *
+ * Without one the line disappears wherever it crosses a road of similar weight
+ * — which, on the Rhine and the Danube, is most of its length, since the road
+ * that supplied a frontier runs along it. The casing is what makes it
+ * followable at a glance instead of traceable with effort.
+ */
+const buildLimesLayers = (): LayerSpecification[] => [
+  {
+    id: 'limes-frontier-casing',
+    type: 'line',
+    source: 'limes',
+    'source-layer': 'frontier',
+    layout: { 'line-cap': 'round', 'line-join': 'round' },
+    paint: {
+      'line-color': LIMES_COLOURS.casing,
+      'line-opacity': 0.85,
+      'line-width': ['interpolate', ['linear'], ['zoom'], 3, 4.5, 8, 7, 14, 11],
+    },
+  },
+  ...LIMES_LINE_KINDS.map(({ kind, dashes }): LayerSpecification => ({
+    id: `limes-frontier-${kind}`,
+    type: 'line',
+    source: 'limes',
+    'source-layer': 'frontier',
+    filter: ['==', ['get', 'kind'], kind],
+    layout: { 'line-cap': dashes ? 'butt' : 'round', 'line-join': 'round' },
+    paint: {
+      'line-color': LIMES_COLOURS.line,
+      /**
+       * A built work outweighs a line inferred from the edge of a province, and
+       * the two run side by side for most of Britain and the Rhine — the wall,
+       * and the boundary a few kilometres behind it. Given equal weight they
+       * read as two frontiers, which is one more than there was.
+       */
+      'line-opacity': kind === 'barrier' ? 1 : 0.62,
+      'line-width': [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        3,
+        kind === 'barrier' ? 2.2 : 1.6,
+        8,
+        kind === 'barrier' ? 3.4 : 2.4,
+        14,
+        kind === 'barrier' ? 6 : 4,
+      ],
+      ...(dashes ? { 'line-dasharray': dashes } : {}),
+    },
+  })),
+  /**
+   * The name, written along the line rather than beside it.
+   *
+   * `symbol-placement: 'line'` is the whole reason a reader can tell which
+   * frontier they are following without opening anything: the label bends with
+   * the Danube, so it belongs to the river visibly rather than by proximity.
+   */
+  {
+    id: 'limes-frontier-labels',
+    type: 'symbol',
+    source: 'limes',
+    'source-layer': 'frontier',
+    minzoom: 5,
+    layout: {
+      'symbol-placement': 'line',
+      'symbol-spacing': 320,
+      'text-field': ['get', 'sector_name'],
+      'text-font': [MAP_LABEL_FONT],
+      'text-size': ['interpolate', ['linear'], ['zoom'], 5, 10, 12, 13],
+      'text-letter-spacing': 0.08,
+      'text-max-angle': 35,
+      'text-padding': 6,
+    },
+    paint: {
+      'text-color': LIMES_COLOURS.label,
+      'text-halo-color': LIMES_COLOURS.labelHalo,
+      'text-halo-width': 1.6,
+    },
+  },
+  /**
+   * Borrowed military places, promoted out of the sheet's general annotation.
+   *
+   * Still drawn as annotation — thin line, no disc — because they are still
+   * Pleiades and not contributions. What changes is that they get the frontier's
+   * own plan marks instead of the generic crenellation, and they stop competing
+   * with the two thousand villas and sanctuaries around them: this layer is
+   * above the frontier line, so a tower on the wall wins the collision against
+   * a name in the hinterland.
+   */
+  {
+    id: 'limes-installations',
+    type: 'symbol',
+    source: 'atlas',
+    'source-layer': 'places',
+    minzoom: 7,
+    filter: ['all', ['get', 'military'], ['has', 'mark']],
+    layout: {
+      'icon-image': buildLimesReferenceIconExpression(),
+      'icon-size': ['interpolate', ['linear'], ['zoom'], 7, 0.7, 11, 1, 14, 1.2],
+      'icon-optional': true,
+      'text-field': ['get', 'title'],
+      'text-font': [MAP_LABEL_FONT],
+      'text-size': ['interpolate', ['linear'], ['zoom'], 7, 9, 14, 12],
+      'text-anchor': 'top',
+      'text-offset': [0, 0.6],
+      'text-max-width': 8,
+      'text-padding': 4,
+    },
+    paint: {
+      'text-color': ATLAS_COLOURS.label,
+      'text-halo-color': ATLAS_COLOURS.labelHalo,
+      'text-halo-width': 1.2,
+    },
+  },
+]
+
+/**
+ * How far back the sheet steps when the frontier is switched on.
+ *
+ * The house rule is one accent per screen and never decoratively. On this view
+ * the frontier is the one thing being asserted, so it takes the oxide red and
+ * everything else has to make room: the roads, the places and the urban fills
+ * are still there to be read, at the weight of context rather than of subject.
+ */
+const LIMES_RECESSION = 0.42
+
+/**
  * The antiquity atlas, drawn from this project's own vector tiles.
  *
  * Order is the whole trick with a sheet assembled from separate sources: sea
@@ -325,8 +527,19 @@ const ATLAS_COLOURS: AtlasColours = {
  * A road whose course Barrington records as inferred rather than established is
  * dashed. That distinction is in the data and the map has no business flattening
  * it — a solid line here would be the atlas asserting more than its source does.
+ *
+ * ## The frontier
+ *
+ * `limes` is a reading of this sheet, not a different sheet, so it is an option
+ * here rather than a style of its own. Forking would have left two copies of a
+ * hundred lines of layer specs to drift apart, and the layers a reader sees
+ * with the switch off must be exactly the layers they saw before it existed —
+ * which is a thing a test can assert only while there is one function.
  */
-const buildAtlasStyle = (source: BasemapSource): StyleSpecification => ({
+const buildAtlasStyle = (
+  source: BasemapSource,
+  options: { limes: boolean } = { limes: false },
+): StyleSpecification => ({
   version: 8,
   glyphs: source.glyphsUrl,
   sources: {
@@ -335,8 +548,18 @@ const buildAtlasStyle = (source: BasemapSource): StyleSpecification => ({
       tiles: [`${source.atlasTilesUrl}/{z}/{x}/{y}.mvt`],
       minzoom: 0,
       maxzoom: 12,
-      attribution: ATLAS_ATTRIBUTION,
+      attribution: options.limes ? LIMES_ATTRIBUTION : ATLAS_ATTRIBUTION,
     },
+    ...(options.limes
+      ? {
+          limes: {
+            type: 'vector' as const,
+            tiles: [`${source.limesTilesUrl}/{z}/{x}/{y}.mvt`],
+            minzoom: 0,
+            maxzoom: 12,
+          },
+        }
+      : {}),
     /**
      * Relief, from the elevation tiles the terrain view already uses.
      *
@@ -349,7 +572,7 @@ const buildAtlasStyle = (source: BasemapSource): StyleSpecification => ({
      */
     terrain: {
       type: 'raster-dem',
-      tiles: [source.terrainUrl],
+      tiles: [resolveTerrainUrl(source)],
       encoding: 'terrarium',
       tileSize: 256,
       maxzoom: 13,
@@ -391,7 +614,10 @@ const buildAtlasStyle = (source: BasemapSource): StyleSpecification => ({
       type: 'fill',
       source: 'atlas',
       'source-layer': 'areas',
-      paint: { 'fill-color': ATLAS_COLOURS.urban, 'fill-opacity': 0.85 },
+      paint: {
+        'fill-color': ATLAS_COLOURS.urban,
+        'fill-opacity': options.limes ? 0.85 * LIMES_RECESSION : 0.85,
+      },
     },
     {
       id: 'atlas-coast',
@@ -425,6 +651,7 @@ const buildAtlasStyle = (source: BasemapSource): StyleSpecification => ({
       paint: {
         'line-color': ATLAS_COLOURS.road,
         'line-dasharray': [2, 2],
+        'line-opacity': options.limes ? LIMES_RECESSION : 1,
         'line-width': ['interpolate', ['linear'], ['zoom'], 4, 0.5, 14, 2],
       },
     },
@@ -436,6 +663,7 @@ const buildAtlasStyle = (source: BasemapSource): StyleSpecification => ({
       filter: ['all', ['==', ['get', 'kind'], 'road'], ['get', 'certain']],
       paint: {
         'line-color': ['case', ['get', 'major'], ATLAS_COLOURS.roadMajor, ATLAS_COLOURS.road],
+        'line-opacity': options.limes ? LIMES_RECESSION : 1,
         'line-width': [
           'interpolate',
           ['linear'],
@@ -465,6 +693,17 @@ const buildAtlasStyle = (source: BasemapSource): StyleSpecification => ({
       source: 'atlas',
       'source-layer': 'places',
       minzoom: 6,
+      /**
+       * While the frontier is showing, the military places are drawn by
+       * `limes-installations` with their own plan marks. Without this filter
+       * they are drawn by both layers and every tower on the wall carries a
+       * crenellation and a plan stacked on the same point.
+       */
+      ...(options.limes
+        ? {
+            filter: ['!', ['all', ['get', 'military'], ['has', 'mark']]] as FilterSpecification,
+          }
+        : {}),
       layout: {
         'icon-image': buildAtlasIconExpression(),
         'icon-size': ['interpolate', ['linear'], ['zoom'], 6, 0.45, 9, 0.75, 13, 1],
@@ -481,6 +720,8 @@ const buildAtlasStyle = (source: BasemapSource): StyleSpecification => ({
         'text-color': ATLAS_COLOURS.label,
         'text-halo-color': ATLAS_COLOURS.labelHalo,
         'text-halo-width': 1.2,
+        'text-opacity': options.limes ? 0.55 : 1,
+        'icon-opacity': options.limes ? 0.5 : 1,
       },
     },
     {
@@ -502,53 +743,32 @@ const buildAtlasStyle = (source: BasemapSource): StyleSpecification => ({
         'text-halo-width': 1.4,
       },
     },
+    ...(options.limes ? buildLimesLayers() : []),
   ],
 })
 
 export const buildBasemapStyle = (request: StyleRequest): StyleSpecification => {
   if (request.view === 'antiquity-dare') return buildDareStyle(request.source)
-  if (request.view === 'antiquity-awmc') return buildAtlasStyle(request.source)
+  if (request.view === 'antiquity-awmc') {
+    return buildAtlasStyle(request.source, { limes: request.isFollowingLimes === true })
+  }
 
   const colours = request.isDark ? DARK_COLOURS : LIGHT_COLOURS
   const roadOpacity = request.view === 'modern' ? MODERN_ROAD_OPACITY : QUIET_ROAD_OPACITY
 
   if (request.source.provider === 'pmtiles') registerPmtilesProtocol()
 
-  const style: StyleSpecification = {
+  return {
     version: 8,
     glyphs: request.source.glyphsUrl,
     sources: { basemap: buildVectorSource(request.source) },
     layers: buildBasemapLayers(colours, roadOpacity),
   }
-
-  if (request.view === 'terrain') {
-    style.sources.terrain = {
-      type: 'raster-dem',
-      tiles: [request.source.terrainUrl],
-      encoding: 'terrarium',
-      tileSize: 256,
-      maxzoom: 13,
-      attribution: 'Elevation: Mapzen / AWS Open Data',
-    }
-    style.layers.splice(1, 0, {
-      id: 'hillshade',
-      type: 'hillshade',
-      source: 'terrain',
-      paint: {
-        'hillshade-exaggeration': 0.4,
-        'hillshade-shadow-color': request.isDark ? '#000000' : '#8c8271',
-        'hillshade-highlight-color': request.isDark ? '#2e2820' : '#faf7ef',
-      },
-    })
-  }
-
-  return style
 }
 
 export const BASEMAP_VIEWS: BasemapOption[] = [
   { value: 'vestigia', group: 'today', label: 'Vestigia', hint: 'Antiquity foregrounded' },
   { value: 'modern', group: 'today', label: 'Modern', hint: 'Roads and towns today' },
-  { value: 'terrain', group: 'today', label: 'Terrain', hint: 'Relief and elevation' },
   {
     value: 'antiquity-dare',
     group: 'antiquity',
@@ -603,6 +823,7 @@ export const useBasemapStyle = () => {
     terrainUrl: config.public.basemap.terrainUrl,
     antiquityDareUrl: config.public.basemap.antiquityDareUrl,
     atlasTilesUrl: absolute(config.public.basemap.atlasTilesUrl),
+    limesTilesUrl: absolute(config.public.basemap.limesTilesUrl),
     glyphsUrl: config.public.basemap.glyphsUrl,
   }))
 
@@ -610,13 +831,50 @@ export const useBasemapStyle = () => {
 
   const sheetTone = computed(() => resolveSheetTone(view.value, isDark.value))
 
+  /**
+   * A reading of the Barrington sheet, not a sixth view.
+   *
+   * It lives beside `view` rather than inside it because it is orthogonal to
+   * the choice of sheet in principle and constrained to one sheet in practice:
+   * `canFollowLimes` is what keeps it from being switched on over a modern
+   * road map, where a frontier drawn against present-day motorways would
+   * assert a continuity that is not there.
+   *
+   * Not persisted, like `view`. The camera hash stays the only durable map
+   * state, so a shared link opens on the reader's own choice of sheet.
+   */
+  const isLimesActive = useState<boolean>('limes-active', () => false)
+
+  const canFollowLimes = computed(() => view.value === 'antiquity-awmc')
+
+  const isFollowingLimes = computed(() => canFollowLimes.value && isLimesActive.value)
+
   const currentStyle = computed(() =>
-    buildBasemapStyle({ view: view.value, isDark: isDark.value, source: source.value }),
+    buildBasemapStyle({
+      view: view.value,
+      isDark: isDark.value,
+      source: source.value,
+      isFollowingLimes: isFollowingLimes.value,
+    }),
   )
 
   const setView = (next: BasemapView): void => {
     view.value = next
   }
 
-  return { view, setView, currentStyle, isDark, sheetTone, availableViews: BASEMAP_VIEWS }
+  const setLimesActive = (next: boolean): void => {
+    isLimesActive.value = next
+  }
+
+  return {
+    view,
+    setView,
+    currentStyle,
+    isDark,
+    sheetTone,
+    availableViews: BASEMAP_VIEWS,
+    canFollowLimes,
+    isFollowingLimes,
+    setLimesActive,
+  }
 }

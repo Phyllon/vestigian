@@ -1,10 +1,10 @@
 import { desc, eq } from 'drizzle-orm'
-import { sites } from '~~/server/database/schema'
+import { limesSectors, sites } from '~~/server/database/schema'
 
 /**
- * Sites are the only indexable content here — the map itself is one URL. Capped
- * at the sitemap limit; if the atlas ever outgrows that, this becomes an index
- * pointing at paged children.
+ * Sites and the frontier sectors are the indexable content — the map itself is
+ * one URL. Capped at the sitemap limit; if the atlas ever outgrows that, this
+ * becomes an index pointing at paged children.
  */
 const MAX_ENTRIES = 50000
 
@@ -19,6 +19,9 @@ export default defineEventHandler(async (event) => {
     .where(eq(sites.status, 'approved'))
     .orderBy(desc(sites.updatedAt))
     .limit(MAX_ENTRIES)
+
+  // Seventeen rows, and they change only when the frontier is re-imported.
+  const sectors = await database.select({ slug: limesSectors.slug }).from(limesSectors)
 
   const base = config.public.siteUrl.replace(/\/$/, '')
 
@@ -37,6 +40,8 @@ export default defineEventHandler(async (event) => {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>${base}/</loc></url>
+  <url><loc>${base}/limes</loc></url>
+${sectors.map((row) => `  <url><loc>${base}/limes/${row.slug}</loc></url>`).join('\n')}
 ${entries}
 </urlset>`
 })

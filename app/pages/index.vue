@@ -1,5 +1,6 @@
 <script setup lang="ts">
   const { loggedIn } = useSession()
+  const { isFollowingLimes } = useBasemapStyle()
   const { selectSite } = useSiteQuery()
 
   const isContributing = ref(false)
@@ -25,8 +26,18 @@
     -->
     <h1 class="sr-only">Vestigia — an atlas of the ancient world</h1>
 
-    <!-- Controls float over the map; the map itself never scrolls or reflows. -->
-    <div class="pointer-events-none absolute inset-0 p-3 md:p-4">
+    <!--
+      Controls float over the map; the map itself never scrolls or reflows.
+
+      Padded clear of the frontier panel on wide screens, where that panel is a
+      rail down the left edge and would otherwise sit on top of the search field
+      and the key. On a phone the panel is a bottom sheet and there is nothing
+      to move out of the way of.
+    -->
+    <div
+      class="pointer-events-none absolute inset-0 p-3 transition-[padding] md:p-4"
+      :class="isFollowingLimes ? 'md:pl-[23rem]' : ''"
+    >
       <div class="pointer-events-auto flex items-start gap-2">
         <div class="w-full max-w-sm">
           <MapSearchField />
@@ -34,7 +45,15 @@
         <MapBasemapSwitcher class="ml-auto" />
       </div>
 
-      <MapLegend class="pointer-events-auto absolute bottom-4 left-3 md:left-4" />
+      <!--
+        `absolute` ignores the container's padding, so the frontier panel has to
+        be cleared here as well as above — without this the key sits underneath
+        the panel on a wide screen and cannot be opened.
+      -->
+      <MapLegend
+        class="pointer-events-auto absolute bottom-4 left-3 md:left-4"
+        :class="isFollowingLimes ? 'md:left-[23.5rem]' : ''"
+      />
 
       <!--
         Clear of MapLibre's own chrome. The compact attribution control — the
@@ -79,6 +98,13 @@
       above the detail panels — see MapFeaturePicker.
       "Lazy" left the modulepreload graph, so it's off the critical path rather than blocking. But it's still downloaded.
     -->
+    <!--
+      Only while the frontier is showing. Lazy for the same reason as the
+      panels below: a reader who never turns the switch on should not download
+      the roll, its formatting or the sector fetch.
+    -->
+    <LazyLimesPanel v-if="isFollowingLimes" />
+
     <LazyMapFeaturePicker />
     <LazySiteDetailPanel />
     <LazyTracingDetailPanel />

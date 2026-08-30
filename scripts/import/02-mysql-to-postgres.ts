@@ -99,6 +99,21 @@ const SITE_LICENCE = 'CC-BY-SA-3.0'
 
 const unmatchedKinds = new Set<string>()
 
+/**
+ * Vici's own word for what a site is, kept beside the category it maps to.
+ *
+ * The enum stays closed at nine — that is the right number for a legend — but
+ * collapsing `fort`, `watchtower` and `camp` into one `fortification` threw
+ * away the distinction a reader following a frontier most needs, and nothing
+ * else in the dump records it. Stored verbatim (lower-cased) rather than
+ * mapped, because this is the source's vocabulary and not this project's:
+ * `shared/utils/limes.ts` is where it is interpreted.
+ */
+const normaliseKind = (kind: string | null): string | null => {
+  const normalised = kind?.trim().toLowerCase()
+  return normalised && normalised.length > 0 ? normalised.slice(0, 40) : null
+}
+
 const mapCategory = (kind: string | null): string => {
   if (!kind) return 'other'
   const normalised = kind.trim().toLowerCase()
@@ -172,20 +187,35 @@ const importPoints = async (): Promise<number> => {
 
         const [periodFrom, periodTo] = readPeriod(point.periodFrom, point.periodTo)
 
+        /**
+         * The conflict clause updates exactly one column, and only where it is
+         * still unset.
+         *
+         * Doing nothing on conflict is right for everything else: a record
+         * edited here since the import must not be reverted to what vici said.
+         * But `subcategory` was added long after the first import ran, so on
+         * every existing row it is null and doing nothing would leave it null
+         * forever — the column would only ever be filled in a database that
+         * started empty. Restricting the update to rows without one keeps the
+         * rule intact and makes a re-run safe on a live instance.
+         */
         await tx`
           INSERT INTO sites (
-            slug, title, category, summary, description, geom,
+            slug, title, category, subcategory, summary, description, geom,
             period_from, period_to, status, source_ref, licence, attribution
           )
           VALUES (
             ${slug}, ${point.title}, ${mapCategory(point.kind)}::site_category,
+            ${normaliseKind(point.kind)},
             ${point.summary}, ${point.description},
             ST_SetSRID(ST_MakePoint(${point.longitude}, ${point.latitude}), 4326),
             ${periodFrom}, ${periodTo}, 'approved',
             ${`vici.org#${point.pointId}`}, ${SITE_LICENCE},
             'Vici.org contributors'
           )
-          ON CONFLICT (source_ref) WHERE source_ref IS NOT NULL DO NOTHING
+          ON CONFLICT (source_ref) WHERE source_ref IS NOT NULL
+          DO UPDATE SET subcategory = EXCLUDED.subcategory
+          WHERE sites.subcategory IS NULL
         `
         imported += 1
       }

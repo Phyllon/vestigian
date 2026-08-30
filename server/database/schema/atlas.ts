@@ -32,6 +32,14 @@ const multiPolygonGeometry = customType<{ data: string; driverData: string }>({
   dataType: () => 'geometry(MultiPolygon, 4326)',
 })
 
+const lineGeometry = customType<{ data: string; driverData: string }>({
+  dataType: () => 'geometry(LineString, 4326)',
+})
+
+const polygonGeometry = customType<{ data: string; driverData: string }>({
+  dataType: () => 'geometry(Polygon, 4326)',
+})
+
 export const antiquityLineKindEnum = pgEnum('antiquity_line_kind', [
   'road',
   'aqueduct',
@@ -125,5 +133,55 @@ export const antiquityPlaces = pgTable(
     uniqueIndex('antiquity_places_pleiades_idx').on(table.pleiadesId),
     index('antiquity_places_geom_idx').using('gist', table.geom),
     index('antiquity_places_category_idx').on(table.category),
+  ],
+)
+
+export const limesSegmentKindEnum = pgEnum('limes_segment_kind', ['barrier', 'river', 'notional'])
+
+/**
+ * The frontier, in named sectors. Same licence family as the tables above and
+ * kept here for that reason: every metre is derived from AWMC's extent of the
+ * empire and its wall linework, so these rows are ODbL and are never joined to
+ * `sites`. The names, dates and prose come from `shared/utils/limes.ts`.
+ */
+export const limesSectors = pgTable(
+  'limes_sectors',
+  {
+    id: serial('id').primaryKey(),
+    slug: varchar('slug', { length: 80 }).notNull(),
+    name: varchar('name', { length: 160 }).notNull(),
+    latinName: varchar('latin_name', { length: 160 }),
+    summary: text('summary'),
+    pleiadesId: varchar('pleiades_id', { length: 32 }),
+    minYear: integer('min_year'),
+    maxYear: integer('max_year'),
+    lengthMetres: integer('length_metres').notNull(),
+    geom: multiLineGeometry('geom').notNull(),
+    /** The longest continuous run, so `ST_LineLocatePoint` has one line to measure along. */
+    pathGeom: lineGeometry('path_geom').notNull(),
+    /** Derived at import so the camera can fit a sector without reading its geometry. */
+    bbox: polygonGeometry('bbox').notNull(),
+  },
+  (table) => [
+    uniqueIndex('limes_sectors_slug_idx').on(table.slug),
+    index('limes_sectors_bbox_idx').using('gist', table.bbox),
+    index('limes_sectors_path_idx').using('gist', table.pathGeom),
+  ],
+)
+
+export const limesSegments = pgTable(
+  'limes_segments',
+  {
+    id: serial('id').primaryKey(),
+    sectorId: integer('sector_id')
+      .notNull()
+      .references(() => limesSectors.id, { onDelete: 'cascade' }),
+    kind: limesSegmentKindEnum('kind').notNull(),
+    certain: boolean('certain').notNull().default(true),
+    geom: multiLineGeometry('geom').notNull(),
+  },
+  (table) => [
+    index('limes_segments_geom_idx').using('gist', table.geom),
+    index('limes_segments_sector_idx').on(table.sectorId),
   ],
 )

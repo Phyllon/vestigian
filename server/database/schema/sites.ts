@@ -50,6 +50,14 @@ export const sites = pgTable(
     slug: varchar('slug', { length: 160 }).notNull(),
     title: varchar('title', { length: 240 }).notNull(),
     category: siteCategoryEnum('category').notNull().default('other'),
+    /**
+     * The source's own word for what this is, where it had one — vici's
+     * `pnt_kind`, so `watchtower` and `camp` survive a category that calls them
+     * both `fortification`. Free text because the vocabulary belongs to the
+     * source, not to this project: a kind added upstream must not be a
+     * migration here. Null for anything not imported from vici.
+     */
+    subcategory: varchar('subcategory', { length: 40 }),
     summary: text('summary'),
     description: text('description'),
     geom: pointGeometry('geom').notNull(),
@@ -72,6 +80,11 @@ export const sites = pgTable(
     index('sites_geom_idx').using('gist', table.geom),
     index('sites_status_idx').on(table.status),
     index('sites_category_idx').on(table.category),
+    // Partial: only vici-sourced rows carry a subcategory, and the frontier
+    // queries ask for one specific kind at a time.
+    index('sites_subcategory_idx')
+      .on(table.subcategory)
+      .where(sql`${table.subcategory} IS NOT NULL`),
     uniqueIndex('sites_slug_idx').on(table.slug),
     uniqueIndex('sites_source_ref_idx').on(table.sourceRef),
     index('sites_search_idx').using(

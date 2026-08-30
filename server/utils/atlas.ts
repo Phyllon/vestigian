@@ -1,4 +1,5 @@
 import type { TileCoordinate } from '#shared/types'
+import { buildMilitaryFeatureTypePattern, buildPleiadesMarkSql } from '#shared/utils/limes'
 import { TILE_BUFFER, TILE_EXTENT, getSimplifyTolerance } from './mvt'
 
 /**
@@ -170,6 +171,17 @@ export const buildAtlasTileSql = (query: AtlasTileQuery): string => {
     WHERE r.geom IS NOT NULL
   `
 
+  /**
+   * Whether a place stood on a frontier is decided here, not in the style.
+   *
+   * `feature_types` is a comma-separated list from a vocabulary of several
+   * hundred terms; matching it inside a MapLibre filter would mean shipping the
+   * free text in every tile and running a string match per symbol. One boolean
+   * is a byte, and it is computed from the same set the sector roll queries
+   * against, so the mark on the map and the entry in the list cannot disagree
+   * about what counts as military. The pattern is built from fixed identifiers
+   * and contains no quotes — see `buildMilitaryFeatureTypePattern`.
+   */
   const placeLayer = `
     SELECT ST_AsMVT(p, 'places', ${TILE_EXTENT}, 'geom', 'id') AS tile
     FROM (
@@ -178,6 +190,8 @@ export const buildAtlasTileSql = (query: AtlasTileQuery): string => {
         antiquity_places.pleiades_id,
         antiquity_places.title,
         antiquity_places.category::text AS category,
+        (antiquity_places.feature_types ~ '${buildMilitaryFeatureTypePattern()}') AS military,
+        ${buildPleiadesMarkSql('antiquity_places.feature_types')} AS mark,
         ST_AsMVTGeom(
           ST_Transform(antiquity_places.geom, 3857), b.env, ${TILE_EXTENT}, ${TILE_BUFFER}, true
         ) AS geom

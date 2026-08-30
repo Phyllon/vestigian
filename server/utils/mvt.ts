@@ -145,6 +145,10 @@ export const buildFeatureTileSql = (query: FeatureTileQuery): string => {
         sites.slug,
         sites.title,
         sites.category::text AS category,
+        -- vici's own kind, where the record came with one. Small and highly
+        -- repetitive, so it costs almost nothing in a tile that already carries
+        -- a title, and it is what lets the frontier draw a turret as a turret.
+        sites.subcategory,
         sites.period_from,
         sites.period_to,
         ST_AsMVTGeom(

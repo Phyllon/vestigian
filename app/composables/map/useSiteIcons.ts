@@ -1,5 +1,6 @@
 import type { ExpressionSpecification, Map as MapLibreMap } from 'maplibre-gl'
-import type { SiteCategory } from '#shared/types'
+import type { LimesMark, SiteCategory } from '#shared/types'
+import { LIMES_MARKS, VICI_MARKS } from '#shared/utils/limes'
 
 /**
  * A drawn mark per category, so a fort reads as a fort at a glance rather than
@@ -219,5 +220,117 @@ export const buildAtlasIconExpression = (): ExpressionSpecification =>
     'match',
     ['get', 'category'],
     ...SITE_CATEGORIES.flatMap((category) => [category, atlasIconId(category)]),
+    '',
+  ] as unknown as ExpressionSpecification
+
+const LIMES_ICON_PREFIX = 'vestigia-limes-'
+
+export const limesIconId = (mark: LimesMark): string => `${LIMES_ICON_PREFIX}${mark}`
+
+/**
+ * The frontier's own marks — a plan, not an elevation.
+ *
+ * Every other glyph in this file is drawn as the thing would look standing in
+ * front of you, which is right for a sheet where each mark is a separate place.
+ * These are drawn as the thing looks from above, because a frontier is read
+ * from above: the playing-card rectangle of a Roman fort, with its rounded
+ * corners and its two gates, is the single most recognisable plan in Roman
+ * archaeology and it does not need a caption. Rank comes from size and from how
+ * much is inside, so a tower, a fortlet, a fort and a legionary fortress sort
+ * themselves down a line without a legend.
+ */
+export const LIMES_ICON_PATHS: Record<LimesMark, string> = {
+  /**
+   * A tower inside its enclosure: the small square is the tower, the larger one
+   * the ditch and palisade around it.
+   *
+   * It was first drawn with four sight lines radiating out, which is what a
+   * watchtower was for and which at map size collapsed into a plus sign in a
+   * circle — the most generic mark it is possible to draw. Nested squares
+   * survive being small, which is the only property that matters at 20 pixels.
+   */
+  watchtower: 'M7.4 7.4h9.2v9.2H7.4zM10.4 10.4h3.2v3.2h-3.2z',
+
+  /** The fort plan at its smallest — rounded corners, one gate, nothing inside. */
+  fortlet:
+    'M8.6 8.8h6.8a1.8 1.8 0 0 1 1.8 1.8v3.8a1.8 1.8 0 0 1-1.8 1.8H8.6a1.8 1.8 0 0 1-1.8-1.8v-3.8a1.8 1.8 0 0 1 1.8-1.8M12 6.9v1.9',
+
+  /** The playing card: rounded corners, four gates, the via principalis across it. */
+  fort: 'M7.6 6.8h8.8a2.4 2.4 0 0 1 2.4 2.4v5.6a2.4 2.4 0 0 1-2.4 2.4H7.6a2.4 2.4 0 0 1-2.4-2.4V9.2a2.4 2.4 0 0 1 2.4-2.4M5.2 12h13.6M12 6.8v10.4',
+
+  /** The same plan doubled: a legionary fortress is a fort with a fort inside it. */
+  fortress:
+    'M6 5.9h12a2.1 2.1 0 0 1 2.1 2.1v8a2.1 2.1 0 0 1-2.1 2.1H6A2.1 2.1 0 0 1 3.9 16V8A2.1 2.1 0 0 1 6 5.9M8.3 9.1h7.4a1.2 1.2 0 0 1 1.2 1.2v3.4a1.2 1.2 0 0 1-1.2 1.2H8.3a1.2 1.2 0 0 1-1.2-1.2v-3.4a1.2 1.2 0 0 1 1.2-1.2',
+
+  /** A marching camp: the same shape, dug in a day and never finished. */
+  camp: 'M7.6 7.6h3M13.4 7.6h3a2 2 0 0 1 2 2v1.4M18.4 13.4v1a2 2 0 0 1-2 2h-3M10.6 16.4h-3a2 2 0 0 1-2-2v-1M5.6 11v-1.4a2 2 0 0 1 2-2',
+}
+
+export const LIMES_MARK_LABELS: Record<LimesMark, string> = {
+  watchtower: 'Watchtower',
+  fortlet: 'Fortlet',
+  fort: 'Fort',
+  fortress: 'Legionary fortress',
+  camp: 'Marching camp',
+}
+
+/**
+ * Registered like the other two sets, and for the same reason: `setStyle` wipes
+ * the image registry, so everything the map might draw is rebuilt from one
+ * place after every style change. Five more canvases.
+ *
+ * Both a record's mark and a borrowed place's mark come from here. They are
+ * told apart by the disc, exactly as elsewhere on the sheet — ink for what is
+ * ours, pencil for what is referenced — so the frontier does not quietly
+ * inflate Pleiades' 2,700 military places into contributions.
+ */
+export const registerLimesIcons = (map: MapLibreMap, palette: SiteIconPalette): void => {
+  for (const mark of LIMES_MARKS) {
+    for (const reference of [false, true]) {
+      const image = rasteriseIcon({
+        path: LIMES_ICON_PATHS[mark],
+        ink: reference ? ATLAS_MARK_INK : palette.ink,
+        palette,
+        reference,
+      })
+      if (!image) continue
+
+      const id = reference ? `${limesIconId(mark)}-reference` : limesIconId(mark)
+      if (map.hasImage(id)) map.removeImage(id)
+      map.addImage(id, image, { pixelRatio: ICON_PIXEL_RATIO })
+    }
+  }
+}
+
+/**
+ * The mark for a contributed record on the frontier, matched on vici's own kind.
+ *
+ * Falls back to the fortification glyph rather than to a fort: most of the
+ * 12,804 records in that category came from vici with a kind this vocabulary
+ * does not translate, and promoting all of them to forts would put a fort plan
+ * on every hillfort and city wall along the Rhine.
+ */
+export const buildLimesRecordIconExpression = (): ExpressionSpecification =>
+  [
+    'match',
+    ['get', 'subcategory'],
+    // Matched on vici's word, not on the mark's name. The two coincide for all
+    // three kinds today, which is exactly why this must not be written as if
+    // they were the same vocabulary.
+    ...Object.entries(VICI_MARKS).flatMap(([kind, mark]) => [kind, limesIconId(mark)]),
+    siteIconId('fortification'),
+  ] as unknown as ExpressionSpecification
+
+/**
+ * The mark for a borrowed place on the frontier. Drawn as annotation, like
+ * every other Pleiades mark on the sheet, and falling back to nothing: a
+ * military place Pleiades classifies only as a stretch of wall is part of the
+ * frontier without being a post on it.
+ */
+export const buildLimesReferenceIconExpression = (): ExpressionSpecification =>
+  [
+    'match',
+    ['get', 'mark'],
+    ...LIMES_MARKS.flatMap((mark) => [mark, `${limesIconId(mark)}-reference`]),
     '',
   ] as unknown as ExpressionSpecification
