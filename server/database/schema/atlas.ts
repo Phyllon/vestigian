@@ -10,7 +10,7 @@ import {
   uniqueIndex,
   varchar,
 } from 'drizzle-orm/pg-core'
-import { pointGeometry } from './sites'
+import { pointGeometry, siteCategoryEnum } from './sites'
 
 /**
  * The antiquity atlas: third-party reference cartography behind the
@@ -113,10 +113,17 @@ export const antiquityPlaces = pgTable(
     minYear: integer('min_year'),
     maxYear: integer('max_year'),
     locationPrecision: varchar('location_precision', { length: 24 }),
+    /**
+     * Pleiades' free-text feature types, collapsed at import into the marks
+     * this map already draws. Null where the record is a landscape feature
+     * rather than a place: a name on the sheet, and no symbol.
+     */
+    category: siteCategoryEnum('category'),
     geom: pointGeometry('geom').notNull(),
   },
   (table) => [
     uniqueIndex('antiquity_places_pleiades_idx').on(table.pleiadesId),
     index('antiquity_places_geom_idx').using('gist', table.geom),
+    index('antiquity_places_category_idx').on(table.category),
   ],
 )

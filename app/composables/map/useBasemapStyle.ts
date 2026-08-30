@@ -1,6 +1,11 @@
 import { Protocol } from 'pmtiles'
 import maplibregl from 'maplibre-gl'
 import type { LayerSpecification, StyleSpecification } from 'maplibre-gl'
+// Imported explicitly rather than through Nuxt's auto-imports: this is called
+// while the style is built, so the unit tests — which import this module
+// directly — would otherwise fail on an undefined reference that the running
+// application never sees.
+import { buildAtlasIconExpression } from './useSiteIcons'
 import type {
   BasemapGroup,
   BasemapOption,
@@ -332,9 +337,39 @@ const buildAtlasStyle = (source: BasemapSource): StyleSpecification => ({
       maxzoom: 12,
       attribution: ATLAS_ATTRIBUTION,
     },
+    /**
+     * Relief, from the elevation tiles the terrain view already uses.
+     *
+     * The obvious source would have been CAWM's raster sheet, which is exactly
+     * this and nothing else — but that is 3.2 GB and thirty thousand requests
+     * to a university server for imagery carrying no information we do not
+     * already draw. A modern DEM answers the same question: the Apennines have
+     * not moved, and where the ground has changed — a silted harbour, a shifted
+     * delta — it is the coastline that records it, and that comes from AWMC.
+     */
+    terrain: {
+      type: 'raster-dem',
+      tiles: [source.terrainUrl],
+      encoding: 'terrarium',
+      tileSize: 256,
+      maxzoom: 13,
+      attribution: 'Elevation: Mapzen / AWS Open Data',
+    },
   },
   layers: [
     { id: 'background', type: 'background', paint: { 'background-color': ATLAS_COLOURS.land } },
+    // Under the water, so the sea reads as a flat wash rather than a shaded
+    // seabed, and well under the linework.
+    {
+      id: 'atlas-hillshade',
+      type: 'hillshade',
+      source: 'terrain',
+      paint: {
+        'hillshade-exaggeration': 0.32,
+        'hillshade-shadow-color': '#9c9179',
+        'hillshade-highlight-color': '#faf7ef',
+      },
+    },
     {
       id: 'atlas-sea',
       type: 'fill',
@@ -412,16 +447,33 @@ const buildAtlasStyle = (source: BasemapSource): StyleSpecification => ({
         ],
       },
     },
+    /**
+     * A mark for every place the source classifies, and a name for the rest.
+     *
+     * One symbol layer rather than a mark layer plus a label layer: MapLibre
+     * lays out the icon and its text as a single collision unit that way, so a
+     * label can never be separated from the mark it belongs to — which is what
+     * happens when a place is crowded out at the edge of a tile.
+     *
+     * `icon-optional` is what lets the landscape features through. Their icon
+     * expression yields an empty string, and without this MapLibre treats a
+     * symbol with no icon as unplaceable and drops the name with it.
+     */
     {
-      id: 'atlas-place-labels',
+      id: 'atlas-places',
       type: 'symbol',
       source: 'atlas',
       'source-layer': 'places',
       minzoom: 6,
       layout: {
+        'icon-image': buildAtlasIconExpression(),
+        'icon-size': ['interpolate', ['linear'], ['zoom'], 6, 0.45, 9, 0.75, 13, 1],
+        'icon-optional': true,
         'text-field': ['get', 'title'],
         'text-font': [MAP_LABEL_FONT],
         'text-size': ['interpolate', ['linear'], ['zoom'], 6, 9, 14, 13],
+        'text-anchor': 'top',
+        'text-offset': [0, 0.6],
         'text-max-width': 8,
         'text-padding': 4,
       },

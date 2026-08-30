@@ -7,6 +7,7 @@
    * that covers a quarter of it to explain nine glyphs is a poor trade until
    * the reader asks for it.
    */
+  const { view } = useBasemapStyle()
   const isOpen = ref(false)
 
   const toggle = (): void => {
@@ -62,6 +63,20 @@
             </span>
           </li>
         </ul>
+
+        <!--
+          The antiquity sheet carries twenty-two thousand places borrowed from
+          Pleiades alongside the records contributed here, and the borrowed ones
+          outnumber them. Same glyphs, drawn without the disc — so the reader can
+          tell the atlas from the work without being told twice.
+        -->
+        <p
+          v-if="isAntiquityView(view)"
+          class="mt-2.5 max-w-64 border-t border-paper-300 pt-2 text-xs leading-snug text-ink-500 dark:border-night-600 dark:text-paper-400"
+        >
+          The same marks drawn as thin outlines, without a disc, are places referenced from the
+          Barrington Atlas and Pleiades — not records contributed here.
+        </p>
       </div>
     </Transition>
 

@@ -64,6 +64,10 @@ export const SITE_CATEGORIES = Object.keys(SITE_ICON_PATHS) as SiteCategory[]
 
 export const siteIconId = (category: SiteCategory): string => `${SITE_ICON_PREFIX}${category}`
 
+const ATLAS_ICON_PREFIX = 'vestigia-atlas-'
+
+export const atlasIconId = (category: SiteCategory): string => `${ATLAS_ICON_PREFIX}${category}`
+
 /**
  * The box the paths are drawn in, the size the marker occupies on screen, and
  * the device pixels behind it. Rasterising at twice the display size and
@@ -90,6 +94,17 @@ interface IconRasterRequest {
   path: string
   ink: string
   palette: SiteIconPalette
+  /**
+   * A reference mark rather than a record: drawn straight onto the sheet with
+   * no disc behind it and a thinner line.
+   *
+   * The antiquity view carries two populations at once — twenty-eight thousand
+   * places borrowed from Pleiades, and the records people actually contributed
+   * here. Given the same marker they are indistinguishable, and the borrowed
+   * ones outnumber the contributed ones badly enough to make the atlas look
+   * like the work. Pencil on the printed sheet, ink for what is ours.
+   */
+  reference?: boolean
 }
 
 /**
@@ -111,16 +126,18 @@ const rasteriseIcon = (request: IconRasterRequest): ImageData | null => {
   context.lineJoin = 'round'
   context.lineCap = 'round'
 
-  context.beginPath()
-  context.arc(12, 12, 10.4, 0, Math.PI * 2)
-  context.fillStyle = request.palette.ground
-  context.fill()
-  context.strokeStyle = request.palette.ring
-  context.lineWidth = 1
-  context.stroke()
+  if (!request.reference) {
+    context.beginPath()
+    context.arc(12, 12, 10.4, 0, Math.PI * 2)
+    context.fillStyle = request.palette.ground
+    context.fill()
+    context.strokeStyle = request.palette.ring
+    context.lineWidth = 1
+    context.stroke()
+  }
 
   context.strokeStyle = request.ink
-  context.lineWidth = 1.6
+  context.lineWidth = request.reference ? 1.1 : 1.6
   context.stroke(new Path2D(request.path))
 
   return context.getImageData(0, 0, ICON_RASTER_PIXELS, ICON_RASTER_PIXELS)
@@ -150,6 +167,32 @@ export const registerSiteIcons = (map: MapLibreMap, palette: SiteIconPalette): v
   }
 }
 
+/** Line work for a borrowed place — the same glyphs, drawn as annotation. */
+export const ATLAS_MARK_INK = '#8c8271'
+
+/**
+ * The antiquity sheet's own marks, registered alongside the record markers
+ * because both are wiped by `setStyle` and both are rebuilt from one place.
+ * Cheap enough to register unconditionally: nine more canvases, drawn once per
+ * style change, and the alternative is a second hook that has to know which
+ * basemap is showing.
+ */
+export const registerAtlasIcons = (map: MapLibreMap, palette: SiteIconPalette): void => {
+  for (const category of SITE_CATEGORIES) {
+    const image = rasteriseIcon({
+      path: SITE_ICON_PATHS[category],
+      ink: ATLAS_MARK_INK,
+      palette,
+      reference: true,
+    })
+    if (!image) continue
+
+    const id = atlasIconId(category)
+    if (map.hasImage(id)) map.removeImage(id)
+    map.addImage(id, image, { pixelRatio: ICON_PIXEL_RATIO })
+  }
+}
+
 /**
  * `match` on the category, falling back to the 'other' mark. Built from the
  * path record so a new category cannot be added without also getting a marker,
@@ -163,4 +206,18 @@ export const buildSiteIconExpression = (): ExpressionSpecification =>
     siteIconId('other'),
     // A spread cannot satisfy the tuple shape `match` is typed with, though the
     // value it produces is exactly that shape.
+  ] as unknown as ExpressionSpecification
+
+/**
+ * The same match against the atlas marks. Its fallback is an empty string
+ * rather than the 'other' glyph: a Pleiades record with no category is a river
+ * or a mountain, which belongs on the sheet as a name and not as a place, and
+ * MapLibre draws no icon for an empty `icon-image`.
+ */
+export const buildAtlasIconExpression = (): ExpressionSpecification =>
+  [
+    'match',
+    ['get', 'category'],
+    ...SITE_CATEGORIES.flatMap((category) => [category, atlasIconId(category)]),
+    '',
   ] as unknown as ExpressionSpecification

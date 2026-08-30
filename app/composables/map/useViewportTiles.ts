@@ -93,6 +93,7 @@ export const useViewportTiles = () => {
      * to dies in `Maximum call stack size exceeded`.
      */
     registerSiteIcons(map, colours)
+    registerAtlasIcons(map, colours)
 
     map.addLayer({
       id: TRACING_LAYER_ID,

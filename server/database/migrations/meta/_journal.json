@@ -29,6 +29,13 @@
       "when": 1754300000000,
       "tag": "0003_antiquity_atlas",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1754400000000,
+      "tag": "0004_atlas_place_categories",
+      "breakpoints": true
     }
   ]
 }

@@ -33,6 +33,7 @@ import { Readable } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
 import { createGunzip } from 'node:zlib'
 import { parse } from 'csv-parse'
+import { isLocatedPrecisely, resolvePlaceCategory } from '../../shared/utils/pleiades'
 import { Redis } from 'ioredis'
 import postgres from 'postgres'
 
@@ -447,6 +448,7 @@ interface PlaceInsert {
   title: string
   description: string | null
   feature_types: string | null
+  category: string | null
   min_year: number | null
   max_year: number | null
   location_precision: string | null
@@ -494,23 +496,24 @@ const importPlaces = async (): Promise<number> => {
     if (batch.length === 0) return
     await sql`
       INSERT INTO antiquity_places
-        (pleiades_id, title, description, feature_types, min_year, max_year,
+        (pleiades_id, title, description, feature_types, category, min_year, max_year,
          location_precision, geom)
       SELECT
         v.pleiades_id, v.title, v.description, v.feature_types,
-        v.min_year::int, v.max_year::int, v.location_precision,
+        v.category::site_category, v.min_year::int, v.max_year::int, v.location_precision,
         ST_SetSRID(ST_MakePoint(v.lon::double precision, v.lat::double precision), 4326)
       FROM unnest(
         ${batch.map((row) => row.pleiades_id)}::text[],
         ${batch.map((row) => row.title)}::text[],
         ${batch.map((row) => row.description)}::text[],
         ${batch.map((row) => row.feature_types)}::text[],
+        ${batch.map((row) => row.category)}::text[],
         ${batch.map((row) => (row.min_year === null ? null : String(row.min_year)))}::text[],
         ${batch.map((row) => (row.max_year === null ? null : String(row.max_year)))}::text[],
         ${batch.map((row) => row.location_precision)}::text[],
         ${batch.map((row) => row.lon)}::double precision[],
         ${batch.map((row) => row.lat)}::double precision[]
-      ) AS v(pleiades_id, title, description, feature_types, min_year, max_year,
+      ) AS v(pleiades_id, title, description, feature_types, category, min_year, max_year,
              location_precision, lon, lat)
       ON CONFLICT (pleiades_id) DO NOTHING
     `
@@ -528,14 +531,21 @@ const importPlaces = async (): Promise<number> => {
     if (!id || !title || UNNAMED_TITLE.test(title)) continue
     if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue
 
+    // Every row carries a representative point, including the ones Pleiades
+    // says are not located. Importing those would put eight thousand marks on
+    // ground the source explicitly declines to place them on.
+    const precision = text(row.locationPrecision)
+    if (!isLocatedPrecisely(precision)) continue
+
     batch.push({
       pleiades_id: id,
       title: title.slice(0, 300),
       description: text(row.description),
       feature_types: text(row.featureTypes)?.slice(0, 240) ?? null,
+      category: resolvePlaceCategory(text(row.featureTypes)),
       min_year: year(row.minDate),
       max_year: year(row.maxDate),
-      location_precision: text(row.locationPrecision),
+      location_precision: precision,
       lon,
       lat,
     })

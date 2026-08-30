@@ -177,7 +177,7 @@ export const buildAtlasTileSql = (query: AtlasTileQuery): string => {
         antiquity_places.id,
         antiquity_places.pleiades_id,
         antiquity_places.title,
-        antiquity_places.feature_types,
+        antiquity_places.category::text AS category,
         ST_AsMVTGeom(
           ST_Transform(antiquity_places.geom, 3857), b.env, ${TILE_EXTENT}, ${TILE_BUFFER}, true
         ) AS geom

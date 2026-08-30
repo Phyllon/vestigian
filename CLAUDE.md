@@ -104,6 +104,26 @@ imported and this project draws the sheet itself:
 | Regions and peoples      | AWMC `regional_name_linework`                        | 2,618  |
 | Places                   | Pleiades                                             | 38,002 |
 
+Places carry a **mark**, not just a name: Pleiades' free-text `featureTypes` are
+collapsed once at import into the same nine categories the contributed records
+use (`resolvePlaceCategory`), so one key explains the whole map. **They are drawn
+as annotation — the same glyphs with no disc behind them and a thinner line.**
+Twenty-two thousand borrowed places against sixty-one thousand contributed
+records, given identical markers, would make the atlas look like the work; the
+legend says so too when an antiquity view is showing. A place Pleiades does not
+classify — a river, a cape, a people — gets its name and no mark, because
+inventing a symbol would claim a site where the source records a landscape. So
+does a place Pleiades declines to locate: `unlocated` and `related` rows carry a
+representative point that is a filing convenience, and 8,545 of them are dropped
+rather than drawn.
+
+Relief comes from the elevation tiles the terrain view already uses. CAWM's
+raster sheet is exactly that and nothing else, and mirroring it would have cost
+3.2 GB and thirty thousand requests to Iowa for imagery carrying no information
+this map does not already draw. Where the ground genuinely has changed — a
+silted harbour, a shifted delta — it is the coastline that records it, and that
+comes from AWMC.
+
 `pnpm import:atlas`, which downloads to `.import/atlas/`, replaces each layer
 wholesale and bumps the atlas cache generation itself. `ATLAS_SKIP_OPEN_WATER=1`
 omits the 240 MB of sea polygons and still gives a usable sheet. ~75 MB in
