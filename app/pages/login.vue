@@ -3,6 +3,7 @@
 
   definePageMeta({ layout: 'reading' })
   useHead({ title: t('loginPage.title') })
+  useNoIndex()
 </script>
 
 <template>

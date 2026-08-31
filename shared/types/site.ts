@@ -141,7 +141,7 @@ export interface SiteDraft {
  * dimensions are deliberately not offered: they would make the imgproxy cache
  * unbounded and let a caller drive the image server's CPU.
  */
-export type ImagePreset = 'thumb' | 'card' | 'full'
+export type ImagePreset = 'thumb' | 'card' | 'full' | 'og'
 
 export interface ImagePresetSize {
   width: number
@@ -153,4 +153,7 @@ export const IMAGE_PRESETS: Record<ImagePreset, ImagePresetSize> = {
   thumb: { width: 160, height: 160, fit: 'cover' },
   card: { width: 720, height: 480, fit: 'cover' },
   full: { width: 1600, height: 1600, fit: 'contain' },
+  // The Open Graph protocol's documented recommended size, so a shared card
+  // renders crisp rather than upscaled on every major platform.
+  og: { width: 1200, height: 630, fit: 'cover' },
 }

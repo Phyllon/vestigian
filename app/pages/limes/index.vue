@@ -17,8 +17,18 @@
     (sectors.value ?? []).reduce((sum, sector) => sum + sector.lengthMetres, 0),
   )
 
+  const config = useRuntimeConfig()
+  const base = config.public.siteUrl.replace(/\/$/, '')
+
   useHead({ title: t('limesIndexPage.title') })
   useSeoMeta({ description: t('limesIndexPage.description') })
+  useCanonicalUrl()
+
+  useSocialMeta({
+    title: t('limesIndexPage.title'),
+    description: t('limesIndexPage.description'),
+    imageUrl: `${base}/og/infrastructure.png`,
+  })
 
   definePageMeta({ layout: 'reading' })
 </script>

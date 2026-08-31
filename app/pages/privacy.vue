@@ -42,8 +42,18 @@
     }
   }
 
+  const config = useRuntimeConfig()
+  const base = config.public.siteUrl.replace(/\/$/, '')
+
   useHead({ title: t('privacy.title') })
   useSeoMeta({ description: t('privacy.intro') })
+  useCanonicalUrl()
+
+  useSocialMeta({
+    title: t('privacy.title'),
+    description: t('privacy.intro'),
+    imageUrl: `${base}/og/default.png`,
+  })
 
   definePageMeta({ layout: 'reading' })
 </script>

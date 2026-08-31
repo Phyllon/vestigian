@@ -1,12 +1,32 @@
 <script setup lang="ts">
+  import { buildWebSiteJsonLd } from '#shared/utils/structuredData'
+
   const { t } = useI18n()
   const { loggedIn } = useSession()
   const { isFollowingLimes } = useBasemapStyle()
   const { selectSite } = useSiteQuery()
+  const config = useRuntimeConfig()
 
   const isContributing = ref(false)
+  const base = config.public.siteUrl.replace(/\/$/, '')
 
   useHead({ title: t('indexPage.title') })
+  useCanonicalUrl()
+
+  useSocialMeta({
+    title: 'Vestigia',
+    description: t('indexPage.description'),
+    imageUrl: `${base}/og/default.png`,
+  })
+
+  useHead({
+    script: [
+      {
+        type: 'application/ld+json',
+        innerHTML: JSON.stringify(buildWebSiteJsonLd({ siteUrl: base, name: 'Vestigia' })),
+      },
+    ],
+  })
 
   const startContributing = (): void => {
     selectSite(null)

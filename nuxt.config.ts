@@ -59,6 +59,20 @@ export default defineNuxtConfig({
    * prefixing every route with `/fr`, `/de`, … would double the URL surface
    * six times over for a change that is about interface text and enrichment
    * content, not localized routing, with no `hreflang` investment to back it.
+   *
+   * That "no hreflang investment" is deliberate, not an oversight to fix
+   * later: `hreflang` alternates require one crawlable URL per language
+   * variant, and there is exactly one URL per page here regardless of
+   * locale — tags pointing every variant at the same address would either
+   * be ignored by Google or actively misread as duplicates. The two real,
+   * cheap mitigations instead: `app.vue`'s `htmlAttrs.lang` already reflects
+   * `useI18n().locale`, which under SSR resolves from this same cookie
+   * before render, so the one indexable variant's `lang` is correct; and
+   * `server/middleware/content-language.ts` sets a `Content-Language`
+   * response header from the same cookie, so it's explicit — not merely
+   * implied by `lang` — which language a crawler is seeing, since Google
+   * will only ever index whichever locale resolves for an anonymous crawl
+   * (the default, `en`, absent a cookie).
    */
   i18n: {
     strategy: 'no_prefix',

@@ -552,7 +552,8 @@
   "indexPage": {
     "title": "Carte",
     "srHeading": "Vestigia — un atlas du monde antique",
-    "addToAtlas": "Ajouter à l'atlas"
+    "addToAtlas": "Ajouter à l'atlas",
+    "description": "Vestigia cartographie les traces de l'ancien monde — les colonies, les routes, les fortifications et les points de repère, enregistrés par les gens qui les visitent."
   },
   "forgotPasswordPage": {
     "title": "Réinitialiser votre mot de passe",
@@ -609,7 +610,8 @@
     "credit": "Crédit",
     "defaultAttribution": "Les contributeurs de Vestigia",
     "edit": "Modifier",
-    "lastRevised": "Dernière révision"
+    "lastRevised": "Dernière révision",
+    "defaultDescription": "Une caractéristique tracée enregistrée en Vestigia, un atlas du monde antique."
   },
   "siteEditPage": {
     "notFound": "Aucun site enregistré sous ce nom.",

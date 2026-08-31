@@ -552,7 +552,8 @@
   "indexPage": {
     "title": "Kaart",
     "srHeading": "Vestigia ",
-    "addToAtlas": "Toevoegen aan de atlas"
+    "addToAtlas": "Toevoegen aan de atlas",
+    "description": "Vestigia in kaart brengen van de sporen van de oude wereld nederzettingen, wegen, vestingwerken en vindplaatsen, geregistreerd door de mensen die hen bezoeken."
   },
   "forgotPasswordPage": {
     "title": "Uw wachtwoord resetten",
@@ -609,7 +610,8 @@
     "credit": "Krediet",
     "defaultAttribution": "Medewerkers van Vestigia",
     "edit": "Bewerken",
-    "lastRevised": "Laatst herzien"
+    "lastRevised": "Laatst herzien",
+    "defaultDescription": "Een getraceerd kenmerk opgenomen in Vestigia, een atlas van de oude wereld."
   },
   "siteEditPage": {
     "notFound": "Geen site geregistreerd onder die naam.",

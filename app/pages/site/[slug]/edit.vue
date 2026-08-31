@@ -16,6 +16,7 @@
   }
 
   useHead({ title: () => t('siteEditPage.editingTitle', { title: site.value?.title ?? '' }) })
+  useNoIndex()
 
   /**
    * Position is edited numerically here rather than by dragging a pin. Moving a

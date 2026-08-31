@@ -3,6 +3,7 @@
 
   definePageMeta({ layout: 'reading' })
   useHead({ title: t('verifyPage.title') })
+  useNoIndex()
 
   const route = useRoute()
   const state = ref<'working' | 'done' | 'failed'>('working')

@@ -43,6 +43,11 @@ export default defineEventHandler((event) => {
     'Disallow: /moderation',
     'Disallow: /verify',
     'Disallow: /reset-password',
+    'Disallow: /login',
+    'Disallow: /register',
+    'Disallow: /forgot-password',
+    'Disallow: /site/*/edit',
+    'Disallow: /tracing/*/edit',
   ]
 
   const trainers = MODEL_TRAINING_CRAWLERS.flatMap((agent) => [

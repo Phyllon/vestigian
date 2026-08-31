@@ -1,5 +1,6 @@
 <script setup lang="ts">
   import type { LimesInstallation, LimesSectorDetail } from '#shared/types'
+  import { buildBreadcrumbJsonLd } from '#shared/utils/structuredData'
 
   /**
    * One stretch of frontier, and everything recorded along it in order.
@@ -31,8 +32,37 @@
     ),
   )
 
+  const config = useRuntimeConfig()
+  const base = config.public.siteUrl.replace(/\/$/, '')
+
   useHead({ title: () => sector.value?.name ?? t('limesSectorPage.theLimes') })
   useSeoMeta({ description: () => sector.value?.summary ?? undefined })
+  useCanonicalUrl()
+
+  useSocialMeta({
+    title: sector.value.name,
+    description: sector.value.summary ?? t('limesSectorPage.theLimes'),
+    imageUrl: `${base}/og/infrastructure.png`,
+  })
+
+  useHead(() => ({
+    script: sector.value
+      ? [
+          {
+            type: 'application/ld+json',
+            innerHTML: JSON.stringify(
+              buildBreadcrumbJsonLd({
+                items: [
+                  { name: 'Vestigia', url: base },
+                  { name: t('limesSectorPage.theLimes'), url: `${base}/limes` },
+                  { name: sector.value.name, url: `${base}/limes/${slug.value}` },
+                ],
+              }),
+            ),
+          },
+        ]
+      : [],
+  }))
 
   definePageMeta({ layout: 'reading' })
 </script>

@@ -5,7 +5,7 @@ import { IMAGE_PRESETS } from '#shared/types'
 
 export const paramsSchema = z.object({
   id: routeIdentifier,
-  preset: z.enum(['thumb', 'card', 'full']),
+  preset: z.enum(['thumb', 'card', 'full', 'og']),
 })
 
 /**

@@ -552,7 +552,8 @@
   "indexPage": {
     "title": "Karte",
     "srHeading": "Vestigia - ein Atlas der antiken Welt",
-    "addToAtlas": "Zum Atlas hinzufügen"
+    "addToAtlas": "Zum Atlas hinzufügen",
+    "description": "Vestigia kartiert die Spuren der antiken Welt - Siedlungen, Straßen, Befestigungen und Fundstellen, die von den Menschen aufgezeichnet wurden, die sie besuchen."
   },
   "forgotPasswordPage": {
     "title": "Setzen Sie Ihr Passwort zurück",
@@ -609,7 +610,8 @@
     "credit": "Kredit",
     "defaultAttribution": "Vestigia-Beiträge",
     "edit": "Edit",
-    "lastRevised": "Letzte Überarbeitung"
+    "lastRevised": "Letzte Überarbeitung",
+    "defaultDescription": "Ein nachgezeichnetes Merkmal, aufgezeichnet in Vestigia, einem Atlas der antiken Welt."
   },
   "siteEditPage": {
     "notFound": "Keine Website unter diesem Namen aufgezeichnet.",

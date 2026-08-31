@@ -552,7 +552,8 @@
   "indexPage": {
     "title": "Map",
     "srHeading": "Vestigia — an atlas of the ancient world",
-    "addToAtlas": "Add to the atlas"
+    "addToAtlas": "Add to the atlas",
+    "description": "Vestigia maps the traces of the ancient world — settlements, roads, fortifications and findspots, recorded by the people who visit them."
   },
   "forgotPasswordPage": {
     "title": "Reset your password",
@@ -602,6 +603,7 @@
   },
   "tracingDetailPage": {
     "notFound": "No tracing with that identifier.",
+    "defaultDescription": "A traced feature recorded in Vestigia, an atlas of the ancient world.",
     "tracedArea": "Traced area",
     "tracedRoute": "Traced route",
     "type": "Type",

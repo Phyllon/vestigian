@@ -1,12 +1,15 @@
 <script setup lang="ts">
   import type { SiteDetail } from '#shared/types'
+  import { buildBreadcrumbJsonLd, buildSiteJsonLd } from '#shared/utils/structuredData'
 
   definePageMeta({ layout: 'reading' })
 
   const { t, locale } = useI18n()
   const route = useRoute()
+  const config = useRuntimeConfig()
 
   const { loggedIn } = useSession()
+  const { buildUrl } = useImageUrl()
 
   const { data: site } = await useFetch<SiteDetail>(() => `/api/sites/slug/${route.params.slug}`)
 
@@ -29,13 +32,60 @@
       : '/',
   )
 
+  const base = config.public.siteUrl.replace(/\/$/, '')
+
+  const ogImageUrl = computed(() => {
+    if (!site.value) return `${base}/og/default.png`
+    if (site.value.images.length > 0) return `${base}${buildUrl(site.value.images[0]!, 'og')}`
+    return `${base}/og/${site.value.category}.png`
+  })
+
   useHead(() => ({
     title: site.value?.title,
-    meta: [
-      { name: 'description', content: site.value?.summary ?? '' },
-      { property: 'og:title', content: site.value?.title ?? '' },
-      { property: 'og:type', content: 'article' },
-    ],
+    meta: [{ name: 'description', content: site.value?.summary ?? '' }],
+  }))
+
+  useSocialMeta({
+    title: site.value?.title ?? '',
+    description: site.value?.summary ?? '',
+    imageUrl: ogImageUrl.value,
+    type: 'article',
+  })
+
+  useCanonicalUrl()
+
+  useHead(() => ({
+    script: site.value
+      ? [
+          {
+            type: 'application/ld+json',
+            innerHTML: JSON.stringify(
+              buildSiteJsonLd({
+                title: site.value.title,
+                summary: site.value.summary,
+                slug: site.value.slug,
+                position: site.value.position,
+                modernPlace: site.value.modernPlace,
+                countryCode: site.value.countryCode,
+                updatedAt: site.value.updatedAt,
+                siteUrl: base,
+                imageUrls: site.value.images.map((image) => `${base}${buildUrl(image, 'og')}`),
+              }),
+            ),
+          },
+          {
+            type: 'application/ld+json',
+            innerHTML: JSON.stringify(
+              buildBreadcrumbJsonLd({
+                items: [
+                  { name: 'Vestigia', url: base },
+                  { name: site.value.title, url: `${base}/site/${site.value.slug}` },
+                ],
+              }),
+            ),
+          },
+        ]
+      : [],
   }))
 </script>
 

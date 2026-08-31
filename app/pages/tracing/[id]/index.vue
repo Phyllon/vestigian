@@ -1,10 +1,12 @@
 <script setup lang="ts">
   import type { TracingDetail } from '~/composables/data/useSiteQuery'
+  import { buildBreadcrumbJsonLd, buildTracingJsonLd } from '#shared/utils/structuredData'
 
   definePageMeta({ layout: 'reading' })
 
   const { t, te, locale } = useI18n()
   const route = useRoute()
+  const config = useRuntimeConfig()
   const { loggedIn } = useSession()
 
   const { data: tracing } = await useFetch<TracingDetail>(() => `/api/tracings/${route.params.id}`)
@@ -13,7 +15,54 @@
     throw createError({ statusCode: 404, statusMessage: t('tracingDetailPage.notFound') })
   }
 
-  useHead({ title: () => tracing.value?.title })
+  const base = config.public.siteUrl.replace(/\/$/, '')
+  const description = computed(
+    () => tracing.value?.description ?? t('tracingDetailPage.defaultDescription'),
+  )
+
+  useHead({
+    title: () => tracing.value?.title,
+    meta: [{ name: 'description', content: description }],
+  })
+
+  useSocialMeta({
+    title: tracing.value.title,
+    description: description.value,
+    imageUrl: `${base}/og/tracing.png`,
+    type: 'article',
+  })
+
+  useCanonicalUrl()
+
+  useHead(() => ({
+    script: tracing.value
+      ? [
+          {
+            type: 'application/ld+json',
+            innerHTML: JSON.stringify(
+              buildTracingJsonLd({
+                id: tracing.value.id,
+                title: tracing.value.title,
+                description: tracing.value.description,
+                updatedAt: tracing.value.updatedAt,
+                siteUrl: base,
+              }),
+            ),
+          },
+          {
+            type: 'application/ld+json',
+            innerHTML: JSON.stringify(
+              buildBreadcrumbJsonLd({
+                items: [
+                  { name: 'Vestigia', url: base },
+                  { name: tracing.value.title, url: `${base}/tracing/${tracing.value.id}` },
+                ],
+              }),
+            ),
+          },
+        ]
+      : [],
+  }))
 
   const length = computed(() => formatLength(tracing.value?.lengthMetres ?? null))
 </script>

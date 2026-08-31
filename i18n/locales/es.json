@@ -552,7 +552,8 @@
   "indexPage": {
     "title": "Mapa",
     "srHeading": "Vestigia — un atlas del mundo antiguo",
-    "addToAtlas": "Añadir al atlas"
+    "addToAtlas": "Añadir al atlas",
+    "description": "Vestigia mapea los rastros del mundo antiguo — asentamientos, caminos, fortificaciones y hallazgos, grabados por la gente que los visita."
   },
   "forgotPasswordPage": {
     "title": "Restablecer su contraseña",
@@ -609,7 +610,8 @@
     "credit": "Crédito",
     "defaultAttribution": "Colaboradores de Vestigia",
     "edit": "Editar",
-    "lastRevised": "Última revisión"
+    "lastRevised": "Última revisión",
+    "defaultDescription": "Una característica trazada registrada en Vestigia, un atlas del mundo antiguo."
   },
   "siteEditPage": {
     "notFound": "No hay sitio registrado bajo ese nombre.",

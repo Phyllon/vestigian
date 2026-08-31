@@ -6,6 +6,7 @@
 
   definePageMeta({ layout: 'reading' })
   useHead({ title: t('forgotPasswordPage.title') })
+  useNoIndex()
 
   const schema = z.object({ email: z.string().email(t('forgotPasswordPage.errorEmail')) })
   type ForgotState = z.output<typeof schema>

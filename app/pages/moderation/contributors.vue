@@ -3,6 +3,7 @@
 
   definePageMeta({ layout: 'reading', middleware: 'moderator' })
   useHead({ title: t('moderation.contributorsPage.title') })
+  useNoIndex()
 </script>
 
 <template>

@@ -552,7 +552,8 @@
   "indexPage": {
     "title": "Mappa",
     "srHeading": "Vestigia — un atlante del mondo antico",
-    "addToAtlas": "Aggiungi all'atlante"
+    "addToAtlas": "Aggiungi all'atlante",
+    "description": "Vestigia mappa le tracce del mondo antico — insediamenti, strade, fortificazioni e reperti, registrati dalle persone che li visitano."
   },
   "forgotPasswordPage": {
     "title": "Reimposta la password",
@@ -609,7 +610,8 @@
     "credit": "Credito",
     "defaultAttribution": "Vestigia contributori",
     "edit": "Modifica",
-    "lastRevised": "Ultimo aggiornamento"
+    "lastRevised": "Ultimo aggiornamento",
+    "defaultDescription": "Una caratteristica tracciata registrata in Vestigia, un atlante del mondo antico."
   },
   "siteEditPage": {
     "notFound": "Nessun sito registrato sotto quel nome.",

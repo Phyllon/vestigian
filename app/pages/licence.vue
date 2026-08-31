@@ -7,9 +7,18 @@
    * NC-credited source layers (see CLAUDE.md's antiquity-basemaps section).
    */
   const { t } = useI18n()
+  const config = useRuntimeConfig()
+  const base = config.public.siteUrl.replace(/\/$/, '')
 
   useHead({ title: t('licence.title') })
   useSeoMeta({ description: t('licence.intro') })
+  useCanonicalUrl()
+
+  useSocialMeta({
+    title: t('licence.title'),
+    description: t('licence.intro'),
+    imageUrl: `${base}/og/default.png`,
+  })
 
   definePageMeta({ layout: 'reading' })
 </script>

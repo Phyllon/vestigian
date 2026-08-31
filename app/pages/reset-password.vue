@@ -7,6 +7,7 @@
 
   definePageMeta({ layout: 'reading' })
   useHead({ title: t('resetPasswordPage.title') })
+  useNoIndex()
 
   const route = useRoute()
   const toast = useToast()

@@ -13,6 +13,7 @@
   }
 
   useHead({ title: () => t('tracingEditPage.editingTitle', { title: tracing.value?.title ?? '' }) })
+  useNoIndex()
 
   const initial = computed(() => ({
     title: tracing.value?.title,

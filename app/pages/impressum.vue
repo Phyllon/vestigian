@@ -5,9 +5,18 @@
    * identity before this goes live. See CLAUDE.md's "GDPR / legal" section.
    */
   const { t } = useI18n()
+  const config = useRuntimeConfig()
+  const base = config.public.siteUrl.replace(/\/$/, '')
 
   useHead({ title: t('impressum.title') })
   useSeoMeta({ description: t('impressum.intro') })
+  useCanonicalUrl()
+
+  useSocialMeta({
+    title: t('impressum.title'),
+    description: t('impressum.intro'),
+    imageUrl: `${base}/og/default.png`,
+  })
 
   definePageMeta({ layout: 'reading' })
 </script>
