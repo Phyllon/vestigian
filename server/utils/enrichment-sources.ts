@@ -1,4 +1,5 @@
-import type { EnrichmentRoute, LonLat } from '#shared/types'
+import { ENRICHMENT_LANGUAGES } from '#shared/types'
+import type { EnrichmentLanguage, EnrichmentRoute, LonLat } from '#shared/types'
 
 /**
  * Talking to the ancient-world gazetteers. The judgement about what comes back
@@ -42,10 +43,24 @@ const DARE_PROPERTY = 'P1936'
  *
  * The order is a preference, not a ranking of quality — the first language
  * with an article wins, and the reader is told which one they are reading.
+ *
+ * A caller with a specific target language (the reader's chosen UI language)
+ * gets that language moved to the front instead — a native article in the
+ * language actually being read beats a machine translation of the English
+ * one, and this is exactly the quality gap the sampling above already found:
+ * English alone reached 77%, the full set 87%, and Dutch ground specifically
+ * gained the most from having more than English to try.
  */
-const ARTICLE_LANGUAGES = ['en', 'nl', 'de', 'es', 'it', 'fr'] as const
+const ARTICLE_LANGUAGES = ENRICHMENT_LANGUAGES
 
-export type ArticleLanguage = (typeof ARTICLE_LANGUAGES)[number]
+export type ArticleLanguage = EnrichmentLanguage
+
+export const articleLanguageOrder = (
+  preferred?: EnrichmentLanguage,
+): readonly ArticleLanguage[] => {
+  if (!preferred) return ARTICLE_LANGUAGES
+  return [preferred, ...ARTICLE_LANGUAGES.filter((language) => language !== preferred)]
+}
 
 export interface ArticleReference {
   language: ArticleLanguage
@@ -160,6 +175,7 @@ export const resolveWikidataEntity = async (
 /** Coordinate, place types and the best available article, in one call. */
 export const loadWikidataFacts = async (
   wikidataId: string,
+  preferredLanguage?: EnrichmentLanguage,
 ): Promise<{ position: LonLat | null; placeTypes: string[]; article: ArticleReference | null }> => {
   const sitefilter = ARTICLE_LANGUAGES.map((language) => `${language}wiki`).join('|')
 
@@ -173,7 +189,7 @@ export const loadWikidataFacts = async (
   if (!entity) return { position: null, placeTypes: [], article: null }
 
   let article: ArticleReference | null = null
-  for (const language of ARTICLE_LANGUAGES) {
+  for (const language of articleLanguageOrder(preferredLanguage)) {
     const title = entity.sitelinks?.[`${language}wiki`]?.title
     if (title) {
       article = { language, title }

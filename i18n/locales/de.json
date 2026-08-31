@@ -1,0 +1,149 @@
+{
+  "layout": {
+    "skipToMap": "Skip zur Karte",
+    "skipToContent": "Skip zum Inhalt",
+    "tagline": "spuren der antike",
+    "queue": "Schlange",
+    "signIn": "Zeichen",
+    "signOut": "Abmelden",
+    "signOutAs": "Abmelden, Abmelden als{name}",
+    "footerLicence": "Daten und Lizenzen",
+    "menu": "Menü"
+  },
+  "themeToggle": {
+    "switchToDay": "Wechsel zum Tag",
+    "switchToNight": "Wechsel in die Nacht"
+  },
+  "languageSwitcher": {
+    "label": "Sprache",
+    "current": "Sprache:{name}"
+  },
+  "basemapSwitcher": {
+    "label": "Basemap:{label}",
+    "menuLabel": "Basisplan",
+    "groupToday": "Heute",
+    "groupAntiquity": "Antike",
+    "followLimes": "Folgen Sie den Limes",
+    "followLimesHint": "Die Grenze, ihre Mauern und ihre Festungen"
+  },
+  "legend": {
+    "title": "Was die Markierungen bedeuten",
+    "hideKey": "Schlüssel ausblenden",
+    "showKey": "Schlüssel",
+    "referencedNote": "Die gleichen Markierungen, die als dünne Umrisse ohne Scheibe gezeichnet sind, sind Orte, auf die aus dem Barrington Atlas und den Plejaden verwiesen wird - keine Aufzeichnungen, die hier beigetragen wurden.",
+    "frontierTitle": "Die Grenze",
+    "basemapCreditDare": "Antike (DARE): © Johan Åhlfeldt, Universität Göteborg, CC BY-SA 3.0.",
+    "basemapCreditBarrington": "Antike (Barrington): Straßen, Küsten und Orte vom Ancient World Mapping Center (ODbL 1.0) und Plejaden (CC BY 3.0)."
+  },
+  "siteDetail": {
+    "loading": "Beladung",
+    "recordsHere": "{count}aufzeichnungen hier",
+    "close": "Nähere Angaben zum Standort",
+    "openFullEntry": "Öffnen Sie den vollständigen Eintrag",
+    "edit": "Edit",
+    "revised": "Überarbeitet",
+    "notFound": "Diese Website konnte nicht geladen werden. Es wurde möglicherweise entfernt oder wartet auf eine Überprüfung."
+  },
+  "enrichment": {
+    "sectionTitle": "Sonstige",
+    "machineTranslatedFrom": "Maschinenübersetzt von{language}",
+    "inLanguage": "In{language}",
+    "matchedThrough": "Abgeglichen durch{source},{metres}m von der aufgezeichneten position",
+    "languages": {
+      "en": "Englisch",
+      "nl": "Niederländisch",
+      "de": "Deutsch",
+      "es": "Spanisch",
+      "it": "Italienisch",
+      "fr": "Französisch"
+    },
+    "sources": {
+      "wikidata": "Wikidaten",
+      "pleiades": "Plejaden",
+      "dare": "der digitale Atlas des Römischen Reiches"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Zeichen",
+      "email": "E-Mail",
+      "password": "Passwort",
+      "forgotPassword": "Ihr Passwort vergessen?",
+      "submit": "Zeichen",
+      "noAccount": "Noch kein Account?",
+      "createOne": "Erstellen Sie eine",
+      "errorEmail": "Sieht nicht aus wie eine E-Mail-Adresse.",
+      "errorPassword": "Geben Sie Ihr Passwort ein.",
+      "failedTitle": "Konnte sich nicht anmelden",
+      "failedDescription": "Überprüfen Sie Ihre Details und versuchen Sie es erneut."
+    },
+    "register": {
+      "title": "Beitritt Vestigia",
+      "intro": "Ihre ersten beiden Beiträge werden von einem Moderator überprüft. Danach veröffentlichen sie, wie Sie sie schreiben.",
+      "displayName": "Anzeigename",
+      "email": "E-Mail",
+      "password": "Passwort",
+      "passwordConfirmation": "Wiederholtes Passwort",
+      "submit": "Konto erstellen",
+      "doneTitle": "Überprüfen Sie Ihren Posteingang",
+      "doneDescription": "Bestätigen Sie Ihre Adresse, um die Einrichtung des Kontos abzuschließen. Der Link ist gut für einen Tag.",
+      "errorDisplayName": "Mindestens drei Zeichen.",
+      "errorEmail": "Sieht nicht aus wie eine E-Mail-Adresse.",
+      "errorPasswordMismatch": "Die beiden Passwörter stimmen nicht überein.",
+      "failedTitle": "Eintragung fehlgeschlagen",
+      "failedDefault": "Versuchen Sie es gleich noch einmal."
+    }
+  },
+  "moderation": {
+    "reviewQueue": {
+      "loading": "Lade die Warteschlange..",
+      "selectedCount": "{count}ausgewählt",
+      "batchNotePlaceholder": "Hinweis, an jeden Autor gesendet (optional)",
+      "publishAll": "Alle veröffentlichen",
+      "rejectAll": "Alle ablehnen",
+      "clear": "Klar",
+      "selectAll": "Wählen Sie alle",
+      "nothingWaitingTitle": "Nichts wartet.",
+      "nothingWaitingHint": "Neue Beiträge von nicht vertrauenswürdigen Konten werden hier erscheinen.",
+      "selectRevision": "Select Revision{id}",
+      "editToA": "editieren zu a",
+      "newEntity": "neu",
+      "revision": "revision{id}",
+      "deletedAccount": "Gelöschtes Konto",
+      "acceptedCount": "{count}akzeptiert",
+      "blankingWarning": "Dieser Edit entfernt mehr als er hinzufügt. Überprüfen Sie es mit dem Live-Record vor der Veröffentlichung.",
+      "substantialNote": "Eine substanzielle Umschreibung.",
+      "noteToAuthor": "Anmerkung:{name}",
+      "theContributor": "der kontributor",
+      "noteHint": "E-Mail mit der Entscheidung",
+      "notePlaceholder": "Warum - vor allem, wenn dies eine Ablehnung ist. Ein Mitwirkender kann die Warteschlange nicht sehen.",
+      "publish": "Veröffentlichen",
+      "publishAria": "Veröffentlichen{title}",
+      "reject": "Ablehnung",
+      "rejectAria": "Ablehnung{title}",
+      "batchFailedTitle": "Batch-Review fehlgeschlagen",
+      "reviewFailedTitle": "Bewertung fehlgeschlagen",
+      "tryAgain": "Versuchen Sie es noch einmal.",
+      "published": "Veröffentlicht",
+      "rejected": "Abgelehnt",
+      "approvedPlural": "genehmigt",
+      "rejectedPlural": "abgelehnt",
+      "batchResultTitle": "{count} {decision}.",
+      "batchResultSkipped": "{count}übersprungen."
+    }
+  },
+  "licence": {
+    "title": "Daten und Lizenzen",
+    "intro": "Vestigia basiert auf Daten, die andere frei wiederverwendbar gemacht haben. Begriffe unterscheiden sich je nach Schicht - hier ist, was für jeden gilt.",
+    "recordsHeading": "Beitragende Aufzeichnungen",
+    "recordsBody": "Website und Tracing-Text ist CC BY-SA - frei zu verwenden und anzupassen, auch kommerziell, sofern Änderungen unter derselben Lizenz geteilt werden und die Quelle gutgeschrieben wird. Die strukturierten Metadaten (Koordinaten, Daten, Kategorien) sind CC0 — keine Rechte vorbehalten.",
+    "imagesHeading": "Fotografien",
+    "imagesBody": "Jede Fotografie trägt ihre eigene Lizenz und Zuordnung, die unter dem Bild selbst gezeigt wird. Die Lizenzen variieren je nach Datensatz; Überprüfen Sie das Bild, bevor Sie es separat von der von ihm dargestellten Website wiederverwenden.",
+    "barringtonHeading": "Antike (Barrington) basemap",
+    "barringtonBody": "Alte Küsten, Straßen, Wasser und Orte sind aus dem Ancient World Mapping Center (ODbL 1.0) und Plejaden (CC BY 3.0) gezogen. Beide sind wiederverwendbar, auch kommerziell, mit Attribution - der Anteil von ODbL gilt für die zugrunde liegende Datenbank, nicht für die gerenderten Kartenkacheln.",
+    "dareHeading": "Antike (DARE) Basiskarte",
+    "dareBody": "Diese Basiskarte ist CC BY-SA 3.0 von Johan Åhlfeldt (Digitaler Atlas des Römischen Reiches, Universität Göteborg) - aber zwei eigene Quellenebenen werden als nicht-kommerziell (CC BY-NC 3.0 / CC BY-NC-SA) bezeichnet, was die CC BY-SA nicht überschreiben kann. Behandeln Sie diese spezielle Schicht nur als nicht-kommerzielle Nutzung.",
+    "limesHeading": "Die Grenze (limes)",
+    "limesBody": "Die Grenzlinie ergibt sich aus der Ausdehnung des Imperiums des Ancient World Mapping Center (ODbL 1.0) und ist nicht Teil der beigetragenen Datenbank."
+  }
+}

@@ -4,11 +4,17 @@
 
   const { view, setView, availableViews, canFollowLimes, isFollowingLimes, setLimesActive } =
     useBasemapStyle()
+  const { t } = useI18n()
   const isOpen = ref(false)
   const root = useTemplateRef('root')
   const trigger = useTemplateRef('trigger')
 
   const groups: BasemapGroup[] = ['today', 'antiquity']
+
+  const groupLabels = computed<Record<BasemapGroup, string>>(() => ({
+    today: t('basemapSwitcher.groupToday'),
+    antiquity: t('basemapSwitcher.groupAntiquity'),
+  }))
 
   const viewsInGroup = (group: BasemapGroup) =>
     availableViews.filter((option) => option.group === group)
@@ -61,7 +67,7 @@
       type="button"
       class="leaf flex items-center gap-2 px-3 py-2 text-sm text-ink-700 transition hover:bg-paper-200 dark:text-paper-200 dark:hover:bg-night-700"
       :aria-expanded="isOpen"
-      :aria-label="`Basemap: ${activeLabel}`"
+      :aria-label="t('basemapSwitcher.label', { label: activeLabel })"
       aria-haspopup="menu"
       aria-controls="basemap-choices"
       @click="isOpen = !isOpen"
@@ -90,19 +96,14 @@
         v-if="isOpen"
         id="basemap-choices"
         role="menu"
-        aria-label="Basemap"
+        :aria-label="t('basemapSwitcher.menuLabel')"
         class="leaf absolute right-0 top-full z-20 mt-2 max-h-[70vh] w-64 overflow-y-auto shadow-lifted"
       >
-        <div
-          v-for="group in groups"
-          :key="group"
-          role="group"
-          :aria-label="BASEMAP_GROUP_LABELS[group]"
-        >
+        <div v-for="group in groups" :key="group" role="group" :aria-label="groupLabels[group]">
           <p
             class="eyebrow border-b border-paper-200 px-4 pb-1 pt-3 text-ink-500 dark:border-night-700 dark:text-paper-400"
           >
-            {{ BASEMAP_GROUP_LABELS[group] }}
+            {{ groupLabels[group] }}
           </p>
 
           <button
@@ -164,9 +165,11 @@
               />
             </span>
             <span class="flex flex-col gap-0.5">
-              <span class="font-medium text-ink-900 dark:text-paper-100">Follow the limes</span>
+              <span class="font-medium text-ink-900 dark:text-paper-100">
+                {{ t('basemapSwitcher.followLimes') }}
+              </span>
               <span class="text-xs text-ink-500 dark:text-paper-400">
-                The frontier, its walls and its forts
+                {{ t('basemapSwitcher.followLimesHint') }}
               </span>
             </span>
           </button>

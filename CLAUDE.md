@@ -256,8 +256,20 @@ Both of Nitro's bundled UIs (`/_scalar`, `/_swagger`) are switched off in
 `cdn.jsdelivr.net` — the exact third-party runtime request self-hosted fonts,
 self-hosted glyphs and ALTCHA-over-Turnstile all exist to avoid — and the CSP
 here would refuse it silently, the same way the missing nonce token once did.
-`/api/openapi.json` is same-origin JSON; paste it into Insomnia, Postman or
-scalar.com's own hosted reference rather than serving a UI bundle from this app.
+`/api/openapi.json` is same-origin JSON in development; paste it into
+Insomnia, Postman or scalar.com's own hosted reference rather than serving a
+UI bundle from this app.
+
+**Dev only — 404s in production.** A machine-readable map of every route,
+parameter and response shape is a development convenience, not something to
+leave reachable on the public internet, even though each endpoint underneath
+still enforces its own auth guard and rate limit regardless of whether its
+shape is documented anywhere. Two independent guards: `nitro.openAPI.production`
+is `false` in production, so Nitro's own base document
+(`/_nitro-base-openapi.json`) stops being generated at all; and
+`server/api/openapi.json.get.ts` refuses outright on `!import.meta.dev` before
+it ever fetches that base document, rather than relying on the fetch failing
+to fail this route indirectly.
 
 ## Which client to reach for
 
@@ -348,6 +360,7 @@ whatever client it is handed — see the note in `server/utils/db.ts`.
 
 ```
 e2e/                         Playwright, against the production build (+README)
+i18n/locales/ en fr es de it nl .json    bootstrapped by scripts/i18n/translate-locales.ts
 app/
   assets/css/main.css        design tokens (Tailwind v4 @theme)
   components/
@@ -359,17 +372,17 @@ app/
     auth/      LoginForm RegisterForm PasswordField PasswordRequirements
     moderation/ ReviewQueue RevisionDiff ContributorTable
     limes/     LimesPanel
-    ui/        ThemeToggle RevisionHistory
+    ui/        ThemeToggle LanguageSwitcher RevisionHistory
   composables/
     map/  useMapInstance useBasemapStyle useViewportTiles useGeolocation useSiteIcons (+__test__/)
     data/ useSiteQuery useSiteEnrichment useImageUrl                                  (+__test__/)
     auth/ useSession
     limes/ useLimes
-    ui/   useColorScheme useBreakpoint
+    ui/   useColorScheme useUiLocale useBreakpoint                                      (+__test__/)
   layouts/ default.vue (map shell) reading.vue (documents)
   middleware/ authenticated.ts moderator.ts
   router.options.ts          scroll behaviour; the camera hash is not a selector
-  pages/ index login register verify forgot-password reset-password
+  pages/ index login register verify forgot-password reset-password licence
          site/[slug] site/[slug]/edit tracing/[id] tracing/[id]/edit
          limes/index limes/[slug]
          moderation/index moderation/contributors
@@ -392,6 +405,7 @@ shared/utils/  password policy, authorization rules, the limes gazetteer     (+_
 scripts/import/  four-stage vici.org import + vici-licences.ts (shared vocabulary)
                  04-mirror-basemap-tiles.ts 05-antiquity-atlas.ts 06-limes.ts
 scripts/warm-tiles.ts snapshot-database.ts reconcile-images.ts build-glyphs.ts
+scripts/i18n/translate-locales.ts   bootstraps i18n/locales/{fr,es,de,it,nl}.json via LibreTranslate
 public/fonts/    self-hosted SDF label glyphs + the font's OFL
 docker/  Dockerfile compose.dev.yml compose.prod.yml traefik/ backup.sh
   observability/  alloy.alloy loki.yml tempo.yml prometheus.yml alerts.yml
@@ -682,6 +696,66 @@ that article's derivative.
 Remaining losses are not fixable by loosening the threshold — no article in any
 of the six, genuinely too far, or no coordinate to check.
 
+**`/api/sites/:id/enrichment` now takes `lang`** (one of the six enrichment
+languages, `shared/types`' `ENRICHMENT_LANGUAGES`), defaulting to
+`translate.target` when omitted. The Valkey cache key is
+`` `enrich:v3:${siteId}:${lang}` `` — language-scoped, unlike the earlier
+`v3:${siteId}` key, because without it whichever visitor happened to warm the
+cache first would silently serve their translation to every other language's
+request for the same site. `loadWikidataFacts` also takes the target language
+and tries that Wikipedia edition first, before falling back to the fixed
+`en, nl, de, es, it, fr` order — a native article in the language actually
+being read beats a machine translation of the English one, which is the same
+gap the sampling above already measured.
+
+## i18n
+
+Six languages — French, Spanish, English, German, Italian, Dutch — via
+`@nuxtjs/i18n`, `strategy: 'no_prefix'`. The locale lives in a cookie
+(`vestigia-locale`), not the URL: slugs never change on edit and the sitemap
+points at them, and prefixing every route with `/fr`, `/de`, … would double
+the URL surface six times over with no `hreflang` investment to back it, for a
+change that is about interface text and enrichment content, not localized
+routing.
+
+`i18n/locales/en.json` is the central message catalogue this file used to call
+a prerequisite for adding locales at all — namespaced by the same folder
+grouping as `app/components/` (`map.basemapSwitcher.*`, `auth.login.*`, …), so
+a key's home is obvious from its name. The other five are bootstrapped from it
+by `pnpm i18n:translate` (`scripts/i18n/translate-locales.ts`) against the
+self-hosted LibreTranslate instance — once, offline, not per request the way
+enrichment translation is: UI chrome does not change per visitor, so there is
+no reason to pay a translation call on every page load for it. The script never
+sends an ICU placeholder (`{id}`) to the translator at all — it splits each
+string around its placeholders and translates only the surrounding text,
+splicing the placeholder back in verbatim, because the first version tried
+substituting a token (`⟦0⟧`) instead and the real LibreTranslate instance
+silently dropped it rather than preserving it: "Select revision {id}" came
+back as "Selecteer revisie:" with nothing about the response looking wrong
+until something tried to interpolate into it. It also writes progress after
+every key rather than once at the end of a language — the first run hung on
+`nl`'s very first call with no timeout and no partial file to show for it —
+is resumable (a key already translated to something other than the English
+source is left alone), and reports any key LibreTranslate returned nothing
+useful for so a human knows what still needs a manual pass. The five output
+files are static, checked-in
+JSON, editable afterward like any translation.
+
+`app/composables/ui/useUiLocale.ts` wraps `useI18n()` the way `useColorScheme.ts`
+wraps `useColorMode()` — except colour mode leans entirely on `@nuxt/ui`'s
+built-in module for persistence, and there is no locale equivalent, so the
+cookie handling is new here. `LanguageSwitcher.vue` sits beside
+`ThemeToggle.vue` in both layout headers.
+
+**Component migration is not exhaustive.** Every string in the components
+listed as the pattern (`BasemapSwitcher`, `Legend`, `SiteDetailPanel`,
+`LoginForm`, `RegisterForm`, `ReviewQueue`, both layouts, `SiteEnrichment`) is
+extracted; the rest of `app/components/` still carries English literals. A
+component not yet migrated simply shows English regardless of locale — visible
+but not broken — so the remaining folders can be migrated one at a time
+without an in-between state where the interface is inconsistent in a way that
+looks like a bug rather than an incomplete rollout.
+
 ## Not built
 
 - Purging withdrawn images from object storage (withdrawal is reversible by design — nothing deletes bytes).
@@ -693,7 +767,7 @@ of the six, genuinely too far, or no coordinate to check.
 - Full-text search across descriptions (titles and summaries only).
 - RDF / Pelagios linked data. The GeoJSON feed at `/api/data/sites.geojson` exists.
 - Offline tile caching. The app is installable as a PWA but needs signal.
-- i18n. English only by decision; strings are not yet centralised into one module, which they should be before adding locales. Note the source has `nl`, `de` and `fr` text for thousands of sites — the import takes `en` and discards the rest.
+- Full i18n component coverage — see "i18n" above for what is and is not migrated. Note the vici source has `nl`, `de` and `fr` text for thousands of sites — the import takes `en` and discards the rest; none of that is surfaced by the interface language yet, only the borrowed Wikipedia enrichment is.
 - Off-box backups. `docker/backup.sh` writes nightly to a volume on the same VPS, and `pnpm db:snapshot` writes beside the database it copies. Neither survives losing the machine.
 - PWA icons. `public/manifest.webmanifest` references `/icons/icon-192.png`, `-512` and `-maskable`; none of them exist.
 
@@ -751,7 +825,7 @@ contradicts what they asked for. Those belong in the reply.
   tablet, above desktop.
 - **Fast, clean, modern.** Make it quick, keep it readable, use current best
   practice, lazy-load where it helps.
-- **Accessibility every time** — ARIA and the rest, improved where possible.
+- **Accessibility every time** — ARIA and the rest, improved where possible. Also take keyboard i18n into account.
 - **Semantic HTML** — the most fitting tag, always.
 - **Short answers in chat**, without dropping anything important.
 - **ORM over string queries.**
@@ -764,3 +838,4 @@ contradicts what they asked for. Those belong in the reply.
 - **Completed tasks** when having completed a task, never print the achieved goals to the chat, keep it clean
 - **EU/GDPR compliance** all packages or code dealing with user data or which are user-related must be GDPR compliant
 - **e2e-tests** add e2e-tests when new critical features were added
+- **i18n** always use i18n for defined languages (de, en, fr, es, it, nl)

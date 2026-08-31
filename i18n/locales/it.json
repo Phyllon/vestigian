@@ -1,0 +1,149 @@
+{
+  "layout": {
+    "skipToMap": "Vai alla mappa",
+    "skipToContent": "Salta al contenuto",
+    "tagline": "tracce di antichità",
+    "queue": "Que",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "signOutAs": "Sign out, signed in as {name}",
+    "footerLicence": "Data & licences",
+    "menu": "Menu"
+  },
+  "themeToggle": {
+    "switchToDay": "Switch to day",
+    "switchToNight": "Switch to night"
+  },
+  "languageSwitcher": {
+    "label": "Language",
+    "current": "Language: {name}"
+  },
+  "basemapSwitcher": {
+    "label": "Basemap: {label}",
+    "menuLabel": "Basemap",
+    "groupToday": "Today",
+    "groupAntiquity": "Antiquity",
+    "followLimes": "Follow the limes",
+    "followLimesHint": "The frontier, its walls and its forts"
+  },
+  "legend": {
+    "title": "What the marks mean",
+    "hideKey": "Hide key",
+    "showKey": "Key",
+    "referencedNote": "The same marks drawn as thin outlines, without a disc, are places referenced from the Barrington Atlas and Pleiades — not records contributed here.",
+    "frontierTitle": "The frontier",
+    "basemapCreditDare": "Antiquity (DARE): © Johan Åhlfeldt, Gothenburg University, CC BY-SA 3.0.",
+    "basemapCreditBarrington": "Antiquity (Barrington): roads, coastline and places from the Ancient World Mapping Center (ODbL 1.0) and Pleiades (CC BY 3.0)."
+  },
+  "siteDetail": {
+    "loading": "Loading",
+    "recordsHere": "{count} records here",
+    "close": "Close site details",
+    "openFullEntry": "Open the full entry",
+    "edit": "Edit",
+    "revised": "Revised",
+    "notFound": "That site could not be loaded. It may have been removed or is awaiting review."
+  },
+  "enrichment": {
+    "sectionTitle": "Elsewhere",
+    "machineTranslatedFrom": "Machine-translated from {language}",
+    "inLanguage": "In {language}",
+    "matchedThrough": "Matched through {source}, {metres} m from the recorded position",
+    "languages": {
+      "en": "English",
+      "nl": "Dutch",
+      "de": "German",
+      "es": "Spanish",
+      "it": "Italian",
+      "fr": "French"
+    },
+    "sources": {
+      "wikidata": "Wikidata",
+      "pleiades": "Pleiades",
+      "dare": "the Digital Atlas of the Roman Empire"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in",
+      "email": "Email",
+      "password": "Password",
+      "forgotPassword": "Forgotten your password?",
+      "submit": "Sign in",
+      "noAccount": "No account yet?",
+      "createOne": "Create one",
+      "errorEmail": "That does not look like an email address.",
+      "errorPassword": "Enter your password.",
+      "failedTitle": "Could not sign in",
+      "failedDescription": "Check your details and try again."
+    },
+    "register": {
+      "title": "Join Vestigia",
+      "intro": "Your first two contributions are checked by a moderator. After that they publish as you write them.",
+      "displayName": "Display name",
+      "email": "Email",
+      "password": "Password",
+      "passwordConfirmation": "Repeat password",
+      "submit": "Create account",
+      "doneTitle": "Check your inbox",
+      "doneDescription": "Confirm your address to finish setting up the account. The link is good for one day.",
+      "errorDisplayName": "At least three characters.",
+      "errorEmail": "That does not look like an email address.",
+      "errorPasswordMismatch": "The two passwords do not match.",
+      "failedTitle": "Registration failed",
+      "failedDefault": "Try again shortly."
+    }
+  },
+  "moderation": {
+    "reviewQueue": {
+      "loading": "Loading the queue…",
+      "selectedCount": "{count} selected",
+      "batchNotePlaceholder": "Note, sent to every author (optional)",
+      "publishAll": "Publish all",
+      "rejectAll": "Reject all",
+      "clear": "Clear",
+      "selectAll": "Select all",
+      "nothingWaitingTitle": "Nothing waiting.",
+      "nothingWaitingHint": "New contributions from untrusted accounts will appear here.",
+      "selectRevision": "Select revision {id}",
+      "editToA": "edit to a",
+      "newEntity": "new",
+      "revision": "revision {id}",
+      "deletedAccount": "Deleted account",
+      "acceptedCount": "{count} accepted",
+      "blankingWarning": "This edit removes more than it adds. Check it against the live record before publishing.",
+      "substantialNote": "A substantial rewrite.",
+      "noteToAuthor": "Note to {name}",
+      "theContributor": "the contributor",
+      "noteHint": "Emailed with the decision",
+      "notePlaceholder": "Why — especially if this is a rejection. A contributor cannot see the queue.",
+      "publish": "Publish",
+      "publishAria": "Publish {title}",
+      "reject": "Reject",
+      "rejectAria": "Reject {title}",
+      "batchFailedTitle": "Batch review failed",
+      "reviewFailedTitle": "Review failed",
+      "tryAgain": "Try again.",
+      "published": "Published",
+      "rejected": "Rejected",
+      "approvedPlural": "approved",
+      "rejectedPlural": "rejected",
+      "batchResultTitle": "{count} {decision}.",
+      "batchResultSkipped": "{count} skipped."
+    }
+  },
+  "licence": {
+    "title": "Data & licences",
+    "intro": "Vestigia is built on data that others made freely reusable. Terms differ by layer — here is what applies to each.",
+    "recordsHeading": "Contributed records",
+    "recordsBody": "Site and tracing text is CC BY-SA — free to reuse and adapt, including commercially, provided changes are shared under the same licence and the source is credited. The structured metadata (coordinates, dates, categories) is CC0 — no rights reserved.",
+    "imagesHeading": "Photographs",
+    "imagesBody": "Every photograph carries its own licence and attribution, shown beneath the image itself. Licences vary per record; check the image before reusing it separately from the site it illustrates.",
+    "barringtonHeading": "Antiquity (Barrington) basemap",
+    "barringtonBody": "Ancient coastline, roads, water and places are drawn from the Ancient World Mapping Center (ODbL 1.0) and Pleiades (CC BY 3.0). Both are reusable, including commercially, with attribution — ODbL's share-alike applies to the underlying database, not to the rendered map tiles.",
+    "dareHeading": "Antiquity (DARE) basemap",
+    "dareBody": "This basemap is CC BY-SA 3.0 from Johan Åhlfeldt (Digital Atlas of the Roman Empire, Gothenburg University) — but two of its own source layers are credited non-commercial (CC BY-NC 3.0 / CC BY-NC-SA), which the blanket CC BY-SA cannot override. Treat this specific layer as non-commercial use only.",
+    "limesHeading": "The frontier (limes)",
+    "limesBody": "The frontier line is derived from the Ancient World Mapping Center's extent of the empire (ODbL 1.0) and is not part of the contributed database."
+  }
+}

@@ -1,14 +1,26 @@
 import { and, eq, inArray, sql } from 'drizzle-orm'
 import { z } from 'zod'
-import type { SiteEnrichment } from '#shared/types'
+import { ENRICHMENT_LANGUAGES } from '#shared/types'
+import type { EnrichmentLanguage, SiteEnrichment } from '#shared/types'
 
 export const paramsSchema = z.object({ id: routeIdentifier })
+
+export const querySchema = z.object({
+  /** The reader's chosen UI language. Falls back to the server default (translate.target) when omitted. */
+  lang: z.enum(ENRICHMENT_LANGUAGES).optional(),
+})
 
 /** A week for an answer, a day for a refusal. */
 const HIT_TTL_SECONDS = 604800
 const MISS_TTL_SECONDS = 86400
 
-const cacheKeyFor = (siteId: number): string => `enrich:v3:${siteId}`
+/**
+ * Language-scoped: without it, whichever visitor happened to warm the cache
+ * first would silently serve their translation to every other language's
+ * request for the same site.
+ */
+const cacheKeyFor = (siteId: number, lang: EnrichmentLanguage): string =>
+  `enrich:v3:${siteId}:${lang}`
 
 /**
  * Borrowed prose about one site, or null.
@@ -33,15 +45,19 @@ defineRouteMeta({
     tags: ['sites'],
     summary: 'Get a borrowed Wikipedia extract for a site',
     description:
-      'Null is an ordinary answer — most sites have no confident external match. Server-proxied and cached; never fetched from the browser.',
+      'Null is an ordinary answer — most sites have no confident external match. Server-proxied and cached; never fetched from the browser. `lang` picks the target language, defaulting to the server configuration when omitted.',
   },
 })
 
 export default defineEventHandler(async (event): Promise<SiteEnrichment | null> => {
   const { id } = await getValidatedRouterParams(event, paramsSchema.parse)
+  const { lang } = await getValidatedQuery(event, querySchema.parse)
   await enforceRateLimit(event, 'enrichment')
 
-  const cacheKey = cacheKeyFor(id)
+  const { translate } = useRuntimeConfig()
+  const targetLanguage = lang ?? (translate.target as EnrichmentLanguage) ?? 'en'
+
+  const cacheKey = cacheKeyFor(id, targetLanguage)
 
   try {
     const cached = await useRedis().get(cacheKey)
@@ -99,6 +115,7 @@ export default defineEventHandler(async (event): Promise<SiteEnrichment | null> 
       pleiadesId,
       dareId: first('dare'),
     },
+    targetLanguage,
   })
 
   try {
@@ -118,6 +135,7 @@ export default defineEventHandler(async (event): Promise<SiteEnrichment | null> 
 interface BuildRequest {
   site: { position: { lon: number; lat: number }; category: SiteCategory }
   identifiers: { wikidataId: string | null; pleiadesId: string | null; dareId: string | null }
+  targetLanguage: EnrichmentLanguage
 }
 
 /**
@@ -125,7 +143,7 @@ interface BuildRequest {
  * retrieved for a candidate that is about to be refused.
  */
 const buildEnrichment = async (request: BuildRequest): Promise<SiteEnrichment | null> => {
-  const { site, identifiers } = request
+  const { site, identifiers, targetLanguage } = request
 
   // No concordance means no lead worth following. Searching by name and
   // position was measured and produces modern towns and railway stations, so
@@ -135,7 +153,7 @@ const buildEnrichment = async (request: BuildRequest): Promise<SiteEnrichment | 
   const resolved = await resolveWikidataEntity(identifiers)
   if (!resolved) return null
 
-  const facts = await loadWikidataFacts(resolved.id)
+  const facts = await loadWikidataFacts(resolved.id, targetLanguage)
 
   const placeTypes = identifiers.pleiadesId
     ? await loadPleiadesPlaceTypes(identifiers.pleiadesId)
@@ -152,24 +170,23 @@ const buildEnrichment = async (request: BuildRequest): Promise<SiteEnrichment | 
   if (!summary) return null
 
   /**
-   * Translated here rather than in the browser so it happens once for everyone
-   * and lands in the same cache entry as the extract. A visitor never waits on
-   * LibreTranslate twice for the same site, and never waits at all on a warm
-   * key.
+   * Translated here rather than in the browser so it happens once per
+   * (site, language) pair and lands in the same cache entry as the extract. A
+   * visitor never waits on LibreTranslate twice for the same site in the same
+   * language, and never waits at all on a warm key. `loadWikidataFacts` above
+   * already preferred a native article in `targetLanguage` when one exists, so
+   * this only fires when nothing but a foreign-language article was found.
    */
-  const { translate } = useRuntimeConfig()
-  const target = translate.target || 'en'
-
   const translated =
-    summary.language === target
+    summary.language === targetLanguage
       ? null
-      : await translateText({ text: summary.extract, from: summary.language, to: target })
+      : await translateText({ text: summary.extract, from: summary.language, to: targetLanguage })
 
   return {
     title: summary.title,
     extract: translated ?? summary.extract,
     articleUrl: summary.articleUrl,
-    language: translated ? target : summary.language,
+    language: translated ? targetLanguage : summary.language,
     originalLanguage: summary.language,
     isMachineTranslated: translated !== null,
     source: 'Wikipedia',

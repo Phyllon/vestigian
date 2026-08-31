@@ -24,7 +24,10 @@ import { reviewSchema } from './moderation/review.post'
 import { roleSchema } from './moderation/role.post'
 import { trustSchema } from './moderation/trust.post'
 import { querySchema as moderationUsersQuery } from './moderation/users.get'
-import { paramsSchema as enrichmentParams } from './sites/[id]/enrichment.get'
+import {
+  paramsSchema as enrichmentParams,
+  querySchema as enrichmentQuery,
+} from './sites/[id]/enrichment.get'
 import { paramsSchema as imageDeleteParams } from './sites/[id]/images/[imageId].delete'
 import {
   bodySchema as imagePatchBody,
@@ -367,7 +370,10 @@ const OPERATION_OVERRIDES: Record<
   },
   '/api/sites/{id}/enrichment': {
     get: {
-      parameters: paramsFromSchema(enrichmentParams, 'path'),
+      parameters: [
+        ...paramsFromSchema(enrichmentParams, 'path'),
+        ...paramsFromSchema(enrichmentQuery, 'query'),
+      ],
       responses: {
         200: jsonResponse('SiteEnrichment, or null.'),
         404: COMMON_RESPONSES[404],
@@ -460,6 +466,16 @@ interface OpenApiDocument {
 }
 
 export default defineEventHandler(async (event): Promise<OpenApiDocument> => {
+  // Dev only. A machine-readable map of every route, parameter and response
+  // shape is a development convenience, not something to leave reachable on
+  // the public internet — see the note in nuxt.config.ts, which independently
+  // disables the base document this route fetches, in production. Refused
+  // before that fetch even runs, rather than relying on the base document's
+  // own absence to fail this route indirectly.
+  if (!import.meta.dev) {
+    throw createError({ statusCode: 404, message: 'Not found.' })
+  }
+
   // A relative path, deliberately with no baseURL. Nitro's server-side $fetch
   // resolves a same-origin relative call against its own request handler
   // rather than opening a real socket, so this costs one in-process function

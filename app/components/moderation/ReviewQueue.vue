@@ -19,6 +19,7 @@
   }
 
   const toast = useToast()
+  const { t } = useI18n()
 
   const { data, refresh, status } = await useFetch<{
     items: QueueItem[]
@@ -70,8 +71,17 @@
         },
       )
       toast.add({
-        title: `${result.succeeded} ${decision}.`,
-        description: result.skipped > 0 ? `${result.skipped} skipped.` : undefined,
+        title: t('moderation.reviewQueue.batchResultTitle', {
+          count: result.succeeded,
+          decision:
+            decision === 'approved'
+              ? t('moderation.reviewQueue.approvedPlural')
+              : t('moderation.reviewQueue.rejectedPlural'),
+        }),
+        description:
+          result.skipped > 0
+            ? t('moderation.reviewQueue.batchResultSkipped', { count: result.skipped })
+            : undefined,
         color: result.skipped > 0 ? 'warning' : 'success',
       })
       batchNote.value = ''
@@ -79,8 +89,10 @@
       await refresh()
     } catch (error) {
       toast.add({
-        title: 'Batch review failed',
-        description: (error as { data?: { message?: string } }).data?.message ?? 'Try again.',
+        title: t('moderation.reviewQueue.batchFailedTitle'),
+        description:
+          (error as { data?: { message?: string } }).data?.message ??
+          t('moderation.reviewQueue.tryAgain'),
         color: 'error',
       })
     } finally {
@@ -97,14 +109,19 @@
       })
       notes[revisionId] = ''
       toast.add({
-        title: decision === 'approved' ? 'Published' : 'Rejected',
+        title:
+          decision === 'approved'
+            ? t('moderation.reviewQueue.published')
+            : t('moderation.reviewQueue.rejected'),
         color: decision === 'approved' ? 'success' : 'neutral',
       })
       await refresh()
     } catch (error) {
       toast.add({
-        title: 'Review failed',
-        description: (error as { data?: { message?: string } }).data?.message ?? 'Try again.',
+        title: t('moderation.reviewQueue.reviewFailedTitle'),
+        description:
+          (error as { data?: { message?: string } }).data?.message ??
+          t('moderation.reviewQueue.tryAgain'),
         color: 'error',
       })
     } finally {
@@ -115,7 +132,9 @@
 
 <template>
   <div class="space-y-4">
-    <p v-if="status === 'pending'" class="datum" role="status">Loading the queue…</p>
+    <p v-if="status === 'pending'" class="datum" role="status">
+      {{ t('moderation.reviewQueue.loading') }}
+    </p>
 
     <div
       v-else-if="selected.size > 0"
@@ -124,12 +143,12 @@
       aria-label="Actions for the selected revisions"
     >
       <p class="text-sm text-ink-700 dark:text-paper-200" role="status">
-        {{ selected.size }} selected
+        {{ t('moderation.reviewQueue.selectedCount', { count: selected.size }) }}
       </p>
 
       <UInput
         v-model="batchNote"
-        placeholder="Note, sent to every author (optional)"
+        :placeholder="t('moderation.reviewQueue.batchNotePlaceholder')"
         aria-label="Note sent to the author of every selected revision"
         size="xs"
         class="w-full sm:w-72"
@@ -141,7 +160,7 @@
           :loading="isBatchRunning"
           @click="reviewBatch('approved')"
         >
-          Publish all
+          {{ t('moderation.reviewQueue.publishAll') }}
         </UButton>
         <UButton
           size="xs"
@@ -150,20 +169,24 @@
           :loading="isBatchRunning"
           @click="reviewBatch('rejected')"
         >
-          Reject all
+          {{ t('moderation.reviewQueue.rejectAll') }}
         </UButton>
-        <UButton size="xs" variant="ghost" color="neutral" @click="clearSelection">Clear</UButton>
+        <UButton size="xs" variant="ghost" color="neutral" @click="clearSelection">
+          {{ t('moderation.reviewQueue.clear') }}
+        </UButton>
       </div>
     </div>
 
     <div v-if="status !== 'pending' && (data?.items.length ?? 0) > 1 && selected.size === 0">
-      <UButton size="xs" variant="ghost" color="neutral" @click="selectAll">Select all</UButton>
+      <UButton size="xs" variant="ghost" color="neutral" @click="selectAll">
+        {{ t('moderation.reviewQueue.selectAll') }}
+      </UButton>
     </div>
 
     <div v-else-if="!data?.items.length" class="leaf px-6 py-8">
-      <p class="text-lg">Nothing waiting.</p>
+      <p class="text-lg">{{ t('moderation.reviewQueue.nothingWaitingTitle') }}</p>
       <p class="mt-1 text-sm text-ink-500 dark:text-paper-400">
-        New contributions from untrusted accounts will appear here.
+        {{ t('moderation.reviewQueue.nothingWaitingHint') }}
       </p>
     </div>
 
@@ -176,14 +199,21 @@
       <div class="flex flex-wrap items-baseline justify-between gap-2">
         <UCheckbox
           :model-value="selected.has(item.id)"
-          :aria-label="`Select revision ${item.id}`"
+          :aria-label="t('moderation.reviewQueue.selectRevision', { id: item.id })"
           @update:model-value="toggleSelection(item.id)"
         />
         <p class="eyebrow">
-          {{ item.entity_id ? 'edit to a' : 'new' }} {{ item.entity_type }} · revision {{ item.id }}
+          {{
+            item.entity_id
+              ? t('moderation.reviewQueue.editToA')
+              : t('moderation.reviewQueue.newEntity')
+          }}
+          {{ item.entity_type }} ·
+          {{ t('moderation.reviewQueue.revision', { id: item.id }) }}
         </p>
         <p class="datum">
-          {{ item.author_name ?? 'Deleted account' }} · {{ item.author_accepted }} accepted
+          {{ item.author_name ?? t('moderation.reviewQueue.deletedAccount') }} ·
+          {{ t('moderation.reviewQueue.acceptedCount', { count: item.author_accepted }) }}
         </p>
       </div>
 
@@ -193,10 +223,10 @@
         v-if="item.blanking"
         class="mt-2 rounded-notebook bg-oxide-50 px-3 py-2 text-xs text-oxide-700 dark:bg-oxide-950 dark:text-oxide-300"
       >
-        This edit removes more than it adds. Check it against the live record before publishing.
+        {{ t('moderation.reviewQueue.blankingWarning') }}
       </p>
       <p v-else-if="item.substantial" class="mt-2 text-xs text-ink-500 dark:text-paper-400">
-        A substantial rewrite.
+        {{ t('moderation.reviewQueue.substantialNote') }}
       </p>
 
       <p v-if="item.payload.summary" class="mt-1 text-sm text-ink-700 dark:text-paper-200">
@@ -212,14 +242,18 @@
       </div>
 
       <UFormField
-        :label="`Note to ${item.author_name ?? 'the contributor'}`"
-        hint="Emailed with the decision"
+        :label="
+          t('moderation.reviewQueue.noteToAuthor', {
+            name: item.author_name ?? t('moderation.reviewQueue.theContributor'),
+          })
+        "
+        :hint="t('moderation.reviewQueue.noteHint')"
         class="mt-4"
       >
         <UTextarea
           v-model="notes[item.id]"
           :rows="2"
-          placeholder="Why — especially if this is a rejection. A contributor cannot see the queue."
+          :placeholder="t('moderation.reviewQueue.notePlaceholder')"
           class="w-full"
         />
       </UFormField>
@@ -230,20 +264,20 @@
           size="sm"
           color="success"
           :loading="reviewing === item.id"
-          :aria-label="`Publish ${item.payload.title}`"
+          :aria-label="t('moderation.reviewQueue.publishAria', { title: item.payload.title })"
           @click="decide(item.id, 'approved')"
         >
-          Publish
+          {{ t('moderation.reviewQueue.publish') }}
         </UButton>
         <UButton
           size="sm"
           variant="ghost"
           color="error"
           :loading="reviewing === item.id"
-          :aria-label="`Reject ${item.payload.title}`"
+          :aria-label="t('moderation.reviewQueue.rejectAria', { title: item.payload.title })"
           @click="decide(item.id, 'rejected')"
         >
-          Reject
+          {{ t('moderation.reviewQueue.reject') }}
         </UButton>
       </div>
     </article>

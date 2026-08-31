@@ -8,6 +8,7 @@
    * the reader asks for it.
    */
   const { view, isFollowingLimes } = useBasemapStyle()
+  const { t } = useI18n()
   const isOpen = ref(false)
 
   /**
@@ -40,7 +41,7 @@
         id="map-legend"
         class="rounded-notebook border border-paper-300 bg-paper-50/95 p-3 shadow-leaf backdrop-blur-sm dark:border-night-600 dark:bg-night-800/95"
       >
-        <h2 class="eyebrow mb-2">What the marks mean</h2>
+        <h2 class="eyebrow mb-2">{{ t('legend.title') }}</h2>
 
         <ul class="grid grid-cols-2 gap-x-4 gap-y-1.5">
           <li v-for="category in SITE_CATEGORIES" :key="category" class="flex items-center gap-2">
@@ -86,8 +87,33 @@
           v-if="isAntiquityView(view)"
           class="mt-2.5 max-w-64 border-t border-paper-300 pt-2 text-xs leading-snug text-ink-500 dark:border-night-600 dark:text-paper-400"
         >
-          The same marks drawn as thin outlines, without a disc, are places referenced from the
-          Barrington Atlas and Pleiades — not records contributed here.
+          {{ t('legend.referencedNote') }}
+        </p>
+
+        <!--
+          Basemap credit, per layer — DARE's own terms require attribution and
+          a link, and neither AWMC (ODbL) nor Pleiades (CC BY) is used without
+          one either. See /licence for the full terms.
+        -->
+        <p
+          v-if="view === 'antiquity-dare'"
+          class="mt-2 max-w-64 text-xs leading-snug text-ink-500 dark:text-paper-400"
+        >
+          {{ t('legend.basemapCreditDare') }}
+          <a
+            href="https://dh.gu.se/geography/imperium/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="underline underline-offset-2 hover:text-oxide-600 dark:hover:text-oxide-300"
+          >
+            dh.gu.se
+          </a>
+        </p>
+        <p
+          v-else-if="view === 'antiquity-awmc'"
+          class="mt-2 max-w-64 text-xs leading-snug text-ink-500 dark:text-paper-400"
+        >
+          {{ t('legend.basemapCreditBarrington') }}
         </p>
 
         <!--
@@ -97,7 +123,7 @@
         -->
         <template v-if="isFollowingLimes">
           <h2 class="eyebrow mb-2 mt-3 border-t border-paper-300 pt-2.5 dark:border-night-600">
-            The frontier
+            {{ t('legend.frontierTitle') }}
           </h2>
 
           <ul class="flex flex-col gap-1.5">
@@ -144,7 +170,7 @@
       aria-controls="map-legend"
       @click="toggle"
     >
-      {{ isOpen ? 'Hide key' : 'Key' }}
+      {{ isOpen ? t('legend.hideKey') : t('legend.showKey') }}
     </UButton>
   </div>
 </template>

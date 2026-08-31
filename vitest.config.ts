@@ -14,10 +14,11 @@ export default defineConfig({
       'server/**/__test__/**/*.test.ts',
       'app/composables/**/__test__/**/*.test.ts',
       'shared/**/__test__/**/*.test.ts',
+      'scripts/**/__test__/**/*.test.ts',
     ],
     coverage: {
       provider: 'v8',
-      include: ['server/utils/**', 'app/composables/**', 'shared/utils/**'],
+      include: ['server/utils/**', 'app/composables/**', 'shared/utils/**', 'scripts/i18n/**'],
       exclude: ['**/__test__/**'],
       thresholds: { statements: 70, branches: 70, functions: 70, lines: 70 },
     },

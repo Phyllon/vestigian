@@ -18,16 +18,13 @@
     isLoading: boolean
   }>()
 
-  const LANGUAGE_NAMES: Record<string, string> = {
-    en: 'English',
-    nl: 'Dutch',
-    de: 'German',
-    es: 'Spanish',
-    it: 'Italian',
-    fr: 'French',
-  }
+  const { t, locale } = useI18n()
 
-  const nameOf = (code: string): string => LANGUAGE_NAMES[code] ?? code.toUpperCase()
+  const nameOf = (code: string): string => {
+    const known = t(`enrichment.languages.${code}`)
+    // vue-i18n returns the key itself when nothing matches — not a valid name.
+    return known === `enrichment.languages.${code}` ? code.toUpperCase() : known
+  }
 
   /**
    * What to say about the language, if anything.
@@ -44,28 +41,29 @@
     if (!enrichment) return null
 
     if (enrichment.isMachineTranslated) {
-      return `Machine-translated from ${nameOf(enrichment.originalLanguage)}`
+      return t('enrichment.machineTranslatedFrom', {
+        language: nameOf(enrichment.originalLanguage),
+      })
     }
 
-    return enrichment.language === 'en' ? null : `In ${nameOf(enrichment.language)}`
+    return enrichment.language === locale.value
+      ? null
+      : t('enrichment.inLanguage', { language: nameOf(enrichment.language) })
   })
-
-  const ROUTE_LABELS: Record<SiteEnrichment['matchedVia'], string> = {
-    wikidata: 'Wikidata',
-    pleiades: 'Pleiades',
-    dare: 'the Digital Atlas of the Roman Empire',
-  }
 
   const provenance = computed(() => {
     if (!props.enrichment) return ''
     const { matchedVia, matchedWithinMetres } = props.enrichment
-    return `Matched through ${ROUTE_LABELS[matchedVia]}, ${matchedWithinMetres} m from the recorded position`
+    return t('enrichment.matchedThrough', {
+      source: t(`enrichment.sources.${matchedVia}`),
+      metres: matchedWithinMetres,
+    })
   })
 </script>
 
 <template>
   <section v-if="isLoading || enrichment">
-    <h2 class="eyebrow">Elsewhere</h2>
+    <h2 class="eyebrow">{{ t('enrichment.sectionTitle') }}</h2>
 
     <!-- The same pulse the panel uses while the record itself loads. -->
     <div v-if="isLoading" class="mt-2 space-y-2" aria-hidden="true">

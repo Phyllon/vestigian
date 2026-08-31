@@ -1,0 +1,149 @@
+{
+  "layout": {
+    "skipToMap": "Passer à la carte",
+    "skipToContent": "Passer au contenu",
+    "tagline": "traces d'antiquité",
+    "queue": "Demande",
+    "signIn": "Connexion",
+    "signOut": "Déconnexion",
+    "signOutAs": "Signer, signer comme{name}",
+    "footerLicence": "Données et licences",
+    "menu": "Menu"
+  },
+  "themeToggle": {
+    "switchToDay": "Passer à jour",
+    "switchToNight": "Passer à la nuit"
+  },
+  "languageSwitcher": {
+    "label": "Langue",
+    "current": "Langue:{name}"
+  },
+  "basemapSwitcher": {
+    "label": "Carte de base :{label}",
+    "menuLabel": "Carte de base",
+    "groupToday": "Aujourd'hui",
+    "groupAntiquity": "Antiquité",
+    "followLimes": "Suivre les chaux",
+    "followLimesHint": "La frontière, ses murs et ses forts"
+  },
+  "legend": {
+    "title": "Ce que signifient les marques",
+    "hideKey": "Masquer la clé",
+    "showKey": "Clé",
+    "referencedNote": "Les mêmes marques dessinées que les contours fins, sans disque, sont des endroits référencés de l'Atlas de Barrington et des Pléiades — pas les enregistrements fournis ici.",
+    "frontierTitle": "La frontière",
+    "basemapCreditDare": "Antiquité : © Johan Åhlfeldt, Université de Göteborg, CC BY-SA 3.0.",
+    "basemapCreditBarrington": "Antiquité (Barrington) : routes, côtes et lieux du Centre de cartographie du monde antique (ODbL 1.0) et des Pléiades (CC BY 3.0)."
+  },
+  "siteDetail": {
+    "loading": "Chargement",
+    "recordsHere": "{count}les enregistrements ici",
+    "close": "Fermer les détails du site",
+    "openFullEntry": "Ouvrir l'entrée complète",
+    "edit": "Modifier",
+    "revised": "Révisé",
+    "notFound": "Ce site ne pouvait pas être chargé. Il a peut-être été retiré ou est en attente de révision."
+  },
+  "enrichment": {
+    "sectionTitle": "Ailleurs",
+    "machineTranslatedFrom": "Traduit de la machine{language}",
+    "inLanguage": "Dans{language}",
+    "matchedThrough": "Correspondance{source},{metres}m de la position enregistrée",
+    "languages": {
+      "en": "Changements climatiques",
+      "nl": "Néerlandais",
+      "de": "Allemand",
+      "es": "Espagnol",
+      "it": "Italien",
+      "fr": "Français"
+    },
+    "sources": {
+      "wikidata": "Wikidonnées",
+      "pleiades": "Pléiades",
+      "dare": "l'Atlas numérique de l'Empire romain"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Connexion",
+      "email": "Courriel",
+      "password": "Mot de passe",
+      "forgotPassword": "Vous avez oublié votre mot de passe ?",
+      "submit": "Connexion",
+      "noAccount": "Pas encore de compte ?",
+      "createOne": "Créer une",
+      "errorEmail": "Cela ne ressemble pas à une adresse email.",
+      "errorPassword": "Entrez votre mot de passe.",
+      "failedTitle": "Impossible de se connecter",
+      "failedDescription": "Vérifiez vos coordonnées et essayez à nouveau."
+    },
+    "register": {
+      "title": "Rejoignez Vestigia",
+      "intro": "Vos deux premières contributions sont vérifiées par un modérateur. Après cela, ils publient comme vous les écrivez.",
+      "displayName": "Afficher le nom",
+      "email": "Courriel",
+      "password": "Mot de passe",
+      "passwordConfirmation": "Répéter le mot de passe",
+      "submit": "Créer un compte",
+      "doneTitle": "Vérifiez votre boîte de réception",
+      "doneDescription": "Confirmez votre adresse pour terminer la configuration du compte. Le lien est bon pour une journée.",
+      "errorDisplayName": "Au moins trois caractères.",
+      "errorEmail": "Cela ne ressemble pas à une adresse email.",
+      "errorPasswordMismatch": "Les deux mots de passe ne correspondent pas.",
+      "failedTitle": "L'enregistrement a échoué",
+      "failedDefault": "Essaie encore."
+    }
+  },
+  "moderation": {
+    "reviewQueue": {
+      "loading": "Chargement de la file d'attente..",
+      "selectedCount": "{count}sélectionné",
+      "batchNotePlaceholder": "Note, envoyée à chaque auteur (facultatif)",
+      "publishAll": "Tout publier",
+      "rejectAll": "Tout rejeter",
+      "clear": "Effacer",
+      "selectAll": "Tout sélectionner",
+      "nothingWaitingTitle": "Rien n'attend.",
+      "nothingWaitingHint": "De nouvelles contributions provenant de comptes non fiables apparaîtront ici.",
+      "selectRevision": "Sélectionner la révision{id}",
+      "editToA": "modifier à un",
+      "newEntity": "nouveaux",
+      "revision": "révision{id}",
+      "deletedAccount": "Compte supprimé",
+      "acceptedCount": "{count}accepté",
+      "blankingWarning": "Cette modification supprime plus qu'elle n'ajoute. Vérifiez-le en direct avant de publier.",
+      "substantialNote": "Une réécriture substantielle.",
+      "noteToAuthor": "Remarque{name}",
+      "theContributor": "le contributeur",
+      "noteHint": "E-mailé avec la décision",
+      "notePlaceholder": "Pourquoi, surtout si c'est un rejet. Un contributeur ne peut pas voir la file d'attente.",
+      "publish": "Publier",
+      "publishAria": "Publier{title}",
+      "reject": "Rejet",
+      "rejectAria": "Rejet{title}",
+      "batchFailedTitle": "Réexamen par lots échoué",
+      "reviewFailedTitle": "La révision a échoué",
+      "tryAgain": "Essaie encore.",
+      "published": "Publié",
+      "rejected": "Rejeté",
+      "approvedPlural": "approuvé",
+      "rejectedPlural": "rejeté",
+      "batchResultTitle": "{count} {decision}.",
+      "batchResultSkipped": "{count}j'ai sauté."
+    }
+  },
+  "licence": {
+    "title": "Données et licences",
+    "intro": "Vestigia est construit sur des données que d'autres rendu librement réutilisable. Les termes diffèrent par couche — voici ce qui s'applique à chacun.",
+    "recordsHeading": "Comptes rendus",
+    "recordsBody": "Le site et le texte de traçage sont CC BY-SA — libre de réutilisation et d'adaptation, y compris commercialement, à condition que les modifications soient partagées sous la même licence et que la source soit créditée. Les métadonnées structurées (coordonnées, dates, catégories) sont CC0 — aucun droit réservé.",
+    "imagesHeading": "Photographies",
+    "imagesBody": "Chaque photographie porte sa propre licence et attribution, sous l'image elle-même. Les licences varient par enregistrement; vérifiez l'image avant de la réutiliser séparément du site qu'elle illustre.",
+    "barringtonHeading": "Carte de base de l'antiquité (Barrington)",
+    "barringtonBody": "Les côtes anciennes, les routes, l'eau et les lieux sont tirés du Centre de cartographie du monde ancien (ODbL 1.0) et des Pléiades (CC BY 3.0). Les deux sont réutilisables, y compris commercialement, avec l'attribution — la part-alike d'ODbL s'applique à la base de données sous-jacente, et non aux tuiles de cartes rendues.",
+    "dareHeading": "Carte de base de l'antiquité (DARE)",
+    "dareBody": "Cette carte de base est CC BY-SA 3.0 de Johan Åhlfeldt (Atlas numérique de l'Empire romain, Université de Göteborg) — mais deux de ses propres couches de source sont créditées non commerciales (CC BY-NC 3.0 / CC BY-NC-SA), que la couverture CC BY-SA ne peut pas surcharger. Traiter cette couche comme une utilisation non commerciale seulement.",
+    "limesHeading": "La frontière (limes)",
+    "limesBody": "La ligne frontière est dérivée de l'étendue de l'empire du Centre de cartographie du monde antique (ODbL 1.0) et ne fait pas partie de la base de données."
+  }
+}

@@ -1,6 +1,8 @@
 <script setup lang="ts">
+  const { locale } = useI18n()
+
   useHead({
-    htmlAttrs: { lang: 'en' },
+    htmlAttrs: { lang: locale },
     titleTemplate: (title?: string) => (title ? `${title} · Vestigia` : 'Vestigia'),
     link: [
       { rel: 'manifest', href: '/manifest.webmanifest' },

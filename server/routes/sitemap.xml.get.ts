@@ -40,6 +40,7 @@ export default defineEventHandler(async (event) => {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>${base}/</loc></url>
+  <url><loc>${base}/licence</loc></url>
   <url><loc>${base}/limes</loc></url>
 ${sectors.map((row) => `  <url><loc>${base}/limes/${row.slug}</loc></url>`).join('\n')}
 ${entries}

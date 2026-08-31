@@ -1,0 +1,149 @@
+{
+  "layout": {
+    "skipToMap": "Skip to the map",
+    "skipToContent": "Saltar al contenido",
+    "tagline": "rastros de antigüedad",
+    "queue": "Queue",
+    "signIn": "Iniciar sesión",
+    "signOut": "Suscríbase",
+    "signOutAs": "Firmado, firmado como{name}",
+    "footerLicence": "Licencias de datos",
+    "menu": "Menú"
+  },
+  "themeToggle": {
+    "switchToDay": "Cambiar al día",
+    "switchToNight": "Cambiar a la noche"
+  },
+  "languageSwitcher": {
+    "label": "Idioma",
+    "current": "Idioma:{name}"
+  },
+  "basemapSwitcher": {
+    "label": "Base de referencia:{label}",
+    "menuLabel": "Base de referencia",
+    "groupToday": "Hoy",
+    "groupAntiquity": "Antigüedad",
+    "followLimes": "Seguir los limones",
+    "followLimesHint": "La frontera, sus paredes y sus fuertes"
+  },
+  "legend": {
+    "title": "Lo que significan las marcas",
+    "hideKey": "Ocultar la llave",
+    "showKey": "Clave",
+    "referencedNote": "Las mismas marcas dibujadas como esbozos delgados, sin un disco, son lugares referenciados del Atlas Barrington y Pleiades — no registros contribuidos aquí.",
+    "frontierTitle": "La frontera",
+    "basemapCreditDare": "Antigüedad (DARE): © Johan Åhlfeldt, Universidad de Gotemburgo, CC BY-SA 3.0.",
+    "basemapCreditBarrington": "Antigüedad (Barrington): carreteras, costa y lugares del Centro de Mapping del Mundo Antiguo (ODbL 1.0) y Pléyades (CC BY 3.0)."
+  },
+  "siteDetail": {
+    "loading": "Cargando",
+    "recordsHere": "{count}registros aquí",
+    "close": "Cerrar detalles del sitio",
+    "openFullEntry": "Abra la entrada completa",
+    "edit": "Editar",
+    "revised": "Revisada",
+    "notFound": "Ese sitio no puede ser cargado. Puede haber sido eliminado o está pendiente de revisión."
+  },
+  "enrichment": {
+    "sectionTitle": "En otro lugar",
+    "machineTranslatedFrom": "Traducción automática de{language}",
+    "inLanguage": "In{language}",
+    "matchedThrough": "Atravesado{source},{metres}m de la posición grabada",
+    "languages": {
+      "en": "Inglés",
+      "nl": "Dutch",
+      "de": "Alemán",
+      "es": "Español",
+      "it": "Italiano",
+      "fr": "Francés"
+    },
+    "sources": {
+      "wikidata": "Wikidata",
+      "pleiades": "Pleiades",
+      "dare": "el Atlas Digital del Imperio Romano"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Iniciar sesión",
+      "email": "Email",
+      "password": "Contraseña",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "submit": "Iniciar sesión",
+      "noAccount": "¿Todavía no tiene cuenta?",
+      "createOne": "Crear uno",
+      "errorEmail": "Eso no parece una dirección de correo electrónico.",
+      "errorPassword": "Introduzca su contraseña.",
+      "failedTitle": "No podía firmar",
+      "failedDescription": "Revisa tus datos e intenta de nuevo."
+    },
+    "register": {
+      "title": "Únase a Vestigia",
+      "intro": "Sus dos primeras contribuciones son comprobadas por un moderador. Después de eso publican como los escribes.",
+      "displayName": "Nombre de visualización",
+      "email": "Email",
+      "password": "Contraseña",
+      "passwordConfirmation": "Repetir contraseña",
+      "submit": "Crear cuenta",
+      "doneTitle": "Revisa tu buzón de entrada",
+      "doneDescription": "Confirme su dirección para terminar de configurar la cuenta. El enlace es bueno para un día.",
+      "errorDisplayName": "Al menos tres personajes.",
+      "errorEmail": "Eso no parece una dirección de correo electrónico.",
+      "errorPasswordMismatch": "Las dos contraseñas no coinciden.",
+      "failedTitle": "El registro falló",
+      "failedDefault": "Inténtalo de nuevo en breve."
+    }
+  },
+  "moderation": {
+    "reviewQueue": {
+      "loading": "Cargando la cola..",
+      "selectedCount": "{count}seleccionado",
+      "batchNotePlaceholder": "Nota, enviada a cada autor (opcional)",
+      "publishAll": "Publish all",
+      "rejectAll": "Rechazar todo",
+      "clear": "Despejado",
+      "selectAll": "Seleccione todo",
+      "nothingWaitingTitle": "Nada esperando.",
+      "nothingWaitingHint": "Aquí aparecerán nuevas contribuciones de cuentas no confiadas.",
+      "selectRevision": "Seleccione la revisión{id}",
+      "editToA": "editar a un",
+      "newEntity": "nuevo",
+      "revision": "revisión{id}",
+      "deletedAccount": "Cuenta suprimida",
+      "acceptedCount": "{count}aceptadas",
+      "blankingWarning": "Esta edición elimina más de lo que añade. Revise contra el registro en vivo antes de publicar.",
+      "substantialNote": "Una reescritura sustancial.",
+      "noteToAuthor": "Nota a{name}",
+      "theContributor": "el contribuyente",
+      "noteHint": "Correo electrónico con la decisión",
+      "notePlaceholder": "Por qué, especialmente si esto es un rechazo. Un contribuyente no puede ver la cola.",
+      "publish": "Publish",
+      "publishAria": "Publish{title}",
+      "reject": "Rechazo",
+      "rejectAria": "Rechazo{title}",
+      "batchFailedTitle": "Falló la revisión de los lotes",
+      "reviewFailedTitle": "La revisión falló",
+      "tryAgain": "Inténtalo de nuevo.",
+      "published": "Publicado",
+      "rejected": "Rechazado",
+      "approvedPlural": "aprobado",
+      "rejectedPlural": "rechazado",
+      "batchResultTitle": "{count} {decision}.",
+      "batchResultSkipped": "{count}saltado."
+    }
+  },
+  "licence": {
+    "title": "Licencias de datos",
+    "intro": "Vestigia se basa en datos que otros hicieron libremente reutilizables. Los términos difieren por capa — aquí es lo que se aplica a cada uno.",
+    "recordsHeading": "Registros gentiles",
+    "recordsBody": "El texto de localización y localización es CC BY-SA, libre de reutilización y adaptación, incluso comercialmente, siempre que los cambios se compartan con la misma licencia y se acredita la fuente. Los metadatos estructurados (coordinados, fechas, categorías) son CAC0, sin derechos reservados.",
+    "imagesHeading": "Fotografías",
+    "imagesBody": "Cada fotografía lleva su propia licencia y atribución, mostrada bajo la imagen misma. Las licencias varían por registro; comprueba la imagen antes de reutilizarla por separado del sitio que ilustra.",
+    "barringtonHeading": "Antigüedad (Barrington) basemap",
+    "barringtonBody": "Antiguas costas, carreteras, agua y lugares se dibujan desde el Centro Mundial de Mapping (ODbL 1.0) y Pléyades (CC BY 3.0). Ambos son reutilizables, incluyendo comercialmente, con atribución — el compartimiento de ODbL se aplica a la base de datos subyacente, no a las fichas de mapa renderizadas.",
+    "dareHeading": "Antigüedad (DARE)",
+    "dareBody": "Esta base es CC BY-SA 3.0 de Johan Åhlfeldt ( Atlas Digital del Imperio Romano, Universidad de Gotemburgo), pero dos de sus propias capas fuente se acreditan no comerciales (CC BY-NC 3.0 / CC BY-NC-SA), que la manta CC BY-SA no puede anular. Tratar esta capa específica como uso no comercial solamente.",
+    "limesHeading": "La frontera (limes)",
+    "limesBody": "La línea fronteriza se deriva de la extensión del imperio del Centro Mundial de Mapping (ODbL 1.0) y no es parte de la base de datos aportada."
+  }
+}

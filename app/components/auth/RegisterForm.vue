@@ -4,6 +4,7 @@
   import type { Form, FormSubmitEvent } from '@nuxt/ui'
 
   const toast = useToast()
+  const { t } = useI18n()
   const form = useTemplateRef<Form<RegistrationState>>('form')
   const altchaWidget = useTemplateRef<HTMLElement & { reset?: () => void }>('altchaWidget')
   const altchaPayload = ref('')
@@ -12,15 +13,15 @@
 
   const schema = z
     .object({
-      displayName: z.string().trim().min(3, 'At least three characters.').max(60),
-      email: z.string().email('That does not look like an email address.'),
+      displayName: z.string().trim().min(3, t('auth.register.errorDisplayName')).max(60),
+      email: z.string().email(t('auth.register.errorEmail')),
       password: passwordSchema,
       passwordConfirmation: z.string(),
       /** Honeypot — hidden from people, irresistible to bots. */
       website: z.string().max(0).optional(),
     })
     .refine((values) => values.password === values.passwordConfirmation, {
-      message: 'The two passwords do not match.',
+      message: t('auth.register.errorPasswordMismatch'),
       path: ['passwordConfirmation'],
     })
 
@@ -73,7 +74,7 @@
       isDone.value = true
     } catch (error) {
       const response = (error as { data?: { message?: string; data?: { field?: string } } }).data
-      const message = response?.message ?? 'Try again shortly.'
+      const message = response?.message ?? t('auth.register.failedDefault')
 
       /**
        * A conflict names the field it came from, so the message lands under
@@ -91,7 +92,7 @@
         return
       }
 
-      toast.add({ title: 'Registration failed', description: message, color: 'error' })
+      toast.add({ title: t('auth.register.failedTitle'), description: message, color: 'error' })
     } finally {
       isSubmitting.value = false
     }
@@ -110,9 +111,9 @@
 
 <template>
   <div v-if="isDone" class="leaf p-6" role="status">
-    <h1 class="text-xl">Check your inbox</h1>
+    <h1 class="text-xl">{{ t('auth.register.doneTitle') }}</h1>
     <p class="mt-2 text-sm text-ink-700 dark:text-paper-200">
-      Confirm your address to finish setting up the account. The link is good for one day.
+      {{ t('auth.register.doneDescription') }}
     </p>
   </div>
 
@@ -127,27 +128,30 @@
     @submit="register"
   >
     <header>
-      <h1 class="text-2xl">Join Vestigia</h1>
+      <h1 class="text-2xl">{{ t('auth.register.title') }}</h1>
       <p class="mt-1 text-sm text-ink-500 dark:text-paper-400">
-        Your first two contributions are checked by a moderator. After that they publish as you
-        write them.
+        {{ t('auth.register.intro') }}
       </p>
     </header>
 
-    <UFormField label="Display name" name="displayName" required>
+    <UFormField :label="t('auth.register.displayName')" name="displayName" required>
       <UInput v-model="state.displayName" autocomplete="nickname" class="w-full" />
     </UFormField>
 
-    <UFormField label="Email" name="email" required>
+    <UFormField :label="t('auth.register.email')" name="email" required>
       <UInput v-model="state.email" type="email" autocomplete="email" class="w-full" />
     </UFormField>
 
-    <UFormField label="Password" name="password" required>
+    <UFormField :label="t('auth.register.password')" name="password" required>
       <AuthPasswordField v-model="state.password" autocomplete="new-password" />
       <AuthPasswordRequirements :password="state.password ?? ''" />
     </UFormField>
 
-    <UFormField label="Repeat password" name="passwordConfirmation" required>
+    <UFormField
+      :label="t('auth.register.passwordConfirmation')"
+      name="passwordConfirmation"
+      required
+    >
       <AuthPasswordField v-model="state.passwordConfirmation" autocomplete="new-password" />
     </UFormField>
 
@@ -180,7 +184,7 @@
     />
 
     <UButton type="submit" :loading="isSubmitting" :disabled="!isComplete" color="primary" block>
-      Create account
+      {{ t('auth.register.submit') }}
     </UButton>
   </UForm>
 </template>

@@ -50,7 +50,34 @@ export default defineNuxtConfig({
     'nuxt-auth-utils',
     'nuxt-security',
     '@nuxt/test-utils/module',
+    '@nuxtjs/i18n',
   ],
+
+  /**
+   * `no_prefix`: locale lives in a cookie, not the URL. Slugs never change on
+   * edit and the sitemap points at them (see CLAUDE.md's governance section);
+   * prefixing every route with `/fr`, `/de`, … would double the URL surface
+   * six times over for a change that is about interface text and enrichment
+   * content, not localized routing, with no `hreflang` investment to back it.
+   */
+  i18n: {
+    strategy: 'no_prefix',
+    defaultLocale: 'en',
+    langDir: 'locales',
+    locales: [
+      { code: 'en', name: 'English', file: 'en.json' },
+      { code: 'fr', name: 'Français', file: 'fr.json' },
+      { code: 'es', name: 'Español', file: 'es.json' },
+      { code: 'de', name: 'Deutsch', file: 'de.json' },
+      { code: 'it', name: 'Italiano', file: 'it.json' },
+      { code: 'nl', name: 'Nederlands', file: 'nl.json' },
+    ],
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: 'vestigia-locale',
+      redirectOn: 'no prefix',
+    },
+  },
 
   /**
    * Composables are grouped into subdirectories (map, data, auth, ui) and Nuxt
@@ -415,27 +442,29 @@ export default defineNuxtConfig({
     },
     experimental: { openAPI: true },
     /**
-     * The spec is served in production too — every one of these endpoints
-     * already sits behind its own auth guard and rate limit, so documenting
-     * its shape leaks nothing that isn't already true of a request that tries
-     * it. Consistent with `/api/data/sites.geojson` already being a public,
-     * documented feed.
+     * Dev only. The spec was served in production too until it was pointed
+     * out that an unauthenticated, machine-readable map of every route,
+     * parameter and response shape is worth withholding from the public
+     * internet even though each endpoint underneath still enforces its own
+     * auth guard and rate limit independently — the spec is a convenience for
+     * this project's own development, not a public contract, and
+     * `/api/data/sites.geojson` remains the intentionally public, documented
+     * feed regardless.
      *
      * Both bundled UIs are switched off rather than left at their defaults.
      * Nitro's `/_scalar` and `/_swagger` routes load their renderer from
      * `cdn.jsdelivr.net` — a runtime request to a third party, the exact thing
      * self-hosted fonts, self-hosted glyphs and ALTCHA-over-Turnstile exist to
      * avoid here, and the CSP in this file would refuse it silently the same
-     * way the missing nonce token once did. The JSON at `openAPI.route` is
-     * same-origin and needs no allowlist entry; paste it into Insomnia,
-     * Postman or scalar.com's own hosted reference instead of serving a UI
-     * bundle from this app.
+     * way the missing nonce token once did.
      */
     openAPI: {
       /**
        * Not `/api/openapi.json` — that path is `server/api/openapi.json.get.ts`,
        * a normal route that fetches this one and merges in the parameter and
-       * request-body schemas derived from each route's zod validator.
+       * request-body schemas derived from each route's zod validator. That
+       * route also 404s outright in production, on `import.meta.dev`, as a
+       * second guard independent of this flag.
        *
        * `defineRouteMeta` is a build-time macro: its argument is parsed as an
        * AST and only object/array literals of literals survive
@@ -448,7 +477,7 @@ export default defineNuxtConfig({
        * instead, in a route with no such restriction.
        */
       route: '/_nitro-base-openapi.json',
-      production: 'runtime',
+      production: isProduction ? false : 'runtime',
       meta: {
         title: 'Vestigia API',
         description:

@@ -41,6 +41,7 @@ interface StoredEntry {
  */
 export const useSiteEnrichment = (source?: MaybeRefOrGetter<number | null | undefined>) => {
   const { selectedSiteId } = useSiteQuery()
+  const { locale } = useI18n()
 
   const siteId = computed<number | null>(() =>
     source === undefined ? selectedSiteId.value : (toValue(source) ?? null),
@@ -48,17 +49,24 @@ export const useSiteEnrichment = (source?: MaybeRefOrGetter<number | null | unde
 
   const remembered = useStorage<Record<string, StoredEntry>>(STORAGE_KEY, {})
 
-  const readRemembered = (siteId: number): StoredEntry | null => {
-    const entry = remembered.value[String(siteId)]
+  /**
+   * Storage key includes the language, so switching the interface language
+   * refetches rather than replaying yesterday's English translation under a
+   * new label.
+   */
+  const storageKey = (siteId: number, lang: string): string => `${siteId}:${lang}`
+
+  const readRemembered = (siteId: number, lang: string): StoredEntry | null => {
+    const entry = remembered.value[storageKey(siteId, lang)]
     if (!entry || entry.schema !== STORAGE_SCHEMA) return null
     if (Date.now() - entry.storedAt > STORAGE_TTL_MS) return null
     return entry
   }
 
-  const remember = (siteId: number, value: SiteEnrichment | null): void => {
+  const remember = (siteId: number, lang: string, value: SiteEnrichment | null): void => {
     const next: Record<string, StoredEntry> = {
       ...remembered.value,
-      [String(siteId)]: { schema: STORAGE_SCHEMA, storedAt: Date.now(), value },
+      [storageKey(siteId, lang)]: { schema: STORAGE_SCHEMA, storedAt: Date.now(), value },
     }
 
     // Oldest out first, so a long session cannot fill the origin's quota.
@@ -72,23 +80,28 @@ export const useSiteEnrichment = (source?: MaybeRefOrGetter<number | null | unde
   }
 
   /**
-   * Keyed per site, unlike the detail query beside it, so switching back to a
-   * site already seen this session costs nothing.
+   * Keyed per site and language, unlike the detail query beside it, so
+   * switching back to a site already seen this session in this language costs
+   * nothing — and switching language refetches rather than reusing a
+   * translation into the language just left.
    */
   const { data: enrichment, status } = useLazyAsyncData<SiteEnrichment | null>(
-    () => `site-enrichment-${siteId.value ?? 'none'}`,
+    () => `site-enrichment-${siteId.value ?? 'none'}-${locale.value}`,
     async () => {
       const id = siteId.value
       if (id === null) return null
 
-      const stored = readRemembered(id)
+      const lang = locale.value
+      const stored = readRemembered(id, lang)
       if (stored) return stored.value
 
-      const fetched = await $fetch<SiteEnrichment | null>(`/api/sites/${id}/enrichment`)
-      remember(id, fetched)
+      const fetched = await $fetch<SiteEnrichment | null>(`/api/sites/${id}/enrichment`, {
+        query: { lang },
+      })
+      remember(id, lang, fetched)
       return fetched
     },
-    { watch: [siteId], server: false, default: () => null },
+    { watch: [siteId, locale], server: false, default: () => null },
   )
 
   /**

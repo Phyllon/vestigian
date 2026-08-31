@@ -11,6 +11,7 @@
   const { enrichment, isLoadingEnrichment } = useSiteEnrichment()
   const { loggedIn } = useSession()
   const { isCompact } = useBreakpoint()
+  const { t } = useI18n()
 
   const period = computed(() =>
     site.value ? formatPeriod(site.value.periodFrom, site.value.periodTo) : '',
@@ -63,7 +64,7 @@
         <div
           class="flex items-start gap-3 border-b border-paper-200 px-5 py-3 dark:border-night-700"
         >
-          <p class="eyebrow pt-1">{{ site?.category ?? 'Loading' }}</p>
+          <p class="eyebrow pt-1">{{ site?.category ?? t('siteDetail.loading') }}</p>
 
           <div class="ml-auto flex items-center gap-1">
             <!--
@@ -78,13 +79,13 @@
               @click="returnToOverlappingFeatures"
             >
               <UIcon name="i-lucide-chevron-left" class="size-3.5" aria-hidden="true" />
-              {{ overlappingFeatures.length }} records here
+              {{ t('siteDetail.recordsHere', { count: overlappingFeatures.length }) }}
             </button>
 
             <button
               type="button"
               class="grid size-8 shrink-0 place-items-center rounded-notebook text-ink-500 transition hover:bg-paper-200 dark:text-paper-400 dark:hover:bg-night-700"
-              aria-label="Close site details"
+              :aria-label="t('siteDetail.close')"
               @click="close"
             >
               <UIcon name="i-lucide-x" class="size-4" aria-hidden="true" />
@@ -147,24 +148,24 @@
             :to="`/site/${site.slug}`"
             class="text-sm text-oxide-600 underline underline-offset-2 dark:text-oxide-300"
           >
-            Open the full entry
+            {{ t('siteDetail.openFullEntry') }}
           </NuxtLink>
           <NuxtLink
             v-if="loggedIn"
             :to="`/site/${site.slug}/edit`"
             class="text-sm text-ink-500 underline underline-offset-2 dark:text-paper-400"
           >
-            Edit
+            {{ t('siteDetail.edit') }}
           </NuxtLink>
           <p class="datum ml-auto">
-            Revised
+            {{ t('siteDetail.revised') }}
             <time :datetime="site.updatedAt">{{ formatDate(site.updatedAt) }}</time>
           </p>
         </div>
       </article>
 
       <p v-else class="p-5 text-sm text-ink-500 dark:text-paper-400">
-        That site could not be loaded. It may have been removed or is awaiting review.
+        {{ t('siteDetail.notFound') }}
       </p>
     </aside>
   </Transition>

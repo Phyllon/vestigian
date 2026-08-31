@@ -79,6 +79,16 @@ export interface ExternalIdentifier {
 export type EnrichmentRoute = 'wikidata' | 'pleiades' | 'dare'
 
 /**
+ * Wikipedias this atlas can read and LibreTranslate can translate between —
+ * the same six the interface itself is offered in. Shared so the client's
+ * `lang` query parameter and the server's article-language preference and
+ * translation target can never drift into different vocabularies.
+ */
+export const ENRICHMENT_LANGUAGES = ['en', 'nl', 'de', 'es', 'it', 'fr'] as const
+
+export type EnrichmentLanguage = (typeof ENRICHMENT_LANGUAGES)[number]
+
+/**
  * Borrowed prose about a site, shown only when it is certainly the same place.
  *
  * `matchedVia` and `matchedWithinMetres` travel with the text on purpose. This

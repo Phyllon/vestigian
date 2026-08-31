@@ -43,6 +43,7 @@
     "import:limes": "tsx --env-file-if-exists=.env scripts/import/06-limes.ts",
     "glyphs:build": "tsx scripts/build-glyphs.ts",
     "tiles:warm": "tsx --env-file-if-exists=.env scripts/warm-tiles.ts",
+    "i18n:translate": "tsx --env-file-if-exists=.env scripts/i18n/translate-locales.ts",
     "prepare": "husky"
   },
   "dependencies": {
@@ -51,6 +52,7 @@
     "@fontsource/ibm-plex-mono": "^5.1.0",
     "@fontsource/ibm-plex-sans": "^5.1.0",
     "@node-rs/argon2": "^2.0.2",
+    "@nuxtjs/i18n": "^10.6.0",
     "@opentelemetry/api": "^1.9.1",
     "@opentelemetry/exporter-trace-otlp-http": "^0.221.0",
     "@opentelemetry/resources": "^2.10.0",
