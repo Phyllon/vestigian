@@ -3,9 +3,18 @@ import { and, eq, isNull } from 'drizzle-orm'
 import { emailTokens, users } from '~~/server/database/schema'
 import { passwordSchema } from '#shared/utils/password'
 
-const bodySchema = z.object({
+export const bodySchema = z.object({
   token: z.string().min(10).max(200),
   password: passwordSchema,
+})
+
+defineRouteMeta({
+  openAPI: {
+    tags: ['auth'],
+    summary: 'Redeem a reset link and set a new password',
+    description:
+      'Does not sign in on success by design — resetting a password ends with a deliberate sign-in, not an automatic one from an emailed link.',
+  },
 })
 
 export default defineEventHandler(async (event) => {

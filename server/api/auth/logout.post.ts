@@ -5,6 +5,15 @@
  * signed in. It is rate limited because it is unauthenticated and writes a
  * response header.
  */
+defineRouteMeta({
+  openAPI: {
+    tags: ['auth'],
+    summary: 'Sign out',
+    description:
+      'Clears the session cookie. Not gated on holding a session — clearing an absent cookie is a no-op.',
+  },
+})
+
 export default defineEventHandler(async (event) => {
   await enforceRateLimit(event, 'record')
   await clearUserSession(event)

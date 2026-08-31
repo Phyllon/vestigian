@@ -4,18 +4,25 @@ import { siteImages } from '~~/server/database/schema'
 import { canManageImage } from '#shared/utils/authorization'
 import type { SessionUser } from '#shared/types'
 
-const paramsSchema = z.object({
+export const paramsSchema = z.object({
   id: routeIdentifier,
   imageId: routeIdentifier,
 })
 
-const bodySchema = z.object({
+export const bodySchema = z.object({
   caption: z.string().trim().max(500).nullable().optional(),
   attribution: z.string().trim().max(200).nullable().optional(),
   licence: z.string().trim().max(60).optional(),
 })
 
 /** Corrects the metadata around a photograph without re-uploading it. */
+defineRouteMeta({
+  openAPI: {
+    tags: ['sites'],
+    summary: "Correct a photograph's caption, attribution or licence",
+  },
+})
+
 export default defineEventHandler(async (event) => {
   const session = await requireUserSession(event)
   const user = session.user as SessionUser

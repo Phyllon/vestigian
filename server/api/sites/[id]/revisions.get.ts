@@ -3,7 +3,7 @@ import { and, desc, eq } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
 import { revisions, users } from '~~/server/database/schema'
 
-const paramsSchema = z.object({ id: routeIdentifier })
+export const paramsSchema = z.object({ id: routeIdentifier })
 
 // The same table twice, so each join needs its own name.
 const author = alias(users, 'author')
@@ -13,6 +13,15 @@ const reviewer = alias(users, 'reviewer')
  * The history of one site. Public, because a record whose provenance cannot be
  * inspected is a record no one should cite.
  */
+defineRouteMeta({
+  openAPI: {
+    tags: ['sites'],
+    summary: 'List the approved revision history of a site',
+    description:
+      'Public — a record whose provenance cannot be inspected is a record no one should cite.',
+  },
+})
+
 export default defineEventHandler(async (event) => {
   await enforceRateLimit(event, 'record')
   const { id } = await getValidatedRouterParams(event, paramsSchema.parse)

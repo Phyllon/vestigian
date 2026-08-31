@@ -7,6 +7,15 @@
  * is also a free way to make the process do work, hence the rate limit below as
  * a second line rather than the only one.
  */
+defineRouteMeta({
+  openAPI: {
+    tags: ['system'],
+    summary: 'Prometheus scrape target',
+    description:
+      'Not intended to be publicly reachable — denied at the Traefik router in production. Read by Alloy over the compose network.',
+  },
+})
+
 export default defineEventHandler(async (event) => {
   await enforceRateLimit(event, 'expensive')
 

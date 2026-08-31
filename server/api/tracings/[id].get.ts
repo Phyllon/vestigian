@@ -1,11 +1,19 @@
 import { z } from 'zod'
 
-const paramsSchema = z.object({ id: routeIdentifier })
+export const paramsSchema = z.object({ id: routeIdentifier })
 
 /**
  * Full record for one tracing, including its geometry so the edit tool can load
  * the existing shape rather than making the contributor redraw it.
  */
+defineRouteMeta({
+  openAPI: {
+    tags: ['tracings'],
+    summary: 'Get a tracing by numeric id',
+    description: 'Includes the full geometry, so the edit tool can load the existing shape.',
+  },
+})
+
 export default defineEventHandler(async (event) => {
   await enforceRateLimit(event, 'record')
   const { id } = await getValidatedRouterParams(event, paramsSchema.parse)

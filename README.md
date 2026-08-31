@@ -329,8 +329,6 @@ docker run --rm --network container:vestigia-dev-minio-1 \
 
 ### clicking username (top right corner) -> open overlay with useful information (which?) and logout button
 
-### remember the current position and zoom to be restored on new page load. If GPS is active, load this position zoomed-in directly instead
-
 ### check work flow of "add to atlas" (logged-in)
 
 ### optimize components for mobile use -> heavy

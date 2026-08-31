@@ -2,12 +2,12 @@ import { z } from 'zod'
 import type { SessionUser } from '#shared/types'
 import { evaluateTrust } from '#shared/utils/authorization'
 
-const positionSchema = z.object({
+export const positionSchema = z.object({
   lon: z.number().min(-180).max(180),
   lat: z.number().min(-85).max(85),
 })
 
-const siteDraftSchema = z.object({
+export const siteDraftSchema = z.object({
   kind: z.literal('site'),
   /** Present when editing an existing site, absent when recording a new one. */
   entityId: databaseIdentifier.optional(),
@@ -32,7 +32,7 @@ const siteDraftSchema = z.object({
   editSummary: z.string().trim().max(300).optional(),
 })
 
-const tracingDraftSchema = z.object({
+export const tracingDraftSchema = z.object({
   kind: z.literal('tracing'),
   entityId: databaseIdentifier.optional(),
   title: z.string().trim().min(3).max(240),
@@ -45,13 +45,25 @@ const tracingDraftSchema = z.object({
   editSummary: z.string().trim().max(300).optional(),
 })
 
-const contributionSchema = z.discriminatedUnion('kind', [siteDraftSchema, tracingDraftSchema])
+export const contributionSchema = z.discriminatedUnion('kind', [
+  siteDraftSchema,
+  tracingDraftSchema,
+])
 
 /**
  * The single write path for both new records and edits. Whether the result goes
  * live immediately is decided by evaluateTrust — never by the client, and never
  * differently for an edit than for a create.
  */
+defineRouteMeta({
+  openAPI: {
+    tags: ['contributions'],
+    summary: 'Create or edit a site or tracing',
+    description:
+      'The single write path for both new records and edits. Whether the result publishes immediately is decided server-side by trust — never by the client.',
+  },
+})
+
 export default defineEventHandler(async (event) => {
   const session = await requireUserSession(event)
   const user = session.user as SessionUser

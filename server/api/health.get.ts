@@ -7,4 +7,13 @@
  * work, so there is nothing to amplify — `ready`, which does two Postgres round
  * trips and a Redis ping, is rate limited precisely because it is not this.
  */
+defineRouteMeta({
+  openAPI: {
+    tags: ['system'],
+    summary: 'Liveness probe',
+    description:
+      'Answers as long as the process is running. Unrated on purpose — this is what the container HEALTHCHECK polls.',
+  },
+})
+
 export default defineEventHandler(() => ({ status: 'ok', uptime: process.uptime() }))

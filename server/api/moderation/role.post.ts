@@ -3,9 +3,18 @@ import { count, eq } from 'drizzle-orm'
 import { users } from '~~/server/database/schema'
 import { checkRoleChange, describeRoleChangeRejection } from '#shared/utils/authorization'
 
-const roleSchema = z.object({
+export const roleSchema = z.object({
   userId: databaseIdentifier,
   role: z.enum(['contributor', 'moderator', 'admin']),
+})
+
+defineRouteMeta({
+  openAPI: {
+    tags: ['moderation'],
+    summary: "Change a user's role",
+    description:
+      'Admin only. Nobody can change their own role, which is also what keeps an instance from losing its last admin.',
+  },
 })
 
 export default defineEventHandler(async (event) => {

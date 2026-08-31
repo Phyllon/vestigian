@@ -4,9 +4,9 @@ import { siteImages } from '~~/server/database/schema'
 import { canManageImage } from '#shared/utils/authorization'
 import type { SessionUser } from '#shared/types'
 
-const paramsSchema = z.object({ id: routeIdentifier })
+export const paramsSchema = z.object({ id: routeIdentifier })
 
-const bodySchema = z.object({
+export const bodySchema = z.object({
   imageId: databaseIdentifier,
   targetIndex: z.number().int().min(0).max(200),
 })
@@ -16,6 +16,14 @@ const bodySchema = z.object({
  * delta, which is cheap at gallery scale and removes the class of bug where two
  * concurrent reorders leave the sequence inconsistent.
  */
+defineRouteMeta({
+  openAPI: {
+    tags: ['sites'],
+    summary: "Reorder a site's gallery",
+    description: 'The whole new ordering is written in one transaction, never a partial delta.',
+  },
+})
+
 export default defineEventHandler(async (event) => {
   const session = await requireUserSession(event)
   const user = session.user as SessionUser

@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-const querySchema = z.object({
+export const querySchema = z.object({
   bbox: z
     .string()
     .regex(/^-?[\d.]+,-?[\d.]+,-?[\d.]+,-?[\d.]+$/, 'bbox must be west,south,east,north')
@@ -14,6 +14,15 @@ const querySchema = z.object({
  * made this data available in the first place. It is bounded and paged, so it
  * is a data feed rather than a way to pull the whole database in one request.
  */
+defineRouteMeta({
+  openAPI: {
+    tags: ['data'],
+    summary: 'Bulk GeoJSON feed of approved sites',
+    description:
+      'Read-only, bounded and paged reuse feed. CORS-open. Data is CC BY-SA (text) / CC0 (metadata); image licences vary per record and are not part of this feed.',
+  },
+})
+
 export default defineEventHandler(async (event) => {
   await enforceRateLimit(event, 'search')
   const { bbox, category, limit } = await getValidatedQuery(event, querySchema.parse)

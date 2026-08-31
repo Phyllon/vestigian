@@ -4,7 +4,7 @@ import { siteImages } from '~~/server/database/schema'
 import { canManageImage } from '#shared/utils/authorization'
 import type { SessionUser } from '#shared/types'
 
-const paramsSchema = z.object({
+export const paramsSchema = z.object({
   id: routeIdentifier,
   imageId: routeIdentifier,
 })
@@ -19,6 +19,15 @@ const paramsSchema = z.object({
  *
  * Purging the stored object is a separate, deliberate operation.
  */
+defineRouteMeta({
+  openAPI: {
+    tags: ['sites'],
+    summary: 'Withdraw a photograph from the public gallery',
+    description:
+      'Marks the row rejected; the stored object is untouched. Nothing in this project deletes bytes.',
+  },
+})
+
 export default defineEventHandler(async (event) => {
   const session = await requireUserSession(event)
   const user = session.user as SessionUser

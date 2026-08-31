@@ -7,6 +7,14 @@ import type { LimesSector } from '#shared/types'
  * read as the frontier runs, so scrolling it traces the circuit from the Solway
  * to the Euphrates.
  */
+defineRouteMeta({
+  openAPI: {
+    tags: ['limes'],
+    summary: 'List the named frontier sectors',
+    description: 'Ordered north-west to south-east, the way the frontier itself runs.',
+  },
+})
+
 export default defineEventHandler(async (event): Promise<LimesSector[]> => {
   await enforceRateLimit(event, 'record')
 

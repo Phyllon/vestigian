@@ -2,7 +2,7 @@ import { and, eq, inArray, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import type { SiteEnrichment } from '#shared/types'
 
-const paramsSchema = z.object({ id: routeIdentifier })
+export const paramsSchema = z.object({ id: routeIdentifier })
 
 /** A week for an answer, a day for a refusal. */
 const HIT_TTL_SECONDS = 604800
@@ -28,6 +28,15 @@ const cacheKeyFor = (siteId: number): string => `enrich:v3:${siteId}`
  * calls spaced 800ms apart, so the shared cache is not an optimisation — it is
  * what makes the feature viable at all.
  */
+defineRouteMeta({
+  openAPI: {
+    tags: ['sites'],
+    summary: 'Get a borrowed Wikipedia extract for a site',
+    description:
+      'Null is an ordinary answer — most sites have no confident external match. Server-proxied and cached; never fetched from the browser.',
+  },
+})
+
 export default defineEventHandler(async (event): Promise<SiteEnrichment | null> => {
   const { id } = await getValidatedRouterParams(event, paramsSchema.parse)
   await enforceRateLimit(event, 'enrichment')

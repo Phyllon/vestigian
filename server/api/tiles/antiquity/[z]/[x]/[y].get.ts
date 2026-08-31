@@ -10,6 +10,15 @@ import type { TileCoordinate } from '#shared/types'
  * and it is rebuilt by an import rather than edited — so it carries its own
  * cache generation and survives every approval, where the site pyramid does not.
  */
+defineRouteMeta({
+  openAPI: {
+    tags: ['tiles'],
+    summary: 'The Barrington sheet as a vector tile',
+    description:
+      "AWMC's Barrington-derived geodata (ODbL 1.0) and Pleiades places (CC BY 3.0). Rebuilt only by an import, so it carries its own cache generation.",
+  },
+})
+
 export default defineEventHandler(async (event) => {
   await enforceRateLimit(event, 'tiles')
 

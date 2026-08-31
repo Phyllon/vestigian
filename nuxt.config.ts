@@ -410,6 +410,49 @@ export default defineNuxtConfig({
         ? { driver: 'redis', url: process.env.NUXT_REDIS_URL }
         : { driver: 'memory' },
     },
+    experimental: { openAPI: true },
+    /**
+     * The spec is served in production too — every one of these endpoints
+     * already sits behind its own auth guard and rate limit, so documenting
+     * its shape leaks nothing that isn't already true of a request that tries
+     * it. Consistent with `/api/data/sites.geojson` already being a public,
+     * documented feed.
+     *
+     * Both bundled UIs are switched off rather than left at their defaults.
+     * Nitro's `/_scalar` and `/_swagger` routes load their renderer from
+     * `cdn.jsdelivr.net` — a runtime request to a third party, the exact thing
+     * self-hosted fonts, self-hosted glyphs and ALTCHA-over-Turnstile exist to
+     * avoid here, and the CSP in this file would refuse it silently the same
+     * way the missing nonce token once did. The JSON at `openAPI.route` is
+     * same-origin and needs no allowlist entry; paste it into Insomnia,
+     * Postman or scalar.com's own hosted reference instead of serving a UI
+     * bundle from this app.
+     */
+    openAPI: {
+      /**
+       * Not `/api/openapi.json` — that path is `server/api/openapi.json.get.ts`,
+       * a normal route that fetches this one and merges in the parameter and
+       * request-body schemas derived from each route's zod validator.
+       *
+       * `defineRouteMeta` is a build-time macro: its argument is parsed as an
+       * AST and only object/array literals of literals survive
+       * (`nitropack/dist/rollup/index.mjs`'s `astToObject`). A call like
+       * `paramsFromSchema(querySchema, 'query')` — or even a reference to an
+       * imported constant — returns `undefined` and is silently dropped, which
+       * is not something a build error would ever surface. `tags`, `summary`
+       * and `description` survive because they are written as literals; the
+       * schema-shaped fields cannot be, so they are computed at request time
+       * instead, in a route with no such restriction.
+       */
+      route: '/_nitro-base-openapi.json',
+      production: 'runtime',
+      meta: {
+        title: 'Vestigia API',
+        description:
+          'Site, tracing, tile, moderation and frontier endpoints. Data is CC BY-SA / CC0; see /api/data/sites.geojson for the bulk feed.',
+      },
+      ui: { scalar: false, swagger: false },
+    },
   },
 
   routeRules: {

@@ -2,12 +2,19 @@ import { z } from 'zod'
 import { and, eq } from 'drizzle-orm'
 import { emailTokens, users } from '~~/server/database/schema'
 
-const bodySchema = z.object({ token: z.string().min(10).max(200) })
+export const bodySchema = z.object({ token: z.string().min(10).max(200) })
 
 /**
  * Redeems an email verification token. The token is looked up by its hash, so
  * the raw value never exists in the database at any point.
  */
+defineRouteMeta({
+  openAPI: {
+    tags: ['auth'],
+    summary: 'Redeem an email verification token',
+  },
+})
+
 export default defineEventHandler(async (event) => {
   await enforceRateLimit(event, 'login')
   const { token } = await readValidatedBody(event, bodySchema.parse)

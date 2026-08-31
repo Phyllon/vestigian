@@ -3,7 +3,7 @@ import { and, eq } from 'drizzle-orm'
 import { sites } from '~~/server/database/schema'
 import type { SiteDetail } from '#shared/types'
 
-const paramsSchema = z.object({
+export const paramsSchema = z.object({
   slug: z
     .string()
     .min(1)
@@ -16,6 +16,14 @@ const paramsSchema = z.object({
  * both remain cheap single-index reads rather than one endpoint branching on
  * the shape of its parameter.
  */
+defineRouteMeta({
+  openAPI: {
+    tags: ['sites'],
+    summary: 'Get a site by its slug',
+    description: 'The route the public /site/{slug} page reads. Slugs never change on edit.',
+  },
+})
+
 export default defineEventHandler(async (event): Promise<SiteDetail> => {
   await enforceRateLimit(event, 'record')
   const { slug } = await getValidatedRouterParams(event, paramsSchema.parse)

@@ -216,9 +216,10 @@ Seven things that are not obvious, five of them found by running it:
 7. **`sites.subcategory` is why turrets read as turrets.** `CATEGORY_BY_KIND`
    collapses vici's `fort`, `watchtower` and `camp` into one `fortification`
    category; the column keeps the source's own word beside it. Re-running
-   `import:convert` fills it through `ON CONFLICT … DO UPDATE … WHERE
-subcategory IS NULL`, which is the only column a re-run may overwrite.
-   12,804 fortifications split into 6,914 watchtowers, 5,551 forts, 339 camps.
+   `import:convert` fills it through
+   `ON CONFLICT … DO UPDATE … WHERE subcategory IS NULL`, the only column a
+   re-run may overwrite. 12,804 fortifications split into 6,914 watchtowers,
+   5,551 forts, 339 camps.
 
 **Licence:** the sector tables are ODbL, like `antiquity_*`, and are never
 joined to `sites`. The one judgement call is `offsetMetres` in
@@ -226,6 +227,37 @@ joined to `sites`. The one judgement call is `offsetMetres` in
 records that are not ODbL. It is computed **on read and never stored**, and
 `/api/data/sites.geojson` gains no field from it, so what leaves is a Produced
 Work with both attributions attached. See the docstring on that endpoint.
+
+## OpenAPI
+
+Every route under `server/api/` declares `defineRouteMeta({ openAPI: {...} })`
+for `tags`, `summary` and `description` — and only those three. **`defineRouteMeta`
+is a build-time macro, not a runtime call**: its argument is parsed as an AST
+(`nitropack/dist/rollup/index.mjs`'s `astToObject`) and only object/array
+literals of literals survive. A function call — `paramsFromSchema(schema)` — or
+a bare reference to an imported constant returns `undefined` there, silently,
+with no build error. `tags`/`summary`/`description` are written as string
+literals and come through; `parameters`, `requestBody`, `responses` and
+`security` cannot be, since they need to be derived from the same zod schema a
+handler actually validates against — so they do not live in `defineRouteMeta`
+at all.
+
+Instead, `server/api/openapi.json.get.ts` fetches Nitro's own auto-generated
+document (moved to the internal path `/_nitro-base-openapi.json` via
+`nitro.openAPI.route` in `nuxt.config.ts` specifically so nothing collides with
+this route) and merges in `parameters`/`requestBody`/`responses`/`security` by
+path and method, built from each route's real, already-`export`ed zod schema
+via `zodToJsonSchema` (`server/utils/openapi.ts`). One schema, not two — a route
+whose validation changes and whose documentation does not is worse than no
+documentation.
+
+Both of Nitro's bundled UIs (`/_scalar`, `/_swagger`) are switched off in
+`nuxt.config.ts` (`openAPI.ui`). Both load their renderer from
+`cdn.jsdelivr.net` — the exact third-party runtime request self-hosted fonts,
+self-hosted glyphs and ALTCHA-over-Turnstile all exist to avoid — and the CSP
+here would refuse it silently, the same way the missing nonce token once did.
+`/api/openapi.json` is same-origin JSON; paste it into Insomnia, Postman or
+scalar.com's own hosted reference rather than serving a UI bundle from this app.
 
 ## Which client to reach for
 
@@ -242,9 +274,10 @@ casts behind proximity search, `ST_AsGeoJSON` on read, and the `SELECT 1` in
 `ready.get.ts`.
 
 A handful of geometry accessors is **not** such a reason. `sites/[id]/enrichment`
-reads `ST_X`/`ST_Y` through Drizzle, as `sql\`ST_X(${schema.sites.geom})\``inside a normal`.select()`: table, columns and enum literals stay checked, and
-only the two accessors are raw. Reach for `useSql()` when the _statement shape_
-is beyond the builder, not when one expression is.
+reads `ST_X`/`ST_Y` through Drizzle, as `` sql`ST_X(${schema.sites.geom})` `` inside
+a normal `.select()`: table, columns and enum literals stay checked, and only the
+two accessors are raw. Reach for `useSql()` when the _statement shape_ is beyond
+the builder, not when one expression is.
 
 **The two hold separate connections, so a transaction cannot span them.**
 `server/utils/revisions.ts` is the reason it matters: `applyRevision()` writes
@@ -345,10 +378,10 @@ server/
   api/ tiles/[z]/[x]/[y]  tiles/antiquity/[z]/[x]/[y]
        tiles/limes/[z]/[x]/[y]
        sites/  tracings/  auth/  contributions/  moderation/  data/  limes/
-       images/[id]/[preset]  sites/[id]/enrichment  health ready metrics
+       images/[id]/[preset]  sites/[id]/enrichment  health ready metrics openapi.json
   routes/ robots.txt sitemap.xml
   database/ schema/ (users sites geo atlas) migrations/ migrate.ts
-  utils/ mvt atlas limes permissions ratelimit images images-order uploads tokens diff
+  utils/ mvt atlas limes openapi permissions ratelimit images images-order uploads tokens diff
          mail mail-template notifications
          site-record validation
          revisions slug db cache argon altcha enrichment enrichment-sources translate
@@ -386,6 +419,15 @@ application above the map: auth, contribution, moderation, revisions.
 6. `pnpm fix` applies what is mechanically fixable: `lint:fix` then `format`.
    It is deliberately sequential — ESLint and Prettier both rewrite the same
    files, so running them together would have them clobbering each other.
+7. Git hooks run automatically after `pnpm install` (Husky's `prepare` script,
+   alongside `nuxt prepare` in `postinstall`). **pre-commit** runs
+   `lint-staged` — the same `eslint --fix` then `prettier --write` order as
+   `pnpm fix`, scoped to staged files. **commit-msg**
+   (`scripts/verify-commit-msg.ts`) rejects an empty or under-10-character
+   subject; it is a structural check, not a conventional-commits gate — this
+   repo's own log is lowercase, imperative, no type prefix, and the hook
+   protects that style rather than replacing it. **pre-push** runs the full
+   `pnpm check`, the same gate CI runs, so a bad push is caught locally first.
 
 Two things that had never run and silently broke everything, now fixed — worth
 knowing because both failed _invisibly_:
@@ -589,7 +631,7 @@ describing objects that are gone, and the gallery breaks while every query
 reports health. `--repair` returns those rows to `pending`. Orphaned objects are
 reported only — nothing in this project deletes bytes.
 
-Neither snapshot leaves the machine yet. That is the open gap.
+Neither snapshot leaves the machine yet — see "Not built".
 
 Data is CC BY-SA (text) / CC0 (metadata); **image licences vary per record**, which is why `licence` and `attribution` are non-null columns and attribution renders under every image rather than hiding behind an interaction.
 

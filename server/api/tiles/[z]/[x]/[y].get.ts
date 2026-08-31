@@ -8,6 +8,15 @@ import type { TileCoordinate } from '#shared/types'
  * coordinate must never reach the spatial query, and a cached tile must never
  * cost a connection from the pool.
  */
+defineRouteMeta({
+  openAPI: {
+    tags: ['tiles'],
+    summary: 'Contributed sites and tracings as a vector tile',
+    description:
+      'The hot path of the application. Counted clusters below zoom 9, individual sites at 9+, tracings from zoom 7. Tiles carry id, slug, title and category only.',
+  },
+})
+
 export default defineEventHandler(async (event) => {
   await enforceRateLimit(event, 'tiles')
 

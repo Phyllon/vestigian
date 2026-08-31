@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { emailTokens, users } from '~~/server/database/schema'
 import { passwordSchema } from '#shared/utils/password'
 
-const registrationSchema = z.object({
+export const registrationSchema = z.object({
   email: z.string().email().max(320),
   displayName: z
     .string()
@@ -14,6 +14,15 @@ const registrationSchema = z.object({
   altcha: z.string().optional(),
   /** Honeypot. Real browsers leave it empty; most bots fill every field. */
   website: z.string().max(0).optional(),
+})
+
+defineRouteMeta({
+  openAPI: {
+    tags: ['auth'],
+    summary: 'Register a new account',
+    description:
+      'Requires a solved ALTCHA challenge. Unlike forgot-password, a duplicate email or display name is reported as 409 rather than hidden — see the comment below on that trade-off.',
+  },
 })
 
 export default defineEventHandler(async (event) => {

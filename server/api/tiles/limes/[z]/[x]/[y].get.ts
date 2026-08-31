@@ -10,6 +10,15 @@ import type { TileCoordinate } from '#shared/types'
  * (AWMC, ODbL 1.0) and the same cache generation, so an import that rebuilds
  * one invalidates both.
  */
+defineRouteMeta({
+  openAPI: {
+    tags: ['tiles'],
+    summary: 'The Roman frontier as a vector tile',
+    description:
+      'Named sectors and their stretches, drawn over the Barrington sheet when "Follow the limes" is on. Rides the atlas cache generation.',
+  },
+})
+
 export default defineEventHandler(async (event) => {
   await enforceRateLimit(event, 'tiles')
 

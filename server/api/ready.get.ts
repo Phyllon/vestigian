@@ -9,6 +9,15 @@ import { sql } from 'drizzle-orm'
  * cannot reach Postgres while the other can would otherwise report ready and
  * take traffic that fails on the half nothing checked.
  */
+defineRouteMeta({
+  openAPI: {
+    tags: ['system'],
+    summary: 'Readiness probe',
+    description:
+      'Probes both database pools and the cache. Used by Traefik to decide whether to route traffic.',
+  },
+})
+
 export default defineEventHandler(async (event) => {
   await enforceRateLimit(event, 'expensive')
   const checks = { database: false, cache: false }

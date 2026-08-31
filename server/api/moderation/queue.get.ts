@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { and, asc, eq, gt } from 'drizzle-orm'
 import { revisions, users } from '~~/server/database/schema'
 
-const querySchema = z.object({
+export const querySchema = z.object({
   limit: z.coerce.number().int().min(1).max(50).default(20),
   cursor: routeIdentifier.optional(),
 })
@@ -12,6 +12,15 @@ const querySchema = z.object({
  * priority one. Each item arrives with its diff already computed, so a
  * moderator sees what changed rather than two records to compare by eye.
  */
+defineRouteMeta({
+  openAPI: {
+    tags: ['moderation'],
+    summary: 'List pending revisions, oldest first',
+    description:
+      'Moderator only. Fairness ordering, not priority — each item arrives with its diff already computed.',
+  },
+})
+
 export default defineEventHandler(async (event) => {
   await requireModerator(event)
   await enforceRateLimit(event, 'record')

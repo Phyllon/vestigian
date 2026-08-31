@@ -3,7 +3,7 @@ import { and, eq } from 'drizzle-orm'
 import { siteImages } from '~~/server/database/schema'
 import { IMAGE_PRESETS } from '#shared/types'
 
-const paramsSchema = z.object({
+export const paramsSchema = z.object({
   id: routeIdentifier,
   preset: z.enum(['thumb', 'card', 'full']),
 })
@@ -20,6 +20,15 @@ const paramsSchema = z.object({
  * images that can be asked for is exactly the set this route agrees to serve:
  * approved, with a licence that permits publication.
  */
+defineRouteMeta({
+  openAPI: {
+    tags: ['images'],
+    summary: 'Redirect to a signed imgproxy rendition of a photograph',
+    description:
+      'The signing key never reaches the client and the bucket/object key never reaches the wire — only an approved, publishably-licensed image resolves.',
+  },
+})
+
 export default defineEventHandler(async (event) => {
   await enforceRateLimit(event, 'record')
   const { id, preset } = await getValidatedRouterParams(event, paramsSchema.parse)

@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { and, eq, sql } from 'drizzle-orm'
 import { revisions } from '~~/server/database/schema'
 
-const revertSchema = z.object({
+export const revertSchema = z.object({
   revisionId: databaseIdentifier,
   reason: z.string().trim().max(300).optional(),
 })
@@ -14,6 +14,15 @@ const revertSchema = z.object({
  * one. History stays append-only, so the record of what was reverted and by
  * whom survives — which is the whole point of keeping revisions at all.
  */
+defineRouteMeta({
+  openAPI: {
+    tags: ['moderation'],
+    summary: 'Restore the state a record had before a given revision',
+    description:
+      'Moderator only. Writes a new revision rather than deleting the offending one — history stays append-only.',
+  },
+})
+
 export default defineEventHandler(async (event) => {
   const moderator = await requireModerator(event)
   await enforceRateLimit(event, 'contribute')

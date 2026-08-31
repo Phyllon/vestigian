@@ -3,7 +3,7 @@ import { eq } from 'drizzle-orm'
 import { users } from '~~/server/database/schema'
 import { canRevokeTrust } from '#shared/utils/authorization'
 
-const trustSchema = z.object({
+export const trustSchema = z.object({
   userId: databaseIdentifier,
   revoked: z.boolean(),
   reason: z.string().trim().max(300).optional(),
@@ -16,6 +16,15 @@ const trustSchema = z.object({
  * trust returns them to exactly where they were rather than resetting their
  * standing — a suspension, not a punishment that compounds.
  */
+defineRouteMeta({
+  openAPI: {
+    tags: ['moderation'],
+    summary: "Revoke or restore a contributor's automatic publishing",
+    description:
+      'Moderator only. Revoking does not touch the approved-contribution count, so restoring trust returns someone exactly where they were.',
+  },
+})
+
 export default defineEventHandler(async (event) => {
   const moderator = await requireModerator(event)
   await enforceRateLimit(event, 'contribute')

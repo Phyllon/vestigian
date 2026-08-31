@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import type { SiteSummary } from '#shared/types'
 
-const querySchema = z.object({
+export const querySchema = z.object({
   q: z.string().trim().min(2).max(80),
   limit: z.coerce.number().int().min(1).max(20).default(10),
 })
@@ -11,6 +11,15 @@ const querySchema = z.object({
  * still finds its site. Meilisearch is only worth adding if this stops being
  * fast enough, which at twenty thousand records it will not.
  */
+defineRouteMeta({
+  openAPI: {
+    tags: ['sites'],
+    summary: 'Search sites by title',
+    description:
+      'Full-text search with a trigram fallback for misspellings. Titles and summaries only.',
+  },
+})
+
 export default defineEventHandler(async (event): Promise<SiteSummary[]> => {
   await enforceRateLimit(event, 'search')
   const { q, limit } = await getValidatedQuery(event, querySchema.parse)

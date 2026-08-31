@@ -2,13 +2,22 @@ import { z } from 'zod'
 import { eq, sql } from 'drizzle-orm'
 import { emailTokens, users } from '~~/server/database/schema'
 
-const bodySchema = z.object({ email: z.string().email().max(320) })
+export const bodySchema = z.object({ email: z.string().email().max(320) })
 
 /**
  * Always answers the same way, whether or not the address has an account.
  * Anything else turns this endpoint into a way to test which addresses are
  * registered here.
  */
+defineRouteMeta({
+  openAPI: {
+    tags: ['auth'],
+    summary: 'Request a password reset link',
+    description:
+      'Answers identically whether or not the address has an account, so the response cannot be used to enumerate registered emails.',
+  },
+})
+
 export default defineEventHandler(async (event) => {
   await enforceRateLimit(event, 'passwordReset')
   const { email } = await readValidatedBody(event, bodySchema.parse)

@@ -38,6 +38,15 @@ const useStorage = (): S3Client => {
  * re-encode is what strips EXIF and guarantees the stored file is a plain
  * image and nothing else.
  */
+defineRouteMeta({
+  openAPI: {
+    tags: ['contributions'],
+    summary: 'Upload a photograph for a site',
+    description:
+      'multipart/form-data. The declared content type is a hint only — format is read from magic bytes and every image is re-encoded through sharp, which strips EXIF.',
+  },
+})
+
 export default defineEventHandler(async (event) => {
   const session = await requireUserSession(event)
   const user = session.user as SessionUser

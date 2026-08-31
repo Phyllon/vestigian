@@ -8,6 +8,15 @@ import type { Challenge } from 'altcha-lib'
  * oracle for anyone wanting an unlimited supply of valid challenges to solve
  * offline and spend later.
  */
+defineRouteMeta({
+  openAPI: {
+    tags: ['auth'],
+    summary: 'Issue a signup proof-of-work challenge',
+    description:
+      'A signed, expiring ALTCHA challenge for the registration form. Not cacheable — each call is a fresh puzzle.',
+  },
+})
+
 export default defineEventHandler(async (event): Promise<Challenge> => {
   await enforceRateLimit(event, 'challenge')
 

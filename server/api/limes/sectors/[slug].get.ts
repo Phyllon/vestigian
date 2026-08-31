@@ -2,7 +2,7 @@ import { z } from 'zod'
 import type { LimesInstallation, LimesMark, LimesSectorDetail } from '#shared/types'
 import { buildMilitaryFeatureTypePattern, resolveLimesMark } from '#shared/utils/limes'
 
-const paramsSchema = z.object({ slug: z.string().trim().min(1).max(80) })
+export const paramsSchema = z.object({ slug: z.string().trim().min(1).max(80) })
 
 /**
  * Anything further from the sector's path than this is not on it.
@@ -85,6 +85,15 @@ const toInstallation = (row: InstallationRow): LimesInstallation => ({
  * `sites.geom`, so without the bounding-box term this is a sequential scan over
  * sixty thousand records per sector.
  */
+defineRouteMeta({
+  openAPI: {
+    tags: ['limes'],
+    summary: 'One sector and the roll of installations along it',
+    description:
+      'Records and Pleiades references are kept in separate arrays, each with its own attribution. offsetMetres is computed on read against ODbL geometry and never stored.',
+  },
+})
+
 export default defineEventHandler(async (event): Promise<LimesSectorDetail> => {
   await enforceRateLimit(event, 'record')
   const { slug } = await getValidatedRouterParams(event, paramsSchema.parse)

@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { and, asc, count, desc, eq, ilike, sql } from 'drizzle-orm'
 import { revisions, users } from '~~/server/database/schema'
 
-const querySchema = z.object({
+export const querySchema = z.object({
   search: z.string().trim().max(80).optional(),
   limit: z.coerce.number().int().min(1).max(100).default(50),
 })
@@ -11,6 +11,15 @@ const querySchema = z.object({
  * The contributor list. Deliberately does not expose email addresses: a
  * moderator needs to judge contributions, not to contact people directly.
  */
+defineRouteMeta({
+  openAPI: {
+    tags: ['moderation'],
+    summary: 'List contributors and their standing',
+    description:
+      'Moderator only. Deliberately omits email addresses — a moderator judges contributions, not people to contact.',
+  },
+})
+
 export default defineEventHandler(async (event) => {
   await requireModerator(event)
   await enforceRateLimit(event, 'record')

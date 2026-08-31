@@ -3,7 +3,7 @@ import { eq, inArray } from 'drizzle-orm'
 import { revisions } from '~~/server/database/schema'
 import { canReviewRevision } from '#shared/utils/authorization'
 
-const batchSchema = z.object({
+export const batchSchema = z.object({
   revisionIds: z.array(databaseIdentifier).min(1).max(50),
   decision: z.enum(['approved', 'rejected']),
   note: z.string().trim().max(1000).optional(),
@@ -24,6 +24,15 @@ interface BatchOutcome {
  * other forty-nine, and the moderator needs to know precisely which ones did
  * not go through.
  */
+defineRouteMeta({
+  openAPI: {
+    tags: ['moderation'],
+    summary: 'Approve or reject up to 50 revisions in one action',
+    description:
+      'Moderator only. Each revision is decided independently; a failure on one is reported, not thrown, so it cannot abandon the rest of the batch.',
+  },
+})
+
 export default defineEventHandler(async (event) => {
   const moderator = await requireModerator(event)
   await enforceRateLimit(event, 'contribute')

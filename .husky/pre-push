@@ -1,0 +1,2 @@
+echo "pre-push: running pnpm check (lint, typecheck, tests, format) before pushing..."
+pnpm check

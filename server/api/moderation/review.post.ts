@@ -3,10 +3,18 @@ import { eq } from 'drizzle-orm'
 import { revisions } from '~~/server/database/schema'
 import { canReviewRevision } from '#shared/utils/authorization'
 
-const reviewSchema = z.object({
+export const reviewSchema = z.object({
   revisionId: databaseIdentifier,
   decision: z.enum(['approved', 'rejected']),
   note: z.string().trim().max(1000).optional(),
+})
+
+defineRouteMeta({
+  openAPI: {
+    tags: ['moderation'],
+    summary: 'Approve or reject one pending revision',
+    description: 'Moderator only, and never on your own contribution — see canReviewRevision.',
+  },
 })
 
 export default defineEventHandler(async (event) => {

@@ -3,7 +3,7 @@ import { and, desc, eq, isNull, sql } from 'drizzle-orm'
 import { emailTokens, users } from '~~/server/database/schema'
 import type { SessionUser } from '#shared/types'
 
-const credentialsSchema = z.object({
+export const credentialsSchema = z.object({
   email: z.string().email().max(320),
   password: z.string().min(1).max(200),
 })
@@ -69,6 +69,31 @@ const resendConfirmationLink = async (account: UnverifiedAccount): Promise<boole
 
   return true
 }
+
+/**
+ * Registers the `sessionCookie` security scheme once, globally. It has to live
+ * on some route's `$global`, and this is the route that issues the cookie.
+ */
+defineRouteMeta({
+  openAPI: {
+    tags: ['auth'],
+    summary: 'Sign in with email and password',
+    description:
+      'Always hashes, even with no matching account, so timing cannot reveal which emails are registered. Sets the session cookie on success.',
+    $global: {
+      components: {
+        securitySchemes: {
+          sessionCookie: {
+            type: 'apiKey',
+            in: 'cookie',
+            name: 'vestigia-session',
+            description: 'Sealed session cookie set by this endpoint on successful sign-in.',
+          },
+        },
+      },
+    },
+  },
+})
 
 export default defineEventHandler(async (event) => {
   await enforceRateLimit(event, 'login')
