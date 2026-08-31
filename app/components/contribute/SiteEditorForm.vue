@@ -18,11 +18,12 @@
 
   const isEditing = computed(() => props.siteId !== undefined)
 
+  const { t } = useI18n()
   const { editsGoLiveImmediately, contributionsUntilTrusted } = useSession()
   const toast = useToast()
 
   const schema = z.object({
-    title: z.string().trim().min(3, 'Give the site a name of at least three characters.').max(240),
+    title: z.string().trim().min(3, t('siteEditorForm.nameTooShort')).max(240),
     category: z.enum([
       'settlement',
       'fortification',
@@ -54,24 +55,31 @@
   /** Required on edits so history reads as a record of decisions, not diffs. */
   const editSummary = ref('')
 
-  const categoryOptions = [
-    { label: 'Settlement', value: 'settlement' },
-    { label: 'Fortification', value: 'fortification' },
-    { label: 'Sanctuary', value: 'sanctuary' },
-    { label: 'Burial', value: 'burial' },
-    { label: 'Infrastructure', value: 'infrastructure' },
-    { label: 'Villa', value: 'villa' },
-    { label: 'Production', value: 'production' },
-    { label: 'Findspot', value: 'findspot' },
-    { label: 'Other', value: 'other' },
-  ]
+  const categoryOptions = computed(() => [
+    { label: t('categories.settlement'), value: 'settlement' },
+    { label: t('categories.fortification'), value: 'fortification' },
+    { label: t('categories.sanctuary'), value: 'sanctuary' },
+    { label: t('categories.burial'), value: 'burial' },
+    { label: t('categories.infrastructure'), value: 'infrastructure' },
+    { label: t('categories.villa'), value: 'villa' },
+    { label: t('categories.production'), value: 'production' },
+    { label: t('categories.findspot'), value: 'findspot' },
+    { label: t('categories.other'), value: 'other' },
+  ])
 
   const isSaving = ref(false)
 
   const reviewNotice = computed(() =>
     editsGoLiveImmediately.value
-      ? 'Your edits publish immediately.'
-      : `A moderator reviews this before it appears. ${contributionsUntilTrusted.value} more accepted ${contributionsUntilTrusted.value === 1 ? 'contribution' : 'contributions'} and your edits go live straight away.`,
+      ? t('siteEditorForm.editsPublishImmediately')
+      : t('siteEditorForm.reviewNotice', {
+          count: contributionsUntilTrusted.value,
+          contributionWord: t(
+            contributionsUntilTrusted.value === 1
+              ? 'siteEditorForm.contribution'
+              : 'siteEditorForm.contributions',
+          ),
+        }),
   )
 
   const save = async (event: FormSubmitEvent<SiteFormState>): Promise<void> => {
@@ -94,9 +102,10 @@
       emit('submitted', { revisionId: result.revisionId, entityId: result.entityId })
     } catch (error) {
       toast.add({
-        title: 'That could not be saved',
+        title: t('siteEditorForm.saveFailedTitle'),
         description:
-          (error as { data?: { message?: string } }).data?.message ?? 'Try again in a moment.',
+          (error as { data?: { message?: string } }).data?.message ??
+          t('siteEditorForm.tryAgainMoment'),
         color: 'error',
       })
     } finally {
@@ -108,37 +117,59 @@
 <template>
   <UForm :schema="schema" :state="state" class="space-y-4" @submit="save">
     <header class="space-y-1">
-      <h2 class="text-xl">{{ isEditing ? 'Edit this site' : 'Record a site' }}</h2>
+      <h2 class="text-xl">
+        {{ isEditing ? t('siteEditorForm.editTitle') : t('siteEditorForm.recordTitle') }}
+      </h2>
       <p class="datum">{{ position.lat.toFixed(5) }}, {{ position.lon.toFixed(5) }}</p>
     </header>
 
-    <UFormField label="Name" name="title" required>
-      <UInput v-model="state.title" placeholder="Kastell Saalburg" class="w-full" />
+    <UFormField :label="t('siteEditorForm.name')" name="title" required>
+      <UInput
+        v-model="state.title"
+        :placeholder="t('siteEditorForm.namePlaceholder')"
+        class="w-full"
+      />
     </UFormField>
 
-    <UFormField label="Type" name="category" required>
+    <UFormField :label="t('siteEditorForm.type')" name="category" required>
       <USelect v-model="state.category" :items="categoryOptions" class="w-full" />
     </UFormField>
 
-    <UFormField label="One-line summary" name="summary" hint="Shown in search results">
+    <UFormField
+      :label="t('siteEditorForm.summary')"
+      name="summary"
+      :hint="t('siteEditorForm.summaryHint')"
+    >
       <UInput v-model="state.summary" class="w-full" />
     </UFormField>
 
     <div class="grid grid-cols-2 gap-3">
-      <UFormField label="From" name="periodFrom" hint="Negative for BC">
+      <UFormField
+        :label="t('siteEditorForm.from')"
+        name="periodFrom"
+        :hint="t('siteEditorForm.fromHint')"
+      >
         <UInput v-model.number="state.periodFrom" type="number" class="w-full" />
       </UFormField>
-      <UFormField label="To" name="periodTo">
+      <UFormField :label="t('siteEditorForm.to')" name="periodTo">
         <UInput v-model.number="state.periodTo" type="number" class="w-full" />
       </UFormField>
     </div>
 
-    <UFormField label="Description" name="description">
+    <UFormField :label="t('siteEditorForm.description')" name="description">
       <UTextarea v-model="state.description" :rows="7" class="w-full" />
     </UFormField>
 
-    <UFormField v-if="isEditing" label="What did you change?" hint="Shown in the site's history">
-      <UInput v-model="editSummary" placeholder="Corrected the dating" class="w-full" />
+    <UFormField
+      v-if="isEditing"
+      :label="t('siteEditorForm.whatChanged')"
+      :hint="t('siteEditorForm.whatChangedHint')"
+    >
+      <UInput
+        v-model="editSummary"
+        :placeholder="t('siteEditorForm.editSummaryPlaceholder')"
+        class="w-full"
+      />
     </UFormField>
 
     <p
@@ -149,9 +180,11 @@
 
     <div class="flex items-center gap-2">
       <UButton type="submit" :loading="isSaving" color="primary">
-        {{ isEditing ? 'Save changes' : 'Save site' }}
+        {{ isEditing ? t('siteEditorForm.saveChanges') : t('siteEditorForm.saveSite') }}
       </UButton>
-      <UButton variant="ghost" color="neutral" @click="emit('cancel')">Cancel</UButton>
+      <UButton variant="ghost" color="neutral" @click="emit('cancel')">{{
+        t('siteEditorForm.cancel')
+      }}</UButton>
     </div>
   </UForm>
 </template>

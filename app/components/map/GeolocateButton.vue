@@ -2,8 +2,13 @@
   import type maplibregl from 'maplibre-gl'
   import { buildAccuracyCircle } from '~/composables/map/useGeolocation'
 
+  const { t } = useI18n()
   const map = useMapInstance()
-  const { status, position, isFollowing, errorMessage, toggleFollow } = useGeolocation()
+  const { status, position, isFollowing, errorCode, toggleFollow } = useGeolocation()
+
+  const errorMessage = computed(() =>
+    errorCode.value ? t(`geolocate.errors.${errorCode.value}`) : null,
+  )
 
   const POSITION_SOURCE_ID = 'device-position'
 
@@ -14,9 +19,9 @@
   })
 
   const buttonLabel = computed(() => {
-    if (status.value === 'denied') return 'Location blocked'
-    if (isFollowing.value) return 'Stop following your position'
-    return 'Show your position'
+    if (status.value === 'denied') return t('geolocate.locationBlocked')
+    if (isFollowing.value) return t('geolocate.stopFollowing')
+    return t('geolocate.showPosition')
   })
 
   const drawPosition = (): void => {

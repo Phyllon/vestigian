@@ -3,6 +3,7 @@
 
   const props = defineProps<{ images: SiteImage[] }>()
 
+  const { t } = useI18n()
   const { buildUrl, buildCredit } = useImageUrl()
   const activeIndex = ref(0)
 
@@ -25,7 +26,7 @@
         <img
           v-if="activeImage"
           :src="buildUrl(activeImage, 'card')"
-          :alt="activeImage.caption ?? 'Photograph of the site'"
+          :alt="activeImage.caption ?? t('siteGallery.defaultAlt')"
           class="aspect-[3/2] w-full object-cover"
           loading="lazy"
           decoding="async"
@@ -45,7 +46,7 @@
     <ul
       v-if="images.length > 1"
       class="mt-3 flex gap-2 overflow-x-auto pb-1"
-      aria-label="Choose a photograph"
+      :aria-label="t('siteGallery.choosePhotograph')"
     >
       <li v-for="(image, index) in images" :key="image.id">
         <button
@@ -56,7 +57,7 @@
               ? 'border-oxide-600'
               : 'border-transparent opacity-70 hover:opacity-100'
           "
-          :aria-label="`Show image ${index + 1} of ${images.length}`"
+          :aria-label="t('siteGallery.showImage', { index: index + 1, count: images.length })"
           :aria-current="index === activeIndex ? 'true' : undefined"
           @click="show(index)"
         >

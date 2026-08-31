@@ -2,6 +2,7 @@
   import type { Map as MapLibreMap } from 'maplibre-gl'
   import type { CameraState } from '#shared/types'
 
+  const { t } = useI18n()
   const container = useTemplateRef<HTMLDivElement>('container')
   const map = shallowRef<MapLibreMap | null>(null)
   const isReady = ref(false)
@@ -125,7 +126,7 @@
       ref="container"
       class="h-full w-full bg-paper-100 dark:bg-night-900"
       role="application"
-      aria-label="Map of archaeological sites"
+      :aria-label="t('mapCanvas.ariaLabel')"
     />
 
     <div
@@ -144,7 +145,7 @@
         v-if="!isReady"
         class="pointer-events-none absolute inset-0 grid place-items-center bg-paper-100 dark:bg-night-900"
       >
-        <p class="eyebrow animate-pulse" role="status">Unfolding the map</p>
+        <p class="eyebrow animate-pulse" role="status">{{ t('mapCanvas.loading') }}</p>
       </div>
     </Transition>
 

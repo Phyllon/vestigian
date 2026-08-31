@@ -3,6 +3,7 @@
 
   definePageMeta({ layout: 'reading' })
 
+  const { t, locale } = useI18n()
   const route = useRoute()
 
   const { loggedIn } = useSession()
@@ -12,7 +13,7 @@
   const { enrichment, isLoadingEnrichment } = useSiteEnrichment(() => site.value?.id ?? null)
 
   const period = computed(() =>
-    site.value ? formatPeriod(site.value.periodFrom, site.value.periodTo) : '',
+    site.value ? formatPeriod(site.value.periodFrom, site.value.periodTo, t) : '',
   )
 
   const coordinates = computed(() =>
@@ -41,7 +42,7 @@
 <template>
   <div>
     <article v-if="site" class="leaf p-8">
-      <p class="eyebrow">{{ site.category }}</p>
+      <p class="eyebrow">{{ t(`categories.${site.category}`) }}</p>
       <h1 class="mt-2 text-4xl leading-tight">{{ site.title }}</h1>
 
       <p v-if="site.summary" class="mt-3 text-lg leading-relaxed text-ink-700 dark:text-paper-200">
@@ -82,7 +83,9 @@
       <footer
         class="mt-10 flex flex-wrap items-center gap-3 border-t border-paper-200 pt-4 dark:border-night-700"
       >
-        <UButton :to="mapLink" color="primary" icon="i-lucide-map">Show on the map</UButton>
+        <UButton :to="mapLink" color="primary" icon="i-lucide-map">{{
+          t('siteDetailPage.showOnMap')
+        }}</UButton>
         <UButton
           v-if="loggedIn"
           :to="`/site/${site.slug}/edit`"
@@ -90,11 +93,11 @@
           color="neutral"
           icon="i-lucide-pencil"
         >
-          Edit
+          {{ t('siteDetailPage.edit') }}
         </UButton>
         <p class="datum ml-auto">
-          Last revised
-          <time :datetime="site.updatedAt">{{ formatDate(site.updatedAt) }}</time>
+          {{ t('siteDetailPage.lastRevised') }}
+          <time :datetime="site.updatedAt">{{ formatDate(site.updatedAt, locale) }}</time>
         </p>
       </footer>
     </article>

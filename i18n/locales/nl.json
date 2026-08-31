@@ -93,6 +93,19 @@
       "failedTitle": "Registratie mislukt",
       "failedDefault": "Probeer het binnenkort nog eens.",
       "privacyNotice": "Het aanmaken van een account slaat uw e-mailadres en de naam van het scherm{link}voor wat dat betekent en voor hoe lang."
+    },
+    "passwordField": {
+      "showPassword": "Wachtwoord tonen",
+      "hidePassword": "Wachtwoord verbergen"
+    },
+    "passwordRequirements": {
+      "met": "met",
+      "notMet": "nog niet voldaan",
+      "rules": {
+        "length": "Tussen{min}en{max}tekens",
+        "capital": "Eén hoofdletter",
+        "special": "Een bijzonder karakter"
+      }
     }
   },
   "moderation": {
@@ -131,6 +144,69 @@
       "rejectedPlural": "verworpen",
       "batchResultTitle": "{count} {decision}.",
       "batchResultSkipped": "{count}overgeslagen."
+    },
+    "contributorTable": {
+      "findPlaceholder": "Zoek een medewerker",
+      "accepted": "{count}aanvaard",
+      "waiting": "{count}wachten",
+      "restoreTrust": "Vertrouwen herstellen",
+      "restoreTrustAria": "Vertrouwen herstellen voor{name}",
+      "suspendPublishing": "Publicatie onderbreken",
+      "suspendPublishingAria": "Publiceren onderbreken voor{name}",
+      "roleAria": "Rol voor{name}",
+      "suspendPrompt": "Waarom is{name}geschorst worden?",
+      "suspendHint": "Aan hen gemaild, letterlijk",
+      "suspendReasonPlaceholder": "Drie bewerkingen verwijderd brontekst zonder te zeggen waarom.",
+      "cancel": "Annuleren",
+      "untouchedNote": "Hun geaccepteerde bijdragen zijn onaangetast.",
+      "noMatches": "Dat komt niet overeen.",
+      "standing": {
+        "moderator": "Uitgeverijen op rol",
+        "revoked": "Elke bewerking in de wachtrij onderbroken",
+        "earned": "Publiceert onmiddellijk",
+        "probation": "In de wachtrij{remaining}te gaan"
+      },
+      "trustSuspended": "Automatische publicatie opgeschort.",
+      "trustRestored": "Vertrouwen hersteld.",
+      "toldByEmail": "{name}is verteld via e-mail.",
+      "trustFailedTitle": "Kon vertrouwen niet wijzigen",
+      "tryAgain": "Probeer het nog eens.",
+      "nowRole": "{name}is nu een{role}.",
+      "roleFailedTitle": "Kon rol niet veranderen",
+      "roles": {
+        "contributor": "Medewerker",
+        "moderator": "Moderator",
+        "admin": "Beheerder"
+      }
+    },
+    "revisionDiff": {
+      "fields": {
+        "title": "Naam",
+        "category": "Type",
+        "summary": "Samenvatting",
+        "description": "Omschrijving",
+        "position": "Positie",
+        "periodFrom": "Periode van",
+        "periodTo": "Periode tot",
+        "geometry": "Vorm",
+        "editSummary": "Notificatie bewerken"
+      },
+      "kinds": {
+        "added": "toegevoegd",
+        "removed": "verwijderd",
+        "changed": "gewijzigd"
+      },
+      "noChanges": "Geen velden veranderd."
+    },
+    "queuePage": {
+      "title": "Wachtrij bekijken",
+      "intro": "Bijdragen van rekeningen die nog niet automatisch gepubliceerd zijn.",
+      "contributorsLink": "Bijdragen"
+    },
+    "contributorsPage": {
+      "title": "Bijdragen",
+      "backToQueue": "Wachtrij bekijken",
+      "intro": "Suspending publishing houdt het record van een donateur intact en herstelt het keert ze terug naar precies waar ze waren."
     }
   },
   "licence": {
@@ -202,5 +278,353 @@
     "minorsBody": "Vestigia is niet gericht op kinderen. Als u jonger bent dan 16, maak dan geen rekening aan zonder de betrokkenheid van een ouder of voogd.",
     "changesHeading": "Wijzigingen",
     "changesBody": "Deze pagina wordt bijgewerkt wanneer wat de dienst daadwerkelijk doet verandert. Het weerspiegelt de huidige versie van de lopende toepassing."
+  },
+  "geolocate": {
+    "locationBlocked": "Locatie geblokkeerd",
+    "stopFollowing": "Stop met het volgen van uw positie",
+    "showPosition": "Uw positie tonen",
+    "errors": {
+      "denied": "De locatie is geblokkeerd. Laat het in uw browserinstellingen om dit te gebruiken.",
+      "timeout": "Nog geen oplossing. Ga ergens heen met een duidelijker zicht op de hemel.",
+      "unavailable": "Locatie is nu niet beschikbaar op dit apparaat.",
+      "insecureContext": "Locatie heeft een veilige verbinding en een apparaat met GPS nodig."
+    }
+  },
+  "revisionHistory": {
+    "title": "Historie",
+    "loading": "Laden..",
+    "created": "Aangemaakt",
+    "edited": "Uitgegeven",
+    "revert": "terugzetten",
+    "unknownAuthor": "Onbekend",
+    "publishedAutomatically": "Gepubliceerd automatisch De auteur heeft vertrouwen verdiend.",
+    "reviewedBy": "Beoordeeld door{reviewer}.",
+    "published": "Gepubliceerd.",
+    "restoreEarlier": "De versie hiervoor herstellen",
+    "reverted": "Teruggedraaid. De eerdere versie is weer live.",
+    "revertFailedTitle": "Kon niet terugzetten",
+    "tryAgain": "Probeer het nog eens."
+  },
+  "categories": {
+    "settlement": "Afwikkeling",
+    "fortification": "Fortificatie",
+    "sanctuary": "Sanctuary",
+    "burial": "Begraven",
+    "infrastructure": "Infrastructuur",
+    "villa": "Villa",
+    "production": "Produktie",
+    "findspot": "Zoeken",
+    "other": "Andere"
+  },
+  "limesMarks": {
+    "watchtower": "Wachttoren",
+    "fortlet": "Fortlet",
+    "fort": "Fort",
+    "fortress": "Legionaire vesting",
+    "camp": "Marskamp"
+  },
+  "featurePicker": {
+    "recordsHere": "{count}slaat hier op",
+    "dismiss": "De lijst van dossiers hier verwerpen",
+    "alongThisLine": "Langs deze lijn",
+    "atThisPoint": "Op dit punt",
+    "metresAway": "{metres}m",
+    "kilometresAway": "{kilometres}km"
+  },
+  "limesFormat": {
+    "bc": "{year}BC",
+    "ad": "AD{year}",
+    "toYear": "tot{year}",
+    "fromYear": "van{year}",
+    "yearRange": "{from}Wat{to}",
+    "atTheStart": "bij het begin",
+    "kmAlong": "{km}km"
+  },
+  "limesPanel": {
+    "title": "De Romeinse grens",
+    "backToFrontier": "Terug naar de hele grens",
+    "loading": "Laden",
+    "theLimes": "De limoenen",
+    "showFrontier": "Grens tonen",
+    "hideFrontier": "De grens verbergen",
+    "introBody": "Vijfduizend kilometer grens, in het rekt de bronnaam. Kies er een om het einde te volgen.",
+    "unrolling": "De grens opentrekken..",
+    "readingRoll": "De rol lezen..",
+    "recorded": "{count}geregistreerd",
+    "readStretch": "Lees dit stuk",
+    "referenced": "waarnaar verwezen"
+  },
+  "limesSectorPage": {
+    "breadcrumb": "Broodkruimels",
+    "theLimes": "De limoenen",
+    "length": "Lengte",
+    "inUse": "In gebruik",
+    "recordedOnIt": "Opgenomen",
+    "pleiades": "Pleiades",
+    "alongTheLine": "Langs de lijn, west naar oost",
+    "nothingRecorded": "Er is nog niets opgenomen op dit stuk.",
+    "fortification": "Fortificatie",
+    "contributedRecords": "{count}bijgedragen records",
+    "referencedPlaces": "{count}referentieplaatsen",
+    "notFound": "Er is geen grens."
+  },
+  "limesIndexPage": {
+    "title": "De limoenen",
+    "description": "De grens van het Romeinse rijk, sector per sector: zijn muren, zijn rivieren en de forten en wachttorens langs hen.",
+    "intro": "De rand van de Romeinse wereld, van de Solway tot de Eufraat. Het was nooit een ding: een gemortelde muur over het Raetiaanse plateau, een rivier gepatrouilleerd van de westelijke oever, een lijn van forten bij het laatste betrouwbare water voor de woestijn. Wat volgt is die rand in de stretchs de bronnaam, getrokken uit de omvang van het Oude World Mapping Center van het imperium op 200 CE en uit het verslag van de muren die eigenlijk werden gebouwd.",
+    "acrossStretches": "{length}over{count}rekt",
+    "attribution": "Grens afgeleid van de{link}De omvang van het imperium en zijn muurlijnwerk, ODbL 1.0. De namen en de noten hierboven zijn deze atlas eigen; de geometrie is niet.",
+    "attributionLinkText": "Ancient World Mapping Center"
+  },
+  "mapSearch": {
+    "searching": "Zoeken",
+    "noMatches": "Geen overeenkomsten",
+    "matches": "{count}overeenkomsten",
+    "label": "Zoekplaatsen, wegen en plaatsen",
+    "placeholder": "Zoekplaatsen, wegen, plaatsen",
+    "resultsLabel": "Zoekresultaten"
+  },
+  "mapCanvas": {
+    "ariaLabel": "Kaart van archeologische sites",
+    "loading": "Ontvouwen van de kaart"
+  },
+  "siteExternalLinks": {
+    "title": "Ook opgenomen in",
+    "opensNewTab": "(opent in een nieuw tabblad)",
+    "schemes": {
+      "pleiades": "Pleiades",
+      "wikidata": "Wikidata",
+      "vici": "Vici.org",
+      "trismegistos": "Trismegistos"
+    }
+  },
+  "siteMetaList": {
+    "locationNotResolved": "Locatie niet opgelost",
+    "period": "Periode",
+    "near": "Nabij",
+    "position": "Positie",
+    "copyCoordinates": "Coördinaten kopiëren{coordinates}"
+  },
+  "siteGallery": {
+    "defaultAlt": "Foto van de site",
+    "choosePhotograph": "Kies een foto",
+    "showImage": "Afbeelding tonen{index}van{count}"
+  },
+  "tracingDetail": {
+    "area": "Gebied",
+    "route": "Route",
+    "recordsHere": "{count}slaat hier op",
+    "closeDetails": "Traceergegevens sluiten",
+    "panelLabel": "Traceergegevens",
+    "type": "Type",
+    "length": "Lengte",
+    "tracedNote": "Getraceerde routes worden getraceerd omdat een tracing een interpretatie is van waar iets liep, niet een overzicht ervan.",
+    "openFullEntry": "Het volledige item openen",
+    "edit": "Bewerken",
+    "defaultAttribution": "Medewerkers van Vestigia"
+  },
+  "siteGalleryManager": {
+    "defaultPhotographName": "foto{index}",
+    "reorderFailedTitle": "Kon niet herschikken",
+    "tryAgain": "Probeer het nog eens.",
+    "withdrawn": "Foto uit de galerie.",
+    "withdrawFailedTitle": "Kon niet intrekken",
+    "saveFailedTitle": "Kon niet opslaan",
+    "title": "Foto's",
+    "intro": "De eerste afbeelding is die op de kaart. Terugtrekken verbergt een foto zonder de plaat te wissen dat het hier was.",
+    "captionPlaceholder": "Titel",
+    "whoTookItPlaceholder": "Wie nam het mee",
+    "save": "Opslaan",
+    "cancel": "Annuleren",
+    "noCaption": "Geen bijschrift",
+    "creditUnknown": "Krediet onbekend",
+    "moveEarlier": "Verplaatsen{name}eerder",
+    "moveLater": "Verplaatsen{name}later",
+    "editCaptionAndCredit": "Bewerk het bijschrift en het krediet van{name}",
+    "edit": "Bewerken",
+    "withdraw": "Terugtrekken{name}",
+    "withdrawButton": "Terugtrekken",
+    "noPhotographs": "Nog geen foto's."
+  },
+  "contributionPanel": {
+    "ariaLabel": "Toevoegen aan de atlas",
+    "title": "Toevoegen aan de atlas",
+    "whatDidYouFind": "Wat heb je gevonden?",
+    "aPlace": "Een plaats",
+    "aPlaceDescription": "Een fort, villa, toevluchtsoord, vindplek, alles met één positie.",
+    "aRoute": "Een route of lijn",
+    "aRouteDescription": "Een weg, aquaduct of muur getraceerd door het landschap.",
+    "cancel": "Annuleren",
+    "whereIsIt": "Waar is het?",
+    "tapTheMap": "Tik op de kaart op de positie van de site. Je kunt het achteraf aanpassen.",
+    "sitePublished": "Uitgegeven site. Voeg foto's toe terwijl u hier bent, of sluit dit paneel.",
+    "done": "Klaar"
+  },
+  "imageUploader": {
+    "title": "Een foto toevoegen",
+    "selectedAlt": "Geselecteerde foto",
+    "dropHint": "JPEG, PNG of WebP, tot 15 MB",
+    "chooseAria": "Kies een foto van JPEG, PNG of WebP, tot 15 MB",
+    "caption": "Titel",
+    "captionPlaceholder": "De noordelijke poort, gezien van binnenuit",
+    "whoTookIt": "Wie nam het mee",
+    "shownAsCredit": "Getoond als het krediet",
+    "licence": "Vergunning",
+    "licenceHint": "Alleen afbeeldingen uploaden die u op deze manier mag licentieren",
+    "licenceOptions": {
+      "ccBySa": "CC BY-SA 4.0",
+      "ccBy": "CC BY 4.0 ",
+      "cc0": "CC0: geen rechten voorbehouden"
+    },
+    "upload": "Foto uploaden",
+    "uploadFailedTitle": "Uploaden mislukt",
+    "tryDifferentFile": "Probeer een ander bestand."
+  },
+  "siteEditorForm": {
+    "nameTooShort": "Geef de site een naam van ten minste drie tekens.",
+    "editsPublishImmediately": "Uw bewerkingen publiceren onmiddellijk.",
+    "reviewNotice": "Een moderator beoordeelt dit voordat het verschijnt.{count}meer geaccepteerd{contributionWord}en je bewerkingen gaan direct live.",
+    "contribution": "bijdrage",
+    "contributions": "bijdragen",
+    "saveFailedTitle": "Dat kon niet worden opgeslagen",
+    "tryAgainMoment": "Probeer het zo nog eens.",
+    "editTitle": "Deze site bewerken",
+    "recordTitle": "Een site opnemen",
+    "name": "Naam",
+    "namePlaceholder": "Kastell Saalburg",
+    "type": "Type",
+    "summary": "Overzicht met één regel",
+    "summaryHint": "In zoekresultaten weergegeven",
+    "from": "Van",
+    "fromHint": "Negatief voor BC",
+    "to": "Aan",
+    "description": "Omschrijving",
+    "whatChanged": "Wat heb je veranderd?",
+    "whatChangedHint": "Getoond in de geschiedenis van de site",
+    "editSummaryPlaceholder": "Correctie van de datum",
+    "saveChanges": "Wijzigingen opslaan",
+    "saveSite": "Plaats opslaan",
+    "cancel": "Annuleren"
+  },
+  "tracingEditorForm": {
+    "nameRequired": "Noem de weg of structuur.",
+    "categoryOptions": {
+      "infrastructure": "Weg, aquaduct of brug",
+      "fortification": "Wand- of defensieve lijn",
+      "other": "Iets anders"
+    },
+    "drawFirst": "Teken eerst de lijn en sla dan op.",
+    "saveFailedTitle": "Dat kon niet worden opgeslagen",
+    "tryAgainShortly": "Probeer het binnenkort nog eens.",
+    "editTitle": "Dit traceren bewerken",
+    "traceTitle": "Een route volgen",
+    "editHint": "Pas de bestaande punten aan, of herteken de koers volledig.",
+    "traceHint": "Klik op de cursus en pas de punten aan. Getraceerde routes verschijnen vervaagd op de kaart, omdat een tracing eerder een interpretatie is dan een enquête.",
+    "pointsCaptured": "{count}gevangen punten",
+    "name": "Naam",
+    "namePlaceholder": "Via Claudia Augusta, noordelijke sectie",
+    "type": "Type",
+    "notes": "Opmerkingen",
+    "notesHint": "Bewijsmateriaal, datering, onzekerheid",
+    "whatChanged": "Wat heb je veranderd?",
+    "whatChangedHint": "Getoond in de geschiedenis",
+    "editSummaryPlaceholder": "Verbeterde koers ten oosten van de rivier",
+    "editsPublishImmediately": "Uw bewerkingen publiceren onmiddellijk.",
+    "reviewedBeforeAppearing": "Een moderator bekijkt dit voordat het op de kaart verschijnt.",
+    "saveChanges": "Wijzigingen opslaan",
+    "saveTracing": "Traceren opslaan",
+    "cancel": "Annuleren"
+  },
+  "geometryDrawTool": {
+    "traceLine": "Traceer een regel",
+    "outlineArea": "Omlijn een gebied",
+    "adjustPoints": "Punten aanpassen",
+    "toolbarLabel": "Tekengereedschap",
+    "useShape": "Gebruik deze vorm",
+    "clear": "Wissen"
+  },
+  "loginPage": {
+    "title": "Aanmelden"
+  },
+  "registerPage": {
+    "title": "Een account aanmaken"
+  },
+  "indexPage": {
+    "title": "Kaart",
+    "srHeading": "Vestigia ",
+    "addToAtlas": "Toevoegen aan de atlas"
+  },
+  "forgotPasswordPage": {
+    "title": "Uw wachtwoord resetten",
+    "errorEmail": "Dat lijkt niet op een e-mailadres.",
+    "checkInbox": "Controleer uw inbox",
+    "checkInboxBody": "Als dat adres een account heeft, is er een resetlink onderweg. Het werkt voor een uur.",
+    "intro": "We sturen een link om een nieuwe in te stellen.",
+    "email": "E-mail",
+    "sendLink": "Verwijzing versturen"
+  },
+  "resetPasswordPage": {
+    "title": "Een nieuw wachtwoord instellen",
+    "passwordMismatch": "De twee wachtwoorden komen niet overeen.",
+    "newPassword": "Nieuw wachtwoord",
+    "repeatIt": "Herhaal het",
+    "savePassword": "Wachtwoord opslaan",
+    "changed": "Wachtwoord gewijzigd. Meld je aan bij de nieuwe.",
+    "resetFailedTitle": "Kon niet resetten",
+    "askForNewLink": "Vraag om een nieuwe link."
+  },
+  "verifyPage": {
+    "title": "Bevestig uw adres",
+    "missingToken": "Die link mist zijn token. Open het direct vanuit de e-mail.",
+    "couldNotUse": "Die link kon niet worden gebruikt.",
+    "checking": "Controle",
+    "oneMoment": "Een momentje",
+    "confirmed": "Bevestigd",
+    "accountReady": "Uw account is klaar",
+    "readyBody": "Meld u aan en neem uw eerste site op. De eerste twee gaan voorbij een moderator; daarna publiceren ze terwijl je ze schrijft.",
+    "signIn": "Aanmelden",
+    "notConfirmed": "Niet bevestigd",
+    "linkDidNotWork": "Die koppeling werkte niet",
+    "startAgain": "Opnieuw beginnen"
+  },
+  "periodFormat": {
+    "bc": "{year}BC",
+    "ad": "AD{year}",
+    "undated": "Niet gedateerd",
+    "fromYear": "Van{year}",
+    "untilYear": "Tot{year}",
+    "yearRange": "{from}Wat{to}"
+  },
+  "siteDetailPage": {
+    "showOnMap": "Op de kaart tonen",
+    "edit": "Bewerken",
+    "lastRevised": "Laatst herzien"
+  },
+  "tracingDetailPage": {
+    "notFound": "Geen spoor met die identificatie.",
+    "tracedArea": "Getraceerd gebied",
+    "tracedRoute": "Getraceerde route",
+    "type": "Type",
+    "length": "Lengte",
+    "credit": "Krediet",
+    "defaultAttribution": "Medewerkers van Vestigia",
+    "edit": "Bewerken",
+    "lastRevised": "Laatst herzien"
+  },
+  "siteEditPage": {
+    "notFound": "Geen site geregistreerd onder die naam.",
+    "editingTitle": "Bewerken{title}",
+    "backToEntry": "Terug naar het item",
+    "nothingChanged": "Er is niets veranderd.",
+    "position": "Positie",
+    "positionHint": "Wijzig dit alleen als de geregistreerde positie fout is. Het verplaatsen van een site is een substantiële bewerking.",
+    "latitude": "Breedtegraad",
+    "longitude": "Lengtegraad"
+  },
+  "tracingEditPage": {
+    "notFound": "Geen spoor met die identificatie.",
+    "editingTitle": "Bewerken{title}",
+    "srHeading": "Bewerken{title}",
+    "editorAriaLabel": "Traceerbewerker"
   }
 }

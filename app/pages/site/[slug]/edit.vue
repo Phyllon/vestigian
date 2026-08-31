@@ -3,6 +3,7 @@
 
   definePageMeta({ layout: 'reading', middleware: 'authenticated' })
 
+  const { t } = useI18n()
   const route = useRoute()
   const toast = useToast()
 
@@ -11,10 +12,10 @@
   )
 
   if (!site.value) {
-    throw createError({ statusCode: 404, statusMessage: 'No site recorded under that name.' })
+    throw createError({ statusCode: 404, statusMessage: t('siteEditPage.notFound') })
   }
 
-  useHead({ title: () => `Editing ${site.value?.title ?? ''}` })
+  useHead({ title: () => t('siteEditPage.editingTitle', { title: site.value?.title ?? '' }) })
 
   /**
    * Position is edited numerically here rather than by dragging a pin. Moving a
@@ -40,7 +41,7 @@
   }
 
   const cancel = (): void => {
-    toast.add({ title: 'Nothing was changed.', color: 'neutral' })
+    toast.add({ title: t('siteEditPage.nothingChanged'), color: 'neutral' })
     void finish()
   }
 </script>
@@ -53,7 +54,7 @@
         class="eyebrow inline-flex items-center gap-1 hover:text-oxide-600"
       >
         <UIcon name="i-lucide-arrow-left" class="size-3" aria-hidden="true" />
-        Back to the entry
+        {{ t('siteEditPage.backToEntry') }}
       </NuxtLink>
       <!-- The page's own heading. The form below it heads its section at h2. -->
       <h1 class="mt-2 text-3xl leading-tight">{{ site.title }}</h1>
@@ -80,16 +81,16 @@
     </section>
 
     <section class="leaf p-6">
-      <h2 class="eyebrow">Position</h2>
+      <h2 class="eyebrow">{{ t('siteEditPage.position') }}</h2>
       <p class="mt-1 text-sm text-ink-500 dark:text-paper-400">
-        Only change this if the recorded position is wrong. Moving a site is a substantial edit.
+        {{ t('siteEditPage.positionHint') }}
       </p>
 
       <div class="mt-3 grid grid-cols-2 gap-3">
-        <UFormField label="Latitude">
+        <UFormField :label="t('siteEditPage.latitude')">
           <UInput v-model.number="position.lat" type="number" step="0.00001" class="w-full" />
         </UFormField>
-        <UFormField label="Longitude">
+        <UFormField :label="t('siteEditPage.longitude')">
           <UInput v-model.number="position.lon" type="number" step="0.00001" class="w-full" />
         </UFormField>
       </div>

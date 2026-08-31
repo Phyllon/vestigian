@@ -162,6 +162,21 @@ services:
   libretranslate:
     image: libretranslate/libretranslate:latest
     restart: unless-stopped
+    # gunicorn's own entrypoint runs it with `--max-requests 250`; recycling a
+    # worker at that ceiling is supposed to spawn a replacement immediately,
+    # but the arbiter has been observed in dev not to, leaving it listening
+    # with zero workers while `restart: unless-stopped` above does nothing
+    # because the container never actually exits. `init: true` (tini as PID 1)
+    # is still worth having but did not fix this when tried — see the fuller
+    # account, and the actual mitigation (`autoheal`), in docker/compose.dev.yml.
+    # Lower-risk here than in dev: enrichment translation is one request at a
+    # time from real traffic, not the rapid burst `pnpm i18n:translate` sends,
+    # and it fails open regardless (see CLAUDE.md's Enrichment section) — but
+    # `autoheal` costs nothing and keeps both compose files honest with each
+    # other.
+    init: true
+    labels:
+      autoheal: 'true'
     logging: *default-logging
     environment:
       LT_LOAD_ONLY: 'en,nl,de,es,it,fr'
@@ -179,8 +194,17 @@ services:
         - python -c "import urllib.request; urllib.request.urlopen('http://localhost:5000/languages')"
       interval: 30s
       timeout: 5s
-      retries: 10
+      retries: 3
       start_period: 300s
+
+  autoheal:
+    image: willfarrell/autoheal:latest
+    restart: unless-stopped
+    logging: *default-logging
+    environment:
+      AUTOHEAL_CONTAINER_LABEL: autoheal
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
 
   backup:
     image: postgres:17-alpine

@@ -25,44 +25,40 @@ export type PasswordRuleId = 'length' | 'capital' | 'special'
 
 interface PasswordRule {
   id: PasswordRuleId
-  label: string
   isSatisfiedBy: (password: string) => boolean
 }
 
 const PASSWORD_RULES: PasswordRule[] = [
   {
     id: 'length',
-    label: `Between ${PASSWORD_MINIMUM_LENGTH} and ${PASSWORD_MAXIMUM_LENGTH} characters`,
     isSatisfiedBy: (password) =>
       password.length >= PASSWORD_MINIMUM_LENGTH && password.length <= PASSWORD_MAXIMUM_LENGTH,
   },
   {
     id: 'capital',
-    label: 'One capital letter',
     isSatisfiedBy: (password) => CAPITAL_LETTER.test(password),
   },
   {
     id: 'special',
-    label: 'One special character',
     isSatisfiedBy: (password) => SPECIAL_CHARACTER.test(password),
   },
 ]
 
 export interface PasswordRuleState {
   id: PasswordRuleId
-  label: string
   isMet: boolean
 }
 
 /**
  * Every rule with its current state, in a fixed order. All of them are returned
  * whether met or not: a checklist that only shows what is still wrong makes the
- * requirements look like they are growing as the reader types.
+ * requirements look like they are growing as the reader types. No label is
+ * carried here — this is isomorphic shared code with no guaranteed i18n
+ * context, so `PasswordRequirements.vue` maps `id` to translated text itself.
  */
 export const checkPasswordRules = (password: string): PasswordRuleState[] =>
   PASSWORD_RULES.map((rule) => ({
     id: rule.id,
-    label: rule.label,
     isMet: rule.isSatisfiedBy(password),
   }))
 

@@ -6,6 +6,7 @@
 
   const emit = defineEmits<{ close: [] }>()
 
+  const { t } = useI18n()
   const map = useMapInstance()
 
   const mode = ref<ContributionMode>('choose')
@@ -55,12 +56,14 @@
 <template>
   <aside
     class="absolute inset-x-0 bottom-0 z-30 max-h-[82vh] overflow-y-auto rounded-t-lg bg-paper-50 p-5 shadow-lifted md:inset-y-0 md:left-auto md:right-0 md:w-[26rem] md:rounded-none dark:bg-night-800"
-    aria-label="Add to the atlas"
+    :aria-label="t('contributionPanel.ariaLabel')"
   >
     <div v-if="mode === 'choose'" class="space-y-4">
       <header>
-        <h2 class="text-xl">Add to the atlas</h2>
-        <p class="mt-1 text-sm text-ink-500 dark:text-paper-400">What did you find?</p>
+        <h2 class="text-xl">{{ t('contributionPanel.title') }}</h2>
+        <p class="mt-1 text-sm text-ink-500 dark:text-paper-400">
+          {{ t('contributionPanel.whatDidYouFind') }}
+        </p>
       </header>
 
       <button
@@ -74,9 +77,11 @@
           aria-hidden="true"
         />
         <span>
-          <span class="block font-medium text-ink-900 dark:text-paper-100">A place</span>
+          <span class="block font-medium text-ink-900 dark:text-paper-100">{{
+            t('contributionPanel.aPlace')
+          }}</span>
           <span class="block text-sm text-ink-500 dark:text-paper-400">
-            A fort, villa, sanctuary, findspot — anything with one position.
+            {{ t('contributionPanel.aPlaceDescription') }}
           </span>
         </span>
       </button>
@@ -92,22 +97,28 @@
           aria-hidden="true"
         />
         <span>
-          <span class="block font-medium text-ink-900 dark:text-paper-100">A route or line</span>
+          <span class="block font-medium text-ink-900 dark:text-paper-100">{{
+            t('contributionPanel.aRoute')
+          }}</span>
           <span class="block text-sm text-ink-500 dark:text-paper-400">
-            A road, aqueduct or wall traced across the landscape.
+            {{ t('contributionPanel.aRouteDescription') }}
           </span>
         </span>
       </button>
 
-      <UButton variant="ghost" color="neutral" block @click="finish">Cancel</UButton>
+      <UButton variant="ghost" color="neutral" block @click="finish">{{
+        t('contributionPanel.cancel')
+      }}</UButton>
     </div>
 
     <div v-else-if="mode === 'site' && !draftPosition" class="space-y-3">
-      <h2 class="text-xl">Where is it?</h2>
+      <h2 class="text-xl">{{ t('contributionPanel.whereIsIt') }}</h2>
       <p class="text-sm text-ink-700 dark:text-paper-200">
-        Tap the map at the position of the site. You can adjust it afterwards.
+        {{ t('contributionPanel.tapTheMap') }}
       </p>
-      <UButton variant="ghost" color="neutral" @click="finish">Cancel</UButton>
+      <UButton variant="ghost" color="neutral" @click="finish">{{
+        t('contributionPanel.cancel')
+      }}</UButton>
     </div>
 
     <div v-else-if="mode === 'site' && draftPosition" class="space-y-6">
@@ -123,10 +134,12 @@
           class="rounded-notebook bg-verdigris-50 px-3 py-2 text-sm text-verdigris-700 dark:bg-verdigris-900 dark:text-verdigris-200"
           role="status"
         >
-          Site published. Add photographs while you are here, or close this panel.
+          {{ t('contributionPanel.sitePublished') }}
         </div>
         <ContributeImageUploader :site-id="createdSiteId" />
-        <UButton variant="ghost" color="neutral" block @click="finish">Done</UButton>
+        <UButton variant="ghost" color="neutral" block @click="finish">{{
+          t('contributionPanel.done')
+        }}</UButton>
       </template>
     </div>
 

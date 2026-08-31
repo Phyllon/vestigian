@@ -1,5 +1,10 @@
 <script setup lang="ts">
-  import { checkPasswordRules } from '#shared/utils/password'
+  import {
+    checkPasswordRules,
+    PASSWORD_MAXIMUM_LENGTH,
+    PASSWORD_MINIMUM_LENGTH,
+    type PasswordRuleId,
+  } from '#shared/utils/password'
 
   /**
    * The password policy as a live checklist. Every rule is shown from the
@@ -16,7 +21,19 @@
    */
   const props = defineProps<{ password: string }>()
 
-  const rules = computed(() => checkPasswordRules(props.password))
+  const { t } = useI18n()
+
+  const ruleLabel = (id: PasswordRuleId): string =>
+    id === 'length'
+      ? t('auth.passwordRequirements.rules.length', {
+          min: PASSWORD_MINIMUM_LENGTH,
+          max: PASSWORD_MAXIMUM_LENGTH,
+        })
+      : t(`auth.passwordRequirements.rules.${id}`)
+
+  const rules = computed(() =>
+    checkPasswordRules(props.password).map((rule) => ({ ...rule, label: ruleLabel(rule.id) })),
+  )
 </script>
 
 <template>
@@ -41,7 +58,9 @@
       >
         {{ rule.label }}
       </span>
-      <span class="sr-only">{{ rule.isMet ? '— met' : '— not yet met' }}</span>
+      <span class="sr-only">{{
+        rule.isMet ? t('auth.passwordRequirements.met') : t('auth.passwordRequirements.notMet')
+      }}</span>
     </li>
   </ul>
 </template>

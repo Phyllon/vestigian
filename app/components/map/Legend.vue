@@ -72,7 +72,7 @@
             </svg>
 
             <span class="text-xs text-ink-700 dark:text-paper-200">
-              {{ SITE_CATEGORY_LABELS[category] }}
+              {{ t(`categories.${category}`) }}
             </span>
           </li>
         </ul>
@@ -152,7 +152,7 @@
                 />
               </svg>
               <span class="text-xs text-ink-700 dark:text-paper-200">
-                {{ LIMES_MARK_LABELS[mark] }}
+                {{ t(`limesMarks.${mark}`) }}
               </span>
             </li>
           </ul>

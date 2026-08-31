@@ -18,6 +18,7 @@
     contributors: ContributorRow[]
   }
 
+  const { t } = useI18n()
   const { currentUser } = useSession()
   const toast = useToast()
 
@@ -40,22 +41,24 @@
 
   const contributors = computed(() => data.value?.contributors ?? [])
 
-  const roleOptions = [
-    { label: 'Contributor', value: 'contributor' },
-    { label: 'Moderator', value: 'moderator' },
-    { label: 'Administrator', value: 'admin' },
-  ]
+  const roleOptions = computed(() => [
+    { label: t('moderation.contributorTable.roles.contributor'), value: 'contributor' },
+    { label: t('moderation.contributorTable.roles.moderator'), value: 'moderator' },
+    { label: t('moderation.contributorTable.roles.admin'), value: 'admin' },
+  ])
 
   /**
    * One phrase per reason `evaluateTrust` can give, so the branch order is the
    * server's rather than something a reader has to check against it by eye.
    */
   const STANDING_BY_REASON: Record<TrustEvaluation['reason'], (row: ContributorRow) => string> = {
-    moderator: () => 'Publishes by role',
-    revoked: () => 'Suspended — every edit queued',
-    earned: () => 'Publishes immediately',
+    moderator: () => t('moderation.contributorTable.standing.moderator'),
+    revoked: () => t('moderation.contributorTable.standing.revoked'),
+    earned: () => t('moderation.contributorTable.standing.earned'),
     probation: (row) =>
-      `Queued — ${Math.max(TRUST_THRESHOLD - row.approvedContributions, 0)} to go`,
+      t('moderation.contributorTable.standing.probation', {
+        remaining: Math.max(TRUST_THRESHOLD - row.approvedContributions, 0),
+      }),
   }
 
   const describeStanding = (row: ContributorRow): string =>
@@ -105,16 +108,20 @@
         },
       })
       toast.add({
-        title: change.revoked ? 'Automatic publishing suspended.' : 'Trust restored.',
-        description: `${change.row.displayName} has been told by email.`,
+        title: change.revoked
+          ? t('moderation.contributorTable.trustSuspended')
+          : t('moderation.contributorTable.trustRestored'),
+        description: t('moderation.contributorTable.toldByEmail', { name: change.row.displayName }),
         color: change.revoked ? 'neutral' : 'success',
       })
       suspendingUserId.value = null
       await refresh()
     } catch (error) {
       toast.add({
-        title: 'Could not change trust',
-        description: (error as { data?: { message?: string } }).data?.message ?? 'Try again.',
+        title: t('moderation.contributorTable.trustFailedTitle'),
+        description:
+          (error as { data?: { message?: string } }).data?.message ??
+          t('moderation.contributorTable.tryAgain'),
         color: 'error',
       })
     } finally {
@@ -126,12 +133,17 @@
     busyUserId.value = row.id
     try {
       await $fetch('/api/moderation/role', { method: 'POST', body: { userId: row.id, role } })
-      toast.add({ title: `${row.displayName} is now a ${role}.`, color: 'success' })
+      toast.add({
+        title: t('moderation.contributorTable.nowRole', { name: row.displayName, role }),
+        color: 'success',
+      })
       await refresh()
     } catch (error) {
       toast.add({
-        title: 'Could not change role',
-        description: (error as { data?: { message?: string } }).data?.message ?? 'Try again.',
+        title: t('moderation.contributorTable.roleFailedTitle'),
+        description:
+          (error as { data?: { message?: string } }).data?.message ??
+          t('moderation.contributorTable.tryAgain'),
         color: 'error',
       })
     } finally {
@@ -144,8 +156,8 @@
   <div class="space-y-4">
     <UInput
       v-model="search"
-      placeholder="Find a contributor"
-      aria-label="Find a contributor"
+      :placeholder="t('moderation.contributorTable.findPlaceholder')"
+      :aria-label="t('moderation.contributorTable.findPlaceholder')"
       icon="i-lucide-search"
       class="w-full max-w-xs"
     />
@@ -162,11 +174,14 @@
             v-if="row.role !== 'contributor'"
             class="eyebrow text-oxide-600 dark:text-oxide-300"
           >
-            {{ row.role }}
+            {{ t(`moderation.contributorTable.roles.${row.role}`) }}
           </span>
           <span class="datum ml-auto">
-            {{ row.approvedContributions }} accepted
-            <template v-if="row.pendingCount > 0"> · {{ row.pendingCount }} waiting</template>
+            {{ t('moderation.contributorTable.accepted', { count: row.approvedContributions }) }}
+            <template v-if="row.pendingCount > 0">
+              ·
+              {{ t('moderation.contributorTable.waiting', { count: row.pendingCount }) }}</template
+            >
           </span>
         </div>
 
@@ -181,10 +196,12 @@
             size="xs"
             color="success"
             :loading="busyUserId === row.id"
-            :aria-label="`Restore trust for ${row.displayName}`"
+            :aria-label="
+              t('moderation.contributorTable.restoreTrustAria', { name: row.displayName })
+            "
             @click="setTrust({ row, revoked: false })"
           >
-            Restore trust
+            {{ t('moderation.contributorTable.restoreTrust') }}
           </UButton>
 
           <UButton
@@ -192,17 +209,19 @@
             size="xs"
             variant="ghost"
             color="error"
-            :aria-label="`Suspend publishing for ${row.displayName}`"
+            :aria-label="
+              t('moderation.contributorTable.suspendPublishingAria', { name: row.displayName })
+            "
             @click="startSuspension(row)"
           >
-            Suspend publishing
+            {{ t('moderation.contributorTable.suspendPublishing') }}
           </UButton>
 
           <USelect
             v-if="mayChangeRole(row) && suspendingUserId !== row.id"
             :model-value="row.role"
             :items="roleOptions"
-            :aria-label="`Role for ${row.displayName}`"
+            :aria-label="t('moderation.contributorTable.roleAria', { name: row.displayName })"
             size="xs"
             class="w-40"
             @update:model-value="(value: string) => setRole(row, value)"
@@ -211,12 +230,12 @@
 
         <div v-if="suspendingUserId === row.id" class="mt-3">
           <UFormField
-            :label="`Why is ${row.displayName} being suspended?`"
-            hint="Emailed to them, verbatim"
+            :label="t('moderation.contributorTable.suspendPrompt', { name: row.displayName })"
+            :hint="t('moderation.contributorTable.suspendHint')"
           >
             <UInput
               v-model="suspensionReason"
-              placeholder="Three edits removed sourced text without saying why."
+              :placeholder="t('moderation.contributorTable.suspendReasonPlaceholder')"
               class="w-full"
             />
           </UFormField>
@@ -228,17 +247,19 @@
               :loading="busyUserId === row.id"
               @click="setTrust({ row, revoked: true, reason: suspensionReason })"
             >
-              Suspend publishing
+              {{ t('moderation.contributorTable.suspendPublishing') }}
             </UButton>
             <UButton size="xs" variant="ghost" color="neutral" @click="cancelSuspension">
-              Cancel
+              {{ t('moderation.contributorTable.cancel') }}
             </UButton>
-            <p class="datum">Their accepted contributions are untouched.</p>
+            <p class="datum">{{ t('moderation.contributorTable.untouchedNote') }}</p>
           </div>
         </div>
       </li>
     </ul>
 
-    <p v-if="contributors.length === 0" class="datum">No contributors match that.</p>
+    <p v-if="contributors.length === 0" class="datum">
+      {{ t('moderation.contributorTable.noMatches') }}
+    </p>
   </div>
 </template>

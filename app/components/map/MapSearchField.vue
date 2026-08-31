@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import type { SiteSummary } from '#shared/types'
 
+  const { t } = useI18n()
   const map = useMapInstance()
   const { term, results, isSearching } = useSiteSearch()
   const { selectSite } = useSiteQuery()
@@ -10,10 +11,10 @@
    * for a sighted reader; without a live region the same search is silent.
    */
   const searchStatus = computed(() => {
-    if (isSearching.value) return 'Searching'
+    if (isSearching.value) return t('mapSearch.searching')
     if (term.value.trim().length === 0) return ''
-    if (results.value.length === 0) return 'No matches'
-    return `${results.value.length} matches`
+    if (results.value.length === 0) return t('mapSearch.noMatches')
+    return t('mapSearch.matches', { count: results.value.length })
   })
 
   const goToSite = (site: SiteSummary): void => {
@@ -39,12 +40,12 @@
       class="leaf flex items-center gap-2 px-3 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-oxide-600"
     >
       <UIcon name="i-lucide-search" class="size-4 shrink-0 text-ink-300" aria-hidden="true" />
-      <label for="map-search" class="sr-only">Search sites, roads and places</label>
+      <label for="map-search" class="sr-only">{{ t('mapSearch.label') }}</label>
       <input
         id="map-search"
         v-model="term"
         type="search"
-        placeholder="Search sites, roads, places"
+        :placeholder="t('mapSearch.placeholder')"
         class="w-full bg-transparent py-2.5 text-sm text-ink-900 outline-none placeholder:text-ink-300 dark:text-paper-100"
         autocomplete="off"
         spellcheck="false"
@@ -63,7 +64,7 @@
     <ul
       v-if="results.length > 0"
       class="leaf absolute inset-x-0 top-full z-20 mt-2 max-h-80 overflow-y-auto shadow-lifted"
-      aria-label="Search results"
+      :aria-label="t('mapSearch.resultsLabel')"
     >
       <li v-for="site in results" :key="site.id">
         <button
@@ -72,7 +73,7 @@
           @click="goToSite(site)"
         >
           <span class="text-sm font-medium text-ink-900 dark:text-paper-100">{{ site.title }}</span>
-          <span class="eyebrow">{{ site.category }}</span>
+          <span class="eyebrow">{{ t(`categories.${site.category}`) }}</span>
         </button>
       </li>
     </ul>

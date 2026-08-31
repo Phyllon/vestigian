@@ -8,19 +8,12 @@
 
   defineProps<{ changes: FieldChange[] }>()
 
-  const FIELD_LABELS: Record<string, string> = {
-    title: 'Name',
-    category: 'Type',
-    summary: 'Summary',
-    description: 'Description',
-    position: 'Position',
-    periodFrom: 'Period from',
-    periodTo: 'Period to',
-    geometry: 'Shape',
-    editSummary: 'Edit note',
-  }
+  const { t, te } = useI18n()
 
-  const labelFor = (field: string): string => FIELD_LABELS[field] ?? field
+  const labelFor = (field: string): string =>
+    te(`moderation.revisionDiff.fields.${field}`)
+      ? t(`moderation.revisionDiff.fields.${field}`)
+      : field
 
   /** Long values are clipped: a diff is for scanning, not for reading in full. */
   const clip = (value: string | null): string => {
@@ -49,7 +42,7 @@
               change.kind === 'changed',
           }"
         >
-          {{ change.kind }}
+          {{ t(`moderation.revisionDiff.kinds.${change.kind}`) }}
         </span>
       </dt>
 
@@ -67,5 +60,5 @@
     </div>
   </dl>
 
-  <p v-else class="datum">No fields changed.</p>
+  <p v-else class="datum">{{ t('moderation.revisionDiff.noChanges') }}</p>
 </template>

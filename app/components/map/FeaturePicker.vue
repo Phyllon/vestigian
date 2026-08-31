@@ -15,6 +15,7 @@
    * corner and is replaced by the panel once a choice is made, so it should
    * read as the same surface rather than as a popup over the map.
    */
+  const { t, te } = useI18n()
   const { overlappingFeatures, isPickerOpen, chooseCandidate, clearSelection } = useSiteQuery()
   const { isCompact } = useBreakpoint()
 
@@ -22,14 +23,14 @@
     SITE_ICON_PATHS[category as SiteCategory] ?? SITE_ICON_PATHS.other
 
   const labelFor = (category: string): string =>
-    SITE_CATEGORY_LABELS[category as SiteCategory] ?? SITE_CATEGORY_LABELS.other
+    te(`categories.${category}`) ? t(`categories.${category}`) : t('categories.other')
 
   /** Rounded hard: a metre of precision here would be false confidence. */
   const distanceLabel = (metres: number | null): string => {
-    if (metres === null) return 'Along this line'
-    if (metres < 5) return 'At this point'
-    if (metres < 1000) return `${Math.round(metres / 5) * 5} m away`
-    return `${(metres / 1000).toFixed(1)} km away`
+    if (metres === null) return t('featurePicker.alongThisLine')
+    if (metres < 5) return t('featurePicker.atThisPoint')
+    if (metres < 1000) return t('featurePicker.metresAway', { metres: Math.round(metres / 5) * 5 })
+    return t('featurePicker.kilometresAway', { kilometres: (metres / 1000).toFixed(1) })
   }
 </script>
 
@@ -59,12 +60,12 @@
           class="flex items-start justify-between gap-3 border-b border-paper-200 px-5 py-3 dark:border-night-700"
         >
           <h2 id="feature-picker-heading" class="eyebrow pt-1">
-            {{ overlappingFeatures.length }} records here
+            {{ t('featurePicker.recordsHere', { count: overlappingFeatures.length }) }}
           </h2>
           <button
             type="button"
             class="grid size-8 shrink-0 place-items-center rounded-notebook text-ink-500 transition hover:bg-paper-200 dark:text-paper-400 dark:hover:bg-night-700"
-            aria-label="Dismiss the list of records here"
+            :aria-label="t('featurePicker.dismiss')"
             @click="clearSelection"
           >
             <UIcon name="i-lucide-x" class="size-4" aria-hidden="true" />

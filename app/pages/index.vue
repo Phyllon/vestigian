@@ -1,11 +1,12 @@
 <script setup lang="ts">
+  const { t } = useI18n()
   const { loggedIn } = useSession()
   const { isFollowingLimes } = useBasemapStyle()
   const { selectSite } = useSiteQuery()
 
   const isContributing = ref(false)
 
-  useHead({ title: 'Map' })
+  useHead({ title: t('indexPage.title') })
 
   const startContributing = (): void => {
     selectSite(null)
@@ -24,7 +25,7 @@
       is still the first thing a screen reader looks for, and the record panels
       below it are headed at level two on the strength of it.
     -->
-    <h1 class="sr-only">Vestigia — an atlas of the ancient world</h1>
+    <h1 class="sr-only">{{ t('indexPage.srHeading') }}</h1>
 
     <!--
       Controls float over the map; the map itself never scrolls or reflows.
@@ -73,7 +74,7 @@
           class="shadow-leaf"
           @click="startContributing"
         >
-          Add to the atlas
+          {{ t('indexPage.addToAtlas') }}
         </UButton>
       </div>
 

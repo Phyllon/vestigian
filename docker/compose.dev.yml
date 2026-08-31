@@ -97,6 +97,29 @@ services:
   # download from happening again on every `stack:up`.
   libretranslate:
     image: libretranslate/libretranslate:latest
+    # Its own entrypoint (scripts/entrypoint.sh) launches gunicorn with
+    # `--max-requests 250`, and the many small requests `translate-locales.ts`
+    # fires in a burst make two workers (LT_THREADS below) hit that ceiling
+    # within about a minute of each other. gunicorn is supposed to spawn a
+    # replacement the instant it retires one ("Autorestarting worker after
+    # current request") — here the arbiter has been observed not to, twice,
+    # confirmed by container logs showing both workers exit with no matching
+    # "Booting worker" line after. The container keeps listening and the
+    # healthcheck can still pass on stale luck, so every request queues
+    # forever with nothing to accept it. `init: true` (tini as PID 1, the
+    # standard fix for a dockerized gunicorn losing signals) does **not** fix
+    # this on its own — tried, still reproduced — so the arbiter itself is
+    # wedging, plausibly in a `child_exit` hook tied to the Prometheus
+    # multiprocess cleanup this image's entrypoint sets up. Kept anyway: it is
+    # still correct hygiene and costs nothing. `autoheal` below is the actual
+    # mitigation — restart the container, since nothing in this repo can fix
+    # gunicorn's own arbiter — and `retries` is cut from 30 to 3 so `unhealthy`
+    # is reached in well under a minute instead of five. `pnpm i18n:translate`
+    # still preflights the endpoint and fails fast rather than hanging if
+    # autoheal hasn't caught up yet.
+    init: true
+    labels:
+      autoheal: 'true'
     environment:
       LT_LOAD_ONLY: 'en,nl,de,es,it,fr'
       # Without this, models are installed only when the volume is empty, so
@@ -115,9 +138,23 @@ services:
         - python -c "import urllib.request; urllib.request.urlopen('http://localhost:5000/languages')"
       interval: 10s
       timeout: 5s
-      retries: 30
+      retries: 3
       # First boot downloads the models; nothing is wrong before that finishes.
       start_period: 300s
+
+  # Restarts any container labeled `autoheal: true` once Docker marks it
+  # unhealthy — currently just libretranslate, see the comment on that
+  # service. Compose itself never reacts to health status on its own;
+  # `restart: unless-stopped` only fires on a process exit, and libretranslate
+  # never exits, it just stops answering. ~2 MB, one container, watches the
+  # Docker socket read-only.
+  autoheal:
+    image: willfarrell/autoheal:latest
+    restart: unless-stopped
+    environment:
+      AUTOHEAL_CONTAINER_LABEL: autoheal
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
 
   # ---------------------------------------------------------------------------
   # Observability, behind a profile so it is opt-in.

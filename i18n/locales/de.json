@@ -93,6 +93,19 @@
       "failedTitle": "Eintragung fehlgeschlagen",
       "failedDefault": "Versuchen Sie es gleich noch einmal.",
       "privacyNotice": "Erstellen eines Kontos speichert Ihre E-Mail-Adresse und den Anzeigenamen - siehe{link}für was das bedeutet und für wie lange."
+    },
+    "passwordField": {
+      "showPassword": "Passwort anzeigen",
+      "hidePassword": "Passwort ausblenden"
+    },
+    "passwordRequirements": {
+      "met": "— erfüllt",
+      "notMet": "— noch nicht erfüllt",
+      "rules": {
+        "length": "Zwischen{min}und{max}zeichen",
+        "capital": "1 Großbuchstabe",
+        "special": "Ein besonderer Charakter"
+      }
     }
   },
   "moderation": {
@@ -131,6 +144,69 @@
       "rejectedPlural": "abgelehnt",
       "batchResultTitle": "{count} {decision}.",
       "batchResultSkipped": "{count}übersprungen."
+    },
+    "contributorTable": {
+      "findPlaceholder": "Finden Sie einen Mitwirkenden",
+      "accepted": "{count}akzeptiert",
+      "waiting": "{count}warten",
+      "restoreTrust": "Vertrauen wiederherstellen",
+      "restoreTrustAria": "Vertrauen wiederherstellen für{name}",
+      "suspendPublishing": "Veröffentlichen unterbrechen",
+      "suspendPublishingAria": "Suspend Publishing für{name}",
+      "roleAria": "Rolle für{name}",
+      "suspendPrompt": "Warum ist{name}ausgesetzt werden?",
+      "suspendHint": "E-Mail an sie, verbatim",
+      "suspendReasonPlaceholder": "Drei Bearbeitungen entfernten Text, ohne zu sagen, warum.",
+      "cancel": "Stornierung",
+      "untouchedNote": "Ihre akzeptierten Beiträge bleiben unberührt.",
+      "noMatches": "Kein Mitwirkender passt dazu.",
+      "standing": {
+        "moderator": "Veröffentlicht nach Rolle",
+        "revoked": "Suspended — jede Edit Schlange",
+        "earned": "Veröffentlicht sofort",
+        "probation": "Schlange —{remaining}zu gehen"
+      },
+      "trustSuspended": "Automatisches Publizieren ausgesetzt.",
+      "trustRestored": "Vertrauen wiederhergestellt.",
+      "toldByEmail": "{name}wurde per e-mail mitgeteilt.",
+      "trustFailedTitle": "Vertrauen nicht ändern konnte",
+      "tryAgain": "Versuchen Sie es noch einmal.",
+      "nowRole": "{name}jetzt ist ein{role}.",
+      "roleFailedTitle": "Kann die Rolle nicht ändern",
+      "roles": {
+        "contributor": "Beitragszahler",
+        "moderator": "Moderator",
+        "admin": "Administrator"
+      }
+    },
+    "revisionDiff": {
+      "fields": {
+        "title": "Name",
+        "category": "Typ",
+        "summary": "Zusammenfassung",
+        "description": "Beschreibung",
+        "position": "Position",
+        "periodFrom": "Zeitraum ab",
+        "periodTo": "Zeitraum bis",
+        "geometry": "Form",
+        "editSummary": "Anmerkung bearbeiten"
+      },
+      "kinds": {
+        "added": "zugesetzt",
+        "removed": "entfernt",
+        "changed": "geändert"
+      },
+      "noChanges": "Es haben sich keine Felder geändert."
+    },
+    "queuePage": {
+      "title": "Überprüfungswarteschlange",
+      "intro": "Beiträge von Accounts, die noch keine automatische Veröffentlichung verdient haben.",
+      "contributorsLink": "Beitragende"
+    },
+    "contributorsPage": {
+      "title": "Beitragende",
+      "backToQueue": "Überprüfungswarteschlange",
+      "intro": "Suspending Publishing hält die Aufzeichnungen eines Mitwirkenden intakt - die Wiederherstellung bringt sie genau dorthin zurück, wo sie waren."
     }
   },
   "licence": {
@@ -202,5 +278,353 @@
     "minorsBody": "Vestigia richtet sich nicht an Kinder. Wenn sie unter 16 jahre alt sind, erstellen sie bitte kein konto ohne die beteiligung eines elternteils oder erziehungsberechtigten.",
     "changesHeading": "Änderungen",
     "changesBody": "Diese Seite wird aktualisiert, wenn sich das, was der Dienst tatsächlich tut, ändert. Es spiegelt die aktuelle Version der laufenden Anwendung wider."
+  },
+  "geolocate": {
+    "locationBlocked": "Standort blockiert",
+    "stopFollowing": "Hör auf, deiner Position zu folgen",
+    "showPosition": "Zeigen Sie Ihre Position",
+    "errors": {
+      "denied": "Der Standort ist blockiert. Lassen Sie es in Ihren Browsereinstellungen zu, dies zu verwenden.",
+      "timeout": "Noch kein Fix. Bewegen Sie sich irgendwo mit einem klareren Blick auf den Himmel.",
+      "unavailable": "Der Standort ist derzeit auf diesem Gerät nicht verfügbar.",
+      "insecureContext": "Der Standort benötigt eine sichere Verbindung und ein Gerät mit GPS."
+    }
+  },
+  "revisionHistory": {
+    "title": "Geschichte",
+    "loading": "Beladung..",
+    "created": "Geschaffen",
+    "edited": "Bearbeitet",
+    "revert": "rückkauf",
+    "unknownAuthor": "Unbekannt",
+    "publishedAutomatically": "Automatisch veröffentlicht - der Autor hat Vertrauen verdient.",
+    "reviewedBy": "Überarbeitet von{reviewer}.",
+    "published": "Veröffentlicht.",
+    "restoreEarlier": "Wiederherstellen der Version vor diesem",
+    "reverted": "Zurückgesetzt. Die frühere Version ist wieder live.",
+    "revertFailedTitle": "Konnte nicht zurückgesetzt werden",
+    "tryAgain": "Versuchen Sie es noch einmal."
+  },
+  "categories": {
+    "settlement": "Abrechnung",
+    "fortification": "Befestigung",
+    "sanctuary": "Heiligtum",
+    "burial": "Bestattung",
+    "infrastructure": "Infrastruktur",
+    "villa": "Villa",
+    "production": "Produktion",
+    "findspot": "Findspot",
+    "other": "Andere"
+  },
+  "limesMarks": {
+    "watchtower": "Wachturm",
+    "fortlet": "Fortlet",
+    "fort": "Fort",
+    "fortress": "Legionäre Festung",
+    "camp": "Marschlager"
+  },
+  "featurePicker": {
+    "recordsHere": "{count}aufzeichnungen hier",
+    "dismiss": "Verwerfen Sie die Liste der Aufzeichnungen hier",
+    "alongThisLine": "Entlang dieser Linie",
+    "atThisPoint": "An diesem Punkt",
+    "metresAway": "{metres}m entfernt",
+    "kilometresAway": "{kilometres}km entfernt"
+  },
+  "limesFormat": {
+    "bc": "{year}BC",
+    "ad": "AD{year}",
+    "toYear": "bis{year}",
+    "fromYear": "von{year}",
+    "yearRange": "{from}–{to}",
+    "atTheStart": "zu beginn",
+    "kmAlong": "{km}km entlang"
+  },
+  "limesPanel": {
+    "title": "Die römische Grenze",
+    "backToFrontier": "Zurück zur ganzen Grenze",
+    "loading": "Beladung",
+    "theLimes": "Die Kalke",
+    "showFrontier": "Zeigen Sie die Grenze",
+    "hideFrontier": "Verstecken Sie die Grenze",
+    "introBody": "Fünftausend Kilometer Grenze, in den Strecken die Quellen Namen. Wählen Sie einen, um ihm Ende zu Ende zu folgen.",
+    "unrolling": "Die Grenze aufrollen..",
+    "readingRoll": "Die Rolle lesen..",
+    "recorded": "{count}aufgezeichnet",
+    "readStretch": "Lesen Sie diese Strecke",
+    "referenced": "bezug genommen"
+  },
+  "limesSectorPage": {
+    "breadcrumb": "Brotkrume",
+    "theLimes": "Die Kalke",
+    "length": "Länge",
+    "inUse": "In Gebrauch",
+    "recordedOnIt": "Aufgenommen darin",
+    "pleiades": "Plejaden",
+    "alongTheLine": "Entlang der Linie, von Westen nach Osten",
+    "nothingRecorded": "Auf dieser Strecke ist noch nichts aufgezeichnet.",
+    "fortification": "Befestigung",
+    "contributedRecords": "{count}beigesteuerte aufzeichnungen —",
+    "referencedPlaces": "{count}referenzorte —",
+    "notFound": "Keine solche Grenze."
+  },
+  "limesIndexPage": {
+    "title": "Die Kalke",
+    "description": "Die Grenze des römischen Reiches, Sektor für Sektor: seine Mauern, seine Flüsse und die Festungen und Wachtürme entlang ihnen.",
+    "intro": "Der Rand der römischen Welt, vom Solway bis zum Euphrat. Es war nie eine Sache: eine mörtelte Mauer über dem Raetian Plateau, ein Fluss patrouillierte von seinem westlichen Ufer, eine Linie von Forts am letzten zuverlässigen Wasser vor der Wüste. Was folgt, ist, dass die Kante in den Dehnungen der Quellen Name, gezogen aus dem Ancient World Mapping Center die Ausdehnung des Reiches bei 200 CE und aus seiner Aufzeichnung der Wände, die tatsächlich gebaut wurden.",
+    "acrossStretches": "{length}quer{count}strecken",
+    "attribution": "Frontier abgeleitet von der{link}Das Ausmaß des Imperiums und seine Wandlinie, ODbL 1.0. Die Namen und die obigen Notizen sind die des Atlas; die Geometrie ist es nicht.",
+    "attributionLinkText": "Aktivitäten in der Nähe von Ancient World Mapping Center"
+  },
+  "mapSearch": {
+    "searching": "Suche",
+    "noMatches": "Keine Matches",
+    "matches": "{count}spiele",
+    "label": "Suchorte, Straßen und Orte",
+    "placeholder": "Suchorte, Straßen, Orte",
+    "resultsLabel": "Suchergebnisse"
+  },
+  "mapCanvas": {
+    "ariaLabel": "Karte der archäologischen Stätten",
+    "loading": "Entfaltung der Karte"
+  },
+  "siteExternalLinks": {
+    "title": "Auch aufgezeichnet in",
+    "opensNewTab": "(wird in einem neuen tab geöffnet)",
+    "schemes": {
+      "pleiades": "Plejaden",
+      "wikidata": "Wikidaten",
+      "vici": "Vici.org",
+      "trismegistos": "Trismegistos"
+    }
+  },
+  "siteMetaList": {
+    "locationNotResolved": "Standort nicht geklärt",
+    "period": "Zeitraum",
+    "near": "Nahe",
+    "position": "Position",
+    "copyCoordinates": "Kopieren der Koordinaten{coordinates}"
+  },
+  "siteGallery": {
+    "defaultAlt": "Foto der Website",
+    "choosePhotograph": "Wählen Sie ein Foto",
+    "showImage": "Showbild{index}von{count}"
+  },
+  "tracingDetail": {
+    "area": "Fläche",
+    "route": "Route",
+    "recordsHere": "{count}aufzeichnungen hier",
+    "closeDetails": "Nähere Angaben zur Rückverfolgung",
+    "panelLabel": "Angaben zur Rückverfolgung",
+    "type": "Typ",
+    "length": "Länge",
+    "tracedNote": "Verfolgte Routen werden gestrichelt gezeichnet, weil ein Tracing eine Interpretation dessen ist, wo etwas lief, nicht eine Umfrage darüber.",
+    "openFullEntry": "Öffnen Sie den vollständigen Eintrag",
+    "edit": "Edit",
+    "defaultAttribution": "Vestigia-Beiträge"
+  },
+  "siteGalleryManager": {
+    "defaultPhotographName": "foto{index}",
+    "reorderFailedTitle": "Konnte nicht reordern",
+    "tryAgain": "Versuchen Sie es noch einmal.",
+    "withdrawn": "Foto aus der Galerie zurückgezogen.",
+    "withdrawFailedTitle": "Konnte sich nicht zurückziehen",
+    "saveFailedTitle": "Konnte nicht retten",
+    "title": "Fotografien",
+    "intro": "Das erste Bild ist das auf der Karte gezeigte. Das Zurückziehen verbirgt ein Foto, ohne die Aufzeichnung zu löschen, die es hier war.",
+    "captionPlaceholder": "Bildunterschrift",
+    "whoTookItPlaceholder": "Wer nahm es",
+    "save": "Sparen",
+    "cancel": "Stornierung",
+    "noCaption": "Keine Bildunterschrift",
+    "creditUnknown": "Kredit unbekannt",
+    "moveEarlier": "Bewegung{name}früher",
+    "moveLater": "Bewegung{name}später",
+    "editCaptionAndCredit": "Bearbeiten Sie die Beschriftung und den Kredit von{name}",
+    "edit": "Edit",
+    "withdraw": "Rücknahme{name}",
+    "withdrawButton": "Rücknahme",
+    "noPhotographs": "Noch keine Fotos."
+  },
+  "contributionPanel": {
+    "ariaLabel": "Zum Atlas hinzufügen",
+    "title": "Zum Atlas hinzufügen",
+    "whatDidYouFind": "Was haben Sie gefunden?",
+    "aPlace": "Ein Ort",
+    "aPlaceDescription": "Eine Festung, Villa, Heiligtum, Findspot - alles mit einer Position.",
+    "aRoute": "Eine Strecke oder Linie",
+    "aRouteDescription": "Eine Straße, ein Aquädukt oder eine Wand, die über die Landschaft geführt wird.",
+    "cancel": "Stornierung",
+    "whereIsIt": "Wo ist er?",
+    "tapTheMap": "Tippen Sie auf die Karte an der Position der Website. Sie können es danach anpassen.",
+    "sitePublished": "Website veröffentlicht. Fügen Sie Fotos hinzu, während Sie hier sind, oder schließen Sie dieses Panel.",
+    "done": "Geschehen"
+  },
+  "imageUploader": {
+    "title": "Füge ein Foto hinzu",
+    "selectedAlt": "Ausgewähltes Foto",
+    "dropHint": "JPEG, PNG oder WebP, bis zu 15 MB",
+    "chooseAria": "Wählen Sie ein Foto - JPEG, PNG oder WebP, bis zu 15 MB",
+    "caption": "Bildunterschrift",
+    "captionPlaceholder": "Das Nordtor, von innen gesehen",
+    "whoTookIt": "Wer nahm es",
+    "shownAsCredit": "Ausgewiesen als Kredit",
+    "licence": "Lizenz",
+    "licenceHint": "Nur Bilder hochladen, die Sie auf diese Weise lizenzieren können",
+    "licenceOptions": {
+      "ccBySa": "CC BY-SA 4.0 — gleiche Anteile",
+      "ccBy": "CC BY 4.0 — Kredit erforderlich",
+      "cc0": "CC0 — keine Rechte vorbehalten"
+    },
+    "upload": "Foto hochladen",
+    "uploadFailedTitle": "Upload fehlgeschlagen",
+    "tryDifferentFile": "Versuchen Sie eine andere Datei."
+  },
+  "siteEditorForm": {
+    "nameTooShort": "Geben Sie der Website einen Namen mit mindestens drei Zeichen.",
+    "editsPublishImmediately": "Ihre Edits veröffentlichen sofort.",
+    "reviewNotice": "Ein moderator überprüft dies, bevor es erscheint.{count}mehr akzeptiert{contributionWord}und deine edits gehen sofort live.",
+    "contribution": "beitrag",
+    "contributions": "beiträge",
+    "saveFailedTitle": "Das konnte nicht gerettet werden",
+    "tryAgainMoment": "Versuchen Sie es gleich noch einmal.",
+    "editTitle": "Bearbeiten Sie diese Website",
+    "recordTitle": "Aufzeichnen einer Website",
+    "name": "Name",
+    "namePlaceholder": "Kastell Saalburg",
+    "type": "Typ",
+    "summary": "Einzeilige Zusammenfassung",
+    "summaryHint": "Gezeigt in den Suchergebnissen",
+    "from": "Von",
+    "fromHint": "Negativ für BC",
+    "to": "Bis",
+    "description": "Beschreibung",
+    "whatChanged": "Was hast du verändert?",
+    "whatChangedHint": "Gezeigt in der Geschichte der Website",
+    "editSummaryPlaceholder": "Korrigiert die dating",
+    "saveChanges": "Änderungen speichern",
+    "saveSite": "Speicherplatz",
+    "cancel": "Stornierung"
+  },
+  "tracingEditorForm": {
+    "nameRequired": "Nennen Sie die Straße oder Struktur.",
+    "categoryOptions": {
+      "infrastructure": "Straße, Aquädukt oder Brücke",
+      "fortification": "Mauer- oder Verteidigungslinie",
+      "other": "Etwas anderes"
+    },
+    "drawFirst": "Zeichne zuerst die Linie, dann spare.",
+    "saveFailedTitle": "Das konnte nicht gerettet werden",
+    "tryAgainShortly": "Versuchen Sie es gleich noch einmal.",
+    "editTitle": "Bearbeiten Sie dieses Tracing",
+    "traceTitle": "Route verfolgen",
+    "editHint": "Passen Sie die vorhandenen Punkte an oder zeichnen Sie den Kurs vollständig neu.",
+    "traceHint": "Klicken Sie auf den Kurs und passen Sie dann die Punkte an. Verfolgte Routen erscheinen gestrichelt auf der Karte, weil ein Tracing eher eine Interpretation als eine Umfrage ist.",
+    "pointsCaptured": "{count}erfasste punkte",
+    "name": "Name",
+    "namePlaceholder": "Via Claudia Augusta, nördlicher Abschnitt",
+    "type": "Typ",
+    "notes": "Anmerkungen",
+    "notesHint": "Evidenz, Datierung, Unsicherheit",
+    "whatChanged": "Was hast du verändert?",
+    "whatChangedHint": "Gezeigt in der Geschichte",
+    "editSummaryPlaceholder": "Korrigiert den Verlauf östlich des Flusses",
+    "editsPublishImmediately": "Ihre Edits veröffentlichen sofort.",
+    "reviewedBeforeAppearing": "Ein Moderator überprüft dies, bevor es auf der Karte erscheint.",
+    "saveChanges": "Änderungen speichern",
+    "saveTracing": "Trassierung speichern",
+    "cancel": "Stornierung"
+  },
+  "geometryDrawTool": {
+    "traceLine": "Linie verfolgen",
+    "outlineArea": "Umriss eines Gebiets",
+    "adjustPoints": "Punkte anpassen",
+    "toolbarLabel": "Zeichenwerkzeuge",
+    "useShape": "Verwenden Sie diese Form",
+    "clear": "Klar"
+  },
+  "loginPage": {
+    "title": "Zeichen"
+  },
+  "registerPage": {
+    "title": "Erstellen Sie ein Konto"
+  },
+  "indexPage": {
+    "title": "Karte",
+    "srHeading": "Vestigia - ein Atlas der antiken Welt",
+    "addToAtlas": "Zum Atlas hinzufügen"
+  },
+  "forgotPasswordPage": {
+    "title": "Setzen Sie Ihr Passwort zurück",
+    "errorEmail": "Sieht nicht aus wie eine E-Mail-Adresse.",
+    "checkInbox": "Überprüfen Sie Ihren Posteingang",
+    "checkInboxBody": "Wenn diese Adresse ein Konto hat, ist ein Reset-Link unterwegs. Es funktioniert eine Stunde lang.",
+    "intro": "Wir werden einen Link senden, um einen neuen zu setzen.",
+    "email": "E-Mail",
+    "sendLink": "Senden Sie den Link"
+  },
+  "resetPasswordPage": {
+    "title": "Setzen Sie ein neues Passwort",
+    "passwordMismatch": "Die beiden Passwörter stimmen nicht überein.",
+    "newPassword": "Neues Passwort",
+    "repeatIt": "Wiederholen Sie",
+    "savePassword": "Passwort speichern",
+    "changed": "Passwort geändert. Melden Sie sich mit dem neuen an.",
+    "resetFailedTitle": "Konnte nicht zurückgesetzt werden",
+    "askForNewLink": "Fragen Sie nach einem neuen Link."
+  },
+  "verifyPage": {
+    "title": "Bestätige deine Adresse",
+    "missingToken": "Diesem Link fehlt sein Token. Öffnen Sie es direkt aus der E-Mail.",
+    "couldNotUse": "Dieser Link konnte nicht verwendet werden.",
+    "checking": "Überprüfung",
+    "oneMoment": "Ein Moment",
+    "confirmed": "Bestätigt",
+    "accountReady": "Ihr Konto ist bereit",
+    "readyBody": "Melden Sie sich an und notieren Sie Ihre erste Website. Die ersten beiden gehen an einem moderator vorbei; danach veröffentlichen sie, während sie sie schreiben.",
+    "signIn": "Zeichen",
+    "notConfirmed": "Nicht bestätigt",
+    "linkDidNotWork": "Dieser Link funktionierte nicht",
+    "startAgain": "Starten Sie erneut"
+  },
+  "periodFormat": {
+    "bc": "{year}BC",
+    "ad": "AD{year}",
+    "undated": "Undat",
+    "fromYear": "Von{year}",
+    "untilYear": "Bis{year}",
+    "yearRange": "{from}–{to}"
+  },
+  "siteDetailPage": {
+    "showOnMap": "Auf der Karte anzeigen",
+    "edit": "Edit",
+    "lastRevised": "Letzte Überarbeitung"
+  },
+  "tracingDetailPage": {
+    "notFound": "Keine Rückverfolgung mit diesem Identifikator.",
+    "tracedArea": "Rückverfolgungsgebiet",
+    "tracedRoute": "Traced Route",
+    "type": "Typ",
+    "length": "Länge",
+    "credit": "Kredit",
+    "defaultAttribution": "Vestigia-Beiträge",
+    "edit": "Edit",
+    "lastRevised": "Letzte Überarbeitung"
+  },
+  "siteEditPage": {
+    "notFound": "Keine Website unter diesem Namen aufgezeichnet.",
+    "editingTitle": "Bearbeiten{title}",
+    "backToEntry": "Zurück zum Eintrag",
+    "nothingChanged": "Nichts wurde geändert.",
+    "position": "Position",
+    "positionHint": "Ändern Sie dies nur, wenn die aufgezeichnete Position falsch ist. Das Verschieben einer Website ist eine erhebliche Bearbeitung.",
+    "latitude": "Breitengrad",
+    "longitude": "Längengrad"
+  },
+  "tracingEditPage": {
+    "notFound": "Keine Rückverfolgung mit diesem Identifikator.",
+    "editingTitle": "Bearbeiten{title}",
+    "srHeading": "Edit{title}",
+    "editorAriaLabel": "Trace Editor"
   }
 }

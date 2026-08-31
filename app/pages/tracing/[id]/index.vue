@@ -3,13 +3,14 @@
 
   definePageMeta({ layout: 'reading' })
 
+  const { t, te, locale } = useI18n()
   const route = useRoute()
   const { loggedIn } = useSession()
 
   const { data: tracing } = await useFetch<TracingDetail>(() => `/api/tracings/${route.params.id}`)
 
   if (!tracing.value) {
-    throw createError({ statusCode: 404, statusMessage: 'No tracing with that identifier.' })
+    throw createError({ statusCode: 404, statusMessage: t('tracingDetailPage.notFound') })
   }
 
   useHead({ title: () => tracing.value?.title })
@@ -20,23 +21,36 @@
 <template>
   <div v-if="tracing" class="space-y-6">
     <article class="leaf p-8">
-      <p class="eyebrow">{{ tracing.kind === 'area' ? 'Traced area' : 'Traced route' }}</p>
+      <p class="eyebrow">
+        {{
+          tracing.kind === 'area'
+            ? t('tracingDetailPage.tracedArea')
+            : t('tracingDetailPage.tracedRoute')
+        }}
+      </p>
       <h1 class="mt-2 text-4xl leading-tight">{{ tracing.title }}</h1>
 
       <dl
         class="mt-6 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 border-y border-paper-200 py-3 dark:border-night-700"
       >
-        <dt class="eyebrow pt-0.5">Type</dt>
-        <dd class="text-sm text-ink-700 dark:text-paper-200">{{ tracing.category }}</dd>
+        <dt class="eyebrow pt-0.5">{{ t('tracingDetailPage.type') }}</dt>
+        <dd class="text-sm text-ink-700 dark:text-paper-200">
+          {{
+            te(`categories.${tracing.category}`)
+              ? t(`categories.${tracing.category}`)
+              : tracing.category
+          }}
+        </dd>
 
         <template v-if="length">
-          <dt class="eyebrow pt-0.5">Length</dt>
+          <dt class="eyebrow pt-0.5">{{ t('tracingDetailPage.length') }}</dt>
           <dd class="datum">{{ length }}</dd>
         </template>
 
-        <dt class="eyebrow pt-0.5">Credit</dt>
+        <dt class="eyebrow pt-0.5">{{ t('tracingDetailPage.credit') }}</dt>
         <dd class="datum">
-          {{ tracing.attribution ?? 'Vestigia contributors' }} · {{ tracing.licence }}
+          {{ tracing.attribution ?? t('tracingDetailPage.defaultAttribution') }} ·
+          {{ tracing.licence }}
         </dd>
       </dl>
 
@@ -58,11 +72,11 @@
           color="primary"
           icon="i-lucide-pencil"
         >
-          Edit
+          {{ t('tracingDetailPage.edit') }}
         </UButton>
         <p class="datum ml-auto">
-          Last revised
-          <time :datetime="tracing.updatedAt">{{ formatDate(tracing.updatedAt) }}</time>
+          {{ t('tracingDetailPage.lastRevised') }}
+          <time :datetime="tracing.updatedAt">{{ formatDate(tracing.updatedAt, locale) }}</time>
         </p>
       </footer>
     </article>

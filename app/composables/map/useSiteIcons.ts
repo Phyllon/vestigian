@@ -49,18 +49,6 @@ export const SITE_ICON_PATHS: Record<SiteCategory, string> = {
   other: 'M14 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0M12 6.5v2M12 15.5v2M6.5 12h2M15.5 12h2',
 }
 
-export const SITE_CATEGORY_LABELS: Record<SiteCategory, string> = {
-  settlement: 'Settlement',
-  fortification: 'Fortification',
-  sanctuary: 'Sanctuary',
-  burial: 'Burial',
-  infrastructure: 'Infrastructure',
-  villa: 'Villa',
-  production: 'Production',
-  findspot: 'Findspot',
-  other: 'Other',
-}
-
 export const SITE_CATEGORIES = Object.keys(SITE_ICON_PATHS) as SiteCategory[]
 
 export const siteIconId = (category: SiteCategory): string => `${SITE_ICON_PREFIX}${category}`
@@ -264,14 +252,6 @@ export const LIMES_ICON_PATHS: Record<LimesMark, string> = {
 
   /** A marching camp: the same shape, dug in a day and never finished. */
   camp: 'M7.6 7.6h3M13.4 7.6h3a2 2 0 0 1 2 2v1.4M18.4 13.4v1a2 2 0 0 1-2 2h-3M10.6 16.4h-3a2 2 0 0 1-2-2v-1M5.6 11v-1.4a2 2 0 0 1 2-2',
-}
-
-export const LIMES_MARK_LABELS: Record<LimesMark, string> = {
-  watchtower: 'Watchtower',
-  fortlet: 'Fortlet',
-  fort: 'Fort',
-  fortress: 'Legionary fortress',
-  camp: 'Marching camp',
 }
 
 /**

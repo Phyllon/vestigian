@@ -1,4 +1,5 @@
 <script setup lang="ts">
+  const { t, te } = useI18n()
   const {
     tracing,
     selectTracing,
@@ -45,14 +46,16 @@
     <aside
       v-if="isTracingPanelOpen && tracing"
       class="pointer-events-auto fixed inset-x-0 bottom-0 z-30 max-h-[70vh] overflow-y-auto rounded-t-lg bg-paper-50 shadow-lifted md:inset-y-0 md:left-auto md:right-0 md:max-h-none md:w-[26rem] md:rounded-none md:border-l md:border-paper-200 dark:bg-night-800 dark:md:border-night-700"
-      aria-label="Tracing details"
+      :aria-label="t('tracingDetail.panelLabel')"
     >
       <div class="sticky top-0 z-10 bg-paper-50 pt-2 dark:bg-night-800 md:pt-0">
         <div class="mx-auto mb-1 h-1 w-10 rounded-full bg-paper-300 dark:bg-night-600 md:hidden" />
         <div
           class="flex items-start gap-3 border-b border-paper-200 px-5 py-3 dark:border-night-700"
         >
-          <p class="eyebrow pt-1">{{ tracing.kind === 'area' ? 'Area' : 'Route' }}</p>
+          <p class="eyebrow pt-1">
+            {{ tracing.kind === 'area' ? t('tracingDetail.area') : t('tracingDetail.route') }}
+          </p>
 
           <div class="ml-auto flex items-center gap-1">
             <!-- See SiteDetailPanel: the list survives the choice made from it. -->
@@ -63,13 +66,13 @@
               @click="returnToOverlappingFeatures"
             >
               <UIcon name="i-lucide-chevron-left" class="size-3.5" aria-hidden="true" />
-              {{ overlappingFeatures.length }} records here
+              {{ t('tracingDetail.recordsHere', { count: overlappingFeatures.length }) }}
             </button>
 
             <button
               type="button"
               class="grid size-8 shrink-0 place-items-center rounded-notebook text-ink-500 transition hover:bg-paper-200 dark:text-paper-400 dark:hover:bg-night-700"
-              aria-label="Close tracing details"
+              :aria-label="t('tracingDetail.closeDetails')"
               @click="close"
             >
               <UIcon name="i-lucide-x" class="size-4" aria-hidden="true" />
@@ -84,11 +87,17 @@
         <dl
           class="mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 border-y border-paper-200 py-3 dark:border-night-700"
         >
-          <dt class="eyebrow pt-0.5">Type</dt>
-          <dd class="text-sm text-ink-700 dark:text-paper-200">{{ tracing.category }}</dd>
+          <dt class="eyebrow pt-0.5">{{ t('tracingDetail.type') }}</dt>
+          <dd class="text-sm text-ink-700 dark:text-paper-200">
+            {{
+              te(`categories.${tracing.category}`)
+                ? t(`categories.${tracing.category}`)
+                : tracing.category
+            }}
+          </dd>
 
           <template v-if="length">
-            <dt class="eyebrow pt-0.5">Length</dt>
+            <dt class="eyebrow pt-0.5">{{ t('tracingDetail.length') }}</dt>
             <dd class="datum">{{ length }}</dd>
           </template>
         </dl>
@@ -96,8 +105,7 @@
         <p
           class="mt-4 rounded-notebook bg-paper-100 px-3 py-2 text-xs text-ink-500 dark:bg-night-700 dark:text-paper-400"
         >
-          Traced routes are drawn dashed because a tracing is an interpretation of where something
-          ran, not a survey of it.
+          {{ t('tracingDetail.tracedNote') }}
         </p>
 
         <div
@@ -116,17 +124,17 @@
             :to="`/tracing/${tracing.id}`"
             class="text-sm text-oxide-600 underline underline-offset-2 dark:text-oxide-300"
           >
-            Open the full entry
+            {{ t('tracingDetail.openFullEntry') }}
           </NuxtLink>
           <NuxtLink
             v-if="loggedIn"
             :to="`/tracing/${tracing.id}/edit`"
             class="text-sm text-ink-500 underline underline-offset-2 dark:text-paper-400"
           >
-            Edit
+            {{ t('tracingDetail.edit') }}
           </NuxtLink>
           <p class="datum ml-auto">
-            {{ tracing.attribution ?? 'Vestigia contributors' }}
+            {{ tracing.attribution ?? t('tracingDetail.defaultAttribution') }}
           </p>
         </div>
       </article>

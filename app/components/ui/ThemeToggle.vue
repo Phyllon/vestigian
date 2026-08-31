@@ -1,5 +1,10 @@
 <script setup lang="ts">
-  const { isDark, toggle, label } = useColorScheme()
+  const { t } = useI18n()
+  const { isDark, toggle } = useColorScheme()
+
+  const label = computed(() =>
+    isDark.value ? t('themeToggle.switchToDay') : t('themeToggle.switchToNight'),
+  )
 </script>
 
 <template>

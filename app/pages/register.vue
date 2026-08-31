@@ -1,6 +1,8 @@
 <script setup lang="ts">
+  const { t } = useI18n()
+
   definePageMeta({ layout: 'reading' })
-  useHead({ title: 'Create an account' })
+  useHead({ title: t('registerPage.title') })
 </script>
 
 <template>

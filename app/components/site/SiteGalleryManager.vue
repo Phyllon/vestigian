@@ -4,6 +4,7 @@
   const props = defineProps<{ siteId: number; images: SiteImage[] }>()
   const emit = defineEmits<{ changed: [] }>()
 
+  const { t } = useI18n()
   const { buildUrl } = useImageUrl()
   const toast = useToast()
 
@@ -17,7 +18,7 @@
    * a wall of identical names. Every one of them says which picture it acts on.
    */
   const describe = (image: SiteImage, index: number): string =>
-    image.caption?.trim() || `photograph ${index + 1}`
+    image.caption?.trim() || t('siteGalleryManager.defaultPhotographName', { index: index + 1 })
 
   const move = async (image: SiteImage, direction: -1 | 1): Promise<void> => {
     const currentIndex = props.images.findIndex((candidate) => candidate.id === image.id)
@@ -33,8 +34,10 @@
       emit('changed')
     } catch (error) {
       toast.add({
-        title: 'Could not reorder',
-        description: (error as { data?: { message?: string } }).data?.message ?? 'Try again.',
+        title: t('siteGalleryManager.reorderFailedTitle'),
+        description:
+          (error as { data?: { message?: string } }).data?.message ??
+          t('siteGalleryManager.tryAgain'),
         color: 'error',
       })
     } finally {
@@ -46,12 +49,14 @@
     busyImageId.value = image.id
     try {
       await $fetch(`/api/sites/${props.siteId}/images/${image.id}`, { method: 'DELETE' })
-      toast.add({ title: 'Photograph withdrawn from the gallery.', color: 'neutral' })
+      toast.add({ title: t('siteGalleryManager.withdrawn'), color: 'neutral' })
       emit('changed')
     } catch (error) {
       toast.add({
-        title: 'Could not withdraw',
-        description: (error as { data?: { message?: string } }).data?.message ?? 'Try again.',
+        title: t('siteGalleryManager.withdrawFailedTitle'),
+        description:
+          (error as { data?: { message?: string } }).data?.message ??
+          t('siteGalleryManager.tryAgain'),
         color: 'error',
       })
     } finally {
@@ -76,8 +81,10 @@
       emit('changed')
     } catch (error) {
       toast.add({
-        title: 'Could not save',
-        description: (error as { data?: { message?: string } }).data?.message ?? 'Try again.',
+        title: t('siteGalleryManager.saveFailedTitle'),
+        description:
+          (error as { data?: { message?: string } }).data?.message ??
+          t('siteGalleryManager.tryAgain'),
         color: 'error',
       })
     } finally {
@@ -89,10 +96,9 @@
 <template>
   <section class="space-y-3">
     <div>
-      <h2 class="eyebrow">Photographs</h2>
+      <h2 class="eyebrow">{{ t('siteGalleryManager.title') }}</h2>
       <p class="mt-1 text-sm text-ink-500 dark:text-paper-400">
-        The first image is the one shown on the map. Withdrawing hides a photograph without erasing
-        the record that it was here.
+        {{ t('siteGalleryManager.intro') }}
       </p>
     </div>
 
@@ -113,15 +119,15 @@
           <template v-if="editingId === image.id">
             <UInput
               v-model="draftCaption"
-              placeholder="Caption"
-              aria-label="Caption"
+              :placeholder="t('siteGalleryManager.captionPlaceholder')"
+              :aria-label="t('siteGalleryManager.captionPlaceholder')"
               size="xs"
               class="w-full"
             />
             <UInput
               v-model="draftAttribution"
-              placeholder="Who took it"
-              aria-label="Who took it"
+              :placeholder="t('siteGalleryManager.whoTookItPlaceholder')"
+              :aria-label="t('siteGalleryManager.whoTookItPlaceholder')"
               size="xs"
               class="mt-1 w-full"
             />
@@ -132,20 +138,20 @@
                 :loading="busyImageId === image.id"
                 @click="saveMetadata(image)"
               >
-                Save
+                {{ t('siteGalleryManager.save') }}
               </UButton>
               <UButton size="xs" variant="ghost" color="neutral" @click="editingId = null">
-                Cancel
+                {{ t('siteGalleryManager.cancel') }}
               </UButton>
             </div>
           </template>
 
           <template v-else>
             <p class="truncate text-sm text-ink-900 dark:text-paper-100">
-              {{ image.caption || 'No caption' }}
+              {{ image.caption || t('siteGalleryManager.noCaption') }}
             </p>
             <p class="datum truncate">
-              {{ image.attribution ?? 'Credit unknown' }} · {{ image.licence }}
+              {{ image.attribution ?? t('siteGalleryManager.creditUnknown') }} · {{ image.licence }}
             </p>
 
             <div class="mt-1.5 flex flex-wrap items-center gap-1">
@@ -155,7 +161,7 @@
                 color="neutral"
                 icon="i-lucide-arrow-up"
                 :disabled="index === 0 || busyImageId === image.id"
-                :aria-label="`Move ${describe(image, index)} earlier`"
+                :aria-label="t('siteGalleryManager.moveEarlier', { name: describe(image, index) })"
                 @click="move(image, -1)"
               />
               <UButton
@@ -164,27 +170,29 @@
                 color="neutral"
                 icon="i-lucide-arrow-down"
                 :disabled="index === images.length - 1 || busyImageId === image.id"
-                :aria-label="`Move ${describe(image, index)} later`"
+                :aria-label="t('siteGalleryManager.moveLater', { name: describe(image, index) })"
                 @click="move(image, 1)"
               />
               <UButton
                 size="xs"
                 variant="ghost"
                 color="neutral"
-                :aria-label="`Edit the caption and credit of ${describe(image, index)}`"
+                :aria-label="
+                  t('siteGalleryManager.editCaptionAndCredit', { name: describe(image, index) })
+                "
                 @click="startEditing(image)"
               >
-                Edit
+                {{ t('siteGalleryManager.edit') }}
               </UButton>
               <UButton
                 size="xs"
                 variant="ghost"
                 color="error"
                 :loading="busyImageId === image.id"
-                :aria-label="`Withdraw ${describe(image, index)}`"
+                :aria-label="t('siteGalleryManager.withdraw', { name: describe(image, index) })"
                 @click="withdraw(image)"
               >
-                Withdraw
+                {{ t('siteGalleryManager.withdrawButton') }}
               </UButton>
             </div>
           </template>
@@ -192,6 +200,6 @@
       </li>
     </ul>
 
-    <p v-if="images.length === 0" class="datum">No photographs yet.</p>
+    <p v-if="images.length === 0" class="datum">{{ t('siteGalleryManager.noPhotographs') }}</p>
   </section>
 </template>

@@ -14,6 +14,7 @@
 
   const isEditing = computed(() => props.tracingId !== undefined)
 
+  const { t } = useI18n()
   const toast = useToast()
   const { editsGoLiveImmediately } = useSession()
 
@@ -22,7 +23,7 @@
   const isSaving = ref(false)
 
   const schema = z.object({
-    title: z.string().trim().min(3, 'Name the road or structure.').max(240),
+    title: z.string().trim().min(3, t('tracingEditorForm.nameRequired')).max(240),
     category: z.enum(['infrastructure', 'fortification', 'other']),
     description: z.string().trim().max(20000).optional(),
   })
@@ -35,11 +36,11 @@
     description: props.initial?.description ?? '',
   })
 
-  const categoryOptions = [
-    { label: 'Road, aqueduct or bridge', value: 'infrastructure' },
-    { label: 'Wall or defensive line', value: 'fortification' },
-    { label: 'Something else', value: 'other' },
-  ]
+  const categoryOptions = computed(() => [
+    { label: t('tracingEditorForm.categoryOptions.infrastructure'), value: 'infrastructure' },
+    { label: t('tracingEditorForm.categoryOptions.fortification'), value: 'fortification' },
+    { label: t('tracingEditorForm.categoryOptions.other'), value: 'other' },
+  ])
 
   const vertexCount = computed(() => {
     const drawn = geometry.value
@@ -55,7 +56,7 @@
 
   const save = async (event: FormSubmitEvent<TracingFormState>): Promise<void> => {
     if (!geometry.value) {
-      toast.add({ title: 'Draw the line first, then save.', color: 'warning' })
+      toast.add({ title: t('tracingEditorForm.drawFirst'), color: 'warning' })
       return
     }
 
@@ -75,9 +76,10 @@
       emit('submitted')
     } catch (error) {
       toast.add({
-        title: 'That could not be saved',
+        title: t('tracingEditorForm.saveFailedTitle'),
         description:
-          (error as { data?: { message?: string } }).data?.message ?? 'Try again shortly.',
+          (error as { data?: { message?: string } }).data?.message ??
+          t('tracingEditorForm.tryAgainShortly'),
         color: 'error',
       })
     } finally {
@@ -89,41 +91,49 @@
 <template>
   <div class="space-y-4">
     <header class="space-y-1">
-      <h2 class="text-xl">{{ isEditing ? 'Edit this tracing' : 'Trace a route' }}</h2>
+      <h2 class="text-xl">
+        {{ isEditing ? t('tracingEditorForm.editTitle') : t('tracingEditorForm.traceTitle') }}
+      </h2>
       <p class="text-sm text-ink-500 dark:text-paper-400">
-        {{
-          isEditing
-            ? 'Adjust the existing points, or redraw the course entirely.'
-            : 'Click along the course, then adjust the points. Traced routes appear dashed on the map, because a tracing is an interpretation rather than a survey.'
-        }}
+        {{ isEditing ? t('tracingEditorForm.editHint') : t('tracingEditorForm.traceHint') }}
       </p>
     </header>
 
     <ContributeGeometryDrawTool :initial-geometry="initialGeometry" @finished="captureGeometry" />
 
-    <p v-if="vertexCount > 0" class="datum">{{ vertexCount }} points captured</p>
+    <p v-if="vertexCount > 0" class="datum">
+      {{ t('tracingEditorForm.pointsCaptured', { count: vertexCount }) }}
+    </p>
 
     <UForm :schema="schema" :state="state" class="space-y-4" @submit="save">
-      <UFormField label="Name" name="title" required>
+      <UFormField :label="t('tracingEditorForm.name')" name="title" required>
         <UInput
           v-model="state.title"
-          placeholder="Via Claudia Augusta, northern section"
+          :placeholder="t('tracingEditorForm.namePlaceholder')"
           class="w-full"
         />
       </UFormField>
 
-      <UFormField label="Type" name="category" required>
+      <UFormField :label="t('tracingEditorForm.type')" name="category" required>
         <USelect v-model="state.category" :items="categoryOptions" class="w-full" />
       </UFormField>
 
-      <UFormField label="Notes" name="description" hint="Evidence, dating, uncertainty">
+      <UFormField
+        :label="t('tracingEditorForm.notes')"
+        name="description"
+        :hint="t('tracingEditorForm.notesHint')"
+      >
         <UTextarea v-model="state.description" :rows="5" class="w-full" />
       </UFormField>
 
-      <UFormField v-if="isEditing" label="What did you change?" hint="Shown in the history">
+      <UFormField
+        v-if="isEditing"
+        :label="t('tracingEditorForm.whatChanged')"
+        :hint="t('tracingEditorForm.whatChangedHint')"
+      >
         <UInput
           v-model="editSummary"
-          placeholder="Corrected the course east of the river"
+          :placeholder="t('tracingEditorForm.editSummaryPlaceholder')"
           class="w-full"
         />
       </UFormField>
@@ -133,16 +143,18 @@
       >
         {{
           editsGoLiveImmediately
-            ? 'Your edits publish immediately.'
-            : 'A moderator reviews this before it appears on the map.'
+            ? t('tracingEditorForm.editsPublishImmediately')
+            : t('tracingEditorForm.reviewedBeforeAppearing')
         }}
       </p>
 
       <div class="flex items-center gap-2">
         <UButton type="submit" :loading="isSaving" :disabled="vertexCount < 2" color="primary">
-          {{ isEditing ? 'Save changes' : 'Save tracing' }}
+          {{ isEditing ? t('tracingEditorForm.saveChanges') : t('tracingEditorForm.saveTracing') }}
         </UButton>
-        <UButton variant="ghost" color="neutral" @click="emit('cancel')">Cancel</UButton>
+        <UButton variant="ghost" color="neutral" @click="emit('cancel')">{{
+          t('tracingEditorForm.cancel')
+        }}</UButton>
       </div>
     </UForm>
   </div>

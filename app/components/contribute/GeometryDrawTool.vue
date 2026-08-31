@@ -12,15 +12,28 @@
   const props = defineProps<{ initialGeometry?: GeoJSON.Geometry }>()
   const emit = defineEmits<{ finished: [geometry: GeoJSON.Geometry] }>()
 
+  const { t } = useI18n()
   const map = useMapInstance()
   const activeMode = ref<DrawMode>('linestring')
   let draw: TerraDraw | null = null
 
-  const modes = [
-    { value: 'linestring' as const, label: 'Trace a line', icon: 'i-lucide-spline' },
-    { value: 'polygon' as const, label: 'Outline an area', icon: 'i-lucide-pentagon' },
-    { value: 'select' as const, label: 'Adjust points', icon: 'i-lucide-mouse-pointer-2' },
-  ]
+  const modes = computed(() => [
+    {
+      value: 'linestring' as const,
+      label: t('geometryDrawTool.traceLine'),
+      icon: 'i-lucide-spline',
+    },
+    {
+      value: 'polygon' as const,
+      label: t('geometryDrawTool.outlineArea'),
+      icon: 'i-lucide-pentagon',
+    },
+    {
+      value: 'select' as const,
+      label: t('geometryDrawTool.adjustPoints'),
+      icon: 'i-lucide-mouse-pointer-2',
+    },
+  ])
 
   const setMode = (mode: DrawMode): void => {
     activeMode.value = mode
@@ -99,7 +112,11 @@
 </script>
 
 <template>
-  <div class="leaf flex items-center gap-1 p-1" role="toolbar" aria-label="Drawing tools">
+  <div
+    class="leaf flex items-center gap-1 p-1"
+    role="toolbar"
+    :aria-label="t('geometryDrawTool.toolbarLabel')"
+  >
     <!-- Which mode is active is otherwise carried by the fill colour alone. -->
     <button
       v-for="mode in modes"
@@ -121,7 +138,11 @@
 
     <span class="mx-1 h-6 w-px bg-paper-300 dark:bg-night-600" aria-hidden="true" />
 
-    <UButton size="xs" color="primary" @click="finish">Use this shape</UButton>
-    <UButton size="xs" variant="ghost" color="neutral" @click="clear">Clear</UButton>
+    <UButton size="xs" color="primary" @click="finish">{{
+      t('geometryDrawTool.useShape')
+    }}</UButton>
+    <UButton size="xs" variant="ghost" color="neutral" @click="clear">{{
+      t('geometryDrawTool.clear')
+    }}</UButton>
   </div>
 </template>

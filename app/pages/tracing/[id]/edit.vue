@@ -3,15 +3,16 @@
 
   definePageMeta({ middleware: 'authenticated' })
 
+  const { t } = useI18n()
   const route = useRoute()
 
   const { data: tracing } = await useFetch<TracingDetail>(() => `/api/tracings/${route.params.id}`)
 
   if (!tracing.value) {
-    throw createError({ statusCode: 404, statusMessage: 'No tracing with that identifier.' })
+    throw createError({ statusCode: 404, statusMessage: t('tracingEditPage.notFound') })
   }
 
-  useHead({ title: () => `Editing ${tracing.value?.title ?? ''}` })
+  useHead({ title: () => t('tracingEditPage.editingTitle', { title: tracing.value?.title ?? '' }) })
 
   const initial = computed(() => ({
     title: tracing.value?.title,
@@ -58,12 +59,12 @@
 <template>
   <MapCanvas v-if="tracing">
     <!-- The map fills the page; the heading it needs has nowhere visible to go. -->
-    <h1 class="sr-only">Edit {{ tracing.title }}</h1>
+    <h1 class="sr-only">{{ t('tracingEditPage.srHeading', { title: tracing.title }) }}</h1>
 
     <div class="pointer-events-none absolute inset-0">
       <aside
         class="pointer-events-auto absolute inset-x-0 bottom-0 max-h-[70vh] overflow-y-auto rounded-t-lg bg-paper-50 p-5 shadow-lifted md:inset-y-0 md:left-auto md:right-0 md:w-[26rem] md:rounded-none dark:bg-night-800"
-        aria-label="Tracing editor"
+        :aria-label="t('tracingEditPage.editorAriaLabel')"
       >
         <ContributeTracingEditorForm
           :tracing-id="tracing.id"

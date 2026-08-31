@@ -62,19 +62,34 @@ export const formatFrontierLength = (metres: number): string => {
   return km >= 10 ? `${Math.round(km)} km` : `${km.toFixed(1)} km`
 }
 
+export type FrontierTranslate = (key: string, params?: Record<string, unknown>) => string
+
+interface FrontierYearsRequest {
+  from: number | null
+  to: number | null
+  t: FrontierTranslate
+}
+
 /**
  * A sector's date range as a reader would say it.
  *
  * Negative years are BC, matching `formatPeriod` in `useSiteQuery`. The frontier
  * dates are all AD bar the Rhine and the Danube, whose garrisons predate the
  * era, and writing "-15" on a page about Augustus would be a small failure.
+ *
+ * `t` comes from the calling component — this file has no guaranteed i18n
+ * context of its own — so the request is named rather than a fourth
+ * positional parameter.
  */
-export const formatFrontierYears = (from: number | null, to: number | null): string => {
+export const formatFrontierYears = ({ from, to, t }: FrontierYearsRequest): string => {
   if (from === null && to === null) return ''
-  const year = (value: number): string => (value < 0 ? `${Math.abs(value)} BC` : `AD ${value}`)
-  if (from === null) return `to ${year(to!)}`
-  if (to === null) return `from ${year(from)}`
-  return `${year(from)} – ${year(to)}`
+  const year = (value: number): string =>
+    value < 0
+      ? t('limesFormat.bc', { year: Math.abs(value) })
+      : t('limesFormat.ad', { year: value })
+  if (from === null) return t('limesFormat.toYear', { year: year(to!) })
+  if (to === null) return t('limesFormat.fromYear', { year: year(from) })
+  return t('limesFormat.yearRange', { from: year(from), to: year(to) })
 }
 
 /**
@@ -82,8 +97,8 @@ export const formatFrontierYears = (from: number | null, to: number | null): str
  * than for precision. The roll's whole job is to be walked in order, so the
  * number beside each entry is a milepost, not a measurement.
  */
-export const formatOffset = (metres: number): string => {
-  if (metres < 500) return 'at the start'
-  if (metres < 10000) return `${(metres / 1000).toFixed(1)} km along`
-  return `${Math.round(metres / 1000)} km along`
+export const formatOffset = (metres: number, t: FrontierTranslate): string => {
+  if (metres < 500) return t('limesFormat.atTheStart')
+  if (metres < 10000) return t('limesFormat.kmAlong', { km: (metres / 1000).toFixed(1) })
+  return t('limesFormat.kmAlong', { km: Math.round(metres / 1000) })
 }

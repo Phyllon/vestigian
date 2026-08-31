@@ -812,20 +812,63 @@ useful for so a human knows what still needs a manual pass. The five output
 files are static, checked-in
 JSON, editable afterward like any translation.
 
+**`pnpm i18n:translate` preflights the LibreTranslate endpoint** (`/languages`,
+resolved against the origin of `NUXT_TRANSLATE_URL` — that variable already
+points at `/translate`, so naively appending `/languages` to it hits a 404 that
+looks identical to a dead service) with its own 5s timeout before starting.
+Without it a dead arbiter (below) hangs the whole run instead of failing fast
+with a message that says what to do.
+
+**LibreTranslate's gunicorn arbiter has been observed dropping to zero
+workers, twice, and `init: true` alone does not fix it.** Its own entrypoint
+runs gunicorn with `--max-requests 250`; the burst of small requests
+`translate-locales.ts` fires hits that ceiling on both `LT_THREADS` workers
+within about a minute of each other, and gunicorn is supposed to spawn a
+replacement the instant it retires one ("Autorestarting worker after current
+request") — confirmed by container logs, twice, that it sometimes does not.
+The container keeps listening and the healthcheck can still pass on stale
+luck, so every request queues forever with nothing to accept it. `init: true`
+(tini as PID 1, the standard fix for a dockerized process losing signals) is
+kept in both compose files as correct hygiene but was tried first and did
+**not** stop this from recurring, which is what proves the arbiter itself is
+wedging — plausibly in a `child_exit` hook tied to the Prometheus multiprocess
+cleanup the entrypoint sets up — rather than a signal-reaping problem. The
+actual fix is `autoheal` (`willfarrell/autoheal`, both compose files):
+`libretranslate` carries `labels: { autoheal: 'true' }` and a healthcheck cut
+from `retries: 30` to `3`, so `unhealthy` is reached in well under a minute
+instead of five, and the sidecar restarts the container itself — nothing in
+this repo can fix gunicorn's own arbiter, so restarting around it is the
+whole mitigation. `docker restart vestigia-dev-libretranslate-1` is still the
+manual fallback if autoheal hasn't caught up yet, and the preflight check
+above is what turns a still-wedged arbiter into a clear message instead of a
+silent hang in the meantime.
+
+**The pre-commit hook keeps the five locales from drifting.** When
+`i18n/locales/en.json` is staged, `.husky/pre-commit` runs
+`scripts/i18n/translate-locales.ts` before `lint-staged` and stages whatever
+it changes — the script is already resumable and a no-op in well under a
+second when nothing is pending, so this costs nothing on a commit that didn't
+touch strings. A translation failure (LibreTranslate unreachable, most likely)
+blocks the commit with the same message the script prints standalone, rather
+than letting an English source change ship with four stale locales and a
+fifth that quietly reads the same as English.
+
 `app/composables/ui/useUiLocale.ts` wraps `useI18n()` the way `useColorScheme.ts`
 wraps `useColorMode()` — except colour mode leans entirely on `@nuxt/ui`'s
 built-in module for persistence, and there is no locale equivalent, so the
 cookie handling is new here. `LanguageSwitcher.vue` sits beside
 `ThemeToggle.vue` in both layout headers.
 
-**Component migration is not exhaustive.** Every string in the components
-listed as the pattern (`BasemapSwitcher`, `Legend`, `SiteDetailPanel`,
-`LoginForm`, `RegisterForm`, `ReviewQueue`, both layouts, `SiteEnrichment`) is
-extracted; the rest of `app/components/` still carries English literals. A
-component not yet migrated simply shows English regardless of locale — visible
-but not broken — so the remaining folders can be migrated one at a time
-without an in-between state where the interface is inconsistent in a way that
-looks like a bug rather than an incomplete rollout.
+**Component migration now covers `app/components/`, `app/pages/` and the
+composables/shared utilities their strings came from.** A handful of pure
+functions with no guaranteed i18n context (`useGeolocation`'s error state,
+`useSiteQuery`'s `formatPeriod`, `useLimes`'s `formatFrontierYears` and
+`formatOffset`, `checkPasswordRules`) were changed to return a code or accept
+a `t` function from the calling component rather than a hardcoded English
+string — the pattern to follow for the next one like it. What vici's own
+source calls a site or tracing by (`sites.category`, six languages' worth of
+`psummaries`/`ptexts`) is unaffected; only this app's own interface chrome is
+translated.
 
 ## Not built
 

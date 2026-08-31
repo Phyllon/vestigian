@@ -1,6 +1,8 @@
 <script setup lang="ts">
+  const { t } = useI18n()
+
   definePageMeta({ layout: 'reading' })
-  useHead({ title: 'Confirm your address' })
+  useHead({ title: t('verifyPage.title') })
 
   const route = useRoute()
   const state = ref<'working' | 'done' | 'failed'>('working')
@@ -15,7 +17,7 @@
     const token = route.query.token as string | undefined
     if (!token) {
       state.value = 'failed'
-      message.value = 'That link is missing its token. Open it directly from the email.'
+      message.value = t('verifyPage.missingToken')
       return
     }
 
@@ -25,7 +27,7 @@
     } catch (error) {
       state.value = 'failed'
       message.value =
-        (error as { data?: { message?: string } }).data?.message ?? 'That link could not be used.'
+        (error as { data?: { message?: string } }).data?.message ?? t('verifyPage.couldNotUse')
     }
   }
 
@@ -37,25 +39,26 @@
 <template>
   <div class="leaf mx-auto max-w-md p-8" aria-live="polite">
     <template v-if="state === 'working'">
-      <p class="eyebrow">Checking</p>
-      <h1 class="mt-2 text-2xl">One moment</h1>
+      <p class="eyebrow">{{ t('verifyPage.checking') }}</p>
+      <h1 class="mt-2 text-2xl">{{ t('verifyPage.oneMoment') }}</h1>
     </template>
 
     <template v-else-if="state === 'done'">
-      <p class="eyebrow">Confirmed</p>
-      <h1 class="mt-2 text-2xl">Your account is ready</h1>
+      <p class="eyebrow">{{ t('verifyPage.confirmed') }}</p>
+      <h1 class="mt-2 text-2xl">{{ t('verifyPage.accountReady') }}</h1>
       <p class="mt-2 text-sm text-ink-700 dark:text-paper-200">
-        Sign in and record your first site. The first two go past a moderator; after that they
-        publish as you write them.
+        {{ t('verifyPage.readyBody') }}
       </p>
-      <UButton to="/login" class="mt-5" color="primary">Sign in</UButton>
+      <UButton to="/login" class="mt-5" color="primary">{{ t('verifyPage.signIn') }}</UButton>
     </template>
 
     <template v-else>
-      <p class="eyebrow">Not confirmed</p>
-      <h1 class="mt-2 text-2xl">That link did not work</h1>
+      <p class="eyebrow">{{ t('verifyPage.notConfirmed') }}</p>
+      <h1 class="mt-2 text-2xl">{{ t('verifyPage.linkDidNotWork') }}</h1>
       <p class="mt-2 text-sm text-ink-700 dark:text-paper-200">{{ message }}</p>
-      <UButton to="/register" class="mt-5" variant="ghost" color="neutral">Start again</UButton>
+      <UButton to="/register" class="mt-5" variant="ghost" color="neutral">{{
+        t('verifyPage.startAgain')
+      }}</UButton>
     </template>
   </div>
 </template>

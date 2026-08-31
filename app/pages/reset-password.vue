@@ -3,8 +3,10 @@
   import { passwordSchema } from '#shared/utils/password'
   import type { FormSubmitEvent } from '@nuxt/ui'
 
+  const { t } = useI18n()
+
   definePageMeta({ layout: 'reading' })
-  useHead({ title: 'Set a new password' })
+  useHead({ title: t('resetPasswordPage.title') })
 
   const route = useRoute()
   const toast = useToast()
@@ -16,7 +18,7 @@
       passwordConfirmation: z.string(),
     })
     .refine((values) => values.password === values.passwordConfirmation, {
-      message: 'The two passwords do not match.',
+      message: t('resetPasswordPage.passwordMismatch'),
       path: ['passwordConfirmation'],
     })
 
@@ -33,13 +35,14 @@
         method: 'POST',
         body: { token: route.query.token, password: event.data.password },
       })
-      toast.add({ title: 'Password changed. Sign in with the new one.', color: 'success' })
+      toast.add({ title: t('resetPasswordPage.changed'), color: 'success' })
       await navigateTo('/login')
     } catch (error) {
       toast.add({
-        title: 'Could not reset',
+        title: t('resetPasswordPage.resetFailedTitle'),
         description:
-          (error as { data?: { message?: string } }).data?.message ?? 'Ask for a new link.',
+          (error as { data?: { message?: string } }).data?.message ??
+          t('resetPasswordPage.askForNewLink'),
         color: 'error',
       })
     } finally {
@@ -58,20 +61,20 @@
       @submit="submit"
     >
       <header>
-        <h1 class="text-2xl">Set a new password</h1>
+        <h1 class="text-2xl">{{ t('resetPasswordPage.title') }}</h1>
       </header>
 
-      <UFormField label="New password" name="password" required>
+      <UFormField :label="t('resetPasswordPage.newPassword')" name="password" required>
         <AuthPasswordField v-model="state.password" autocomplete="new-password" />
         <AuthPasswordRequirements :password="state.password ?? ''" />
       </UFormField>
 
-      <UFormField label="Repeat it" name="passwordConfirmation" required>
+      <UFormField :label="t('resetPasswordPage.repeatIt')" name="passwordConfirmation" required>
         <AuthPasswordField v-model="state.passwordConfirmation" autocomplete="new-password" />
       </UFormField>
 
       <UButton type="submit" :loading="isSubmitting" :disabled="!isComplete" color="primary" block>
-        Save password
+        {{ t('resetPasswordPage.savePassword') }}
       </UButton>
     </UForm>
   </div>

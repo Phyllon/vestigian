@@ -9,35 +9,37 @@
    * URL with the camera in the hash, cannot be. Rendered on the server for the
    * same reason.
    */
+  const { t } = useI18n()
+
   const { data: sectors } = await useFetch<LimesSector[]>('/api/limes/sectors')
 
   const totalLength = computed(() =>
     (sectors.value ?? []).reduce((sum, sector) => sum + sector.lengthMetres, 0),
   )
 
-  useHead({ title: 'The limes' })
-  useSeoMeta({
-    description:
-      'The frontier of the Roman empire, sector by sector: its walls, its rivers and the forts and watchtowers along them.',
-  })
+  useHead({ title: t('limesIndexPage.title') })
+  useSeoMeta({ description: t('limesIndexPage.description') })
 
   definePageMeta({ layout: 'reading' })
 </script>
 
 <template>
   <article>
-    <h1 class="font-display text-3xl text-ink-900 dark:text-paper-100">The limes</h1>
+    <h1 class="font-display text-3xl text-ink-900 dark:text-paper-100">
+      {{ t('limesIndexPage.title') }}
+    </h1>
 
     <p class="mt-4 text-base leading-relaxed text-ink-700 dark:text-paper-200">
-      The edge of the Roman world, from the Solway to the Euphrates. It was never one thing: a
-      mortared wall across the Raetian plateau, a river patrolled from its western bank, a line of
-      forts at the last reliable water before the desert. What follows is that edge in the stretches
-      the sources name, drawn from the Ancient World Mapping Center's extent of the empire at 200 CE
-      and from its record of the walls that were actually built.
+      {{ t('limesIndexPage.intro') }}
     </p>
 
     <p class="mt-3 font-mono text-sm text-ink-500 dark:text-paper-400">
-      {{ formatFrontierLength(totalLength) }} across {{ sectors?.length ?? 0 }} stretches
+      {{
+        t('limesIndexPage.acrossStretches', {
+          length: formatFrontierLength(totalLength),
+          count: sectors?.length ?? 0,
+        })
+      }}
     </p>
 
     <ul class="mt-8 flex flex-col">
@@ -60,18 +62,23 @@
           </p>
           <p class="mt-1.5 font-mono text-xs text-ink-500 dark:text-paper-400">
             {{ formatFrontierLength(sector.lengthMetres) }} ·
-            {{ formatFrontierYears(sector.minYear, sector.maxYear) }}
+            {{ formatFrontierYears({ from: sector.minYear, to: sector.maxYear, t }) }}
           </p>
         </NuxtLink>
       </li>
     </ul>
 
     <p class="mt-8 text-xs leading-relaxed text-ink-500 dark:text-paper-400">
-      Frontier derived from the
-      <a href="https://github.com/AWMC/geodata" rel="noopener" class="underline underline-offset-2">
-        Ancient World Mapping Center</a
-      >'s extent of the empire and its wall linework, ODbL 1.0. The names and the notes above are
-      this atlas's own; the geometry is not.
+      <i18n-t keypath="limesIndexPage.attribution">
+        <template #link>
+          <a
+            href="https://github.com/AWMC/geodata"
+            rel="noopener"
+            class="underline underline-offset-2"
+            >{{ t('limesIndexPage.attributionLinkText') }}</a
+          >
+        </template>
+      </i18n-t>
     </p>
   </article>
 </template>

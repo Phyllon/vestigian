@@ -93,6 +93,19 @@
       "failedTitle": "Registrazione fallita",
       "failedDefault": "Riprova tra poco.",
       "privacyNotice": "Creazione di un account memorizza il tuo indirizzo e-mail e il nome della visualizzazione — vedere il{link}per quello che significa e per quanto tempo."
+    },
+    "passwordField": {
+      "showPassword": "Mostra la password",
+      "hidePassword": "Nascondi la password"
+    },
+    "passwordRequirements": {
+      "met": "— riunito",
+      "notMet": "— non ancora incontrato",
+      "rules": {
+        "length": "Tra{min}e{max}caratteri",
+        "capital": "Una lettera di capitale",
+        "special": "Un carattere speciale"
+      }
     }
   },
   "moderation": {
@@ -131,6 +144,69 @@
       "rejectedPlural": "respinto",
       "batchResultTitle": "{count} {decision}.",
       "batchResultSkipped": "{count}saltato."
+    },
+    "contributorTable": {
+      "findPlaceholder": "Trova un collaboratore",
+      "accepted": "{count}accettato",
+      "waiting": "{count}attesa",
+      "restoreTrust": "Ripristinare la fiducia",
+      "restoreTrustAria": "Ripristinare la fiducia per{name}",
+      "suspendPublishing": "Sospenda la pubblicazione",
+      "suspendPublishingAria": "Sospenda la pubblicazione per{name}",
+      "roleAria": "Ruolo per{name}",
+      "suspendPrompt": "Perché{name}essere sospeso?",
+      "suspendHint": "Inviato loro, verbatim",
+      "suspendReasonPlaceholder": "Tre modifiche rimosso testo sorgente senza dire perché.",
+      "cancel": "Annulla",
+      "untouchedNote": "I loro contributi accettati sono intatti.",
+      "noMatches": "Nessun collaboratore lo corrisponde.",
+      "standing": {
+        "moderator": "Pubblicazioni per ruolo",
+        "revoked": "Sospeso — ogni modifica in coda",
+        "earned": "Pubblica immediatamente",
+        "probation": "Queued —{remaining}di andare"
+      },
+      "trustSuspended": "Pubblicazione automatica sospesa.",
+      "trustRestored": "Fiducia restaurata.",
+      "toldByEmail": "{name}è stato detto via e-mail.",
+      "trustFailedTitle": "Non potrebbe cambiare la fiducia",
+      "tryAgain": "Riprova.",
+      "nowRole": "{name}è ora{role}.",
+      "roleFailedTitle": "Non poteva cambiare ruolo",
+      "roles": {
+        "contributor": "Contributatore",
+        "moderator": "Moderatore",
+        "admin": "Amministratore"
+      }
+    },
+    "revisionDiff": {
+      "fields": {
+        "title": "Nome",
+        "category": "Tipo",
+        "summary": "Sintesi",
+        "description": "Designazione",
+        "position": "Posizione",
+        "periodFrom": "Periodo da",
+        "periodTo": "Periodo a",
+        "geometry": "Forma",
+        "editSummary": "Modifica nota"
+      },
+      "kinds": {
+        "added": "aggiunto",
+        "removed": "rimosso",
+        "changed": "cambiato"
+      },
+      "noChanges": "Nessun campo è cambiato."
+    },
+    "queuePage": {
+      "title": "Visualizza la coda",
+      "intro": "Contributi da conti che non hanno ancora guadagnato la pubblicazione automatica.",
+      "contributorsLink": "Contributori"
+    },
+    "contributorsPage": {
+      "title": "Contributori",
+      "backToQueue": "Visualizza la coda",
+      "intro": "Sospettare la pubblicazione mantiene intatto il record di un collaboratore - ripristinando li restituisce esattamente dove erano."
     }
   },
   "licence": {
@@ -202,5 +278,353 @@
     "minorsBody": "Vestigia non è rivolta ai bambini. Se hai meno di 16 anni, non creare un account senza il coinvolgimento di un genitore o di un tutore.",
     "changesHeading": "Cambiamenti",
     "changesBody": "Questa pagina è aggiornata quando ciò che il servizio realmente cambia. Esso riflette la versione corrente dell'applicazione in esecuzione."
+  },
+  "geolocate": {
+    "locationBlocked": "Posizione bloccata",
+    "stopFollowing": "Smettere di seguire la tua posizione",
+    "showPosition": "Mostra la tua posizione",
+    "errors": {
+      "denied": "La posizione è bloccata. Permetterlo nelle impostazioni del browser per utilizzare questo.",
+      "timeout": "Ancora niente. Spostatevi da qualche parte con una vista più chiara del cielo.",
+      "unavailable": "La posizione non è disponibile su questo dispositivo in questo momento.",
+      "insecureContext": "La posizione ha bisogno di una connessione sicura e di un dispositivo con GPS."
+    }
+  },
+  "revisionHistory": {
+    "title": "Storia",
+    "loading": "Caricamento..",
+    "created": "Creato",
+    "edited": "Modificato",
+    "revert": "di nuovo",
+    "unknownAuthor": "Sconosciuto",
+    "publishedAutomatically": "Pubblicato automaticamente — l'autore ha guadagnato fiducia.",
+    "reviewedBy": "Commento rilasciato da{reviewer}.",
+    "published": "Pubblicato.",
+    "restoreEarlier": "Ripristinare la versione prima di questo",
+    "reverted": "Revertito. La versione precedente è di nuovo live.",
+    "revertFailedTitle": "Non posso tornare indietro",
+    "tryAgain": "Riprova."
+  },
+  "categories": {
+    "settlement": "Settlement",
+    "fortification": "Fortificazione",
+    "sanctuary": "Santuario",
+    "burial": "Sepoltura",
+    "infrastructure": "Infrastrutture",
+    "villa": "Villa",
+    "production": "Produzione",
+    "findspot": "Trova il posto",
+    "other": "Altri"
+  },
+  "limesMarks": {
+    "watchtower": "Torre di avvistamento",
+    "fortlet": "Fortezza",
+    "fort": "Forte",
+    "fortress": "Rocca Legione",
+    "camp": "Campo di marcia"
+  },
+  "featurePicker": {
+    "recordsHere": "{count}record qui",
+    "dismiss": "Respingere l'elenco dei documenti qui",
+    "alongThisLine": "Lungo questa linea",
+    "atThisPoint": "A questo punto",
+    "metresAway": "{metres}m distanza",
+    "kilometresAway": "{kilometres}km di distanza"
+  },
+  "limesFormat": {
+    "bc": "{year}BC",
+    "ad": "AD{year}",
+    "toYear": "a{year}",
+    "fromYear": "da{year}",
+    "yearRange": "{from}–{to}",
+    "atTheStart": "all'inizio",
+    "kmAlong": "{km}km lungo"
+  },
+  "limesPanel": {
+    "title": "La frontiera romana",
+    "backToFrontier": "Torna a tutta la frontiera",
+    "loading": "Caricamento",
+    "theLimes": "Le calce",
+    "showFrontier": "Mostra la frontiera",
+    "hideFrontier": "Nascondi la frontiera",
+    "introBody": "Cinquemila chilometri di frontiera, nei tratti il nome delle fonti. Scegli uno per seguirlo fine alla fine.",
+    "unrolling": "Scorrere la frontiera..",
+    "readingRoll": "Leggendo il rotolo..",
+    "recorded": "{count}registrato",
+    "readStretch": "Leggi questo tratto",
+    "referenced": "riferimento"
+  },
+  "limesSectorPage": {
+    "breadcrumb": "Breadcrumb",
+    "theLimes": "Le calce",
+    "length": "Lunghezza",
+    "inUse": "In uso",
+    "recordedOnIt": "Registrato su di esso",
+    "pleiades": "Pleiadi",
+    "alongTheLine": "Lungo la linea, ovest ad est",
+    "nothingRecorded": "Non è ancora registrato nulla su questo tratto.",
+    "fortification": "Fortificazione",
+    "contributedRecords": "{count}record di contributo",
+    "referencedPlaces": "{count}luoghi di riferimento —",
+    "notFound": "Niente di simile."
+  },
+  "limesIndexPage": {
+    "title": "Le calce",
+    "description": "La frontiera dell'impero romano, settore per settore: le sue pareti, i suoi fiumi e i forti e torri di guardia lungo di loro.",
+    "intro": "Il bordo del mondo romano, dal Solway all'Eufrate. Non è mai stata una cosa: una parete morta attraverso l'altopiano Raetian, un fiume pattugliato dalla sua banca occidentale, una linea di forti all'ultima acqua affidabile prima del deserto. Ciò che segue è che il bordo nei tratti il nome delle fonti, tratto dall'estensione del centro di mappatura del mondo antico dell'impero a 200 CE e dal suo record delle pareti che sono state effettivamente costruite.",
+    "acrossStretches": "{length}attraverso{count}tratti",
+    "attribution": "Frontier derivato dal{link}’ la dimensione dell’impero e la sua muratura, ODbL 1.0. I nomi e le note sopra sono propri di questo atlante; la geometria non lo è.",
+    "attributionLinkText": "Centro di mappatura del mondo antico"
+  },
+  "mapSearch": {
+    "searching": "Ricerca",
+    "noMatches": "Nessuna corrispondenza",
+    "matches": "{count}partite",
+    "label": "Siti di ricerca, strade e luoghi",
+    "placeholder": "Siti di ricerca, strade, luoghi",
+    "resultsLabel": "Risultati ricerca"
+  },
+  "mapCanvas": {
+    "ariaLabel": "Mappa dei siti archeologici",
+    "loading": "Spiegare la mappa"
+  },
+  "siteExternalLinks": {
+    "title": "Anche registrato in",
+    "opensNewTab": "(apre in una nuova scheda)",
+    "schemes": {
+      "pleiades": "Pleiadi",
+      "wikidata": "Wikidata",
+      "vici": "Vici.org",
+      "trismegistos": "Trismegisto"
+    }
+  },
+  "siteMetaList": {
+    "locationNotResolved": "Posizione non risolta",
+    "period": "Periodo",
+    "near": "Vicino",
+    "position": "Posizione",
+    "copyCoordinates": "Copia le coordinate{coordinates}"
+  },
+  "siteGallery": {
+    "defaultAlt": "Fotografia del sito",
+    "choosePhotograph": "Scegli una fotografia",
+    "showImage": "Mostra immagine{index}di{count}"
+  },
+  "tracingDetail": {
+    "area": "Settore",
+    "route": "Itinerario",
+    "recordsHere": "{count}record qui",
+    "closeDetails": "Chiudi dettagli di tracciamento",
+    "panelLabel": "Tracciare i dettagli",
+    "type": "Tipo",
+    "length": "Lunghezza",
+    "tracedNote": "I percorsi tracciati sono tratteggiati perché un tracciamento è un'interpretazione di dove qualcosa è andato, non un'indagine di esso.",
+    "openFullEntry": "Aprire l'ingresso completo",
+    "edit": "Modifica",
+    "defaultAttribution": "Vestigia contributori"
+  },
+  "siteGalleryManager": {
+    "defaultPhotographName": "fotografia{index}",
+    "reorderFailedTitle": "Non posso riordinare",
+    "tryAgain": "Riprova.",
+    "withdrawn": "Fotografia ritirata dalla galleria.",
+    "withdrawFailedTitle": "Non si può ritirare",
+    "saveFailedTitle": "Non poteva salvare",
+    "title": "Fotografia",
+    "intro": "La prima immagine è quella mostrata sulla mappa. La rimozione nasconde una fotografia senza cancellare il record che era qui.",
+    "captionPlaceholder": "Didascalia",
+    "whoTookItPlaceholder": "Chi l'ha presa",
+    "save": "Salva",
+    "cancel": "Annulla",
+    "noCaption": "Nessuna captazione",
+    "creditUnknown": "Credito sconosciuto",
+    "moveEarlier": "Muovetevi{name}precedente",
+    "moveLater": "Muovetevi{name}più tardi",
+    "editCaptionAndCredit": "Modificare la didascalia e il credito{name}",
+    "edit": "Modifica",
+    "withdraw": "Ritiro{name}",
+    "withdrawButton": "Ritiro",
+    "noPhotographs": "Ancora nessuna foto."
+  },
+  "contributionPanel": {
+    "ariaLabel": "Aggiungi all'atlante",
+    "title": "Aggiungi all'atlante",
+    "whatDidYouFind": "Cos'hai trovato?",
+    "aPlace": "Un posto",
+    "aPlaceDescription": "Un forte, una villa, un santuario, un deposito — qualsiasi cosa con una posizione.",
+    "aRoute": "Un percorso o una linea",
+    "aRouteDescription": "Una strada, un acquedotto o una parete tracciata attraverso il paesaggio.",
+    "cancel": "Annulla",
+    "whereIsIt": "Dov'è?",
+    "tapTheMap": "Toccare la mappa nella posizione del sito. Puoi aggiustarlo dopo.",
+    "sitePublished": "Sito pubblicato. Aggiungi fotografie mentre sei qui, o chiudi questo pannello.",
+    "done": "Fatto"
+  },
+  "imageUploader": {
+    "title": "Aggiungi una fotografia",
+    "selectedAlt": "Fotografia selezionata",
+    "dropHint": "JPEG, PNG o WebP, fino a 15 MB",
+    "chooseAria": "Scegliere una fotografia — JPEG, PNG o WebP, fino a 15 MB",
+    "caption": "Didascalia",
+    "captionPlaceholder": "Il cancello nord, visto dall'interno",
+    "whoTookIt": "Chi l'ha presa",
+    "shownAsCredit": "Mostrato come il credito",
+    "licence": "Licence",
+    "licenceHint": "Carica solo le immagini che puoi autorizzare in questo modo",
+    "licenceOptions": {
+      "ccBySa": "CC BY-SA 4.0 — Condividi allo stesso modo",
+      "ccBy": "CC BY 4.0 — richiesta di credito",
+      "cc0": "CC0 — Nessun diritto riservato"
+    },
+    "upload": "Carica foto",
+    "uploadFailedTitle": "Caricamento fallito",
+    "tryDifferentFile": "Prova un file diverso."
+  },
+  "siteEditorForm": {
+    "nameTooShort": "Dare al sito un nome di almeno tre caratteri.",
+    "editsPublishImmediately": "Le tue modifiche pubblicano immediatamente.",
+    "reviewNotice": "Un moderatore rivede questo prima che venga visualizzato.{count}più accettati{contributionWord}e le tue modifiche vanno a vivere subito.",
+    "contribution": "contributo",
+    "contributions": "contributi",
+    "saveFailedTitle": "Non si può salvare",
+    "tryAgainMoment": "Riprova tra un attimo.",
+    "editTitle": "Modificare questo sito",
+    "recordTitle": "Registra un sito",
+    "name": "Nome",
+    "namePlaceholder": "Kastell Saalburg",
+    "type": "Tipo",
+    "summary": "Riepilogo di una linea",
+    "summaryHint": "Risultati della ricerca",
+    "from": "Da",
+    "fromHint": "Negativo per BC",
+    "to": "A",
+    "description": "Designazione",
+    "whatChanged": "Cos'hai cambiato?",
+    "whatChangedHint": "Mostrato nella storia del sito",
+    "editSummaryPlaceholder": "Corretto il incontri",
+    "saveChanges": "Salvare le modifiche",
+    "saveSite": "Salva il sito",
+    "cancel": "Annulla"
+  },
+  "tracingEditorForm": {
+    "nameRequired": "Nominare la strada o la struttura.",
+    "categoryOptions": {
+      "infrastructure": "Strada, acquedotto o ponte",
+      "fortification": "Parete o linea difensiva",
+      "other": "Altro"
+    },
+    "drawFirst": "Disegna la linea prima, poi salva.",
+    "saveFailedTitle": "Non si può salvare",
+    "tryAgainShortly": "Riprova tra poco.",
+    "editTitle": "Modifica questo tracciamento",
+    "traceTitle": "Traccia un percorso",
+    "editHint": "Regolare i punti esistenti, o rifare completamente il corso.",
+    "traceHint": "Fare clic sul corso, quindi regolare i punti. I percorsi tracciati appaiono schiacciati sulla mappa, perché un tracciamento è un'interpretazione piuttosto che un sondaggio.",
+    "pointsCaptured": "{count}punti catturati",
+    "name": "Nome",
+    "namePlaceholder": "Via Claudia Augusta, sezione nord",
+    "type": "Tipo",
+    "notes": "Note",
+    "notesHint": "Prove, datazione, incertezza",
+    "whatChanged": "Cos'hai cambiato?",
+    "whatChangedHint": "Mostrato nella storia",
+    "editSummaryPlaceholder": "Corretto il corso a est del fiume",
+    "editsPublishImmediately": "Le tue modifiche pubblicano immediatamente.",
+    "reviewedBeforeAppearing": "Un moderatore rivede questo prima che venga visualizzato sulla mappa.",
+    "saveChanges": "Salvare le modifiche",
+    "saveTracing": "Salva il tracciamento",
+    "cancel": "Annulla"
+  },
+  "geometryDrawTool": {
+    "traceLine": "Traccia una linea",
+    "outlineArea": "Outline una zona",
+    "adjustPoints": "Regolare i punti",
+    "toolbarLabel": "Strumenti di disegno",
+    "useShape": "Utilizzare questa forma",
+    "clear": "Libero"
+  },
+  "loginPage": {
+    "title": "Firma"
+  },
+  "registerPage": {
+    "title": "Creare un account"
+  },
+  "indexPage": {
+    "title": "Mappa",
+    "srHeading": "Vestigia — un atlante del mondo antico",
+    "addToAtlas": "Aggiungi all'atlante"
+  },
+  "forgotPasswordPage": {
+    "title": "Reimposta la password",
+    "errorEmail": "Questo non sembra un indirizzo email.",
+    "checkInbox": "Controlla la casella",
+    "checkInboxBody": "Se quell'indirizzo ha un account, un link di reset sta arrivando. Funziona per un'ora.",
+    "intro": "Invieremo un link per impostare un nuovo.",
+    "email": "Email",
+    "sendLink": "Invia il link"
+  },
+  "resetPasswordPage": {
+    "title": "Impostare una nuova password",
+    "passwordMismatch": "Le due password non corrispondono.",
+    "newPassword": "Nuova password",
+    "repeatIt": "Ripetilo",
+    "savePassword": "Salva la password",
+    "changed": "La password è cambiata. Accedi con la nuova.",
+    "resetFailedTitle": "Non poteva resettare",
+    "askForNewLink": "Chiedi un nuovo link."
+  },
+  "verifyPage": {
+    "title": "Conferma il tuo indirizzo",
+    "missingToken": "Quel link manca il suo token. Aprila direttamente dall'e-mail.",
+    "couldNotUse": "Quel link non potrebbe essere usato.",
+    "checking": "Controllo",
+    "oneMoment": "Un momento",
+    "confirmed": "Confermato",
+    "accountReady": "Il tuo account è pronto",
+    "readyBody": "Accedi e registra il tuo primo sito. I primi due vanno oltre un moderatore; dopo di che pubblicano come li scrivi.",
+    "signIn": "Firma",
+    "notConfirmed": "Non confermato",
+    "linkDidNotWork": "Quel link non funzionava",
+    "startAgain": "Ricominciare"
+  },
+  "periodFormat": {
+    "bc": "{year}BC",
+    "ad": "AD{year}",
+    "undated": "Senza",
+    "fromYear": "Da{year}",
+    "untilYear": "Fino a{year}",
+    "yearRange": "{from}–{to}"
+  },
+  "siteDetailPage": {
+    "showOnMap": "Visualizza sulla mappa",
+    "edit": "Modifica",
+    "lastRevised": "Ultimo aggiornamento"
+  },
+  "tracingDetailPage": {
+    "notFound": "Nessun tracciamento con quell'identificatore.",
+    "tracedArea": "Area riservata",
+    "tracedRoute": "Percorso tracciato",
+    "type": "Tipo",
+    "length": "Lunghezza",
+    "credit": "Credito",
+    "defaultAttribution": "Vestigia contributori",
+    "edit": "Modifica",
+    "lastRevised": "Ultimo aggiornamento"
+  },
+  "siteEditPage": {
+    "notFound": "Nessun sito registrato sotto quel nome.",
+    "editingTitle": "Modifica{title}",
+    "backToEntry": "Torna alla voce",
+    "nothingChanged": "Non e' cambiato niente.",
+    "position": "Posizione",
+    "positionHint": "Solo cambiarlo se la posizione registrata è sbagliata. Spostare un sito è una modifica sostanziale.",
+    "latitude": "Latitudine",
+    "longitude": "Longitudine"
+  },
+  "tracingEditPage": {
+    "notFound": "Nessun tracciamento con quell'identificatore.",
+    "editingTitle": "Modifica{title}",
+    "srHeading": "Modifica{title}",
+    "editorAriaLabel": "Tracciare editor"
   }
 }

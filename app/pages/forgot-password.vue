@@ -2,10 +2,12 @@
   import { z } from 'zod'
   import type { FormSubmitEvent } from '@nuxt/ui'
 
-  definePageMeta({ layout: 'reading' })
-  useHead({ title: 'Reset your password' })
+  const { t } = useI18n()
 
-  const schema = z.object({ email: z.string().email('That does not look like an email address.') })
+  definePageMeta({ layout: 'reading' })
+  useHead({ title: t('forgotPasswordPage.title') })
+
+  const schema = z.object({ email: z.string().email(t('forgotPasswordPage.errorEmail')) })
   type ForgotState = z.output<typeof schema>
 
   const state = reactive<Partial<ForgotState>>({ email: '' })
@@ -28,25 +30,27 @@
 <template>
   <div class="mx-auto max-w-sm">
     <div v-if="isSent" class="leaf p-6" role="status">
-      <h1 class="text-xl">Check your inbox</h1>
+      <h1 class="text-xl">{{ t('forgotPasswordPage.checkInbox') }}</h1>
       <p class="mt-2 text-sm text-ink-700 dark:text-paper-200">
-        If that address has an account, a reset link is on its way. It works for one hour.
+        {{ t('forgotPasswordPage.checkInboxBody') }}
       </p>
     </div>
 
     <UForm v-else :schema="schema" :state="state" class="space-y-4" @submit="request">
       <header>
-        <h1 class="text-2xl">Reset your password</h1>
+        <h1 class="text-2xl">{{ t('forgotPasswordPage.title') }}</h1>
         <p class="mt-1 text-sm text-ink-500 dark:text-paper-400">
-          We will send a link to set a new one.
+          {{ t('forgotPasswordPage.intro') }}
         </p>
       </header>
 
-      <UFormField label="Email" name="email" required>
+      <UFormField :label="t('forgotPasswordPage.email')" name="email" required>
         <UInput v-model="state.email" type="email" autocomplete="email" class="w-full" />
       </UFormField>
 
-      <UButton type="submit" :loading="isSubmitting" color="primary" block>Send the link</UButton>
+      <UButton type="submit" :loading="isSubmitting" color="primary" block>{{
+        t('forgotPasswordPage.sendLink')
+      }}</UButton>
     </UForm>
   </div>
 </template>

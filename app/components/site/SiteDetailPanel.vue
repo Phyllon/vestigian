@@ -11,10 +11,10 @@
   const { enrichment, isLoadingEnrichment } = useSiteEnrichment()
   const { loggedIn } = useSession()
   const { isCompact } = useBreakpoint()
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
 
   const period = computed(() =>
-    site.value ? formatPeriod(site.value.periodFrom, site.value.periodTo) : '',
+    site.value ? formatPeriod(site.value.periodFrom, site.value.periodTo, t) : '',
   )
 
   const coordinates = computed(() =>
@@ -159,7 +159,7 @@
           </NuxtLink>
           <p class="datum ml-auto">
             {{ t('siteDetail.revised') }}
-            <time :datetime="site.updatedAt">{{ formatDate(site.updatedAt) }}</time>
+            <time :datetime="site.updatedAt">{{ formatDate(site.updatedAt, locale) }}</time>
           </p>
         </div>
       </article>

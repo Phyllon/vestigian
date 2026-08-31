@@ -182,20 +182,31 @@ export const useSiteSearch = () => {
  * wrapped in a `<time datetime>` carrying the ISO string it came from, so this
  * is only ever the half a person reads.
  */
-export const formatDate = (iso: string): string =>
-  new Date(iso).toLocaleDateString('en-GB', { dateStyle: 'medium' })
+/** `locale` defaults to `en-GB` so callers with no i18n context still get a sane format. */
+export const formatDate = (iso: string, locale = 'en-GB'): string =>
+  new Date(iso).toLocaleDateString(locale, { dateStyle: 'medium' })
+
+export type PeriodTranslate = (key: string, params?: Record<string, unknown>) => string
 
 /**
  * Formats a date range the way an archaeological label reads it. Years are
  * plain integers in the database, with negatives meaning BC, so the era suffix
  * is derived rather than stored.
+ *
+ * `t` comes from the calling component — this file has no guaranteed i18n
+ * context of its own.
  */
-export const formatPeriod = (from: number | null, to: number | null): string => {
-  const era = (year: number): string => (year < 0 ? `${Math.abs(year)} BC` : `AD ${year}`)
+export const formatPeriod = (
+  from: number | null,
+  to: number | null,
+  t: PeriodTranslate,
+): string => {
+  const era = (year: number): string =>
+    year < 0 ? t('periodFormat.bc', { year: Math.abs(year) }) : t('periodFormat.ad', { year })
 
-  if (from === null && to === null) return 'Undated'
-  if (from !== null && to === null) return `From ${era(from)}`
-  if (from === null && to !== null) return `Until ${era(to)}`
+  if (from === null && to === null) return t('periodFormat.undated')
+  if (from !== null && to === null) return t('periodFormat.fromYear', { year: era(from) })
+  if (from === null && to !== null) return t('periodFormat.untilYear', { year: era(to) })
   if (from === to) return era(from as number)
-  return `${era(from as number)} – ${era(to as number)}`
+  return t('periodFormat.yearRange', { from: era(from as number), to: era(to as number) })
 }

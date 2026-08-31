@@ -1,15 +1,20 @@
 import type { DevicePosition, GeolocationStatus } from '#shared/types'
 
+export type GeolocationErrorCode = 'denied' | 'timeout' | 'unavailable' | 'insecureContext'
+
 /**
  * Live device position. High accuracy is requested only while the map is
  * following the user, because continuous GPS is the single largest battery
  * cost in a field application.
+ *
+ * `errorCode` rather than a message string — a composable has no guaranteed
+ * i18n context, so `GeolocateButton.vue` maps the code to translated text.
  */
 export const useGeolocation = () => {
   const status = ref<GeolocationStatus>('idle')
   const position = ref<DevicePosition | null>(null)
   const isFollowing = ref(false)
-  const errorMessage = ref<string | null>(null)
+  const errorCode = ref<GeolocationErrorCode | null>(null)
 
   let watchId: number | null = null
 
@@ -24,26 +29,23 @@ export const useGeolocation = () => {
       timestamp: reading.timestamp,
     }
     status.value = isFollowing.value ? 'tracking' : 'locating'
-    errorMessage.value = null
+    errorCode.value = null
   }
 
   const handleFailure = (failure: GeolocationPositionError): void => {
     if (failure.code === failure.PERMISSION_DENIED) {
       status.value = 'denied'
-      errorMessage.value = 'Location is blocked. Allow it in your browser settings to use this.'
+      errorCode.value = 'denied'
       return
     }
     status.value = 'unavailable'
-    errorMessage.value =
-      failure.code === failure.TIMEOUT
-        ? 'No fix yet. Move somewhere with a clearer view of the sky.'
-        : 'Location is unavailable on this device right now.'
+    errorCode.value = failure.code === failure.TIMEOUT ? 'timeout' : 'unavailable'
   }
 
   const startWatching = (highAccuracy: boolean): void => {
     if (!isSupported()) {
       status.value = 'unavailable'
-      errorMessage.value = 'Location needs a secure connection and a device with GPS.'
+      errorCode.value = 'insecureContext'
       return
     }
     stopWatching()
@@ -89,7 +91,7 @@ export const useGeolocation = () => {
     status: readonly(status),
     position: readonly(position),
     isFollowing: readonly(isFollowing),
-    errorMessage: readonly(errorMessage),
+    errorCode: readonly(errorCode),
     toggleFollow,
     stop,
   }

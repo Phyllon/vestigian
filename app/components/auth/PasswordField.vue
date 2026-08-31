@@ -12,6 +12,8 @@
    */
   defineProps<{ autocomplete?: string }>()
 
+  const { t } = useI18n()
+
   const model = defineModel<string>({ default: '' })
 
   const isRevealed = ref(false)
@@ -35,7 +37,9 @@
         variant="link"
         size="sm"
         :icon="isRevealed ? 'i-lucide-eye-off' : 'i-lucide-eye'"
-        :aria-label="isRevealed ? 'Hide password' : 'Show password'"
+        :aria-label="
+          isRevealed ? t('auth.passwordField.hidePassword') : t('auth.passwordField.showPassword')
+        "
         :aria-pressed="isRevealed"
         class="-me-1"
         @click="toggleReveal"

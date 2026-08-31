@@ -10,6 +10,7 @@
    * phone. Same shell as `SiteDetailPanel` — a sheet on handhelds, a rail on
    * wide screens — because it competes for the same corner of the screen.
    */
+  const { t } = useI18n()
   const { sectors, sectorsStatus, sector, sectorStatus, selectedSectorSlug, selectSector } =
     useLimes()
   const { selectSite } = useSiteQuery()
@@ -81,7 +82,7 @@
 <template>
   <aside
     class="pointer-events-auto fixed inset-x-0 bottom-0 z-20 flex max-h-[62vh] flex-col rounded-t-lg bg-paper-50 shadow-lifted md:inset-y-0 md:right-auto md:left-0 md:max-h-none md:w-[22rem] md:rounded-none md:border-r md:border-paper-200 dark:bg-night-800 dark:md:border-night-700"
-    aria-label="The Roman frontier"
+    :aria-label="t('limesPanel.title')"
   >
     <div class="sticky top-0 z-10 shrink-0 bg-paper-50 pt-2 dark:bg-night-800 md:pt-0">
       <div class="mx-auto mb-1 h-1 w-10 rounded-full bg-paper-300 dark:bg-night-600 md:hidden" />
@@ -94,10 +95,16 @@
           variant="ghost"
           color="neutral"
           size="xs"
-          aria-label="Back to the whole frontier"
+          :aria-label="t('limesPanel.backToFrontier')"
           @click="selectSector(null)"
         />
-        <p class="eyebrow">{{ selectedSectorSlug ? (sector?.name ?? 'Loading') : 'The limes' }}</p>
+        <p class="eyebrow">
+          {{
+            selectedSectorSlug
+              ? (sector?.name ?? t('limesPanel.loading'))
+              : t('limesPanel.theLimes')
+          }}
+        </p>
 
         <UButton
           class="ml-auto"
@@ -107,7 +114,7 @@
           size="xs"
           :aria-expanded="!isCollapsed"
           aria-controls="limes-body"
-          :aria-label="isCollapsed ? 'Show the frontier' : 'Hide the frontier'"
+          :aria-label="isCollapsed ? t('limesPanel.showFrontier') : t('limesPanel.hideFrontier')"
           @click="isCollapsed = !isCollapsed"
         />
       </div>
@@ -117,15 +124,14 @@
       <!-- The sector list. -->
       <div v-if="!selectedSectorSlug">
         <p class="px-5 py-3 text-sm leading-relaxed text-ink-600 dark:text-paper-300">
-          Five thousand kilometres of frontier, in the stretches the sources name. Choose one to
-          follow it end to end.
+          {{ t('limesPanel.introBody') }}
         </p>
 
         <p
           v-if="sectorsStatus === 'pending'"
           class="px-5 pb-4 text-sm text-ink-500 dark:text-paper-400"
         >
-          Unrolling the frontier…
+          {{ t('limesPanel.unrolling') }}
         </p>
 
         <ul v-else class="border-t border-paper-200 dark:border-night-700">
@@ -138,7 +144,7 @@
               <span class="font-medium text-ink-900 dark:text-paper-100">{{ entry.name }}</span>
               <span class="font-mono text-xs text-ink-500 dark:text-paper-400">
                 {{ formatFrontierLength(entry.lengthMetres) }} ·
-                {{ formatFrontierYears(entry.minYear, entry.maxYear) }}
+                {{ formatFrontierYears({ from: entry.minYear, to: entry.maxYear, t }) }}
               </span>
             </button>
           </li>
@@ -151,7 +157,7 @@
           v-if="sectorStatus === 'pending'"
           class="px-5 py-4 text-sm text-ink-500 dark:text-paper-400"
         >
-          Reading the roll…
+          {{ t('limesPanel.readingRoll') }}
         </p>
 
         <template v-else-if="sector">
@@ -164,13 +170,14 @@
             </p>
             <p class="mt-2 font-mono text-xs text-ink-500 dark:text-paper-400">
               {{ formatFrontierLength(sector.lengthMetres) }} ·
-              {{ formatFrontierYears(sector.minYear, sector.maxYear) }} · {{ roll.length }} recorded
+              {{ formatFrontierYears({ from: sector.minYear, to: sector.maxYear, t }) }} ·
+              {{ t('limesPanel.recorded', { count: roll.length }) }}
             </p>
             <NuxtLink
               :to="`/limes/${sector.slug}`"
               class="mt-2 inline-block text-sm text-oxide-700 underline underline-offset-2 dark:text-oxide-300"
             >
-              Read this stretch
+              {{ t('limesPanel.readStretch') }}
             </NuxtLink>
           </div>
 
@@ -208,11 +215,13 @@
                     {{ installation.title }}
                   </span>
                   <span class="font-mono text-xs text-ink-500 dark:text-paper-400">
-                    {{ formatOffset(installation.offsetMetres) }}
+                    {{ formatOffset(installation.offsetMetres, t) }}
                     <template v-if="installation.mark">
-                      · {{ LIMES_MARK_LABELS[installation.mark] }}
+                      · {{ t(`limesMarks.${installation.mark}`) }}
                     </template>
-                    <template v-if="!installation.slug"> · referenced </template>
+                    <template v-if="!installation.slug">
+                      · {{ t('limesPanel.referenced') }}
+                    </template>
                   </span>
                 </span>
               </button>

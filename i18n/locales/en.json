@@ -93,6 +93,19 @@
       "errorPasswordMismatch": "The two passwords do not match.",
       "failedTitle": "Registration failed",
       "failedDefault": "Try again shortly."
+    },
+    "passwordField": {
+      "showPassword": "Show password",
+      "hidePassword": "Hide password"
+    },
+    "passwordRequirements": {
+      "met": "— met",
+      "notMet": "— not yet met",
+      "rules": {
+        "length": "Between {min} and {max} characters",
+        "capital": "One capital letter",
+        "special": "One special character"
+      }
     }
   },
   "moderation": {
@@ -131,6 +144,69 @@
       "rejectedPlural": "rejected",
       "batchResultTitle": "{count} {decision}.",
       "batchResultSkipped": "{count} skipped."
+    },
+    "contributorTable": {
+      "findPlaceholder": "Find a contributor",
+      "accepted": "{count} accepted",
+      "waiting": "{count} waiting",
+      "restoreTrust": "Restore trust",
+      "restoreTrustAria": "Restore trust for {name}",
+      "suspendPublishing": "Suspend publishing",
+      "suspendPublishingAria": "Suspend publishing for {name}",
+      "roleAria": "Role for {name}",
+      "suspendPrompt": "Why is {name} being suspended?",
+      "suspendHint": "Emailed to them, verbatim",
+      "suspendReasonPlaceholder": "Three edits removed sourced text without saying why.",
+      "cancel": "Cancel",
+      "untouchedNote": "Their accepted contributions are untouched.",
+      "noMatches": "No contributors match that.",
+      "standing": {
+        "moderator": "Publishes by role",
+        "revoked": "Suspended — every edit queued",
+        "earned": "Publishes immediately",
+        "probation": "Queued — {remaining} to go"
+      },
+      "trustSuspended": "Automatic publishing suspended.",
+      "trustRestored": "Trust restored.",
+      "toldByEmail": "{name} has been told by email.",
+      "trustFailedTitle": "Could not change trust",
+      "tryAgain": "Try again.",
+      "nowRole": "{name} is now a {role}.",
+      "roleFailedTitle": "Could not change role",
+      "roles": {
+        "contributor": "Contributor",
+        "moderator": "Moderator",
+        "admin": "Administrator"
+      }
+    },
+    "revisionDiff": {
+      "fields": {
+        "title": "Name",
+        "category": "Type",
+        "summary": "Summary",
+        "description": "Description",
+        "position": "Position",
+        "periodFrom": "Period from",
+        "periodTo": "Period to",
+        "geometry": "Shape",
+        "editSummary": "Edit note"
+      },
+      "kinds": {
+        "added": "added",
+        "removed": "removed",
+        "changed": "changed"
+      },
+      "noChanges": "No fields changed."
+    },
+    "queuePage": {
+      "title": "Review queue",
+      "intro": "Contributions from accounts that have not yet earned automatic publishing.",
+      "contributorsLink": "Contributors"
+    },
+    "contributorsPage": {
+      "title": "Contributors",
+      "backToQueue": "Review queue",
+      "intro": "Suspending publishing keeps a contributor's record intact — restoring it returns them to exactly where they were."
     }
   },
   "licence": {
@@ -202,5 +278,353 @@
     "minorsBody": "Vestigia is not directed at children. If you are under 16, please do not create an account without a parent or guardian's involvement.",
     "changesHeading": "Changes",
     "changesBody": "This page is updated when what the service actually does changes. It reflects the current version of the running application."
+  },
+  "geolocate": {
+    "locationBlocked": "Location blocked",
+    "stopFollowing": "Stop following your position",
+    "showPosition": "Show your position",
+    "errors": {
+      "denied": "Location is blocked. Allow it in your browser settings to use this.",
+      "timeout": "No fix yet. Move somewhere with a clearer view of the sky.",
+      "unavailable": "Location is unavailable on this device right now.",
+      "insecureContext": "Location needs a secure connection and a device with GPS."
+    }
+  },
+  "revisionHistory": {
+    "title": "History",
+    "loading": "Loading…",
+    "created": "Created",
+    "edited": "Edited",
+    "revert": "revert",
+    "unknownAuthor": "Unknown",
+    "publishedAutomatically": "Published automatically — the author has earned trust.",
+    "reviewedBy": "Reviewed by {reviewer}.",
+    "published": "Published.",
+    "restoreEarlier": "Restore the version before this",
+    "reverted": "Reverted. The earlier version is live again.",
+    "revertFailedTitle": "Could not revert",
+    "tryAgain": "Try again."
+  },
+  "categories": {
+    "settlement": "Settlement",
+    "fortification": "Fortification",
+    "sanctuary": "Sanctuary",
+    "burial": "Burial",
+    "infrastructure": "Infrastructure",
+    "villa": "Villa",
+    "production": "Production",
+    "findspot": "Findspot",
+    "other": "Other"
+  },
+  "limesMarks": {
+    "watchtower": "Watchtower",
+    "fortlet": "Fortlet",
+    "fort": "Fort",
+    "fortress": "Legionary fortress",
+    "camp": "Marching camp"
+  },
+  "featurePicker": {
+    "recordsHere": "{count} records here",
+    "dismiss": "Dismiss the list of records here",
+    "alongThisLine": "Along this line",
+    "atThisPoint": "At this point",
+    "metresAway": "{metres} m away",
+    "kilometresAway": "{kilometres} km away"
+  },
+  "limesFormat": {
+    "bc": "{year} BC",
+    "ad": "AD {year}",
+    "toYear": "to {year}",
+    "fromYear": "from {year}",
+    "yearRange": "{from} – {to}",
+    "atTheStart": "at the start",
+    "kmAlong": "{km} km along"
+  },
+  "limesPanel": {
+    "title": "The Roman frontier",
+    "backToFrontier": "Back to the whole frontier",
+    "loading": "Loading",
+    "theLimes": "The limes",
+    "showFrontier": "Show the frontier",
+    "hideFrontier": "Hide the frontier",
+    "introBody": "Five thousand kilometres of frontier, in the stretches the sources name. Choose one to follow it end to end.",
+    "unrolling": "Unrolling the frontier…",
+    "readingRoll": "Reading the roll…",
+    "recorded": "{count} recorded",
+    "readStretch": "Read this stretch",
+    "referenced": "referenced"
+  },
+  "limesSectorPage": {
+    "breadcrumb": "Breadcrumb",
+    "theLimes": "The limes",
+    "length": "Length",
+    "inUse": "In use",
+    "recordedOnIt": "Recorded on it",
+    "pleiades": "Pleiades",
+    "alongTheLine": "Along the line, west to east",
+    "nothingRecorded": "Nothing is recorded on this stretch yet.",
+    "fortification": "Fortification",
+    "contributedRecords": "{count} contributed records —",
+    "referencedPlaces": "{count} referenced places —",
+    "notFound": "No such stretch of frontier."
+  },
+  "limesIndexPage": {
+    "title": "The limes",
+    "description": "The frontier of the Roman empire, sector by sector: its walls, its rivers and the forts and watchtowers along them.",
+    "intro": "The edge of the Roman world, from the Solway to the Euphrates. It was never one thing: a mortared wall across the Raetian plateau, a river patrolled from its western bank, a line of forts at the last reliable water before the desert. What follows is that edge in the stretches the sources name, drawn from the Ancient World Mapping Center's extent of the empire at 200 CE and from its record of the walls that were actually built.",
+    "acrossStretches": "{length} across {count} stretches",
+    "attribution": "Frontier derived from the {link}’s extent of the empire and its wall linework, ODbL 1.0. The names and the notes above are this atlas’s own; the geometry is not.",
+    "attributionLinkText": "Ancient World Mapping Center"
+  },
+  "mapSearch": {
+    "searching": "Searching",
+    "noMatches": "No matches",
+    "matches": "{count} matches",
+    "label": "Search sites, roads and places",
+    "placeholder": "Search sites, roads, places",
+    "resultsLabel": "Search results"
+  },
+  "mapCanvas": {
+    "ariaLabel": "Map of archaeological sites",
+    "loading": "Unfolding the map"
+  },
+  "siteExternalLinks": {
+    "title": "Also recorded in",
+    "opensNewTab": "(opens in a new tab)",
+    "schemes": {
+      "pleiades": "Pleiades",
+      "wikidata": "Wikidata",
+      "vici": "Vici.org",
+      "trismegistos": "Trismegistos"
+    }
+  },
+  "siteMetaList": {
+    "locationNotResolved": "Location not resolved",
+    "period": "Period",
+    "near": "Near",
+    "position": "Position",
+    "copyCoordinates": "Copy the coordinates {coordinates}"
+  },
+  "siteGallery": {
+    "defaultAlt": "Photograph of the site",
+    "choosePhotograph": "Choose a photograph",
+    "showImage": "Show image {index} of {count}"
+  },
+  "tracingDetail": {
+    "area": "Area",
+    "route": "Route",
+    "recordsHere": "{count} records here",
+    "closeDetails": "Close tracing details",
+    "panelLabel": "Tracing details",
+    "type": "Type",
+    "length": "Length",
+    "tracedNote": "Traced routes are drawn dashed because a tracing is an interpretation of where something ran, not a survey of it.",
+    "openFullEntry": "Open the full entry",
+    "edit": "Edit",
+    "defaultAttribution": "Vestigia contributors"
+  },
+  "siteGalleryManager": {
+    "defaultPhotographName": "photograph {index}",
+    "reorderFailedTitle": "Could not reorder",
+    "tryAgain": "Try again.",
+    "withdrawn": "Photograph withdrawn from the gallery.",
+    "withdrawFailedTitle": "Could not withdraw",
+    "saveFailedTitle": "Could not save",
+    "title": "Photographs",
+    "intro": "The first image is the one shown on the map. Withdrawing hides a photograph without erasing the record that it was here.",
+    "captionPlaceholder": "Caption",
+    "whoTookItPlaceholder": "Who took it",
+    "save": "Save",
+    "cancel": "Cancel",
+    "noCaption": "No caption",
+    "creditUnknown": "Credit unknown",
+    "moveEarlier": "Move {name} earlier",
+    "moveLater": "Move {name} later",
+    "editCaptionAndCredit": "Edit the caption and credit of {name}",
+    "edit": "Edit",
+    "withdraw": "Withdraw {name}",
+    "withdrawButton": "Withdraw",
+    "noPhotographs": "No photographs yet."
+  },
+  "contributionPanel": {
+    "ariaLabel": "Add to the atlas",
+    "title": "Add to the atlas",
+    "whatDidYouFind": "What did you find?",
+    "aPlace": "A place",
+    "aPlaceDescription": "A fort, villa, sanctuary, findspot — anything with one position.",
+    "aRoute": "A route or line",
+    "aRouteDescription": "A road, aqueduct or wall traced across the landscape.",
+    "cancel": "Cancel",
+    "whereIsIt": "Where is it?",
+    "tapTheMap": "Tap the map at the position of the site. You can adjust it afterwards.",
+    "sitePublished": "Site published. Add photographs while you are here, or close this panel.",
+    "done": "Done"
+  },
+  "imageUploader": {
+    "title": "Add a photograph",
+    "selectedAlt": "Selected photograph",
+    "dropHint": "JPEG, PNG or WebP, up to 15 MB",
+    "chooseAria": "Choose a photograph — JPEG, PNG or WebP, up to 15 MB",
+    "caption": "Caption",
+    "captionPlaceholder": "The north gate, seen from inside",
+    "whoTookIt": "Who took it",
+    "shownAsCredit": "Shown as the credit",
+    "licence": "Licence",
+    "licenceHint": "Only upload images you may license this way",
+    "licenceOptions": {
+      "ccBySa": "CC BY-SA 4.0 — share alike",
+      "ccBy": "CC BY 4.0 — credit required",
+      "cc0": "CC0 — no rights reserved"
+    },
+    "upload": "Upload photograph",
+    "uploadFailedTitle": "Upload failed",
+    "tryDifferentFile": "Try a different file."
+  },
+  "siteEditorForm": {
+    "nameTooShort": "Give the site a name of at least three characters.",
+    "editsPublishImmediately": "Your edits publish immediately.",
+    "reviewNotice": "A moderator reviews this before it appears. {count} more accepted {contributionWord} and your edits go live straight away.",
+    "contribution": "contribution",
+    "contributions": "contributions",
+    "saveFailedTitle": "That could not be saved",
+    "tryAgainMoment": "Try again in a moment.",
+    "editTitle": "Edit this site",
+    "recordTitle": "Record a site",
+    "name": "Name",
+    "namePlaceholder": "Kastell Saalburg",
+    "type": "Type",
+    "summary": "One-line summary",
+    "summaryHint": "Shown in search results",
+    "from": "From",
+    "fromHint": "Negative for BC",
+    "to": "To",
+    "description": "Description",
+    "whatChanged": "What did you change?",
+    "whatChangedHint": "Shown in the site's history",
+    "editSummaryPlaceholder": "Corrected the dating",
+    "saveChanges": "Save changes",
+    "saveSite": "Save site",
+    "cancel": "Cancel"
+  },
+  "tracingEditorForm": {
+    "nameRequired": "Name the road or structure.",
+    "categoryOptions": {
+      "infrastructure": "Road, aqueduct or bridge",
+      "fortification": "Wall or defensive line",
+      "other": "Something else"
+    },
+    "drawFirst": "Draw the line first, then save.",
+    "saveFailedTitle": "That could not be saved",
+    "tryAgainShortly": "Try again shortly.",
+    "editTitle": "Edit this tracing",
+    "traceTitle": "Trace a route",
+    "editHint": "Adjust the existing points, or redraw the course entirely.",
+    "traceHint": "Click along the course, then adjust the points. Traced routes appear dashed on the map, because a tracing is an interpretation rather than a survey.",
+    "pointsCaptured": "{count} points captured",
+    "name": "Name",
+    "namePlaceholder": "Via Claudia Augusta, northern section",
+    "type": "Type",
+    "notes": "Notes",
+    "notesHint": "Evidence, dating, uncertainty",
+    "whatChanged": "What did you change?",
+    "whatChangedHint": "Shown in the history",
+    "editSummaryPlaceholder": "Corrected the course east of the river",
+    "editsPublishImmediately": "Your edits publish immediately.",
+    "reviewedBeforeAppearing": "A moderator reviews this before it appears on the map.",
+    "saveChanges": "Save changes",
+    "saveTracing": "Save tracing",
+    "cancel": "Cancel"
+  },
+  "geometryDrawTool": {
+    "traceLine": "Trace a line",
+    "outlineArea": "Outline an area",
+    "adjustPoints": "Adjust points",
+    "toolbarLabel": "Drawing tools",
+    "useShape": "Use this shape",
+    "clear": "Clear"
+  },
+  "loginPage": {
+    "title": "Sign in"
+  },
+  "registerPage": {
+    "title": "Create an account"
+  },
+  "indexPage": {
+    "title": "Map",
+    "srHeading": "Vestigia — an atlas of the ancient world",
+    "addToAtlas": "Add to the atlas"
+  },
+  "forgotPasswordPage": {
+    "title": "Reset your password",
+    "errorEmail": "That does not look like an email address.",
+    "checkInbox": "Check your inbox",
+    "checkInboxBody": "If that address has an account, a reset link is on its way. It works for one hour.",
+    "intro": "We will send a link to set a new one.",
+    "email": "Email",
+    "sendLink": "Send the link"
+  },
+  "resetPasswordPage": {
+    "title": "Set a new password",
+    "passwordMismatch": "The two passwords do not match.",
+    "newPassword": "New password",
+    "repeatIt": "Repeat it",
+    "savePassword": "Save password",
+    "changed": "Password changed. Sign in with the new one.",
+    "resetFailedTitle": "Could not reset",
+    "askForNewLink": "Ask for a new link."
+  },
+  "verifyPage": {
+    "title": "Confirm your address",
+    "missingToken": "That link is missing its token. Open it directly from the email.",
+    "couldNotUse": "That link could not be used.",
+    "checking": "Checking",
+    "oneMoment": "One moment",
+    "confirmed": "Confirmed",
+    "accountReady": "Your account is ready",
+    "readyBody": "Sign in and record your first site. The first two go past a moderator; after that they publish as you write them.",
+    "signIn": "Sign in",
+    "notConfirmed": "Not confirmed",
+    "linkDidNotWork": "That link did not work",
+    "startAgain": "Start again"
+  },
+  "periodFormat": {
+    "bc": "{year} BC",
+    "ad": "AD {year}",
+    "undated": "Undated",
+    "fromYear": "From {year}",
+    "untilYear": "Until {year}",
+    "yearRange": "{from} – {to}"
+  },
+  "siteDetailPage": {
+    "showOnMap": "Show on the map",
+    "edit": "Edit",
+    "lastRevised": "Last revised"
+  },
+  "tracingDetailPage": {
+    "notFound": "No tracing with that identifier.",
+    "tracedArea": "Traced area",
+    "tracedRoute": "Traced route",
+    "type": "Type",
+    "length": "Length",
+    "credit": "Credit",
+    "defaultAttribution": "Vestigia contributors",
+    "edit": "Edit",
+    "lastRevised": "Last revised"
+  },
+  "siteEditPage": {
+    "notFound": "No site recorded under that name.",
+    "editingTitle": "Editing {title}",
+    "backToEntry": "Back to the entry",
+    "nothingChanged": "Nothing was changed.",
+    "position": "Position",
+    "positionHint": "Only change this if the recorded position is wrong. Moving a site is a substantial edit.",
+    "latitude": "Latitude",
+    "longitude": "Longitude"
+  },
+  "tracingEditPage": {
+    "notFound": "No tracing with that identifier.",
+    "editingTitle": "Editing {title}",
+    "srHeading": "Edit {title}",
+    "editorAriaLabel": "Tracing editor"
   }
 }

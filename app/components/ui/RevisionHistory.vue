@@ -23,6 +23,8 @@
 
   const props = defineProps<RevisionHistoryProps>()
 
+  const { t, locale } = useI18n()
+
   const endpoint = computed(() =>
     props.entityType === 'site'
       ? `/api/sites/${props.entityId}/revisions`
@@ -45,13 +47,14 @@
     reverting.value = revisionId
     try {
       await $fetch('/api/moderation/revert', { method: 'POST', body: { revisionId } })
-      toast.add({ title: 'Reverted. The earlier version is live again.', color: 'success' })
+      toast.add({ title: t('revisionHistory.reverted'), color: 'success' })
       await refresh()
       await refreshNuxtData()
     } catch (error) {
       toast.add({
-        title: 'Could not revert',
-        description: (error as { data?: { message?: string } }).data?.message ?? 'Try again.',
+        title: t('revisionHistory.revertFailedTitle'),
+        description:
+          (error as { data?: { message?: string } }).data?.message ?? t('revisionHistory.tryAgain'),
         color: 'error',
       })
     } finally {
@@ -62,9 +65,9 @@
 
 <template>
   <section>
-    <h2 class="eyebrow">History</h2>
+    <h2 class="eyebrow">{{ t('revisionHistory.title') }}</h2>
 
-    <p v-if="status === 'pending'" class="datum mt-2">Loading…</p>
+    <p v-if="status === 'pending'" class="datum mt-2">{{ t('revisionHistory.loading') }}</p>
 
     <ol v-else class="mt-3 space-y-1">
       <li
@@ -80,14 +83,19 @@
           @click="toggle(revision.id)"
         >
           <span class="text-sm text-ink-900 dark:text-paper-100">
-            {{ revision.editSummary || (revision.changes.length === 0 ? 'Created' : 'Edited') }}
+            {{
+              revision.editSummary ||
+              (revision.changes.length === 0
+                ? t('revisionHistory.created')
+                : t('revisionHistory.edited'))
+            }}
           </span>
           <span v-if="revision.isRevert" class="eyebrow text-oxide-600 dark:text-oxide-300">
-            revert
+            {{ t('revisionHistory.revert') }}
           </span>
           <span class="datum ml-auto shrink-0">
-            {{ revision.authorName ?? 'Unknown' }} ·
-            <time :datetime="revision.createdAt">{{ formatDate(revision.createdAt) }}</time>
+            {{ revision.authorName ?? t('revisionHistory.unknownAuthor') }} ·
+            <time :datetime="revision.createdAt">{{ formatDate(revision.createdAt, locale) }}</time>
           </span>
         </button>
 
@@ -101,10 +109,10 @@
           <p class="datum">
             {{
               revision.autoApproved
-                ? 'Published automatically — the author has earned trust.'
+                ? t('revisionHistory.publishedAutomatically')
                 : revision.reviewerName
-                  ? `Reviewed by ${revision.reviewerName}.`
-                  : 'Published.'
+                  ? t('revisionHistory.reviewedBy', { reviewer: revision.reviewerName })
+                  : t('revisionHistory.published')
             }}
           </p>
 
@@ -116,7 +124,7 @@
             :loading="reverting === revision.id"
             @click="revert(revision.id)"
           >
-            Restore the version before this
+            {{ t('revisionHistory.restoreEarlier') }}
           </UButton>
         </div>
       </li>

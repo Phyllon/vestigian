@@ -8,6 +8,7 @@
    * a moving camera; here it is a document — linkable, citable, and readable
    * from top to bottom the way the frontier was walked.
    */
+  const { t } = useI18n()
   const route = useRoute()
   const slug = computed(() => String(route.params.slug))
 
@@ -16,7 +17,7 @@
   )
 
   if (!sector.value) {
-    throw createError({ statusCode: 404, statusMessage: 'No such stretch of frontier.' })
+    throw createError({ statusCode: 404, statusMessage: t('limesSectorPage.notFound') })
   }
 
   /**
@@ -30,7 +31,7 @@
     ),
   )
 
-  useHead({ title: () => sector.value?.name ?? 'The limes' })
+  useHead({ title: () => sector.value?.name ?? t('limesSectorPage.theLimes') })
   useSeoMeta({ description: () => sector.value?.summary ?? undefined })
 
   definePageMeta({ layout: 'reading' })
@@ -38,12 +39,12 @@
 
 <template>
   <article v-if="sector">
-    <nav aria-label="Breadcrumb">
+    <nav :aria-label="t('limesSectorPage.breadcrumb')">
       <NuxtLink
         to="/limes"
         class="text-sm text-ink-500 underline underline-offset-2 dark:text-paper-400"
       >
-        The limes
+        {{ t('limesSectorPage.theLimes') }}
       </NuxtLink>
     </nav>
 
@@ -58,23 +59,23 @@
 
     <dl class="mt-5 flex flex-wrap gap-x-8 gap-y-2 font-mono text-sm">
       <div>
-        <dt class="eyebrow">Length</dt>
+        <dt class="eyebrow">{{ t('limesSectorPage.length') }}</dt>
         <dd class="text-ink-800 dark:text-paper-200">
           {{ formatFrontierLength(sector.lengthMetres) }}
         </dd>
       </div>
       <div>
-        <dt class="eyebrow">In use</dt>
+        <dt class="eyebrow">{{ t('limesSectorPage.inUse') }}</dt>
         <dd class="text-ink-800 dark:text-paper-200">
-          {{ formatFrontierYears(sector.minYear, sector.maxYear) }}
+          {{ formatFrontierYears({ from: sector.minYear, to: sector.maxYear, t }) }}
         </dd>
       </div>
       <div>
-        <dt class="eyebrow">Recorded on it</dt>
+        <dt class="eyebrow">{{ t('limesSectorPage.recordedOnIt') }}</dt>
         <dd class="text-ink-800 dark:text-paper-200">{{ roll.length }}</dd>
       </div>
       <div v-if="sector.pleiadesId">
-        <dt class="eyebrow">Pleiades</dt>
+        <dt class="eyebrow">{{ t('limesSectorPage.pleiades') }}</dt>
         <dd>
           <a
             :href="`https://pleiades.stoa.org/places/${sector.pleiadesId}`"
@@ -88,11 +89,11 @@
     </dl>
 
     <h2 class="mt-10 font-display text-xl text-ink-900 dark:text-paper-100">
-      Along the line, west to east
+      {{ t('limesSectorPage.alongTheLine') }}
     </h2>
 
     <p v-if="roll.length === 0" class="mt-3 text-sm text-ink-500 dark:text-paper-400">
-      Nothing is recorded on this stretch yet.
+      {{ t('limesSectorPage.nothingRecorded') }}
     </p>
 
     <ol v-else class="mt-4">
@@ -102,7 +103,7 @@
         class="flex items-baseline gap-3 border-t border-paper-200 py-2 last:border-b dark:border-night-700"
       >
         <span class="w-24 shrink-0 font-mono text-xs text-ink-500 dark:text-paper-400">
-          {{ formatOffset(installation.offsetMetres) }}
+          {{ formatOffset(installation.offsetMetres, t) }}
         </span>
 
         <span class="min-w-0 flex-1">
@@ -125,7 +126,11 @@
         </span>
 
         <span class="shrink-0 font-mono text-xs text-ink-500 dark:text-paper-400">
-          {{ installation.mark ? LIMES_MARK_LABELS[installation.mark] : 'Fortification' }}
+          {{
+            installation.mark
+              ? t(`limesMarks.${installation.mark}`)
+              : t('limesSectorPage.fortification')
+          }}
         </span>
       </li>
     </ol>
@@ -136,9 +141,9 @@
       rather than this atlas's.
     -->
     <p class="mt-8 text-xs leading-relaxed text-ink-500 dark:text-paper-400">
-      {{ sector.roll.records.length }} contributed records —
+      {{ t('limesSectorPage.contributedRecords', { count: sector.roll.records.length }) }}
       {{ sector.roll.recordsAttribution }}.<br />
-      {{ sector.roll.references.length }} referenced places —
+      {{ t('limesSectorPage.referencedPlaces', { count: sector.roll.references.length }) }}
       {{ sector.roll.referencesAttribution }}.
     </p>
   </article>

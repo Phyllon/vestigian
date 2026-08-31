@@ -8,9 +8,12 @@
 
   const props = defineProps<SiteMetaProps>()
 
+  const { t } = useI18n()
+
   const location = computed(
     () =>
-      [props.modernPlace, props.countryCode].filter(Boolean).join(', ') || 'Location not resolved',
+      [props.modernPlace, props.countryCode].filter(Boolean).join(', ') ||
+      t('siteMetaList.locationNotResolved'),
   )
 
   const copyCoordinates = async (): Promise<void> => {
@@ -22,19 +25,19 @@
   <dl
     class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 border-y border-paper-200 py-3 dark:border-night-700"
   >
-    <dt class="eyebrow pt-0.5">Period</dt>
+    <dt class="eyebrow pt-0.5">{{ t('siteMetaList.period') }}</dt>
     <dd class="text-sm text-ink-700 dark:text-paper-200">{{ period }}</dd>
 
-    <dt class="eyebrow pt-0.5">Near</dt>
+    <dt class="eyebrow pt-0.5">{{ t('siteMetaList.near') }}</dt>
     <dd class="text-sm text-ink-700 dark:text-paper-200">{{ location }}</dd>
 
-    <dt class="eyebrow pt-0.5">Position</dt>
+    <dt class="eyebrow pt-0.5">{{ t('siteMetaList.position') }}</dt>
     <dd>
       <!-- The copy affordance only appears on hover, so the name has to carry it. -->
       <button
         type="button"
         class="datum group inline-flex items-center gap-1.5 transition hover:text-oxide-600 dark:hover:text-oxide-300"
-        :aria-label="`Copy the coordinates ${coordinates}`"
+        :aria-label="t('siteMetaList.copyCoordinates', { coordinates })"
         @click="copyCoordinates"
       >
         {{ coordinates }}
