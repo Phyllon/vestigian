@@ -353,6 +353,14 @@ services:
       BOUNCER_KEY_traefik: ${CROWDSEC_BOUNCER_KEY}
       # Community blocklist. Sharing signals is the point of the project; opting
       # out still leaves local detection working.
+      #
+      # GDPR-relevant: this shares the IP addresses CrowdSec locally flags as
+      # abusive with CrowdSec's central API, on the legitimate-interest basis
+      # of Art. 6(1)(f) (network and information security). It is the one
+      # outbound flow of visitor-derived data this project's own GDPR section
+      # in CLAUDE.md and the privacy policy both have to name explicitly —
+      # setting this to 'true' removes it, at the cost of losing the community
+      # blocklist.
       DISABLE_ONLINE_API: 'false'
     volumes:
       - ./security/acquis.yaml:/etc/crowdsec/acquis.yaml:ro

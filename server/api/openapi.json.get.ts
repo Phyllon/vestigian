@@ -106,6 +106,28 @@ const OPERATION_OVERRIDES: Record<
       responses: { 200: jsonResponse('{ status: "signed-out" }'), 429: COMMON_RESPONSES[429] },
     },
   },
+  '/api/auth/account': {
+    delete: {
+      security: SESSION_SECURITY,
+      responses: {
+        200: jsonResponse('{ status: "deleted" }'),
+        401: COMMON_RESPONSES[401],
+        429: COMMON_RESPONSES[429],
+      },
+    },
+  },
+  '/api/auth/export': {
+    get: {
+      security: SESSION_SECURITY,
+      responses: {
+        200: jsonResponse(
+          'Account fields plus the caller’s own sites, tracings, images and revisions.',
+        ),
+        401: COMMON_RESPONSES[401],
+        429: COMMON_RESPONSES[429],
+      },
+    },
+  },
   '/api/auth/register': {
     post: {
       requestBody: bodyFromSchema(registrationSchema),

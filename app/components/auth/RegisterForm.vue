@@ -186,5 +186,20 @@
     <UButton type="submit" :loading="isSubmitting" :disabled="!isComplete" color="primary" block>
       {{ t('auth.register.submit') }}
     </UButton>
+
+    <!--
+      A link, not a checkbox: account data is processed under GDPR Art. 6(1)(b)
+      (performing the contract of providing an account), not consent, so a
+      tickbox would add friction without adding a legal requirement.
+    -->
+    <p class="text-center text-xs text-ink-500 dark:text-paper-400">
+      <i18n-t keypath="auth.register.privacyNotice">
+        <template #link>
+          <NuxtLink to="/privacy" class="underline underline-offset-2">
+            {{ t('privacy.title') }}
+          </NuxtLink>
+        </template>
+      </i18n-t>
+    </p>
   </UForm>
 </template>

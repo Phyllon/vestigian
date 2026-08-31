@@ -59,6 +59,7 @@ export type MailKind =
   | 'revision-rejected'
   | 'trust-suspended'
   | 'trust-restored'
+  | 'account-deleted'
 
 /**
  * Display names, record titles, moderator notes and email addresses are all
@@ -328,6 +329,22 @@ const buildAccountCopy = (input: AccountEmailInput): EmailCopy => {
         note: input.note,
         reassurance:
           'Everything you contributed in the meantime still counts; nothing had to be recorded twice.',
+        footerReason,
+        showPasteFallback: false,
+      }
+
+    case 'account-deleted':
+      return {
+        subject: 'Your Vestigia account has been deleted',
+        preheader: `The account registered to ${input.recipient} was deleted on ${when}.`,
+        heading: 'Your account has been deleted',
+        paragraphs: [
+          'Your Vestigia account has been deleted. Your email address and display name have been removed and this address can no longer sign in.',
+          'Sites and tracings you contributed stay on the map — the atlas keeps a record of what was recorded and when, the same way it does for every edit — but they no longer carry your name; the history shows the account as deleted.',
+        ],
+        facts: [{ label: 'Deleted', value: when }],
+        reassurance:
+          'This is the last message this address will receive from Vestigia. If you did not request this, the account cannot be recovered — write to us right away so we can look at what happened.',
         footerReason,
         showPasteFallback: false,
       }

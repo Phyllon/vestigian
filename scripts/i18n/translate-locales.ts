@@ -142,10 +142,50 @@ const translateOne = async (
   return translated.join('')
 }
 
+/**
+ * LibreTranslate's gunicorn arbiter has been observed leaving the container
+ * with zero live workers after a routine recycle ("Autorestarting worker
+ * after current request" with no matching "Booting worker" afterward) — the
+ * master keeps listening, so a connection queues forever instead of failing,
+ * and no per-key timeout in this script can distinguish that from a slow
+ * translation. Checking `/languages` up front, with its own timeout, turns
+ * that into one clear failure before spending 15s times however many keys
+ * are pending. `docker restart` on the container is the fix; there is no
+ * in-script recovery from a dead arbiter.
+ */
+const PREFLIGHT_TIMEOUT_MS = 5000
+
+const checkTranslateService = async (translateUrl: string): Promise<boolean> => {
+  try {
+    // NUXT_TRANSLATE_URL already points at the /translate endpoint itself
+    // (see .env.example), so /languages is resolved against its origin
+    // rather than appended to the path — the naive concatenation hits
+    // /translate/languages, a 404 that looks identical to a dead arbiter.
+    const languagesUrl = new URL('/languages', translateUrl)
+    const response = await Promise.race([
+      fetch(languagesUrl),
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), PREFLIGHT_TIMEOUT_MS)),
+    ])
+    return response !== null && response.ok
+  } catch {
+    return false
+  }
+}
+
 const main = async (): Promise<void> => {
   const translateUrl = process.env.NUXT_TRANSLATE_URL
   if (!translateUrl) {
     console.error('NUXT_TRANSLATE_URL is not set — nothing to translate against.')
+    process.exitCode = 1
+    return
+  }
+
+  if (!(await checkTranslateService(translateUrl))) {
+    console.error(
+      `${translateUrl}/languages did not respond within ${PREFLIGHT_TIMEOUT_MS}ms. ` +
+        'LibreTranslate is likely up but out of workers — restart the container ' +
+        '(`docker restart vestigia-dev-libretranslate-1`) and try again.',
+    )
     process.exitCode = 1
     return
   }

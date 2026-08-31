@@ -9,7 +9,11 @@
   const { t } = useI18n()
 
   const items = computed(() => [
-    [{ label: t('layout.footerLicence'), icon: 'i-lucide-scale', to: '/licence' }],
+    [
+      { label: t('layout.footerLicence'), icon: 'i-lucide-scale', to: '/licence' },
+      { label: t('privacy.title'), icon: 'i-lucide-shield-check', to: '/privacy' },
+      { label: t('impressum.title'), icon: 'i-lucide-file-text', to: '/impressum' },
+    ],
   ])
 </script>
 
