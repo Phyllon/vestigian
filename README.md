@@ -348,3 +348,5 @@ docker run --rm --network container:vestigia-dev-minio-1 \
 ### check claude.md for unnecessary information. If new contexts don't have to get the information (irrelevant), write it to ./ARCHITECTURE.md instead.
 
 ### buy domain for Lettermint mail testing
+
+### check: OpenAPI

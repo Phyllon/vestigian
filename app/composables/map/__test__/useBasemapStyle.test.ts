@@ -287,6 +287,6 @@ describe('the views on offer', () => {
     // An env file that copies `.env.example` and leaves the line blank would
     // otherwise request tiles from '' — a flat sheet, and nothing logged.
     const blank = atlasStyle({ terrainUrl: '' }).sources.terrain as RasterDEMSourceSpecification
-    expect(blank.tiles?.[0]).toContain('elevation-tiles-prod')
+    expect(blank.tiles?.[0]).toContain('tiles.mapterhorn.com')
   })
 })

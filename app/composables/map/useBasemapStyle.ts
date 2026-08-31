@@ -263,16 +263,20 @@ const buildBasemapLayers = (colours: StyleColours, roadOpacity: number): LayerSp
  * production and the mirror script exists.
  */
 /**
- * Mapzen's terrarium tiles on AWS Open Data, which is the only elevation source
- * this map has ever used. Kept here rather than in `nuxt.config.ts` for the
- * same reason as the DARE fallback below: a deployment whose env file sets the
- * variable to nothing then gets a working sheet instead of a flat one, and the
- * failure mode of a missing hillshade is that nobody notices.
+ * Mapterhorn's terrarium tiles, Copernicus GLO-30 based, replacing Mapzen's on
+ * AWS Open Data. Same encoding, same maths — the only things that moved are the
+ * host and the container format (WebP, 512px, where the AWS mirror served PNG
+ * at 256px; see `tileSize` below).
+ *
+ * Kept here rather than in `nuxt.config.ts` for the same reason as the DARE
+ * fallback below: a deployment whose env file sets the variable to nothing
+ * then gets a working sheet instead of a flat one, and the failure mode of a
+ * missing hillshade is that nobody notices.
  *
  * A different host has to be added to `mapAssetOrigins` in `nuxt.config.ts` or
  * the production build's CSP refuses it silently.
  */
-const TERRAIN_TILES = 'https://elevation-tiles-prod.s3.amazonaws.com/terrarium/{z}/{x}/{y}.png'
+const TERRAIN_TILES = 'https://tiles.mapterhorn.com/{z}/{x}/{y}.webp'
 
 const resolveTerrainUrl = (source: BasemapSource): string =>
   source.terrainUrl.length > 0 ? source.terrainUrl : TERRAIN_TILES
@@ -574,9 +578,12 @@ const buildAtlasStyle = (
       type: 'raster-dem',
       tiles: [resolveTerrainUrl(source)],
       encoding: 'terrarium',
-      tileSize: 256,
+      // Mapterhorn's tiles are 512px, not the 256px the AWS mirror served.
+      // Wrong here and the hillshade decodes at half resolution silently —
+      // MapLibre does not error on a size mismatch, it just samples wrong.
+      tileSize: 512,
       maxzoom: 13,
-      attribution: 'Elevation: Mapzen / AWS Open Data',
+      attribution: 'Elevation: Mapterhorn (Copernicus GLO-30)',
     },
   },
   layers: [

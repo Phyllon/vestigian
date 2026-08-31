@@ -15,7 +15,10 @@ const mapAssetOrigins = [
   // law rather than the CLOUD Act is the whole point of the move.
   'https://*.b-cdn.net',
   'https://storage.bunnycdn.com',
-  'https://elevation-tiles-prod.s3.amazonaws.com',
+  // Mapterhorn: hillshade under the Barrington sheet. Terrarium-encoded,
+  // Copernicus GLO-30 based — replaced Mapzen's tiles on AWS Open Data, which
+  // is why an unset-env fresh clone still falls back to a real host here too.
+  'https://tiles.mapterhorn.com',
   // DARE's tile server, needed only until the mirror is populated and
   // NUXT_PUBLIC_BASEMAP_ANTIQUITY_DARE_URL points at the pull zone. It stays in
   // the list because the unset-env fallback is what makes a fresh clone work.
@@ -332,9 +335,9 @@ export default defineNuxtConfig({
         pmtilesUrl: '',
         /**
          * Elevation for the hillshade under the Barrington sheet. Empty means
-         * "use the Mapzen tiles on AWS Open Data" — the default lives in
-         * `useBasemapStyle` beside the DARE one, so that an env file which sets
-         * this to nothing gets the working default rather than a blank sheet.
+         * "use Mapterhorn's tiles" — the default lives in `useBasemapStyle`
+         * beside the DARE one, so that an env file which sets this to nothing
+         * gets the working default rather than a blank sheet.
          */
         terrainUrl: '',
         /**
