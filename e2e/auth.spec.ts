@@ -3,12 +3,13 @@ import { ACCOUNTS, E2E_PASSWORD } from './helpers/accounts'
 import { openSessionAs, signIn, signOut } from './helpers/auth'
 import { fetchAsBrowser } from './helpers/api'
 import { watchForProblems } from './helpers/console'
+import { gotoAndHydrate } from './helpers/hydration'
 
 test.describe('signing in', () => {
   test('signs in through the form and reaches the map', async ({ page }) => {
     const problems = watchForProblems(page)
 
-    await page.goto('/login')
+    await gotoAndHydrate(page, '/login')
     await page.getByLabel('Email').fill(ACCOUNTS.trusted.email)
     await page.getByLabel('Password').fill(E2E_PASSWORD)
     await page.getByRole('button', { name: /sign in/i }).click()
@@ -24,7 +25,7 @@ test.describe('signing in', () => {
   })
 
   test('refuses a wrong password without saying which half was wrong', async ({ page }) => {
-    await page.goto('/login')
+    await gotoAndHydrate(page, '/login')
     await page.getByLabel('Email').fill(ACCOUNTS.trusted.email)
     await page.getByLabel('Password').fill('Definitely-Not-It-9!')
     await page.getByRole('button', { name: /sign in/i }).click()
@@ -162,7 +163,7 @@ test.describe('route guards', () => {
 
 test.describe('the registration form', () => {
   test('checks the password rules as they are typed', async ({ page }) => {
-    await page.goto('/register')
+    await gotoAndHydrate(page, '/register')
 
     const password = page.getByLabel('Password', { exact: true })
     await password.fill('short')
@@ -177,7 +178,7 @@ test.describe('the registration form', () => {
   })
 
   test('reveals the password on request', async ({ page }) => {
-    await page.goto('/register')
+    await gotoAndHydrate(page, '/register')
 
     const password = page.getByLabel('Password', { exact: true })
     await password.fill('Perfectly-Fine-1!')
@@ -192,7 +193,7 @@ test.describe('the registration form', () => {
   })
 
   test('stays disabled until the challenge is solved, then registers', async ({ page }) => {
-    await page.goto('/register')
+    await gotoAndHydrate(page, '/register')
 
     const unique = Date.now()
     await page.getByLabel('Display name').fill(`E2E Signup ${unique}`)
@@ -217,7 +218,7 @@ test.describe('the registration form', () => {
   })
 
   test('refuses a display name that is already taken', async ({ page }) => {
-    await page.goto('/register')
+    await gotoAndHydrate(page, '/register')
 
     await page.getByLabel('Display name').fill(ACCOUNTS.trusted.displayName)
     await page.getByLabel('Email').fill(`fresh-${Date.now()}@e2e.local`)

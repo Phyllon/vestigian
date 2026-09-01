@@ -441,6 +441,33 @@ export default defineNuxtConfig({
       strictTransportSecurity: isProduction ? { maxAge: 31536000, includeSubdomains: true } : false,
     },
     rateLimiter: false,
+    /**
+     * Off, and deliberately: `nuxt-security`'s default policy runs every GET
+     * query and POST body (`methods: ['GET', 'POST']` — PATCH and DELETE were
+     * never covered even while this was on, which was itself a gap) through
+     * the `xss` package's `FilterXSS`, then rejects the request outright if
+     * filtering changed a single byte. `FilterXSS` HTML-escapes any `<` it
+     * cannot parse as a real tag it recognises, so "the wall is <2m tall" in a
+     * site summary or a visit note is escaped to "&lt;2m tall" and refused —
+     * identically to `<script>`. The comparison cannot tell them apart, which
+     * is the library working as designed for a body assumed to *be* HTML, not
+     * a defect to configure around: no whitelist or option here changes that
+     * an ordinary `<` in free text is indistinguishable from an attack to a
+     * filter that only asks "did anything change".
+     *
+     * The reason it is safe to turn off rather than merely worked around: this
+     * app has no `v-html` anywhere (`grep -rn v-html app/` returns nothing) so
+     * every value a Vue template renders is escaped by `{{ }}` regardless of
+     * this middleware. The two places user text reaches a non-Vue-escaped
+     * output — HTML mail (`server/utils/mail-template.ts`'s `escapeHtml`) and
+     * the GPX field kit (`server/utils/gpx.ts`'s `escapeXml`) — already encode
+     * for their own context explicitly, and both are unit-tested for it. Input
+     * filtering that cannot distinguish "<2m" from "<script>" was defending
+     * output paths that were already defended correctly; turning it off traded
+     * a blunt, redundant check for the free-text fields the app is full of
+     * (summaries, notes, bios, edit summaries) actually working.
+     */
+    xssValidator: false,
     corsHandler: {
       origin: process.env.NUXT_PUBLIC_SITE_URL ?? 'http://localhost:3000',
       methods: ['GET', 'POST', 'PATCH', 'DELETE'],

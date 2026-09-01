@@ -1,5 +1,13 @@
 import { eq } from 'drizzle-orm'
-import { revisions, siteImages, sites, tracings, users } from '~~/server/database/schema'
+import {
+  revisions,
+  siteBookmarks,
+  siteImages,
+  siteVisits,
+  sites,
+  tracings,
+  users,
+} from '~~/server/database/schema'
 import type { SessionUser } from '#shared/types'
 
 /**
@@ -14,7 +22,7 @@ defineRouteMeta({
     tags: ['auth'],
     summary: 'Export the signed-in account’s stored data',
     description:
-      'Account fields plus every site, tracing, image and revision authored by the caller, as JSON. Scoped to the caller’s own id.',
+      'Account fields plus every site, tracing, image and revision authored by the caller, and the private visit log and to-visit list, as JSON. Scoped to the caller’s own id.',
   },
 })
 
@@ -34,6 +42,11 @@ export default defineEventHandler(async (event) => {
       role: users.role,
       approvedContributions: users.approvedContributions,
       trustRevoked: users.trustRevoked,
+      bio: users.bio,
+      homeGround: users.homeGround,
+      publicProfile: users.publicProfile,
+      notifyByEmail: users.notifyByEmail,
+      preferredLocale: users.preferredLocale,
       emailVerifiedAt: users.emailVerifiedAt,
       lastSeenAt: users.lastSeenAt,
       createdAt: users.createdAt,
@@ -46,7 +59,14 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 401, message: 'Sign in again to continue.' })
   }
 
-  const [authoredSites, authoredTracings, authoredImages, authoredRevisions] = await Promise.all([
+  const [
+    authoredSites,
+    authoredTracings,
+    authoredImages,
+    authoredRevisions,
+    recordedVisits,
+    savedPlaces,
+  ] = await Promise.all([
     database
       .select({
         id: sites.id,
@@ -85,6 +105,26 @@ export default defineEventHandler(async (event) => {
       })
       .from(revisions)
       .where(eq(revisions.authorId, userId)),
+
+    /**
+     * The notebook. Not contributions — nobody else can read these — but
+     * squarely personal data, and therefore squarely within Art. 15. The note
+     * is included in full: it is the subject's own words, and an export that
+     * withheld them would be reporting less than the database holds.
+     */
+    database
+      .select({
+        siteId: siteVisits.siteId,
+        visitedOn: siteVisits.visitedOn,
+        note: siteVisits.note,
+        createdAt: siteVisits.createdAt,
+      })
+      .from(siteVisits)
+      .where(eq(siteVisits.userId, userId)),
+    database
+      .select({ siteId: siteBookmarks.siteId, createdAt: siteBookmarks.createdAt })
+      .from(siteBookmarks)
+      .where(eq(siteBookmarks.userId, userId)),
   ])
 
   event.context.log.info({ audit: 'auth.export', userId }, 'account data exported')
@@ -95,5 +135,7 @@ export default defineEventHandler(async (event) => {
     tracings: authoredTracings,
     images: authoredImages,
     revisions: authoredRevisions,
+    visits: recordedVisits,
+    bookmarks: savedPlaces,
   }
 })

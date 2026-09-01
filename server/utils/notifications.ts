@@ -17,6 +17,13 @@ import { revisions, sites, users } from '~~/server/database/schema'
  * events here: a rejection is invisible on the map by definition, and a
  * suspension changes what the person is allowed to do without changing
  * anything they can see.
+ *
+ * Both are gated on `users.notify_by_email`, which the account holder controls
+ * from their settings. Security notices are deliberately **not** — a password
+ * change and a requested change of address are sent whatever this says, because
+ * an attacker holding a session could otherwise switch the preference off and
+ * take the account in silence. The line is: this switch covers messages about
+ * your contributions, never messages about your credentials.
  */
 
 const notificationLogger = () => useLogger()
@@ -78,12 +85,16 @@ export const notifyReviewDecision = async (notification: ReviewNotification): Pr
     if (!revision || revision.authorId === null || revision.revertsRevisionId !== null) return
 
     const [author] = await database
-      .select({ email: users.email, displayName: users.displayName })
+      .select({
+        email: users.email,
+        displayName: users.displayName,
+        notifyByEmail: users.notifyByEmail,
+      })
       .from(users)
       .where(eq(users.id, revision.authorId))
       .limit(1)
 
-    if (!author) return
+    if (!author || !author.notifyByEmail) return
 
     const payload = revision.payload as { title?: string; kind?: string }
 
@@ -127,12 +138,16 @@ export const notifyTrustChange = async (notification: TrustNotification): Promis
     const siteUrl = useRuntimeConfig().public.siteUrl.replace(/\/$/, '')
 
     const [account] = await useDatabase()
-      .select({ email: users.email, displayName: users.displayName })
+      .select({
+        email: users.email,
+        displayName: users.displayName,
+        notifyByEmail: users.notifyByEmail,
+      })
       .from(users)
       .where(eq(users.id, notification.userId))
       .limit(1)
 
-    if (!account) return
+    if (!account || !account.notifyByEmail) return
 
     await sendAccountMail(notification.revoked ? 'trust-suspended' : 'trust-restored', {
       to: account.email,

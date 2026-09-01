@@ -428,6 +428,24 @@ whatever client it is handed — see the note in `server/utils/db.ts`.
 - **Detection is not enforcement.** CrowdSec writes decisions; nothing applies them until a bouncer exists. See `docker/security/README.md`.
 - Rate limiting **fails open** — a cache outage must not lock everyone out.
 - CSP allows only the map asset origins listed in `nuxt.config.ts`.
+- **`nuxt-security`'s `xssValidator` is off** (`security.xssValidator: false` in
+  `nuxt.config.ts`), and that is a considered decision, not a gap. It ran every
+  GET query and POST body through the `xss` package's `FilterXSS`, then
+  rejected the request outright the moment filtering changed a single byte.
+  `FilterXSS` HTML-escapes any `<` it cannot parse as a tag it recognises, so a
+  site summary reading "the wall is <2m tall" or a field note with "<1m wide"
+  was escaped to `&lt;2m` and refused — identically to `<script>alert(1)`,
+  because the check only asks "did anything change", not "was anything
+  dangerous". No whitelist option fixes that: it is what the library is for,
+  applied to a body it assumes is HTML rather than JSON carrying free prose.
+  Turning it off is safe here specifically because **there is no `v-html`
+  anywhere in this app** (`grep -rn v-html app/` returns nothing), so every
+  value a Vue template renders is escaped by `{{ }}` regardless of this
+  middleware, and the two surfaces that are not Vue-rendered already encode for
+  their own context explicitly and are unit-tested for it: HTML mail
+  (`mail-template.ts`'s `escapeHtml`) and the GPX field kit (`gpx.ts`'s
+  `escapeXml`). If a `v-html` is ever added, this decision needs revisiting
+  before that lands, not after.
 
 ## GDPR / legal
 
@@ -511,22 +529,27 @@ app/
                SiteExternalLinks SiteEnrichment
     tracing/   TracingDetailPanel
     contribute/ ContributionPanel SiteEditorForm TracingEditorForm GeometryDrawTool ImageUploader
-    auth/      LoginForm RegisterForm PasswordField PasswordRequirements
+    auth/      LoginForm RegisterForm PasswordField PasswordRequirements AccountMenu
     moderation/ ReviewQueue RevisionDiff ContributorTable
     limes/     LimesPanel
+    notebook/  NotebookControls MilestoneStamps
     ui/        ThemeToggle LanguageSwitcher RevisionHistory
   composables/
-    map/  useMapInstance useBasemapStyle useViewportTiles useGeolocation useSiteIcons (+__test__/)
+    map/  useMapInstance useBasemapStyle useViewportTiles useGeolocation useSiteIcons
+          useNotebookOverlay                                                           (+__test__/)
     data/ useSiteQuery useSiteEnrichment useImageUrl useCanonicalUrl useNoIndex useSocialMeta
                                                                                        (+__test__/)
     auth/ useSession
+    user/ useNotebook
     limes/ useLimes
     ui/   useColorScheme useUiLocale useBreakpoint                                      (+__test__/)
   layouts/ default.vue (map shell) reading.vue (documents)
   middleware/ authenticated.ts moderator.ts
   router.options.ts          scroll behaviour; the camera hash is not a selector
   pages/ index login register verify forgot-password reset-password
-         licence privacy impressum
+         licence privacy impressum settings
+         notebook/index notebook/visits notebook/contributions
+         contributor/[name]
          site/[slug] site/[slug]/edit tracing/[id] tracing/[id]/edit
          limes/index limes/[slug]
          moderation/index moderation/contributors
@@ -535,13 +558,17 @@ server/
   middleware/ content-language.ts   sets Content-Language from the locale cookie
   api/ tiles/[z]/[x]/[y]  tiles/antiquity/[z]/[x]/[y]
        tiles/limes/[z]/[x]/[y]
-       sites/  tracings/  auth/ (+ account.delete.ts export.get.ts)  contributions/
+       sites/  tracings/  contributions/
+       auth/ (+ account.delete.ts export.get.ts change-password.post.ts change-email.post.ts)
+       me/ (index.get/patch contributions visits bookmarks map.geojson field-kit.gpx)
+       contributors/[name]
        moderation/  data/  limes/
        images/[id]/[preset]  sites/[id]/enrichment  health ready metrics openapi.json
   routes/ robots.txt sitemap.xml sitemap-static.xml
           sitemap-sites/[page]  sitemap-tracings/[page]
-  database/ schema/ (users sites geo atlas) migrations/ migrate.ts
+  database/ schema/ (users sites notebook geo atlas) migrations/ migrate.ts
   utils/ mvt atlas limes openapi permissions ratelimit images images-order uploads tokens diff
+         notebook gpx
          mail mail-template notifications
          site-record validation
          revisions slug db cache argon altcha enrichment enrichment-sources translate
@@ -614,6 +641,14 @@ to match the compose defaults.
   rewritten against the real shape. See "The vici.org schema, as observed" below.
 - Migrations are **hand-written** (`0000_initial.sql`, `0001_revision_history.sql`) because drizzle-kit cannot emit PostGIS geometry columns, GiST indexes, or the expression indexes behind search. **Read any generated migration before applying it** — regenerating from the schema files would silently drop all three. See `server/database/migrations/README.md`.
 - Vector-tile source layer names (`transportation`, `place`, `water`, `landuse`, `boundary`, `building`) follow the OpenMapTiles schema. Verify against the actual PMTiles/OpenFreeMap tiles.
+- **`sites.country_code` is null on all 61,272 imported rows.** The column
+  exists, the schema declares it, and nothing in the vici import fills it —
+  measured, not assumed. Two things quietly depend on it: the notebook's
+  "Countries" count reads 0 for everyone, and the `five-countries` milestone is
+  unreachable. Neither is wrong, both are inert. `geo_names` already holds what
+  a reverse-geocode backfill would need, so this is a one-off script rather
+  than a schema question; until it is run, do not build anything else on that
+  column.
 
 ## The vici.org schema, as observed
 
@@ -948,14 +983,130 @@ source calls a site or tracing by (`sites.category`, six languages' worth of
 `psummaries`/`ptexts`) is unaffected; only this app's own interface chrome is
 translated.
 
+## The field notebook — the reader's own traces
+
+The project is called _traces_, and until now the one set of traces it did not
+record was the visitor's own. `site_visits` and `site_bookmarks` fix that: **I
+have stood here**, and **places to go**. It is the one feature here with no
+analogue in vici.org, and it follows from what this atlas already claims to be —
+a record made by the people who visit the places in it.
+
+Everything else in this database is the shared record. These two tables are not,
+and three rules follow from that. They are stated in
+`server/database/schema/notebook.ts` and in migration `0006`, and each has an
+e2e test in `e2e/notebook.spec.ts` because each would be trivially broken from
+somewhere none of them live:
+
+1. **A visit never goes through `applyRevision()`.** That function is still the
+   only writer of the shared record; the handlers under `server/api/me/` are the
+   only writes in the app that touch a table directly, because a private note
+   about somebody's travel is not a change other people review. Sending it
+   through moderation would put a moderator in front of it.
+2. **The notebook never joins `/api/data/sites.geojson`** or any public feed.
+   The `antiquity_*` tables are excluded from that feed for a licence reason;
+   these are excluded for a data-protection one.
+3. **The notebook never enters the MVT pipeline.** Tile invalidation is one
+   global counter (`bumpDataVersion()`) — the reason tiles cache far longer than
+   editable content normally allows. A per-user layer inside `ST_AsMVT` would
+   make every cache key per-user and throw that away, for a few hundred points
+   that fit in one response. The map draws them from a plain `geojson` source
+   fed by `/api/me/map.geojson`, as a ring _around_ the category mark rather than
+   a second glyph on the same coordinate.
+
+Four more things worth knowing:
+
+- **Erasure deletes the notebook outright, and that is a different decision from
+  the rest of `account.delete.ts`.** That endpoint _anonymises_ rather than
+  deletes, so the `ON DELETE CASCADE` on these tables never fires — a private
+  record of where somebody has physically been would otherwise outlive the
+  account that erased itself. The Art. 17(3)(d) archival reasoning that keeps
+  contribution content does not reach it: nobody else can read a visit, and
+  removing it takes nothing from the atlas. The deletes and the anonymisation
+  are one transaction.
+- **`visited_on` is nullable and `visited` is a column, not an inference.** "I
+  have been, I do not recall when" is a real answer; a required date would be
+  filled in with an invented one, and `visitedOn !== null` is therefore not the
+  same question as "has this person stood here".
+- **One row per person per site.** Revisiting updates rather than appends. This
+  records _whether_ someone has been somewhere, not an itinerary — a log of
+  repeat trips is a movement history worth more to an attacker than to its owner.
+- **The GPX field kit is the offline story.** Offline tiles are still unbuilt and
+  are a large piece of work; `/api/me/field-kit.gpx` is small, works on a
+  handheld GPS or OsmAnd with no signal, and is most of that need.
+  `server/utils/gpx.ts` is hand-written — the escaping is the only hard part and
+  is the part that is tested, because an unescaped `&` in an imported title makes
+  the file unparseable and a GPS reports that as "no waypoints" rather than as an
+  error.
+
+### Milestones, and why there is no game
+
+`shared/utils/milestones.ts` derives eight named marks on read and **stores
+none of them** — the same reasoning that deleted `users.trust_level` in
+migration `0002`. Every mark is either _the first time_ something happened or _a
+round number of_ something, so there is nothing to optimise. There are
+deliberately no points, streaks, levels or leaderboards: a streak rewards
+whoever lives nearest a frontier, and a leaderboard turns a shared record into a
+contest that pays for thin records submitted quickly. The one mark worth having
+is `recorded-and-stood` — visiting a place you yourself recorded — which is the
+thesis of the project in a single fact and the only one that cannot be earned
+from a desk.
+
+### The public contributor page is opt-in and a strict projection
+
+`users.public_profile` is off by default, and `/api/contributors/[name]` returns
+display name, bio, joining **month** and published work. Never email, never role
+(which would make the moderator list enumerable), never trust state (a
+moderation judgement is not a public fact), and never visits or bookmarks —
+that switch is about _attribution for contributions_, not general visibility.
+A profile that is off answers **404, not 403**, so the route cannot be used to
+enumerate display names. The month rather than the day because an exact
+registration timestamp is a fingerprint. `contributor-projection.test.ts`
+asserts the absences against the source.
+
+### The account menu
+
+`AuthAccountMenu` replaced a bare button in `default.vue` that showed the
+display name and **signed you out on click** — no dropdown, no confirmation, and
+no route to anything else about the account. The moderation queue stays a
+header link rather than moving into the menu: moderators open it constantly.
+The menu is `ClientOnly` for a different reason than `LanguageSwitcher` and
+`ThemeToggle` — the session _is_ available during SSR, and a display name baked
+into the HTML of `/` would be a cross-user leak the moment anyone enables edge
+caching for pages, which nothing in `routeRules` currently forbids.
+
+### Credentials
+
+`auth/change-password.post.ts` and `auth/change-email.post.ts` both require the
+**current password**: a session is proof of a past sign-in, not of present
+possession, so without it a borrowed laptop is enough to take an account — worse
+than the reset flow, where an attacker at least needs the inbox. Both notify,
+and both ignore `notify_by_email`, because an attacker holding a session could
+otherwise switch the preference off and act in silence. That switch covers
+messages about your _contributions_; never messages about your _credentials_.
+
+A change of address writes **nothing** to `users` up front. The new address is
+parked on a `change-email` token (`email_tokens.new_email`) and only moves when
+someone proves they can read that inbox. Writing it immediately and clearing
+`email_verified_at` would leave a typo — or an address typed into a borrowed
+session — locking the real owner out of an account they can still see and can no
+longer recover, since `forgot-password` would now mail the wrong inbox. Two
+messages go out: the link to the new address, and a warning to the **old** one,
+which is the only signal reaching the genuine owner. It does not name the new
+address; if the request was not theirs, that is a stranger's inbox.
+
+`verify.post.ts` redeems both `verify-email` and `change-email`, because from the
+recipient's side they ask the same thing. The purpose comes from the stored row,
+never the request.
+
 ## Not built
 
 - Purging withdrawn images from object storage (withdrawal is reversible by design — nothing deletes bytes).
-- Notifications beyond mail. A review decision and a trust change now reach the
-  person by email (`server/utils/notifications.ts`); a role change and a revert
-  still do not, and there is nothing in the interface itself. There is also no
-  preference to turn any of it off, which is defensible only while every message
-  is about the reader's own account or their own contribution.
+- Notifications beyond mail. A review decision and a trust change reach the
+  person by email (`server/utils/notifications.ts`), and `users.notify_by_email`
+  now turns both off from `/settings`; a role change and a revert still send
+  nothing, and there is nothing in the interface itself. Security notices —
+  password changed, address change requested — deliberately ignore that
+  preference, for the reason given under "Credentials" above.
 - Full-text search across descriptions (titles and summaries only).
 - RDF / Pelagios linked data. The GeoJSON feed at `/api/data/sites.geojson` exists.
 - Offline tile caching. The app is installable as a PWA but needs signal.

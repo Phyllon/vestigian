@@ -26,6 +26,22 @@ export const users = pgTable(
     trustRevoked: boolean('trust_revoked').notNull().default(false),
     emailVerifiedAt: timestamp('email_verified_at', { withTimezone: true }),
     lastSeenAt: timestamp('last_seen_at', { withTimezone: true }),
+    /** Shown on the opt-in public contributor page and nowhere else. */
+    bio: varchar('bio', { length: 280 }),
+    /**
+     * A camera hash (`{zoom}/{lat}/{lon}`) — the same string the URL fragment
+     * carries, read by the same codec in `useMapInstance`. Three columns would
+     * be a second serialisation of a format that already exists.
+     */
+    homeGround: varchar('home_ground', { length: 64 }),
+    /**
+     * Off by default. A contributor page appearing unasked would publish an
+     * association between a display name and a body of work nobody agreed to.
+     */
+    publicProfile: boolean('public_profile').notNull().default(false),
+    /** Honoured in `server/utils/notifications.ts` before any mail is built. */
+    notifyByEmail: boolean('notify_by_email').notNull().default(true),
+    preferredLocale: varchar('preferred_locale', { length: 5 }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
@@ -45,6 +61,14 @@ export const emailTokens = pgTable(
     /** Only a hash of the token is stored, so a database leak grants nothing. */
     tokenHash: varchar('token_hash', { length: 255 }).notNull(),
     purpose: varchar('purpose', { length: 20 }).notNull(),
+    /**
+     * The address a `change-email` token is asking to move to, held here until
+     * its owner confirms it. Writing it straight to `users` and clearing
+     * `email_verified_at` would let a typo — or someone else's address typed
+     * into a borrowed session — lock the real owner out of an account they can
+     * still see but no longer sign in to. Null for every other purpose.
+     */
+    newEmail: varchar('new_email', { length: 320 }),
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     consumedAt: timestamp('consumed_at', { withTimezone: true }),
   },

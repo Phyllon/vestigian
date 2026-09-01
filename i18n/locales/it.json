@@ -6,9 +6,18 @@
     "queue": "Que",
     "signIn": "Firma",
     "signOut": "Firma",
-    "signOutAs": "Iscriviti, firma come{name}",
     "footerLicence": "Dati e licenze",
     "menu": "Menu"
+  },
+  "account": {
+    "menuFor": "Menu dell'account, connesso come {name}",
+    "standingTrusted": "Le tue modifiche vengono pubblicate subito",
+    "standingProbation": "Tutto ciò che scrivi viene prima riletto | Ancora un contributo accettato e le tue modifiche verranno pubblicate subito | Ancora {n} contributi accettati e le tue modifiche verranno pubblicate subito",
+    "notebook": "Il mio taccuino",
+    "visits": "I luoghi dove sono stato",
+    "contributions": "I miei contributi",
+    "contributors": "Collaboratori",
+    "settings": "Impostazioni"
   },
   "themeToggle": {
     "switchToDay": "Passare al giorno",
@@ -628,5 +637,155 @@
     "editingTitle": "Modifica{title}",
     "srHeading": "Modifica{title}",
     "editorAriaLabel": "Tracciare editor"
+  },
+  "notebook": {
+    "title": "Il mio taccuino",
+    "intro": "Ciò che hai dato all'atlante e dove sei stato. Le tue visite e il tuo corredo da campo appartengono solo a te: nessun altro li vede e non compaiono su nessuna mappa caricata da altri.",
+    "loading": "Apertura del taccuino…",
+    "loadFailed": "Non è stato possibile aprire il taccuino. Riprova tra poco.",
+    "standingHeading": "Posizione",
+    "trust": {
+      "moderator": "Rileggi i contributi degli altri e le tue modifiche vengono pubblicate subito.",
+      "earned": "Le tue modifiche vengono pubblicate subito.",
+      "probation": "Un moderatore legge le tue modifiche prima che compaiano.",
+      "revoked": "La pubblicazione automatica è sospesa su questo account. Le tue modifiche vengono rilette prima di comparire."
+    },
+    "untilTrusted": "Non manca altro. | Manca un contributo accettato. | Mancano {n} contributi accettati.",
+    "joined": "Annota qui dal {date}",
+    "ledgerHeading": "Il registro",
+    "countSites": "Siti",
+    "countTracings": "Tracciati",
+    "countImages": "Fotografie",
+    "countVisits": "Visitati",
+    "countCountries": "Paesi",
+    "countBookmarks": "Nel corredo da campo",
+    "pendingHeading": "Nulla in attesa | Un contributo in attesa | {n} contributi in attesa",
+    "pendingBody": "Un moderatore li legge prima che compaiano sulla mappa. Nulla va perduto nell'attesa, e l'esito ti verrà comunicato per email.",
+    "pendingAction": "Vedi cosa attende",
+    "visitsTitle": "I luoghi dove sono stato",
+    "visitsIntro": "Questo atlante lo costruisce chi va a vedere di persona. Questa è la parte che riguarda solo te: privata, mai pubblicata e mai collegata a qualcosa che altri possano leggere.",
+    "visitsHeading": "Nessuna visita annotata | Una visita | {n} visite",
+    "visitsEmpty": "Ancora nulla di annotato. Apri un sito sulla mappa e segna che ci sei stato.",
+    "fieldKit": "Scarica il corredo da campo (GPX)",
+    "undated": "Data non annotata",
+    "forgetVisit": "Togli la visita a {title}",
+    "bookmarksHeading": "Corredo da campo: vuoto | Corredo da campo: un luogo | Corredo da campo: {n} luoghi",
+    "bookmarksIntro": "Luoghi dove andare. Viaggiano con te nel file GPX qui sopra, che funziona su un GPS portatile o su una mappa offline, senza alcun segnale.",
+    "bookmarksEmpty": "Nulla di salvato. Apri un sito sulla mappa e aggiungilo al tuo corredo da campo.",
+    "dropBookmark": "Togli {title} dal corredo da campo",
+    "contributionsTitle": "I miei contributi",
+    "contributionsIntro": "Tutto ciò che hai inviato, dal più recente, con quanto ne ha scritto un moderatore.",
+    "contributionsEmpty": "Ancora nulla di inviato. Ogni scheda di questa mappa è stata aggiunta da qualcuno che è andato a vedere.",
+    "untitledRecord": "Scheda senza titolo",
+    "status": {
+      "pending": "In attesa",
+      "approved": "Pubblicata",
+      "rejected": "Non accettata"
+    },
+    "entity": {
+      "site": "Sito",
+      "tracing": "Tracciato"
+    },
+    "isRevert": "Un ripristino",
+    "publishedDirectly": "Pubblicata senza revisione",
+    "pendingExplainer": "In attesa di un moderatore. Nel frattempo non si perde nulla.",
+    "loadMore": "Mostra altro",
+    "markVisited": "Sono stato qui",
+    "visitedHere": "Sei stato qui",
+    "addToFieldKit": "Aggiungi al corredo",
+    "inFieldKit": "Nel tuo corredo",
+    "visitedOn": "Quando",
+    "visitedOnHelp": "Facoltativo. Lascialo vuoto se non lo ricordi.",
+    "visitNote": "Nota di campo",
+    "visitNoteHelp": "Facoltativa e privata. Non è una descrizione del sito: a quello serve un contributo.",
+    "saveVisit": "Annota la visita",
+    "forget": "Togli la visita",
+    "cancel": "Annulla",
+    "visitSaved": "Annotato: {title}",
+    "visitSaveFailed": "Non è stato possibile annotare la visita. Riprova tra poco.",
+    "visitRemoveFailed": "Non è stato possibile togliere la visita. Riprova tra poco.",
+    "bookmarkFailed": "Non è stato possibile modificare il corredo. Riprova tra poco.",
+    "bookmarkRemoveFailed": "Non è stato possibile toglierlo dal corredo. Riprova tra poco."
+  },
+  "milestones": {
+    "title": "Segni",
+    "first-accepted": {
+      "label": "Prima scheda",
+      "note": "Un tuo contributo è stato accettato"
+    },
+    "trusted": {
+      "label": "Di fiducia",
+      "note": "Le tue modifiche compaiono mentre le scrivi"
+    },
+    "hundred-accepted": {
+      "label": "Cento schede",
+      "note": "Cento contributi accettati"
+    },
+    "first-visit": {
+      "label": "Prima visita",
+      "note": "Sei stato in un luogo e l'hai annotato"
+    },
+    "ten-visits": {
+      "label": "Dieci luoghi",
+      "note": "Dieci siti visitati"
+    },
+    "hundred-visits": {
+      "label": "Cento luoghi",
+      "note": "Cento siti visitati"
+    },
+    "five-countries": {
+      "label": "Cinque paesi",
+      "note": "Visite in cinque paesi"
+    },
+    "recorded-and-stood": {
+      "label": "Annotato e visitato",
+      "note": "Hai visitato un luogo che avevi annotato tu stesso"
+    }
+  },
+  "settings": {
+    "title": "Impostazioni",
+    "intro": "Come appari, cosa ti raggiunge e le due cose che ti riportano in questo account.",
+    "profileHeading": "Come appari",
+    "displayName": "Nome visualizzato",
+    "displayNameHelp": "La firma sotto ogni scheda che aggiungi. I collegamenti alle tue schede continuano a funzionare se lo cambi.",
+    "bio": "Su di te",
+    "bioHelp": "Visibile solo sulla tua pagina pubblica, e solo se la attivi.",
+    "language": "Lingua",
+    "publicProfile": "Voglio una pagina pubblica da collaboratore",
+    "publicProfileHelp": "Disattivata per impostazione predefinita. Mostra il tuo nome, questo testo e le schede che hai pubblicato: mai la tua email, mai ciò che hai visitato.",
+    "publicProfileLink": "Guardala",
+    "notifyByEmail": "Scrivimi dei miei contributi",
+    "notifyByEmailHelp": "Le decisioni su ciò che invii e i cambiamenti nella tua posizione. I messaggi sulla password o sull'indirizzo vengono sempre inviati.",
+    "save": "Salva",
+    "saved": "Salvato.",
+    "saveFailed": "Non è stato possibile salvare. Riprova tra poco.",
+    "nameTaken": "Quel nome è già preso.",
+    "passwordHeading": "Password",
+    "passwordBody": "Serve la password attuale: essere connessi dimostra che sei già stato qui, non che sei tu il titolare adesso.",
+    "currentPassword": "Password attuale",
+    "newPassword": "Nuova password",
+    "changePassword": "Cambia la password",
+    "passwordChanged": "La tua password è stata cambiata. Te l'abbiamo confermato per email.",
+    "passwordFailed": "Non è stato possibile cambiare la password. Riprova tra poco.",
+    "wrongPassword": "Questa non è la tua password attuale.",
+    "emailHeading": "Indirizzo email",
+    "emailBody": "Nulla cambia finché non confermi il nuovo indirizzo dalla sua casella. Al tuo indirizzo attuale viene comunicato che è stato chiesto un cambio.",
+    "newEmail": "Nuovo indirizzo",
+    "changeEmail": "Cambia l'indirizzo",
+    "emailPending": "Cerca il collegamento di conferma nella nuova casella. Per ora non è cambiato nulla.",
+    "emailTaken": "Quell'indirizzo è già in uso.",
+    "emailFailed": "Non è stato possibile cambiare l'indirizzo. Riprova tra poco.",
+    "dataHeading": "I tuoi dati",
+    "dataBody": "Scarica tutto ciò che questo account contiene, oppure cancellalo del tutto.",
+    "dataAction": "Riservatezza e i tuoi dati"
+  },
+  "contributor": {
+    "notFound": "Nessun collaboratore con questo nome.",
+    "description": "Schede aggiunte a Vestigia da {name}.",
+    "joined": "Annota dal {date}",
+    "accepted": "nessun contributo accettato | un contributo accettato | {n} contributi accettati",
+    "sitesHeading": "Nessun sito | Un sito | {n} siti",
+    "tracingsHeading": "Nessun tracciato | Un tracciato | {n} tracciati",
+    "nothingPublished": "Non ha ancora pubblicato nulla."
   }
 }

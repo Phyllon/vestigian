@@ -13,9 +13,11 @@ import type { SessionUser, UserRole } from '#shared/types'
 /**
  * The caller's role and trust **as they are now**, not as they were at login.
  *
- * `setUserSession` is called in exactly one place — `auth/login.post.ts` — and
- * nuxt-auth-utils seals the result into a stateless cookie that nothing
- * refreshes. Reading role from that cookie meant a demoted moderator kept
+ * The session is sealed by `auth/login.post.ts` into a stateless cookie that
+ * nothing refreshes. (`me/index.patch.ts` re-seals it on a rename, but only to
+ * correct `displayName` — it never writes a role, a trust flag or a
+ * contribution count, so nothing an authorization decision reads has ever been
+ * refreshed there.) Reading role from that cookie meant a demoted moderator kept
  * moderator access until they happened to log out — and since `maxAge` was
  * unset, h3 sealed the session with `ttl: 0`, which means it never expired at
  * all. Demotion is one of the few levers the governance model has; it has to

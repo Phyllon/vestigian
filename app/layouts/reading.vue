@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  const { loggedIn, signOut } = useSession()
+  const { loggedIn } = useSession()
   const { t } = useI18n()
 </script>
 
@@ -27,14 +27,14 @@
         <nav class="ml-auto flex items-center gap-1" aria-label="Main">
           <UiLanguageSwitcher />
           <UiThemeToggle />
-          <button
-            v-if="loggedIn"
-            type="button"
-            class="rounded-notebook px-3 py-1.5 text-sm text-ink-700 dark:text-paper-200"
-            @click="signOut"
+          <AuthAccountMenu v-if="loggedIn" />
+          <NuxtLink
+            v-else
+            to="/login"
+            class="rounded-notebook px-3 py-1.5 text-sm text-ink-700 transition hover:bg-paper-200 dark:text-paper-200 dark:hover:bg-night-700"
           >
-            {{ t('layout.signOut') }}
-          </button>
+            {{ t('layout.signIn') }}
+          </NuxtLink>
         </nav>
       </div>
     </header>

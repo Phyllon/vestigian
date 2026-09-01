@@ -12,6 +12,8 @@ import { bodySchema as forgotPasswordSchema } from './auth/forgot-password.post'
 import { credentialsSchema } from './auth/login.post'
 import { registrationSchema } from './auth/register.post'
 import { bodySchema as resetPasswordSchema } from './auth/reset-password.post'
+import { changeEmailSchema } from './auth/change-email.post'
+import { changePasswordSchema } from './auth/change-password.post'
 import { bodySchema as verifySchema } from './auth/verify.post'
 import { contributionSchema } from './contributions/index.post'
 import { querySchema as geojsonQuerySchema } from './data/sites.geojson.get'
@@ -24,6 +26,12 @@ import { reviewSchema } from './moderation/review.post'
 import { roleSchema } from './moderation/role.post'
 import { trustSchema } from './moderation/trust.post'
 import { querySchema as moderationUsersQuery } from './moderation/users.get'
+import { bookmarkSchema } from './me/bookmarks.post'
+import { paramsSchema as bookmarkDeleteParams } from './me/bookmarks/[siteId].delete'
+import { querySchema as myContributionsQuery } from './me/contributions.get'
+import { profileSchema } from './me/index.patch'
+import { visitSchema } from './me/visits.post'
+import { paramsSchema as visitDeleteParams } from './me/visits/[siteId].delete'
 import {
   paramsSchema as enrichmentParams,
   querySchema as enrichmentQuery,
@@ -116,12 +124,41 @@ const OPERATION_OVERRIDES: Record<
       },
     },
   },
+  '/api/auth/change-email': {
+    post: {
+      security: SESSION_SECURITY,
+      requestBody: bodyFromSchema(changeEmailSchema),
+      responses: {
+        200: jsonResponse(
+          '{ status: "pending-confirmation" } — nothing is written until confirmed.',
+        ),
+        400: errorResponse('That is already the address on the account.'),
+        401: COMMON_RESPONSES[401],
+        403: errorResponse('The current password did not match.'),
+        409: errorResponse('That address is already in use.'),
+        429: COMMON_RESPONSES[429],
+      },
+    },
+  },
+  '/api/auth/change-password': {
+    post: {
+      security: SESSION_SECURITY,
+      requestBody: bodyFromSchema(changePasswordSchema),
+      responses: {
+        200: jsonResponse('{ status: "changed" }'),
+        400: COMMON_RESPONSES[400],
+        401: COMMON_RESPONSES[401],
+        403: errorResponse('The current password did not match.'),
+        429: COMMON_RESPONSES[429],
+      },
+    },
+  },
   '/api/auth/export': {
     get: {
       security: SESSION_SECURITY,
       responses: {
         200: jsonResponse(
-          'Account fields plus the caller’s own sites, tracings, images and revisions.',
+          'Account fields plus the caller’s own sites, tracings, images, revisions, visits and bookmarks.',
         ),
         401: COMMON_RESPONSES[401],
         429: COMMON_RESPONSES[429],
@@ -153,8 +190,9 @@ const OPERATION_OVERRIDES: Record<
     post: {
       requestBody: bodyFromSchema(verifySchema),
       responses: {
-        200: jsonResponse('{ status: "verified" }'),
+        200: jsonResponse('{ status: "verified" | "address-changed" }'),
         400: errorResponse('The link is expired, already used, or not valid.'),
+        409: errorResponse('The new address was claimed by another account in the meantime.'),
         429: COMMON_RESPONSES[429],
       },
     },
@@ -244,6 +282,128 @@ const OPERATION_OVERRIDES: Record<
       responses: {
         200: jsonResponse('LimesSectorDetail, including roll.records and roll.references.'),
         404: errorResponse('No such stretch of frontier.'),
+        429: COMMON_RESPONSES[429],
+      },
+    },
+  },
+  '/api/me': {
+    get: {
+      security: SESSION_SECURITY,
+      responses: {
+        200: jsonResponse('{ account, trust, contributions, notebook }'),
+        401: COMMON_RESPONSES[401],
+        429: COMMON_RESPONSES[429],
+      },
+    },
+    patch: {
+      security: SESSION_SECURITY,
+      requestBody: bodyFromSchema(profileSchema, 'Only the fields present are written.'),
+      responses: {
+        200: jsonResponse('The profile fields as they now stand.'),
+        400: COMMON_RESPONSES[400],
+        401: COMMON_RESPONSES[401],
+        409: errorResponse('That display name is already taken.'),
+        429: COMMON_RESPONSES[429],
+      },
+    },
+  },
+  '/api/me/bookmarks': {
+    get: {
+      security: SESSION_SECURITY,
+      responses: {
+        200: jsonResponse('The caller’s to-visit list, newest first.'),
+        401: COMMON_RESPONSES[401],
+        429: COMMON_RESPONSES[429],
+      },
+    },
+    post: {
+      security: SESSION_SECURITY,
+      requestBody: bodyFromSchema(bookmarkSchema),
+      responses: {
+        200: jsonResponse('{ siteId, status: "saved" } — idempotent.'),
+        401: COMMON_RESPONSES[401],
+        404: errorResponse('No published site at that id.'),
+        429: COMMON_RESPONSES[429],
+      },
+    },
+  },
+  '/api/me/bookmarks/{siteId}': {
+    delete: {
+      security: SESSION_SECURITY,
+      parameters: paramsFromSchema(bookmarkDeleteParams, 'path'),
+      responses: {
+        200: jsonResponse('{ siteId, status: "removed" } — idempotent.'),
+        401: COMMON_RESPONSES[401],
+        429: COMMON_RESPONSES[429],
+      },
+    },
+  },
+  '/api/me/contributions': {
+    get: {
+      security: SESSION_SECURITY,
+      parameters: paramsFromSchema(myContributionsQuery, 'query'),
+      responses: {
+        200: jsonResponse('{ items: [...], nextCursor: number | null } — newest first.'),
+        401: COMMON_RESPONSES[401],
+        429: COMMON_RESPONSES[429],
+      },
+    },
+  },
+  '/api/me/field-kit.gpx': {
+    get: {
+      security: SESSION_SECURITY,
+      responses: {
+        200: {
+          description: 'A GPX 1.1 waypoint file, as an attachment.',
+          content: { 'application/gpx+xml': { schema: { type: 'string' } } },
+        },
+        401: COMMON_RESPONSES[401],
+        429: COMMON_RESPONSES[429],
+      },
+    },
+  },
+  '/api/me/map.geojson': {
+    get: {
+      security: SESSION_SECURITY,
+      responses: {
+        200: {
+          description: 'A GeoJSON FeatureCollection of the caller’s visits and to-visit list.',
+          content: { 'application/geo+json': { schema: { type: 'object' } } },
+        },
+        401: COMMON_RESPONSES[401],
+        429: COMMON_RESPONSES[429],
+      },
+    },
+  },
+  '/api/me/visits': {
+    get: {
+      security: SESSION_SECURITY,
+      responses: {
+        200: jsonResponse('The caller’s visit log, dated entries first.'),
+        401: COMMON_RESPONSES[401],
+        429: COMMON_RESPONSES[429],
+      },
+    },
+    post: {
+      security: SESSION_SECURITY,
+      requestBody: bodyFromSchema(visitSchema, 'The date and the note are both optional.'),
+      responses: {
+        200: jsonResponse('{ siteId, visitedOn } — upserted.'),
+        400: COMMON_RESPONSES[400],
+        401: COMMON_RESPONSES[401],
+        404: errorResponse('No published site at that id.'),
+        429: COMMON_RESPONSES[429],
+      },
+    },
+  },
+  '/api/me/visits/{siteId}': {
+    delete: {
+      security: SESSION_SECURITY,
+      parameters: paramsFromSchema(visitDeleteParams, 'path'),
+      responses: {
+        200: jsonResponse('{ siteId, status: "removed" }'),
+        401: COMMON_RESPONSES[401],
+        404: errorResponse('No visit recorded for that site.'),
         429: COMMON_RESPONSES[429],
       },
     },

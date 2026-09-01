@@ -6,9 +6,18 @@
     "queue": "Queue",
     "signIn": "Sign in",
     "signOut": "Sign out",
-    "signOutAs": "Sign out, signed in as {name}",
     "footerLicence": "Data & licences",
     "menu": "Menu"
+  },
+  "account": {
+    "menuFor": "Account menu, signed in as {name}",
+    "standingTrusted": "Your edits publish immediately",
+    "standingProbation": "Everything you write is reviewed first | One more accepted contribution and your edits publish immediately | {n} more accepted contributions and your edits publish immediately",
+    "notebook": "My notebook",
+    "visits": "Places I have been",
+    "contributions": "My contributions",
+    "contributors": "Contributors",
+    "settings": "Settings"
   },
   "themeToggle": {
     "switchToDay": "Switch to day",
@@ -628,5 +637,155 @@
     "editingTitle": "Editing {title}",
     "srHeading": "Edit {title}",
     "editorAriaLabel": "Tracing editor"
+  },
+  "notebook": {
+    "title": "My notebook",
+    "intro": "What you have put into the atlas, and where you have been. Your visits and your field kit are yours alone — nobody else can see them, and they never appear on the map anyone else loads.",
+    "loading": "Opening the notebook…",
+    "loadFailed": "The notebook could not be opened. Try again in a moment.",
+    "standingHeading": "Standing",
+    "trust": {
+      "moderator": "You review other people's contributions, and your own edits publish immediately.",
+      "earned": "Your edits publish immediately.",
+      "probation": "Your edits are read by a moderator before they appear.",
+      "revoked": "Automatic publishing is suspended on this account. Your edits are read by a moderator before they appear."
+    },
+    "untilTrusted": "Nothing left to do. | One more accepted contribution to go. | {n} more accepted contributions to go.",
+    "joined": "Recording here since {date}",
+    "ledgerHeading": "The ledger",
+    "countSites": "Sites",
+    "countTracings": "Tracings",
+    "countImages": "Photographs",
+    "countVisits": "Visited",
+    "countCountries": "Countries",
+    "countBookmarks": "In the field kit",
+    "pendingHeading": "Nothing waiting | One contribution is waiting | {n} contributions are waiting",
+    "pendingBody": "A moderator reads these before they appear on the map. Nothing is lost while it waits, and you will be told the outcome by email.",
+    "pendingAction": "See what is waiting",
+    "visitsTitle": "Places I have been",
+    "visitsIntro": "This atlas is built by people who go and look. This is the part of it that is only about you — private, never published, and never joined to anything anyone else can read.",
+    "visitsHeading": "No visits recorded | One visit | {n} visits",
+    "visitsEmpty": "Nothing recorded yet. Open a site on the map and mark that you have stood there.",
+    "fieldKit": "Download field kit (GPX)",
+    "undated": "Date not recorded",
+    "forgetVisit": "Remove the visit to {title}",
+    "bookmarksHeading": "Field kit: empty | Field kit: one place | Field kit: {n} places",
+    "bookmarksIntro": "Places to go. They travel with you in the GPX file above, which works on a handheld GPS or an offline phone map with no signal at all.",
+    "bookmarksEmpty": "Nothing saved. Open a site on the map and add it to your field kit.",
+    "dropBookmark": "Remove {title} from the field kit",
+    "contributionsTitle": "My contributions",
+    "contributionsIntro": "Everything you have submitted, newest first, with what a moderator wrote about it.",
+    "contributionsEmpty": "Nothing submitted yet. Every record on this map was added by someone who went and looked.",
+    "untitledRecord": "Untitled record",
+    "status": {
+      "pending": "Waiting",
+      "approved": "Published",
+      "rejected": "Not accepted"
+    },
+    "entity": {
+      "site": "Site",
+      "tracing": "Tracing"
+    },
+    "isRevert": "A revert",
+    "publishedDirectly": "Published without review",
+    "pendingExplainer": "Waiting for a moderator. Nothing is lost while it waits.",
+    "loadMore": "Show more",
+    "markVisited": "I have stood here",
+    "visitedHere": "You have stood here",
+    "addToFieldKit": "Add to field kit",
+    "inFieldKit": "In your field kit",
+    "visitedOn": "When",
+    "visitedOnHelp": "Optional. Leave it empty if you do not recall.",
+    "visitNote": "Field note",
+    "visitNoteHelp": "Optional, and private to you. This is not a description of the site — that is what a contribution is for.",
+    "saveVisit": "Record the visit",
+    "forget": "Remove the visit",
+    "cancel": "Cancel",
+    "visitSaved": "Recorded: {title}",
+    "visitSaveFailed": "The visit could not be recorded. Try again in a moment.",
+    "visitRemoveFailed": "The visit could not be removed. Try again in a moment.",
+    "bookmarkFailed": "The field kit could not be changed. Try again in a moment.",
+    "bookmarkRemoveFailed": "It could not be removed from the field kit. Try again in a moment."
+  },
+  "milestones": {
+    "title": "Marks",
+    "first-accepted": {
+      "label": "First record",
+      "note": "A contribution of yours was accepted"
+    },
+    "trusted": {
+      "label": "Trusted",
+      "note": "Your edits publish as you write them"
+    },
+    "hundred-accepted": {
+      "label": "A hundred records",
+      "note": "A hundred contributions accepted"
+    },
+    "first-visit": {
+      "label": "First visit",
+      "note": "You stood somewhere and wrote it down"
+    },
+    "ten-visits": {
+      "label": "Ten places",
+      "note": "Ten sites visited"
+    },
+    "hundred-visits": {
+      "label": "A hundred places",
+      "note": "A hundred sites visited"
+    },
+    "five-countries": {
+      "label": "Five countries",
+      "note": "Visits across five countries"
+    },
+    "recorded-and-stood": {
+      "label": "Recorded and stood",
+      "note": "You visited a place you had recorded yourself"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "intro": "How you appear, what reaches you, and the two things that get you back into this account.",
+    "profileHeading": "How you appear",
+    "displayName": "Display name",
+    "displayNameHelp": "The byline on every record you contribute. Links to your records keep working if you change it.",
+    "bio": "About you",
+    "bioHelp": "Shown only on your public page, and only if you switch that on.",
+    "language": "Language",
+    "publicProfile": "Give me a public contributor page",
+    "publicProfileHelp": "Off by default. It shows your display name, this description and the records you have published — never your email, never what you have visited.",
+    "publicProfileLink": "See it",
+    "notifyByEmail": "Email me about my contributions",
+    "notifyByEmailHelp": "Decisions on what you submit, and changes to your standing. Messages about your password or your address are always sent.",
+    "save": "Save",
+    "saved": "Saved.",
+    "saveFailed": "That could not be saved. Try again in a moment.",
+    "nameTaken": "That display name is already taken.",
+    "passwordHeading": "Password",
+    "passwordBody": "Your current password is required: being signed in shows you were here before, not that you are the account holder now.",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "changePassword": "Change password",
+    "passwordChanged": "Your password has been changed. We have emailed you to say so.",
+    "passwordFailed": "The password could not be changed. Try again in a moment.",
+    "wrongPassword": "That is not your current password.",
+    "emailHeading": "Email address",
+    "emailBody": "Nothing changes until you confirm the new address from its own inbox. Your current address is told that a change was asked for.",
+    "newEmail": "New address",
+    "changeEmail": "Change address",
+    "emailPending": "Check the new address for a confirmation link. Nothing has changed yet.",
+    "emailTaken": "That address is already in use.",
+    "emailFailed": "The address could not be changed. Try again in a moment.",
+    "dataHeading": "Your data",
+    "dataBody": "Download everything this account holds, or delete it outright.",
+    "dataAction": "Privacy and your data"
+  },
+  "contributor": {
+    "notFound": "No such contributor.",
+    "description": "Records contributed to Vestigia by {name}.",
+    "joined": "Recording since {date}",
+    "accepted": "no accepted contributions | one accepted contribution | {n} accepted contributions",
+    "sitesHeading": "No sites | One site | {n} sites",
+    "tracingsHeading": "No tracings | One tracing | {n} tracings",
+    "nothingPublished": "Nothing published yet."
   }
 }

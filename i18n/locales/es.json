@@ -6,9 +6,18 @@
     "queue": "Cola",
     "signIn": "Iniciar sesión",
     "signOut": "Suscríbase",
-    "signOutAs": "Firmado, firmado como{name}",
     "footerLicence": "Licencias de datos",
     "menu": "Menú"
+  },
+  "account": {
+    "menuFor": "Menú de la cuenta, sesión iniciada como {name}",
+    "standingTrusted": "Tus cambios se publican de inmediato",
+    "standingProbation": "Todo lo que escribes se revisa primero | Una contribución aceptada más y tus cambios se publicarán de inmediato | {n} contribuciones aceptadas más y tus cambios se publicarán de inmediato",
+    "notebook": "Mi cuaderno",
+    "visits": "Lugares donde he estado",
+    "contributions": "Mis contribuciones",
+    "contributors": "Colaboradores",
+    "settings": "Ajustes"
   },
   "themeToggle": {
     "switchToDay": "Cambiar al día",
@@ -628,5 +637,155 @@
     "editingTitle": "Edición{title}",
     "srHeading": "Editar{title}",
     "editorAriaLabel": "Editor de trazado"
+  },
+  "notebook": {
+    "title": "Mi cuaderno",
+    "intro": "Lo que has aportado al atlas y dónde has estado. Tus visitas y tu equipo de campo son solo tuyos: nadie más los ve, y no aparecen en ningún mapa que cargue otra persona.",
+    "loading": "Abriendo el cuaderno…",
+    "loadFailed": "No se pudo abrir el cuaderno. Inténtalo de nuevo en un momento.",
+    "standingHeading": "Situación",
+    "trust": {
+      "moderator": "Revisas las contribuciones de otros, y tus propios cambios se publican de inmediato.",
+      "earned": "Tus cambios se publican de inmediato.",
+      "probation": "Un moderador lee tus cambios antes de que aparezcan.",
+      "revoked": "La publicación automática está suspendida en esta cuenta. Tus cambios se revisan antes de aparecer."
+    },
+    "untilTrusted": "Nada más que hacer. | Falta una contribución aceptada. | Faltan {n} contribuciones aceptadas.",
+    "joined": "Registrando aquí desde {date}",
+    "ledgerHeading": "El registro",
+    "countSites": "Yacimientos",
+    "countTracings": "Trazados",
+    "countImages": "Fotografías",
+    "countVisits": "Visitados",
+    "countCountries": "Países",
+    "countBookmarks": "En el equipo de campo",
+    "pendingHeading": "Nada en espera | Una contribución en espera | {n} contribuciones en espera",
+    "pendingBody": "Un moderador las lee antes de que aparezcan en el mapa. Nada se pierde durante la espera, y se te comunicará el resultado por correo.",
+    "pendingAction": "Ver lo que espera",
+    "visitsTitle": "Lugares donde he estado",
+    "visitsIntro": "Este atlas lo construye gente que va y mira. Esta es la parte que solo te concierne a ti: privada, nunca publicada y nunca unida a nada que otro pueda leer.",
+    "visitsHeading": "Ninguna visita registrada | Una visita | {n} visitas",
+    "visitsEmpty": "Aún no hay nada registrado. Abre un yacimiento en el mapa y anota que has estado allí.",
+    "fieldKit": "Descargar el equipo de campo (GPX)",
+    "undated": "Fecha no registrada",
+    "forgetVisit": "Quitar la visita a {title}",
+    "bookmarksHeading": "Equipo de campo: vacío | Equipo de campo: un lugar | Equipo de campo: {n} lugares",
+    "bookmarksIntro": "Lugares a los que ir. Viajan contigo en el archivo GPX de arriba, que funciona en un GPS de mano o en un mapa sin conexión, sin cobertura alguna.",
+    "bookmarksEmpty": "No hay nada guardado. Abre un yacimiento en el mapa y añádelo a tu equipo de campo.",
+    "dropBookmark": "Quitar {title} del equipo de campo",
+    "contributionsTitle": "Mis contribuciones",
+    "contributionsIntro": "Todo lo que has enviado, lo más reciente primero, con lo que un moderador escribió al respecto.",
+    "contributionsEmpty": "Aún no has enviado nada. Cada ficha de este mapa la añadió alguien que fue y miró.",
+    "untitledRecord": "Ficha sin título",
+    "status": {
+      "pending": "En espera",
+      "approved": "Publicada",
+      "rejected": "No aceptada"
+    },
+    "entity": {
+      "site": "Yacimiento",
+      "tracing": "Trazado"
+    },
+    "isRevert": "Una reversión",
+    "publishedDirectly": "Publicada sin revisión",
+    "pendingExplainer": "Esperando a un moderador. Mientras tanto no se pierde nada.",
+    "loadMore": "Mostrar más",
+    "markVisited": "He estado aquí",
+    "visitedHere": "Has estado aquí",
+    "addToFieldKit": "Añadir al equipo de campo",
+    "inFieldKit": "En tu equipo de campo",
+    "visitedOn": "Cuándo",
+    "visitedOnHelp": "Opcional. Déjalo en blanco si no lo recuerdas.",
+    "visitNote": "Nota de campo",
+    "visitNoteHelp": "Opcional y privada. No es una descripción del yacimiento: para eso está una contribución.",
+    "saveVisit": "Registrar la visita",
+    "forget": "Quitar la visita",
+    "cancel": "Cancelar",
+    "visitSaved": "Registrado: {title}",
+    "visitSaveFailed": "No se pudo registrar la visita. Inténtalo de nuevo en un momento.",
+    "visitRemoveFailed": "No se pudo quitar la visita. Inténtalo de nuevo en un momento.",
+    "bookmarkFailed": "No se pudo cambiar el equipo de campo. Inténtalo de nuevo en un momento.",
+    "bookmarkRemoveFailed": "No se pudo quitar del equipo de campo. Inténtalo de nuevo en un momento."
+  },
+  "milestones": {
+    "title": "Marcas",
+    "first-accepted": {
+      "label": "Primera ficha",
+      "note": "Una contribución tuya fue aceptada"
+    },
+    "trusted": {
+      "label": "De confianza",
+      "note": "Tus cambios se publican según los escribes"
+    },
+    "hundred-accepted": {
+      "label": "Cien fichas",
+      "note": "Cien contribuciones aceptadas"
+    },
+    "first-visit": {
+      "label": "Primera visita",
+      "note": "Estuviste en algún sitio y lo anotaste"
+    },
+    "ten-visits": {
+      "label": "Diez lugares",
+      "note": "Diez yacimientos visitados"
+    },
+    "hundred-visits": {
+      "label": "Cien lugares",
+      "note": "Cien yacimientos visitados"
+    },
+    "five-countries": {
+      "label": "Cinco países",
+      "note": "Visitas en cinco países"
+    },
+    "recorded-and-stood": {
+      "label": "Registrado y visitado",
+      "note": "Visitaste un lugar que tú mismo habías registrado"
+    }
+  },
+  "settings": {
+    "title": "Ajustes",
+    "intro": "Cómo apareces, qué te llega y las dos cosas que te devuelven a esta cuenta.",
+    "profileHeading": "Cómo apareces",
+    "displayName": "Nombre mostrado",
+    "displayNameHelp": "La firma en cada ficha que aportas. Los enlaces a tus fichas siguen funcionando si lo cambias.",
+    "bio": "Sobre ti",
+    "bioHelp": "Solo visible en tu página pública, y solo si la activas.",
+    "language": "Idioma",
+    "publicProfile": "Dame una página pública de colaborador",
+    "publicProfileHelp": "Desactivada por defecto. Muestra tu nombre, este texto y las fichas que has publicado: nunca tu correo, nunca lo que has visitado.",
+    "publicProfileLink": "Verla",
+    "notifyByEmail": "Escríbeme sobre mis contribuciones",
+    "notifyByEmailHelp": "Decisiones sobre lo que envías y cambios en tu situación. Los mensajes sobre tu contraseña o tu dirección se envían siempre.",
+    "save": "Guardar",
+    "saved": "Guardado.",
+    "saveFailed": "No se pudo guardar. Inténtalo de nuevo en un momento.",
+    "nameTaken": "Ese nombre ya está ocupado.",
+    "passwordHeading": "Contraseña",
+    "passwordBody": "Se pide tu contraseña actual: tener la sesión iniciada muestra que estuviste aquí antes, no que seas ahora el titular.",
+    "currentPassword": "Contraseña actual",
+    "newPassword": "Contraseña nueva",
+    "changePassword": "Cambiar la contraseña",
+    "passwordChanged": "Tu contraseña ha cambiado. Te lo hemos confirmado por correo.",
+    "passwordFailed": "No se pudo cambiar la contraseña. Inténtalo de nuevo en un momento.",
+    "wrongPassword": "Esa no es tu contraseña actual.",
+    "emailHeading": "Dirección de correo",
+    "emailBody": "Nada cambia hasta que confirmes la nueva dirección desde su propio buzón. A tu dirección actual se le avisa de que se ha pedido un cambio.",
+    "newEmail": "Nueva dirección",
+    "changeEmail": "Cambiar la dirección",
+    "emailPending": "Busca el enlace de confirmación en el nuevo buzón. Todavía no ha cambiado nada.",
+    "emailTaken": "Esa dirección ya está en uso.",
+    "emailFailed": "No se pudo cambiar la dirección. Inténtalo de nuevo en un momento.",
+    "dataHeading": "Tus datos",
+    "dataBody": "Descarga todo lo que contiene esta cuenta, o bórrala por completo.",
+    "dataAction": "Privacidad y tus datos"
+  },
+  "contributor": {
+    "notFound": "No existe ese colaborador.",
+    "description": "Fichas aportadas a Vestigia por {name}.",
+    "joined": "Registrando desde {date}",
+    "accepted": "ninguna contribución aceptada | una contribución aceptada | {n} contribuciones aceptadas",
+    "sitesHeading": "Ningún yacimiento | Un yacimiento | {n} yacimientos",
+    "tracingsHeading": "Ningún trazado | Un trazado | {n} trazados",
+    "nothingPublished": "Aún no ha publicado nada."
   }
 }

@@ -10,7 +10,7 @@
    * The usual objection to pinning is mobile URL bars, which do not apply
    * here: that only bites a document that scrolls, and this one never does.
    */
-  const { loggedIn, currentUser, isModerator, signOut } = useSession()
+  const { loggedIn, isModerator } = useSession()
   const { t } = useI18n()
 </script>
 
@@ -60,21 +60,7 @@
         <UiLanguageSwitcher />
         <UiThemeToggle />
 
-        <template v-if="loggedIn">
-          <!--
-            The visible label is the account name, which on its own describes
-            who is signed in rather than what the control does. The accessible
-            name says both.
-          -->
-          <button
-            type="button"
-            class="rounded-notebook px-3 py-1.5 text-sm text-ink-700 transition hover:bg-paper-200 dark:text-paper-200 dark:hover:bg-night-700"
-            :aria-label="t('layout.signOutAs', { name: currentUser?.displayName ?? '' })"
-            @click="signOut"
-          >
-            {{ currentUser?.displayName }}
-          </button>
-        </template>
+        <AuthAccountMenu v-if="loggedIn" />
         <NuxtLink
           v-else
           to="/login"

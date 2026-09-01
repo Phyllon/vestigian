@@ -68,6 +68,23 @@ Every one of these was a real failure before it was a rule.
   Playwright's Node-side request context will not send a Secure cookie over
   plain HTTP while Chromium will. Every API assertion made through
   `page.request` came back 401 for a reason unrelated to the application.
+- **`gotoAndHydrate`, not `page.goto`, before filling a form.** Playwright's
+  default `goto()` resolves on the `load` event, which a deferred module
+  script satisfies once it starts executing — not once Vue has mounted and
+  attached its `v-model` listeners. `@nuxtjs/i18n` fetches its locale file as a
+  separate request, awaited inside a Nuxt plugin before the app finishes
+  mounting, so there is a real window on a slow or cold run where the DOM is
+  server-rendered but nothing is listening yet. `fill()` writes the input's
+  value directly and dispatches one native `input` event; if that fires before
+  hydration attaches, it is lost forever — the field visibly shows the typed
+  text, but the component's own `state` never updates, so a submit button
+  gated on `:disabled="!isComplete"` never becomes enabled and the click that
+  follows can only time out. This made two different `auth.spec.ts` tests fail
+  intermittently, moving between runs depending on which test happened to hit
+  a slow hydration. `e2e/helpers/hydration.ts`'s `gotoAndHydrate` waits for
+  `networkidle` instead of `load` — a real signal here, not a guessed
+  duration, since neither `/login` nor `/register` opens a persistent
+  connection (no websocket, no polling, no `EventSource`).
 
 ## Fixtures
 

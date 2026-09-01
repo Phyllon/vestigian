@@ -17,6 +17,13 @@
   const isLampLit = computed(() => isDark.value && isAntiquityView(view.value))
   const { camera: _, restoreCamera, rememberCamera } = useCameraState()
   const { attachOverlay, keepOverlayThroughStyleChanges, findFeaturesAtPoint } = useViewportTiles()
+  const {
+    load: loadNotebook,
+    overlay: notebookOverlay,
+    attachNotebookOverlay,
+    keepNotebookThroughStyleChanges,
+    refreshNotebookOverlay,
+  } = useNotebookOverlay()
   const { chooseCandidate, offerOverlappingFeatures, clearSelection, selectedSiteId } =
     useSiteQuery()
 
@@ -88,6 +95,12 @@
     if (map.value) highlightSelection(map.value, id)
   })
 
+  // Marking a visit from the site panel redraws its ring immediately. The
+  // notebook keeps coordinates on every entry precisely so this needs no fetch.
+  watch(notebookOverlay, () => {
+    if (map.value) refreshNotebookOverlay(map.value)
+  })
+
   onMounted(() => {
     if (!container.value) return
 
@@ -100,6 +113,10 @@
     instance.on('load', () => {
       attachOverlay(instance)
       keepOverlayThroughStyleChanges(instance)
+      // After the shared overlay, so the reader's rings draw above the markers
+      // they annotate rather than under them.
+      attachNotebookOverlay(instance)
+      keepNotebookThroughStyleChanges(instance)
       isReady.value = true
     })
 
@@ -112,6 +129,13 @@
     })
 
     map.value = instance
+
+    /**
+     * Loaded after the map is on screen, not before: the notebook is an
+     * annotation and must never be on the critical path to the atlas itself.
+     * A failure inside `load` is swallowed there for the same reason.
+     */
+    void loadNotebook()
   })
 
   onBeforeUnmount(() => {

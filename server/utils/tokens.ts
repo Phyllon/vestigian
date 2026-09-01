@@ -1,6 +1,6 @@
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto'
 
-export type TokenPurpose = 'verify-email' | 'reset-password'
+export type TokenPurpose = 'verify-email' | 'reset-password' | 'change-email'
 
 /**
  * Verification links are long-lived because people check email on a different
@@ -10,6 +10,12 @@ export type TokenPurpose = 'verify-email' | 'reset-password'
 export const TOKEN_LIFETIMES: Record<TokenPurpose, number> = {
   'verify-email': 24 * 60 * 60 * 1000,
   'reset-password': 60 * 60 * 1000,
+  /**
+   * An address change is confirmed from the new inbox, which may be on another
+   * device — so it needs more than an hour. It is not a key to the account the
+   * way a reset link is, so it does not need to be as short as one.
+   */
+  'change-email': 6 * 60 * 60 * 1000,
 }
 
 export interface IssuedToken {
@@ -63,7 +69,13 @@ export const tokenHashMatches = (candidate: string, stored: string): boolean => 
   return timingSafeEqual(a, b)
 }
 
+/**
+ * `change-email` shares the `/verify` page with `verify-email`: from the
+ * recipient's side both messages ask the same thing — confirm that this address
+ * is yours — and the endpoint behind that page tells the two apart by the
+ * token's stored purpose, not by the URL.
+ */
 export const buildTokenLink = (siteUrl: string, purpose: TokenPurpose, token: string): string => {
-  const path = purpose === 'verify-email' ? '/verify' : '/reset-password'
+  const path = purpose === 'reset-password' ? '/reset-password' : '/verify'
   return `${siteUrl.replace(/\/$/, '')}${path}?token=${encodeURIComponent(token)}`
 }

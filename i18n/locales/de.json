@@ -6,9 +6,18 @@
     "queue": "Schlange",
     "signIn": "Zeichen",
     "signOut": "Abmelden",
-    "signOutAs": "Abmelden, Abmelden als{name}",
     "footerLicence": "Daten und Lizenzen",
     "menu": "Menü"
+  },
+  "account": {
+    "menuFor": "Kontomenü, angemeldet als {name}",
+    "standingTrusted": "Deine Änderungen erscheinen sofort",
+    "standingProbation": "Alles, was du schreibst, wird zuerst geprüft | Noch ein angenommener Beitrag, dann erscheinen deine Änderungen sofort | Noch {n} angenommene Beiträge, dann erscheinen deine Änderungen sofort",
+    "notebook": "Mein Notizbuch",
+    "visits": "Orte, an denen ich war",
+    "contributions": "Meine Beiträge",
+    "contributors": "Mitwirkende",
+    "settings": "Einstellungen"
   },
   "themeToggle": {
     "switchToDay": "Wechsel zum Tag",
@@ -628,5 +637,155 @@
     "editingTitle": "Bearbeiten{title}",
     "srHeading": "Edit{title}",
     "editorAriaLabel": "Trace Editor"
+  },
+  "notebook": {
+    "title": "Mein Notizbuch",
+    "intro": "Was du zum Atlas beigetragen hast und wo du gewesen bist. Deine Besuche und deine Feldausrüstung gehören dir allein – niemand sonst sieht sie, und auf keiner Karte, die andere laden, tauchen sie auf.",
+    "loading": "Notizbuch wird geöffnet…",
+    "loadFailed": "Das Notizbuch ließ sich nicht öffnen. Versuche es gleich noch einmal.",
+    "standingHeading": "Status",
+    "trust": {
+      "moderator": "Du prüfst die Beiträge anderer, und deine eigenen Änderungen erscheinen sofort.",
+      "earned": "Deine Änderungen erscheinen sofort.",
+      "probation": "Deine Änderungen liest eine Moderatorin oder ein Moderator, bevor sie erscheinen.",
+      "revoked": "Das automatische Veröffentlichen ist für dieses Konto ausgesetzt. Deine Änderungen werden vor dem Erscheinen geprüft."
+    },
+    "untilTrusted": "Nichts mehr zu tun. | Noch ein angenommener Beitrag. | Noch {n} angenommene Beiträge.",
+    "joined": "Trägt hier ein seit {date}",
+    "ledgerHeading": "Das Verzeichnis",
+    "countSites": "Fundorte",
+    "countTracings": "Linien",
+    "countImages": "Fotografien",
+    "countVisits": "Besucht",
+    "countCountries": "Länder",
+    "countBookmarks": "In der Feldausrüstung",
+    "pendingHeading": "Nichts wartet | Ein Beitrag wartet | {n} Beiträge warten",
+    "pendingBody": "Eine Moderatorin oder ein Moderator liest sie, bevor sie auf der Karte erscheinen. Während des Wartens geht nichts verloren, und du erfährst das Ergebnis per E-Mail.",
+    "pendingAction": "Ansehen, was wartet",
+    "visitsTitle": "Orte, an denen ich war",
+    "visitsIntro": "Diesen Atlas bauen Menschen, die hingehen und nachsehen. Dies ist der Teil, der nur dich betrifft – privat, nie veröffentlicht und nie mit etwas verknüpft, das andere lesen können.",
+    "visitsHeading": "Keine Besuche eingetragen | Ein Besuch | {n} Besuche",
+    "visitsEmpty": "Noch nichts eingetragen. Öffne einen Fundort auf der Karte und halte fest, dass du dort gestanden hast.",
+    "fieldKit": "Feldausrüstung laden (GPX)",
+    "undated": "Datum nicht festgehalten",
+    "forgetVisit": "Besuch bei {title} entfernen",
+    "bookmarksHeading": "Feldausrüstung: leer | Feldausrüstung: ein Ort | Feldausrüstung: {n} Orte",
+    "bookmarksIntro": "Orte, an die du willst. Sie reisen in der GPX-Datei oben mit und funktionieren auf einem Handgerät oder einer Offline-Karte ganz ohne Empfang.",
+    "bookmarksEmpty": "Nichts gespeichert. Öffne einen Fundort auf der Karte und lege ihn in die Feldausrüstung.",
+    "dropBookmark": "{title} aus der Feldausrüstung entfernen",
+    "contributionsTitle": "Meine Beiträge",
+    "contributionsIntro": "Alles, was du eingereicht hast, das Neueste zuerst, mit dem, was die Moderation dazu geschrieben hat.",
+    "contributionsEmpty": "Noch nichts eingereicht. Jeder Eintrag auf dieser Karte stammt von jemandem, der hingegangen ist und nachgesehen hat.",
+    "untitledRecord": "Eintrag ohne Titel",
+    "status": {
+      "pending": "Wartet",
+      "approved": "Veröffentlicht",
+      "rejected": "Nicht angenommen"
+    },
+    "entity": {
+      "site": "Fundort",
+      "tracing": "Linie"
+    },
+    "isRevert": "Eine Rücknahme",
+    "publishedDirectly": "Ohne Prüfung veröffentlicht",
+    "pendingExplainer": "Wartet auf die Moderation. Währenddessen geht nichts verloren.",
+    "loadMore": "Mehr anzeigen",
+    "markVisited": "Ich war hier",
+    "visitedHere": "Du warst hier",
+    "addToFieldKit": "In die Feldausrüstung",
+    "inFieldKit": "In deiner Feldausrüstung",
+    "visitedOn": "Wann",
+    "visitedOnHelp": "Optional. Lass es leer, wenn du es nicht mehr weißt.",
+    "visitNote": "Feldnotiz",
+    "visitNoteHelp": "Optional und nur für dich. Dies ist keine Beschreibung des Ortes – dafür ist ein Beitrag da.",
+    "saveVisit": "Besuch eintragen",
+    "forget": "Besuch entfernen",
+    "cancel": "Abbrechen",
+    "visitSaved": "Eingetragen: {title}",
+    "visitSaveFailed": "Der Besuch ließ sich nicht eintragen. Versuche es gleich noch einmal.",
+    "visitRemoveFailed": "Der Besuch ließ sich nicht entfernen. Versuche es gleich noch einmal.",
+    "bookmarkFailed": "Die Feldausrüstung ließ sich nicht ändern. Versuche es gleich noch einmal.",
+    "bookmarkRemoveFailed": "Es ließ sich nicht aus der Feldausrüstung entfernen. Versuche es gleich noch einmal."
+  },
+  "milestones": {
+    "title": "Marken",
+    "first-accepted": {
+      "label": "Erster Eintrag",
+      "note": "Ein Beitrag von dir wurde angenommen"
+    },
+    "trusted": {
+      "label": "Vertraut",
+      "note": "Deine Änderungen erscheinen, sobald du sie schreibst"
+    },
+    "hundred-accepted": {
+      "label": "Hundert Einträge",
+      "note": "Hundert angenommene Beiträge"
+    },
+    "first-visit": {
+      "label": "Erster Besuch",
+      "note": "Du hast irgendwo gestanden und es festgehalten"
+    },
+    "ten-visits": {
+      "label": "Zehn Orte",
+      "note": "Zehn Fundorte besucht"
+    },
+    "hundred-visits": {
+      "label": "Hundert Orte",
+      "note": "Hundert Fundorte besucht"
+    },
+    "five-countries": {
+      "label": "Fünf Länder",
+      "note": "Besuche in fünf Ländern"
+    },
+    "recorded-and-stood": {
+      "label": "Eingetragen und dagewesen",
+      "note": "Du hast einen Ort besucht, den du selbst eingetragen hast"
+    }
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "intro": "Wie du erscheinst, was dich erreicht, und die beiden Dinge, mit denen du wieder in dieses Konto kommst.",
+    "profileHeading": "Wie du erscheinst",
+    "displayName": "Anzeigename",
+    "displayNameHelp": "Die Signatur unter jedem Eintrag, den du beiträgst. Links zu deinen Einträgen funktionieren weiter, wenn du ihn änderst.",
+    "bio": "Über dich",
+    "bioHelp": "Nur auf deiner öffentlichen Seite sichtbar, und nur wenn du sie einschaltest.",
+    "language": "Sprache",
+    "publicProfile": "Öffentliche Mitwirkenden-Seite anlegen",
+    "publicProfileHelp": "Standardmäßig aus. Sie zeigt deinen Anzeigenamen, diesen Text und die von dir veröffentlichten Einträge – nie deine E-Mail-Adresse, nie deine Besuche.",
+    "publicProfileLink": "Ansehen",
+    "notifyByEmail": "E-Mails zu meinen Beiträgen",
+    "notifyByEmailHelp": "Entscheidungen zu dem, was du einreichst, und Änderungen an deinem Status. Nachrichten zu Passwort oder Adresse werden immer gesendet.",
+    "save": "Speichern",
+    "saved": "Gespeichert.",
+    "saveFailed": "Das ließ sich nicht speichern. Versuche es gleich noch einmal.",
+    "nameTaken": "Dieser Anzeigename ist schon vergeben.",
+    "passwordHeading": "Passwort",
+    "passwordBody": "Dein aktuelles Passwort ist nötig: Angemeldet zu sein zeigt, dass du schon einmal hier warst, nicht dass du jetzt die Kontoinhaberin oder der Kontoinhaber bist.",
+    "currentPassword": "Aktuelles Passwort",
+    "newPassword": "Neues Passwort",
+    "changePassword": "Passwort ändern",
+    "passwordChanged": "Dein Passwort wurde geändert. Wir haben dir das per E-Mail bestätigt.",
+    "passwordFailed": "Das Passwort ließ sich nicht ändern. Versuche es gleich noch einmal.",
+    "wrongPassword": "Das ist nicht dein aktuelles Passwort.",
+    "emailHeading": "E-Mail-Adresse",
+    "emailBody": "Es ändert sich nichts, bis du die neue Adresse aus ihrem eigenen Postfach bestätigst. Deiner jetzigen Adresse wird mitgeteilt, dass eine Änderung angefragt wurde.",
+    "newEmail": "Neue Adresse",
+    "changeEmail": "Adresse ändern",
+    "emailPending": "Sieh im neuen Postfach nach dem Bestätigungslink. Bisher hat sich nichts geändert.",
+    "emailTaken": "Diese Adresse wird bereits verwendet.",
+    "emailFailed": "Die Adresse ließ sich nicht ändern. Versuche es gleich noch einmal.",
+    "dataHeading": "Deine Daten",
+    "dataBody": "Lade alles herunter, was dieses Konto enthält, oder lösche es ganz.",
+    "dataAction": "Datenschutz und deine Daten"
+  },
+  "contributor": {
+    "notFound": "Diese Person gibt es nicht.",
+    "description": "Einträge, die {name} zu Vestigia beigetragen hat.",
+    "joined": "Trägt ein seit {date}",
+    "accepted": "keine angenommenen Beiträge | ein angenommener Beitrag | {n} angenommene Beiträge",
+    "sitesHeading": "Keine Fundorte | Ein Fundort | {n} Fundorte",
+    "tracingsHeading": "Keine Linien | Eine Linie | {n} Linien",
+    "nothingPublished": "Noch nichts veröffentlicht."
   }
 }

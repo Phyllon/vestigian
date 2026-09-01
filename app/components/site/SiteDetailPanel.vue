@@ -141,6 +141,21 @@
           class="mt-6"
         />
 
+        <!--
+          The reader's own traces. Only for a signed-in visitor, because these
+          are stored against an account — there is no anonymous local-only mode,
+          which would quietly split the notebook across devices.
+        -->
+        <NotebookControls
+          v-if="loggedIn"
+          :key="site.id"
+          :site-id="site.id"
+          :title="site.title"
+          :longitude="site.position.lon"
+          :latitude="site.position.lat"
+          class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700"
+        />
+
         <div
           class="mt-8 flex flex-wrap items-center gap-3 border-t border-paper-200 pt-3 dark:border-night-700"
         >

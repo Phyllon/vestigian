@@ -6,9 +6,18 @@
     "queue": "Demande",
     "signIn": "Connexion",
     "signOut": "Déconnexion",
-    "signOutAs": "Signer, signer comme{name}",
     "footerLicence": "Données et licences",
     "menu": "Menu"
+  },
+  "account": {
+    "menuFor": "Menu du compte, connecté en tant que {name}",
+    "standingTrusted": "Vos modifications paraissent immédiatement",
+    "standingProbation": "Tout ce que vous écrivez est relu d'abord | Encore une contribution acceptée et vos modifications paraîtront immédiatement | Encore {n} contributions acceptées et vos modifications paraîtront immédiatement",
+    "notebook": "Mon carnet",
+    "visits": "Les lieux où je suis allé",
+    "contributions": "Mes contributions",
+    "contributors": "Contributeurs",
+    "settings": "Réglages"
   },
   "themeToggle": {
     "switchToDay": "Passer à jour",
@@ -628,5 +637,155 @@
     "editingTitle": "Édition{title}",
     "srHeading": "Modifier{title}",
     "editorAriaLabel": "Recherche de l'éditeur"
+  },
+  "notebook": {
+    "title": "Mon carnet",
+    "intro": "Ce que vous avez versé à l'atlas, et où vous êtes allé. Vos visites et votre trousse de terrain n'appartiennent qu'à vous — personne d'autre ne les voit, et elles n'apparaissent sur aucune carte chargée par autrui.",
+    "loading": "Ouverture du carnet…",
+    "loadFailed": "Le carnet n'a pas pu être ouvert. Réessayez dans un instant.",
+    "standingHeading": "Statut",
+    "trust": {
+      "moderator": "Vous relisez les contributions des autres, et vos propres modifications paraissent immédiatement.",
+      "earned": "Vos modifications paraissent immédiatement.",
+      "probation": "Un modérateur lit vos modifications avant qu'elles ne paraissent.",
+      "revoked": "La publication automatique est suspendue sur ce compte. Vos modifications sont relues avant de paraître."
+    },
+    "untilTrusted": "Plus rien à faire. | Encore une contribution acceptée. | Encore {n} contributions acceptées.",
+    "joined": "Consigne ici depuis {date}",
+    "ledgerHeading": "Le registre",
+    "countSites": "Sites",
+    "countTracings": "Tracés",
+    "countImages": "Photographies",
+    "countVisits": "Visités",
+    "countCountries": "Pays",
+    "countBookmarks": "Dans la trousse",
+    "pendingHeading": "Rien en attente | Une contribution attend | {n} contributions attendent",
+    "pendingBody": "Un modérateur les lit avant qu'elles ne paraissent sur la carte. Rien ne se perd pendant l'attente, et vous serez informé du résultat par courriel.",
+    "pendingAction": "Voir ce qui attend",
+    "visitsTitle": "Les lieux où je suis allé",
+    "visitsIntro": "Cet atlas est bâti par des gens qui vont voir sur place. Voici la part qui ne concerne que vous — privée, jamais publiée, jamais rattachée à quoi que ce soit qu'un autre puisse lire.",
+    "visitsHeading": "Aucune visite consignée | Une visite | {n} visites",
+    "visitsEmpty": "Rien de consigné pour l'instant. Ouvrez un site sur la carte et notez que vous y avez été.",
+    "fieldKit": "Télécharger la trousse de terrain (GPX)",
+    "undated": "Date non consignée",
+    "forgetVisit": "Retirer la visite à {title}",
+    "bookmarksHeading": "Trousse de terrain : vide | Trousse de terrain : un lieu | Trousse de terrain : {n} lieux",
+    "bookmarksIntro": "Des lieux où aller. Ils voyagent avec vous dans le fichier GPX ci-dessus, qui fonctionne sur un GPS de poche ou une carte hors ligne, sans aucun réseau.",
+    "bookmarksEmpty": "Rien d'enregistré. Ouvrez un site sur la carte et ajoutez-le à votre trousse.",
+    "dropBookmark": "Retirer {title} de la trousse de terrain",
+    "contributionsTitle": "Mes contributions",
+    "contributionsIntro": "Tout ce que vous avez soumis, du plus récent au plus ancien, avec ce qu'un modérateur en a écrit.",
+    "contributionsEmpty": "Rien de soumis pour l'instant. Chaque notice de cette carte vient de quelqu'un qui est allé voir.",
+    "untitledRecord": "Notice sans titre",
+    "status": {
+      "pending": "En attente",
+      "approved": "Publiée",
+      "rejected": "Non retenue"
+    },
+    "entity": {
+      "site": "Site",
+      "tracing": "Tracé"
+    },
+    "isRevert": "Un retour en arrière",
+    "publishedDirectly": "Publiée sans relecture",
+    "pendingExplainer": "En attente d'un modérateur. Rien ne se perd pendant ce temps.",
+    "loadMore": "Afficher plus",
+    "markVisited": "J'y suis allé",
+    "visitedHere": "Vous y êtes allé",
+    "addToFieldKit": "Ajouter à la trousse",
+    "inFieldKit": "Dans votre trousse",
+    "visitedOn": "Quand",
+    "visitedOnHelp": "Facultatif. Laissez vide si vous ne vous en souvenez pas.",
+    "visitNote": "Note de terrain",
+    "visitNoteHelp": "Facultative, et privée. Ce n'est pas une description du site — c'est à cela que sert une contribution.",
+    "saveVisit": "Consigner la visite",
+    "forget": "Retirer la visite",
+    "cancel": "Annuler",
+    "visitSaved": "Consigné : {title}",
+    "visitSaveFailed": "La visite n'a pas pu être consignée. Réessayez dans un instant.",
+    "visitRemoveFailed": "La visite n'a pas pu être retirée. Réessayez dans un instant.",
+    "bookmarkFailed": "La trousse n'a pas pu être modifiée. Réessayez dans un instant.",
+    "bookmarkRemoveFailed": "Le retrait de la trousse a échoué. Réessayez dans un instant."
+  },
+  "milestones": {
+    "title": "Marques",
+    "first-accepted": {
+      "label": "Première notice",
+      "note": "Une de vos contributions a été acceptée"
+    },
+    "trusted": {
+      "label": "De confiance",
+      "note": "Vos modifications paraissent à mesure que vous les écrivez"
+    },
+    "hundred-accepted": {
+      "label": "Cent notices",
+      "note": "Cent contributions acceptées"
+    },
+    "first-visit": {
+      "label": "Première visite",
+      "note": "Vous êtes allé quelque part et l'avez noté"
+    },
+    "ten-visits": {
+      "label": "Dix lieux",
+      "note": "Dix sites visités"
+    },
+    "hundred-visits": {
+      "label": "Cent lieux",
+      "note": "Cent sites visités"
+    },
+    "five-countries": {
+      "label": "Cinq pays",
+      "note": "Des visites dans cinq pays"
+    },
+    "recorded-and-stood": {
+      "label": "Consigné et visité",
+      "note": "Vous avez visité un lieu que vous aviez vous-même consigné"
+    }
+  },
+  "settings": {
+    "title": "Réglages",
+    "intro": "Comment vous apparaissez, ce qui vous parvient, et les deux choses qui vous ramènent dans ce compte.",
+    "profileHeading": "Comment vous apparaissez",
+    "displayName": "Nom affiché",
+    "displayNameHelp": "La signature sous chaque notice que vous versez. Les liens vers vos notices continuent de fonctionner si vous le changez.",
+    "bio": "À votre sujet",
+    "bioHelp": "Visible seulement sur votre page publique, et seulement si vous l'activez.",
+    "language": "Langue",
+    "publicProfile": "Me donner une page publique de contributeur",
+    "publicProfileHelp": "Désactivée par défaut. Elle montre votre nom affiché, ce texte et les notices que vous avez publiées — jamais votre adresse, jamais vos visites.",
+    "publicProfileLink": "La voir",
+    "notifyByEmail": "M'écrire au sujet de mes contributions",
+    "notifyByEmailHelp": "Les décisions sur ce que vous soumettez et les changements de statut. Les messages sur votre mot de passe ou votre adresse sont toujours envoyés.",
+    "save": "Enregistrer",
+    "saved": "Enregistré.",
+    "saveFailed": "Enregistrement impossible. Réessayez dans un instant.",
+    "nameTaken": "Ce nom affiché est déjà pris.",
+    "passwordHeading": "Mot de passe",
+    "passwordBody": "Votre mot de passe actuel est demandé : être connecté montre que vous êtes déjà venu, non que vous êtes le titulaire à cet instant.",
+    "currentPassword": "Mot de passe actuel",
+    "newPassword": "Nouveau mot de passe",
+    "changePassword": "Changer le mot de passe",
+    "passwordChanged": "Votre mot de passe a été changé. Nous vous l'avons confirmé par courriel.",
+    "passwordFailed": "Le mot de passe n'a pas pu être changé. Réessayez dans un instant.",
+    "wrongPassword": "Ce n'est pas votre mot de passe actuel.",
+    "emailHeading": "Adresse électronique",
+    "emailBody": "Rien ne change tant que vous n'avez pas confirmé la nouvelle adresse depuis sa propre boîte. Votre adresse actuelle est prévenue qu'un changement a été demandé.",
+    "newEmail": "Nouvelle adresse",
+    "changeEmail": "Changer l'adresse",
+    "emailPending": "Cherchez le lien de confirmation dans la nouvelle boîte. Rien n'a encore changé.",
+    "emailTaken": "Cette adresse est déjà utilisée.",
+    "emailFailed": "L'adresse n'a pas pu être changée. Réessayez dans un instant.",
+    "dataHeading": "Vos données",
+    "dataBody": "Téléchargez tout ce que ce compte contient, ou supprimez-le entièrement.",
+    "dataAction": "Confidentialité et vos données"
+  },
+  "contributor": {
+    "notFound": "Aucun contributeur de ce nom.",
+    "description": "Notices versées à Vestigia par {name}.",
+    "joined": "Consigne depuis {date}",
+    "accepted": "aucune contribution acceptée | une contribution acceptée | {n} contributions acceptées",
+    "sitesHeading": "Aucun site | Un site | {n} sites",
+    "tracingsHeading": "Aucun tracé | Un tracé | {n} tracés",
+    "nothingPublished": "Rien de publié pour l'instant."
   }
 }

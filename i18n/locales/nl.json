@@ -6,9 +6,18 @@
     "queue": "Wachtrij",
     "signIn": "Aanmelden",
     "signOut": "Afmelden",
-    "signOutAs": "Afmelden, aanmelden als{name}",
     "footerLicence": "Gegevens & licenties",
     "menu": "Menu"
+  },
+  "account": {
+    "menuFor": "Accountmenu, aangemeld als {name}",
+    "standingTrusted": "Je wijzigingen verschijnen meteen",
+    "standingProbation": "Alles wat je schrijft wordt eerst gelezen | Nog één geaccepteerde bijdrage en je wijzigingen verschijnen meteen | Nog {n} geaccepteerde bijdragen en je wijzigingen verschijnen meteen",
+    "notebook": "Mijn notitieboek",
+    "visits": "Waar ik ben geweest",
+    "contributions": "Mijn bijdragen",
+    "contributors": "Bijdragers",
+    "settings": "Instellingen"
   },
   "themeToggle": {
     "switchToDay": "Overschakelen naar dag",
@@ -628,5 +637,155 @@
     "editingTitle": "Bewerken{title}",
     "srHeading": "Bewerken{title}",
     "editorAriaLabel": "Traceerbewerker"
+  },
+  "notebook": {
+    "title": "Mijn notitieboek",
+    "intro": "Wat je aan de atlas hebt toegevoegd, en waar je bent geweest. Je bezoeken en je velduitrusting zijn alleen van jou — niemand anders ziet ze, en ze staan op geen enkele kaart die een ander laadt.",
+    "loading": "Notitieboek wordt geopend…",
+    "loadFailed": "Het notitieboek kon niet worden geopend. Probeer het zo nog eens.",
+    "standingHeading": "Status",
+    "trust": {
+      "moderator": "Je leest bijdragen van anderen na, en je eigen wijzigingen verschijnen meteen.",
+      "earned": "Je wijzigingen verschijnen meteen.",
+      "probation": "Een moderator leest je wijzigingen voordat ze verschijnen.",
+      "revoked": "Automatisch publiceren is voor dit account opgeschort. Je wijzigingen worden eerst gelezen."
+    },
+    "untilTrusted": "Niets meer te doen. | Nog één geaccepteerde bijdrage. | Nog {n} geaccepteerde bijdragen.",
+    "joined": "Legt hier vast sinds {date}",
+    "ledgerHeading": "Het register",
+    "countSites": "Vindplaatsen",
+    "countTracings": "Lijnen",
+    "countImages": "Foto's",
+    "countVisits": "Bezocht",
+    "countCountries": "Landen",
+    "countBookmarks": "In de velduitrusting",
+    "pendingHeading": "Niets in afwachting | Eén bijdrage wacht | {n} bijdragen wachten",
+    "pendingBody": "Een moderator leest ze voordat ze op de kaart verschijnen. Er gaat niets verloren terwijl het wacht, en je hoort de uitkomst per e-mail.",
+    "pendingAction": "Bekijk wat er wacht",
+    "visitsTitle": "Waar ik ben geweest",
+    "visitsIntro": "Deze atlas wordt gemaakt door mensen die er naartoe gaan en kijken. Dit is het deel dat alleen over jou gaat — privé, nooit gepubliceerd, en nooit gekoppeld aan iets dat een ander kan lezen.",
+    "visitsHeading": "Geen bezoeken vastgelegd | Eén bezoek | {n} bezoeken",
+    "visitsEmpty": "Nog niets vastgelegd. Open een vindplaats op de kaart en leg vast dat je er hebt gestaan.",
+    "fieldKit": "Velduitrusting downloaden (GPX)",
+    "undated": "Datum niet vastgelegd",
+    "forgetVisit": "Bezoek aan {title} verwijderen",
+    "bookmarksHeading": "Velduitrusting: leeg | Velduitrusting: één plek | Velduitrusting: {n} plekken",
+    "bookmarksIntro": "Plekken om naartoe te gaan. Ze reizen mee in het GPX-bestand hierboven, dat werkt op een handheld-gps of een offline kaart zonder enig bereik.",
+    "bookmarksEmpty": "Niets opgeslagen. Open een vindplaats op de kaart en voeg die toe aan je velduitrusting.",
+    "dropBookmark": "{title} uit de velduitrusting verwijderen",
+    "contributionsTitle": "Mijn bijdragen",
+    "contributionsIntro": "Alles wat je hebt ingediend, het nieuwste eerst, met wat een moderator erover schreef.",
+    "contributionsEmpty": "Nog niets ingediend. Elke vermelding op deze kaart komt van iemand die is gaan kijken.",
+    "untitledRecord": "Vermelding zonder titel",
+    "status": {
+      "pending": "Wacht",
+      "approved": "Gepubliceerd",
+      "rejected": "Niet geaccepteerd"
+    },
+    "entity": {
+      "site": "Vindplaats",
+      "tracing": "Lijn"
+    },
+    "isRevert": "Een terugdraaiing",
+    "publishedDirectly": "Zonder controle gepubliceerd",
+    "pendingExplainer": "Wacht op een moderator. Er gaat ondertussen niets verloren.",
+    "loadMore": "Meer tonen",
+    "markVisited": "Hier ben ik geweest",
+    "visitedHere": "Hier ben je geweest",
+    "addToFieldKit": "Aan velduitrusting toevoegen",
+    "inFieldKit": "In je velduitrusting",
+    "visitedOn": "Wanneer",
+    "visitedOnHelp": "Optioneel. Laat het leeg als je het niet meer weet.",
+    "visitNote": "Veldnotitie",
+    "visitNoteHelp": "Optioneel en alleen voor jou. Dit is geen beschrijving van de vindplaats — daar is een bijdrage voor.",
+    "saveVisit": "Bezoek vastleggen",
+    "forget": "Bezoek verwijderen",
+    "cancel": "Annuleren",
+    "visitSaved": "Vastgelegd: {title}",
+    "visitSaveFailed": "Het bezoek kon niet worden vastgelegd. Probeer het zo nog eens.",
+    "visitRemoveFailed": "Het bezoek kon niet worden verwijderd. Probeer het zo nog eens.",
+    "bookmarkFailed": "De velduitrusting kon niet worden gewijzigd. Probeer het zo nog eens.",
+    "bookmarkRemoveFailed": "Het kon niet uit de velduitrusting worden verwijderd. Probeer het zo nog eens."
+  },
+  "milestones": {
+    "title": "Merktekens",
+    "first-accepted": {
+      "label": "Eerste vermelding",
+      "note": "Een bijdrage van jou is geaccepteerd"
+    },
+    "trusted": {
+      "label": "Vertrouwd",
+      "note": "Je wijzigingen verschijnen zodra je ze schrijft"
+    },
+    "hundred-accepted": {
+      "label": "Honderd vermeldingen",
+      "note": "Honderd bijdragen geaccepteerd"
+    },
+    "first-visit": {
+      "label": "Eerste bezoek",
+      "note": "Je hebt ergens gestaan en het opgeschreven"
+    },
+    "ten-visits": {
+      "label": "Tien plekken",
+      "note": "Tien vindplaatsen bezocht"
+    },
+    "hundred-visits": {
+      "label": "Honderd plekken",
+      "note": "Honderd vindplaatsen bezocht"
+    },
+    "five-countries": {
+      "label": "Vijf landen",
+      "note": "Bezoeken in vijf landen"
+    },
+    "recorded-and-stood": {
+      "label": "Vastgelegd en er geweest",
+      "note": "Je bezocht een plek die je zelf had vastgelegd"
+    }
+  },
+  "settings": {
+    "title": "Instellingen",
+    "intro": "Hoe je verschijnt, wat jou bereikt, en de twee dingen waarmee je weer in dit account komt.",
+    "profileHeading": "Hoe je verschijnt",
+    "displayName": "Weergavenaam",
+    "displayNameHelp": "De ondertekening bij elke vermelding die je bijdraagt. Links naar je vermeldingen blijven werken als je hem wijzigt.",
+    "bio": "Over jou",
+    "bioHelp": "Alleen zichtbaar op je openbare pagina, en alleen als je die aanzet.",
+    "language": "Taal",
+    "publicProfile": "Geef me een openbare bijdragerspagina",
+    "publicProfileHelp": "Standaard uit. Toont je weergavenaam, deze tekst en je gepubliceerde vermeldingen — nooit je e-mailadres, nooit wat je hebt bezocht.",
+    "publicProfileLink": "Bekijken",
+    "notifyByEmail": "Mail me over mijn bijdragen",
+    "notifyByEmailHelp": "Beslissingen over wat je indient, en wijzigingen in je status. Berichten over je wachtwoord of adres worden altijd verstuurd.",
+    "save": "Opslaan",
+    "saved": "Opgeslagen.",
+    "saveFailed": "Dat kon niet worden opgeslagen. Probeer het zo nog eens.",
+    "nameTaken": "Die weergavenaam is al bezet.",
+    "passwordHeading": "Wachtwoord",
+    "passwordBody": "Je huidige wachtwoord is nodig: aangemeld zijn laat zien dat je hier eerder was, niet dat jij nu de accounthouder bent.",
+    "currentPassword": "Huidig wachtwoord",
+    "newPassword": "Nieuw wachtwoord",
+    "changePassword": "Wachtwoord wijzigen",
+    "passwordChanged": "Je wachtwoord is gewijzigd. We hebben je dat gemaild.",
+    "passwordFailed": "Het wachtwoord kon niet worden gewijzigd. Probeer het zo nog eens.",
+    "wrongPassword": "Dat is niet je huidige wachtwoord.",
+    "emailHeading": "E-mailadres",
+    "emailBody": "Er verandert niets tot je het nieuwe adres bevestigt vanuit die inbox. Je huidige adres krijgt bericht dat er een wijziging is aangevraagd.",
+    "newEmail": "Nieuw adres",
+    "changeEmail": "Adres wijzigen",
+    "emailPending": "Kijk in het nieuwe postvak naar de bevestigingslink. Er is nog niets gewijzigd.",
+    "emailTaken": "Dat adres is al in gebruik.",
+    "emailFailed": "Het adres kon niet worden gewijzigd. Probeer het zo nog eens.",
+    "dataHeading": "Jouw gegevens",
+    "dataBody": "Download alles wat dit account bevat, of verwijder het helemaal.",
+    "dataAction": "Privacy en jouw gegevens"
+  },
+  "contributor": {
+    "notFound": "Deze bijdrager bestaat niet.",
+    "description": "Vermeldingen die {name} aan Vestigia heeft bijgedragen.",
+    "joined": "Legt vast sinds {date}",
+    "accepted": "geen geaccepteerde bijdragen | één geaccepteerde bijdrage | {n} geaccepteerde bijdragen",
+    "sitesHeading": "Geen vindplaatsen | Eén vindplaats | {n} vindplaatsen",
+    "tracingsHeading": "Geen lijnen | Eén lijn | {n} lijnen",
+    "nothingPublished": "Nog niets gepubliceerd."
   }
 }

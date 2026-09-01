@@ -55,6 +55,7 @@ const MONO_FACE = "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospa
 export type MailKind =
   | TokenPurpose
   | 'password-changed'
+  | 'email-change-requested'
   | 'revision-approved'
   | 'revision-rejected'
   | 'trust-suspended'
@@ -196,6 +197,35 @@ const buildTokenCopy = (input: TokenEmailInput): EmailCopy => {
     }
   }
 
+  /**
+   * Explicit, because the branch below is a fallthrough rather than a switch:
+   * without this, a change-email token would be sent under the subject "Reset
+   * your Vestigia password", to an address that has no account yet.
+   */
+  if (input.purpose === 'change-email') {
+    return {
+      subject: 'Confirm your new Vestigia address',
+      preheader: `Confirm ${input.recipient} as the new address on your account. The link works until ${expiry}.`,
+      heading: 'Confirm your new address',
+      paragraphs: [
+        `Someone signed in to the Vestigia account belonging to ${input.displayName} and asked to move it to this address, ${input.recipient}. Until the link below is used, the account keeps its old address and nothing has changed.`,
+        'The old address has been told this was requested, so if it was not you, the account holder already knows.',
+      ],
+      action: { label: 'Confirm this address', href: input.link },
+      facts: [
+        { label: 'Account', value: input.displayName },
+        { label: 'New address', value: input.recipient },
+        { label: 'Requested', value: requested },
+        { label: 'Link expires', value: expiry },
+        { label: 'Uses', value: 'Once' },
+      ],
+      reassurance:
+        'If you were not expecting this, ignore the message. An unconfirmed address is never written to the account, and this link stops working on its own.',
+      footerReason,
+      showPasteFallback: true,
+    }
+  }
+
   return {
     subject: 'Reset your Vestigia password',
     preheader: `Set a new password for ${input.recipient}. The link works once, until ${expiry}.`,
@@ -247,6 +277,33 @@ const buildAccountCopy = (input: AccountEmailInput): EmailCopy => {
         ],
         reassurance:
           'Vestigia will never ask you for a password by email, and no message from us will ever contain one.',
+        footerReason,
+        showPasteFallback: false,
+      }
+
+    /**
+     * Goes to the address being moved *away from*, before the change happens.
+     * The confirmation link goes to the new inbox, which an attacker holding a
+     * session would already control — so this is the only message the genuine
+     * owner receives, and it has to arrive while the old address still works.
+     */
+    case 'email-change-requested':
+      return {
+        subject: 'A change of address was requested on your Vestigia account',
+        preheader: `Someone asked to move your account away from ${input.recipient} on ${when}. It has not moved yet.`,
+        heading: 'A change of address was requested',
+        paragraphs: [
+          `Someone signed in to your Vestigia account and asked to move it to a different email address. Nothing has changed yet: the account still belongs to ${input.recipient}, and it stays that way unless the new address is confirmed from its own inbox.`,
+          'If that was you, there is nothing to do here: finish it from the message sent to the new address. If it was not, change your password now — that ends every signed-in session and the request with it.',
+        ],
+        action: { label: 'Change your password', href: `${site}/forgot-password` },
+        facts: [
+          { label: 'Account', value: input.displayName },
+          { label: 'Current address', value: input.recipient },
+          { label: 'Requested', value: when },
+        ],
+        reassurance:
+          'The new address is not shown here on purpose: if this request was not yours, it is a stranger’s address and not something to be led towards.',
         footerReason,
         showPasteFallback: false,
       }
