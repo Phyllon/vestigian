@@ -62,6 +62,16 @@ Every one of these was a real failure before it was a rule.
   `max-age=60`, so without it the browser answers from its own cache and the
   server never sees the traffic — the rate-limit test passed for the wrong
   reason.
+- **A rate-limit burst is fired concurrently, never as 320 sequential
+  `await`s in a loop.** The fixed window in `buildRateLimitKey` is wall-clock,
+  and a large sequential burst takes real time to complete — long enough,
+  under a loaded runner or simply late in a long suite, to occasionally cross
+  into a _second_ window partway through. The counter resets mid-burst, the
+  policy is never exhausted, and the test fails asserting a 429 that never
+  arrives, for a reason that has nothing to do with rate limiting. Firing the
+  whole burst with `Promise.all` keeps it inside a few hundred milliseconds
+  regardless of system load; Redis's `INCR` is atomic, so which request lands
+  first is irrelevant to the count.
 - **Assertions land on outcomes, not on URLs.** The login form navigates only
   after re-fetching the session; a URL check races that round trip.
 - **`fetchAsBrowser`, not `page.request`.** The session cookie is `Secure`, and

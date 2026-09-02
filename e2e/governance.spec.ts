@@ -200,17 +200,29 @@ test.describe('rate limiting', () => {
 
     // `record` allows 300 a minute. Spend them, then confirm the next request
     // is refused — and that a different address is untouched.
+    //
+    // Fired concurrently, not one `await` at a time in a loop. The fixed
+    // window is wall-clock (`Math.floor(now / windowSeconds * 1000)` in
+    // `buildRateLimitKey`), and 320 sequential round trips took long enough
+    // under load — a slow CI runner, or simply a long suite with many other
+    // tests ahead of this one — that the loop occasionally crossed into a
+    // *second* window partway through: the counter reset mid-burst, 300 was
+    // never reached, and the test failed asserting a 429 that never came, for
+    // a reason that had nothing to do with rate limiting. Firing all 320 at
+    // once keeps the whole burst inside a few hundred milliseconds regardless
+    // of system load, which is what "300 a minute" is actually supposed to
+    // guard against — Redis's `INCR` is atomic, so which of the 320 lands
+    // first is irrelevant to the count either way.
     const statuses = await page.evaluate(async () => {
-      const seen: number[] = []
-      for (let attempt = 0; attempt < 320; attempt += 1) {
+      const requests = Array.from({ length: 320 }, () =>
         // `cache: 'no-store'` is essential: `/api/sites/**` carries
-        // `max-age=60`, so without it the browser answers from its own cache
-        // after the first request and the server never sees attempts two to
-        // three hundred and twenty — the limit is never reached and the test
-        // passes for the wrong reason.
-        seen.push((await fetch('/api/sites/1', { cache: 'no-store' })).status)
-      }
-      return seen
+        // `max-age=60`, so without it the browser answers from its own
+        // cache after the first request and the server never sees the
+        // other 319 — the limit is never reached and the test passes for
+        // the wrong reason.
+        fetch('/api/sites/1', { cache: 'no-store' }).then((response) => response.status),
+      )
+      return Promise.all(requests)
     })
 
     expect(statuses.filter((status) => status === 200).length).toBeGreaterThan(250)
