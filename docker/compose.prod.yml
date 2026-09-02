@@ -375,6 +375,14 @@ services:
         crowdsecurity/appsec-virtual-patching
         crowdsecurity/appsec-generic-rules
       BOUNCER_KEY_traefik: ${CROWDSEC_BOUNCER_KEY}
+      # A second, independently revocable key for the Bunny-edge bouncer below.
+      # Separate from the Traefik key on purpose: the Traefik plugin route was
+      # evaluated and shelved (see docker/security/README.md) because it needs
+      # Traefik's *static* config, which Dokploy owns outside this repo, and
+      # because it can only block after the TLS handshake — the Bunny bouncer
+      # blocks before the request reaches this box at all. Rotating one key
+      # must not require touching the other.
+      BOUNCER_KEY_bunny: ${CROWDSEC_BUNNY_BOUNCER_KEY}
       # Community blocklist. Sharing signals is the point of the project; opting
       # out still leaves local detection working.
       #
@@ -399,6 +407,31 @@ services:
       resources:
         limits:
           memory: 384m
+    logging: *default-logging
+
+  # The enforcement half. Polls CrowdSec's own decision stream and mirrors the
+  # current ban list onto one Bunny Edge Rule, so abusive IPs are blocked at
+  # the CDN edge rather than reaching Traefik at all. See
+  # docker/security/bunny-bouncer/bouncer.mjs for the full reasoning and the
+  # unverified-Bunny-enum-values warning — confirm it actually blocks with the
+  # test in .plans/runbook_prod.deployment.md's bouncer step before trusting it.
+  bunny-bouncer:
+    build: ./security/bunny-bouncer
+    restart: unless-stopped
+    depends_on:
+      - crowdsec
+    environment:
+      CROWDSEC_LAPI_URL: http://crowdsec:8080
+      CROWDSEC_BOUNCER_KEY: ${CROWDSEC_BUNNY_BOUNCER_KEY}
+      BUNNY_API_KEY: ${BUNNY_API_KEY}
+      # The pull zone in front of SITE_HOST specifically — not the images pull
+      # zone, which would only block image requests and leave everything else
+      # open.
+      BUNNY_PULL_ZONE_ID: ${BUNNY_SITE_PULL_ZONE_ID}
+    deploy:
+      resources:
+        limits:
+          memory: 64m
     logging: *default-logging
 
 volumes:

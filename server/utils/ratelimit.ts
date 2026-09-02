@@ -48,10 +48,24 @@ export const RATE_LIMITS = {
    * tracing routes. These had no limit at all, which made them the widest
    * scraping surface in the app — the complete text of a record, addressed by
    * sequential integer ids, with every slug published in the sitemap. High
-   * enough that browsing the map never notices; low enough that enumerating
-   * 61,272 records takes days rather than minutes.
+   * enough that browsing the map never notices.
+   *
+   * On its own this cap does not deliver what its own comment used to claim:
+   * 300/min sustained is 18,000/hour, so enumerating all 61,272 records takes
+   * ~3.4 hours, not days. `recordDaily` below is the number that actually
+   * makes that claim true; this one stays wide because real bursts — a
+   * moderator working the queue, a reader opening several results in a row —
+   * legitimately need it.
    */
   record: { limit: 300, windowSeconds: 60 },
+  /**
+   * The sustained cap `record` alone cannot provide. 2,000/day is far beyond
+   * any real reader's or moderator's daily total, but it puts a full-database
+   * enumeration (61,272 records ÷ 2,000/day) at ~31 days for a single IP —
+   * days to weeks, not hours. Checked in addition to `record`, never instead
+   * of it, on the same five public, sequentially-addressed record routes.
+   */
+  recordDaily: { limit: 2000, windowSeconds: 86400 },
   /**
    * Endpoints that cost more than they look. `sitemap.xml` re-runs a
    * 50,000-row query and `ready` makes two Postgres round trips plus a Redis

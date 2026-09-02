@@ -26,6 +26,7 @@ defineRouteMeta({
 
 export default defineEventHandler(async (event): Promise<SiteDetail> => {
   await enforceRateLimit(event, 'record')
+  await enforceRateLimit(event, 'recordDaily')
   const { slug } = await getValidatedRouterParams(event, paramsSchema.parse)
   const database = useDatabase()
 

@@ -56,15 +56,33 @@ absorbing those at the edge is the only thing that actually works.
 
 CrowdSec has no first-party Bunny bouncer. Options, in order of preference:
 
-1. **A small custom bouncer** driving Bunny's IP-blocklist API from the LAPI
-   decision stream. Roughly a hundred lines; the shape is the same as the
-   Cloudflare worker bouncer.
+1. **A small custom bouncer** driving Bunny's Edge Rule API from the LAPI
+   decision stream. **Built** — `docker/security/bunny-bouncer/`, wired into
+   `docker/compose.prod.yml` as its own service. Polls the LAPI decision
+   stream and mirrors the current IP-scope ban list onto one Bunny Edge Rule
+   (`RemoteIP` trigger, `BlockRequest` action) rather than one rule per IP.
+   The exact Bunny enum values it sends (`ActionType`, trigger `Type`,
+   `PatternMatchingType`) come from Bunny's API reference, not from a request
+   against a real account — there is no Bunny account to verify against from
+   a dev environment. **Confirm it actually blocks** before relying on it: the
+   test is in the "5. CrowdSec-Bouncer" step of
+   `.plans/runbook_prod.deployment.md`. Needs `CROWDSEC_BUNNY_BOUNCER_KEY`
+   (register with `cscli bouncers add bunny`, or let the `BOUNCER_KEY_bunny`
+   env var on the `crowdsec` service pre-register it), `BUNNY_API_KEY`, and
+   `BUNNY_SITE_PULL_ZONE_ID` — the pull zone in front of `SITE_HOST`
+   specifically, not the images zone.
 2. **The Traefik plugin bouncer** (Yaegi, no sidecar). Needs Traefik _static_
    config, which Dokploy owns — editable through its Traefik file-system UI, not
-   from this repo. Blocks at the proxy, after TLS.
+   from this repo. Blocks at the proxy, after TLS. Shelved in favour of option 1,
+   which blocks before the request reaches the box at all — not run alongside it.
 3. **The firewall bouncer** on nftables. Cheapest on-box option because it drops
    before the TLS handshake, but it sees Bunny edge addresses unless the origin
    passes the real IP, so it is a blunt instrument here.
+
+Whichever bouncer runs, it is enforcement of last resort, not the primary
+control — the per-IP limits in `server/utils/ratelimit.ts` already apply to
+every request regardless of whether CrowdSec has flagged anyone, and fail open
+the same way this bouncer does on a Bunny or LAPI outage.
 
 ## The origin firewall — do this first
 

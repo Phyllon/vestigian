@@ -77,9 +77,11 @@ export default withNuxt(
     // The import pipeline, the maintenance scripts and the migration runner
     // report progress on stdout — that is their interface, not a debugging
     // leftover. They are one-shot processes that exit, so they have no logger
-    // and nothing would collect it if they did.
+    // and nothing would collect it if they did. The Bunny bouncer is the same
+    // shape (a long-running poller outside Nitro, stdout is what Alloy
+    // discovers), just not under scripts/ or written in TypeScript.
     name: 'vestigian/scripts',
-    files: ['scripts/**/*.ts', 'server/database/migrate.ts'],
+    files: ['scripts/**/*.ts', 'server/database/migrate.ts', 'docker/security/bunny-bouncer/*.mjs'],
     rules: {
       'no-console': 'off',
     },

@@ -17,6 +17,7 @@ defineRouteMeta({
 
 export default defineEventHandler(async (event): Promise<SiteDetail> => {
   await enforceRateLimit(event, 'record')
+  await enforceRateLimit(event, 'recordDaily')
   const { id } = await getValidatedRouterParams(event, paramsSchema.parse)
 
   // Never required: this route is public, and `endorsedByMe` is simply

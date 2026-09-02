@@ -137,10 +137,65 @@ Beides muss stimmen, dann `NUXT_BEHIND_TRUSTED_PROXY=true`.
 
 ## 5. CrowdSec-Bouncer
 
+**Geändert seit der ersten Fassung dieses Runbooks: statt des
+Traefik-Plugin-Bouncers unten gibt es jetzt `docker/security/bunny-bouncer/`,
+als eigener Service in `docker/compose.prod.yml` bereits verdrahtet.** Grund
+für den Wechsel: der Traefik-Bouncer blockt erst nach dem TLS-Handshake, also
+auf dieser Maschine; der Bunny-Bouncer blockt an Bunnys Edge, bevor die
+Anfrage die Box überhaupt erreicht — genau der Unterschied, den der
+„Offen"-Abschnitt unten schon als Lücke benannt hatte. Die
+Traefik-Plugin-Route bleibt unten dokumentiert (Alternative, keine Ergänzung —
+nicht beide gleichzeitig betreiben), falls der Bunny-Weg aus irgendeinem Grund
+verworfen wird.
+
 CrowdSec ist zweigeteilt: die Engine _erkennt_ und schreibt eine Entscheidung,
 ein _Bouncer_ liest sie und blockiert. Aktuell läuft nur die erste Hälfte —
-`cscli decisions list` zeigt Bans, der Client wird weiter bedient. Bewusst: erst
-beobachten, welche Szenarien real feuern, dann scharfschalten.
+`cscli decisions list` zeigt Bans, der Client wird weiter bedient.
+
+### 5a. Was der Bunny-Bouncer tatsächlich braucht
+
+Was er tut und warum, steht ausführlich im Kopfkommentar von
+`docker/security/bunny-bouncer/bouncer.mjs` — hier nur der Deploy-Teil.
+
+**Wichtig, weil oft missverstanden: der Bunny-Bouncer ersetzt weder Schritt 4
+(Origin-Firewall) noch braucht er das Traefik-Plugin aus 5b.** Er ist
+zusätzlich zu Schritt 4, nicht statt dessen — ohne die Hetzner-Firewall kann
+ein Angreifer Bunny komplett umgehen und die Hetzner-IP direkt ansprechen,
+womit jede Sperre, die der Bouncer bei Bunny setzt, wirkungslos wird. Das
+Traefik-Plugin aus 5b wird durch den Bunny-Bouncer dagegen tatsächlich
+überflüssig — beides zu betreiben blockt doppelt und verwaltet zwei
+Entscheidungsquellen für dieselbe Sperre.
+
+Neue Env-Variablen (zusätzlich zu denen aus Schritt 3):
+
+```bash
+CROWDSEC_BUNNY_BOUNCER_KEY=<eigener Key, unabhängig vom Traefik-Key>
+BUNNY_API_KEY=<Bunny-Account-API-Key>
+BUNNY_SITE_PULL_ZONE_ID=<Pull-Zone-ID vor SITE_HOST, NICHT die Bilder-Zone>
+```
+
+`CROWDSEC_BUNNY_BOUNCER_KEY` wird über `BOUNCER_KEY_bunny` auf dem
+`crowdsec`-Service automatisch registriert — kein manuelles `cscli bouncers add`
+nötig, anders als beim Traefik-Weg unten.
+
+**Verifikation, bevor produktivem Traffic vertraut wird** — die Bunny-Enum-Werte
+im Bouncer (`ActionType`, Trigger-`Type`, `PatternMatchingType`) stammen aus
+Bunnys API-Referenz, nicht aus einem Test gegen einen echten Account:
+
+```bash
+docker exec vestigian-crowdsec-1 cscli decisions add --ip <test-ip> -d 2m
+# 30–60s warten (POLL_INTERVAL_SECONDS), dann von <test-ip> aus, oder via Proxy:
+curl -I https://<site-host>/                     # muss 403 liefern
+docker exec vestigian-crowdsec-1 cscli decisions delete --all
+# Bunny-Dashboard → Pull Zone → Edge Rules: die Regel "crowdsec-bouncer-managed"
+# muss danach wieder leer/deaktiviert sein.
+```
+
+Schlägt der 403 fehl, im Bunny-Dashboard nachsehen, was die Regel tatsächlich
+enthält, und `PatternMatchingType`/`Type` im Bouncer-Code danach korrigieren —
+nicht raten, sondern gegen das beobachtete Verhalten anpassen.
+
+### 5b. Traefik-Plugin-Bouncer (Alternative, aktuell nicht der gewählte Weg)
 
 ```bash
 docker exec vestigian-crowdsec-1 cscli bouncers add traefik-bouncer
@@ -176,18 +231,23 @@ Mechanismus setzen.
 
 0 → 1 → 2 → 3 → 4 → 5, einzeln deployen.
 
-| Schritt      | Rollback                                             |
-| ------------ | ---------------------------------------------------- |
-| 1 Upload     | nichts zu tun, MinIO bleibt unangetastet             |
-| 3 Deployment | Env zurück, redeploy                                 |
-| 4 Firewall   | Regel löschen, `BEHIND_TRUSTED_PROXY=false`          |
-| 5 Bouncer    | Middleware vom Router nehmen, Erkennung läuft weiter |
+| Schritt      | Rollback                                                                                                                                                                                                                           |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1 Upload     | nichts zu tun, MinIO bleibt unangetastet                                                                                                                                                                                           |
+| 3 Deployment | Env zurück, redeploy                                                                                                                                                                                                               |
+| 4 Firewall   | Regel löschen, `BEHIND_TRUSTED_PROXY=false`                                                                                                                                                                                        |
+| 5 Bouncer    | `bunny-bouncer`-Service stoppen (`docker compose stop bunny-bouncer`); die Edge Rule bleibt liegen, aber deaktiviert sich selbst beim nächsten Zyklus nicht mehr — im Bunny-Dashboard manuell deaktivieren. Erkennung läuft weiter |
 
 ## Offen
 
 - **Off-box-Backup der 15 GiB.** Bis Schritt 1 läuft, existieren sie einmal.
   Danach zweimal (lokal + Bunny), aber Bunny ist kein Backup, sondern
   Auslieferung. Das dringendste ungelöste Risiko.
-- Edge-Bouncer statt Traefik-Bouncer (Traefik blockt erst nach dem
-  TLS-Handshake; gegen L7-Floods hilft nur die Edge).
-- Bunny Shield im Dashboard aktivieren (Free-Tier: WAF + L7-DDoS).
+- ~~Edge-Bouncer statt Traefik-Bouncer~~ — **erledigt**, siehe 5a. Offen bleibt
+  nur die Verifikation der Bunny-Enum-Werte gegen den echten Account (Schritt
+  5a, letzter Absatz) — ungetestet, weil aus dieser Umgebung kein Bunny-Account
+  erreichbar ist.
+- Bunny Shield im Dashboard aktivieren (Free-Tier: WAF + L7-DDoS) — zusätzlich
+  zum Bouncer, nicht statt dessen: Shield deckt volumetrische L7-Floods breiter
+  ab, der Bouncer setzt CrowdSecs eigene, aus den Anwendungslogs abgeleiteten
+  Entscheidungen um.

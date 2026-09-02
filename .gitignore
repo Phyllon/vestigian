@@ -17,3 +17,5 @@ test-results/
 playwright-report/
 blob-report/
 .playwright/
+
+tsconfig.scripts.tsbuildinfo

@@ -16,6 +16,7 @@ defineRouteMeta({
 
 export default defineEventHandler(async (event) => {
   await enforceRateLimit(event, 'record')
+  await enforceRateLimit(event, 'recordDaily')
   const { id } = await getValidatedRouterParams(event, paramsSchema.parse)
   const sql = useSql()
 
