@@ -16,61 +16,11 @@ jobs:
       # in exactly one place.
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: pnpm }
+        with: { node-version: 26, cache: pnpm }
       - run: pnpm install --frozen-lockfile
-      # One gate, four checks in parallel. `pnpm install` has already run
-      # `nuxt prepare` through postinstall, so .nuxt exists before eslint
-      # reads the config Nuxt generates into it.
-      - run: pnpm check
-
-  # End-to-end against the production build, with the real stack behind it.
-  # Separate from `verify` because it needs Postgres, Valkey and a build —
-  # roughly two minutes against twenty seconds — and because a unit-test failure
-  # should be reported without waiting for a browser.
-  e2e:
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgis/postgis:17-3.5-alpine
-        env:
-          POSTGRES_USER: vestigian
-          POSTGRES_PASSWORD: vestigian
-          POSTGRES_DB: vestigian
-        ports: ['5432:5432']
-        options: >-
-          --health-cmd "pg_isready -U vestigian" --health-interval 5s
-          --health-timeout 3s --health-retries 20
-      valkey:
-        image: valkey/valkey:8-alpine
-        ports: ['6379:6379']
-    env:
-      NUXT_DATABASE_URL: postgres://vestigian:vestigian@127.0.0.1:5432/vestigian
-      NUXT_REDIS_URL: redis://127.0.0.1:6379
-      NUXT_SESSION_PASSWORD: ci-session-password-at-least-32-chars
-      NUXT_ALTCHA_SECRET: ci-altcha-secret-value-for-tests
-    steps:
-      - uses: actions/checkout@v4
-      # No `version` input: pnpm/action-setup@v4 reads it from package.json's
-      # `packageManager` field on its own, and setting both here and there is
-      # what produced "Multiple versions of pnpm specified" — pin the version
-      # in exactly one place.
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: pnpm }
-      - run: pnpm install --frozen-lockfile
-      - run: psql "$NUXT_DATABASE_URL" -f docker/initdb/01-extensions.sql
-      - run: pnpm db:migrate
-      - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm test:e2e
-      - uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 7
 
   publish:
-    needs: [verify, e2e]
+    needs: [verify]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:

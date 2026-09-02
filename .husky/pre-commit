@@ -1,7 +1,7 @@
 if git diff --cached --name-only | grep -qx "i18n/locales/en.json"; then
   echo "pre-commit: en.json changed — syncing the other five locales..."
   if ! npx tsx --env-file-if-exists=.env scripts/i18n/translate-locales.ts; then
-    echo "pre-commit: i18n:translate failed. If LibreTranslate is the problem, 'docker restart vestigia-dev-libretranslate-1' and try again; otherwise resolve manually and re-run 'pnpm i18n:translate' before committing." >&2
+    echo "pre-commit: i18n:translate failed. If LibreTranslate is the problem, 'docker restart vestigian-dev-libretranslate-1' and try again; otherwise resolve manually and re-run 'pnpm i18n:translate' before committing." >&2
     exit 1
   fi
   git add i18n/locales/*.json

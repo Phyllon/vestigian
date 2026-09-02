@@ -1347,5 +1347,5 @@ contradicts what they asked for. Those belong in the reply.
 - **Planning mode** while in planning mode, instead of writing the plan to a temporary file or chat, save it under current workdir's ".plans/" automatically and open it.
 - **Completed tasks** when having completed a task, never print the achieved goals to the chat, keep it clean
 - **EU/GDPR compliance** all packages or code dealing with user data or which are user-related must be GDPR compliant
-- **e2e-tests** add e2e-tests when new critical features were added
+- **e2e-tests** add e2e-tests when new critical features were added. always run them before committing.
 - **i18n** always use i18n for defined languages (de, en, fr, es, it, nl)

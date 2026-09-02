@@ -1,4 +1,4 @@
--- Vestigia initial schema.
+-- Vestigian initial schema.
 --
 -- Written by hand rather than generated, because three things in this schema are
 -- outside what drizzle-kit can emit: the PostGIS geometry columns, the GiST

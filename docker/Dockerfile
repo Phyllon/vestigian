@@ -3,7 +3,7 @@
 # ---- dependencies -----------------------------------------------------------
 # Separated from the build so a source-only change does not re-resolve the
 # dependency tree, which is the slowest part of the pipeline.
-FROM node:22-alpine AS deps
+FROM node:26-alpine AS deps
 RUN corepack enable
 WORKDIR /app
 COPY package.json pnpm-lock.yaml* ./
@@ -11,7 +11,7 @@ RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
     pnpm install --frozen-lockfile
 
 # ---- build ------------------------------------------------------------------
-FROM node:22-alpine AS build
+FROM node:26-alpine AS build
 RUN corepack enable
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
@@ -21,16 +21,16 @@ RUN pnpm build
 
 # ---- runtime ----------------------------------------------------------------
 # Only .output ships. No source, no dev dependencies, no package manager.
-FROM node:22-alpine AS runtime
+FROM node:26-alpine AS runtime
 WORKDIR /app
 
 RUN apk add --no-cache tini vips \
- && addgroup -g 1001 -S vestigia \
- && adduser -u 1001 -S vestigia -G vestigia
+ && addgroup -g 1001 -S vestigian \
+ && adduser -u 1001 -S vestigian -G vestigian
 
-COPY --from=build --chown=vestigia:vestigia /app/.output ./.output
+COPY --from=build --chown=vestigian:vestigian /app/.output ./.output
 
-USER vestigia
+USER vestigian
 
 ENV NODE_ENV=production \
     NITRO_PORT=3000 \
