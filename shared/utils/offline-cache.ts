@@ -12,7 +12,7 @@
  * aliases or auto-imports would be a silent way to break only that build.
  */
 
-const OFFLINE_AREA_CACHE_PREFIX = 'vestigia-offline-area:'
+const OFFLINE_AREA_CACHE_PREFIX = 'vestigian-offline-area:'
 
 export const cacheNameForArea = (areaId: string): string => `${OFFLINE_AREA_CACHE_PREFIX}${areaId}`
 

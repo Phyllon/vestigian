@@ -161,7 +161,7 @@ prometheus.scrape "app" {
     { __address__ = sys.env("APP_ADDR"), __metrics_path__ = "/api/metrics" },
   ]
   forward_to = [prometheus.remote_write.default.receiver]
-  job_name   = "vestigia-app"
+  job_name   = "vestigian-app"
 }
 
 prometheus.remote_write "default" {

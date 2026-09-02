@@ -25,20 +25,20 @@ import postgres from 'postgres'
 const shouldRepair = process.argv.includes('--repair')
 
 const sql = postgres(
-  process.env.NUXT_DATABASE_URL ?? 'postgres://vestigia:vestigia@127.0.0.1:5432/vestigia',
+  process.env.NUXT_DATABASE_URL ?? 'postgres://vestigian:vestigian@127.0.0.1:5432/vestigian',
 )
 
 const storage = new S3Client({
   region: process.env.NUXT_STORAGE_REGION ?? 'us-east-1',
   endpoint: process.env.NUXT_STORAGE_ENDPOINT ?? 'http://127.0.0.1:9000',
   credentials: {
-    accessKeyId: process.env.NUXT_STORAGE_ACCESS_KEY_ID ?? 'vestigia',
-    secretAccessKey: process.env.NUXT_STORAGE_SECRET_ACCESS_KEY ?? 'vestigia-dev-secret',
+    accessKeyId: process.env.NUXT_STORAGE_ACCESS_KEY_ID ?? 'vestigian',
+    secretAccessKey: process.env.NUXT_STORAGE_SECRET_ACCESS_KEY ?? 'vestigian-dev-secret',
   },
   forcePathStyle: true,
 })
 
-const BUCKET = process.env.NUXT_STORAGE_BUCKET ?? 'vestigia'
+const BUCKET = process.env.NUXT_STORAGE_BUCKET ?? 'vestigian'
 
 interface ImageRow {
   storage_key: string

@@ -17,7 +17,7 @@ describe('database clients', () => {
 
   beforeAll(async () => {
     vi.stubGlobal('useRuntimeConfig', () => ({
-      databaseUrl: 'postgres://vestigia:vestigia@127.0.0.1:5432/vestigia',
+      databaseUrl: 'postgres://vestigian:vestigian@127.0.0.1:5432/vestigian',
     }))
     const module = await import('../db')
     useSql = module.useSql

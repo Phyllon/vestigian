@@ -73,9 +73,9 @@ export const buildFieldKitGpx = (input: FieldKitInput): string => {
 
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',
-    '<gpx version="1.1" creator="Vestigia" xmlns="http://www.topografix.com/GPX/1/1">',
+    '<gpx version="1.1" creator="Vestigian" xmlns="http://www.topografix.com/GPX/1/1">',
     '  <metadata>',
-    '    <name>Vestigia field kit</name>',
+    '    <name>Vestigian field kit</name>',
     `    <desc>${escapeXml(`${input.places.length} places from the notebook of ${input.authorName}.`)}</desc>`,
     `    <time>${input.generatedAt.toISOString()}</time>`,
     '  </metadata>',

@@ -90,7 +90,7 @@
       "failedDescription": "Controleer uw gegevens en probeer het opnieuw."
     },
     "register": {
-      "title": "Word lid van Vestigia",
+      "title": "Word lid van Vestigian",
       "intro": "Uw eerste twee bijdragen worden gecontroleerd door een moderator. Daarna publiceren ze zoals je ze schrijft.",
       "displayName": "Naam tonen",
       "email": "E-mail",
@@ -223,7 +223,7 @@
   },
   "licence": {
     "title": "Gegevens & licenties",
-    "intro": "Vestigia is gebouwd op gegevens die anderen vrij herbruikbaar maakten. Termen verschillen per laag Hier is wat van toepassing is op elk.",
+    "intro": "Vestigian is gebouwd op gegevens die anderen vrij herbruikbaar maakten. Termen verschillen per laag Hier is wat van toepassing is op elk.",
     "recordsHeading": "Bijdragen",
     "recordsBody": "Site en tracing tekst is CC BY-SA  De gestructureerde metadata (coördinaten, data, categorieën) is CC0 .",
     "imagesHeading": "Foto's",
@@ -253,7 +253,7 @@
   },
   "privacy": {
     "title": "Privacybeleid",
-    "intro": "Deze pagina geeft aan wat Vestigia verzamelt, waarom, voor hoe lang, en wie anders ziet het . . . . . . . en bijpassen wat de code eigenlijk doet in plaats van een generiek sjabloon. Het is geen vervanging voor het lezen van de bron, die open is.",
+    "intro": "Deze pagina geeft aan wat Vestigian verzamelt, waarom, voor hoe lang, en wie anders ziet het . . . . . . . en bijpassen wat de code eigenlijk doet in plaats van een generiek sjabloon. Het is geen vervanging voor het lezen van de bron, die open is.",
     "controllerHeading": "Verwerkingsverantwoordelijke",
     "controllerBody": "De dienstverlener die in de wettelijke kennisgeving wordt genoemd, is de verwerkingsverantwoordelijke (\"wij\") voor de hieronder beschreven verwerking. Contactgegevens zijn dezelfde als op die pagina.",
     "accountHeading": "Account aanmaken",
@@ -287,7 +287,7 @@
     "supervisoryHeading": "Toezichtautoriteit",
     "supervisoryPlaceholder": "[Naam en contactgegevens van de voor de plaats van vestiging van de verwerkingsverantwoordelijke verantwoordelijke autoriteit voor gegevensbescherming.]",
     "minorsHeading": "Leeftijd",
-    "minorsBody": "Vestigia is niet gericht op kinderen. Als u jonger bent dan 16, maak dan geen rekening aan zonder de betrokkenheid van een ouder of voogd.",
+    "minorsBody": "Vestigian is niet gericht op kinderen. Als u jonger bent dan 16, maak dan geen rekening aan zonder de betrokkenheid van een ouder of voogd.",
     "changesHeading": "Wijzigingen",
     "changesBody": "Deze pagina wordt bijgewerkt wanneer wat de dienst daadwerkelijk doet verandert. Het weerspiegelt de huidige versie van de lopende toepassing."
   },
@@ -433,7 +433,7 @@
     "tracedNote": "Getraceerde routes worden getraceerd omdat een tracing een interpretatie is van waar iets liep, niet een overzicht ervan.",
     "openFullEntry": "Het volledige item openen",
     "edit": "Bewerken",
-    "defaultAttribution": "Medewerkers van Vestigia"
+    "defaultAttribution": "Medewerkers van Vestigian"
   },
   "siteGalleryManager": {
     "defaultPhotographName": "foto{index}",
@@ -563,9 +563,9 @@
   },
   "indexPage": {
     "title": "Kaart",
-    "srHeading": "Vestigia ",
+    "srHeading": "Vestigian ",
     "addToAtlas": "Toevoegen aan de atlas",
-    "description": "Vestigia in kaart brengen van de sporen van de oude wereld nederzettingen, wegen, vestingwerken en vindplaatsen, geregistreerd door de mensen die hen bezoeken."
+    "description": "Vestigian in kaart brengen van de sporen van de oude wereld nederzettingen, wegen, vestingwerken en vindplaatsen, geregistreerd door de mensen die hen bezoeken."
   },
   "forgotPasswordPage": {
     "title": "Uw wachtwoord resetten",
@@ -620,10 +620,10 @@
     "type": "Type",
     "length": "Lengte",
     "credit": "Krediet",
-    "defaultAttribution": "Medewerkers van Vestigia",
+    "defaultAttribution": "Medewerkers van Vestigian",
     "edit": "Bewerken",
     "lastRevised": "Laatst herzien",
-    "defaultDescription": "Een getraceerd kenmerk opgenomen in Vestigia, een atlas van de oude wereld."
+    "defaultDescription": "Een getraceerd kenmerk opgenomen in Vestigian, een atlas van de oude wereld."
   },
   "siteEditPage": {
     "notFound": "Geen site geregistreerd onder die naam.",
@@ -784,7 +784,7 @@
   },
   "contributor": {
     "notFound": "Deze bijdrager bestaat niet.",
-    "description": "Vermeldingen die {name} aan Vestigia heeft bijgedragen.",
+    "description": "Vermeldingen die {name} aan Vestigian heeft bijgedragen.",
     "joined": "Legt vast sinds {date}",
     "accepted": "geen geaccepteerde bijdragen | één geaccepteerde bijdrage | {n} geaccepteerde bijdragen",
     "sitesHeading": "Geen vindplaatsen | Eén vindplaats | {n} vindplaatsen",

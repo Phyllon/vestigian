@@ -14,7 +14,7 @@
   useCanonicalUrl()
 
   useSocialMeta({
-    title: 'Vestigia',
+    title: 'Vestigian',
     description: t('indexPage.description'),
     imageUrl: `${base}/og/default.png`,
   })
@@ -23,7 +23,7 @@
     script: [
       {
         type: 'application/ld+json',
-        innerHTML: JSON.stringify(buildWebSiteJsonLd({ siteUrl: base, name: 'Vestigia' })),
+        innerHTML: JSON.stringify(buildWebSiteJsonLd({ siteUrl: base, name: 'Vestigian' })),
       },
     ],
   })

@@ -4,15 +4,15 @@
 # decision, because there is nobody to decide about. Everything else here exists
 # to let scenarios filter precisely rather than by substring.
 onsuccess: next_stage
-name: vestigia/access-log
-description: "Parse Vestigia's structured application log"
-filter: "evt.Line.Labels.type == 'vestigia'"
+name: vestigian/access-log
+description: "Parse Vestigian's structured application log"
+filter: "evt.Line.Labels.type == 'vestigian'"
 nodes:
   - filter: "evt.Line.Raw startsWith '{'"
     onsuccess: next_stage
     statics:
       - meta: log_type
-        value: vestigia
+        value: vestigian
       - parsed: message
         expression: "JsonExtract(evt.Line.Raw, 'msg')"
       - parsed: level

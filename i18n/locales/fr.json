@@ -90,7 +90,7 @@
       "failedDescription": "Vérifiez vos coordonnées et essayez à nouveau."
     },
     "register": {
-      "title": "Rejoignez Vestigia",
+      "title": "Rejoignez Vestigian",
       "intro": "Vos deux premières contributions sont vérifiées par un modérateur. Après cela, ils publient comme vous les écrivez.",
       "displayName": "Afficher le nom",
       "email": "Courriel",
@@ -223,7 +223,7 @@
   },
   "licence": {
     "title": "Données et licences",
-    "intro": "Vestigia est construit sur des données que d'autres rendu librement réutilisable. Les termes diffèrent par couche — voici ce qui s'applique à chacun.",
+    "intro": "Vestigian est construit sur des données que d'autres rendu librement réutilisable. Les termes diffèrent par couche — voici ce qui s'applique à chacun.",
     "recordsHeading": "Comptes rendus",
     "recordsBody": "Le site et le texte de traçage sont CC BY-SA — libre de réutilisation et d'adaptation, y compris commercialement, à condition que les modifications soient partagées sous la même licence et que la source soit créditée. Les métadonnées structurées (coordonnées, dates, catégories) sont CC0 — aucun droit réservé.",
     "imagesHeading": "Photographies",
@@ -253,7 +253,7 @@
   },
   "privacy": {
     "title": "Politique de confidentialité",
-    "intro": "Cette page indique ce que Vestigia collectionne, pourquoi, pour combien de temps, et qui d'autre le voit — clairement, et correspondant ce que le code fait réellement plutôt qu'un modèle générique. Ce n'est pas un substitut à la lecture de la source, qui est ouverte.",
+    "intro": "Cette page indique ce que Vestigian collectionne, pourquoi, pour combien de temps, et qui d'autre le voit — clairement, et correspondant ce que le code fait réellement plutôt qu'un modèle générique. Ce n'est pas un substitut à la lecture de la source, qui est ouverte.",
     "controllerHeading": "Contrôleur",
     "controllerBody": "Le fournisseur de services nommé dans l'avis juridique est le contrôleur (« nous ») pour le traitement décrit ci-dessous. Les coordonnées sont les mêmes que sur cette page.",
     "accountHeading": "Création d'un compte",
@@ -287,7 +287,7 @@
     "supervisoryHeading": "Autorité de surveillance",
     "supervisoryPlaceholder": "[Nom et coordonnées de l'autorité de protection des données responsable du lieu d'établissement du responsable du traitement.]",
     "minorsHeading": "Âge",
-    "minorsBody": "Vestigia ne s'adresse pas aux enfants. Si vous avez moins de 16 ans, ne créez pas de compte sans la participation d'un parent ou d'un tuteur.",
+    "minorsBody": "Vestigian ne s'adresse pas aux enfants. Si vous avez moins de 16 ans, ne créez pas de compte sans la participation d'un parent ou d'un tuteur.",
     "changesHeading": "Changements",
     "changesBody": "Cette page est mise à jour lorsque ce que le service fait réellement change. Il reflète la version actuelle de l'application en cours d'exécution."
   },
@@ -433,7 +433,7 @@
     "tracedNote": "Les itinéraires traqués sont tracés en tirets parce qu'un tracé est une interprétation de l'endroit où quelque chose a couru, et non un relevé de celui-ci.",
     "openFullEntry": "Ouvrir l'entrée complète",
     "edit": "Modifier",
-    "defaultAttribution": "Les contributeurs de Vestigia"
+    "defaultAttribution": "Les contributeurs de Vestigian"
   },
   "siteGalleryManager": {
     "defaultPhotographName": "photographie{index}",
@@ -563,9 +563,9 @@
   },
   "indexPage": {
     "title": "Carte",
-    "srHeading": "Vestigia — un atlas du monde antique",
+    "srHeading": "Vestigian — un atlas du monde antique",
     "addToAtlas": "Ajouter à l'atlas",
-    "description": "Vestigia cartographie les traces de l'ancien monde — les colonies, les routes, les fortifications et les points de repère, enregistrés par les gens qui les visitent."
+    "description": "Vestigian cartographie les traces de l'ancien monde — les colonies, les routes, les fortifications et les points de repère, enregistrés par les gens qui les visitent."
   },
   "forgotPasswordPage": {
     "title": "Réinitialiser votre mot de passe",
@@ -620,10 +620,10 @@
     "type": "Type",
     "length": "Longueur",
     "credit": "Crédit",
-    "defaultAttribution": "Les contributeurs de Vestigia",
+    "defaultAttribution": "Les contributeurs de Vestigian",
     "edit": "Modifier",
     "lastRevised": "Dernière révision",
-    "defaultDescription": "Une caractéristique tracée enregistrée en Vestigia, un atlas du monde antique."
+    "defaultDescription": "Une caractéristique tracée enregistrée en Vestigian, un atlas du monde antique."
   },
   "siteEditPage": {
     "notFound": "Aucun site enregistré sous ce nom.",
@@ -784,7 +784,7 @@
   },
   "contributor": {
     "notFound": "Aucun contributeur de ce nom.",
-    "description": "Notices versées à Vestigia par {name}.",
+    "description": "Notices versées à Vestigian par {name}.",
     "joined": "Consigne depuis {date}",
     "accepted": "aucune contribution acceptée | une contribution acceptée | {n} contributions acceptées",
     "sitesHeading": "Aucun site | Un site | {n} sites",

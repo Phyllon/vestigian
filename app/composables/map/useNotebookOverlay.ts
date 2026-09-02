@@ -1,8 +1,8 @@
 import type { GeoJSONSource, Map as MapLibreMap } from 'maplibre-gl'
 
-export const NOTEBOOK_SOURCE_ID = 'vestigia-notebook'
-const VISITED_LAYER_ID = 'vestigia-notebook-visited'
-const BOOKMARK_LAYER_ID = 'vestigia-notebook-bookmarked'
+export const NOTEBOOK_SOURCE_ID = 'vestigian-notebook'
+const VISITED_LAYER_ID = 'vestigian-notebook-visited'
+const BOOKMARK_LAYER_ID = 'vestigian-notebook-bookmarked'
 
 /**
  * The reader's own traces, drawn over the shared map.

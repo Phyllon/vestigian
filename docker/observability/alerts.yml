@@ -1,5 +1,5 @@
 groups:
-  - name: vestigia
+  - name: vestigian
     rules:
       # The alert this whole exercise justifies.
       #
@@ -17,7 +17,7 @@ groups:
           description: 'Valkey is unreachable from enforceRateLimit, so every limit in RATE_LIMITS is absent. Signup and login are unthrottled.'
 
       - alert: AppDown
-        expr: up{job="vestigia-app"} == 0
+        expr: up{job="vestigian-app"} == 0
         for: 2m
         labels: { severity: critical }
         annotations:

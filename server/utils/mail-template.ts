@@ -176,11 +176,11 @@ const buildTokenCopy = (input: TokenEmailInput): EmailCopy => {
 
   if (input.purpose === 'verify-email') {
     return {
-      subject: 'Confirm your Vestigia account',
+      subject: 'Confirm your Vestigian account',
       preheader: `Confirm ${input.recipient} to finish setting up your account. The link works until ${expiry}.`,
       heading: 'Confirm your address',
       paragraphs: [
-        `An account was opened at Vestigia with this address, ${input.recipient}. Confirming it is the last step — until then the account cannot sign in.`,
+        `An account was opened at Vestigian with this address, ${input.recipient}. Confirming it is the last step — until then the account cannot sign in.`,
         'Your first two contributions are read by a moderator before they appear on the map. After that they publish as you write them.',
       ],
       action: { label: 'Confirm this address', href: input.link },
@@ -200,15 +200,15 @@ const buildTokenCopy = (input: TokenEmailInput): EmailCopy => {
   /**
    * Explicit, because the branch below is a fallthrough rather than a switch:
    * without this, a change-email token would be sent under the subject "Reset
-   * your Vestigia password", to an address that has no account yet.
+   * your Vestigian password", to an address that has no account yet.
    */
   if (input.purpose === 'change-email') {
     return {
-      subject: 'Confirm your new Vestigia address',
+      subject: 'Confirm your new Vestigian address',
       preheader: `Confirm ${input.recipient} as the new address on your account. The link works until ${expiry}.`,
       heading: 'Confirm your new address',
       paragraphs: [
-        `Someone signed in to the Vestigia account belonging to ${input.displayName} and asked to move it to this address, ${input.recipient}. Until the link below is used, the account keeps its old address and nothing has changed.`,
+        `Someone signed in to the Vestigian account belonging to ${input.displayName} and asked to move it to this address, ${input.recipient}. Until the link below is used, the account keeps its old address and nothing has changed.`,
         'The old address has been told this was requested, so if it was not you, the account holder already knows.',
       ],
       action: { label: 'Confirm this address', href: input.link },
@@ -227,11 +227,11 @@ const buildTokenCopy = (input: TokenEmailInput): EmailCopy => {
   }
 
   return {
-    subject: 'Reset your Vestigia password',
+    subject: 'Reset your Vestigian password',
     preheader: `Set a new password for ${input.recipient}. The link works once, until ${expiry}.`,
     heading: 'Set a new password',
     paragraphs: [
-      `Someone asked to reset the password for the Vestigia account registered to ${input.recipient}. If that was you, the link below opens the form to set a new one.`,
+      `Someone asked to reset the password for the Vestigian account registered to ${input.recipient}. If that was you, the link below opens the form to set a new one.`,
     ],
     action: { label: 'Set a new password', href: input.link },
     facts: [
@@ -252,7 +252,7 @@ const buildAccountCopy = (input: AccountEmailInput): EmailCopy => {
   const site = input.siteUrl.replace(/\/$/, '')
   const title = input.recordTitle ?? 'your contribution'
   const recordKind = input.recordKind === 'tracing' ? 'tracing' : 'record'
-  const footerReason = `This message was sent to ${input.recipient} because it is the address on your Vestigia account. Only account and moderation events are sent this way — there is no newsletter to unsubscribe from.`
+  const footerReason = `This message was sent to ${input.recipient} because it is the address on your Vestigian account. Only account and moderation events are sent this way — there is no newsletter to unsubscribe from.`
 
   const reviewFacts: EmailFact[] = [
     { label: 'Record', value: title },
@@ -263,11 +263,11 @@ const buildAccountCopy = (input: AccountEmailInput): EmailCopy => {
   switch (input.kind) {
     case 'password-changed':
       return {
-        subject: 'Your Vestigia password was changed',
+        subject: 'Your Vestigian password was changed',
         preheader: `The password for ${input.recipient} was changed on ${when}.`,
         heading: 'Your password was changed',
         paragraphs: [
-          `The password for the Vestigia account registered to ${input.recipient} has been changed. Nothing else about the account was touched, and the new password works from now.`,
+          `The password for the Vestigian account registered to ${input.recipient} has been changed. Nothing else about the account was touched, and the new password works from now.`,
           'If that was not you, take the account back with the button below: setting a password voids every outstanding reset link, this one included.',
         ],
         action: { label: 'Reset the password', href: `${site}/forgot-password` },
@@ -276,7 +276,7 @@ const buildAccountCopy = (input: AccountEmailInput): EmailCopy => {
           { label: 'Changed', value: when },
         ],
         reassurance:
-          'Vestigia will never ask you for a password by email, and no message from us will ever contain one.',
+          'Vestigian will never ask you for a password by email, and no message from us will ever contain one.',
         footerReason,
         showPasteFallback: false,
       }
@@ -289,11 +289,11 @@ const buildAccountCopy = (input: AccountEmailInput): EmailCopy => {
      */
     case 'email-change-requested':
       return {
-        subject: 'A change of address was requested on your Vestigia account',
+        subject: 'A change of address was requested on your Vestigian account',
         preheader: `Someone asked to move your account away from ${input.recipient} on ${when}. It has not moved yet.`,
         heading: 'A change of address was requested',
         paragraphs: [
-          `Someone signed in to your Vestigia account and asked to move it to a different email address. Nothing has changed yet: the account still belongs to ${input.recipient}, and it stays that way unless the new address is confirmed from its own inbox.`,
+          `Someone signed in to your Vestigian account and asked to move it to a different email address. Nothing has changed yet: the account still belongs to ${input.recipient}, and it stays that way unless the new address is confirmed from its own inbox.`,
           'If that was you, there is nothing to do here: finish it from the message sent to the new address. If it was not, change your password now — that ends every signed-in session and the request with it.',
         ],
         action: { label: 'Change your password', href: `${site}/forgot-password` },
@@ -350,7 +350,7 @@ const buildAccountCopy = (input: AccountEmailInput): EmailCopy => {
 
     case 'trust-suspended':
       return {
-        subject: 'Your Vestigia edits now wait for review',
+        subject: 'Your Vestigian edits now wait for review',
         preheader: 'A moderator has suspended automatic publishing on your account.',
         heading: 'Your edits now wait for review',
         paragraphs: [
@@ -371,7 +371,7 @@ const buildAccountCopy = (input: AccountEmailInput): EmailCopy => {
 
     case 'trust-restored':
       return {
-        subject: 'Your Vestigia edits publish immediately again',
+        subject: 'Your Vestigian edits publish immediately again',
         preheader: 'Automatic publishing has been restored on your account.',
         heading: 'Your edits publish immediately again',
         paragraphs: [
@@ -392,16 +392,16 @@ const buildAccountCopy = (input: AccountEmailInput): EmailCopy => {
 
     case 'account-deleted':
       return {
-        subject: 'Your Vestigia account has been deleted',
+        subject: 'Your Vestigian account has been deleted',
         preheader: `The account registered to ${input.recipient} was deleted on ${when}.`,
         heading: 'Your account has been deleted',
         paragraphs: [
-          'Your Vestigia account has been deleted. Your email address and display name have been removed and this address can no longer sign in.',
+          'Your Vestigian account has been deleted. Your email address and display name have been removed and this address can no longer sign in.',
           'Sites and tracings you contributed stay on the map — the atlas keeps a record of what was recorded and when, the same way it does for every edit — but they no longer carry your name; the history shows the account as deleted.',
         ],
         facts: [{ label: 'Deleted', value: when }],
         reassurance:
-          'This is the last message this address will receive from Vestigia. If you did not request this, the account cannot be recovered — write to us right away so we can look at what happened.',
+          'This is the last message this address will receive from Vestigian. If you did not request this, the account cannot be recovered — write to us right away so we can look at what happened.',
         footerReason,
         showPasteFallback: false,
       }
@@ -506,7 +506,7 @@ const renderHtml = (copy: EmailCopy, context: MailContext): string => {
           <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" class="sheet" style="width:100%;max-width:600px;background-color:${SHEET};border:1px solid ${HAIRLINE};border-radius:2px;">
             <tr>
               <td class="pad" style="padding:30px 34px 0;">
-                <span class="display" style="font-family:${DISPLAY_FACE};font-size:28px;line-height:1;color:${INK};letter-spacing:-0.01em;">Vestigia</span>
+                <span class="display" style="font-family:${DISPLAY_FACE};font-size:28px;line-height:1;color:${INK};letter-spacing:-0.01em;">Vestigian</span>
                 <span class="muted" style="font-family:${MONO_FACE};font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:${INK_MUTED};padding-left:10px;">traces of antiquity</span>
                 <div class="rule" style="border-top:1px solid ${RULE};margin-top:18px;font-size:0;line-height:0;">&nbsp;</div>
               </td>
@@ -545,7 +545,7 @@ ${copy.showPasteFallback && copy.action ? renderPasteFallback(copy.action.href) 
             <tr>
               <td class="pad" align="center" style="padding:18px 34px 0;">
                 <p class="muted" style="margin:0 0 4px;font-family:${BODY_FACE};font-size:12px;line-height:1.6;color:${INK_MUTED};">
-                  <a href="${homeLink}" class="muted" style="color:${INK_MUTED};text-decoration:underline;">Vestigia</a> — an atlas of the ancient world, recorded by the people who visit it.
+                  <a href="${homeLink}" class="muted" style="color:${INK_MUTED};text-decoration:underline;">Vestigian</a> — an atlas of the ancient world, recorded by the people who visit it.
                 </p>
                 <p class="muted" style="margin:0;font-family:${BODY_FACE};font-size:12px;line-height:1.6;color:${INK_MUTED};">
                   ${escapeHtml(copy.footerReason)}
@@ -577,7 +577,7 @@ const renderText = (copy: EmailCopy, context: MailContext): string =>
     copy.reassurance,
     '',
     '—',
-    'Vestigia — an atlas of the ancient world.',
+    'Vestigian — an atlas of the ancient world.',
     copy.footerReason,
   ].join('\n')
 

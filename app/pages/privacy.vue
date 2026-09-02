@@ -21,7 +21,7 @@
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = 'vestigia-account-data.json'
+      link.download = 'vestigian-account-data.json'
       link.click()
       URL.revokeObjectURL(url)
     } catch {

@@ -12,7 +12,7 @@ interface OutgoingMail {
 type MailTransport = 'lettermint' | 'dev-inbox' | 'log'
 
 /**
- * Splits `Vestigia <no-reply@vestigia.org>` into its parts. Lettermint takes
+ * Splits `Vestigian <no-reply@vestigian.org>` into its parts. Lettermint takes
  * the header form as one string; Mailpit's API wants the two separately.
  */
 const parseAddress = (address: string): { name: string; email: string } => {

@@ -22,7 +22,7 @@ const COMPOSE_FILE = new URL('../docker/compose.dev.yml', import.meta.url).pathn
 const KEEP_SNAPSHOTS = Number(process.env.KEEP_SNAPSHOTS ?? 14)
 
 const DATABASE_URL =
-  process.env.NUXT_DATABASE_URL ?? 'postgres://vestigia:vestigia@127.0.0.1:5432/vestigia'
+  process.env.NUXT_DATABASE_URL ?? 'postgres://vestigian:vestigian@127.0.0.1:5432/vestigian'
 
 interface DatabaseTarget {
   user: string
@@ -32,8 +32,8 @@ interface DatabaseTarget {
 const readDatabaseTarget = (url: string): DatabaseTarget => {
   const parsed = new URL(url)
   return {
-    user: decodeURIComponent(parsed.username) || 'vestigia',
-    database: parsed.pathname.replace(/^\//, '') || 'vestigia',
+    user: decodeURIComponent(parsed.username) || 'vestigian',
+    database: parsed.pathname.replace(/^\//, '') || 'vestigian',
   }
 }
 
@@ -125,7 +125,7 @@ const main = async (): Promise<void> => {
     .toISOString()
     .replace(/[-:]/g, '')
     .replace(/\.\d+Z$/, 'Z')
-  const destination = `${SNAPSHOT_DIR}vestigia-${stamp}.dump`
+  const destination = `${SNAPSHOT_DIR}vestigian-${stamp}.dump`
 
   console.log('Writing snapshot…')
   try {

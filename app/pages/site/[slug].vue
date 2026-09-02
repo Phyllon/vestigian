@@ -78,7 +78,7 @@
             innerHTML: JSON.stringify(
               buildBreadcrumbJsonLd({
                 items: [
-                  { name: 'Vestigia', url: base },
+                  { name: 'Vestigian', url: base },
                   { name: site.value.title, url: `${base}/site/${site.value.slug}` },
                 ],
               }),

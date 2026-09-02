@@ -49,7 +49,7 @@
   }
 
   const activeLabel = computed(
-    () => availableViews.find((option) => option.value === view.value)?.label ?? 'Vestigia',
+    () => availableViews.find((option) => option.value === view.value)?.label ?? 'Vestigian',
   )
 
   onClickOutside(root, close)

@@ -54,7 +54,7 @@
             innerHTML: JSON.stringify(
               buildBreadcrumbJsonLd({
                 items: [
-                  { name: 'Vestigia', url: base },
+                  { name: 'Vestigian', url: base },
                   { name: tracing.value.title, url: `${base}/tracing/${tracing.value.id}` },
                 ],
               }),

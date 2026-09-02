@@ -21,20 +21,20 @@ describe('paginateOffsets', () => {
 
 describe('buildUrlsetXml', () => {
   it('escapes reserved XML characters in loc', () => {
-    const xml = buildUrlsetXml([{ loc: 'https://vestigia.eu/site/aqua-&-claudia' }])
+    const xml = buildUrlsetXml([{ loc: 'https://vestigian.eu/site/aqua-&-claudia' }])
     expect(xml).toContain('aqua-&amp;-claudia')
     expect(xml).not.toContain('aqua-&-claudia')
   })
 
   it('includes lastmod only when provided', () => {
     const xml = buildUrlsetXml([
-      { loc: 'https://vestigia.eu/site/a', lastmod: '2026-01-01' },
-      { loc: 'https://vestigia.eu/site/b' },
+      { loc: 'https://vestigian.eu/site/a', lastmod: '2026-01-01' },
+      { loc: 'https://vestigian.eu/site/b' },
     ])
     expect(xml).toContain(
-      '<url><loc>https://vestigia.eu/site/a</loc><lastmod>2026-01-01</lastmod></url>',
+      '<url><loc>https://vestigian.eu/site/a</loc><lastmod>2026-01-01</lastmod></url>',
     )
-    expect(xml).toContain('<url><loc>https://vestigia.eu/site/b</loc></url>')
+    expect(xml).toContain('<url><loc>https://vestigian.eu/site/b</loc></url>')
   })
 
   it('produces a valid urlset root element', () => {
@@ -47,12 +47,12 @@ describe('buildUrlsetXml', () => {
 describe('buildSitemapIndexXml', () => {
   it('lists every child sitemap', () => {
     const xml = buildSitemapIndexXml([
-      'https://vestigia.eu/sitemap-sites-0.xml',
-      'https://vestigia.eu/sitemap-tracings-0.xml',
+      'https://vestigian.eu/sitemap-sites-0.xml',
+      'https://vestigian.eu/sitemap-tracings-0.xml',
     ])
-    expect(xml).toContain('<sitemap><loc>https://vestigia.eu/sitemap-sites-0.xml</loc></sitemap>')
+    expect(xml).toContain('<sitemap><loc>https://vestigian.eu/sitemap-sites-0.xml</loc></sitemap>')
     expect(xml).toContain(
-      '<sitemap><loc>https://vestigia.eu/sitemap-tracings-0.xml</loc></sitemap>',
+      '<sitemap><loc>https://vestigian.eu/sitemap-tracings-0.xml</loc></sitemap>',
     )
     expect(xml).toContain('<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')
   })

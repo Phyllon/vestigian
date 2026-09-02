@@ -1,4 +1,4 @@
-name: vestigia
+name: vestigian
 
 # Container logs are rotated. Without this the json-file driver grows without
 # bound, which was already true before any of this and becomes considerably more
@@ -11,10 +11,10 @@ x-logging: &default-logging
 
 services:
   app:
-    image: ghcr.io/${GITHUB_REPOSITORY:-vestigia/vestigia}:${IMAGE_TAG:-latest}
+    image: ghcr.io/${GITHUB_REPOSITORY:-vestigian/vestigian}:${IMAGE_TAG:-latest}
     restart: unless-stopped
     environment:
-      NUXT_DATABASE_URL: postgres://vestigia:${POSTGRES_PASSWORD}@postgres:5432/vestigia
+      NUXT_DATABASE_URL: postgres://vestigian:${POSTGRES_PASSWORD}@postgres:5432/vestigian
       NUXT_REDIS_URL: redis://valkey:6379
       # Traefik terminates TLS in front of this container and Bunny sets
       # x-real-ip in front of that, so the header can be believed here.
@@ -60,21 +60,21 @@ services:
       # deploy behind an optional nicety would be the wrong trade.
     labels:
       traefik.enable: 'true'
-      traefik.http.routers.vestigia.rule: Host(`${SITE_HOST}`)
-      traefik.http.routers.vestigia.entrypoints: websecure
-      traefik.http.routers.vestigia.tls.certresolver: letsencrypt
-      traefik.http.routers.vestigia.middlewares: app-rate-limit@file
+      traefik.http.routers.vestigian.rule: Host(`${SITE_HOST}`)
+      traefik.http.routers.vestigian.entrypoints: websecure
+      traefik.http.routers.vestigian.tls.certresolver: letsencrypt
+      traefik.http.routers.vestigian.middlewares: app-rate-limit@file
       # A second, more specific router so the metrics endpoint can carry its own
       # middleware — Traefik attaches middleware per router, not per path. The
       # higher priority is what makes it win over the catch-all above.
-      traefik.http.routers.vestigia-metrics.rule: Host(`${SITE_HOST}`) && Path(`/api/metrics`)
-      traefik.http.routers.vestigia-metrics.priority: '100'
-      traefik.http.routers.vestigia-metrics.entrypoints: websecure
-      traefik.http.routers.vestigia-metrics.tls.certresolver: letsencrypt
-      traefik.http.routers.vestigia-metrics.middlewares: deny-external@file
-      traefik.http.routers.vestigia-metrics.service: vestigia
-      traefik.http.services.vestigia.loadbalancer.server.port: '3000'
-      traefik.http.services.vestigia.loadbalancer.healthcheck.path: /api/ready
+      traefik.http.routers.vestigian-metrics.rule: Host(`${SITE_HOST}`) && Path(`/api/metrics`)
+      traefik.http.routers.vestigian-metrics.priority: '100'
+      traefik.http.routers.vestigian-metrics.entrypoints: websecure
+      traefik.http.routers.vestigian-metrics.tls.certresolver: letsencrypt
+      traefik.http.routers.vestigian-metrics.middlewares: deny-external@file
+      traefik.http.routers.vestigian-metrics.service: vestigian
+      traefik.http.services.vestigian.loadbalancer.server.port: '3000'
+      traefik.http.services.vestigian.loadbalancer.healthcheck.path: /api/ready
     healthcheck:
       test:
         [
@@ -97,9 +97,9 @@ services:
     restart: unless-stopped
     logging: *default-logging
     environment:
-      POSTGRES_USER: vestigia
+      POSTGRES_USER: vestigian
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: vestigia
+      POSTGRES_DB: vestigian
     command:
       - postgres
       - -c
@@ -118,7 +118,7 @@ services:
       - postgres-data:/var/lib/postgresql/data
       - ./initdb:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U vestigia']
+      test: ['CMD-SHELL', 'pg_isready -U vestigian']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -334,7 +334,7 @@ services:
       - --storage.path=/var/lib/alloy/data
       - /etc/alloy/config.alloy
     environment:
-      POSTGRES_DSN: postgresql://vestigia:${POSTGRES_PASSWORD}@postgres:5432/vestigia?sslmode=disable
+      POSTGRES_DSN: postgresql://vestigian:${POSTGRES_PASSWORD}@postgres:5432/vestigian?sslmode=disable
       REDIS_ADDR: valkey:6379
       APP_ADDR: app:3000
     volumes:
@@ -388,8 +388,8 @@ services:
       DISABLE_ONLINE_API: 'false'
     volumes:
       - ./security/acquis.yaml:/etc/crowdsec/acquis.yaml:ro
-      - ./security/parsers:/etc/crowdsec/parsers/s01-parse/vestigia:ro
-      - ./security/scenarios:/etc/crowdsec/scenarios/vestigia:ro
+      - ./security/parsers:/etc/crowdsec/parsers/s01-parse/vestigian:ro
+      - ./security/scenarios:/etc/crowdsec/scenarios/vestigian:ro
       # Read-only: CrowdSec discovers containers and reads their logs through
       # the socket, exactly as Alloy does. It never writes through it.
       - /var/run/docker.sock:/var/run/docker.sock:ro

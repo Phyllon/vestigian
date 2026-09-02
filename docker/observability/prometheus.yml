@@ -5,7 +5,7 @@ global:
   scrape_interval: 30s
   evaluation_interval: 30s
   external_labels:
-    deployment: vestigia
+    deployment: vestigian
 
 rule_files:
   - /etc/prometheus/alerts.yml

@@ -1,4 +1,4 @@
-# Vestigia — architecture overview
+# Vestigian — architecture overview
 
 High-level map of how the pieces fit together, for anyone (human or agent)
 picking this project up cold. Detail, reasoning and gotchas live in

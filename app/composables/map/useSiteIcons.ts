@@ -15,7 +15,7 @@ import { LIMES_MARKS, VICI_MARKS } from '#shared/utils/limes'
  * The paths are also the legend: `MapLegend` renders these same strings as
  * inline SVG, so the key on screen cannot drift from the marks on the map.
  */
-export const SITE_ICON_PREFIX = 'vestigia-site-'
+export const SITE_ICON_PREFIX = 'vestigian-site-'
 
 export const SITE_ICON_PATHS: Record<SiteCategory, string> = {
   /** A skyline of roofs — several dwellings, which is what a town is. */
@@ -53,7 +53,7 @@ export const SITE_CATEGORIES = Object.keys(SITE_ICON_PATHS) as SiteCategory[]
 
 export const siteIconId = (category: SiteCategory): string => `${SITE_ICON_PREFIX}${category}`
 
-const ATLAS_ICON_PREFIX = 'vestigia-atlas-'
+const ATLAS_ICON_PREFIX = 'vestigian-atlas-'
 
 export const atlasIconId = (category: SiteCategory): string => `${ATLAS_ICON_PREFIX}${category}`
 
@@ -211,7 +211,7 @@ export const buildAtlasIconExpression = (): ExpressionSpecification =>
     '',
   ] as unknown as ExpressionSpecification
 
-const LIMES_ICON_PREFIX = 'vestigia-limes-'
+const LIMES_ICON_PREFIX = 'vestigian-limes-'
 
 export const limesIconId = (mark: LimesMark): string => `${LIMES_ICON_PREFIX}${mark}`
 

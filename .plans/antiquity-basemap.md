@@ -14,7 +14,7 @@
 
 ## Context
 
-The basemap switcher currently offers three views (`vestigia`, `modern`, `terrain`), all of
+The basemap switcher currently offers three views (`vestigian`, `modern`, `terrain`), all of
 them recolourings of one modern OpenMapTiles vector source. None of them show the ancient
 world: the coastline is the modern coastline, the roads are motorways, and the place names
 are today's. An atlas of antiquity that can only draw a 21st-century base is doing half the
@@ -61,7 +61,7 @@ Roads of Britain, CC BY-NC-SA"_. Those contradict the blanket CC BY-SA 3.0 on th
 page: the rendered PNGs bake in layers DARE itself describes as non-commercial. AWMC has
 since relicensed its geodata to ODbL (github.com/AWMC/geodata, `LICENSE.txt`), which
 probably resolves it in fact, but nobody has updated DARE's credits to say so. Acceptable
-for a non-commercial atlas; the wrong dependency the day Vestigia earns money. CAWM carries
+for a non-commercial atlas; the wrong dependency the day Vestigian earns money. CAWM carries
 no such ambiguity, which is the argument for shipping both rather than only DARE.
 
 ## Approach
@@ -71,7 +71,7 @@ no such ambiguity, which is the argument for shipping both rather than only DARE
 Extend the view union and add a sheet tone. Keep the existing docstring's shape.
 
 ```ts
-export type BasemapView = 'vestigia' | 'modern' | 'terrain' | 'antiquity-dare' | 'antiquity-awmc'
+export type BasemapView = 'vestigian' | 'modern' | 'terrain' | 'antiquity-dare' | 'antiquity-awmc'
 
 /**
  * Whether the sheet under the overlay is light or dark. Not the same as the
@@ -105,7 +105,7 @@ Then, in `buildBasemapStyle`, branch before the vector path:
 
 - Antiquity views build `{ background, antiquity raster }` and **no vector source at all** —
   no OpenFreeMap request is made for these views.
-- `glyphs` is still set — the overlay's `vestigia-site-labels` symbol layer needs it and
+- `glyphs` is still set — the overlay's `vestigian-site-labels` symbol layer needs it and
   dropping it empties the labels — but it now points at the self-hosted path from step 8,
   not at OpenFreeMap.
 - Raster source: `{ type: 'raster', tiles: [url], tileSize: 256, minzoom: 3, maxzoom: 10, attribution }`.
@@ -275,7 +275,7 @@ the goal.
 - The licence file ships beside the fonts (`public/fonts/OFL.txt`), as OFL 1.1 requires for
   redistribution.
 
-`tiles.openfreemap.org` stays in `mapAssetOrigins` — the `modern`, `vestigia` and `terrain`
+`tiles.openfreemap.org` stays in `mapAssetOrigins` — the `modern`, `vestigian` and `terrain`
 views still fetch vector tiles from it. Only the font request leaves.
 
 ### 9. Tests
@@ -333,7 +333,7 @@ By hand, on a 375px viewport and on desktop, in both themes:
    pale, step 3 was missed).
 2. Zoom past z10 and confirm the base overzooms softly rather than going blank.
 3. Open MapLibre's compact attribution (i) and confirm both the antiquity attribution and
-   the Vestigia site-data attribution are present, with working links.
+   the Vestigian site-data attribution are present, with working links.
 4. Switch away and back — the site overlay must reappear each time.
 5. In the network panel, confirm an antiquity view requests `/fonts/...` and nothing from
    `tiles.openfreemap.org`; confirm a Greek or accented site title still renders its
@@ -349,7 +349,7 @@ raster tiles come from `*.b-cdn.net`, the site overlay from `/api/tiles/`, and t
 glyphs from `/fonts/` on the app's own origin. The upstream tile URLs survive only as the
 unset-env fallback, and `tiles.openfreemap.org` is no longer touched in these views.
 
-The `modern`, `vestigia` and `terrain` views still fetch vector tiles from OpenFreeMap and
+The `modern`, `vestigian` and `terrain` views still fetch vector tiles from OpenFreeMap and
 hillshade from `elevation-tiles-prod`, as before and unchanged by this work — those are the
 views whose whole content is a third-party basemap. Self-hosting them is the existing
 PMTiles migration path in CLAUDE.md, not this plan.

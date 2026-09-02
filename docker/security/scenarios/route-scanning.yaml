@@ -5,9 +5,9 @@
 # than a path regex. Bounded by construction: `unmatched` is a constant, not a
 # user-supplied path.
 type: leaky
-name: vestigia/route-scanning
+name: vestigian/route-scanning
 description: 'Bursts of requests matching no route'
-filter: "evt.Meta.log_type == 'vestigia' && evt.Meta.http_path == 'unmatched'"
+filter: "evt.Meta.log_type == 'vestigian' && evt.Meta.http_path == 'unmatched'"
 leakspeed: 10s
 capacity: 15
 groupby: evt.Meta.source_ip

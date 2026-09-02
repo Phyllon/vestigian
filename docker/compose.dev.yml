@@ -1,12 +1,12 @@
-name: vestigia-dev
+name: vestigian-dev
 
 services:
   postgres:
     image: postgis/postgis:17-3.5-alpine
     environment:
-      POSTGRES_USER: vestigia
-      POSTGRES_PASSWORD: vestigia
-      POSTGRES_DB: vestigia
+      POSTGRES_USER: vestigian
+      POSTGRES_PASSWORD: vestigian
+      POSTGRES_DB: vestigian
     command:
       # Tuned for the tile workload: the working set is small enough to sit in
       # memory, so the planner should assume fast random reads.
@@ -25,7 +25,7 @@ services:
       - postgres-data:/var/lib/postgresql/data
       - ./initdb:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U vestigia']
+      test: ['CMD-SHELL', 'pg_isready -U vestigian']
       interval: 5s
       timeout: 3s
       retries: 10
@@ -40,8 +40,8 @@ services:
     image: minio/minio:latest
     command: server /data --console-address ':9001'
     environment:
-      MINIO_ROOT_USER: vestigia
-      MINIO_ROOT_PASSWORD: vestigia-dev-secret
+      MINIO_ROOT_USER: vestigian
+      MINIO_ROOT_PASSWORD: vestigian-dev-secret
     ports:
       - '9000:9000'
       - '9001:9001'
@@ -56,8 +56,8 @@ services:
       - minio
     entrypoint: >
       /bin/sh -c "
-      until mc alias set local http://minio:9000 vestigia vestigia-dev-secret; do sleep 1; done;
-      mc mb --ignore-existing local/vestigia;
+      until mc alias set local http://minio:9000 vestigian vestigian-dev-secret; do sleep 1; done;
+      mc mb --ignore-existing local/vestigian;
       "
 
   imgproxy:
@@ -66,8 +66,8 @@ services:
       IMGPROXY_USE_S3: 'true'
       IMGPROXY_S3_ENDPOINT: http://minio:9000
       IMGPROXY_S3_REGION: us-east-1
-      AWS_ACCESS_KEY_ID: vestigia
-      AWS_SECRET_ACCESS_KEY: vestigia-dev-secret
+      AWS_ACCESS_KEY_ID: vestigian
+      AWS_SECRET_ACCESS_KEY: vestigian-dev-secret
       IMGPROXY_MAX_SRC_RESOLUTION: '80'
       IMGPROXY_ENFORCE_WEBP: 'true'
       IMGPROXY_TTL: '2592000'
@@ -253,7 +253,7 @@ services:
       - --storage.path=/var/lib/alloy/data
       - /etc/alloy/config.alloy
     environment:
-      POSTGRES_DSN: postgresql://vestigia:vestigia@postgres:5432/vestigia?sslmode=disable
+      POSTGRES_DSN: postgresql://vestigian:vestigian@postgres:5432/vestigian?sslmode=disable
       REDIS_ADDR: valkey:6379
       # `nuxt dev` runs on the host, so Alloy reaches it back out through the
       # gateway rather than over the compose network.
@@ -290,8 +290,8 @@ services:
       - '8085:8080'
     volumes:
       - ./security/acquis.yaml:/etc/crowdsec/acquis.yaml:ro
-      - ./security/parsers:/etc/crowdsec/parsers/s01-parse/vestigia:ro
-      - ./security/scenarios:/etc/crowdsec/scenarios/vestigia:ro
+      - ./security/parsers:/etc/crowdsec/parsers/s01-parse/vestigian:ro
+      - ./security/scenarios:/etc/crowdsec/scenarios/vestigian:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - crowdsec-config:/etc/crowdsec
       - crowdsec-data:/var/lib/crowdsec/data

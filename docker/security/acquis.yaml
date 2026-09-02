@@ -7,10 +7,10 @@
 # carrying a client IP; before that nothing here could be attributed to anyone.
 source: docker
 container_name:
-  - vestigia-app-1
-  - vestigia-dev-app-1
+  - vestigian-app-1
+  - vestigian-dev-app-1
 labels:
-  type: vestigia
+  type: vestigian
 
 ---
 # Traefik's access log as a second source, kept because it sees requests the app

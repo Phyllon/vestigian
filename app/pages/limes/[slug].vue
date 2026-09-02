@@ -53,7 +53,7 @@
             innerHTML: JSON.stringify(
               buildBreadcrumbJsonLd({
                 items: [
-                  { name: 'Vestigia', url: base },
+                  { name: 'Vestigian', url: base },
                   { name: t('limesSectorPage.theLimes'), url: `${base}/limes` },
                   { name: sector.value.name, url: `${base}/limes/${slug.value}` },
                 ],

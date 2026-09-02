@@ -3,7 +3,7 @@
 
   useHead({
     htmlAttrs: { lang: locale },
-    titleTemplate: (title?: string) => (title ? `${title} · Vestigia` : 'Vestigia'),
+    titleTemplate: (title?: string) => (title ? `${title} · Vestigian` : 'Vestigian'),
     link: [
       { rel: 'manifest', href: '/manifest.webmanifest' },
       { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' },
@@ -14,7 +14,7 @@
       {
         name: 'description',
         content:
-          'Vestigia maps the traces of the ancient world — settlements, roads, fortifications and findspots, recorded by the people who visit them.',
+          'Vestigian maps the traces of the ancient world — settlements, roads, fortifications and findspots, recorded by the people who visit them.',
       },
     ],
   })

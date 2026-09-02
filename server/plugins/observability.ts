@@ -71,7 +71,7 @@ export default defineNitroPlugin((nitro) => {
     //
     // `url.path` is set for the sampler, which reads this attribute rather than
     // the span name for exactly the same reason.
-    const span = trace.getTracer('vestigia').startSpan(`${event.method} ${event.path}`, {
+    const span = trace.getTracer('vestigian').startSpan(`${event.method} ${event.path}`, {
       kind: SpanKind.SERVER,
       attributes: {
         [ATTR_HTTP_REQUEST_METHOD]: event.method,

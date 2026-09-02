@@ -18,20 +18,20 @@ address cannot produce a decision.
 
 ## What is here
 
-| File                    |                                                                                                                        |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `acquis.yaml`           | Docker log source for the app container, plus Traefik's access log                                                     |
-| `parsers/vestigia.yaml` | Pino JSON → `evt.Meta.source_ip` and the fields scenarios filter on                                                    |
-| `scenarios/*.yaml`      | One file per scenario — `cscli` registers local items per file, so a multi-document file silently loads only the first |
+| File                     |                                                                                                                        |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| `acquis.yaml`            | Docker log source for the app container, plus Traefik's access log                                                     |
+| `parsers/vestigian.yaml` | Pino JSON → `evt.Meta.source_ip` and the fields scenarios filter on                                                    |
+| `scenarios/*.yaml`       | One file per scenario — `cscli` registers local items per file, so a multi-document file silently loads only the first |
 
 Verify any change with `cscli explain`, which shows the whole chain:
 
 ```bash
-docker exec vestigia-dev-crowdsec-1 \
-  cscli explain --file /tmp/line.json --type vestigia -o human
+docker exec vestigian-dev-crowdsec-1 \
+  cscli explain --file /tmp/line.json --type vestigian -o human
 ```
 
-A correct result shows `vestigia/access-log` green in `s01-parse`,
+A correct result shows `vestigian/access-log` green in `s01-parse`,
 `geoip-enrich` green in `s02-enrich` (which only happens if `source_ip` was
 extracted), and the intended scenario green at the bottom. An ordinary
 `{"msg":"request","status":200}` line must match **no** scenario — that is the

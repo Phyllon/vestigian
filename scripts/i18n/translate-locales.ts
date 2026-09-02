@@ -184,7 +184,7 @@ const main = async (): Promise<void> => {
     console.error(
       `${translateUrl}/languages did not respond within ${PREFLIGHT_TIMEOUT_MS}ms. ` +
         'LibreTranslate is likely up but out of workers — restart the container ' +
-        '(`docker restart vestigia-dev-libretranslate-1`) and try again.',
+        '(`docker restart vestigian-dev-libretranslate-1`) and try again.',
     )
     process.exitCode = 1
     return

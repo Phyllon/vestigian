@@ -12,7 +12,7 @@ import prettier from 'eslint-config-prettier'
  */
 export default withNuxt(
   {
-    name: 'vestigia/conventions',
+    name: 'vestigian/conventions',
     rules: {
       // "Arrow functions only. No function declarations."
       'func-style': ['error', 'expression', { allowArrowFunctions: true }],
@@ -38,7 +38,7 @@ export default withNuxt(
   },
 
   {
-    name: 'vestigia/vue',
+    name: 'vestigian/vue',
     files: ['**/*.vue'],
     rules: {
       // "Vue SFC order: <script setup> first, <template> second."
@@ -66,7 +66,7 @@ export default withNuxt(
     // report progress on stdout — that is their interface, not a debugging
     // leftover. They are one-shot processes that exit, so they have no logger
     // and nothing would collect it if they did.
-    name: 'vestigia/scripts',
+    name: 'vestigian/scripts',
     files: ['scripts/**/*.ts', 'server/database/migrate.ts'],
     rules: {
       'no-console': 'off',
@@ -74,7 +74,7 @@ export default withNuxt(
   },
 
   {
-    name: 'vestigia/tests',
+    name: 'vestigian/tests',
     files: ['**/__test__/**/*.ts'],
     rules: {
       'max-params': 'off',
@@ -83,7 +83,7 @@ export default withNuxt(
   },
 
   {
-    name: 'vestigia/ignores',
+    name: 'vestigian/ignores',
     ignores: [
       '.nuxt/**',
       '.output/**',

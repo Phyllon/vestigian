@@ -52,7 +52,7 @@ import { LIMES_SECTORS, claimLimesSectors } from '../../shared/utils/limes'
 import type { LimesSegmentKind } from '../../shared/types'
 
 const sql = postgres(
-  process.env.NUXT_DATABASE_URL ?? 'postgres://vestigia:vestigia@127.0.0.1:5432/vestigia',
+  process.env.NUXT_DATABASE_URL ?? 'postgres://vestigian:vestigian@127.0.0.1:5432/vestigian',
   { max: 1 },
 )
 
@@ -496,8 +496,8 @@ const main = async (): Promise<void> => {
 
   try {
     await redis.connect()
-    await redis.del('vestigia:atlas-version')
-    const version = await redis.incr('vestigia:atlas-version')
+    await redis.del('vestigian:atlas-version')
+    const version = await redis.incr('vestigian:atlas-version')
     const stale = [...(await redis.keys('atlas:v*')), ...(await redis.keys('limes:v*'))]
     if (stale.length > 0) await redis.del(...stale)
     console.log(`  Atlas cache generation is now ${version}; ${stale.length} stale tiles dropped.`)

@@ -86,7 +86,7 @@ defineRouteMeta({
           sessionCookie: {
             type: 'apiKey',
             in: 'cookie',
-            name: 'vestigia-session',
+            name: 'vestigian-session',
             description: 'Sealed session cookie set by this endpoint on successful sign-in.',
           },
         },

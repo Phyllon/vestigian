@@ -58,7 +58,7 @@ export interface QuotaCheck {
   fits: boolean
 }
 
-const AREAS_STORAGE_KEY = 'vestigia-offline-areas'
+const AREAS_STORAGE_KEY = 'vestigian-offline-areas'
 const ESTIMATE_SAMPLE_SIZE = 20
 /** A 20% margin: the estimate is a sample-based extrapolation, not a byte count. */
 const QUOTA_SAFETY_FACTOR = 1.2

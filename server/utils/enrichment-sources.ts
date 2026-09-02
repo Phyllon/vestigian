@@ -22,7 +22,7 @@ import type { EnrichmentLanguage, EnrichmentRoute, LonLat } from '#shared/types'
  * answered with "You are making too many requests to the API." That is why
  * this is a server-side proxy behind a Valkey cache and not a browser fetch.
  */
-const USER_AGENT = 'Vestigia/0.1 (https://vestigia.example; atlas of the ancient world)'
+const USER_AGENT = 'Vestigian/0.1 (https://vestigian.example; atlas of the ancient world)'
 
 const REQUEST_TIMEOUT_MS = 8000
 

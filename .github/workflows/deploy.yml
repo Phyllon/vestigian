@@ -33,18 +33,18 @@ jobs:
       postgres:
         image: postgis/postgis:17-3.5-alpine
         env:
-          POSTGRES_USER: vestigia
-          POSTGRES_PASSWORD: vestigia
-          POSTGRES_DB: vestigia
+          POSTGRES_USER: vestigian
+          POSTGRES_PASSWORD: vestigian
+          POSTGRES_DB: vestigian
         ports: ['5432:5432']
         options: >-
-          --health-cmd "pg_isready -U vestigia" --health-interval 5s
+          --health-cmd "pg_isready -U vestigian" --health-interval 5s
           --health-timeout 3s --health-retries 20
       valkey:
         image: valkey/valkey:8-alpine
         ports: ['6379:6379']
     env:
-      NUXT_DATABASE_URL: postgres://vestigia:vestigia@127.0.0.1:5432/vestigia
+      NUXT_DATABASE_URL: postgres://vestigian:vestigian@127.0.0.1:5432/vestigian
       NUXT_REDIS_URL: redis://127.0.0.1:6379
       NUXT_SESSION_PASSWORD: ci-session-password-at-least-32-chars
       NUXT_ALTCHA_SECRET: ci-altcha-secret-value-for-tests

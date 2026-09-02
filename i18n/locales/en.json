@@ -90,7 +90,7 @@
       "failedDescription": "Check your details and try again."
     },
     "register": {
-      "title": "Join Vestigia",
+      "title": "Join Vestigian",
       "intro": "Your first two contributions are checked by a moderator. After that they publish as you write them.",
       "displayName": "Display name",
       "email": "Email",
@@ -223,7 +223,7 @@
   },
   "licence": {
     "title": "Data & licences",
-    "intro": "Vestigia is built on data that others made freely reusable. Terms differ by layer — here is what applies to each.",
+    "intro": "Vestigian is built on data that others made freely reusable. Terms differ by layer — here is what applies to each.",
     "recordsHeading": "Contributed records",
     "recordsBody": "Site and tracing text is CC BY-SA — free to reuse and adapt, including commercially, provided changes are shared under the same licence and the source is credited. The structured metadata (coordinates, dates, categories) is CC0 — no rights reserved.",
     "imagesHeading": "Photographs",
@@ -253,7 +253,7 @@
   },
   "privacy": {
     "title": "Privacy policy",
-    "intro": "This page states what Vestigia collects, why, for how long, and who else sees it — plainly, and matching what the code actually does rather than a generic template. It is not a substitute for reading the source, which is open.",
+    "intro": "This page states what Vestigian collects, why, for how long, and who else sees it — plainly, and matching what the code actually does rather than a generic template. It is not a substitute for reading the source, which is open.",
     "controllerHeading": "Controller",
     "controllerBody": "The service provider named in the legal notice is the controller (\"we\") for the processing described below. Contact details are the same as on that page.",
     "accountHeading": "Creating an account",
@@ -287,7 +287,7 @@
     "supervisoryHeading": "Supervisory authority",
     "supervisoryPlaceholder": "[Name and contact details of the data protection authority responsible for the controller's place of establishment.]",
     "minorsHeading": "Age",
-    "minorsBody": "Vestigia is not directed at children. If you are under 16, please do not create an account without a parent or guardian's involvement.",
+    "minorsBody": "Vestigian is not directed at children. If you are under 16, please do not create an account without a parent or guardian's involvement.",
     "changesHeading": "Changes",
     "changesBody": "This page is updated when what the service actually does changes. It reflects the current version of the running application."
   },
@@ -433,7 +433,7 @@
     "tracedNote": "Traced routes are drawn dashed because a tracing is an interpretation of where something ran, not a survey of it.",
     "openFullEntry": "Open the full entry",
     "edit": "Edit",
-    "defaultAttribution": "Vestigia contributors"
+    "defaultAttribution": "Vestigian contributors"
   },
   "siteGalleryManager": {
     "defaultPhotographName": "photograph {index}",
@@ -563,9 +563,9 @@
   },
   "indexPage": {
     "title": "Map",
-    "srHeading": "Vestigia — an atlas of the ancient world",
+    "srHeading": "Vestigian — an atlas of the ancient world",
     "addToAtlas": "Add to the atlas",
-    "description": "Vestigia maps the traces of the ancient world — settlements, roads, fortifications and findspots, recorded by the people who visit them."
+    "description": "Vestigian maps the traces of the ancient world — settlements, roads, fortifications and findspots, recorded by the people who visit them."
   },
   "forgotPasswordPage": {
     "title": "Reset your password",
@@ -615,13 +615,13 @@
   },
   "tracingDetailPage": {
     "notFound": "No tracing with that identifier.",
-    "defaultDescription": "A traced feature recorded in Vestigia, an atlas of the ancient world.",
+    "defaultDescription": "A traced feature recorded in Vestigian, an atlas of the ancient world.",
     "tracedArea": "Traced area",
     "tracedRoute": "Traced route",
     "type": "Type",
     "length": "Length",
     "credit": "Credit",
-    "defaultAttribution": "Vestigia contributors",
+    "defaultAttribution": "Vestigian contributors",
     "edit": "Edit",
     "lastRevised": "Last revised"
   },
@@ -784,7 +784,7 @@
   },
   "contributor": {
     "notFound": "No such contributor.",
-    "description": "Records contributed to Vestigia by {name}.",
+    "description": "Records contributed to Vestigian by {name}.",
     "joined": "Recording since {date}",
     "accepted": "no accepted contributions | one accepted contribution | {n} accepted contributions",
     "sitesHeading": "No sites | One site | {n} sites",

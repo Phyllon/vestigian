@@ -4,9 +4,9 @@
 # several policies is someone probing for what is not limited, and it is the
 # cheapest possible signal because the application already computed it.
 type: leaky
-name: vestigia/rate-limit-abuse
+name: vestigian/rate-limit-abuse
 description: 'Sustained rate-limit rejections from one address'
-filter: "evt.Meta.log_type == 'vestigia' && evt.Parsed.audit == 'ratelimit.blocked'"
+filter: "evt.Meta.log_type == 'vestigian' && evt.Parsed.audit == 'ratelimit.blocked'"
 leakspeed: 5s
 capacity: 30
 groupby: evt.Meta.source_ip

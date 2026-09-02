@@ -22,7 +22,7 @@
           class="font-display text-lg text-ink-900 dark:text-paper-100"
           style="font-variation-settings: 'opsz' 96"
         >
-          Vestigia
+          Vestigian
         </NuxtLink>
         <nav class="ml-auto flex items-center gap-1" aria-label="Main">
           <UiLanguageSwitcher />

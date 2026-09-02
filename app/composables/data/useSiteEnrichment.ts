@@ -16,7 +16,7 @@ import type { SiteEnrichment } from '#shared/types'
  * expire, and the licence on this text is a reason not to keep it any longer
  * than convenience requires.
  */
-const STORAGE_KEY = 'vestigia-enrichment'
+const STORAGE_KEY = 'vestigian-enrichment'
 
 /** Bumped when the shape changes, so an old cache is discarded rather than parsed. */
 const STORAGE_SCHEMA = 3

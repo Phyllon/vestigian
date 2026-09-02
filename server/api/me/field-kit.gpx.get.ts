@@ -32,7 +32,7 @@ export default defineEventHandler(async (event) => {
 
   setResponseHeader(event, 'content-type', 'application/gpx+xml; charset=utf-8')
   setResponseHeader(event, 'cache-control', 'private, no-store')
-  setResponseHeader(event, 'content-disposition', 'attachment; filename="vestigia-field-kit.gpx"')
+  setResponseHeader(event, 'content-disposition', 'attachment; filename="vestigian-field-kit.gpx"')
 
   return buildFieldKitGpx({
     places,

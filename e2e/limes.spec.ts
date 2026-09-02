@@ -26,7 +26,7 @@ test.describe('following the limes', () => {
     await openMap(page)
     await page.getByRole('button', { name: /^Basemap:/ }).click()
 
-    // The default view is 'vestigia', a modern road map. A frontier drawn
+    // The default view is 'vestigian', a modern road map. A frontier drawn
     // against present-day motorways would assert a continuity that is not there.
     await expect(page.getByRole('menuitemcheckbox', { name: /Follow the limes/ })).toBeHidden()
 

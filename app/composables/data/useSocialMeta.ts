@@ -16,7 +16,7 @@ export const useSocialMeta = (options: SocialMetaOptions): void => {
     ogType: options.type ?? 'website',
     ogUrl: `${base}${route.path}`,
     ogImage: options.imageUrl,
-    ogSiteName: 'Vestigia',
+    ogSiteName: 'Vestigian',
     twitterCard: 'summary_large_image',
     twitterTitle: options.title,
     twitterDescription: options.description,

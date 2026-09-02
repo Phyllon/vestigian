@@ -68,7 +68,7 @@ export type AccountName = keyof typeof ACCOUNTS
 
 const connect = () =>
   postgres(
-    process.env.NUXT_DATABASE_URL ?? 'postgres://vestigia:vestigia@127.0.0.1:5432/vestigia',
+    process.env.NUXT_DATABASE_URL ?? 'postgres://vestigian:vestigian@127.0.0.1:5432/vestigian',
     { max: 1 },
   )
 

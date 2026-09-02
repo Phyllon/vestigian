@@ -8,7 +8,7 @@ import type { SiteCategory } from '../types'
  * "unlocated, settlement", "temple-2". Nothing can draw that directly, so it is
  * collapsed once, at import, into the same nine categories the contributed
  * records use. AWMC does the same thing for their own viewer and calls the
- * result `AWMCI_icon`; this is that idea against Vestigia's marks rather than
+ * result `AWMCI_icon`; this is that idea against Vestigian's marks rather than
  * theirs, so one key explains the whole map.
  *
  * **A null answer is an ordinary one.** Rivers, capes, mountains, peoples and

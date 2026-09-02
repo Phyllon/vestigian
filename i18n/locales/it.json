@@ -90,7 +90,7 @@
       "failedDescription": "Controlla i tuoi dati e riprova."
     },
     "register": {
-      "title": "Unisciti a Vestigia",
+      "title": "Unisciti a Vestigian",
       "intro": "I primi due contributi sono controllati da un moderatore. Dopo di che pubblicano come li scrivi.",
       "displayName": "Nome dell'esposizione",
       "email": "Email",
@@ -223,7 +223,7 @@
   },
   "licence": {
     "title": "Dati e licenze",
-    "intro": "Vestigia è costruita su dati che altri hanno reso liberamente riutilizzabili. I termini differiscono per strato — qui è ciò che si applica a ciascuno.",
+    "intro": "Vestigian è costruita su dati che altri hanno reso liberamente riutilizzabili. I termini differiscono per strato — qui è ciò che si applica a ciascuno.",
     "recordsHeading": "Registrazioni",
     "recordsBody": "Il testo del sito e del tracciamento è CC BY-SA — libero di riutilizzare e adattare, anche commercialmente, le modifiche fornite sono condivise con la stessa licenza e la fonte è accreditata. I metadati strutturati (coordinate, date, categorie) sono CC0 — nessun diritto riservato.",
     "imagesHeading": "Fotografia",
@@ -253,7 +253,7 @@
   },
   "privacy": {
     "title": "Informativa sulla privacy",
-    "intro": "Questa pagina afferma ciò che Vestigia raccoglie, perché, per quanto tempo, e chi altro lo vede — in modo chiaro, e la corrispondenza che il codice effettivamente fa piuttosto che un modello generico. Non è un sostituto per la lettura della fonte, che è aperta.",
+    "intro": "Questa pagina afferma ciò che Vestigian raccoglie, perché, per quanto tempo, e chi altro lo vede — in modo chiaro, e la corrispondenza che il codice effettivamente fa piuttosto che un modello generico. Non è un sostituto per la lettura della fonte, che è aperta.",
     "controllerHeading": "Titolare del trattamento",
     "controllerBody": "Il fornitore di servizi denominato nell'avviso legale è il controller (\"noi\") per il trattamento descritto di seguito. I recapiti sono gli stessi di quella pagina.",
     "accountHeading": "Creazione di un account",
@@ -287,7 +287,7 @@
     "supervisoryHeading": "Autorità di vigilanza",
     "supervisoryPlaceholder": "[Nome e informazioni di contatto dell'autorità di protezione dei dati responsabile del luogo di stabilimento del titolare del trattamento.]",
     "minorsHeading": "Età",
-    "minorsBody": "Vestigia non è rivolta ai bambini. Se hai meno di 16 anni, non creare un account senza il coinvolgimento di un genitore o di un tutore.",
+    "minorsBody": "Vestigian non è rivolta ai bambini. Se hai meno di 16 anni, non creare un account senza il coinvolgimento di un genitore o di un tutore.",
     "changesHeading": "Cambiamenti",
     "changesBody": "Questa pagina è aggiornata quando ciò che il servizio realmente cambia. Esso riflette la versione corrente dell'applicazione in esecuzione."
   },
@@ -433,7 +433,7 @@
     "tracedNote": "I percorsi tracciati sono tratteggiati perché un tracciamento è un'interpretazione di dove qualcosa è andato, non un'indagine di esso.",
     "openFullEntry": "Aprire l'ingresso completo",
     "edit": "Modifica",
-    "defaultAttribution": "Vestigia contributori"
+    "defaultAttribution": "Vestigian contributori"
   },
   "siteGalleryManager": {
     "defaultPhotographName": "fotografia{index}",
@@ -563,9 +563,9 @@
   },
   "indexPage": {
     "title": "Mappa",
-    "srHeading": "Vestigia — un atlante del mondo antico",
+    "srHeading": "Vestigian — un atlante del mondo antico",
     "addToAtlas": "Aggiungi all'atlante",
-    "description": "Vestigia mappa le tracce del mondo antico — insediamenti, strade, fortificazioni e reperti, registrati dalle persone che li visitano."
+    "description": "Vestigian mappa le tracce del mondo antico — insediamenti, strade, fortificazioni e reperti, registrati dalle persone che li visitano."
   },
   "forgotPasswordPage": {
     "title": "Reimposta la password",
@@ -620,10 +620,10 @@
     "type": "Tipo",
     "length": "Lunghezza",
     "credit": "Credito",
-    "defaultAttribution": "Vestigia contributori",
+    "defaultAttribution": "Vestigian contributori",
     "edit": "Modifica",
     "lastRevised": "Ultimo aggiornamento",
-    "defaultDescription": "Una caratteristica tracciata registrata in Vestigia, un atlante del mondo antico."
+    "defaultDescription": "Una caratteristica tracciata registrata in Vestigian, un atlante del mondo antico."
   },
   "siteEditPage": {
     "notFound": "Nessun sito registrato sotto quel nome.",
@@ -784,7 +784,7 @@
   },
   "contributor": {
     "notFound": "Nessun collaboratore con questo nome.",
-    "description": "Schede aggiunte a Vestigia da {name}.",
+    "description": "Schede aggiunte a Vestigian da {name}.",
     "joined": "Annota dal {date}",
     "accepted": "nessun contributo accettato | un contributo accettato | {n} contributi accettati",
     "sitesHeading": "Nessun sito | Un sito | {n} siti",

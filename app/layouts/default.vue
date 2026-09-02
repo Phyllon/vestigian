@@ -43,7 +43,7 @@
               'WONK' 1;
           "
         >
-          Vestigia
+          Vestigian
         </span>
         <span class="eyebrow hidden sm:inline">{{ t('layout.tagline') }}</span>
       </NuxtLink>

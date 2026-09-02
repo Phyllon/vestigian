@@ -1,15 +1,15 @@
 import { LngLat } from 'maplibre-gl'
 import type { FilterSpecification, Map as MapLibreMap, MapGeoJSONFeature } from 'maplibre-gl'
 
-export const OVERLAY_SOURCE_ID = 'vestigia-data'
-export const SITE_LAYER_ID = 'vestigia-sites'
-export const SITE_HALO_LAYER_ID = 'vestigia-site-halo'
-export const CLUSTER_LAYER_ID = 'vestigia-clusters'
-export const CLUSTER_COUNT_LAYER_ID = 'vestigia-cluster-count'
-export const TRACING_LAYER_ID = 'vestigia-tracings'
-export const SITE_LABEL_LAYER_ID = 'vestigia-site-labels'
+export const OVERLAY_SOURCE_ID = 'vestigian-data'
+export const SITE_LAYER_ID = 'vestigian-sites'
+export const SITE_HALO_LAYER_ID = 'vestigian-site-halo'
+export const CLUSTER_LAYER_ID = 'vestigian-clusters'
+export const CLUSTER_COUNT_LAYER_ID = 'vestigian-cluster-count'
+export const TRACING_LAYER_ID = 'vestigian-tracings'
+export const SITE_LABEL_LAYER_ID = 'vestigian-site-labels'
 /** Contributed fortifications, drawn as frontier plans while the limes is on. */
-export const LIMES_FORT_LAYER_ID = 'vestigia-limes-forts'
+export const LIMES_FORT_LAYER_ID = 'vestigian-limes-forts'
 
 interface OverlayPalette extends SiteIconPalette {
   /** Reserved for the selected site. The one oxide accent on this screen. */
@@ -78,7 +78,7 @@ export const useViewportTiles = () => {
       minzoom: 0,
       maxzoom: 14,
       attribution:
-        'Site data CC BY-SA, contributed to <a href="https://vici.org">Vici.org</a> and Vestigia',
+        'Site data CC BY-SA, contributed to <a href="https://vici.org">Vici.org</a> and Vestigian',
     })
 
     /**
@@ -210,7 +210,7 @@ export const useViewportTiles = () => {
     /**
      * The contributed frontier posts, drawn as plans instead of crenellations.
      *
-     * A separate layer rather than a branch inside `vestigia-sites`, because
+     * A separate layer rather than a branch inside `vestigian-sites`, because
      * the two differ in more than their icon: this one comes forward, sits
      * above the frontier line, and is the reason a reader can tell 6,914
      * watchtowers from 5,551 forts along the Rhine at a glance.

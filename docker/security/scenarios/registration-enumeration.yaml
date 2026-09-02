@@ -4,9 +4,9 @@
 # limit as what keeps that from being free. This is what notices someone paying
 # the price anyway.
 type: leaky
-name: vestigia/registration-enumeration
+name: vestigian/registration-enumeration
 description: 'Repeated registration conflicts from one address'
-filter: "evt.Meta.log_type == 'vestigia' && evt.Parsed.audit == 'auth.register' && evt.Parsed.message == 'registration refused: already exists'"
+filter: "evt.Meta.log_type == 'vestigian' && evt.Parsed.audit == 'auth.register' && evt.Parsed.message == 'registration refused: already exists'"
 leakspeed: 60s
 capacity: 8
 groupby: evt.Meta.source_ip

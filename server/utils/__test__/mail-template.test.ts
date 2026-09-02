@@ -10,7 +10,7 @@ import {
 const TOKEN_MAIL = {
   displayName: 'Marcus',
   recipient: 'marcus@example.org',
-  link: 'https://vestigia.example/reset-password?token=abc123',
+  link: 'https://vestigian.example/reset-password?token=abc123',
   expiresAt: new Date('2026-08-28T14:32:00.000Z'),
   requestedAt: new Date('2026-08-28T13:32:00.000Z'),
 } as const
@@ -18,7 +18,7 @@ const TOKEN_MAIL = {
 const ACCOUNT_MAIL = {
   displayName: 'Marcus',
   recipient: 'marcus@example.org',
-  siteUrl: 'https://vestigia.example',
+  siteUrl: 'https://vestigian.example',
   occurredAt: new Date('2026-08-28T14:32:00.000Z'),
 } as const
 
@@ -67,14 +67,14 @@ describe('renderTokenEmail', () => {
       expect(body).toContain('Once')
     }
 
-    expect(mail.subject).toBe('Reset your Vestigia password')
+    expect(mail.subject).toBe('Reset your Vestigian password')
     expect(mail.text).toContain('Your password has not changed')
   })
 
   it('says what an unexpected verification mail means', () => {
     const mail = renderTokenEmail({ purpose: 'verify-email', ...TOKEN_MAIL })
 
-    expect(mail.subject).toBe('Confirm your Vestigia account')
+    expect(mail.subject).toBe('Confirm your Vestigian account')
     expect(mail.html).toContain('Confirm this address')
     expect(mail.text).toContain('an unconfirmed account cannot be used')
   })
@@ -113,8 +113,8 @@ describe('renderAccountEmail', () => {
   it('tells the owner a password changed and how to take the account back', () => {
     const mail = renderAccountEmail({ kind: 'password-changed', ...ACCOUNT_MAIL })
 
-    expect(mail.subject).toBe('Your Vestigia password was changed')
-    expect(mail.html).toContain('https://vestigia.example/forgot-password')
+    expect(mail.subject).toBe('Your Vestigian password was changed')
+    expect(mail.html).toContain('https://vestigian.example/forgot-password')
     expect(mail.text).toContain('28 Aug 2026, 14:32 UTC')
     // Nothing here expires, so there is no one-time link to paste.
     expect(mail.html).not.toContain('paste this into the address bar')
@@ -126,12 +126,12 @@ describe('renderAccountEmail', () => {
       ...ACCOUNT_MAIL,
       recordTitle: 'Kastell Saalburg',
       recordKind: 'site',
-      recordUrl: 'https://vestigia.example/site/kastell-saalburg',
+      recordUrl: 'https://vestigian.example/site/kastell-saalburg',
       moderatorName: 'Livia',
     })
 
     expect(mail.subject).toBe('Published: Kastell Saalburg')
-    expect(mail.html).toContain('https://vestigia.example/site/kastell-saalburg')
+    expect(mail.html).toContain('https://vestigian.example/site/kastell-saalburg')
     expect(mail.text).toContain('Reviewed by: Livia')
   })
 
@@ -199,14 +199,14 @@ describe('renderAccountEmail', () => {
   it('says what restoring trust restores', () => {
     const mail = renderAccountEmail({ kind: 'trust-restored', ...ACCOUNT_MAIL })
 
-    expect(mail.subject).toBe('Your Vestigia edits publish immediately again')
+    expect(mail.subject).toBe('Your Vestigian edits publish immediately again')
     expect(mail.html).toContain('Open the atlas')
   })
 
   it('explains the inbox it landed in without promising an unsubscribe', () => {
     const mail = renderAccountEmail({ kind: 'trust-restored', ...ACCOUNT_MAIL })
 
-    expect(mail.text).toContain('because it is the address on your Vestigia account')
+    expect(mail.text).toContain('because it is the address on your Vestigian account')
     expect(mail.html).toContain('there is no newsletter to unsubscribe from')
   })
 })

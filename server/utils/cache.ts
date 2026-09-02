@@ -18,7 +18,7 @@ export const useRedis = (): Redis => {
   return redis
 }
 
-const DATA_VERSION_KEY = 'vestigia:data-version'
+const DATA_VERSION_KEY = 'vestigian:data-version'
 
 export const getDataVersion = async (): Promise<number> => {
   try {
@@ -36,7 +36,7 @@ export const getDataVersion = async (): Promise<number> => {
   }
 }
 
-const ATLAS_VERSION_KEY = 'vestigia:atlas-version'
+const ATLAS_VERSION_KEY = 'vestigian:atlas-version'
 
 /**
  * The antiquity atlas has its own generation because it changes on a completely

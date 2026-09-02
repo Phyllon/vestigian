@@ -2,7 +2,7 @@
   /**
    * The visit log — the one part of this atlas that is only about its reader.
    *
-   * "Vestigia" is traces, and until now the one set of traces the project did
+   * "Vestigian" is traces, and until now the one set of traces the project did
    * not record was the visitor's own. Everything here is private: it is never
    * joined into `/api/data/sites.geojson`, never drawn into a shared tile, and
    * never visible on a public contributor page.

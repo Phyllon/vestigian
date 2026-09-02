@@ -8,8 +8,8 @@ while true; do
   # The antiquity_* tables hold third-party reference cartography rebuilt by
   # `pnpm import:atlas`; their rows are excluded so nightly dumps do not carry
   # 75 MB of borrowed coastline that a single command reproduces exactly.
-  pg_dump -h postgres -U vestigia -Fc --exclude-table-data='antiquity_*' vestigia > "/backups/vestigia-${STAMP}.dump"
-  find /backups -name 'vestigia-*.dump' -mtime +14 -delete
-  echo "backup written: vestigia-${STAMP}.dump"
+  pg_dump -h postgres -U vestigian -Fc --exclude-table-data='antiquity_*' vestigian > "/backups/vestigian-${STAMP}.dump"
+  find /backups -name 'vestigian-*.dump' -mtime +14 -delete
+  echo "backup written: vestigian-${STAMP}.dump"
   sleep 86400
 done

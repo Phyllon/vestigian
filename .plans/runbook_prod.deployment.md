@@ -63,15 +63,15 @@ Bunnys S3-API ist seit Juli 2026 **Public Preview**, nicht stabil. Deshalb:
 # Storage Zone in Bunny anlegen (Falkenstein), Pull Zone davor.
 # rclone-Remotes: minio (lokal) und bunny (S3-Preview-Endpoint)
 
-rclone sync minio:vestigia bunny:vestigia --progress --transfers 16 --checksum
-rclone size minio:vestigia && rclone size bunny:vestigia   # müssen übereinstimmen
+rclone sync minio:vestigian bunny:vestigian --progress --transfers 16 --checksum
+rclone size minio:vestigian && rclone size bunny:vestigian   # müssen übereinstimmen
 ```
 
 Freigabekriterium, gegen das neue Ziel, ohne Produktionsconfig anzufassen:
 
 ```bash
 NUXT_STORAGE_ENDPOINT=<bunny-s3-endpoint> \
-NUXT_STORAGE_BUCKET=vestigia \
+NUXT_STORAGE_BUCKET=vestigian \
 NUXT_STORAGE_ACCESS_KEY_ID=<key> \
 NUXT_STORAGE_SECRET_ACCESS_KEY=<secret> \
 pnpm images:reconcile          # missing muss 0 sein
@@ -143,7 +143,7 @@ ein _Bouncer_ liest sie und blockiert. Aktuell läuft nur die erste Hälfte —
 beobachten, welche Szenarien real feuern, dann scharfschalten.
 
 ```bash
-docker exec vestigia-crowdsec-1 cscli bouncers add traefik-bouncer
+docker exec vestigian-crowdsec-1 cscli bouncers add traefik-bouncer
 ```
 
 Dokploy UI → Traefik → **statische** Config: Plugin `crowdsec-bouncer-traefik-plugin`
@@ -152,9 +152,9 @@ und dem Key. Zuletzt am App-Router anhängen:
 `app-rate-limit@file,crowdsec@file`.
 
 ```bash
-docker exec vestigia-crowdsec-1 cscli decisions add --ip <test-ip> -d 2m
+docker exec vestigian-crowdsec-1 cscli decisions add --ip <test-ip> -d 2m
 curl -I https://<site-host>/                     # 403
-docker exec vestigia-crowdsec-1 cscli decisions delete --all
+docker exec vestigian-crowdsec-1 cscli decisions delete --all
 ```
 
 **Vorher klären:** `docker/traefik/` ist an keinen Container gemountet. Dokploy

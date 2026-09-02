@@ -105,7 +105,7 @@ test.describe('the basemap switcher', () => {
     expect(tileRequests.length, 'the overlay was not re-attached').toBeGreaterThan(beforeSwap)
 
     const afterAntiquity = tileRequests.length
-    await chooseBasemap(page, 'Vestigia')
+    await chooseBasemap(page, 'Vestigian')
     await waitForTiles(page)
     expect(tileRequests.length).toBeGreaterThan(afterAntiquity)
   })

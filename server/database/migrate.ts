@@ -8,7 +8,7 @@ import postgres from 'postgres'
  * leave a pool of half-configured connections behind.
  */
 const connection = postgres(
-  process.env.NUXT_DATABASE_URL ?? 'postgres://vestigia:vestigia@127.0.0.1:5432/vestigia',
+  process.env.NUXT_DATABASE_URL ?? 'postgres://vestigian:vestigian@127.0.0.1:5432/vestigian',
   { max: 1 },
 )
 

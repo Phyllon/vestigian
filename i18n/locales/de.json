@@ -90,7 +90,7 @@
       "failedDescription": "Überprüfen Sie Ihre Details und versuchen Sie es erneut."
     },
     "register": {
-      "title": "Beitritt Vestigia",
+      "title": "Beitritt Vestigian",
       "intro": "Ihre ersten beiden Beiträge werden von einem Moderator überprüft. Danach veröffentlichen sie, wie Sie sie schreiben.",
       "displayName": "Anzeigename",
       "email": "E-Mail",
@@ -223,7 +223,7 @@
   },
   "licence": {
     "title": "Daten und Lizenzen",
-    "intro": "Vestigia basiert auf Daten, die andere frei wiederverwendbar gemacht haben. Begriffe unterscheiden sich je nach Schicht - hier ist, was für jeden gilt.",
+    "intro": "Vestigian basiert auf Daten, die andere frei wiederverwendbar gemacht haben. Begriffe unterscheiden sich je nach Schicht - hier ist, was für jeden gilt.",
     "recordsHeading": "Beitragende Aufzeichnungen",
     "recordsBody": "Website und Tracing-Text ist CC BY-SA - frei zu verwenden und anzupassen, auch kommerziell, sofern Änderungen unter derselben Lizenz geteilt werden und die Quelle gutgeschrieben wird. Die strukturierten Metadaten (Koordinaten, Daten, Kategorien) sind CC0 — keine Rechte vorbehalten.",
     "imagesHeading": "Fotografien",
@@ -253,7 +253,7 @@
   },
   "privacy": {
     "title": "Datenschutzpolitik",
-    "intro": "Diese Seite gibt an, was Vestigia sammelt, warum, wie lange und wer es sonst noch sieht - klar und übereinstimmend, was der Code tatsächlich tut, anstatt eine generische Vorlage. Es ist kein Ersatz für das Lesen der Quelle, die offen ist.",
+    "intro": "Diese Seite gibt an, was Vestigian sammelt, warum, wie lange und wer es sonst noch sieht - klar und übereinstimmend, was der Code tatsächlich tut, anstatt eine generische Vorlage. Es ist kein Ersatz für das Lesen der Quelle, die offen ist.",
     "controllerHeading": "Regler",
     "controllerBody": "Der im rechtlichen Hinweis genannte Dienstleister ist der Verantwortliche („wir) für die unten beschriebene Verarbeitung. Die Kontaktdaten sind die gleichen wie auf dieser Seite.",
     "accountHeading": "Erstellen eines Accounts",
@@ -287,7 +287,7 @@
     "supervisoryHeading": "Aufsichtsbehörde",
     "supervisoryPlaceholder": "[Name und Kontaktdaten der Datenschutzbehörde, die für den Sitz des für die Verarbeitung Verantwortlichen zuständig ist.]",
     "minorsHeading": "Alter",
-    "minorsBody": "Vestigia richtet sich nicht an Kinder. Wenn sie unter 16 jahre alt sind, erstellen sie bitte kein konto ohne die beteiligung eines elternteils oder erziehungsberechtigten.",
+    "minorsBody": "Vestigian richtet sich nicht an Kinder. Wenn sie unter 16 jahre alt sind, erstellen sie bitte kein konto ohne die beteiligung eines elternteils oder erziehungsberechtigten.",
     "changesHeading": "Änderungen",
     "changesBody": "Diese Seite wird aktualisiert, wenn sich das, was der Dienst tatsächlich tut, ändert. Es spiegelt die aktuelle Version der laufenden Anwendung wider."
   },
@@ -433,7 +433,7 @@
     "tracedNote": "Verfolgte Routen werden gestrichelt gezeichnet, weil ein Tracing eine Interpretation dessen ist, wo etwas lief, nicht eine Umfrage darüber.",
     "openFullEntry": "Öffnen Sie den vollständigen Eintrag",
     "edit": "Edit",
-    "defaultAttribution": "Vestigia-Beiträge"
+    "defaultAttribution": "Vestigian-Beiträge"
   },
   "siteGalleryManager": {
     "defaultPhotographName": "foto{index}",
@@ -563,9 +563,9 @@
   },
   "indexPage": {
     "title": "Karte",
-    "srHeading": "Vestigia - ein Atlas der antiken Welt",
+    "srHeading": "Vestigian - ein Atlas der antiken Welt",
     "addToAtlas": "Zum Atlas hinzufügen",
-    "description": "Vestigia kartiert die Spuren der antiken Welt - Siedlungen, Straßen, Befestigungen und Fundstellen, die von den Menschen aufgezeichnet wurden, die sie besuchen."
+    "description": "Vestigian kartiert die Spuren der antiken Welt - Siedlungen, Straßen, Befestigungen und Fundstellen, die von den Menschen aufgezeichnet wurden, die sie besuchen."
   },
   "forgotPasswordPage": {
     "title": "Setzen Sie Ihr Passwort zurück",
@@ -620,10 +620,10 @@
     "type": "Typ",
     "length": "Länge",
     "credit": "Kredit",
-    "defaultAttribution": "Vestigia-Beiträge",
+    "defaultAttribution": "Vestigian-Beiträge",
     "edit": "Edit",
     "lastRevised": "Letzte Überarbeitung",
-    "defaultDescription": "Ein nachgezeichnetes Merkmal, aufgezeichnet in Vestigia, einem Atlas der antiken Welt."
+    "defaultDescription": "Ein nachgezeichnetes Merkmal, aufgezeichnet in Vestigian, einem Atlas der antiken Welt."
   },
   "siteEditPage": {
     "notFound": "Keine Website unter diesem Namen aufgezeichnet.",
@@ -784,7 +784,7 @@
   },
   "contributor": {
     "notFound": "Diese Person gibt es nicht.",
-    "description": "Einträge, die {name} zu Vestigia beigetragen hat.",
+    "description": "Einträge, die {name} zu Vestigian beigetragen hat.",
     "joined": "Trägt ein seit {date}",
     "accepted": "keine angenommenen Beiträge | ein angenommener Beitrag | {n} angenommene Beiträge",
     "sitesHeading": "Keine Fundorte | Ein Fundort | {n} Fundorte",

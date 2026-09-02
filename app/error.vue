@@ -24,7 +24,7 @@
    */
   useHead({
     htmlAttrs: { lang: 'en' },
-    title: computed(() => `${heading.value} · Vestigia`),
+    title: computed(() => `${heading.value} · Vestigian`),
   })
 </script>
 

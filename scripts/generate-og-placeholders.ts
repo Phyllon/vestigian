@@ -48,7 +48,7 @@ const CARDS: OgCard[] = [
     label,
   })),
   { filename: 'tracing.png', label: 'Tracing' },
-  { filename: 'default.png', label: 'Vestigia' },
+  { filename: 'default.png', label: 'Vestigian' },
 ]
 
 const escapeXml = (value: string): string =>
@@ -70,7 +70,7 @@ const buildCardSvg = (label: string): string => `
     font-size="34"
     letter-spacing="4"
     fill="${OXIDE}"
-  >VESTIGIA</text>
+  >VESTIGIAN</text>
 </svg>
 `
 

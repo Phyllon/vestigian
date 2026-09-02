@@ -38,7 +38,7 @@ import { Redis } from 'ioredis'
 import postgres from 'postgres'
 
 const sql = postgres(
-  process.env.NUXT_DATABASE_URL ?? 'postgres://vestigia:vestigia@127.0.0.1:5432/vestigia',
+  process.env.NUXT_DATABASE_URL ?? 'postgres://vestigian:vestigian@127.0.0.1:5432/vestigian',
   { max: 1 },
 )
 
@@ -590,8 +590,8 @@ const main = async (): Promise<void> => {
     await redis.connect()
     // Cleared rather than incremented: an unset key already reads as 1, so the
     // first increment would leave the prefix where it was.
-    await redis.del('vestigia:atlas-version')
-    const version = await redis.incr('vestigia:atlas-version')
+    await redis.del('vestigian:atlas-version')
+    const version = await redis.incr('vestigian:atlas-version')
     const stale = await redis.keys('atlas:v*')
     if (stale.length > 0) await redis.del(...stale)
     console.log(`\nAtlas cache generation is now ${version}; ${stale.length} stale tiles dropped.`)

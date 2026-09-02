@@ -57,7 +57,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Sent before the address is overwritten — the last message this address
-  // will ever receive from Vestigia, per the project's rule that a decision
+  // will ever receive from Vestigian, per the project's rule that a decision
   // reaches the person it was made about before it becomes irreversible.
   const siteUrl = useRuntimeConfig().public.siteUrl.replace(/\/$/, '')
   await sendAccountMail('account-deleted', {
@@ -77,7 +77,7 @@ export default defineEventHandler(async (event) => {
     await tx
       .update(users)
       .set({
-        email: `deleted-${sessionUser.id}@vestigia.invalid`,
+        email: `deleted-${sessionUser.id}@vestigian.invalid`,
         displayName: `Deleted account #${sessionUser.id}`,
         passwordHash: DUMMY_HASH,
         emailVerifiedAt: null,

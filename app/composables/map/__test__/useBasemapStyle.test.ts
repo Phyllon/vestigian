@@ -120,7 +120,7 @@ describe('buildBasemapStyle, vector views', () => {
   })
 
   it('serves glyphs from this origin rather than a font server', () => {
-    const style = buildBasemapStyle({ view: 'vestigia', isDark: false, source })
+    const style = buildBasemapStyle({ view: 'vestigian', isDark: false, source })
     expect(style.glyphs).not.toMatch(/^https?:/)
   })
 })
@@ -258,7 +258,7 @@ describe('the frontier', () => {
   it('is not offered on a sheet it would mislead on', () => {
     // The flag is ignored anywhere but the Barrington sheet, so a frontier can
     // never be drawn against present-day motorways.
-    for (const view of ['vestigia', 'modern', 'antiquity-dare'] as const) {
+    for (const view of ['vestigian', 'modern', 'antiquity-dare'] as const) {
       const style = buildBasemapStyle({ view, isDark: false, source, isFollowingLimes: true })
       expect(layerIds(style).some((id) => id.startsWith('limes-'))).toBe(false)
     }
@@ -268,7 +268,7 @@ describe('the frontier', () => {
 describe('the views on offer', () => {
   it('no longer offers terrain', () => {
     /**
-     * It was the `vestigia` palette with one hillshade layer spliced in, and
+     * It was the `vestigian` palette with one hillshade layer spliced in, and
      * the same elevation source does better work as `atlas-hillshade` under the
      * Barrington sheet — so the relief is still on the map and the option was
      * only a fourth way to look at the same roads.

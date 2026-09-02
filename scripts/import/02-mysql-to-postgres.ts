@@ -1,5 +1,5 @@
 /**
- * Transforms the vici.org MySQL data into the Vestigia PostGIS schema.
+ * Transforms the vici.org MySQL data into the Vestigian PostGIS schema.
  *
  * The dump's shape was verified against the October 2023 export. It is not a
  * places/lines pair — a site is assembled from five tables:
@@ -35,7 +35,7 @@ const source = await mysql.createConnection(
 )
 
 const target = postgres(
-  process.env.NUXT_DATABASE_URL ?? 'postgres://vestigia:vestigia@127.0.0.1:5432/vestigia',
+  process.env.NUXT_DATABASE_URL ?? 'postgres://vestigian:vestigian@127.0.0.1:5432/vestigian',
 )
 
 interface ViciPoint {

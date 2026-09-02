@@ -13,7 +13,7 @@ describe('cacheNameForArea / isOfflineAreaCacheName', () => {
   })
 
   it('does not misidentify an unrelated cache name, such as Workbox’s own precache', () => {
-    expect(isOfflineAreaCacheName('workbox-precache-v2-https://vestigia.eu/')).toBe(false)
+    expect(isOfflineAreaCacheName('workbox-precache-v2-https://vestigian.eu/')).toBe(false)
   })
 })
 

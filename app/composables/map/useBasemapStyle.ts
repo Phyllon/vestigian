@@ -145,7 +145,7 @@ const DARK_COLOURS: StyleColours = {
 
 /** Modern view: full road hierarchy and settlement labels, as on a road map. */
 const MODERN_ROAD_OPACITY = 1
-/** Vestigia view: modern infrastructure present but pushed to the background. */
+/** Vestigian view: modern infrastructure present but pushed to the background. */
 const QUIET_ROAD_OPACITY = 0.35
 
 interface StyleRequest {
@@ -774,7 +774,7 @@ export const buildBasemapStyle = (request: StyleRequest): StyleSpecification => 
 }
 
 export const BASEMAP_VIEWS: BasemapOption[] = [
-  { value: 'vestigia', group: 'today', label: 'Vestigia', hint: 'Antiquity foregrounded' },
+  { value: 'vestigian', group: 'today', label: 'Vestigian', hint: 'Antiquity foregrounded' },
   { value: 'modern', group: 'today', label: 'Modern', hint: 'Roads and towns today' },
   {
     value: 'antiquity-dare',
@@ -804,7 +804,7 @@ export const BASEMAP_GROUP_LABELS: Record<BasemapGroup, string> = {
 export const useBasemapStyle = () => {
   const config = useRuntimeConfig()
   const colorMode = useColorMode()
-  const view = useState<BasemapView>('basemap-view', () => 'vestigia')
+  const view = useState<BasemapView>('basemap-view', () => 'vestigian')
 
   /**
    * Tile URLs have to be absolute.

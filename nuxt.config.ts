@@ -89,7 +89,7 @@ export default defineNuxtConfig({
     ],
     detectBrowserLanguage: {
       useCookie: true,
-      cookieKey: 'vestigia-locale',
+      cookieKey: 'vestigian-locale',
       redirectOn: 'no prefix',
     },
   },
@@ -266,7 +266,7 @@ export default defineNuxtConfig({
     preference: 'system',
     fallback: 'light',
     classSuffix: '',
-    storageKey: 'vestigia-color-mode',
+    storageKey: 'vestigian-color-mode',
   },
 
   runtimeConfig: {
@@ -319,7 +319,7 @@ export default defineNuxtConfig({
      * must start and serve without it exactly as it does without LibreTranslate.
      */
     telemetry: {
-      serviceName: 'vestigia',
+      serviceName: 'vestigian',
       otlpEndpoint: '',
       /** `debug` | `info` | `warn` | `error`. */
       logLevel: 'info',
@@ -356,7 +356,7 @@ export default defineNuxtConfig({
      */
     mail: {
       apiKey: '',
-      from: 'Vestigia <no-reply@vestigia.example>',
+      from: 'Vestigian <no-reply@vestigian.example>',
       devInboxUrl: 'http://127.0.0.1:8025',
     },
     /**
@@ -568,7 +568,7 @@ export default defineNuxtConfig({
       route: '/_nitro-base-openapi.json',
       production: isProduction ? false : 'runtime',
       meta: {
-        title: 'Vestigia API',
+        title: 'Vestigian API',
         description:
           'Site, tracing, tile, moderation and frontier endpoints. Data is CC BY-SA / CC0; see /api/data/sites.geojson for the bulk feed.',
       },

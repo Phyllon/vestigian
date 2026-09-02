@@ -2,7 +2,7 @@ import { Map as MapLibreMap } from 'maplibre-gl'
 import type { LngLatLike, StyleSpecification } from 'maplibre-gl'
 import type { CameraState, LonLat } from '#shared/types'
 
-const MAP_INJECTION_KEY = Symbol('vestigia-map') as InjectionKey<Ref<MapLibreMap | null>>
+const MAP_INJECTION_KEY = Symbol('vestigian-map') as InjectionKey<Ref<MapLibreMap | null>>
 
 interface MapCreationOptions {
   container: HTMLElement

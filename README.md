@@ -1,8 +1,8 @@
-# Vestigia
+# Vestigian
 
 An atlas of the traces antiquity left behind — settlements, roads, fortifications and findspots, recorded by the people who go and look at them.
 
-Built on data contributed to [Vici.org](https://vici.org) by René Voorburg and its contributors, reused under CC BY-SA. Vestigia is an independent reimplementation, not a fork of the vici.org codebase.
+Built on data contributed to [Vici.org](https://vici.org) by René Voorburg and its contributors, reused under CC BY-SA. Vestigian is an independent reimplementation, not a fork of the vici.org codebase.
 
 ## Getting started
 
@@ -180,7 +180,7 @@ Licences are chosen from a closed list at upload time, since an image with an un
 
 ## Public data
 
-`GET /api/data/sites.geojson?bbox=west,south,east,north` returns approved sites as GeoJSON with licence and attribution on every feature, CORS-open and bounded to 1000 records per request. RDF and a Pelagios-compatible gazetteer dump are the natural next step if you want other projects to link to Vestigia's places.
+`GET /api/data/sites.geojson?bbox=west,south,east,north` returns approved sites as GeoJSON with licence and attribution on every feature, CORS-open and bounded to 1000 records per request. RDF and a Pelagios-compatible gazetteer dump are the natural next step if you want other projects to link to Vestigian's places.
 
 ## Operations
 
@@ -222,7 +222,7 @@ That inverts the moment the first real contribution lands, since accounts,
 revisions and uploads exist nowhere else.
 
 ```bash
-pnpm db:snapshot        # → .import/snapshots/vestigia-<stamp>.dump  (~15 MB)
+pnpm db:snapshot        # → .import/snapshots/vestigian-<stamp>.dump  (~15 MB)
 pnpm images:reconcile   # do the database and the bucket still agree?
 ```
 
@@ -242,9 +242,9 @@ To keep a portable copy of the photographs — the Docker volume only restores
 back into MinIO — mirror the bucket out as ordinary files:
 
 ```bash
-docker run --rm --network container:vestigia-dev-minio-1 \
+docker run --rm --network container:vestigian-dev-minio-1 \
   -v "$PWD/image-archive:/out" minio/mc:latest sh -c \
-  "mc alias set src http://127.0.0.1:9000 vestigia vestigia-dev-secret && mc mirror src/vestigia /out"
+  "mc alias set src http://127.0.0.1:9000 vestigian vestigian-dev-secret && mc mirror src/vestigian /out"
 ```
 
 Reverse the arguments to restore into a fresh bucket. Add `image-archive/` to
@@ -258,7 +258,7 @@ items.
 **After every deploy or bulk import, warm the tile cache:**
 
 ```bash
-pnpm tiles:warm https://vestigia.org
+pnpm tiles:warm https://vestigian.org
 ```
 
 The only predictable slow moment is the minutes after a data-version bump, when the low-zoom clustered tiles are all generated at once by real traffic. There are a few hundred of them over the data's extent, so warming takes seconds and removes the spike.
@@ -321,9 +321,9 @@ Honest list, so nothing here is a surprise:
 
 ### save plain file images from MinIO object storage to disk
 
-docker run --rm --network container:vestigia-dev-minio-1 \
+docker run --rm --network container:vestigian-dev-minio-1 \
 -v "$PWD/image-archive:/out" minio/mc:latest sh -c \
-"mc alias set src http://127.0.0.1:9000 vestigia vestigia-dev-secret && mc mirror src/vestigia /out"
+"mc alias set src http://127.0.0.1:9000 vestigian vestigian-dev-secret && mc mirror src/vestigian /out"
 
 ### register -> brLMa34FghWLUFf
 

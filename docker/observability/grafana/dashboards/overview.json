@@ -1,7 +1,7 @@
 {
-  "uid": "vestigia-overview",
-  "title": "Vestigia \u2014 overview",
-  "tags": ["vestigia"],
+  "uid": "vestigian-overview",
+  "title": "Vestigian \u2014 overview",
+  "tags": ["vestigian"],
   "timezone": "browser",
   "schemaVersion": 39,
   "version": 1,
@@ -459,7 +459,7 @@
       },
       "targets": [
         {
-          "expr": "process_resident_memory_bytes{job=\"vestigia-app\"}",
+          "expr": "process_resident_memory_bytes{job=\"vestigian-app\"}",
           "legendFormat": "app rss",
           "refId": "A",
           "datasource": {
@@ -491,7 +491,7 @@
       },
       "targets": [
         {
-          "expr": "nodejs_eventloop_lag_p99_seconds{job=\"vestigia-app\"}",
+          "expr": "nodejs_eventloop_lag_p99_seconds{job=\"vestigian-app\"}",
           "legendFormat": "lag p99",
           "refId": "A",
           "datasource": {

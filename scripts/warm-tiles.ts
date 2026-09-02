@@ -8,7 +8,7 @@
  * warming them costs a few seconds and removes the spike entirely.
  *
  *   pnpm tiles:warm                       # local
- *   pnpm tiles:warm https://vestigia.org  # after deploying
+ *   pnpm tiles:warm https://vestigian.org  # after deploying
  */
 
 /** Zoom levels worth warming: everything the opening view can reach. */
