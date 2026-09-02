@@ -96,6 +96,18 @@ Every one of these was a real failure before it was a rule.
   duration, since neither `/login` nor `/register` opens a persistent
   connection (no websocket, no polling, no `EventSource`).
 
+## Accessibility
+
+`a11y.spec.ts` runs `@axe-core/playwright` against the map shell, the auth
+pages, the open account menu and the notebook/settings pages, tagged
+`wcag2a`/`wcag2aa`/`wcag21aa` only — axe's `best-practice` set is opinionated
+beyond the standard and would fail this app's map-first layout for reasons
+that are not conformance issues. This is a complement to
+`eslint-plugin-vuejs-accessibility` (`pnpm lint`, static template checks) and
+the hand audits recorded in CLAUDE.md, not a replacement: axe catches missing
+accessible names, contrast and duplicate ids at scale, but has no opinion on
+whether a keyboard _route_ through a page makes sense.
+
 ## Fixtures
 
 Seeded by `global-setup`, removed by `global-teardown`, and removed again

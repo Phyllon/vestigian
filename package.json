@@ -84,6 +84,7 @@
     "zod-to-json-schema": "^3.25.2"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@iconify-json/lucide": "^1.2.125",
     "@nuxt/eslint": "^1.17.0",
     "@nuxt/test-utils": "^3.15.1",
@@ -101,6 +102,7 @@
     "drizzle-kit": "^0.28.1",
     "eslint": "^10.8.1",
     "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-vuejs-accessibility": "^2.6.0",
     "fontnik": "^0.7.7",
     "happy-dom": "^15.11.7",
     "husky": "^9.1.7",

@@ -56,6 +56,12 @@
 </script>
 
 <template>
+  <!--
+    Escape delegate only, not a control of its own: the div is never focusable
+    and has no role, it just catches the key while it bubbles up from the
+    trigger button or the open menu beneath it.
+  -->
+  <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions -->
   <div ref="root" class="relative" @keydown.esc="dismiss">
     <!--
       The label is hidden below `sm`, which is where most of the traffic is, so

@@ -1,6 +1,7 @@
 // @ts-check
 import withNuxt from './.nuxt/eslint.config.mjs'
 import prettier from 'eslint-config-prettier'
+import vueA11y from 'eslint-plugin-vuejs-accessibility'
 
 /**
  * ESLint covers correctness and the conventions in CLAUDE.md that a formatter
@@ -11,6 +12,8 @@ import prettier from 'eslint-config-prettier'
  * useHead and useSession do not read as undefined globals here.
  */
 export default withNuxt(
+  ...vueA11y.configs['flat/recommended'],
+
   {
     name: 'vestigian/conventions',
     rules: {
@@ -58,6 +61,15 @@ export default withNuxt(
       'vue/attributes-order': 'warn',
       'vue/no-useless-v-bind': 'error',
       'vue/require-explicit-emits': 'error',
+
+      // The plugin's own default demands *both* a nested control and a
+      // for/id pair on every label — stricter than WCAG, which only asks for
+      // one working association. `some` is what eslint-plugin-jsx-a11y
+      // defaults to for the same rule, and matches how labels are actually
+      // built here: RegisterForm's honeypot and ImageUploader's dropzone nest
+      // their control, MapSearchField pairs a sr-only label with `for`/`id`
+      // because the control sits beside icons the label cannot wrap.
+      'vuejs-accessibility/label-has-for': ['error', { required: { some: ['nesting', 'id'] } }],
     },
   },
 
