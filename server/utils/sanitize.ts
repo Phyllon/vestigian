@@ -1,5 +1,17 @@
 import sanitizeHtml from 'sanitize-html'
-import { decode } from 'he'
+import he from 'he'
+
+/**
+ * Default import, then destructure — not `import { decode } from 'he'`.
+ * `he` is CommonJS and Nitro leaves it external rather than bundling it, so
+ * this runs through Node's own ESM loader in `.output`, which is stricter
+ * about named exports from a CJS module than `tsc`/vitest are: it refused to
+ * start with "Named export 'decode' not found", even though the named form
+ * type-checked, passed every unit test, and looked identical in `nuxt dev`.
+ * Only the production build exercises this path — exactly the class of bug
+ * `e2e/README.md` already warns about.
+ */
+const { decode } = he
 
 /**
  * Strips markup from free text a contributor typed into a description field.
