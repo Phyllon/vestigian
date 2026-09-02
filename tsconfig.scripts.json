@@ -23,6 +23,9 @@
     "vitest.config.ts",
     // Reached from scripts/import/03-mirror-images.ts, which reuses the same
     // magic-byte detection the upload endpoint uses.
-    "server/utils/uploads.ts"
+    "server/utils/uploads.ts",
+    // Reached from scripts/strip-description-html.ts, which reuses the same
+    // sanitizer the contribution endpoint validates descriptions through.
+    "server/utils/sanitize.ts"
   ]
 }

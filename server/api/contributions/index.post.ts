@@ -24,7 +24,7 @@ export const siteDraftSchema = z.object({
     'other',
   ]),
   summary: z.string().trim().max(400).optional(),
-  description: z.string().trim().max(20000).optional(),
+  description: z.string().trim().transform(stripHtml).pipe(z.string().max(20000)).optional(),
   position: positionSchema,
   periodFrom: z.number().int().min(-1200).max(1500).nullable().default(null),
   periodTo: z.number().int().min(-1200).max(1500).nullable().default(null),
@@ -37,7 +37,7 @@ export const tracingDraftSchema = z.object({
   entityId: databaseIdentifier.optional(),
   title: z.string().trim().min(3).max(240),
   category: z.enum(['infrastructure', 'fortification', 'other']),
-  description: z.string().trim().max(20000).optional(),
+  description: z.string().trim().transform(stripHtml).pipe(z.string().max(20000)).optional(),
   geometry: z.object({
     type: z.enum(['LineString', 'Polygon']),
     coordinates: z.array(z.any()).min(2).max(10000),

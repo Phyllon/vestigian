@@ -1,10 +1,10 @@
-# CLAUDE.md — Vestigia
+# CLAUDE.md — Vestigian
 
 Context for continuing this project. Read this first.
 
 ## What this is
 
-**Vestigia** ("traces") is an atlas of the ancient world — settlements, roads, fortifications, findspots — recorded by the people who visit them. It is an independent reimplementation inspired by [vici.org](https://vici.org), reusing that project's openly-licensed data.
+**Vestigian** ("traces") is an atlas of the ancient world — settlements, roads, fortifications, findspots — recorded by the people who visit them. It is an independent reimplementation inspired by [vici.org](https://vici.org), reusing that project's openly-licensed data.
 
 **It is not a fork and must not become one.** Do not copy vici.org's code, markup, layout, or visual language. The data is shared; the character is not.
 
@@ -75,7 +75,7 @@ After any deploy or bulk import, run `pnpm tiles:warm <url>`.
 
 The switcher offers four views in two groups. Two are recolourings of one
 modern vector source; the two **antiquity** views replace it outright. A third
-modern view, `terrain`, was deleted: it was the `vestigia` palette with one
+modern view, `terrain`, was deleted: it was the `vestigian` palette with one
 hillshade layer spliced in, and the same elevation source does better work as
 `atlas-hillshade` under the Barrington sheet — so the relief is still on the
 map and the option was a fourth way of looking at the same roads.
@@ -446,6 +446,36 @@ whatever client it is handed — see the note in `server/utils/db.ts`.
   (`mail-template.ts`'s `escapeHtml`) and the GPX field kit (`gpx.ts`'s
   `escapeXml`). If a `v-html` is ever added, this decision needs revisiting
   before that lands, not after.
+- **A description is stripped of markup on the way in, not merely escaped on
+  the way out.** `stripHtml` (`server/utils/sanitize.ts`) runs inside the
+  `siteDraftSchema`/`tracingDraftSchema` zod pipeline
+  (`server/api/contributions/index.post.ts`), between `.trim()` and the
+  `.max(20000)` length check, so the stored payload — and everything derived
+  from it, `revisions.payload` included — never carries a tag at all. This is
+  a different guarantee than the `xssValidator` decision above: that one
+  relies entirely on Vue's own `{{ }}` escaping happening at render time and
+  is correct as long as nothing renders a description through `v-html`;
+  `stripHtml` means the description is plain text even if that assumption
+  ever stops holding, or the same text leaves the app through a surface that
+  is not Vue at all (the OpenAPI-documented `GET /api/data/sites.geojson`
+  feed, an RSS-style export, anything not yet built). It uses `sanitize-html`
+  (`allowedTags: []`) rather than a hand-rolled regex, with two adjustments
+  the library does not do on its own: block-level tags and `<br>` become a
+  newline _before_ stripping, so `<p>one</p><p>two</p>` survives as two lines
+  instead of running together, and `he.decode` reverses the HTML-entity
+  encoding `sanitize-html` applies to whatever text remains — its normal job
+  is producing safe markup, not plain text, so without this step "Tom & Jerry"
+  would be stored as "Tom &amp; Jerry" and then double-encoded again by Vue's
+  own escaping when rendered. It never rejects and it does not touch `<` that
+  is not part of a real tag: "the wall is <2m tall" — the exact example above
+  — comes through untouched, because `sanitize-html`'s parser has no tag
+  named `2m` to match. `pnpm strip-description-html --repair`
+  (`scripts/strip-description-html.ts`) backfills every `sites.description`
+  and `tracings.description` row that predates this check. It writes the live
+  columns directly rather than going through `applyRevision()` — this is data
+  hygiene in the same category as `images:reconcile`, not an editorial change
+  to what a record says, and revision history is append-only, so a bulk
+  backfill has nowhere to go there even if it wanted to.
 
 ## GDPR / legal
 
@@ -457,7 +487,7 @@ against the actual code rather than assumed.
 
 **No cookie-consent banner exists, and none should be added.** The app sets
 exactly three cookies — `nuxt-session` (7 days, `nuxt.config.ts`'s
-`session.maxAge`), `vestigia-color-mode`, `vestigia-locale` — and all three
+`session.maxAge`), `vestigian-color-mode`, `vestigian-locale` — and all three
 are strictly necessary for functionality the visitor directly requested.
 There is no analytics, no tracking pixel, no advertising cookie anywhere in
 the app (confirmed by grep, not assumed). §25(2) TDDDG — the German
@@ -469,7 +499,7 @@ advertising cookie, **that** is what needs a banner — the exemption stops
 applying the moment a cookie exists that a visitor could reasonably decline.
 
 **Right to erasure** (`server/api/auth/account.delete.ts`) anonymises the
-`users` row — email becomes `deleted-{id}@vestigia.invalid` (`.invalid` is the
+`users` row — email becomes `deleted-{id}@vestigian.invalid` (`.invalid` is the
 TLD RFC 2606 reserves for exactly this), display name becomes
 `Deleted account #{id}`, password hash becomes `DUMMY_HASH` — rather than
 deleting it outright. `revisions.author_id`, `sites.created_by`,
@@ -583,6 +613,7 @@ scripts/import/  four-stage vici.org import + vici-licences.ts (shared vocabular
                  04-mirror-basemap-tiles.ts 05-antiquity-atlas.ts 06-limes.ts
 scripts/generate-og-placeholders.ts  static per-category Open Graph cards, run by hand
 scripts/warm-tiles.ts snapshot-database.ts reconcile-images.ts build-glyphs.ts
+                 strip-description-html.ts
 scripts/i18n/translate-locales.ts   bootstraps i18n/locales/{fr,es,de,it,nl}.json via LibreTranslate
 public/fonts/    self-hosted SDF label glyphs + the font's OFL
 docker/  Dockerfile compose.dev.yml compose.prod.yml traefik/ backup.sh
@@ -898,7 +929,7 @@ gap the sampling above already measured.
 
 Six languages — French, Spanish, English, German, Italian, Dutch — via
 `@nuxtjs/i18n`, `strategy: 'no_prefix'`. The locale lives in a cookie
-(`vestigia-locale`), not the URL: slugs never change on edit and the sitemap
+(`vestigian-locale`), not the URL: slugs never change on edit and the sitemap
 points at them, and prefixing every route with `/fr`, `/de`, … would double
 the URL surface six times over with no `hreflang` investment to back it, for a
 change that is about interface text and enrichment content, not localized
@@ -953,7 +984,7 @@ actual fix is `autoheal` (`willfarrell/autoheal`, both compose files):
 from `retries: 30` to `3`, so `unhealthy` is reached in well under a minute
 instead of five, and the sidecar restarts the container itself — nothing in
 this repo can fix gunicorn's own arbiter, so restarting around it is the
-whole mitigation. `docker restart vestigia-dev-libretranslate-1` is still the
+whole mitigation. `docker restart vestigian-dev-libretranslate-1` is still the
 manual fallback if autoheal hasn't caught up yet, and the preflight check
 above is what turns a still-wedged arbiter into a clear message instead of a
 silent hang in the meantime.
@@ -1232,7 +1263,7 @@ typechecking or reading the code:
    never called `refresh()` — its write path reads fresh from `localStorage`
    rather than trusting `areas.value`, for exactly that reason.
 
-**Licence:** a bounded download of Vestigia's own vector layers carries no new
+**Licence:** a bounded download of Vestigian's own vector layers carries no new
 question — same CC BY-SA / CC0 as everything else at `/api/data/sites.geojson`.
 A basemap slice is OpenStreetMap data via the operator's own PMTiles archive,
 attributed the same way the live map already attributes it.
