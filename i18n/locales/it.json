@@ -787,5 +787,40 @@
     "sitesHeading": "Nessun sito | Un sito | {n} siti",
     "tracingsHeading": "Nessun tracciato | Un tracciato | {n} tracciati",
     "nothingPublished": "Non ha ancora pubblicato nulla."
+  },
+  "offline": {
+    "openPanel": "Scarica quest'area per l'uso offline",
+    "close": "Chiudi",
+    "panelTitle": "Mappa offline",
+    "panelIntro": "Salva ciò che è a schermo ora su questo dispositivo, così si apre anche senza segnale.",
+    "name": "Nome",
+    "detail": "Livello di dettaglio",
+    "tierOverview": "Panoramica",
+    "tierRegional": "Regionale",
+    "tierDetailed": "Dettagliato",
+    "includeBasemap": "Includi la mappa di sfondo",
+    "basemapUnavailable": "La mappa di sfondo non può essere salvata su questa installazione; le tue schede, il foglio dell'antichità e la frontiera sì.",
+    "estimating": "Stima in corso…",
+    "estimateFailed": "Non è stato possibile stimare quest'area. Provane una più piccola.",
+    "tooLarge": "Quest'area è troppo grande a questo livello di dettaglio. Aumenta lo zoom o scegli un livello di dettaglio inferiore.",
+    "estimateSummary": "≈ {size} su {count} tessere",
+    "quotaWarning": "Potrebbe non entrare nello spazio rimasto su questo dispositivo.",
+    "startDownload": "Scarica",
+    "downloadProgress": "{done} di {total} tessere · {size}",
+    "cancel": "Annulla",
+    "downloadComplete": "Salvato per l'uso offline.",
+    "downloadFailed": "Il download non è riuscito a completarsi. Ciò che è già stato salvato resta utilizzabile.",
+    "manageLink": "Gestisci le mappe offline"
+  },
+  "offlinePage": {
+    "menuLabel": "Mappe offline",
+    "title": "Mappe offline",
+    "intro": "Aree salvate su questo dispositivo. Esistono solo qui: disconnettendosi, o su un altro dispositivo, non ne compare nessuna.",
+    "totalUsage": "{size} usati su questo dispositivo",
+    "empty": "Ancora nulla di salvato. Apri la mappa, trova un'area e usa il pulsante di download in basso a destra.",
+    "areaMeta": "{count} tessere · {size}",
+    "withBasemap": "con mappa di sfondo",
+    "remove": "Rimuovi {name}",
+    "removeFailed": "Non è stato possibile rimuovere quell'area. Riprova tra poco."
   }
 }

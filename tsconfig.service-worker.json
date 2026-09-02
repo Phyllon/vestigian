@@ -1,0 +1,20 @@
+{
+  // A service worker runs in its own global scope — `self` is
+  // `ServiceWorkerGlobalScope`, not `Window` — so it needs the `WebWorker` lib
+  // instead of the app's DOM one, in a project of its own for the same reason
+  // `tsconfig.scripts.json` exists: it is not part of the Nuxt app and shares
+  // none of its auto-imports.
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "WebWorker"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": true,
+    "noEmit": true
+  },
+  "include": ["service-worker/**/*.ts"]
+}

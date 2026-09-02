@@ -85,6 +85,7 @@
       <div
         class="pointer-events-auto absolute bottom-12 right-3 flex flex-col items-end gap-2 md:right-4"
       >
+        <MapOfflineDownloadControl />
         <MapGeolocateButton />
 
         <UButton

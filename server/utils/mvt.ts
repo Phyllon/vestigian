@@ -1,7 +1,6 @@
 import type { TileCoordinate, TileRenderPlan } from '#shared/types'
+import { MAX_ZOOM, MIN_ZOOM } from '#shared/utils/tile-limits'
 
-export const MIN_ZOOM = 0
-export const MAX_ZOOM = 18
 export const TILE_EXTENT = 4096
 export const TILE_BUFFER = 64
 

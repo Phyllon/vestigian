@@ -787,5 +787,40 @@
     "sitesHeading": "Aucun site | Un site | {n} sites",
     "tracingsHeading": "Aucun tracé | Un tracé | {n} tracés",
     "nothingPublished": "Rien de publié pour l'instant."
+  },
+  "offline": {
+    "openPanel": "Enregistrer cette zone pour une utilisation hors ligne",
+    "close": "Fermer",
+    "panelTitle": "Carte hors ligne",
+    "panelIntro": "Enregistre ce qui est affiché à l'écran sur cet appareil, pour que cela s'ouvre même sans réseau.",
+    "name": "Nom",
+    "detail": "Niveau de détail",
+    "tierOverview": "Aperçu",
+    "tierRegional": "Régional",
+    "tierDetailed": "Détaillé",
+    "includeBasemap": "Inclure le fond de carte",
+    "basemapUnavailable": "Le fond de carte ne peut pas être enregistré sur ce déploiement ; vos propres notices, la carte antique et la frontière, si.",
+    "estimating": "Estimation…",
+    "estimateFailed": "Impossible d'estimer cette zone. Essayez une zone plus petite.",
+    "tooLarge": "Cette zone est trop grande à ce niveau de détail. Zoomez ou choisissez un niveau de détail inférieur.",
+    "estimateSummary": "≈ {size} sur {count} tuiles",
+    "quotaWarning": "Cela pourrait ne pas tenir dans l'espace restant sur cet appareil.",
+    "startDownload": "Télécharger",
+    "downloadProgress": "{done} sur {total} tuiles · {size}",
+    "cancel": "Annuler",
+    "downloadComplete": "Enregistré pour une utilisation hors ligne.",
+    "downloadFailed": "Le téléchargement n'a pas pu se terminer. Ce qui a déjà été enregistré reste utilisable.",
+    "manageLink": "Gérer les cartes hors ligne"
+  },
+  "offlinePage": {
+    "menuLabel": "Cartes hors ligne",
+    "title": "Cartes hors ligne",
+    "intro": "Zones enregistrées sur cet appareil. Elles n'existent qu'ici — après déconnexion, ou sur un autre appareil, aucune n'apparaît.",
+    "totalUsage": "{size} utilisés sur cet appareil",
+    "empty": "Rien d'enregistré pour l'instant. Ouvrez la carte, repérez une zone et utilisez le bouton de téléchargement en bas à droite.",
+    "areaMeta": "{count} tuiles · {size}",
+    "withBasemap": "avec fond de carte",
+    "remove": "Retirer {name}",
+    "removeFailed": "Cette zone n'a pas pu être retirée. Réessayez dans un instant."
   }
 }

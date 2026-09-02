@@ -787,5 +787,40 @@
     "sitesHeading": "No sites | One site | {n} sites",
     "tracingsHeading": "No tracings | One tracing | {n} tracings",
     "nothingPublished": "Nothing published yet."
+  },
+  "offline": {
+    "openPanel": "Download this area for offline use",
+    "close": "Close",
+    "panelTitle": "Offline map",
+    "panelIntro": "Saves what is on screen now to this device, so it opens with no signal.",
+    "name": "Name",
+    "detail": "Detail",
+    "tierOverview": "Overview",
+    "tierRegional": "Regional",
+    "tierDetailed": "Detailed",
+    "includeBasemap": "Include the background map",
+    "basemapUnavailable": "The background map cannot be saved on this deployment; your own records, the antiquity sheet and the frontier still can.",
+    "estimating": "Estimating…",
+    "estimateFailed": "Could not estimate this area. Try a smaller one.",
+    "tooLarge": "That area is too large at this level of detail. Zoom in or choose a lower level of detail.",
+    "estimateSummary": "≈ {size} across {count} tiles",
+    "quotaWarning": "This may not fit in the storage this device has left.",
+    "startDownload": "Download",
+    "downloadProgress": "{done} of {total} tiles · {size}",
+    "cancel": "Cancel",
+    "downloadComplete": "Saved for offline use.",
+    "downloadFailed": "The download could not finish. What was already saved is still usable.",
+    "manageLink": "Manage offline maps"
+  },
+  "offlinePage": {
+    "menuLabel": "Offline maps",
+    "title": "Offline maps",
+    "intro": "Areas saved to this device. They live only here — signing out, or opening the atlas on another device, shows none of them.",
+    "totalUsage": "{size} used on this device",
+    "empty": "Nothing saved yet. Open the map, find an area, and use the download button near the bottom right.",
+    "areaMeta": "{count} tiles · {size}",
+    "withBasemap": "with background map",
+    "remove": "Remove {name}",
+    "removeFailed": "Could not remove that area. Try again in a moment."
   }
 }

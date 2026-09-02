@@ -787,5 +787,40 @@
     "sitesHeading": "Keine Fundorte | Ein Fundort | {n} Fundorte",
     "tracingsHeading": "Keine Linien | Eine Linie | {n} Linien",
     "nothingPublished": "Noch nichts veröffentlicht."
+  },
+  "offline": {
+    "openPanel": "Diesen Bereich für die Offline-Nutzung speichern",
+    "close": "Schließen",
+    "panelTitle": "Offline-Karte",
+    "panelIntro": "Speichert, was gerade zu sehen ist, auf diesem Gerät, damit es auch ohne Empfang öffnet.",
+    "name": "Name",
+    "detail": "Detailgrad",
+    "tierOverview": "Überblick",
+    "tierRegional": "Regional",
+    "tierDetailed": "Detailliert",
+    "includeBasemap": "Hintergrundkarte einschließen",
+    "basemapUnavailable": "Die Hintergrundkarte lässt sich auf dieser Installation nicht speichern; eigene Einträge, das Antike-Blatt und die Grenze aber schon.",
+    "estimating": "Wird geschätzt…",
+    "estimateFailed": "Für diesen Bereich ließ sich keine Schätzung erstellen. Versuche einen kleineren.",
+    "tooLarge": "Dieser Bereich ist bei diesem Detailgrad zu groß. Zoome hinein oder wähle einen geringeren Detailgrad.",
+    "estimateSummary": "≈ {size} auf {count} Kacheln",
+    "quotaWarning": "Das passt möglicherweise nicht in den verbleibenden Speicher dieses Geräts.",
+    "startDownload": "Herunterladen",
+    "downloadProgress": "{done} von {total} Kacheln · {size}",
+    "cancel": "Abbrechen",
+    "downloadComplete": "Für die Offline-Nutzung gespeichert.",
+    "downloadFailed": "Der Download konnte nicht abgeschlossen werden. Was schon gespeichert wurde, bleibt nutzbar.",
+    "manageLink": "Offline-Karten verwalten"
+  },
+  "offlinePage": {
+    "menuLabel": "Offline-Karten",
+    "title": "Offline-Karten",
+    "intro": "Auf diesem Gerät gespeicherte Bereiche. Sie existieren nur hier – nach dem Abmelden oder auf einem anderen Gerät ist keiner davon zu sehen.",
+    "totalUsage": "{size} auf diesem Gerät belegt",
+    "empty": "Noch nichts gespeichert. Öffne die Karte, suche einen Bereich und nutze die Download-Schaltfläche unten rechts.",
+    "areaMeta": "{count} Kacheln · {size}",
+    "withBasemap": "mit Hintergrundkarte",
+    "remove": "{name} entfernen",
+    "removeFailed": "Dieser Bereich ließ sich nicht entfernen. Versuche es gleich noch einmal."
   }
 }

@@ -613,6 +613,15 @@ const OPERATION_OVERRIDES: Record<
     },
   },
   '/api/tiles/{z}/{x}/{y}': { get: { parameters: TILE_PARAMS, responses: TILE_RESPONSES } },
+  '/api/tiles/basemap/{z}/{x}/{y}': {
+    get: {
+      parameters: TILE_PARAMS,
+      responses: {
+        ...TILE_RESPONSES,
+        404: errorResponse('No offline basemap is configured for this deployment.'),
+      },
+    },
+  },
   '/api/tiles/antiquity/{z}/{x}/{y}': {
     get: { parameters: TILE_PARAMS, responses: TILE_RESPONSES },
   },

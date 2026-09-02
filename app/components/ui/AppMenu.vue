@@ -13,6 +13,7 @@
       { label: t('layout.footerLicence'), icon: 'i-lucide-scale', to: '/licence' },
       { label: t('privacy.title'), icon: 'i-lucide-shield-check', to: '/privacy' },
       { label: t('impressum.title'), icon: 'i-lucide-file-text', to: '/impressum' },
+      { label: t('offlinePage.menuLabel'), icon: 'i-lucide-download', to: '/offline' },
     ],
   ])
 </script>

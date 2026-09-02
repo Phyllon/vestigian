@@ -51,6 +51,7 @@ export default defineNuxtConfig({
     'nuxt-security',
     '@nuxt/test-utils/module',
     '@nuxtjs/i18n',
+    '@vite-pwa/nuxt',
   ],
 
   /**
@@ -471,6 +472,53 @@ export default defineNuxtConfig({
     corsHandler: {
       origin: process.env.NUXT_PUBLIC_SITE_URL ?? 'http://localhost:3000',
       methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+    },
+  },
+
+  /**
+   * The offline field notebook: a hand-written Service Worker, not
+   * `generateSW`'s declarative routing.
+   *
+   * `generateSW` covers "cache what the app requests as it requests it,"
+   * which is the wrong shape for this feature — an explicit, user-triggered
+   * bulk download of a bounded area, with progress reporting and a named,
+   * permanently-retained cache per area, is application logic no declarative
+   * routing config expresses. `injectManifest` gives that custom logic a real
+   * service worker file (`service-worker/sw.ts`) while still getting
+   * Workbox's precaching of the built app shell and its well-tested update
+   * lifecycle — the part actually worth not hand-rolling, per the reasoning
+   * that put Nuxt UI ahead of custom form controls elsewhere in this project.
+   *
+   * `manifest: false`: `public/manifest.webmanifest` is hand-written and
+   * already linked from `app.vue`, built by `pnpm icons:build`. Nothing here
+   * duplicates or replaces it.
+   */
+  pwa: {
+    strategies: 'injectManifest',
+    // Not `'service-worker'`: @vite-pwa/nuxt resolves `srcDir` against
+    // `nuxt.options.srcDir` (Nuxt 4's `app/`), not the project root, and this
+    // repo keeps everything that is not Nuxt-scanned code — `server/`,
+    // `shared/`, and now this — at the top level to match `scripts/` and
+    // `tsconfig.scripts.json`'s own reasoning: it is not part of the Nuxt app
+    // and should not read as though it were.
+    srcDir: fileURLToPath(new URL('./service-worker', import.meta.url)),
+    filename: 'sw.ts',
+    manifest: false,
+    injectManifest: {
+      // The four tile-route families are runtime-cached by the service
+      // worker's own fetch handler, not precached — there is no fixed set of
+      // tiles to list ahead of time, and precaching would download nothing
+      // useful while inflating the app-shell manifest.
+      globPatterns: ['**/*.{js,css,html}', 'fonts/**/*.woff2'],
+      globIgnores: ['**/node_modules/**/*'],
+    },
+    registerType: 'autoUpdate',
+    devOptions: {
+      // Off in `nuxt dev`: Vite's dev server rewrites and hot-reloads modules
+      // in ways a service worker's cache-first strategy actively fights. The
+      // offline feature is exercised against the production build, the same
+      // as everything else in `e2e/`.
+      enabled: false,
     },
   },
 

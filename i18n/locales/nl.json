@@ -787,5 +787,40 @@
     "sitesHeading": "Geen vindplaatsen | Eén vindplaats | {n} vindplaatsen",
     "tracingsHeading": "Geen lijnen | Eén lijn | {n} lijnen",
     "nothingPublished": "Nog niets gepubliceerd."
+  },
+  "offline": {
+    "openPanel": "Dit gebied opslaan voor offline gebruik",
+    "close": "Sluiten",
+    "panelTitle": "Offline kaart",
+    "panelIntro": "Slaat op wat nu in beeld is op dit apparaat, zodat het ook zonder bereik opent.",
+    "name": "Naam",
+    "detail": "Detailniveau",
+    "tierOverview": "Overzicht",
+    "tierRegional": "Regionaal",
+    "tierDetailed": "Gedetailleerd",
+    "includeBasemap": "Achtergrondkaart meenemen",
+    "basemapUnavailable": "De achtergrondkaart kan op deze installatie niet worden opgeslagen; je eigen vermeldingen, het antieke blad en de grens wel.",
+    "estimating": "Bezig met schatten…",
+    "estimateFailed": "Kon geen schatting maken voor dit gebied. Probeer een kleiner gebied.",
+    "tooLarge": "Dit gebied is te groot bij dit detailniveau. Zoom in of kies een lager detailniveau.",
+    "estimateSummary": "≈ {size} verdeeld over {count} tegels",
+    "quotaWarning": "Dit past mogelijk niet in de resterende opslag van dit apparaat.",
+    "startDownload": "Downloaden",
+    "downloadProgress": "{done} van {total} tegels · {size}",
+    "cancel": "Annuleren",
+    "downloadComplete": "Opgeslagen voor offline gebruik.",
+    "downloadFailed": "De download kon niet worden afgerond. Wat al is opgeslagen, blijft bruikbaar.",
+    "manageLink": "Offline kaarten beheren"
+  },
+  "offlinePage": {
+    "menuLabel": "Offline kaarten",
+    "title": "Offline kaarten",
+    "intro": "Op dit apparaat opgeslagen gebieden. Ze bestaan alleen hier — na uitloggen of op een ander apparaat is er geen van te zien.",
+    "totalUsage": "{size} gebruikt op dit apparaat",
+    "empty": "Nog niets opgeslagen. Open de kaart, zoek een gebied op en gebruik de downloadknop rechtsonder.",
+    "areaMeta": "{count} tegels · {size}",
+    "withBasemap": "met achtergrondkaart",
+    "remove": "{name} verwijderen",
+    "removeFailed": "Dat gebied kon niet worden verwijderd. Probeer het zo nog eens."
   }
 }

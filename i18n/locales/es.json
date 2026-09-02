@@ -787,5 +787,40 @@
     "sitesHeading": "Ningún yacimiento | Un yacimiento | {n} yacimientos",
     "tracingsHeading": "Ningún trazado | Un trazado | {n} trazados",
     "nothingPublished": "Aún no ha publicado nada."
+  },
+  "offline": {
+    "openPanel": "Descargar esta zona para uso sin conexión",
+    "close": "Cerrar",
+    "panelTitle": "Mapa sin conexión",
+    "panelIntro": "Guarda lo que se ve ahora en pantalla en este dispositivo, para que se abra sin cobertura.",
+    "name": "Nombre",
+    "detail": "Nivel de detalle",
+    "tierOverview": "Panorámica",
+    "tierRegional": "Regional",
+    "tierDetailed": "Detallado",
+    "includeBasemap": "Incluir el mapa base",
+    "basemapUnavailable": "El mapa base no se puede guardar en esta instalación; tus propias fichas, la lámina de antigüedad y la frontera sí.",
+    "estimating": "Calculando…",
+    "estimateFailed": "No se pudo calcular esta zona. Prueba con una más pequeña.",
+    "tooLarge": "Esa zona es demasiado grande con este nivel de detalle. Acércate o elige un nivel de detalle menor.",
+    "estimateSummary": "≈ {size} en {count} teselas",
+    "quotaWarning": "Puede que no quepa en el almacenamiento restante de este dispositivo.",
+    "startDownload": "Descargar",
+    "downloadProgress": "{done} de {total} teselas · {size}",
+    "cancel": "Cancelar",
+    "downloadComplete": "Guardado para uso sin conexión.",
+    "downloadFailed": "La descarga no pudo completarse. Lo que ya se guardó sigue siendo utilizable.",
+    "manageLink": "Gestionar mapas sin conexión"
+  },
+  "offlinePage": {
+    "menuLabel": "Mapas sin conexión",
+    "title": "Mapas sin conexión",
+    "intro": "Zonas guardadas en este dispositivo. Solo existen aquí: al cerrar sesión, o en otro dispositivo, no aparece ninguna.",
+    "totalUsage": "{size} usados en este dispositivo",
+    "empty": "Aún no hay nada guardado. Abre el mapa, busca una zona y usa el botón de descarga abajo a la derecha.",
+    "areaMeta": "{count} teselas · {size}",
+    "withBasemap": "con mapa base",
+    "remove": "Quitar {name}",
+    "removeFailed": "No se pudo quitar esa zona. Inténtalo de nuevo en un momento."
   }
 }
