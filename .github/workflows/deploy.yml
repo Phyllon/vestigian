@@ -10,8 +10,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # No `version` input: pnpm/action-setup@v4 reads it from package.json's
+      # `packageManager` field on its own, and setting both here and there is
+      # what produced "Multiple versions of pnpm specified" — pin the version
+      # in exactly one place.
       - uses: pnpm/action-setup@v4
-        with: { version: 9 }
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: pnpm }
       - run: pnpm install --frozen-lockfile
@@ -47,8 +50,11 @@ jobs:
       NUXT_ALTCHA_SECRET: ci-altcha-secret-value-for-tests
     steps:
       - uses: actions/checkout@v4
+      # No `version` input: pnpm/action-setup@v4 reads it from package.json's
+      # `packageManager` field on its own, and setting both here and there is
+      # what produced "Multiple versions of pnpm specified" — pin the version
+      # in exactly one place.
       - uses: pnpm/action-setup@v4
-        with: { version: 9 }
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: pnpm }
       - run: pnpm install --frozen-lockfile
