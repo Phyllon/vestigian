@@ -9,8 +9,15 @@
    * it with `tabindex="-1"` would hide it from the people most likely to want
    * it. `type="button"` is explicit because a bare button inside a form
    * submits it, which would post a half-filled registration on first click.
+   *
+   * `id` is optional and forwarded to `UInput` rather than left to Nuxt UI's
+   * own `useId()`. See the comment above the field ids in `settings.vue`: on
+   * a page whose header mounts `ClientOnly`-deferred widgets, that
+   * auto-generated id can drift from the `for`/`aria-describedby` values its
+   * own `UFormField` renders, and axe catches the result as an unlabelled
+   * control. A caller inside such a layout should pass an explicit `id`.
    */
-  defineProps<{ autocomplete?: string }>()
+  defineProps<{ autocomplete?: string; id?: string }>()
 
   const { t } = useI18n()
 
@@ -25,6 +32,7 @@
 
 <template>
   <UInput
+    :id="id"
     v-model="model"
     :type="isRevealed ? 'text' : 'password'"
     :autocomplete="autocomplete"

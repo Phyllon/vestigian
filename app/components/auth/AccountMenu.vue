@@ -66,7 +66,17 @@
 
 <template>
   <ClientOnly>
-    <UDropdownMenu :items="items" :content="{ align: 'end' }">
+    <!--
+      `modal="false"`: this is a nav menu (WAI-ARIA menu-button pattern), not
+      a dialog. Nuxt UI's default `modal: true` hides the rest of the page
+      from assistive tech while it's open (Reka UI's `aria-hidden`-on-siblings
+      behaviour for a true modal), but the map canvas and header controls
+      behind it stay focusable regardless — axe caught the mismatch as an
+      `aria-hidden-focus` violation, a hidden ancestor with a reachable
+      focusable descendant, which is real independent of the in-page focus
+      trap that would otherwise stop a keyboard user from reaching it.
+    -->
+    <UDropdownMenu :items="items" :content="{ align: 'end' }" :modal="false">
       <button
         type="button"
         class="flex items-center gap-2 rounded-notebook px-2 py-1.5 text-sm text-ink-700 transition hover:bg-paper-200 dark:text-paper-200 dark:hover:bg-night-700"

@@ -123,6 +123,22 @@
     await setLocale(code)
   }
 
+  /**
+   * Explicit ids for every `UFormField`-wrapped control below, rather than
+   * Nuxt UI's own `useId()`-generated ones.
+   *
+   * `reading.vue`'s header mounts `LanguageSwitcher`, `ThemeToggle` and
+   * `AccountMenu` inside `ClientOnly`, so each renders an inert placeholder
+   * during SSR and only calls its own `useId()` (via its `UDropdownMenu`)
+   * once mounted client-side. That shifts how many `useId()` slots are
+   * already spent by the time this page's `UFormField`s reserve theirs,
+   * server versus client — axe caught the result: the input's `id` attribute
+   * got corrected to the client's value, but the `aria-describedby` and
+   * `<label for>` pointing at it were left holding the server's, so six
+   * fields on this page — display name, bio, both password fields, the new
+   * address, and the second current-password field — had no accessible name
+   * at all once hydrated. A static id sidesteps the mismatch outright.
+   */
   useHead({ title: t('settings.title') })
   useNoIndex()
 
@@ -144,11 +160,17 @@
       </h2>
 
       <UFormField :label="t('settings.displayName')" :help="t('settings.displayNameHelp')">
-        <UInput v-model="displayName" autocomplete="nickname" maxlength="60" class="w-full" />
+        <UInput
+          id="settings-display-name"
+          v-model="displayName"
+          autocomplete="nickname"
+          maxlength="60"
+          class="w-full"
+        />
       </UFormField>
 
       <UFormField :label="t('settings.bio')" :help="t('settings.bioHelp')">
-        <UTextarea v-model="bio" :rows="3" maxlength="280" class="w-full" />
+        <UTextarea id="settings-bio" v-model="bio" :rows="3" maxlength="280" class="w-full" />
       </UFormField>
 
       <UFormField :label="t('settings.language')">
@@ -193,11 +215,19 @@
       <p class="text-sm text-ink-600 dark:text-paper-300">{{ t('settings.passwordBody') }}</p>
 
       <UFormField :label="t('settings.currentPassword')">
-        <AuthPasswordField v-model="currentPassword" autocomplete="current-password" />
+        <AuthPasswordField
+          id="settings-password-current"
+          v-model="currentPassword"
+          autocomplete="current-password"
+        />
       </UFormField>
 
       <UFormField :label="t('settings.newPassword')">
-        <AuthPasswordField v-model="newPassword" autocomplete="new-password" />
+        <AuthPasswordField
+          id="settings-password-new"
+          v-model="newPassword"
+          autocomplete="new-password"
+        />
       </UFormField>
 
       <AuthPasswordRequirements v-if="newPassword" :password="newPassword" />
@@ -224,11 +254,21 @@
       </p>
 
       <UFormField :label="t('settings.newEmail')">
-        <UInput v-model="newEmail" type="email" autocomplete="email" class="w-full" />
+        <UInput
+          id="settings-email-new"
+          v-model="newEmail"
+          type="email"
+          autocomplete="email"
+          class="w-full"
+        />
       </UFormField>
 
       <UFormField :label="t('settings.currentPassword')">
-        <AuthPasswordField v-model="emailPassword" autocomplete="current-password" />
+        <AuthPasswordField
+          id="settings-email-password"
+          v-model="emailPassword"
+          autocomplete="current-password"
+        />
       </UFormField>
 
       <UButton type="submit" :loading="isChangingEmail" :disabled="!newEmail || !emailPassword">
