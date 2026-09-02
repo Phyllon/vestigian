@@ -51,7 +51,10 @@
     "openFullEntry": "Open the full entry",
     "edit": "Edit",
     "revised": "Revised",
-    "notFound": "That site could not be loaded. It may have been removed or is awaiting review."
+    "notFound": "That site could not be loaded. It may have been removed or is awaiting review.",
+    "endorse": "Found this useful",
+    "endorsedByMe": "You found this useful",
+    "endorsementCount": "No one has marked this useful yet | 1 person found this useful | {n} people found this useful"
   },
   "enrichment": {
     "sectionTitle": "Elsewhere",

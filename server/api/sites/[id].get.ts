@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { SiteDetail } from '#shared/types'
+import type { SessionUser, SiteDetail } from '#shared/types'
 
 export const paramsSchema = z.object({ id: routeIdentifier })
 
@@ -19,7 +19,12 @@ export default defineEventHandler(async (event): Promise<SiteDetail> => {
   await enforceRateLimit(event, 'record')
   const { id } = await getValidatedRouterParams(event, paramsSchema.parse)
 
-  const site = await loadSiteDetail(id)
+  // Never required: this route is public, and `endorsedByMe` is simply
+  // `false` for a signed-out reader rather than something the route refuses.
+  const session = await getUserSession(event)
+  const viewerId = (session.user as SessionUser | undefined)?.id ?? null
+
+  const site = await loadSiteDetail(id, viewerId)
 
   if (!site) {
     throw createError({ statusCode: 404, message: 'No approved site with that identifier.' })

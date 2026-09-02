@@ -51,7 +51,10 @@
     "openFullEntry": "Aprire l'ingresso completo",
     "edit": "Modifica",
     "revised": "Rivisto",
-    "notFound": "Quel sito non poteva essere caricato. Potrebbe essere stato rimosso o è in attesa di revisione."
+    "notFound": "Quel sito non poteva essere caricato. Potrebbe essere stato rimosso o è in attesa di revisione.",
+    "endorse": "Utile",
+    "endorsedByMe": "Hai trovato utile questo",
+    "endorsementCount": "Nessuno ha ancora trovato utile questo | 1 persona ha trovato utile questo | {n} persone hanno trovato utile questo"
   },
   "enrichment": {
     "sectionTitle": "Altro",

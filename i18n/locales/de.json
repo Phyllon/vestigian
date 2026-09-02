@@ -51,7 +51,10 @@
     "openFullEntry": "Öffnen Sie den vollständigen Eintrag",
     "edit": "Bearbeiten",
     "revised": "Überarbeitet",
-    "notFound": "Diese Website konnte nicht geladen werden. Es wurde möglicherweise entfernt oder wartet auf eine Überprüfung."
+    "notFound": "Diese Website konnte nicht geladen werden. Es wurde möglicherweise entfernt oder wartet auf eine Überprüfung.",
+    "endorse": "Als hilfreich markieren",
+    "endorsedByMe": "Von dir als hilfreich markiert",
+    "endorsementCount": "Noch niemand hat das als hilfreich markiert | 1 Person fand das hilfreich | {n} Personen fanden das hilfreich"
   },
   "enrichment": {
     "sectionTitle": "Sonstige",

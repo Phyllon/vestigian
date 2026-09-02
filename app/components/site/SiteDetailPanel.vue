@@ -141,6 +141,8 @@
           class="mt-6"
         />
 
+        <SiteEndorsementButton v-model="site" class="mt-6" />
+
         <!--
           The reader's own traces. Only for a signed-in visitor, because these
           are stored against an account — there is no anonymous local-only mode,

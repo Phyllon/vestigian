@@ -67,6 +67,14 @@ export interface SiteDetail extends SiteSummary {
   images: SiteImage[]
   externalIds: ExternalIdentifier[]
   updatedAt: string
+  /** How many signed-in readers have marked this "found useful". Always public. */
+  endorsementCount: number
+  /**
+   * Whether the caller themselves has. `false` for a signed-out visitor —
+   * never `null` or omitted, so a template can bind to it directly without a
+   * separate "do we even know" branch.
+   */
+  endorsedByMe: boolean
 }
 
 export interface ExternalIdentifier {

@@ -528,7 +528,7 @@ app/
     map/       MapCanvas BasemapSwitcher GeolocateButton MapSearchField Legend FeaturePicker
                OfflineDownloadControl
     site/      SiteDetailPanel SiteGallery SiteGalleryManager SiteMetaList
-               SiteExternalLinks SiteEnrichment
+               SiteExternalLinks SiteEnrichment SiteEndorsementButton
     tracing/   TracingDetailPanel
     contribute/ ContributionPanel SiteEditorForm TracingEditorForm GeometryDrawTool ImageUploader
     auth/      LoginForm RegisterForm PasswordField PasswordRequirements AccountMenu
@@ -539,8 +539,8 @@ app/
   composables/
     map/  useMapInstance useBasemapStyle useViewportTiles useGeolocation useSiteIcons
           useNotebookOverlay useOfflineAreas                                           (+__test__/)
-    data/ useSiteQuery useSiteEnrichment useImageUrl useCanonicalUrl useNoIndex useSocialMeta
-                                                                                       (+__test__/)
+    data/ useSiteQuery useSiteEnrichment useSiteEndorsement useImageUrl useCanonicalUrl
+          useNoIndex useSocialMeta                                                     (+__test__/)
     auth/ useSession
     user/ useNotebook
     limes/ useLimes
@@ -560,7 +560,7 @@ server/
   middleware/ content-language.ts   sets Content-Language from the locale cookie
   api/ tiles/[z]/[x]/[y]  tiles/antiquity/[z]/[x]/[y]
        tiles/limes/[z]/[x]/[y]  tiles/basemap/[z]/[x]/[y]
-       sites/  tracings/  contributions/
+       sites/ (+ [id]/endorse.post.ts endorse.delete.ts)  tracings/  contributions/
        auth/ (+ account.delete.ts export.get.ts change-password.post.ts change-email.post.ts)
        me/ (index.get/patch contributions visits bookmarks map.geojson field-kit.gpx)
        contributors/[name]
@@ -568,11 +568,11 @@ server/
        images/[id]/[preset]  sites/[id]/enrichment  health ready metrics openapi.json
   routes/ robots.txt sitemap.xml sitemap-static.xml
           sitemap-sites/[page]  sitemap-tracings/[page]
-  database/ schema/ (users sites notebook geo atlas) migrations/ migrate.ts
+  database/ schema/ (users sites notebook endorsements geo atlas) migrations/ migrate.ts
   utils/ mvt atlas limes openapi permissions ratelimit images images-order uploads tokens diff
-         notebook gpx basemap-pmtiles
-         mail mail-template notifications
+         notebook gpx basemap-pmtiles endorsements
          site-record validation
+         mail mail-template notifications
          revisions slug db cache argon altcha enrichment enrichment-sources translate
          logger metrics tracing sitemap
                                                                             (+__test__/)
@@ -1099,6 +1099,51 @@ address; if the request was not theirs, that is a stranger's inbox.
 `verify.post.ts` redeems both `verify-email` and `change-email`, because from the
 recipient's side they ask the same thing. The purpose comes from the stored row,
 never the request.
+
+### "Found this useful" — a public count from a private table's sibling
+
+A unique-visitor count was considered and **deliberately not built**. It would
+have meant aggregating `site_visits` — the table the field-notebook section
+above documents as strictly private, never joined to any public feed, for
+good reason: a location history, even counted rather than listed, still
+re-identifies someone on a rarely-visited site. That design was made
+deliberately earlier in this project and a feature request is not, on its
+own, a reason to reverse it quietly.
+
+What exists instead is `site_endorsements` — "I found this useful," positive
+only, one per person per site, open to **any signed-in reader**, not gated on
+having recorded a visit at all. It looks like `site_visits` and
+`site_bookmarks` (same shape: `user_id`, `site_id`, a unique index on the
+pair) and is governed by a different rule, stated in
+`server/database/schema/endorsements.ts`: the **count** is public from the
+moment it is written — shown on every reader's view of a site — while the
+**row** stays exactly as private as a bookmark. Nobody but the endorser ever
+learns who endorsed a site or when, on any surface, including to a moderator
+— `endorsement-projection.test.ts` asserts this the same blunt way
+`contributor-projection.test.ts` asserts the contributor page's absences,
+and an e2e test signs in as a moderator specifically to confirm the display
+name never appears in the response. What makes the count safe to publish
+where a visit count would not be: an endorsement carries no coordinate and no
+timestamp anyone but its author can read. It says a place was useful, not
+where someone has physically been.
+
+Survives account erasure, unlike `site_visits`/`site_bookmarks`. Those two
+are explicitly deleted in `account.delete.ts` because a private location
+history has nothing to gain from surviving its owner's anonymisation.
+Endorsements are left alone: the row carries no attribution any public
+surface exposes, so removing it on erasure would only make the public count
+wrong for no privacy benefit. `ON DELETE CASCADE` exists purely as
+referential-integrity hygiene for a hard-delete path this app does not
+otherwise have.
+
+`loadSiteDetail` takes an optional `viewerId` — `null` for an anonymous
+request, never a special case requiring its own branch — and answers
+`endorsedByMe` via `COALESCE(bool_or(user_id = viewerId), false)` in the same
+query that computes the count. `bool_or` over `user_id = NULL` is `NULL`, not
+`false` (SQL: nothing equals `NULL`, including by comparison), and `bool_or`
+over zero rows is also `NULL` — both cases needed the explicit `COALESCE`, and
+both were caught by testing against the running database rather than
+assumed.
 
 ## Offline maps — how large, and what actually got measured
 

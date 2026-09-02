@@ -46,6 +46,8 @@ import {
   paramsSchema as imageOrderParams,
 } from './sites/[id]/images/order.post'
 import { paramsSchema as siteIdParams } from './sites/[id].get'
+import { paramsSchema as endorseDeleteParams } from './sites/[id]/endorse.delete'
+import { paramsSchema as endorsePostParams } from './sites/[id]/endorse.post'
 import { paramsSchema as siteRevisionsParams } from './sites/[id]/revisions.get'
 import { querySchema as siteSearchQuery } from './sites/search.get'
 import { paramsSchema as siteSlugParams } from './sites/slug/[slug].get'
@@ -158,7 +160,7 @@ const OPERATION_OVERRIDES: Record<
       security: SESSION_SECURITY,
       responses: {
         200: jsonResponse(
-          'Account fields plus the caller’s own sites, tracings, images, revisions, visits and bookmarks.',
+          'Account fields plus the caller’s own sites, tracings, images, revisions, visits, bookmarks and endorsements.',
         ),
         401: COMMON_RESPONSES[401],
         429: COMMON_RESPONSES[429],
@@ -544,8 +546,31 @@ const OPERATION_OVERRIDES: Record<
     get: {
       parameters: paramsFromSchema(siteIdParams, 'path'),
       responses: {
-        200: jsonResponse('The full site record: summary, description, images, external ids.'),
+        200: jsonResponse(
+          'The full site record: summary, description, images, external ids, endorsementCount, endorsedByMe.',
+        ),
         404: COMMON_RESPONSES[404],
+        429: COMMON_RESPONSES[429],
+      },
+    },
+  },
+  '/api/sites/{id}/endorse': {
+    post: {
+      security: SESSION_SECURITY,
+      parameters: paramsFromSchema(endorsePostParams, 'path'),
+      responses: {
+        200: jsonResponse('{ siteId, count, endorsedByMe: true }'),
+        401: COMMON_RESPONSES[401],
+        404: errorResponse('No published site at that id.'),
+        429: COMMON_RESPONSES[429],
+      },
+    },
+    delete: {
+      security: SESSION_SECURITY,
+      parameters: paramsFromSchema(endorseDeleteParams, 'path'),
+      responses: {
+        200: jsonResponse('{ siteId, count, endorsedByMe: false }'),
+        401: COMMON_RESPONSES[401],
         429: COMMON_RESPONSES[429],
       },
     },

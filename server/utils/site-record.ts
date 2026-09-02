@@ -14,8 +14,16 @@ import type { SiteDetail } from '#shared/types'
  *
  * Calling a function instead of an endpoint removes the shared bucket and the
  * wasted round trip together.
+ *
+ * `viewerId` is optional and only ever affects `endorsedByMe` — every other
+ * field, `endorsementCount` included, is identical for every caller. Passing
+ * `null` (an anonymous visitor, or a route that chooses not to check) is not
+ * a degraded read; it is simply someone `endorsedByMe: false` is correct for.
  */
-export const loadSiteDetail = async (id: number): Promise<SiteDetail | null> => {
+export const loadSiteDetail = async (
+  id: number,
+  viewerId: number | null = null,
+): Promise<SiteDetail | null> => {
   const sql = useSql()
 
   const [site] = await sql<
@@ -68,6 +76,21 @@ export const loadSiteDetail = async (id: number): Promise<SiteDetail | null> => 
     SELECT scheme, value FROM external_ids WHERE site_id = ${id} ORDER BY scheme
   `
 
+  /**
+   * One query either way, rather than a count plus a separate existence
+   * check. `bool_or(user_id = viewerId)` is `NULL` — not `false` — both when
+   * `viewerId` is null (`x = NULL` is never true or false, only unknown, in
+   * SQL) and when the site has no endorsements at all (`bool_or` of zero
+   * rows is `NULL`), so both cases need the explicit `COALESCE`.
+   */
+  const [endorsements] = await sql<{ count: string; endorsed_by_me: boolean }[]>`
+    SELECT
+      count(*)::text AS count,
+      COALESCE(bool_or(user_id = ${viewerId}), false) AS endorsed_by_me
+    FROM site_endorsements
+    WHERE site_id = ${id}
+  `
+
   return {
     id: site.id,
     slug: site.slug,
@@ -81,6 +104,8 @@ export const loadSiteDetail = async (id: number): Promise<SiteDetail | null> => 
     countryCode: site.country_code,
     position: { lon: site.lon, lat: site.lat },
     updatedAt: site.updated_at.toISOString(),
+    endorsementCount: Number(endorsements?.count ?? 0),
+    endorsedByMe: endorsements?.endorsed_by_me ?? false,
     images: images
       .filter((image) => isPublishableLicence(image.licence))
       .map((image) => ({

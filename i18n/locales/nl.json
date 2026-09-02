@@ -51,7 +51,10 @@
     "openFullEntry": "Het volledige item openen",
     "edit": "Bewerken",
     "revised": "Herzien",
-    "notFound": "Die site kon niet geladen worden. Het kan zijn verwijderd of wacht op herziening."
+    "notFound": "Die site kon niet geladen worden. Het kan zijn verwijderd of wacht op herziening.",
+    "endorse": "Nuttig gevonden",
+    "endorsedByMe": "Door jou nuttig gevonden",
+    "endorsementCount": "Nog niemand heeft dit nuttig gevonden | 1 persoon vond dit nuttig | {n} mensen vonden dit nuttig"
   },
   "enrichment": {
     "sectionTitle": "Elders",

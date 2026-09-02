@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm'
 import {
   revisions,
   siteBookmarks,
+  siteEndorsements,
   siteImages,
   siteVisits,
   sites,
@@ -22,7 +23,7 @@ defineRouteMeta({
     tags: ['auth'],
     summary: 'Export the signed-in account’s stored data',
     description:
-      'Account fields plus every site, tracing, image and revision authored by the caller, and the private visit log and to-visit list, as JSON. Scoped to the caller’s own id.',
+      'Account fields plus every site, tracing, image and revision authored by the caller, the private visit log and to-visit list, and sites the caller has endorsed, as JSON. Scoped to the caller’s own id.',
   },
 })
 
@@ -66,6 +67,7 @@ export default defineEventHandler(async (event) => {
     authoredRevisions,
     recordedVisits,
     savedPlaces,
+    givenEndorsements,
   ] = await Promise.all([
     database
       .select({
@@ -125,6 +127,16 @@ export default defineEventHandler(async (event) => {
       .select({ siteId: siteBookmarks.siteId, createdAt: siteBookmarks.createdAt })
       .from(siteBookmarks)
       .where(eq(siteBookmarks.userId, userId)),
+
+    /**
+     * Not part of the notebook above — see the docstring on
+     * `siteEndorsements` for why — but still the caller's own action on
+     * their own account, so Art. 15 covers it the same way.
+     */
+    database
+      .select({ siteId: siteEndorsements.siteId, createdAt: siteEndorsements.createdAt })
+      .from(siteEndorsements)
+      .where(eq(siteEndorsements.userId, userId)),
   ])
 
   event.context.log.info({ audit: 'auth.export', userId }, 'account data exported')
@@ -137,5 +149,6 @@ export default defineEventHandler(async (event) => {
     revisions: authoredRevisions,
     visits: recordedVisits,
     bookmarks: savedPlaces,
+    endorsements: givenEndorsements,
   }
 })

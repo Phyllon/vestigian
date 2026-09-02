@@ -1,5 +1,6 @@
 export * from './users'
 export * from './sites'
 export * from './notebook'
+export * from './endorsements'
 export * from './geo'
 export * from './atlas'

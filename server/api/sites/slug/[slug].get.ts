@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { and, eq } from 'drizzle-orm'
 import { sites } from '~~/server/database/schema'
-import type { SiteDetail } from '#shared/types'
+import type { SessionUser, SiteDetail } from '#shared/types'
 
 export const paramsSchema = z.object({
   slug: z
@@ -39,7 +39,10 @@ export default defineEventHandler(async (event): Promise<SiteDetail> => {
     throw createError({ statusCode: 404, message: 'No site recorded under that name.' })
   }
 
-  const site = await loadSiteDetail(row.id)
+  const session = await getUserSession(event)
+  const viewerId = (session.user as SessionUser | undefined)?.id ?? null
+
+  const site = await loadSiteDetail(row.id, viewerId)
 
   if (!site) {
     throw createError({ statusCode: 404, message: 'No site recorded under that name.' })
