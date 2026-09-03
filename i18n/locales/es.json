@@ -394,7 +394,8 @@
     "matches": "{count}coincidencias",
     "label": "Sitios de búsqueda, carreteras y lugares",
     "placeholder": "Sitios de búsqueda, carreteras, lugares",
-    "resultsLabel": "Resultados de la búsqueda"
+    "resultsLabel": "Resultados de la búsqueda",
+    "modernPlace": "Lugar moderno · {country}"
   },
   "mapCanvas": {
     "ariaLabel": "Mapa de sitios arqueológicos",

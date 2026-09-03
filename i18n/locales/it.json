@@ -394,7 +394,8 @@
     "matches": "{count}partite",
     "label": "Siti di ricerca, strade e luoghi",
     "placeholder": "Siti di ricerca, strade, luoghi",
-    "resultsLabel": "Risultati ricerca"
+    "resultsLabel": "Risultati ricerca",
+    "modernPlace": "Luogo moderno · {country}"
   },
   "mapCanvas": {
     "ariaLabel": "Mappa dei siti archeologici",

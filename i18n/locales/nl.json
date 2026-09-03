@@ -394,7 +394,8 @@
     "matches": "{count}overeenkomsten",
     "label": "Zoekplaatsen, wegen en plaatsen",
     "placeholder": "Zoekplaatsen, wegen, plaatsen",
-    "resultsLabel": "Zoekresultaten"
+    "resultsLabel": "Zoekresultaten",
+    "modernPlace": "Moderne plaats · {country}"
   },
   "mapCanvas": {
     "ariaLabel": "Kaart van archeologische sites",

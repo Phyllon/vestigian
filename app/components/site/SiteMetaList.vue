@@ -9,10 +9,11 @@
   const props = defineProps<SiteMetaProps>()
 
   const { t } = useI18n()
+  const { countryName } = useCountryName()
 
   const location = computed(
     () =>
-      [props.modernPlace, props.countryCode].filter(Boolean).join(', ') ||
+      [props.modernPlace, countryName(props.countryCode)].filter(Boolean).join(', ') ||
       t('siteMetaList.locationNotResolved'),
   )
 

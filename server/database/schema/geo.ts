@@ -45,3 +45,35 @@ export const countryBoundaries = pgTable(
   },
   (table) => [index('country_boundaries_geom_idx').using('gist', table.geom)],
 )
+
+/**
+ * Modern cities and towns, for the map search bar — a different job from
+ * `geoNames` above, which exists only to answer "which country" for a site's
+ * own coordinate and is scoped to wherever vici.org's dump happens to cover.
+ * This is GeoNames.org's own `cities500` extract (CC BY 4.0, every populated
+ * place with 500+ people, worldwide — `scripts/import/09-cities.ts`), kept
+ * in its own table for the same reason `antiquity_*` is never joined to
+ * `sites`: a modern town is not a record this atlas holds an opinion about,
+ * just a place a reader might type into the search field to navigate there.
+ *
+ * The trigram index that makes `ILIKE`/similarity search on `name` fast
+ * (`cities_name_trgm_idx`) is hand-written in the migration, not declared
+ * here — drizzle-kit cannot emit an opclass index any more than it can emit
+ * `sites_title_trgm_idx`, which has the same omission for the same reason.
+ */
+export const cities = pgTable(
+  'cities',
+  {
+    id: integer('id').primaryKey(),
+    name: varchar('name', { length: 200 }).notNull(),
+    countryCode: varchar('country_code', { length: 2 }).notNull(),
+    population: integer('population').notNull().default(0),
+    geom: pointGeometry('geom').notNull(),
+    lat: doublePrecision('lat').notNull(),
+    lon: doublePrecision('lon').notNull(),
+  },
+  (table) => [
+    index('cities_geom_idx').using('gist', table.geom),
+    index('cities_population_idx').on(table.population),
+  ],
+)

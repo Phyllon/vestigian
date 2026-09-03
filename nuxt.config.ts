@@ -417,16 +417,38 @@ export default defineNuxtConfig({
         'img-src': ["'self'", 'data:', 'blob:', imageOrigin, ...mapAssetOrigins],
         'worker-src': ["'self'", 'blob:'],
         'child-src': ["'self'", 'blob:'],
-        'connect-src': ["'self'", ...mapAssetOrigins],
+        'connect-src': [
+          "'self'",
+          ...mapAssetOrigins,
+          ...(isProduction ? [] : ['https://cdn.jsdelivr.net']),
+        ],
         /**
          * Nuxt stamps a per-request nonce on the inline scripts that carry the
          * runtime config and the pre-paint colour-mode switch. Without the
          * matching 'nonce-{{nonce}}' token here the browser refuses those
          * scripts and the client app never mounts at all.
+         *
+         * `cdn.jsdelivr.net` is added in development only, for the Scalar
+         * OpenAPI UI's own bundle (`nitro.openAPI.ui.scalar` below) — the same
+         * third-party runtime request self-hosted fonts, self-hosted glyphs
+         * and ALTCHA-over-Turnstile exist to avoid, accepted here only because
+         * it never ships to production: `/_scalar` itself 404s in production
+         * regardless of this policy (`nitro.openAPI.production` below), so
+         * loosening the CSP for it only ever matters against a developer's own
+         * local traffic.
          */
-        'script-src': ["'self'", "'nonce-{{nonce}}'", "'wasm-unsafe-eval'"],
-        'style-src': ["'self'", "'unsafe-inline'"],
-        'font-src': ["'self'"],
+        'script-src': [
+          "'self'",
+          "'nonce-{{nonce}}'",
+          "'wasm-unsafe-eval'",
+          ...(isProduction ? [] : ['https://cdn.jsdelivr.net']),
+        ],
+        'style-src': [
+          "'self'",
+          "'unsafe-inline'",
+          ...(isProduction ? [] : ['https://cdn.jsdelivr.net']),
+        ],
+        'font-src': ["'self'", ...(isProduction ? [] : ['https://cdn.jsdelivr.net'])],
         /**
          * On in production, off in development, and the development half is
          * not laziness. This directive rewrites every http:// subresource to
@@ -554,12 +576,15 @@ export default defineNuxtConfig({
      * `/api/data/sites.geojson` remains the intentionally public, documented
      * feed regardless.
      *
-     * Both bundled UIs are switched off rather than left at their defaults.
-     * Nitro's `/_scalar` and `/_swagger` routes load their renderer from
-     * `cdn.jsdelivr.net` — a runtime request to a third party, the exact thing
-     * self-hosted fonts, self-hosted glyphs and ALTCHA-over-Turnstile exist to
-     * avoid here, and the CSP in this file would refuse it silently the same
-     * way the missing nonce token once did.
+     * Scalar is on in development only; Swagger stays off regardless — one UI
+     * is enough, and Scalar's is the nicer of the two. Nitro's `/_scalar` and
+     * `/_swagger` routes both load their renderer from `cdn.jsdelivr.net` — a
+     * runtime request to a third party, the exact thing self-hosted fonts,
+     * self-hosted glyphs and ALTCHA-over-Turnstile exist to avoid — which is
+     * why this stays off in production and why the CSP above only allowlists
+     * that host for `!isProduction`. Left at Nitro's default, the CSP here
+     * would have refused the request silently, the same way the missing nonce
+     * token once did.
      */
     openAPI: {
       /**
@@ -586,7 +611,7 @@ export default defineNuxtConfig({
         description:
           'Site, tracing, tile, moderation and frontier endpoints. Data is CC BY-SA / CC0; see /api/data/sites.geojson for the bulk feed.',
       },
-      ui: { scalar: false, swagger: false },
+      ui: { scalar: !isProduction, swagger: false },
     },
   },
 

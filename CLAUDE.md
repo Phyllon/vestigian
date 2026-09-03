@@ -251,14 +251,20 @@ via `zodToJsonSchema` (`server/utils/openapi.ts`). One schema, not two — a rou
 whose validation changes and whose documentation does not is worse than no
 documentation.
 
-Both of Nitro's bundled UIs (`/_scalar`, `/_swagger`) are switched off in
-`nuxt.config.ts` (`openAPI.ui`). Both load their renderer from
-`cdn.jsdelivr.net` — the exact third-party runtime request self-hosted fonts,
-self-hosted glyphs and ALTCHA-over-Turnstile all exist to avoid — and the CSP
-here would refuse it silently, the same way the missing nonce token once did.
-`/api/openapi.json` is same-origin JSON in development; paste it into
-Insomnia, Postman or scalar.com's own hosted reference rather than serving a
-UI bundle from this app.
+Nitro's two bundled UIs (`/_scalar`, `/_swagger`) both load their renderer
+from `cdn.jsdelivr.net` — the exact third-party runtime request self-hosted
+fonts, self-hosted glyphs and ALTCHA-over-Turnstile all exist to avoid — so
+only one is on, and only in development. `nuxt.config.ts`'s
+`nitro.openAPI.ui` is `{ scalar: !isProduction, swagger: false }`: Scalar is
+the nicer of the two, Swagger stays off outright, and `!isProduction` gates
+the CSP too — `script-src`/`style-src`/`font-src`/`connect-src` allowlist
+`cdn.jsdelivr.net` only when `!isProduction`, or the policy here would refuse
+Scalar's own bundle silently, the same way the missing nonce token once did.
+Safe to loosen for development only: `/_scalar` 404s in production regardless
+of the CSP, via the same `nitro.openAPI.production` flag below, so the wider
+CSP never ships. `/api/openapi.json` is same-origin JSON either way; paste it
+into Insomnia, Postman or scalar.com's own hosted reference for a production
+deployment, which serves no UI bundle of its own at all.
 
 **Dev only — 404s in production.** A machine-readable map of every route,
 parameter and response shape is a development convenience, not something to
@@ -590,7 +596,7 @@ server/
   middleware/ content-language.ts   sets Content-Language from the locale cookie
   api/ tiles/[z]/[x]/[y]  tiles/antiquity/[z]/[x]/[y]
        tiles/limes/[z]/[x]/[y]  tiles/basemap/[z]/[x]/[y]
-       sites/ (+ [id]/endorse.post.ts endorse.delete.ts)  tracings/  contributions/
+       sites/ (+ [id]/endorse.post.ts endorse.delete.ts)  tracings/  contributions/  places/
        auth/ (+ account.delete.ts export.get.ts change-password.post.ts change-email.post.ts)
        me/ (index.get/patch contributions visits bookmarks map.geojson field-kit.gpx)
        contributors/[name]
@@ -603,15 +609,15 @@ server/
          notebook gpx basemap-pmtiles endorsements
          site-record validation
          mail mail-template notifications
-         revisions slug db cache argon altcha enrichment enrichment-sources translate
-         logger metrics tracing sitemap
+         revisions slug db cache argon altcha enrichment enrichment-sources concordances
+         concordance-sources translate logger metrics tracing sitemap
                                                                             (+__test__/)
 shared/types/  vocabulary shared by both sides
 shared/utils/  password policy, authorization rules, the limes gazetteer, JSON-LD builders,
                tile enumeration, offline-cache naming, byte formatting            (+__test__/)
 scripts/import/  four-stage vici.org import + vici-licences.ts (shared vocabulary)
                  02c-geo-names.ts 04-mirror-basemap-tiles.ts 05-antiquity-atlas.ts
-                 06-limes.ts 07-country-boundaries.ts 08-edh-findspots.ts
+                 06-limes.ts 07-country-boundaries.ts 08-edh-findspots.ts 09-cities.ts
 scripts/generate-og-placeholders.ts  static per-category Open Graph cards, run by hand
 scripts/warm-tiles.ts snapshot-database.ts reconcile-images.ts build-glyphs.ts
                  strip-description-html.ts backfill-country-codes.ts verify-concordances.ts
@@ -738,6 +744,7 @@ pnpm import:country-boundaries  # → 239 countries, Natural Earth, public domai
 pnpm exec tsx scripts/backfill-country-codes.ts --repair   # needs country-boundaries first
 pnpm import:edh-findspots       # → 29,861 inscription findspots, CC BY-SA 4.0
 pnpm exec tsx scripts/verify-concordances.ts --repair       # overnight-scale, see its own docstring
+pnpm import:cities              # → 235,666 modern cities and towns, CC BY 4.0
 pnpm tiles:warm <url>
 ```
 
@@ -792,6 +799,63 @@ independently verified against Wikidata and against iDAI.gazetteer), shown in
 `SiteExternalLinks.vue` as a verdigris mark — this project's own "approved/confirmed"
 token — with the distance in a title, never a negative marker on an identifier nothing has
 checked yet.
+
+**New and edited sites are cross-referenced automatically — `scripts/verify-concordances.ts`
+is the bulk backfill, not the only path.** `server/utils/concordances.ts`'s
+`verifySiteConcordances(siteId)` runs the identical three checks for one site and is called
+from `applyRevision()` — the one place a live row is ever written — so a contribution gets
+checked against EDH, iDAI.gazetteer and Historic England the moment it publishes, whether
+that's automatic (trust-based) approval, a moderator's approval, or an edit to an existing
+site's position or title. It is fire-and-forget: `applyRevision()` calls it with `void`,
+never `await`, because iDAI.gazetteer and Historic England are each one external request
+with an 8s timeout, and nothing about a contribution's own approval should wait on them —
+the same fail-open reasoning already applied to rate limiting and mail delivery. Failures
+are caught and logged, never thrown into the caller. `concordances.ts` cannot be imported by
+the standalone script — it uses `useSql()`/`useLogger()`, Nitro auto-imports with nothing
+behind them in a bare `tsx` process — so the two files duplicate `recordConcordanceMatch`'s
+shape rather than share it; the script remains the only way to backfill the 61k+ sites that
+existed before this hook did, and the only reasonable way to re-run iDAI.gazetteer or
+Historic England against the whole catalog after a threshold or source change, since one
+site importing the app's own module graph on every write is not a batch tool.
+
+New contributions carry no external identifiers at all today — there is no field for them
+in `SiteEditorForm`, and `SitePayload` has none — so EDH (which joins by an existing
+Pleiades/Trismegistos id) will only ever find something for an _edited_, previously-imported
+site, never a brand-new one. iDAI.gazetteer (searched by title) and Historic England
+(searched by position, GB-scoped) are the two that actually do useful work for a genuinely
+new contribution.
+
+**Modern-city search: a self-hosted table, not a live geocoding API.** The search bar
+(`MapSearchField.vue`) needed to find modern cities and towns, not only Vestigian's own
+records, so a reader typing "Trier" can navigate there even before anyone has contributed a
+site nearby. There is no live geocoding API that is both EU-based and open-source the way
+this project has consistently chosen elsewhere (self-hosted fonts, self-hosted glyphs,
+self-hosted translation): Nominatim's public instance carries a strict 1 req/s fair-use
+policy that rules out autocomplete-style use, and Photon (komoot, Germany, Apache-2.0) needs
+its own Elasticsearch index to self-host — real new infrastructure for a feature that
+doesn't need fuzzy geocoding, just "does a city by this name exist and where." Measured
+against a real import rather than estimated: GeoNames.org's `cities500` extract (CC BY 4.0,
+every populated place ≥500 people, worldwide) is 235,666 rows and **49 MB in Postgres**
+(26 MB table + 23 MB indexes — a GiST index on `geom`, a trigram GIN index on `name`), a
+rounding error against the rest of the database. `cities` (`scripts/import/09-cities.ts`,
+`server/database/schema/geo.ts`) is deliberately not `geo_names`: that table exists only to
+answer "which country" for a site's own coordinate and is a sparse point set scoped to
+wherever vici.org's own dump happens to cover (five countries); this is worldwide and keyed
+for name search. `adm-zip` is the one new dependency this needed — GeoNames ships as a
+`.zip`, the only zipped source in this pipeline, and Node has no built-in zip-container
+reader (`DecompressionStream` handles gzip/deflate streams, not the zip format itself).
+
+`/api/places/search` (`PlaceSummary`, not `SiteSummary` — no `slug`, because there is no
+page for a modern town) mirrors `/api/sites/search`'s trigram-fallback shape, but ranks
+differently: an exact prefix match always outranks a fuzzy trigram-only one, and within
+either group the more populous place wins. Ranking by trigram similarity alone put the
+villages "Londa"/"Londe" ahead of London for the query "Lond" — similarity rewards a short
+candidate matching a short query, which has nothing to do with which "Lond…" a reader
+actually wants. `useSiteSearch` (`app/composables/data/useSiteQuery.ts`) queries both
+`/api/sites/search` and `/api/places/search` in parallel via `Promise.allSettled` and merges
+them into one ranked list (`MapSearchResult`, sites first), so one source failing does not
+blank the other's results. Selecting a place only moves the camera — `goToResult` calls
+`selectSite` for a site, never for a place, since a modern town has no detail panel to open.
 
 **Contact René Voorburg before mirroring images at scale.** The licences permit
 reuse; the bandwidth is his server's. Quote real figures — **36,216 requests**

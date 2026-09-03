@@ -394,7 +394,8 @@
     "matches": "{count}spiele",
     "label": "Suchorte, Straßen und Orte",
     "placeholder": "Suchorte, Straßen, Orte",
-    "resultsLabel": "Suchergebnisse"
+    "resultsLabel": "Suchergebnisse",
+    "modernPlace": "Moderner Ort · {country}"
   },
   "mapCanvas": {
     "ariaLabel": "Karte der archäologischen Stätten",

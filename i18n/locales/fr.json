@@ -394,7 +394,8 @@
     "matches": "{count}allumettes",
     "label": "Sites de recherche, routes et lieux",
     "placeholder": "Sites de recherche, routes, lieux",
-    "resultsLabel": "Résultats de la recherche"
+    "resultsLabel": "Résultats de la recherche",
+    "modernPlace": "Lieu moderne · {country}"
   },
   "mapCanvas": {
     "ariaLabel": "Carte des sites archéologiques",

@@ -1,5 +1,5 @@
 import { useDebounceFn } from '@vueuse/core'
-import type { SiteDetail, SiteSummary } from '#shared/types'
+import type { MapSearchResult, PlaceSummary, SiteDetail, SiteSummary } from '#shared/types'
 
 /**
  * Reads for the detail panel and the search field. Tiles deliberately carry no
@@ -136,9 +136,18 @@ export const formatLength = (metres: number | null): string => {
   return `${(metres / 1000).toFixed(metres < 10000 ? 1 : 0)} km`
 }
 
+/**
+ * Backs the map search bar. Queries Vestigian's own sites and GeoNames'
+ * modern cities/towns (`PlaceSummary` — `/api/places/search`) in parallel and
+ * merges them into one ranked list, sites first: this atlas's own records are
+ * the primary content, a modern place is here only to get a reader to the
+ * right patch of map. `Promise.allSettled` rather than `Promise.all` so one
+ * source failing (a places-table hiccup, say) still shows the other's
+ * results instead of blanking the whole field.
+ */
 export const useSiteSearch = () => {
   const term = ref('')
-  const results = ref<SiteSummary[]>([])
+  const results = ref<MapSearchResult[]>([])
   const isSearching = ref(false)
 
   let requestToken = 0
@@ -158,14 +167,22 @@ export const useSiteSearch = () => {
     const token = ++requestToken
     isSearching.value = true
 
-    try {
-      const found = await $fetch<SiteSummary[]>('/api/sites/search', { query: { q: trimmed } })
-      if (token === requestToken) results.value = found
-    } catch {
-      if (token === requestToken) results.value = []
-    } finally {
-      if (token === requestToken) isSearching.value = false
-    }
+    const [sites, places] = await Promise.allSettled([
+      $fetch<SiteSummary[]>('/api/sites/search', { query: { q: trimmed } }),
+      $fetch<PlaceSummary[]>('/api/places/search', { query: { q: trimmed } }),
+    ])
+
+    if (token !== requestToken) return
+
+    results.value = [
+      ...(sites.status === 'fulfilled'
+        ? sites.value.map((site) => ({ kind: 'site' as const, ...site }))
+        : []),
+      ...(places.status === 'fulfilled'
+        ? places.value.map((place) => ({ kind: 'place' as const, ...place }))
+        : []),
+    ]
+    isSearching.value = false
   }
 
   const debouncedSearch = useDebounceFn(runSearch, 220)

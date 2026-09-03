@@ -1,4 +1,4 @@
-import type { LonLat } from './site'
+import type { LonLat, PlaceSummary, SiteSummary } from './site'
 
 /**
  * The views offered by the basemap switcher, in two families. The first two are
@@ -75,3 +75,12 @@ export interface TileRenderPlan {
   clusterGridSize: number
   includeTracings: boolean
 }
+
+/**
+ * One combined result list for the map search bar, covering both what the
+ * atlas records (`site`) and where a reader might simply want to navigate to
+ * (`place`, a modern city or town — see `PlaceSummary`). A discriminated
+ * union rather than two separate lists so the field can render one ranked
+ * list and the "no matches" state has one thing to be empty about.
+ */
+export type MapSearchResult = ({ kind: 'site' } & SiteSummary) | ({ kind: 'place' } & PlaceSummary)

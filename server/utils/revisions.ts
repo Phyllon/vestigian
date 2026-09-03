@@ -53,6 +53,7 @@ export const applyRevision = async (revisionId: number): Promise<void> => {
 
   const payload = revision.payload
   const targetId = revision.entity_id ?? payload.entityId ?? null
+  let finalSiteId: number | null = payload.kind === 'site' ? targetId : null
 
   await sql.begin(async (tx) => {
     if (payload.kind === 'site') {
@@ -60,6 +61,7 @@ export const applyRevision = async (revisionId: number): Promise<void> => {
         await updateSite(tx, targetId, payload)
       } else {
         const createdId = await insertSite(tx, payload, revision.author_id)
+        finalSiteId = createdId
         await tx`UPDATE revisions SET entity_id = ${createdId} WHERE id = ${revisionId}`
       }
     }
@@ -89,6 +91,12 @@ export const applyRevision = async (revisionId: number): Promise<void> => {
       `
     }
   })
+
+  // Fire-and-forget: cross-referencing a site against EDH, iDAI.gazetteer and
+  // Historic England costs up to two external requests, and nothing in this
+  // path — a contribution's own approval — should wait on them. See
+  // `verifySiteConcordances`'s own docstring for why it is never awaited here.
+  if (finalSiteId) void verifySiteConcordances(finalSiteId)
 
   // The governance audit line. `applyRevision` is the only path by which a live
   // row is ever written — automatic approval, moderator approval and revert all

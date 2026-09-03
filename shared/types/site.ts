@@ -46,6 +46,19 @@ export interface SiteSummary {
   position: LonLat
 }
 
+/**
+ * A modern city or town — GeoNames.org's `cities500` extract
+ * (`scripts/import/09-cities.ts`), not a Vestigian record. Exists only to
+ * let the map search bar navigate to a place this atlas holds no opinion
+ * about, which is why it carries no `slug`: there is no page for it.
+ */
+export interface PlaceSummary {
+  id: number
+  name: string
+  countryCode: string
+  position: LonLat
+}
+
 export interface SiteImage {
   id: number
   storageKey: string

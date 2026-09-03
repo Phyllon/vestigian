@@ -394,7 +394,8 @@
     "matches": "{count} matches",
     "label": "Search sites, roads and places",
     "placeholder": "Search sites, roads, places",
-    "resultsLabel": "Search results"
+    "resultsLabel": "Search results",
+    "modernPlace": "Modern place · {country}"
   },
   "mapCanvas": {
     "ariaLabel": "Map of archaeological sites",

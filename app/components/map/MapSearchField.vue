@@ -1,10 +1,11 @@
 <script setup lang="ts">
-  import type { SiteSummary } from '#shared/types'
+  import type { MapSearchResult } from '#shared/types'
 
   const { t } = useI18n()
   const map = useMapInstance()
   const { term, results, isSearching } = useSiteSearch()
   const { selectSite } = useSiteQuery()
+  const { countryName } = useCountryName()
 
   /**
    * Spoken, not drawn. The list appearing under the field is the whole feedback
@@ -17,14 +18,18 @@
     return t('mapSearch.matches', { count: results.value.length })
   })
 
-  const goToSite = (site: SiteSummary): void => {
+  /**
+   * A site opens its detail panel; a modern place is not a Vestigian
+   * record — it has nothing to open, so this only moves the camera there.
+   */
+  const goToResult = (result: MapSearchResult): void => {
     map.value?.flyTo({
-      center: [site.position.lon, site.position.lat],
-      zoom: 15,
+      center: [result.position.lon, result.position.lat],
+      zoom: result.kind === 'site' ? 15 : 12,
       duration: 1200,
       essential: true,
     })
-    selectSite(site.id)
+    if (result.kind === 'site') selectSite(result.id)
     term.value = ''
   }
 </script>
@@ -66,14 +71,22 @@
       class="leaf absolute inset-x-0 top-full z-20 mt-2 max-h-80 overflow-y-auto shadow-lifted"
       :aria-label="t('mapSearch.resultsLabel')"
     >
-      <li v-for="site in results" :key="site.id">
+      <li v-for="result in results" :key="`${result.kind}-${result.id}`">
         <button
           type="button"
           class="flex w-full flex-col items-start border-b border-paper-200 px-4 py-2.5 text-left transition last:border-b-0 hover:bg-paper-100 dark:border-night-700 dark:hover:bg-night-700"
-          @click="goToSite(site)"
+          @click="goToResult(result)"
         >
-          <span class="text-sm font-medium text-ink-900 dark:text-paper-100">{{ site.title }}</span>
-          <span class="eyebrow">{{ t(`categories.${site.category}`) }}</span>
+          <span class="text-sm font-medium text-ink-900 dark:text-paper-100">
+            {{ result.kind === 'site' ? result.title : result.name }}
+          </span>
+          <span class="eyebrow">
+            {{
+              result.kind === 'site'
+                ? t(`categories.${result.category}`)
+                : t('mapSearch.modernPlace', { country: countryName(result.countryCode) })
+            }}
+          </span>
         </button>
       </li>
     </ul>
