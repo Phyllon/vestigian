@@ -92,7 +92,20 @@
       "errorEmail": "Sieht nicht aus wie eine E-Mail-Adresse.",
       "errorPassword": "Geben Sie Ihr Passwort ein.",
       "failedTitle": "Konnte sich nicht anmelden",
-      "failedDescription": "Überprüfen Sie Ihre Details und versuchen Sie es erneut."
+      "failedDescription": "Überprüfen Sie Ihre Details und versuchen Sie es erneut.",
+      "twoFactor": {
+        "title": "Geben Sie Ihren Code ein",
+        "introCode": "Öffnen Sie Ihre Authenticator-App und geben Sie den 6-stelligen Code ein, den sie anzeigt.",
+        "introBackup": "Geben Sie einen der Backup-Codes ein, die Sie beim Einschalten gespeichert haben.",
+        "code": "Code",
+        "backupCode": "Backup-Code",
+        "submit": "Überprüfung",
+        "useBackupInstead": "Verwenden Sie stattdessen einen Backup-Code",
+        "useCodeInstead": "Verwenden Sie stattdessen Ihre Authenticator App",
+        "startOver": "Start vorbei",
+        "failedTitle": "Dieser Code funktionierte nicht",
+        "failedDescription": "Überprüfen Sie den Code und versuchen Sie es erneut."
+      }
     },
     "register": {
       "title": "Beitritt Vestigian",
@@ -803,7 +816,35 @@
     "emailFailed": "Die Adresse ließ sich nicht ändern. Versuche es gleich noch einmal.",
     "dataHeading": "Deine Daten",
     "dataBody": "Lade alles herunter, was dieses Konto enthält, oder lösche es ganz.",
-    "dataAction": "Datenschutz und deine Daten"
+    "dataAction": "Datenschutz und deine Daten",
+    "cancel": "Stornierung",
+    "twoFactor": {
+      "heading": "Zwei-Faktor-Authentifizierung",
+      "body": "Ein zusätzlicher Code aus einer Authentifizierungs-App, zusätzlich zu Ihrem Passwort, wenn Sie sich anmelden.",
+      "enable": "Zwei-Faktor-Authentifizierung aktivieren",
+      "setupFailed": "Das konnte nicht eingerichtet werden. Versuchen Sie es gleich noch einmal.",
+      "wrongCode": "Dieser Kodex ist nicht richtig.",
+      "scanIntro": "Scannen Sie dies mit einer Authentifikations-App (Google Authenticator, 1Password, Authy oder ähnliches), und geben Sie dann den Code ein, den es zur Bestätigung anzeigt.",
+      "qrAlt": "QR-Code für Zwei-Faktor-Einrichtung",
+      "manualKey": "Oder geben Sie diesen Schlüssel von Hand ein",
+      "confirmCode": "Code",
+      "confirm": "Bestätigen und einschalten",
+      "enabled": "Die Zwei-Faktor-Authentifizierung ist aktiviert. Speichern Sie Ihre Backup-Codes irgendwo sicher.",
+      "backupCodesIntro": "Speichern Sie diese zehn Backup-Codes irgendwo sicher. Jeder funktioniert einmal, und dies ist das einzige Mal, dass sie gezeigt werden.",
+      "copyCodes": "Kopiercodes",
+      "downloadCodes": "Download als .txt",
+      "copied": "Kopierte Codes.",
+      "copyFailed": "Konnte nicht kopieren. Wählen und kopieren Sie sie von Hand.",
+      "savedCodes": "Ich habe diese Codes gespeichert",
+      "isOn": "Die Zwei-Faktor-Authentifizierung ist aktiviert.",
+      "regenerateHeading": "Neue Backup-Codes",
+      "regenerate": "Backup-Codes wiederherstellen",
+      "backupCodesRegenerated": "Neue Backup-Codes wurden herausgegeben. Die alten funktionieren nicht mehr.",
+      "disableHeading": "Deaktivieren der Zwei-Faktor-Authentifizierung",
+      "disable": "Abschalten",
+      "disabled": "Die Zwei-Faktor-Authentifizierung ist ausgeschaltet.",
+      "disableFailed": "Das hat nicht funktioniert. Überprüfen Sie Ihr Passwort und Ihren Code und versuchen Sie es erneut."
+    }
   },
   "contributor": {
     "notFound": "Diese Person gibt es nicht.",

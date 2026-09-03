@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm'
-import { siteBookmarks, siteVisits, users } from '~~/server/database/schema'
+import { siteBookmarks, siteVisits, twoFactorBackupCodes, users } from '~~/server/database/schema'
 import type { SessionUser } from '#shared/types'
 
 /**
@@ -74,6 +74,10 @@ export default defineEventHandler(async (event) => {
   await database.transaction(async (tx) => {
     await tx.delete(siteVisits).where(eq(siteVisits.userId, sessionUser.id))
     await tx.delete(siteBookmarks).where(eq(siteBookmarks.userId, sessionUser.id))
+    // A credential, like the password, not contribution content — gets the
+    // same hard-clear treatment as `passwordHash` below, not the archival
+    // exemption that keeps a revision's authorship legible.
+    await tx.delete(twoFactorBackupCodes).where(eq(twoFactorBackupCodes.userId, sessionUser.id))
     await tx
       .update(users)
       .set({
@@ -81,6 +85,8 @@ export default defineEventHandler(async (event) => {
         displayName: `Deleted account #${sessionUser.id}`,
         passwordHash: DUMMY_HASH,
         emailVerifiedAt: null,
+        totpSecretEncrypted: null,
+        totpEnabledAt: null,
         // Profile text is the person's own writing about themselves, and the
         // public page it fed must not survive the account.
         bio: null,

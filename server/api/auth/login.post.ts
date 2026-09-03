@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto'
 import { z } from 'zod'
 import { and, desc, eq, isNull, sql } from 'drizzle-orm'
 import { emailTokens, users } from '~~/server/database/schema'
@@ -118,6 +119,7 @@ export default defineEventHandler(async (event) => {
       approvedContributions: users.approvedContributions,
       trustRevoked: users.trustRevoked,
       emailVerifiedAt: users.emailVerifiedAt,
+      totpEnabledAt: users.totpEnabledAt,
     })
     .from(users)
     .where(eq(sql`lower(${users.email})`, credentials.email.toLowerCase()))
@@ -158,6 +160,32 @@ export default defineEventHandler(async (event) => {
         ? 'Confirm your email address first. A fresh link is on its way.'
         : 'Confirm your email address first. A link was sent recently — check your inbox, and the spam folder.',
     })
+  }
+
+  /**
+   * A second factor, if the account has one on. Reachable only once the
+   * password has already checked out — the same placement as the
+   * unverified-email branch above, and for the same reason: neither adds a
+   * way to learn anything about an account from outside it. No session is
+   * set here; a short-lived challenge is, and `verify-2fa.post.ts` is the
+   * only thing that can turn it into one.
+   */
+  if (account.totpEnabledAt) {
+    const challengeId = randomBytes(24).toString('base64url')
+    await useRedis().set(
+      loginChallengeKey(challengeId),
+      JSON.stringify({ userId: account.id, attempts: 0 }),
+      'EX',
+      LOGIN_CHALLENGE_TTL_SECONDS,
+    )
+
+    authEventsTotal().inc({ event: 'login', outcome: 'requires-2fa' })
+    event.context.log.info(
+      { audit: 'auth.login', userId: account.id },
+      'password accepted, awaiting second factor',
+    )
+
+    return { requiresTwoFactor: true as const, challengeId }
   }
 
   authEventsTotal().inc({ event: 'login', outcome: 'accepted' })

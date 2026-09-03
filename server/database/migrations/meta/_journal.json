@@ -92,6 +92,13 @@
       "when": 1788445875407,
       "tag": "0012_slow_human_torch",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1788458659012,
+      "tag": "0013_glamorous_power_pack",
+      "breakpoints": true
     }
   ]
 }

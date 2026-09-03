@@ -92,7 +92,20 @@
       "errorEmail": "Dat lijkt niet op een e-mailadres.",
       "errorPassword": "Voer uw wachtwoord in.",
       "failedTitle": "Kon niet aanmelden",
-      "failedDescription": "Controleer uw gegevens en probeer het opnieuw."
+      "failedDescription": "Controleer uw gegevens en probeer het opnieuw.",
+      "twoFactor": {
+        "title": "Voer uw code in",
+        "introCode": "Open uw aanmeldingsapp en voer de 6-cijferige code in.",
+        "introBackup": "Voer een van de back-upcodes in die je hebt opgeslagen toen je dit aanzette.",
+        "code": "Rubriek",
+        "backupCode": "Reservekopiecode",
+        "submit": "Verifiëren",
+        "useBackupInstead": "In plaats daarvan een reservekopiecode gebruiken",
+        "useCodeInstead": "Gebruik in plaats daarvan uw aanmeldapp",
+        "startOver": "Overnieuw beginnen",
+        "failedTitle": "Die code werkte niet",
+        "failedDescription": "Controleer de code en probeer het opnieuw."
+      }
     },
     "register": {
       "title": "Word lid van Vestigian",
@@ -803,7 +816,35 @@
     "emailFailed": "Het adres kon niet worden gewijzigd. Probeer het zo nog eens.",
     "dataHeading": "Jouw gegevens",
     "dataBody": "Download alles wat dit account bevat, of verwijder het helemaal.",
-    "dataAction": "Privacy en jouw gegevens"
+    "dataAction": "Privacy en jouw gegevens",
+    "cancel": "Annuleren",
+    "twoFactor": {
+      "heading": "Two-factor authenticatie",
+      "body": "Een extra code van een authenticator app, bovenop uw wachtwoord, wanneer u zich aanmeldt.",
+      "enable": "Two-factor authenticatie inschakelen",
+      "setupFailed": "Dat kon niet worden opgezet. Probeer het zo nog eens.",
+      "wrongCode": "Die code klopt niet.",
+      "scanIntro": "Scan dit met een authenticator-app (Google Authenticator, 1Password, Authy, of vergelijkbaar), voer dan de code die het toont om te bevestigen.",
+      "qrAlt": "QR-code voor twee-factor setup",
+      "manualKey": "Of voer deze sleutel met de hand in",
+      "confirmCode": "Rubriek",
+      "confirm": "Bevestigen en inschakelen",
+      "enabled": "Twee-factor authenticatie staat aan. Bewaar je back-up codes ergens veilig.",
+      "backupCodesIntro": "Bewaar deze tien back-up codes ergens veilig. Elk werkt eenmaal, en dit is de enige keer dat ze worden getoond.",
+      "copyCodes": "Codes kopiëren",
+      "downloadCodes": "Downloaden als .txt",
+      "copied": "Codes gekopieerd.",
+      "copyFailed": "Kon niet kopiëren. Selecteer en kopieer ze met de hand.",
+      "savedCodes": "Ik heb deze codes bewaard",
+      "isOn": "Twee-factor authenticatie staat aan.",
+      "regenerateHeading": "Nieuwe reservecodes",
+      "regenerate": "Backupcodes regenereren",
+      "backupCodesRegenerated": "Er zijn nieuwe back-upcodes afgegeven. De oude werken niet meer.",
+      "disableHeading": "Tweefactorauthenticatie uitschakelen",
+      "disable": "Uitzetten",
+      "disabled": "Twee-factor authenticatie is uitgeschakeld.",
+      "disableFailed": "Dat werkte niet. Controleer uw wachtwoord en code en probeer het opnieuw."
+    }
   },
   "contributor": {
     "notFound": "Deze bijdrager bestaat niet.",

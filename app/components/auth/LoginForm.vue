@@ -24,10 +24,36 @@
    */
   const isComplete = computed(() => schema.safeParse(state).success)
 
+  /**
+   * A second step, not a second page. `/api/auth/login` answers
+   * `{ requiresTwoFactor: true, challengeId }` — a 200, not an error — for an
+   * account with 2FA on, so this form swaps its own body rather than
+   * navigating anywhere; the credentials already entered stay exactly where
+   * they were if the reader needs to go back.
+   */
+  const challengeId = ref<string | null>(null)
+  const code = ref('')
+  const useBackupCode = ref(false)
+  const isVerifying = ref(false)
+
+  interface LoginResponse {
+    requiresTwoFactor?: true
+    challengeId?: string
+  }
+
   const signIn = async (event: FormSubmitEvent<CredentialsState>): Promise<void> => {
     isSubmitting.value = true
     try {
-      await $fetch('/api/auth/login', { method: 'POST', body: event.data })
+      const response = await $fetch<LoginResponse>('/api/auth/login', {
+        method: 'POST',
+        body: event.data,
+      })
+
+      if (response.requiresTwoFactor && response.challengeId) {
+        challengeId.value = response.challengeId
+        return
+      }
+
       await refresh()
       await navigateTo((route.query.next as string) || '/')
     } catch (error) {
@@ -42,10 +68,41 @@
       isSubmitting.value = false
     }
   }
+
+  const verifyCode = async (): Promise<void> => {
+    if (!challengeId.value) return
+    isVerifying.value = true
+    try {
+      await $fetch('/api/auth/verify-2fa', {
+        method: 'POST',
+        body: { challengeId: challengeId.value, code: code.value.trim() },
+      })
+      await refresh()
+      await navigateTo((route.query.next as string) || '/')
+    } catch (error) {
+      toast.add({
+        title: t('auth.login.twoFactor.failedTitle'),
+        description:
+          (error as { data?: { message?: string } }).data?.message ??
+          t('auth.login.twoFactor.failedDescription'),
+        color: 'error',
+      })
+      code.value = ''
+    } finally {
+      isVerifying.value = false
+    }
+  }
+
+  /** Back to the credentials step, rather than reloading the page. */
+  const cancelTwoFactor = (): void => {
+    challengeId.value = null
+    code.value = ''
+    useBackupCode.value = false
+  }
 </script>
 
 <template>
-  <UForm :schema="schema" :state="state" class="space-y-4" @submit="signIn">
+  <UForm v-if="!challengeId" :schema="schema" :state="state" class="space-y-4" @submit="signIn">
     <header>
       <h1 class="text-2xl">{{ t('auth.login.title') }}</h1>
     </header>
@@ -86,4 +143,66 @@
       </NuxtLink>
     </p>
   </UForm>
+
+  <!--
+    The password already checked out — `challengeId` only exists because
+    `/api/auth/login` returned it — so this step asks for the second factor
+    only, not the whole form again.
+  -->
+  <form v-else class="space-y-4" @submit.prevent="verifyCode">
+    <header>
+      <h1 class="text-2xl">{{ t('auth.login.twoFactor.title') }}</h1>
+      <p class="mt-1 text-sm text-ink-600 dark:text-paper-300">
+        {{
+          useBackupCode
+            ? t('auth.login.twoFactor.introBackup')
+            : t('auth.login.twoFactor.introCode')
+        }}
+      </p>
+    </header>
+
+    <UFormField
+      :label="useBackupCode ? t('auth.login.twoFactor.backupCode') : t('auth.login.twoFactor.code')"
+    >
+      <UInput
+        id="login-2fa-code"
+        v-model="code"
+        :inputmode="useBackupCode ? 'text' : 'numeric'"
+        :maxlength="useBackupCode ? 9 : 6"
+        autocomplete="one-time-code"
+        class="w-full font-mono tracking-widest"
+      />
+    </UFormField>
+
+    <UButton
+      type="submit"
+      :loading="isVerifying"
+      :disabled="code.trim().length === 0"
+      color="primary"
+      block
+    >
+      {{ t('auth.login.twoFactor.submit') }}
+    </UButton>
+
+    <div class="flex items-center justify-between text-sm">
+      <button
+        type="button"
+        class="text-ink-500 underline underline-offset-2 dark:text-paper-400"
+        @click="useBackupCode = !useBackupCode"
+      >
+        {{
+          useBackupCode
+            ? t('auth.login.twoFactor.useCodeInstead')
+            : t('auth.login.twoFactor.useBackupInstead')
+        }}
+      </button>
+      <button
+        type="button"
+        class="text-ink-500 underline underline-offset-2 dark:text-paper-400"
+        @click="cancelTwoFactor"
+      >
+        {{ t('auth.login.twoFactor.startOver') }}
+      </button>
+    </div>
+  </form>
 </template>

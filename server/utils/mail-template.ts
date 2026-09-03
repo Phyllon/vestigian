@@ -61,6 +61,9 @@ export type MailKind =
   | 'trust-suspended'
   | 'trust-restored'
   | 'account-deleted'
+  | 'two-factor-enabled'
+  | 'two-factor-disabled'
+  | 'two-factor-backup-codes-regenerated'
 
 /**
  * Display names, record titles, moderator notes and email addresses are all
@@ -402,6 +405,65 @@ const buildAccountCopy = (input: AccountEmailInput): EmailCopy => {
         facts: [{ label: 'Deleted', value: when }],
         reassurance:
           'This is the last message this address will receive from Vestigian. If you did not request this, the account cannot be recovered — write to us right away so we can look at what happened.',
+        footerReason,
+        showPasteFallback: false,
+      }
+
+    case 'two-factor-enabled':
+      return {
+        subject: 'Two-factor authentication was turned on',
+        preheader: `Two-factor authentication was enabled on your Vestigian account on ${when}.`,
+        heading: 'Two-factor authentication is on',
+        paragraphs: [
+          `Two-factor authentication has been turned on for the Vestigian account registered to ${input.recipient}. From now on, signing in also asks for a code from your authenticator app.`,
+          'Ten backup codes were generated at the same time and shown once, on the settings page. If you have not saved them somewhere safe, do that now — they are the only way back into the account if the authenticator app is ever lost.',
+        ],
+        action: { label: 'Open settings', href: `${site}/settings` },
+        facts: [
+          { label: 'Account', value: input.displayName },
+          { label: 'Enabled', value: when },
+        ],
+        reassurance:
+          'If you did not do this, change your password immediately: whoever did has a session on this account.',
+        footerReason,
+        showPasteFallback: false,
+      }
+
+    case 'two-factor-disabled':
+      return {
+        subject: 'Two-factor authentication was turned off',
+        preheader: `Two-factor authentication was disabled on your Vestigian account on ${when}.`,
+        heading: 'Two-factor authentication is off',
+        paragraphs: [
+          `Two-factor authentication has been turned off for the Vestigian account registered to ${input.recipient}. Signing in now needs only the password again, and every backup code issued for it has been discarded.`,
+        ],
+        action: { label: 'Open settings', href: `${site}/settings` },
+        facts: [
+          { label: 'Account', value: input.displayName },
+          { label: 'Disabled', value: when },
+        ],
+        reassurance:
+          'If you did not do this, change your password immediately: turning this off required both the password and a working code, so whoever did has both right now.',
+        footerReason,
+        showPasteFallback: false,
+      }
+
+    case 'two-factor-backup-codes-regenerated':
+      return {
+        subject: 'Your Vestigian backup codes were regenerated',
+        preheader: `A new set of two-factor backup codes was issued for your account on ${when}.`,
+        heading: 'New backup codes were issued',
+        paragraphs: [
+          `A new set of ten backup codes was generated for the Vestigian account registered to ${input.recipient}. The old codes no longer work, including any that were never used.`,
+          'The new codes were shown once, on the settings page. If you have not saved them somewhere safe, do that now.',
+        ],
+        action: { label: 'Open settings', href: `${site}/settings` },
+        facts: [
+          { label: 'Account', value: input.displayName },
+          { label: 'Regenerated', value: when },
+        ],
+        reassurance:
+          'If you did not do this, change your password immediately: this required your password to trigger.',
         footerReason,
         showPasteFallback: false,
       }

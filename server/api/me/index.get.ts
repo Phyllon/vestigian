@@ -45,6 +45,7 @@ export default defineEventHandler(async (event) => {
           notifyByEmail: users.notifyByEmail,
           preferredLocale: users.preferredLocale,
           emailVerifiedAt: users.emailVerifiedAt,
+          totpEnabledAt: users.totpEnabledAt,
           createdAt: users.createdAt,
         })
         .from(users)

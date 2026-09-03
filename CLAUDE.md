@@ -645,6 +645,32 @@ whatever client it is handed — see the note in `server/utils/db.ts`.
 - **Detection is not enforcement.** CrowdSec writes decisions; nothing applies them until a bouncer exists. See `docker/security/README.md`.
 - Rate limiting **fails open** — a cache outage must not lock everyone out.
 - CSP allows only the map asset origins listed in `nuxt.config.ts`.
+- **Two-factor login is opt-in TOTP, and nothing else.** RFC 6238 was chosen
+  specifically because it has no provider: no SMS gateway, no push service,
+  no third party ever contacted — a shared secret and the current time,
+  checked entirely on this server and in the visitor's own authenticator
+  app. `server/utils/totp.ts`. The account's secret has to be reversible
+  (verifying a live code means recomputing it, not comparing digests), so
+  unlike every hash and token digest elsewhere in this app it is
+  **encrypted, not hashed** — AES-256-GCM, key in `NUXT_TOTP_ENCRYPTION_KEY`
+  (`openssl rand -hex 32`, generated the same way as `NUXT_ALTCHA_SECRET`).
+  That reversibility is the one real new operational risk this feature adds:
+  losing or rotating the key makes every enrolled user's secret permanently
+  unverifiable, with no self-service recovery for that specific failure —
+  only their own backup codes, or an admin clearing the two `users` columns
+  directly in Postgres, get them back in. The ten backup codes issued at
+  enrollment are hashed with `hashToken`, the same one-way pattern
+  `emailTokens` already uses, and each is single-use, enforced by a
+  conditional `UPDATE … WHERE consumed_at IS NULL` rather than a
+  read-then-write, so two concurrent submissions of the same code cannot
+  both succeed. Disabling 2FA requires **both** the current password and a
+  working code — the stronger bar, not the weaker one either check alone
+  would be, since turning a second factor off is itself a security-lowering
+  action. The login flow never sets a session for a two-factor account until
+  `verify-2fa.post.ts` sees a correct code; the intervening state is an
+  opaque, short-lived challenge in Valkey, not a partial cookie, and it
+  invalidates itself after 8 wrong attempts on top of the IP-wide
+  `twoFactorVerify` rate limit.
 - **`nuxt-security`'s `xssValidator` is off** (`security.xssValidator: false` in
   `nuxt.config.ts`), and that is a considered decision, not a gap. It ran every
   GET query and POST body through the `xss` package's `FilterXSS`, then

@@ -92,7 +92,20 @@
       "errorEmail": "Questo non sembra un indirizzo email.",
       "errorPassword": "Inserisci la password.",
       "failedTitle": "Non poteva firmare",
-      "failedDescription": "Controlla i tuoi dati e riprova."
+      "failedDescription": "Controlla i tuoi dati e riprova.",
+      "twoFactor": {
+        "title": "Inserisci il tuo codice",
+        "introCode": "Apri l'app autenticatore e inserisci il codice a 6 cifre che mostra.",
+        "introBackup": "Inserisci uno dei codici di backup che hai salvato quando hai acceso questo.",
+        "code": "Codice",
+        "backupCode": "Codice di backup",
+        "submit": "Verifica",
+        "useBackupInstead": "Utilizzare un codice di backup",
+        "useCodeInstead": "Utilizzare la tua app di autenticatore",
+        "startOver": "Iniziare",
+        "failedTitle": "Quel codice non funzionava",
+        "failedDescription": "Controlla il codice e riprova."
+      }
     },
     "register": {
       "title": "Unisciti a Vestigian",
@@ -803,7 +816,35 @@
     "emailFailed": "Non è stato possibile cambiare l'indirizzo. Riprova tra poco.",
     "dataHeading": "I tuoi dati",
     "dataBody": "Scarica tutto ciò che questo account contiene, oppure cancellalo del tutto.",
-    "dataAction": "Riservatezza e i tuoi dati"
+    "dataAction": "Riservatezza e i tuoi dati",
+    "cancel": "Annulla",
+    "twoFactor": {
+      "heading": "Autenticazione a due fattori",
+      "body": "Un codice in più da un'applicazione autentica, in cima alla password, quando si accede.",
+      "enable": "Attivare l'autenticazione a due fattori",
+      "setupFailed": "Non potrebbe essere organizzato. Riprova tra un attimo.",
+      "wrongCode": "Quel codice non e' giusto.",
+      "scanIntro": "Scansiona questo con un'applicazione autenticatore (Google Authenticator, 1Password, Authy, o simile), quindi inserisci il codice che mostra per confermare.",
+      "qrAlt": "Codice QR per configurazione a due fattori",
+      "manualKey": "O inserire questa chiave a mano",
+      "confirmCode": "Codice",
+      "confirm": "Confermare e attivare",
+      "enabled": "L'autenticazione a due fattori è attiva. Salva i tuoi codici di backup in un posto sicuro.",
+      "backupCodesIntro": "Salva questi dieci codici di backup in un posto sicuro. Ogni opera una volta, e questa è l'unica volta che vengono mostrati.",
+      "copyCodes": "Codici di copia",
+      "downloadCodes": "Scarica come .txt",
+      "copied": "Codici copiati.",
+      "copyFailed": "Non posso copiare. Seleziona e copiali a mano.",
+      "savedCodes": "Ho salvato questi codici",
+      "isOn": "L'autenticazione a due fattori è attiva.",
+      "regenerateHeading": "Nuovi codici di backup",
+      "regenerate": "Rigenera i codici di backup",
+      "backupCodesRegenerated": "Sono stati emessi nuovi codici di backup. I vecchi non funzionano più.",
+      "disableHeading": "Spegnere l'autenticazione a due fattori",
+      "disable": "Spegnilo",
+      "disabled": "L'autenticazione a due fattori è disattivata.",
+      "disableFailed": "Non ha funzionato. Controlla la password e il codice e riprova."
+    }
   },
   "contributor": {
     "notFound": "Nessun collaboratore con questo nome.",

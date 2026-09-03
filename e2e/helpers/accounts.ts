@@ -62,6 +62,19 @@ export const ACCOUNTS = {
     role: 'admin',
     approvedContributions: 0,
   },
+  /**
+   * Exclusively for `two-factor.spec.ts` — enabling and disabling a real
+   * TOTP secret on `trusted` or another shared account would leave it
+   * mid-enrollment for every other spec file that signs in as that account
+   * afterward, since `signIn` posts credentials and expects an immediate
+   * session rather than a `requiresTwoFactor` challenge.
+   */
+  twoFactorSubject: {
+    email: 'two-factor@e2e.local',
+    displayName: 'E2E Two Factor',
+    role: 'contributor',
+    approvedContributions: 0,
+  },
 } as const satisfies Record<string, TestAccount>
 
 export type AccountName = keyof typeof ACCOUNTS

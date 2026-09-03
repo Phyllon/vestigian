@@ -327,6 +327,17 @@ export default defineNuxtConfig({
      */
     altchaSecret: '',
     /**
+     * AES-256-GCM key for the stored TOTP secret behind opt-in two-factor
+     * login (`server/utils/totp.ts`). Unlike every other secret in this
+     * config, this one is reversible by design — it has to be, to check a
+     * live code — so losing or rotating it makes every enrolled user's
+     * stored secret permanently unverifiable (their backup codes, or an
+     * admin clearing the two columns directly in Postgres, are the only way
+     * back in). Empty means enrollment refuses with a 503 that names this
+     * variable, the same failure mode `altchaSecret` already has.
+     */
+    totpEncryptionKey: '',
+    /**
      * Telemetry. All three are server-side: the browser never speaks to the
      * observability stack, and `connect-src` in the CSP below would refuse it
      * if it tried.

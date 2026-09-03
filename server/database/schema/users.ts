@@ -42,6 +42,16 @@ export const users = pgTable(
     /** Honoured in `server/utils/notifications.ts` before any mail is built. */
     notifyByEmail: boolean('notify_by_email').notNull().default(true),
     preferredLocale: varchar('preferred_locale', { length: 5 }),
+    /**
+     * AES-256-GCM ciphertext of the TOTP secret (`server/utils/totp.ts`), not
+     * a hash — unlike `passwordHash` this has to be reversible to check a
+     * live code, so it needs `NUXT_TOTP_ENCRYPTION_KEY` rather than argon2id.
+     * Null until enrollment is confirmed; a scanned-but-unconfirmed secret is
+     * held in Valkey instead (see `server/api/auth/2fa/setup.post.ts`), never
+     * written here.
+     */
+    totpSecretEncrypted: varchar('totp_secret_encrypted', { length: 255 }),
+    totpEnabledAt: timestamp('totp_enabled_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [

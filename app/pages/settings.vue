@@ -124,6 +124,152 @@
   }
 
   /**
+   * Two-factor authentication. Sits between the password and email forms —
+   * also a credential, and the enable/disable/regenerate calls below all ask
+   * for the current password for the same reason those two do.
+   *
+   * Backup codes are the one thing this section shows only once: `enable`
+   * and `regenerateBackupCodes` each return them in the response and
+   * nowhere else ever will, so `backupCodes` is cleared the moment the
+   * reader acknowledges having saved them rather than kept around in memory
+   * longer than it has to be.
+   */
+  const isTwoFactorEnabled = computed(() => account.value?.account.totpEnabledAt != null)
+  const isEnrolling = ref(false)
+  const isStartingEnrollment = ref(false)
+  const isConfirmingEnrollment = ref(false)
+  const enrollmentQrCode = ref('')
+  const enrollmentSecret = ref('')
+  const confirmCode = ref('')
+  const backupCodes = ref<string[] | null>(null)
+
+  const disablePassword = ref('')
+  const disableCode = ref('')
+  const isDisabling = ref(false)
+
+  const regeneratePassword = ref('')
+  const isRegenerating = ref(false)
+
+  const startEnrollment = async (): Promise<void> => {
+    isStartingEnrollment.value = true
+    try {
+      const response = await $fetch('/api/auth/2fa/setup', { method: 'POST' })
+      enrollmentQrCode.value = response.qrCode
+      enrollmentSecret.value = response.secret
+      isEnrolling.value = true
+    } catch {
+      toast.add({ title: t('settings.twoFactor.setupFailed'), color: 'error' })
+    } finally {
+      isStartingEnrollment.value = false
+    }
+  }
+
+  const cancelEnrollment = (): void => {
+    isEnrolling.value = false
+    confirmCode.value = ''
+    enrollmentQrCode.value = ''
+    enrollmentSecret.value = ''
+  }
+
+  const confirmEnrollment = async (): Promise<void> => {
+    isConfirmingEnrollment.value = true
+    try {
+      const response = await $fetch('/api/auth/2fa/enable', {
+        method: 'POST',
+        body: { code: confirmCode.value.trim() },
+      })
+      backupCodes.value = response.backupCodes
+      cancelEnrollment()
+      await Promise.all([refreshSession(), refresh()])
+      toast.add({ title: t('settings.twoFactor.enabled'), color: 'success' })
+    } catch (error) {
+      const status = (error as { statusCode?: number }).statusCode
+      toast.add({
+        title:
+          status === 403 ? t('settings.twoFactor.wrongCode') : t('settings.twoFactor.setupFailed'),
+        color: 'error',
+      })
+    } finally {
+      isConfirmingEnrollment.value = false
+    }
+  }
+
+  const disableTwoFactor = async (): Promise<void> => {
+    isDisabling.value = true
+    try {
+      await $fetch('/api/auth/2fa/disable', {
+        method: 'POST',
+        body: { currentPassword: disablePassword.value, code: disableCode.value.trim() },
+      })
+      disablePassword.value = ''
+      disableCode.value = ''
+      await Promise.all([refreshSession(), refresh()])
+      toast.add({ title: t('settings.twoFactor.disabled'), color: 'success' })
+    } catch (error) {
+      const status = (error as { statusCode?: number }).statusCode
+      toast.add({
+        title: status === 403 ? t('settings.wrongPassword') : t('settings.twoFactor.disableFailed'),
+        color: 'error',
+      })
+    } finally {
+      isDisabling.value = false
+    }
+  }
+
+  const regenerateBackupCodes = async (): Promise<void> => {
+    isRegenerating.value = true
+    try {
+      const response = await $fetch('/api/auth/2fa/backup-codes', {
+        method: 'POST',
+        body: { currentPassword: regeneratePassword.value },
+      })
+      backupCodes.value = response.backupCodes
+      regeneratePassword.value = ''
+      toast.add({ title: t('settings.twoFactor.backupCodesRegenerated'), color: 'success' })
+    } catch (error) {
+      const status = (error as { statusCode?: number }).statusCode
+      toast.add({
+        title: status === 403 ? t('settings.wrongPassword') : t('settings.twoFactor.disableFailed'),
+        color: 'error',
+      })
+    } finally {
+      isRegenerating.value = false
+    }
+  }
+
+  const acknowledgeBackupCodes = (): void => {
+    backupCodes.value = null
+  }
+
+  const copyBackupCodes = async (): Promise<void> => {
+    if (!backupCodes.value) return
+    try {
+      await navigator.clipboard.writeText(backupCodes.value.join('\n'))
+      toast.add({ title: t('settings.twoFactor.copied'), color: 'success' })
+    } catch {
+      toast.add({ title: t('settings.twoFactor.copyFailed'), color: 'error' })
+    }
+  }
+
+  /**
+   * A `Blob` built and downloaded entirely client-side — the codes never
+   * make a second trip to any server, this app's own included. `<a
+   * download>` inside an artifact viewer sandbox is inert, but this is a
+   * real page in a real browser, where the pattern works as the platform
+   * intends.
+   */
+  const downloadBackupCodes = (): void => {
+    if (!backupCodes.value) return
+    const blob = new Blob([`${backupCodes.value.join('\n')}\n`], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'vestigian-backup-codes.txt'
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+
+  /**
    * Explicit ids for every `UFormField`-wrapped control below, rather than
    * Nuxt UI's own `useId()`-generated ones.
    *
@@ -240,6 +386,152 @@
         {{ t('settings.changePassword') }}
       </UButton>
     </form>
+
+    <section class="mt-10 space-y-5 border-t border-paper-200 pt-6 dark:border-night-700">
+      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+        {{ t('settings.twoFactor.heading') }}
+      </h2>
+      <p class="text-sm text-ink-600 dark:text-paper-300">{{ t('settings.twoFactor.body') }}</p>
+
+      <!-- The codes, shown exactly once, from either enabling or regenerating. -->
+      <div v-if="backupCodes" class="leaf space-y-4 p-4">
+        <p class="text-sm font-medium text-ink-900 dark:text-paper-100">
+          {{ t('settings.twoFactor.backupCodesIntro') }}
+        </p>
+        <ul class="grid grid-cols-2 gap-2 font-mono text-sm text-ink-800 dark:text-paper-200">
+          <li v-for="backupCode in backupCodes" :key="backupCode" class="datum">
+            {{ backupCode }}
+          </li>
+        </ul>
+        <div class="flex flex-wrap gap-2">
+          <UButton color="neutral" variant="outline" icon="i-lucide-copy" @click="copyBackupCodes">
+            {{ t('settings.twoFactor.copyCodes') }}
+          </UButton>
+          <UButton
+            color="neutral"
+            variant="outline"
+            icon="i-lucide-download"
+            @click="downloadBackupCodes"
+          >
+            {{ t('settings.twoFactor.downloadCodes') }}
+          </UButton>
+        </div>
+        <UButton color="primary" @click="acknowledgeBackupCodes">
+          {{ t('settings.twoFactor.savedCodes') }}
+        </UButton>
+      </div>
+
+      <!-- Off, and not mid-enrollment. -->
+      <UButton
+        v-else-if="!isTwoFactorEnabled && !isEnrolling"
+        :loading="isStartingEnrollment"
+        icon="i-lucide-shield-plus"
+        @click="startEnrollment"
+      >
+        {{ t('settings.twoFactor.enable') }}
+      </UButton>
+
+      <!-- Enrolling: scan, then confirm with a live code. -->
+      <div v-else-if="isEnrolling" class="space-y-4">
+        <p class="text-sm text-ink-600 dark:text-paper-300">
+          {{ t('settings.twoFactor.scanIntro') }}
+        </p>
+        <img
+          :src="enrollmentQrCode"
+          :alt="t('settings.twoFactor.qrAlt')"
+          class="leaf h-48 w-48"
+          width="192"
+          height="192"
+        />
+        <p class="font-mono text-xs text-ink-500 dark:text-paper-400">
+          {{ t('settings.twoFactor.manualKey') }}: {{ enrollmentSecret }}
+        </p>
+
+        <UFormField :label="t('settings.twoFactor.confirmCode')">
+          <UInput
+            id="settings-2fa-confirm-code"
+            v-model="confirmCode"
+            inputmode="numeric"
+            maxlength="6"
+            autocomplete="one-time-code"
+            class="w-full font-mono tracking-widest"
+          />
+        </UFormField>
+
+        <div class="flex gap-2">
+          <UButton
+            :loading="isConfirmingEnrollment"
+            :disabled="confirmCode.trim().length !== 6"
+            @click="confirmEnrollment"
+          >
+            {{ t('settings.twoFactor.confirm') }}
+          </UButton>
+          <UButton color="neutral" variant="ghost" @click="cancelEnrollment">
+            {{ t('settings.cancel') }}
+          </UButton>
+        </div>
+      </div>
+
+      <!-- On: disable, or regenerate the backup codes. -->
+      <template v-else>
+        <p class="datum flex items-center gap-2 text-sm text-verdigris-700 dark:text-verdigris-300">
+          <UIcon name="i-lucide-shield-check" class="size-4" aria-hidden="true" />
+          {{ t('settings.twoFactor.isOn') }}
+        </p>
+
+        <form class="space-y-4" @submit.prevent="regenerateBackupCodes">
+          <h3 class="font-medium text-ink-900 dark:text-paper-100">
+            {{ t('settings.twoFactor.regenerateHeading') }}
+          </h3>
+          <UFormField :label="t('settings.currentPassword')">
+            <AuthPasswordField
+              id="settings-2fa-regenerate-password"
+              v-model="regeneratePassword"
+              autocomplete="current-password"
+            />
+          </UFormField>
+          <UButton
+            type="submit"
+            color="neutral"
+            variant="outline"
+            :loading="isRegenerating"
+            :disabled="!regeneratePassword"
+          >
+            {{ t('settings.twoFactor.regenerate') }}
+          </UButton>
+        </form>
+
+        <form class="space-y-4" @submit.prevent="disableTwoFactor">
+          <h3 class="font-medium text-ink-900 dark:text-paper-100">
+            {{ t('settings.twoFactor.disableHeading') }}
+          </h3>
+          <UFormField :label="t('settings.currentPassword')">
+            <AuthPasswordField
+              id="settings-2fa-disable-password"
+              v-model="disablePassword"
+              autocomplete="current-password"
+            />
+          </UFormField>
+          <UFormField :label="t('settings.twoFactor.confirmCode')">
+            <UInput
+              id="settings-2fa-disable-code"
+              v-model="disableCode"
+              autocomplete="one-time-code"
+              class="w-full font-mono tracking-widest"
+            />
+          </UFormField>
+          <UButton
+            type="submit"
+            color="error"
+            variant="outline"
+            :loading="isDisabling"
+            :disabled="!disablePassword || !disableCode"
+          >
+            {{ t('settings.twoFactor.disable') }}
+          </UButton>
+        </form>
+      </template>
+    </section>
 
     <form
       class="mt-10 space-y-5 border-t border-paper-200 pt-6 dark:border-night-700"

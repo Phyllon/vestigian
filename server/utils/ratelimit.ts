@@ -72,6 +72,14 @@ export const RATE_LIMITS = {
    * ping — both unauthenticated, both trivially amplified.
    */
   expensive: { limit: 30, windowSeconds: 60 },
+  /**
+   * A second factor at login: matches `login`'s own brute-force resistance
+   * level, by IP. A 6-digit TOTP code is a smaller space than a password, so
+   * `verify-2fa.post.ts` also invalidates the whole login challenge outright
+   * after 8 wrong attempts against *that* challenge specifically — this
+   * policy is the IP-wide backstop, not the only guard.
+   */
+  twoFactorVerify: { limit: 8, windowSeconds: 900 },
 } as const satisfies Record<string, RateLimitPolicy>
 
 export type RateLimitName = keyof typeof RATE_LIMITS

@@ -99,7 +99,20 @@
       "errorEmail": "That does not look like an email address.",
       "errorPassword": "Enter your password.",
       "failedTitle": "Could not sign in",
-      "failedDescription": "Check your details and try again."
+      "failedDescription": "Check your details and try again.",
+      "twoFactor": {
+        "title": "Enter your code",
+        "introCode": "Open your authenticator app and enter the 6-digit code it shows.",
+        "introBackup": "Enter one of the backup codes you saved when you turned this on.",
+        "code": "Code",
+        "backupCode": "Backup code",
+        "submit": "Verify",
+        "useBackupInstead": "Use a backup code instead",
+        "useCodeInstead": "Use your authenticator app instead",
+        "startOver": "Start over",
+        "failedTitle": "That code did not work",
+        "failedDescription": "Check the code and try again."
+      }
     },
     "register": {
       "title": "Join Vestigian",
@@ -810,7 +823,35 @@
     "emailFailed": "The address could not be changed. Try again in a moment.",
     "dataHeading": "Your data",
     "dataBody": "Download everything this account holds, or delete it outright.",
-    "dataAction": "Privacy and your data"
+    "dataAction": "Privacy and your data",
+    "cancel": "Cancel",
+    "twoFactor": {
+      "heading": "Two-factor authentication",
+      "body": "An extra code from an authenticator app, on top of your password, when you sign in.",
+      "enable": "Turn on two-factor authentication",
+      "setupFailed": "That could not be set up. Try again in a moment.",
+      "wrongCode": "That code is not right.",
+      "scanIntro": "Scan this with an authenticator app (Google Authenticator, 1Password, Authy, or similar), then enter the code it shows to confirm.",
+      "qrAlt": "QR code for two-factor setup",
+      "manualKey": "Or enter this key by hand",
+      "confirmCode": "Code",
+      "confirm": "Confirm and turn on",
+      "enabled": "Two-factor authentication is on. Save your backup codes somewhere safe.",
+      "backupCodesIntro": "Save these ten backup codes somewhere safe. Each works once, and this is the only time they are shown.",
+      "copyCodes": "Copy codes",
+      "downloadCodes": "Download as .txt",
+      "copied": "Codes copied.",
+      "copyFailed": "Could not copy. Select and copy them by hand.",
+      "savedCodes": "I've saved these codes",
+      "isOn": "Two-factor authentication is on.",
+      "regenerateHeading": "New backup codes",
+      "regenerate": "Regenerate backup codes",
+      "backupCodesRegenerated": "New backup codes were issued. The old ones no longer work.",
+      "disableHeading": "Turn off two-factor authentication",
+      "disable": "Turn off",
+      "disabled": "Two-factor authentication is off.",
+      "disableFailed": "That did not work. Check your password and code and try again."
+    }
   },
   "contributor": {
     "notFound": "No such contributor.",
