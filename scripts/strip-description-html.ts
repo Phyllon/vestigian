@@ -1,7 +1,13 @@
 /**
- * Strips markup out of `sites.description` and `tracings.description` for
- * rows imported or edited before `stripHtml` (`server/utils/sanitize.ts`)
- * started running on every new contribution.
+ * Strips markup out of every free-text column that predates `stripHtml`
+ * (`server/utils/sanitize.ts`) running on write: `sites.description`,
+ * `sites.summary`, `tracings.description`, and `site_images.caption` /
+ * `site_images.attribution`. All five went through the same gap —
+ * `stripHtml` originally covered only the two `description` columns, and
+ * `summary`, `caption` and `attribution` accepted raw markup (including a
+ * literal `<script>` tag, found while auditing the upload pipeline) until
+ * `server/api/contributions/index.post.ts` and
+ * `server/api/contributions/images.post.ts` were fixed to match.
  *
  * A direct UPDATE, not a revision: this is data hygiene, the same category as
  * `images:reconcile`, not an editorial change to a record's content — the
@@ -22,25 +28,27 @@ const sql = postgres(
   process.env.NUXT_DATABASE_URL ?? 'postgres://vestigian:vestigian@127.0.0.1:5432/vestigian',
 )
 
-interface DescribedRow {
+interface TextRow {
   id: number
-  description: string
+  value: string
 }
 
-const processTable = async (table: 'sites' | 'tracings'): Promise<void> => {
-  // Cheap prefilter — most rows carry no '<' at all, and reading every
-  // description through stripHtml just to find no change would cost far more
-  // than the query saves.
-  const rows = await sql<DescribedRow[]>`
-    SELECT id, description FROM ${sql(table)}
-    WHERE description IS NOT NULL AND description LIKE '%<%'
+const processColumn = async (table: string, column: string): Promise<void> => {
+  // Cheap prefilter — most rows carry no '<' at all, and reading every value
+  // through stripHtml just to find no change would cost far more than the
+  // query saves.
+  const rows = await sql<TextRow[]>`
+    SELECT id, ${sql(column)} AS value FROM ${sql(table)}
+    WHERE ${sql(column)} IS NOT NULL AND ${sql(column)} LIKE '%<%'
   `
 
   const changed = rows
-    .map((row) => ({ id: row.id, before: row.description, after: stripHtml(row.description) }))
+    .map((row) => ({ id: row.id, before: row.value, after: stripHtml(row.value) }))
     .filter((row) => row.before !== row.after)
 
-  console.log(`${table}: ${rows.length} candidate rows, ${changed.length} actually change.`)
+  console.log(
+    `${table}.${column}: ${rows.length} candidate rows, ${changed.length} actually change.`,
+  )
   for (const row of changed.slice(0, 5)) {
     console.log(`  · #${row.id}: ${JSON.stringify(row.before.slice(0, 60))} → stripped`)
   }
@@ -48,18 +56,21 @@ const processTable = async (table: 'sites' | 'tracings'): Promise<void> => {
 
   if (changed.length > 0 && shouldRepair) {
     for (const row of changed) {
-      await sql`UPDATE ${sql(table)} SET description = ${row.after} WHERE id = ${row.id}`
+      await sql`UPDATE ${sql(table)} SET ${sql(column)} = ${row.after} WHERE id = ${row.id}`
     }
     console.log(`  written ${changed.length} rows.`)
   }
 }
 
 const main = async (): Promise<void> => {
-  await processTable('sites')
-  await processTable('tracings')
+  await processColumn('sites', 'description')
+  await processColumn('sites', 'summary')
+  await processColumn('tracings', 'description')
+  await processColumn('site_images', 'caption')
+  await processColumn('site_images', 'attribution')
 
   if (!shouldRepair) {
-    console.log('\nRun again with --repair to write the stripped descriptions.')
+    console.log('\nRun again with --repair to write the stripped values.')
   }
 
   await sql.end()

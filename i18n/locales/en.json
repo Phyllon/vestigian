@@ -303,7 +303,7 @@
     }
   },
   "revisionHistory": {
-    "title": "History",
+    "title": "File History",
     "loading": "Loading…",
     "created": "Created",
     "edited": "Edited",
@@ -403,11 +403,27 @@
   "siteExternalLinks": {
     "title": "Also recorded in",
     "opensNewTab": "(opens in a new tab)",
+    "verifiedTitle": "Verified against {source}, {metres} m away",
+    "verifiedSummary": "Cross-referenced against {count} of {total} linked sources",
     "schemes": {
       "pleiades": "Pleiades",
       "wikidata": "Wikidata",
       "vici": "Vici.org",
-      "trismegistos": "Trismegistos"
+      "trismegistos": "Trismegistos",
+      "dare": "Digital Atlas of the Roman Empire",
+      "livius": "Livius.org",
+      "arachne": "Arachne",
+      "mithraeum": "The New Mithraeum",
+      "omnesviae": "OmnesViae",
+      "osmway": "OpenStreetMap",
+      "osmnode": "OpenStreetMap",
+      "pecs": "Princeton Encyclopedia of Classical Sites",
+      "romaq": "ROMAQ — Roman Aqueducts",
+      "archis": "Archis",
+      "wikipedia": "Wikipedia",
+      "edh": "Epigraphic Database Heidelberg",
+      "idai-gazetteer": "iDAI.gazetteer",
+      "historic-england": "Historic England"
     }
   },
   "siteMetaList": {
@@ -477,6 +493,7 @@
     "selectedAlt": "Selected photograph",
     "dropHint": "JPEG, PNG or WebP, up to 15 MB",
     "chooseAria": "Choose a photograph — JPEG, PNG or WebP, up to 15 MB",
+    "sizeLimitHint": "Photographs must be under 15 MB.",
     "caption": "Caption",
     "captionPlaceholder": "The north gate, seen from inside",
     "whoTookIt": "Who took it",

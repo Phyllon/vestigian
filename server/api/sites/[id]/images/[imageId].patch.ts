@@ -9,9 +9,20 @@ export const paramsSchema = z.object({
   imageId: routeIdentifier,
 })
 
+/** Stripped the same way the upload path strips them (server/utils/sanitize.ts) — an
+ * edit is exactly as much a chance to store markup as the original upload was. */
+const optionalStrippedText = (maxLength: number) =>
+  z
+    .string()
+    .trim()
+    .nullable()
+    .optional()
+    .transform((value) => (typeof value === 'string' ? stripHtml(value) : value))
+    .pipe(z.string().max(maxLength).nullable().optional())
+
 export const bodySchema = z.object({
-  caption: z.string().trim().max(500).nullable().optional(),
-  attribution: z.string().trim().max(200).nullable().optional(),
+  caption: optionalStrippedText(500),
+  attribution: optionalStrippedText(200),
   licence: z.string().trim().max(60).optional(),
 })
 

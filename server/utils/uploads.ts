@@ -4,6 +4,15 @@ export const MAX_UPLOAD_BYTES = 15 * 1024 * 1024
 export const MIN_UPLOAD_BYTES = 1024
 
 /**
+ * Slack for the multipart boundaries and the caption/attribution/licence/
+ * siteId text fields that ride alongside the file in the same request body —
+ * none of it is the photograph itself, but it still counts against
+ * `Content-Length`. Generous on purpose: this only bounds an early rejection
+ * before the body is read, not what `inspectUpload` actually accepts.
+ */
+export const UPLOAD_FORM_FIELD_OVERHEAD_BYTES = 8 * 1024
+
+/**
  * The declared content type is client-supplied and worthless as a check, so the
  * format is read from the file's own leading bytes. A .jpg that is actually an
  * SVG is the classic way to smuggle script into an image pipeline.

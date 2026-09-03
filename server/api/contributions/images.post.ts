@@ -52,20 +52,41 @@ export default defineEventHandler(async (event) => {
   const user = session.user as SessionUser
   await enforceRateLimit(event, 'upload')
 
+  /**
+   * `nuxt-security`'s `requestSizeLimiter` reads this same header and stops
+   * being a limiter at all the moment it is absent: a request sent with
+   * `Transfer-Encoding: chunked` and no `Content-Length` sails through that
+   * check unbounded, and `readMultipartFormData` below buffers the entire
+   * body into memory with nothing left to cap it. A real browser upload
+   * always sends `Content-Length` for a `File`/`Blob` body — its size is
+   * known before the request is sent — so requiring it here costs no
+   * legitimate uploader anything.
+   */
+  const declaredLength = Number(getRequestHeader(event, 'content-length'))
+  if (!Number.isFinite(declaredLength) || declaredLength <= 0) {
+    throw createError({ statusCode: 411, message: 'A Content-Length header is required.' })
+  }
+  if (declaredLength > MAX_UPLOAD_BYTES + UPLOAD_FORM_FIELD_OVERHEAD_BYTES) {
+    throw createError({ statusCode: 413, message: describeRejection('too-large') })
+  }
+
   const form = await readMultipartFormData(event)
   if (!form) throw createError({ statusCode: 400, message: 'Attach an image to upload.' })
 
   const file = form.find((part) => part.name === 'file' && part.filename)
   const siteIdRaw = form.find((part) => part.name === 'siteId')?.data.toString()
-  const caption = form
-    .find((part) => part.name === 'caption')
-    ?.data.toString()
-    .slice(0, 500)
+  // Stripped the same way a site or tracing description is (server/utils/sanitize.ts):
+  // this is free text a contributor typed, and the only thing standing between
+  // markup stored here and a script tag is that nothing today renders it through
+  // `v-html`. Stripping on the way in means that stays true even if it stops
+  // being true, or the value leaves through a surface that isn't Vue at all.
+  const caption = stripHtml(
+    form.find((part) => part.name === 'caption')?.data.toString() ?? '',
+  ).slice(0, 500)
   const licence = form.find((part) => part.name === 'licence')?.data.toString() ?? ''
-  const attribution = form
-    .find((part) => part.name === 'attribution')
-    ?.data.toString()
-    .slice(0, 200)
+  const attribution = stripHtml(
+    form.find((part) => part.name === 'attribution')?.data.toString() ?? '',
+  ).slice(0, 200)
 
   const siteId = Number(siteIdRaw)
   if (!file || !Number.isInteger(siteId) || siteId <= 0) {
@@ -169,9 +190,9 @@ export default defineEventHandler(async (event) => {
     .values({
       siteId,
       storageKey: '',
-      caption: caption ?? null,
+      caption: caption || null,
       licence: normalisedLicence,
-      attribution: attribution ?? null,
+      attribution: attribution || null,
       width: metadata.width ?? 0,
       height: metadata.height ?? 0,
       status,

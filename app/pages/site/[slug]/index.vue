@@ -154,8 +154,6 @@
       </footer>
     </article>
 
-    <div v-if="site" class="leaf mt-6 px-8 py-6">
-      <UiRevisionHistory :entity-id="site.id" entity-type="site" />
-    </div>
+    <UiRevisionHistory v-if="site" :entity-id="site.id" entity-type="site" class="mt-6" />
   </div>
 </template>

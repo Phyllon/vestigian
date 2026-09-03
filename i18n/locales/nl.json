@@ -303,7 +303,7 @@
     }
   },
   "revisionHistory": {
-    "title": "Historie",
+    "title": "Dossiergeschiedenis",
     "loading": "Laden..",
     "created": "Aangemaakt",
     "edited": "Uitgegeven",
@@ -403,11 +403,27 @@
   "siteExternalLinks": {
     "title": "Ook opgenomen in",
     "opensNewTab": "(opent in een nieuw tabblad)",
+    "verifiedTitle": "Geverifieerd met {source}, {metres} m verderop",
+    "verifiedSummary": "Vergeleken met {count} van {total} gekoppelde bronnen",
     "schemes": {
       "pleiades": "Pleiades",
       "wikidata": "Wikidata",
       "vici": "Vici.org",
-      "trismegistos": "Trismegistos"
+      "trismegistos": "Trismegistos",
+      "dare": "Digitale Atlas van het Romeinse Rijk",
+      "livius": "Livius.org",
+      "arachne": "Arachne",
+      "mithraeum": "Het nieuwe Mithraeum",
+      "omnesviae": "OmnesViae",
+      "osmway": "OpenStreetMap",
+      "osmnode": "OpenStreetMap",
+      "pecs": "Princeton Encyclopedie van klassieke sites",
+      "romaq": "ROMAQ — Romeinse aquaducten",
+      "archis": "Archis",
+      "wikipedia": "Wikipedia",
+      "edh": "Epigrafische Databank Heidelberg",
+      "idai-gazetteer": "iDAI.gazetter",
+      "historic-england": "Historisch Engeland"
     }
   },
   "siteMetaList": {
@@ -477,6 +493,7 @@
     "selectedAlt": "Geselecteerde foto",
     "dropHint": "JPEG, PNG of WebP, tot 15 MB",
     "chooseAria": "Kies een foto van JPEG, PNG of WebP, tot 15 MB",
+    "sizeLimitHint": "Foto's moeten kleiner zijn dan 15 MB.",
     "caption": "Titel",
     "captionPlaceholder": "De noordelijke poort, gezien van binnenuit",
     "whoTookIt": "Wie nam het mee",

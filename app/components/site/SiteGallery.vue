@@ -22,12 +22,14 @@
   -->
   <div>
     <figure>
-      <div class="overflow-hidden rounded-notebook bg-paper-200 dark:bg-night-700">
+      <div
+        class="flex max-h-112 items-center justify-center overflow-hidden rounded-notebook bg-paper-200 dark:bg-night-700"
+      >
         <img
           v-if="activeImage"
-          :src="buildUrl(activeImage, 'card')"
+          :src="buildUrl(activeImage, 'full')"
           :alt="activeImage.caption ?? t('siteGallery.defaultAlt')"
-          class="aspect-[3/2] w-full object-cover"
+          class="max-h-112 w-full object-contain"
           loading="lazy"
           decoding="async"
         />

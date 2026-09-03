@@ -103,6 +103,14 @@
       />
     </label>
 
+    <!--
+      The dropzone's own hint (below) only shows before a file is chosen —
+      once one is picked it is replaced by the preview image, which is
+      exactly the moment a file that turns out to be too large needs the
+      limit to still be visible.
+    -->
+    <p class="datum">{{ t('imageUploader.sizeLimitHint') }}</p>
+
     <template v-if="selected">
       <UFormField :label="t('imageUploader.caption')">
         <UInput

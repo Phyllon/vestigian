@@ -303,7 +303,7 @@
     }
   },
   "revisionHistory": {
-    "title": "Storia",
+    "title": "Storia del fascicolo",
     "loading": "Caricamento..",
     "created": "Creato",
     "edited": "Modificato",
@@ -403,11 +403,27 @@
   "siteExternalLinks": {
     "title": "Anche registrato in",
     "opensNewTab": "(apre in una nuova scheda)",
+    "verifiedTitle": "Verificato con {source}, a {metres} m",
+    "verifiedSummary": "Confrontato con {count} di {total} fonti collegate",
     "schemes": {
       "pleiades": "Pleiadi",
       "wikidata": "Wikidata",
       "vici": "Vici.org",
-      "trismegistos": "Trismegisto"
+      "trismegistos": "Trismegisto",
+      "dare": "Atlante digitale dell'Impero Romano",
+      "livius": "Livius.org",
+      "arachne": "Aracide",
+      "mithraeum": "Il nuovo Mithraeum",
+      "omnesviae": "OmnesVia",
+      "osmway": "OpenStreetMap",
+      "osmnode": "OpenStreetMap",
+      "pecs": "Princeton Enciclopedia dei Siti Classici",
+      "romaq": "ROMAQ — Acquedotti romani",
+      "archis": "Archis",
+      "wikipedia": "Wikipedia",
+      "edh": "Banca dati epigrafica di Heidelberg",
+      "idai-gazetteer": "iDAI.gazetteer",
+      "historic-england": "Inghilterra storica"
     }
   },
   "siteMetaList": {
@@ -477,6 +493,7 @@
     "selectedAlt": "Fotografia selezionata",
     "dropHint": "JPEG, PNG o WebP, fino a 15 MB",
     "chooseAria": "Scegliere una fotografia — JPEG, PNG o WebP, fino a 15 MB",
+    "sizeLimitHint": "Le fotografie devono essere inferiori a 15 MB.",
     "caption": "Didascalia",
     "captionPlaceholder": "Il cancello nord, visto dall'interno",
     "whoTookIt": "Chi l'ha presa",

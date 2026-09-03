@@ -23,7 +23,7 @@ export const siteDraftSchema = z.object({
     'findspot',
     'other',
   ]),
-  summary: z.string().trim().max(400).optional(),
+  summary: z.string().trim().transform(stripHtml).pipe(z.string().max(400)).optional(),
   description: z.string().trim().transform(stripHtml).pipe(z.string().max(20000)).optional(),
   position: positionSchema,
   periodFrom: z.number().int().min(-1200).max(1500).nullable().default(null),

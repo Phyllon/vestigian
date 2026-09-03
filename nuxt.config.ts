@@ -443,6 +443,20 @@ export default defineNuxtConfig({
     },
     rateLimiter: false,
     /**
+     * `nuxt-security`'s own default for a `multipart/form-data` request is
+     * 8 MB — well under the 15 MB (`MAX_UPLOAD_BYTES`,
+     * `server/utils/uploads.ts`) this app actually advertises to a
+     * contributor. Left at the default, a 10 MB phone photograph never
+     * reached `server/api/contributions/images.post.ts` at all: this
+     * middleware ran first and answered a bare 413, never the friendly
+     * "Images must be under 15 MB" message `describeRejection` exists to
+     * show. The two numbers must be read together — raising one without the
+     * other just moves which layer silently wins.
+     */
+    requestSizeLimiter: {
+      maxUploadFileRequestInBytes: 15_500_000,
+    },
+    /**
      * Off, and deliberately: `nuxt-security`'s default policy runs every GET
      * query and POST body (`methods: ['GET', 'POST']` — PATCH and DELETE were
      * never covered even while this was on, which was itself a gap) through

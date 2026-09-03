@@ -303,7 +303,7 @@
     }
   },
   "revisionHistory": {
-    "title": "Historique",
+    "title": "Historique du dossier",
     "loading": "Chargement..",
     "created": "Créé",
     "edited": "Édité",
@@ -403,11 +403,27 @@
   "siteExternalLinks": {
     "title": "Également enregistré en",
     "opensNewTab": "(ouvre dans un nouvel onglet)",
+    "verifiedTitle": "Vérifié avec {source}, à {metres} m",
+    "verifiedSummary": "Recoupé avec {count} des {total} sources liées",
     "schemes": {
       "pleiades": "Pléiades",
       "wikidata": "Wikidonnées",
       "vici": "Vici.org",
-      "trismegistos": "Trismegistos"
+      "trismegistos": "Trismegistos",
+      "dare": "Atlas numérique de l'Empire romain",
+      "livius": "Livius.org",
+      "arachne": "Arachne",
+      "mithraeum": "Le nouveau Mithraeum",
+      "omnesviae": "OmnesViae",
+      "osmway": "OuvrirStreetMap",
+      "osmnode": "OuvrirStreetMap",
+      "pecs": "Princeton Encyclopedia of Classical Sites",
+      "romaq": "ROMAQ — Aqueducs romains",
+      "archis": "Archis",
+      "wikipedia": "Wikipédia",
+      "edh": "Base de données épigraphique de Heidelberg",
+      "idai-gazetteer": "iDAI.gazetteter",
+      "historic-england": "Angleterre historique"
     }
   },
   "siteMetaList": {
@@ -477,6 +493,7 @@
     "selectedAlt": "Photographie sélectionnée",
     "dropHint": "JPEG, PNG ou WebP, jusqu'à 15 Mo",
     "chooseAria": "Choisissez une photographie — JPEG, PNG ou WebP, jusqu'à 15 Mo",
+    "sizeLimitHint": "Les photographies doivent faire moins de 15 Mo.",
     "caption": "Légende",
     "captionPlaceholder": "La porte nord, vue de l'intérieur",
     "whoTookIt": "Qui l'a pris ",

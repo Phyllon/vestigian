@@ -64,7 +64,12 @@
 </script>
 
 <template>
-  <section>
+  <!--
+    Bulk-imported records were never written through applyRevision() and so
+    carry no revisions row at all — the layer is omitted rather than shown
+    empty, not just while loading.
+  -->
+  <section v-if="status === 'pending' || (revisions?.length ?? 0) > 0" class="leaf px-8 py-6">
     <h2 class="eyebrow">{{ t('revisionHistory.title') }}</h2>
 
     <p v-if="status === 'pending'" class="datum mt-2">{{ t('revisionHistory.loading') }}</p>

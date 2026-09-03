@@ -303,7 +303,7 @@
     }
   },
   "revisionHistory": {
-    "title": "Geschichte",
+    "title": "Aktenverlauf",
     "loading": "Beladung..",
     "created": "Geschaffen",
     "edited": "Bearbeitet",
@@ -403,11 +403,27 @@
   "siteExternalLinks": {
     "title": "Auch aufgezeichnet in",
     "opensNewTab": "(wird in einem neuen tab geöffnet)",
+    "verifiedTitle": "Abgeglichen mit {source}, {metres} m entfernt",
+    "verifiedSummary": "Mit {count} von {total} verknüpften Quellen abgeglichen",
     "schemes": {
       "pleiades": "Plejaden",
       "wikidata": "Wikidaten",
       "vici": "Vici.org",
-      "trismegistos": "Trismegistos"
+      "trismegistos": "Trismegistos",
+      "dare": "Digitaler Atlas des Römischen Reiches",
+      "livius": "Livius.org",
+      "arachne": "Arachne",
+      "mithraeum": "Das neue Mithraeum",
+      "omnesviae": "OmnesViae",
+      "osmway": "OpenStreetMap",
+      "osmnode": "OpenStreetMap",
+      "pecs": "Princeton Enzyklopädie der klassischen Stätten",
+      "romaq": "ROMAQ — Römische Aquädukte",
+      "archis": "Archis",
+      "wikipedia": "Wikipedia",
+      "edh": "Epigraphische Datenbank Heidelberg",
+      "idai-gazetteer": "iDAI.gazetteer",
+      "historic-england": "Historisches England"
     }
   },
   "siteMetaList": {
@@ -477,6 +493,7 @@
     "selectedAlt": "Ausgewähltes Foto",
     "dropHint": "JPEG, PNG oder WebP, bis zu 15 MB",
     "chooseAria": "Wählen Sie ein Foto - JPEG, PNG oder WebP, bis zu 15 MB",
+    "sizeLimitHint": "Fotos müssen unter 15 MB groß sein.",
     "caption": "Bildunterschrift",
     "captionPlaceholder": "Das Nordtor, von innen gesehen",
     "whoTookIt": "Wer nahm es",

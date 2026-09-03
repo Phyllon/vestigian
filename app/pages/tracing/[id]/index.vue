@@ -130,8 +130,6 @@
       </footer>
     </article>
 
-    <div class="leaf px-8 py-6">
-      <UiRevisionHistory :entity-id="tracing.id" entity-type="tracing" />
-    </div>
+    <UiRevisionHistory :entity-id="tracing.id" entity-type="tracing" />
   </div>
 </template>
