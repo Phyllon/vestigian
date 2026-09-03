@@ -610,10 +610,11 @@ shared/types/  vocabulary shared by both sides
 shared/utils/  password policy, authorization rules, the limes gazetteer, JSON-LD builders,
                tile enumeration, offline-cache naming, byte formatting            (+__test__/)
 scripts/import/  four-stage vici.org import + vici-licences.ts (shared vocabulary)
-                 04-mirror-basemap-tiles.ts 05-antiquity-atlas.ts 06-limes.ts
+                 02c-geo-names.ts 04-mirror-basemap-tiles.ts 05-antiquity-atlas.ts
+                 06-limes.ts 07-country-boundaries.ts 08-edh-findspots.ts
 scripts/generate-og-placeholders.ts  static per-category Open Graph cards, run by hand
 scripts/warm-tiles.ts snapshot-database.ts reconcile-images.ts build-glyphs.ts
-                 strip-description-html.ts
+                 strip-description-html.ts backfill-country-codes.ts verify-concordances.ts
 scripts/i18n/translate-locales.ts   bootstraps i18n/locales/{fr,es,de,it,nl}.json via LibreTranslate
 public/fonts/    self-hosted SDF label glyphs + the font's OFL
 docker/  Dockerfile compose.dev.yml compose.prod.yml traefik/ backup.sh
@@ -674,14 +675,12 @@ to match the compose defaults.
   rewritten against the real shape. See "The vici.org schema, as observed" below.
 - Migrations are **hand-written** (`0000_initial.sql`, `0001_revision_history.sql`) because drizzle-kit cannot emit PostGIS geometry columns, GiST indexes, or the expression indexes behind search. **Read any generated migration before applying it** — regenerating from the schema files would silently drop all three. See `server/database/migrations/README.md`.
 - Vector-tile source layer names (`transportation`, `place`, `water`, `landuse`, `boundary`, `building`) follow the OpenMapTiles schema. Verify against the actual PMTiles/OpenFreeMap tiles.
-- **`sites.country_code` is null on all 61,272 imported rows.** The column
-  exists, the schema declares it, and nothing in the vici import fills it —
-  measured, not assumed. Two things quietly depend on it: the notebook's
-  "Countries" count reads 0 for everyone, and the `five-countries` milestone is
-  unreachable. Neither is wrong, both are inert. `geo_names` already holds what
-  a reverse-geocode backfill would need, so this is a one-off script rather
-  than a schema question; until it is run, do not build anything else on that
-  column.
+- ~~`sites.country_code` is null on all 61,272 imported rows.~~ **Backfilled,
+  and every new contribution now sets it on write** — see "Import pipeline"
+  above for the full account, including the two wrong versions this went
+  through before point-in-polygon against real country boundaries replaced a
+  nearest-point match against the wrong dataset. The notebook's "Countries"
+  count and the `five-countries` milestone now work.
 
 ## The vici.org schema, as observed
 
@@ -727,17 +726,72 @@ Order matters; each step is resumable. The scratch MariaDB is **not** part of
 ```bash
 docker run -d --name vici-mysql -p 3307:3306 -e MARIADB_ROOT_PASSWORD=root mariadb:11
 
-pnpm import:fetch           # dumps → scratch MariaDB (reuses db_dumb/ if present)
-pnpm import:convert         # → 61,272 sites, 11,720 tracings, 8,692 concordances
-pnpm import:image-records   # → 39,212 site_images rows over 36,216 objects; no bytes
-pnpm import:images          # → the photographs; ~12 hours, ~10 GB, resumable
-pnpm import:basemap dare    # → the DARE sheet; ~10 hours, ~1.2 GB, resumable
-pnpm import:atlas           # → the Barrington sheet: AWMC + Pleiades into PostGIS
-pnpm import:limes           # → the frontier, derived from the atlas; ~1 minute
+pnpm import:fetch               # dumps → scratch MariaDB (reuses db_dumb/ if present)
+pnpm import:convert             # → 61,272 sites, 11,720 tracings, 8,692 concordances
+pnpm import:image-records       # → 39,212 site_images rows over 36,216 objects; no bytes
+pnpm import:images              # → the photographs; ~12 hours, ~10 GB, resumable
+pnpm import:geo-names           # → 447,053 rows, geo.sql.gz already in the scratch MariaDB
+pnpm import:basemap dare        # → the DARE sheet; ~10 hours, ~1.2 GB, resumable
+pnpm import:atlas               # → the Barrington sheet: AWMC + Pleiades into PostGIS
+pnpm import:limes               # → the frontier, derived from the atlas; ~1 minute
+pnpm import:country-boundaries  # → 239 countries, Natural Earth, public domain
+pnpm exec tsx scripts/backfill-country-codes.ts --repair   # needs country-boundaries first
+pnpm import:edh-findspots       # → 29,861 inscription findspots, CC BY-SA 4.0
+pnpm exec tsx scripts/verify-concordances.ts --repair       # overnight-scale, see its own docstring
 pnpm tiles:warm <url>
 ```
 
-The map is fully usable after `import:convert`; everything after is photographs.
+The map is fully usable after `import:convert`; everything after is photographs, geographic
+enrichment and cross-referencing.
+
+**`geo_names` was documented as "already holding what a reverse-geocode backfill would
+need" before this was checked — it did not.** `01-fetch-dump.ts` fetches `geo.sql.gz`
+into the scratch MariaDB alongside `vici.sql.gz`, but nothing ever transferred it into
+Postgres; the table existed, indexed, empty. `pnpm import:geo-names`
+(`scripts/import/02c-geo-names.ts`) is the missing step, and it turned out not to be
+what `sites.country_code` actually needed anyway — see the next paragraph.
+
+**`sites.country_code` has a real backfill now, and it went through two wrong versions
+first.** A nearest-_point_ match against `geo_names` — sparse, and scoped to wherever
+vici.org's own `geo.sql` dump happens to cover (five countries: DE, FR, IT, NL, BE) —
+confidently mislabelled any site genuinely outside that area with whichever of the five
+happened to be closest; caught by testing a real out-of-range coordinate (Madrid, which
+came back `FR`) and found to affect 32,032 of 61,273 sites once audited. A 75 km distance
+guard on the same lookup fixed the wrong-country problem but not the underlying one: a
+nearest-point match can only ever answer for five countries, clearing the other 43,479
+sites to null instead of answering them. `pnpm import:country-boundaries`
+(`scripts/import/07-country-boundaries.ts`, Natural Earth 1:50m admin-0, public domain)
+plus point-in-polygon (`scripts/backfill-country-codes.ts`, now `ST_Contains` against
+real boundaries, with a 60 km coastal-tolerance fallback for genuinely coastal sites that
+land just outside a simplified 1:50m coastline) is what actually answers this, for any
+country, with no distance threshold to guess. `server/utils/revisions.ts`'s `insertSite`/
+`updateSite` run the identical lookup on every write, so this only had to be backfilled
+once — every new contribution gets a correct `country_code` from the moment it publishes.
+Only 9 sites resolve to nothing at all: 4 in Northern Cyprus (a disputed territory with no
+clean ISO code, even in Natural Earth's own data), 1 open-water shipwreck findspot, and 4
+with corrupted source coordinates (two at exactly `0,0`, one at 76°N, one at longitude `0`
+for what should be Orkney) — the system correctly declining to guess, not a bug.
+
+**Cross-referencing beyond what vici.org's own import captured.** vici.org recognises 14
+concordance schemes (`02-mysql-to-postgres.ts`'s `KNOWN_SCHEMES`), but only 4 ever got an
+outbound URL (`server/utils/site-record.ts`'s `EXTERNAL_URL_PATTERNS`) — the rest rendered
+as plain text. Extended to 10 confirmed-live schemes; `livius`, `mithraeum`, `romaq` and
+`archis` are deliberately left unlinked (see that file's own comment for why each one,
+checked rather than guessed, doesn't have a safe pattern). Three more schemes —
+`edh`, `idai-gazetteer`, `historic-england` — do not come from vici.org's import at all:
+`scripts/verify-concordances.ts` discovers and verifies them itself, against sources
+researched and found to actually support this (two live APIs confirmed working; a third,
+EDH, has no live search API at all and is a bulk import instead —
+`scripts/import/08-edh-findspots.ts`; a fourth, the Portable Antiquities Scheme, is
+blocked by a Cloudflare bot challenge on every request and was not pursued). Every
+candidate, from any of these three, still has to pass the same distance-and-category gate
+`server/utils/enrichment.ts`'s `verifyEnrichmentMatch` already applies to Wikidata — this
+is the same rule extended to more sources, not a separate, looser one. Persisted in
+`external_id_verifications` (one row per identifier×source, so the same Wikidata id can be
+independently verified against Wikidata and against iDAI.gazetteer), shown in
+`SiteExternalLinks.vue` as a verdigris mark — this project's own "approved/confirmed"
+token — with the distance in a title, never a negative marker on an identifier nothing has
+checked yet.
 
 **Contact René Voorburg before mirroring images at scale.** The licences permit
 reuse; the bandwidth is his server's. Quote real figures — **36,216 requests**

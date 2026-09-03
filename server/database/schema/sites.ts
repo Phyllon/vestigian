@@ -164,6 +164,36 @@ export const externalIds = pgTable(
   ],
 )
 
+export const verificationStatusEnum = pgEnum('verification_status', ['verified', 'rejected'])
+
+/**
+ * A companion table, not columns on `external_ids` — an identifier is
+ * authored (parsed once, on import); a verification is computed, and
+ * recomputable, against whichever external source was checked. One row per
+ * (identifier, source) pair: a Wikidata id can be verified independently
+ * against Wikidata's own coordinate and against iDAI.gazetteer's, and each
+ * check keeps its own distance and timestamp rather than one overwriting
+ * the other.
+ */
+export const externalIdVerifications = pgTable(
+  'external_id_verifications',
+  {
+    id: serial('id').primaryKey(),
+    externalIdId: integer('external_id_id')
+      .notNull()
+      .references(() => externalIds.id, { onDelete: 'cascade' }),
+    status: verificationStatusEnum('status').notNull(),
+    /** Null when the source consulted has no coordinate to compare against. */
+    distanceMetres: integer('distance_metres'),
+    /** Which source produced this row — 'wikidata', 'edh', 'idai-gazetteer' … */
+    checkedVia: varchar('checked_via', { length: 40 }).notNull(),
+    checkedAt: timestamp('checked_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('external_id_verifications_unique').on(table.externalIdId, table.checkedVia),
+  ],
+)
+
 /**
  * Every change to a site, image or tracing is written here first. The public
  * map reads only approved records; the moderation queue reads pending ones.

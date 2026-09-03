@@ -15,7 +15,15 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "noEmit": true
+    "noEmit": true,
+    // `enrichment.ts` and `concordance-sources.ts` (below) type-only-import
+    // from `#shared/types` — stripped entirely by tsx at runtime
+    // (`verbatimModuleSyntax`), but the type checker still needs to resolve
+    // it. Nuxt's own generated `#shared` alias (`.nuxt/tsconfig.shared.json`)
+    // is not reachable here; this is the same mapping, relative to this file.
+    "paths": {
+      "#shared/*": ["./shared/*"]
+    }
   },
   "include": [
     "scripts/**/*.ts",
@@ -26,6 +34,10 @@
     "server/utils/uploads.ts",
     // Reached from scripts/strip-description-html.ts, which reuses the same
     // sanitizer the contribution endpoint validates descriptions through.
-    "server/utils/sanitize.ts"
+    "server/utils/sanitize.ts",
+    // Reached from scripts/verify-concordances.ts — both are pure/dependency-
+    // free (no Nitro auto-imports), the same requirement as the two above.
+    "server/utils/enrichment.ts",
+    "server/utils/concordance-sources.ts"
   ]
 }

@@ -119,6 +119,35 @@ export const applyRevision = async (revisionId: number): Promise<void> => {
  */
 type Transaction = postgres.TransactionSql
 
+/**
+ * `country_code` is set here by point-in-polygon against
+ * `country_boundaries` (Natural Earth, public domain —
+ * `scripts/import/07-country-boundaries.ts`), so a contribution gets a
+ * country the moment it publishes rather than needing another bulk pass to
+ * catch up — that gap is exactly how every imported site ended up with a
+ * null `country_code` in the first place.
+ *
+ * This was originally a nearest-*point* match against `geo_names`, which is
+ * sparse and scoped to wherever vici.org's own `geo.sql` dump happens to
+ * cover (five countries: DE, FR, IT, NL, BE) — a site genuinely outside
+ * that area still has *a* nearest `geo_names` point, however far away, and
+ * an unguarded match confidently mislabelled it with whichever of those
+ * five happened to be closest. Measured: 43,479 of 61,274 approved sites,
+ * over two thirds, sat outside that area. Real boundary polygons have no
+ * such failure mode for almost every site — a point is either inside a
+ * country or it is not. The one real exception is the coastline itself:
+ * Natural Earth's 1:50m boundary is a simplification, and a genuinely
+ * coastal site (a harbour, a villa maritima, a small island) can land just
+ * outside it in the gap — measured, 688 sites, mostly Italian coastal and
+ * island sites up to 54 km from the nearest mapped boundary, against a
+ * 100+ km gap to the next-nearest country in every one of them. So the
+ * lookup falls back to the nearest boundary within `COASTAL_TOLERANCE_METRES`
+ * only when strict containment finds nothing — `COALESCE` short-circuits in
+ * Postgres, so this second, slightly more expensive query only runs for
+ * that rare miss, not on every write.
+ */
+const COASTAL_TOLERANCE_METRES = 60_000
+
 const insertSite = async (
   tx: Transaction,
   payload: SitePayload,
@@ -129,13 +158,36 @@ const insertSite = async (
   const [created] = await tx<{ id: number }[]>`
     INSERT INTO sites (
       slug, title, category, summary, description, geom,
-      period_from, period_to, status, created_by
+      period_from, period_to, country_code, status, created_by
     )
     VALUES (
       ${slug}, ${payload.title}, ${payload.category}::site_category,
       ${payload.summary ?? null}, ${payload.description ?? null},
       ST_SetSRID(ST_MakePoint(${payload.position.lon}, ${payload.position.lat}), 4326),
-      ${payload.periodFrom}, ${payload.periodTo}, 'approved', ${authorId}
+      ${payload.periodFrom}, ${payload.periodTo},
+      COALESCE(
+        (
+          SELECT b.iso_a2 FROM country_boundaries b
+          WHERE ST_Contains(
+            b.geom,
+            ST_SetSRID(ST_MakePoint(${payload.position.lon}, ${payload.position.lat}), 4326)
+          )
+          LIMIT 1
+        ),
+        (
+          SELECT n.iso_a2 FROM (
+            SELECT iso_a2, geom FROM country_boundaries
+            ORDER BY geom <-> ST_SetSRID(ST_MakePoint(${payload.position.lon}, ${payload.position.lat}), 4326)
+            LIMIT 1
+          ) n
+          WHERE ST_DWithin(
+            n.geom::geography,
+            ST_SetSRID(ST_MakePoint(${payload.position.lon}, ${payload.position.lat}), 4326)::geography,
+            ${COASTAL_TOLERANCE_METRES}
+          )
+        )
+      ),
+      'approved', ${authorId}
     )
     RETURNING id
   `
@@ -148,6 +200,10 @@ const insertSite = async (
  * links, citations and the sitemap all point at it, and a renamed site that
  * silently breaks every inbound link is worse than a slug that no longer
  * matches its title exactly.
+ *
+ * `country_code` is recomputed here too, not just on create: a corrected
+ * position (see `siteEditPage.position` in the edit form) is exactly the
+ * case where the old country_code would otherwise go stale silently.
  */
 const updateSite = async (tx: Transaction, siteId: number, payload: SitePayload): Promise<void> => {
   await tx`
@@ -159,6 +215,28 @@ const updateSite = async (tx: Transaction, siteId: number, payload: SitePayload)
       geom = ST_SetSRID(ST_MakePoint(${payload.position.lon}, ${payload.position.lat}), 4326),
       period_from = ${payload.periodFrom},
       period_to = ${payload.periodTo},
+      country_code = COALESCE(
+        (
+          SELECT b.iso_a2 FROM country_boundaries b
+          WHERE ST_Contains(
+            b.geom,
+            ST_SetSRID(ST_MakePoint(${payload.position.lon}, ${payload.position.lat}), 4326)
+          )
+          LIMIT 1
+        ),
+        (
+          SELECT n.iso_a2 FROM (
+            SELECT iso_a2, geom FROM country_boundaries
+            ORDER BY geom <-> ST_SetSRID(ST_MakePoint(${payload.position.lon}, ${payload.position.lat}), 4326)
+            LIMIT 1
+          ) n
+          WHERE ST_DWithin(
+            n.geom::geography,
+            ST_SetSRID(ST_MakePoint(${payload.position.lon}, ${payload.position.lat}), 4326)::geography,
+            ${COASTAL_TOLERANCE_METRES}
+          )
+        )
+      ),
       status = 'approved'
     WHERE id = ${siteId}
   `

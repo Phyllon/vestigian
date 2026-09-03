@@ -57,6 +57,27 @@
       "when": 1754700000000,
       "tag": "0007_site_endorsements",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1788382420934,
+      "tag": "0008_tiresome_mathemanic",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1788409944200,
+      "tag": "0009_complex_black_cat",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1788411482514,
+      "tag": "0010_lying_nightshade",
+      "breakpoints": true
     }
   ]
 }

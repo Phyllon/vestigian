@@ -81,6 +81,15 @@ export interface ExternalIdentifier {
   scheme: string
   value: string
   url: string | null
+  /**
+   * A source this identifier has been checked against, and how far its
+   * coordinate sat from this site's own — `null` when nothing has verified
+   * it yet, which is not the same as "wrong", only "unchecked"
+   * (`scripts/verify-concordances.ts`; `server/utils/enrichment.ts` for
+   * Wikidata itself, though that one is not persisted — see its own note).
+   */
+  verifiedVia: string | null
+  verifiedDistanceMetres: number | null
 }
 
 /** Which concordance got us from a site to an external entity. */

@@ -1,12 +1,22 @@
 <script setup lang="ts">
   import type { ExternalIdentifier } from '#shared/types'
 
-  defineProps<{ identifiers: ExternalIdentifier[] }>()
+  const props = defineProps<{ identifiers: ExternalIdentifier[] }>()
 
   const { t, te } = useI18n()
 
   const labelFor = (scheme: string): string =>
     te(`siteExternalLinks.schemes.${scheme}`) ? t(`siteExternalLinks.schemes.${scheme}`) : scheme
+
+  const verifiedTitleFor = (identifier: ExternalIdentifier): string =>
+    t('siteExternalLinks.verifiedTitle', {
+      source: labelFor(identifier.verifiedVia ?? ''),
+      metres: identifier.verifiedDistanceMetres ?? 0,
+    })
+
+  const verifiedCount = computed(
+    () => props.identifiers.filter((identifier) => identifier.verifiedVia).length,
+  )
 </script>
 
 <template>
@@ -24,9 +34,26 @@
           {{ labelFor(identifier.scheme) }}
           <span class="sr-only">{{ t('siteExternalLinks.opensNewTab') }}</span>
           <UIcon name="i-lucide-arrow-up-right" class="size-3" aria-hidden="true" />
+          <!--
+            Verdigris, not a new colour: this project's own token for an
+            approved/confirmed state. Absence means unchecked, not wrong, so
+            an unverified link carries no negative marker of its own.
+          -->
+          <UIcon
+            v-if="identifier.verifiedVia"
+            name="i-lucide-badge-check"
+            class="size-3 text-verdigris-600 dark:text-verdigris-400"
+            :aria-label="verifiedTitleFor(identifier)"
+            :title="verifiedTitleFor(identifier)"
+          />
         </a>
         <span v-else class="datum">{{ labelFor(identifier.scheme) }} {{ identifier.value }}</span>
       </li>
     </ul>
+    <p v-if="verifiedCount > 0" class="datum mt-2">
+      {{
+        t('siteExternalLinks.verifiedSummary', { count: verifiedCount, total: identifiers.length })
+      }}
+    </p>
   </section>
 </template>
