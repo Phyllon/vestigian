@@ -275,8 +275,31 @@ docker run --rm --network container:vestigian-dev-minio-1 \
   "mc alias set src http://127.0.0.1:9000 vestigian vestigian-dev-secret && mc mirror src/vestigian /out"
 ```
 
-Reverse the arguments to restore into a fresh bucket. Add `image-archive/` to
-`.gitignore` first: at ~10 GB it must not go near git.
+Add `image-archive/` to `.gitignore` first: at ~10 GB it must not go near git.
+
+To restore, mirror the same pair of arguments the other way — source and
+target swap, everything else is identical:
+
+```bash
+docker run --rm --network container:vestigian-dev-minio-1 \
+  -v "$PWD/image-archive:/out" minio/mc:latest sh -c \
+  "mc alias set dst http://127.0.0.1:9000 vestigian vestigian-dev-secret && mc mirror /out dst/vestigian"
+```
+
+In production the bucket is Bunny Edge Storage, reachable over the public
+internet rather than a Docker network — run this from wherever the archive
+lives (the VPS, or a laptop with the archive downloaded), with no
+`--network` flag needed, and the same `BUNNY_*` values `compose.prod.yml`
+already injects into the app container:
+
+```bash
+docker run --rm -v "$PWD/image-archive:/out" minio/mc:latest sh -c \
+  "mc alias set src https://<BUNNY_S3_ENDPOINT> <BUNNY_ACCESS_KEY_ID> <BUNNY_SECRET_ACCESS_KEY> && mc mirror src/<BUNNY_BUCKET> /out"
+
+# restore, same swap as above
+docker run --rm -v "$PWD/image-archive:/out" minio/mc:latest sh -c \
+  "mc alias set dst https://<BUNNY_S3_ENDPOINT> <BUNNY_ACCESS_KEY_ID> <BUNNY_SECRET_ACCESS_KEY> && mc mirror /out dst/<BUNNY_BUCKET>"
+```
 
 Re-running `import:images` after a database rebuild does **not** re-download
 anything. An object already in storage is adopted — read back locally,
