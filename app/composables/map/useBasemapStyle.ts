@@ -65,6 +65,44 @@ const DARE_ATTRIBUTION =
   'Antiquity base © <a href="https://imperium.ahlfeldt.se" target="_blank" rel="noopener">Digital Atlas of the Roman Empire</a>, Johan Åhlfeldt (CC BY-SA 3.0)'
 
 /**
+ * Sentinel-2 cloudless, EOX IT Services GmbH (Vienna, Austria) — a global,
+ * cloud-free mosaic built from ESA Copernicus Sentinel-2 open data. This is
+ * the 2025 vintage, CC BY-NC-SA 4.0: acceptable while nothing in this atlas
+ * is sold, the same "wrong dependency the day it does" trade-off DARE's own
+ * attribution above already documents, not a coincidence — EOX's own older
+ * (2016/2017) vintage is CC BY 4.0 with no such condition, at the cost of
+ * imagery that is now years further from current.
+ *
+ * The path segments are `{TileMatrix}/{TileRow}/{TileCol}` in EOX's own WMTS
+ * capabilities document — **`z/y/x`, not the `z/x/y` every other tile source
+ * in this file uses.** Confirmed by fetching the same coordinate both ways
+ * and looking at the actual imagery: `z/x/y` landed on generic forest,
+ * `z/y/x` clearly showed the Danube through Vienna, exactly where it should
+ * be. Written into the template with `{y}` before `{x}` here, once, so
+ * nothing downstream has to know the axes are unusual for this one source.
+ */
+const SATELLITE_TILES =
+  'https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2025_3857/default/GoogleMapsCompatible/{z}/{y}/{x}.jpg'
+
+const SATELLITE_ATTRIBUTION =
+  'Satellite: <a href="https://s2maps.eu" target="_blank" rel="noopener">Sentinel-2 cloudless</a> by <a href="https://eox.at" target="_blank" rel="noopener">EOX IT Services GmbH</a> (Contains modified Copernicus Sentinel data 2025, CC BY-NC-SA 4.0)'
+
+/**
+ * Sentinel-2's real ground resolution is ~10 m/pixel, which lands at almost
+ * exactly this zoom for 256px tiles — `pnpm import:satellite-tiles` mirrors
+ * no deeper than this on purpose (see that script's own docstring for the
+ * measured tile counts), since anything past it is EOX's server upsampling,
+ * not more real detail. Declared here for the same reason as
+ * `DARE_MAX_ZOOM`: without a ceiling MapLibre requests zooms the mirror does
+ * not hold and gets a 404, and the base goes blank right where it matters
+ * most. The live EOX fallback (used until a mirror is configured) actually
+ * serves up to z21, so this ceiling costs nothing today — overzoom looks
+ * identical to native tiles at this resolution — and means the sheet will
+ * not visibly change the day someone does configure the mirror.
+ */
+const SATELLITE_MAX_ZOOM = 13
+
+/**
  * The AWMC sheet is ours to draw, not someone else's to borrow.
  *
  * The CAWM tile server publishes only physical relief — no roads, no names, no
@@ -95,10 +133,13 @@ export const isAntiquityView = (view: BasemapView): view is AntiquityView =>
  * What the overlay is drawn on, which is not the same question as which theme
  * the reader chose. An antiquity raster is parchment at midnight too, so the
  * night palette — pale ink on a dark disc — would put invisible markers on a
- * bright sheet. Everything drawing over the basemap reads this, not `isDark`.
+ * bright sheet. Satellite imagery is the same problem from the other
+ * direction: real photography has no "dark mode" to switch to, so it gets the
+ * same fixed treatment as the antiquity rasters rather than following
+ * `isDark`. Everything drawing over the basemap reads this, not `isDark`.
  */
 export const resolveSheetTone = (view: BasemapView, isDark: boolean): BasemapSheetTone => {
-  if (isAntiquityView(view)) return 'light'
+  if (isAntiquityView(view) || view === 'satellite') return 'light'
   return isDark ? 'dark' : 'light'
 }
 
@@ -143,9 +184,7 @@ const DARK_COLOURS: StyleColours = {
   boundary: '#3d362c',
 }
 
-/** Modern view: full road hierarchy and settlement labels, as on a road map. */
-const MODERN_ROAD_OPACITY = 1
-/** Vestigian view: modern infrastructure present but pushed to the background. */
+/** The only remaining vector view: modern infrastructure present but pushed to the background. */
 const QUIET_ROAD_OPACITY = 0.35
 
 interface StyleRequest {
@@ -284,6 +323,9 @@ const resolveTerrainUrl = (source: BasemapSource): string =>
 const resolveDareUrl = (source: BasemapSource): string =>
   source.antiquityDareUrl.length > 0 ? source.antiquityDareUrl : DARE_TILES
 
+const resolveSatelliteUrl = (source: BasemapSource): string =>
+  source.satelliteUrl.length > 0 ? source.satelliteUrl : SATELLITE_TILES
+
 /**
  * DARE, as printed. Raster tiles carry their own cartography, so there is
  * nothing to style: the sheet is the map.
@@ -308,6 +350,32 @@ const buildDareStyle = (source: BasemapSource): StyleSpecification => ({
   layers: [
     { id: 'background', type: 'background', paint: { 'background-color': LIGHT_COLOURS.land } },
     { id: 'antiquity', type: 'raster', source: 'antiquity' },
+  ],
+})
+
+/**
+ * Satellite imagery, as photographed. Like DARE, raster tiles carry their own
+ * content and there is nothing to recolour — the sheet stays paper-toned in
+ * both themes for the same reason: these tiles are opaque, and only the
+ * uncovered edges show the background through, so a night backdrop would read
+ * as a hole rather than as the dark it is elsewhere.
+ */
+const buildSatelliteStyle = (source: BasemapSource): StyleSpecification => ({
+  version: 8,
+  glyphs: source.glyphsUrl,
+  sources: {
+    satellite: {
+      type: 'raster',
+      tiles: [resolveSatelliteUrl(source)],
+      tileSize: 256,
+      minzoom: 0,
+      maxzoom: SATELLITE_MAX_ZOOM,
+      attribution: SATELLITE_ATTRIBUTION,
+    },
+  },
+  layers: [
+    { id: 'background', type: 'background', paint: { 'background-color': LIGHT_COLOURS.land } },
+    { id: 'satellite', type: 'raster', source: 'satellite' },
   ],
 })
 
@@ -759,9 +827,9 @@ export const buildBasemapStyle = (request: StyleRequest): StyleSpecification => 
   if (request.view === 'antiquity-awmc') {
     return buildAtlasStyle(request.source, { limes: request.isFollowingLimes === true })
   }
+  if (request.view === 'satellite') return buildSatelliteStyle(request.source)
 
   const colours = request.isDark ? DARK_COLOURS : LIGHT_COLOURS
-  const roadOpacity = request.view === 'modern' ? MODERN_ROAD_OPACITY : QUIET_ROAD_OPACITY
 
   if (request.source.provider === 'pmtiles') registerPmtilesProtocol()
 
@@ -769,13 +837,13 @@ export const buildBasemapStyle = (request: StyleRequest): StyleSpecification => 
     version: 8,
     glyphs: request.source.glyphsUrl,
     sources: { basemap: buildVectorSource(request.source) },
-    layers: buildBasemapLayers(colours, roadOpacity),
+    layers: buildBasemapLayers(colours, QUIET_ROAD_OPACITY),
   }
 }
 
 export const BASEMAP_VIEWS: BasemapOption[] = [
   { value: 'vestigian', group: 'today', label: 'Vestigian', hint: 'Antiquity foregrounded' },
-  { value: 'modern', group: 'today', label: 'Modern', hint: 'Roads and towns today' },
+  { value: 'satellite', group: 'today', label: 'Satellite', hint: 'Sentinel-2 imagery' },
   {
     value: 'antiquity-dare',
     group: 'antiquity',
@@ -829,6 +897,7 @@ export const useBasemapStyle = () => {
     pmtilesUrl: config.public.basemap.pmtilesUrl,
     terrainUrl: config.public.basemap.terrainUrl,
     antiquityDareUrl: config.public.basemap.antiquityDareUrl,
+    satelliteUrl: config.public.basemap.satelliteUrl,
     atlasTilesUrl: absolute(config.public.basemap.atlasTilesUrl),
     limesTilesUrl: absolute(config.public.basemap.limesTilesUrl),
     glyphsUrl: config.public.basemap.glyphsUrl,

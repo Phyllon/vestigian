@@ -3,11 +3,13 @@ import { watchForProblems } from './helpers/console'
 import { openMap, waitForTiles } from './helpers/map'
 
 /**
- * The antiquity views are the only raster basemaps in the application and the
- * only ones fetched from an origin outside the app. Both of those are things
- * the production build can refuse and the development server cannot: a tile
- * host missing from the CSP allowlist fails silently, exactly as the missing
- * nonce token once did.
+ * The antiquity views and the satellite view are the only raster basemaps in
+ * the application, and the only ones fetched from an origin outside the app —
+ * `Vestigian` is the only vector view left after `modern` was dropped as too
+ * similar a recolouring of the same source to earn a second entry. All three
+ * raster views are things the production build can refuse and the
+ * development server cannot: a tile host missing from the CSP allowlist
+ * fails silently, exactly as the missing nonce token once did.
  */
 const chooseBasemap = async (page: Parameters<typeof openMap>[0], label: string): Promise<void> => {
   await page.getByRole('button', { name: /^Basemap:/ }).click()
@@ -83,6 +85,28 @@ test.describe('the basemap switcher', () => {
     expect(tiles.length, 'no antiquity tile was requested at all').toBeGreaterThan(0)
     expect(tiles.some((status) => status === 200)).toBe(true)
     expect(problems.cspViolations, 'the antiquity tile origin is not allowlisted').toEqual([])
+  })
+
+  test('draws the satellite sheet without a CSP refusal', async ({ page }) => {
+    // Same failure class as the DARE test above: EOX's tile host missing from
+    // the CSP allowlist would fail silently, with a blank sheet and nothing
+    // in the page's own console to explain why.
+    const problems = watchForProblems(page)
+    const tiles: number[] = []
+
+    page.on('response', (response) => {
+      if (/tiles\.maps\.eox\.at|basemap\/satellite\/\d+\/\d+\/\d+\.jpg/.test(response.url())) {
+        tiles.push(response.status())
+      }
+    })
+
+    await openMap(page)
+    await chooseBasemap(page, 'Satellite')
+    await page.waitForTimeout(2_000)
+
+    expect(tiles.length, 'no satellite tile was requested at all').toBeGreaterThan(0)
+    expect(tiles.some((status) => status === 200)).toBe(true)
+    expect(problems.cspViolations, 'the satellite tile origin is not allowlisted').toEqual([])
   })
 
   test('keeps the site overlay across a style swap', async ({ page }) => {

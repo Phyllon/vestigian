@@ -20,6 +20,7 @@ const source: BasemapSource = {
   pmtilesUrl: '',
   terrainUrl: 'https://elevation.example/{z}/{x}/{y}.png',
   antiquityDareUrl: '',
+  satelliteUrl: '',
   atlasTilesUrl: 'http://localhost:3000/api/tiles/antiquity',
   limesTilesUrl: 'http://localhost:3000/api/tiles/limes',
   glyphsUrl: '/fonts/{fontstack}/{range}.pbf',
@@ -32,6 +33,15 @@ const dareSource = (overrides: Partial<BasemapSource> = {}) => {
     source: { ...source, ...overrides },
   })
   return style.sources.antiquity as RasterSourceSpecification
+}
+
+const satelliteSource = (overrides: Partial<BasemapSource> = {}) => {
+  const style = buildBasemapStyle({
+    view: 'satellite',
+    isDark: false,
+    source: { ...source, ...overrides },
+  })
+  return style.sources.satellite as RasterSourceSpecification
 }
 
 const atlasStyle = (overrides: Partial<BasemapSource> = {}) =>
@@ -114,7 +124,7 @@ describe('buildBasemapStyle, vector views', () => {
   it('asks for the fontstack the repository actually ships', () => {
     // The directory under public/fonts is named for this string. A mismatch
     // renders every label blank and logs nothing worth reading.
-    const style = buildBasemapStyle({ view: 'modern', isDark: false, source })
+    const style = buildBasemapStyle({ view: 'vestigian', isDark: false, source })
     const labels = style.layers.find((layer) => layer.id === 'place-labels')
     expect(labels?.type === 'symbol' && labels.layout?.['text-font']).toEqual([MAP_LABEL_FONT])
   })
@@ -122,6 +132,40 @@ describe('buildBasemapStyle, vector views', () => {
   it('serves glyphs from this origin rather than a font server', () => {
     const style = buildBasemapStyle({ view: 'vestigian', isDark: false, source })
     expect(style.glyphs).not.toMatch(/^https?:/)
+  })
+})
+
+describe('buildBasemapStyle, satellite view', () => {
+  it('reads tile coordinates as z/y/x, not the usual z/x/y', () => {
+    // Confirmed against EOX's own WMTS capabilities document and by fetching
+    // the same coordinate both ways: their path segments are
+    // {TileMatrix}/{TileRow}/{TileCol}, i.e. row (y) before column (x). Every
+    // other raster source in this file is z/x/y — getting this backwards
+    // would silently mirror or request the wrong tile at any coordinate that
+    // is not on the diagonal.
+    const tiles = satelliteSource().tiles ?? []
+    expect(tiles[0]).toMatch(/\{z\}\/\{y\}\/\{x\}/)
+  })
+
+  it('stops at the zoom a mirror would actually hold', () => {
+    // Sentinel-2's real resolution is ~10m/pixel, which lands at this zoom —
+    // past it the upstream server is upsampling, not showing more detail.
+    expect(satelliteSource().maxzoom).toBe(13)
+  })
+
+  it('prefers a configured mirror over asking EOX directly', () => {
+    const mirrored = satelliteSource({
+      satelliteUrl: 'https://cdn.example/basemap/satellite/{z}/{y}/{x}.jpg',
+    })
+    expect(mirrored.tiles).toEqual(['https://cdn.example/basemap/satellite/{z}/{y}/{x}.jpg'])
+    expect(satelliteSource().tiles?.[0]).toContain('tiles.maps.eox.at')
+  })
+
+  it('carries the attribution the licence requires', () => {
+    const attribution = satelliteSource().attribution ?? ''
+    expect(attribution).toContain('<a href=')
+    expect(attribution).toContain('EOX')
+    expect(attribution).toContain('CC BY-NC-SA')
   })
 })
 
@@ -145,9 +189,16 @@ describe('resolveSheetTone', () => {
     expect(resolveSheetTone('antiquity-awmc', true)).toBe('light')
   })
 
+  it('keeps the sheet light over the satellite photograph even at night', () => {
+    // Real imagery has no dark mode of its own to switch to, the same problem
+    // as the antiquity rasters from the other direction.
+    expect(resolveSheetTone('satellite', true)).toBe('light')
+    expect(resolveSheetTone('satellite', false)).toBe('light')
+  })
+
   it('follows the theme everywhere else', () => {
-    expect(resolveSheetTone('modern', true)).toBe('dark')
-    expect(resolveSheetTone('modern', false)).toBe('light')
+    expect(resolveSheetTone('vestigian', true)).toBe('dark')
+    expect(resolveSheetTone('vestigian', false)).toBe('light')
   })
 })
 
@@ -258,7 +309,7 @@ describe('the frontier', () => {
   it('is not offered on a sheet it would mislead on', () => {
     // The flag is ignored anywhere but the Barrington sheet, so a frontier can
     // never be drawn against present-day motorways.
-    for (const view of ['vestigian', 'modern', 'antiquity-dare'] as const) {
+    for (const view of ['vestigian', 'satellite', 'antiquity-dare'] as const) {
       const style = buildBasemapStyle({ view, isDark: false, source, isFollowingLimes: true })
       expect(layerIds(style).some((id) => id.startsWith('limes-'))).toBe(false)
     }

@@ -1,14 +1,24 @@
 /**
- * Mirrors an antiquity basemap pyramid into object storage.
+ * Mirrors a raster basemap pyramid into object storage.
  *
- * One academic server publishes a reconstruction of the ancient world as plain
- * XYZ raster tiles under a licence that permits reuse:
+ * Two servers publish tiles under a licence that permits reuse:
  *
- *   dare  https://dh.gu.se/tiles/imperium/  Digital Atlas of the Roman Empire,
- *         Johan Åhlfeldt, Centre for Digital Humanities, Gothenburg. CC BY-SA
- *         3.0 per imperium.ahlfeldt.se/info_api.php. Note that DARE's own
- *         legend credits two inputs as CC BY-NC 3.0 and CC BY-NC-SA, which the
- *         blanket BY-SA cannot cover; acceptable while nothing here is sold.
+ *   dare       https://dh.gu.se/tiles/imperium/  Digital Atlas of the Roman
+ *              Empire, Johan Åhlfeldt, Centre for Digital Humanities,
+ *              Gothenburg. CC BY-SA 3.0 per imperium.ahlfeldt.se/info_api.php.
+ *              Note that DARE's own legend credits two inputs as CC BY-NC 3.0
+ *              and CC BY-NC-SA, which the blanket BY-SA cannot cover;
+ *              acceptable while nothing here is sold.
+ *   satellite  https://tiles.maps.eox.at/  Sentinel-2 cloudless, EOX IT
+ *              Services GmbH (Vienna, Austria), built from ESA Copernicus
+ *              Sentinel-2 open data. This mirrors the 2025 vintage, CC
+ *              BY-NC-SA 4.0 — same "acceptable while nothing here is sold"
+ *              trade-off as DARE above, not a coincidence. **EOX's tile path
+ *              is z/row/col, not the z/x/y every other source here uses** —
+ *              `urlTemplate` below has `{y}` before `{x}` for exactly that
+ *              reason; storage keys still use this project's own `z/x/y`
+ *              convention regardless, so a mirrored pull-zone URL reads
+ *              exactly like DARE's does.
  *
  * The other antiquity sheet is not mirrored and never was. The CAWM tile server
  * publishes physical relief only — no roads, names or settlements — so copying
@@ -16,20 +26,22 @@
  * separately as open data and is imported by `pnpm import:atlas` instead.
  *
  * Permission is not the same as bandwidth. Like the photograph mirror, this is
- * deliberately slow and single-threaded: a parallel crawl of thirty thousand
- * tiles off a university web server is indistinguishable from an attack. Tell
- * Johan Åhlfeldt before the full run and quote the real figures this script
- * prints — johan.ahlfeldt@lir.gu.se. Prove the setup first with MIRROR_LIMIT=5.
+ * deliberately slow and single-threaded: a parallel crawl of tens of thousands
+ * of tiles off someone else's server is indistinguishable from an attack. Tell
+ * the source before the full run and quote the real figures this script
+ * prints — johan.ahlfeldt@lir.gu.se for DARE, cloudless@eox.at for the
+ * satellite tiles. Prove the setup first with MIRROR_LIMIT=5.
  *
  * Hotlinking instead would push that same traffic onto them permanently and
  * once per visitor rather than once in total, which is why the pyramid is
- * copied at all; vici.org mirrors this tileset for the same reason.
+ * copied at all; vici.org mirrors the DARE tileset for the same reason.
  *
  * Resumable: a tile already in storage costs a HEAD against our own bucket and
  * no request to the origin, so an interrupted run is restarted freely and a
  * second full run is nearly free.
  *
  *   pnpm import:basemap dare
+ *   pnpm import:basemap satellite
  *   MIRROR_LIMIT=5 pnpm import:basemap dare
  */
 import {
@@ -38,19 +50,37 @@ import {
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3'
-import { detectImageFormat } from '../../server/utils/uploads'
+import { detectImageFormat, type AcceptedImageFormat } from '../../server/utils/uploads'
+
+const EXTENSION_FOR_FORMAT: Record<AcceptedImageFormat, string> = {
+  png: 'png',
+  jpeg: 'jpg',
+  webp: 'webp',
+}
+
+const CONTENT_TYPE_FOR_FORMAT: Record<AcceptedImageFormat, string> = {
+  png: 'image/png',
+  jpeg: 'image/jpeg',
+  webp: 'image/webp',
+}
 
 /** Pause between requests to the source server, in milliseconds. */
 const REQUEST_INTERVAL = 1200
 
 /**
- * Both servers hold z3–z11, and z11 alone is three quarters of the pyramid for
- * a level the base is never read at — sites are individual markers by then and
- * the sheet underneath is scenery. Stopping at 10 and letting MapLibre overzoom
- * by a factor of two costs a little sharpness and saves ~89,000 tiles per
- * tileset. `ANTIQUITY_MAX_ZOOM` in useBasemapStyle.ts must agree with this.
+ * DARE holds z3–z11, and z11 alone is three quarters of the pyramid for a
+ * level the base is never read at — sites are individual markers by then and
+ * the sheet underneath is scenery. Stopping at 10 and letting MapLibre
+ * overzoom by a factor of two costs a little sharpness and saves ~89,000
+ * tiles. `DARE_MAX_ZOOM` in useBasemapStyle.ts must agree with this.
+ *
+ * The satellite mirror stops at 13 instead — measured against a real sample
+ * (see `SATELLITE_MAX_ZOOM`'s own docstring in useBasemapStyle.ts): Sentinel-2's
+ * ~10m/pixel ground resolution lands almost exactly there, so a deeper mirror
+ * would only be storing the upstream server's own upsampling.
+ * `MIRROR_MAX_ZOOM` overrides either default (set per tileset below) for a
+ * single run.
  */
-const MAX_ZOOM = Number(process.env.MIRROR_MAX_ZOOM ?? 10)
 const MIN_ZOOM = 3
 
 /**
@@ -78,6 +108,10 @@ interface Tileset {
   urlTemplate: string
   prefix: string
   attribution: string
+  format: AcceptedImageFormat
+  maxZoom: number
+  /** What to tell the operator to set once the mirror exists. */
+  envVar: string
 }
 
 const TILESETS: Record<string, Tileset> = {
@@ -85,6 +119,20 @@ const TILESETS: Record<string, Tileset> = {
     urlTemplate: 'https://dh.gu.se/tiles/imperium/{z}/{x}/{y}.png',
     prefix: 'basemap/dare',
     attribution: 'Digital Atlas of the Roman Empire, Johan Åhlfeldt (CC BY-SA 3.0)',
+    format: 'png',
+    maxZoom: 10,
+    envVar: 'NUXT_PUBLIC_BASEMAP_ANTIQUITY_DARE_URL',
+  },
+  satellite: {
+    // z/row/col — see the module docstring above.
+    urlTemplate:
+      'https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2025_3857/default/GoogleMapsCompatible/{z}/{y}/{x}.jpg',
+    prefix: 'basemap/satellite',
+    attribution:
+      'Sentinel-2 cloudless by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2025, CC BY-NC-SA 4.0)',
+    format: 'jpeg',
+    maxZoom: 13,
+    envVar: 'NUXT_PUBLIC_BASEMAP_SATELLITE_URL',
   },
 }
 
@@ -127,10 +175,10 @@ const latitudeToRow = (latitude: number, zoom: number): number => {
 }
 
 /** Every tile of the bounding box, coarsest zoom first, so an interrupted run still covers the world. */
-const planPyramid = (): TileAddress[] => {
+const planPyramid = (maxZoom: number): TileAddress[] => {
   const tiles: TileAddress[] = []
 
-  for (let z = MIN_ZOOM; z <= MAX_ZOOM; z += 1) {
+  for (let z = MIN_ZOOM; z <= maxZoom; z += 1) {
     const limit = 2 ** z - 1
     const first = { x: longitudeToColumn(BBOX.west, z), y: latitudeToRow(BBOX.north, z) }
     const last = { x: longitudeToColumn(BBOX.east, z), y: latitudeToRow(BBOX.south, z) }
@@ -152,7 +200,7 @@ const fillTemplate = (template: string, tile: TileAddress): string =>
     .replace('{y}', String(tile.y))
 
 const storageKeyFor = (tileset: Tileset, tile: TileAddress): string =>
-  `${tileset.prefix}/${tile.z}/${tile.x}/${tile.y}.png`
+  `${tileset.prefix}/${tile.z}/${tile.x}/${tile.y}.${EXTENSION_FOR_FORMAT[tileset.format]}`
 
 const isAlreadyStored = async (key: string): Promise<boolean> => {
   try {
@@ -188,16 +236,26 @@ const mirrorTile = async (request: MirrorRequest): Promise<TileOutcome> => {
   // The declared content type is a hint; the leading bytes are not. A tile
   // server answering an out-of-range request with an HTML error page reaches
   // this point looking like a success.
-  if (raw.byteLength < MIN_TILE_BYTES || detectImageFormat(raw) !== 'png') return 'absent'
+  if (raw.byteLength < MIN_TILE_BYTES || detectImageFormat(raw) !== request.tileset.format) {
+    return 'absent'
+  }
 
   await storage.send(
     new PutObjectCommand({
       Bucket: BUCKET,
       Key: storageKeyFor(request.tileset, request.tile),
       Body: raw,
-      ContentType: 'image/png',
+      ContentType: CONTENT_TYPE_FOR_FORMAT[request.tileset.format],
       CacheControl: 'public, max-age=31536000, immutable',
-      Metadata: { attribution: request.tileset.attribution },
+      // S3 metadata values must be US-ASCII; an un-encoded "Johan Åhlfeldt"
+      // silently broke every upload's SigV4 signature (confirmed directly
+      // against this project's own MinIO — "the request signature we
+      // calculated does not match the signature you provided", on every
+      // single tile, with nothing in the earlier error to suggest the cause
+      // was the attribution string rather than the credentials). Percent-
+      // encoding is the standard escape for non-ASCII S3 metadata; decode on
+      // read if this is ever surfaced rather than just stored.
+      Metadata: { attribution: encodeURIComponent(request.tileset.attribution) },
     }),
   )
 
@@ -234,10 +292,11 @@ const main = async (): Promise<void> => {
 
   await checkBucketReachable()
 
-  const planned = planPyramid().slice(0, MIRROR_LIMIT)
+  const maxZoom = Number(process.env.MIRROR_MAX_ZOOM ?? tileset.maxZoom)
+  const planned = planPyramid(maxZoom).slice(0, MIRROR_LIMIT)
 
   console.log(
-    `${planned.length} tiles planned for '${name}', z${MIN_ZOOM}–z${MAX_ZOOM} over ` +
+    `${planned.length} tiles planned for '${name}', z${MIN_ZOOM}–z${maxZoom} over ` +
       `${BBOX.west}…${BBOX.east}°E, ${BBOX.south}…${BBOX.north}°N.\n` +
       `That is the number of requests their server will see, and the number to quote ` +
       `when you tell them. Roughly ${Math.round((planned.length * REQUEST_INTERVAL) / 3600000)} ` +
@@ -279,8 +338,8 @@ const main = async (): Promise<void> => {
   console.log(
     `\nMirrored ${mirrored} tiles, ${skipped} already in storage. ` +
       `${absent} not published by the source, ${deferred} left for a later run.\n` +
-      `Set NUXT_PUBLIC_BASEMAP_ANTIQUITY_${name.toUpperCase()}_URL to the pull zone path ` +
-      `for ${tileset.prefix}/{z}/{x}/{y}.png.`,
+      `Set ${tileset.envVar} to the pull zone path for ` +
+      `${tileset.prefix}/{z}/{x}/{y}.${EXTENSION_FOR_FORMAT[tileset.format]}.`,
   )
 }
 

@@ -24,6 +24,10 @@ const mapAssetOrigins = [
   // the list because the unset-env fallback is what makes a fresh clone work.
   // The other antiquity sheet needs no entry: it is served from this origin.
   'https://dh.gu.se',
+  // EOX's Sentinel-2 cloudless tile server (Vienna, Austria), the satellite
+  // view's live source until NUXT_PUBLIC_BASEMAP_SATELLITE_URL points at a
+  // mirror — same "unset-env fallback" reasoning as dh.gu.se above.
+  'https://tiles.maps.eox.at',
 ]
 
 /**
@@ -388,6 +392,12 @@ export default defineNuxtConfig({
          * `pnpm import:basemap` and the note in `.env.example`.
          */
         antiquityDareUrl: '',
+        /**
+         * The mirrored Sentinel-2 cloudless pyramid. Empty means "ask EOX's own
+         * tile server directly" — right for development, wrong for production
+         * once traffic is real; see `pnpm import:satellite-tiles`.
+         */
+        satelliteUrl: '',
         /**
          * The antiquity atlas is served by this application from its own
          * PostGIS, so this is a path rather than a third-party origin.

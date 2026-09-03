@@ -71,15 +71,22 @@ The app is strictly 12-factor (env-only config, no local disk writes, `/api/heal
 
 After any deploy or bulk import, run `pnpm tiles:warm <url>`.
 
-## Antiquity basemaps — one borrowed, one built
+## Antiquity basemaps — one borrowed, one built, plus a satellite view
 
-The switcher offers four views in two groups. Two are recolourings of one
-modern vector source; the two **antiquity** views replace it outright. A third
-modern view, `terrain`, was deleted: it was the `vestigian` palette with one
-hillshade layer spliced in, and the same elevation source does better work as
-`atlas-hillshade` under the Barrington sheet — so the relief is still on the
-map and the option was a fourth way of looking at the same roads.
-`NUXT_PUBLIC_BASEMAP_TERRAIN_URL` stays; the tiles are still fetched.
+The switcher offers four views in two groups. `Vestigian` is a recolouring of
+one modern vector source with modern infrastructure pushed to the background;
+`Satellite` is real photography (raster, not vector) from a different source
+entirely; the two **antiquity** views replace the vector source outright.
+There used to be a fifth: `modern`, a full-opacity recolouring of the same
+vector source `Vestigian` already draws, dropped because it was too slight a
+difference from `Vestigian` to earn its own entry — `Satellite` replaced it
+with a genuinely distinct way of looking at the ground instead. A third
+modern view, `terrain`, was deleted earlier still: it was the `vestigian`
+palette with one hillshade layer spliced in, and the same elevation source
+does better work as `atlas-hillshade` under the Barrington sheet — so the
+relief is still on the map and the option was a fourth way of looking at the
+same roads. `NUXT_PUBLIC_BASEMAP_TERRAIN_URL` stays; the tiles are still
+fetched.
 
 **Antiquity (DARE)** is raster, from `dh.gu.se/tiles/imperium` — Johan Åhlfeldt,
 Gothenburg. CC BY-SA 3.0 with attribution and a link, per his terms page. **But**
@@ -92,6 +99,44 @@ every 1.2 s. **Tell Åhlfeldt before the full run** (johan.ahlfeldt@lir.gu.se) a
 quote that number, exactly as with René Voorburg's photographs; ask about the
 NC-credited inputs in the same message. Until
 `NUXT_PUBLIC_BASEMAP_ANTIQUITY_DARE_URL` is set the app falls back to his server.
+
+**Satellite** is Sentinel-2 cloudless, from `tiles.maps.eox.at` — EOX IT
+Services GmbH, Vienna, built from ESA Copernicus Sentinel-2 open data. There is
+no live geocoding-grade satellite source that is both EU-based and genuinely
+open-source; this is the closest real match — an open-_data_-derived tile
+service, the same category this project already accepts for DARE and the
+PMTiles basemap. **The 2025 vintage this app uses is CC BY-NC-SA 4.0** —
+EOX's older 2016/2017 vintage is unrestricted CC BY 4.0, but eight to nine
+years further from current; the 2025 vintage was chosen anyway, on the same
+"acceptable while nothing here is sold" trade-off DARE's own attribution
+above already documents, not a coincidence. **EOX's tile path is
+`{TileMatrix}/{TileRow}/{TileCol}` — `z/row/col`, not the `z/x/y` every other
+raster source in this file uses** — confirmed by fetching the same coordinate
+both ways and looking at the actual imagery: `z/x/y` landed on generic
+forest, `z/y/x` clearly showed the Danube through Vienna. Both
+`SATELLITE_TILES` in `useBasemapStyle.ts` and `TILESETS.satellite` in the
+mirror script write `{y}` before `{x}` for exactly this reason; a mirrored
+pull-zone URL, once one exists, is a normal `z/x/y` path in this project's
+own storage regardless — only the live EOX fallback carries the quirk.
+Mirrored with `pnpm import:basemap satellite` — z3–z13 over the same bbox as
+DARE (Sentinel-2's own ~10m/pixel resolution rules out going deeper; see
+`SATELLITE_MAX_ZOOM`'s docstring), measured at **~1.9M tiles, ~19 GB** from a
+32-tile real sample averaging 10.1 KB/tile. **Tell EOX before the full run**
+(cloudless@eox.at), same courtesy as Åhlfeldt and Voorburg. Until
+`NUXT_PUBLIC_BASEMAP_SATELLITE_URL` is set the app falls back to EOX's server.
+
+Building and testing the satellite mirror surfaced a real, previously-latent
+bug in `04-mirror-basemap-tiles.ts`, unrelated to satellite tiles themselves:
+**S3 object metadata must be US-ASCII, and DARE's own attribution string
+("Johan **Åhlfeldt**") was never encoded** — every `PutObjectCommand` this
+script ever issued for DARE failed its SigV4 signature, confirmed directly
+against this project's own MinIO ("the request signature we calculated does
+not match the signature you provided" — a message that names the credentials,
+not the actual cause). The DARE mirror script had, as far as this evidence
+shows, never successfully stored a tile. Fixed by `encodeURIComponent`-ing
+the `Metadata.attribution` value, the standard escape for non-ASCII S3
+metadata, and confirmed live: the identical request that failed before the
+fix now succeeds.
 
 **Antiquity (Barrington)** is ours, and the more interesting one. The CAWM tile
 server that was going to supply it publishes _physical relief only_ — no roads,
@@ -738,6 +783,7 @@ pnpm import:image-records       # → 39,212 site_images rows over 36,216 object
 pnpm import:images              # → the photographs; ~12 hours, ~10 GB, resumable
 pnpm import:geo-names           # → 447,053 rows, geo.sql.gz already in the scratch MariaDB
 pnpm import:basemap dare        # → the DARE sheet; ~10 hours, ~1.2 GB, resumable
+pnpm import:basemap satellite   # → Sentinel-2 cloudless; ~1.9M tiles, ~19 GB, resumable
 pnpm import:atlas               # → the Barrington sheet: AWMC + Pleiades into PostGIS
 pnpm import:limes               # → the frontier, derived from the atlas; ~1 minute
 pnpm import:country-boundaries  # → 239 countries, Natural Earth, public domain

@@ -1,19 +1,26 @@
 import type { LonLat, PlaceSummary, SiteSummary } from './site'
 
 /**
- * The views offered by the basemap switcher, in two families. The first two are
- * recolourings of one modern vector source: 'vestigian' suppresses modern
- * infrastructure, 'modern' is a conventional road map. The two 'antiquity-*'
- * views replace that source outright with a reconstruction of the ancient world.
+ * The views offered by the basemap switcher, in two families. 'vestigian' is a
+ * recolouring of one modern vector source, with modern infrastructure pushed
+ * to the background. 'satellite' is Sentinel-2 imagery — real photography, not
+ * a stylised recolouring, which is why it is raster rather than another take on
+ * the same vector source. The two 'antiquity-*' views replace the vector source
+ * outright with a reconstruction of the ancient world.
  *
- * There was a third modern view, 'terrain', which was the 'vestigian' palette
- * with one hillshade layer spliced in. It was removed rather than kept: the
- * same elevation source does better work as `atlas-hillshade` under the
- * Barrington sheet, so the relief it offered is still on the map and the option
- * was only a fourth way to look at the same roads. `BasemapSource.terrainUrl`
- * stays for that reason — the tiles are still fetched, just not by a view.
+ * There was a 'modern' view, a conventional full-opacity road map — dropped
+ * because a recolouring of the same OpenStreetMap data one slider-click away
+ * from 'vestigian' was not different enough to earn a second entry in the
+ * switcher; 'satellite' replaced it with an actually distinct way of looking at
+ * the ground. There was also a third modern view, 'terrain', which was the
+ * 'vestigian' palette with one hillshade layer spliced in. It was removed
+ * rather than kept: the same elevation source does better work as
+ * `atlas-hillshade` under the Barrington sheet, so the relief it offered is
+ * still on the map and the option was only a fourth way to look at the same
+ * roads. `BasemapSource.terrainUrl` stays for that reason — the tiles are
+ * still fetched, just not by a view.
  */
-export type BasemapView = 'vestigian' | 'modern' | 'antiquity-dare' | 'antiquity-awmc'
+export type BasemapView = 'vestigian' | 'satellite' | 'antiquity-dare' | 'antiquity-awmc'
 
 export type BasemapProvider = 'openfreemap' | 'pmtiles'
 
@@ -43,6 +50,8 @@ export interface BasemapSource {
   pmtilesUrl: string
   terrainUrl: string
   antiquityDareUrl: string
+  /** The mirrored Sentinel-2 cloudless pyramid. Empty means "ask EOX directly". */
+  satelliteUrl: string
   atlasTilesUrl: string
   /** The frontier layers, added to the Barrington sheet when it is switched on. */
   limesTilesUrl: string
