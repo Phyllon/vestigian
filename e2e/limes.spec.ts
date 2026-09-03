@@ -3,12 +3,14 @@ import { watchForProblems } from './helpers/console'
 import { openMap, waitForTiles } from './helpers/map'
 
 /**
- * The frontier is a switch on the Barrington sheet rather than a sixth view,
- * which makes two things worth asserting that a unit test cannot: that the
- * switch is not reachable from a sheet it would mislead on, and that turning it
- * on actually reaches this application's own tile endpoint from inside
- * MapLibre's worker — where a root-relative URL throws and the source silently
- * loads nothing while the rest of the style renders.
+ * The frontier is an overlay drawn above whichever basemap is showing, not a
+ * reading of the Barrington sheet specifically any more (see `isFollowingLimes`
+ * in `useBasemapStyle` and `useLimesOverlay`) — which makes two things worth
+ * asserting that a unit test cannot: that the switch actually works on a sheet
+ * other than the one it used to be confined to, and that turning it on reaches
+ * this application's own tile endpoint from inside MapLibre's worker — where a
+ * root-relative URL throws and the source silently loads nothing while the rest
+ * of the style renders.
  */
 const chooseBasemap = async (page: Parameters<typeof openMap>[0], label: string): Promise<void> => {
   await page.getByRole('button', { name: /^Basemap:/ }).click()
@@ -22,17 +24,37 @@ const toggleLimes = async (page: Parameters<typeof openMap>[0]): Promise<void> =
 }
 
 test.describe('following the limes', () => {
-  test('is offered only on the sheet it belongs to', async ({ page }) => {
+  test('is offered on any basemap, in the shared Overlays group', async ({ page }) => {
     await openMap(page)
     await page.getByRole('button', { name: /^Basemap:/ }).click()
 
-    // The default view is 'vestigian', a modern road map. A frontier drawn
-    // against present-day motorways would assert a continuity that is not there.
-    await expect(page.getByRole('menuitemcheckbox', { name: /Follow the limes/ })).toBeHidden()
+    // The default view is 'vestigian', a modern road map — the switch used to
+    // be hidden here entirely. It lives beside the Tabula Peutingeriana
+    // overlay toggle now, not nested under either basemap group.
+    const overlays = page.getByRole('group', { name: 'Overlays' })
+    await expect(overlays.getByRole('menuitemcheckbox', { name: /Follow the limes/ })).toBeVisible()
 
     await page.getByRole('menuitemradio', { name: 'Antiquity (Barrington)' }).click()
     await page.getByRole('button', { name: /^Basemap:/ }).click()
-    await expect(page.getByRole('menuitemcheckbox', { name: /Follow the limes/ })).toBeVisible()
+    await expect(overlays.getByRole('menuitemcheckbox', { name: /Follow the limes/ })).toBeVisible()
+  })
+
+  test('draws the frontier over a modern basemap, not only the Barrington sheet', async ({
+    page,
+  }) => {
+    const limesTiles: number[] = []
+    page.on('response', (response) => {
+      if (response.url().includes('/api/tiles/limes/')) limesTiles.push(response.status())
+    })
+
+    await openMap(page)
+    // Deliberately left on the default 'vestigian' view — the whole point of
+    // this test is that the switch no longer requires the Barrington sheet.
+    await toggleLimes(page)
+    await waitForTiles(page)
+
+    expect(limesTiles.length, 'no frontier tiles were requested').toBeGreaterThan(0)
+    expect(limesTiles.every((status) => status < 400)).toBe(true)
   })
 
   test('draws the frontier from this application, and the overlay survives it', async ({

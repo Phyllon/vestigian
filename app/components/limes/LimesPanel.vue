@@ -80,8 +80,22 @@
 </script>
 
 <template>
+  <!--
+    `absolute`, not `fixed`. `fixed` positions against the viewport, and
+    `md:inset-y-0` on a fixed element reaches all the way to the browser's own
+    top edge — underneath this app's own header (`z-40` in `default.vue`),
+    which sits above this panel's `z-20`. The sticky back button and sector
+    title in the header just below were being rendered exactly where the app
+    header already draws, invisible and unclickable — confirmed live, where
+    Playwright reported the click intercepted by the header's own subtree, and
+    the only way back to the sector list was switching the frontier off and on
+    again. `absolute` positions against `MapCanvas`'s own container instead,
+    which is already sized to the space below the header, so `inset-y-0`
+    reaches exactly as far as it should. The bottom-sheet layout below `md`
+    needed no change: `bottom-0` never intersected the header either way.
+  -->
   <aside
-    class="pointer-events-auto fixed inset-x-0 bottom-0 z-20 flex max-h-[62vh] flex-col rounded-t-lg bg-paper-50 shadow-lifted md:inset-y-0 md:right-auto md:left-0 md:max-h-none md:w-[22rem] md:rounded-none md:border-r md:border-paper-200 dark:bg-night-800 dark:md:border-night-700"
+    class="pointer-events-auto absolute inset-x-0 bottom-0 z-20 flex max-h-[62vh] flex-col rounded-t-lg bg-paper-50 shadow-lifted md:inset-y-0 md:right-auto md:left-0 md:max-h-none md:w-[22rem] md:rounded-none md:border-r md:border-paper-200 dark:bg-night-800 dark:md:border-night-700"
     :aria-label="t('limesPanel.title')"
   >
     <div class="sticky top-0 z-10 shrink-0 bg-paper-50 pt-2 dark:bg-night-800 md:pt-0">

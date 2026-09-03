@@ -202,15 +202,16 @@ describe('resolveSheetTone', () => {
   })
 })
 
-describe('the frontier', () => {
+describe('the frontier — what the Barrington sheet itself still does for it', () => {
+  /**
+   * The frontier line is no longer part of this style at all — it is drawn by
+   * `useLimesOverlay` above whichever basemap is showing (see that module's
+   * own tests for the layer specs). What's left here is what the Barrington
+   * sheet does to make room for it: the rest of the sheet recedes, and the
+   * general place layer stops drawing the military places the frontier's own
+   * layer draws instead.
+   */
   it('leaves the Barrington sheet exactly as it was when the switch is off', () => {
-    /**
-     * The regression that matters most. The frontier is an option on the atlas
-     * style rather than a style of its own, which is what keeps a hundred lines
-     * of layer specs from being copied and drifting — and the price of that
-     * choice is that a change made for the frontier can reach a reader who
-     * never asked for it. This is the assertion that says it cannot.
-     */
     const off = atlasStyle()
     expect(layerIds(off).some((id) => id.startsWith('limes-'))).toBe(false)
     expect(off.sources.limes).toBeUndefined()
@@ -229,10 +230,11 @@ describe('the frontier', () => {
     ])
   })
 
-  it('adds the frontier from this application, not a third party', () => {
-    const limes = limesStyle().sources.limes as VectorSourceSpecification
-    expect(limes.type).toBe('vector')
-    expect(limes.tiles?.[0]).toMatch(/^http:\/\/localhost:3000\/api\/tiles\/limes\/\{z\}/)
+  it('never adds a limes source or layers of its own, even with the flag on', () => {
+    // Only `useLimesOverlay` does that now, on top of the rendered map — this
+    // style itself only reacts to the flag by dimming and filtering.
+    expect(limesStyle().sources.limes).toBeUndefined()
+    expect(layerIds(limesStyle()).some((id) => id.startsWith('limes-'))).toBe(false)
   })
 
   it('says the frontier is derived rather than surveyed', () => {
@@ -242,49 +244,6 @@ describe('the frontier', () => {
     const attribution = (limesStyle().sources.atlas as VectorSourceSpecification).attribution ?? ''
     expect(attribution).toContain('Ancient World Mapping Center')
     expect(attribution).toContain('derived')
-  })
-
-  it('draws one line layer per kind, because line-dasharray is not data-driven', () => {
-    /**
-     * A `match` on the feature's kind is the obvious way to write this and
-     * MapLibre accepts the style without complaint: `line-dasharray` is a
-     * cross-faded property, so a data expression is ignored and every stretch
-     * comes out solid — a river drawn as a wall, with nothing logged.
-     */
-    const ids = layerIds(limesStyle())
-    expect(ids).toContain('limes-frontier-barrier')
-    expect(ids).toContain('limes-frontier-river')
-    expect(ids).toContain('limes-frontier-notional')
-
-    for (const id of ['limes-frontier-river', 'limes-frontier-notional']) {
-      const layer = limesStyle().layers.find((entry) => entry.id === id) as LineLayerSpecification
-      const dashes = layer.paint?.['line-dasharray']
-      // Plain numbers, not an expression: `['match', ['get', 'kind'], …]` is
-      // what MapLibre would silently discard.
-      expect(Array.isArray(dashes) && dashes.every((step) => typeof step === 'number')).toBe(true)
-    }
-  })
-
-  it('draws only the built works solid', () => {
-    const layer = (id: string) =>
-      limesStyle().layers.find((entry) => entry.id === id) as LineLayerSpecification
-
-    expect(layer('limes-frontier-barrier').paint?.['line-dasharray']).toBeUndefined()
-    expect(layer('limes-frontier-river').paint?.['line-dasharray']).toBeDefined()
-    expect(layer('limes-frontier-notional').paint?.['line-dasharray']).toBeDefined()
-  })
-
-  it('spends the one accent on the frontier and puts a casing under it', () => {
-    // The house rule is one oxide red per screen, never decorative. Here it is
-    // the subject. The casing is what keeps the line readable where it runs
-    // along the supply road that served it.
-    const ids = layerIds(limesStyle())
-    expect(ids.indexOf('limes-frontier-casing')).toBeLessThan(ids.indexOf('limes-frontier-barrier'))
-
-    const barrier = limesStyle().layers.find(
-      (entry) => entry.id === 'limes-frontier-barrier',
-    ) as LineLayerSpecification
-    expect(barrier.paint?.['line-color']).toBe('#9a3b22')
   })
 
   it('pushes the rest of the sheet back so the frontier can be the subject', () => {
@@ -304,15 +263,6 @@ describe('the frontier', () => {
     expect(places(limesStyle()).filter).toBeDefined()
     expect(JSON.stringify(places(limesStyle()).filter)).toContain('military')
     expect(places(atlasStyle()).filter).toBeUndefined()
-  })
-
-  it('is not offered on a sheet it would mislead on', () => {
-    // The flag is ignored anywhere but the Barrington sheet, so a frontier can
-    // never be drawn against present-day motorways.
-    for (const view of ['vestigian', 'satellite', 'antiquity-dare'] as const) {
-      const style = buildBasemapStyle({ view, isDark: false, source, isFollowingLimes: true })
-      expect(layerIds(style).some((id) => id.startsWith('limes-'))).toBe(false)
-    }
   })
 })
 

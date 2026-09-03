@@ -78,6 +78,18 @@
       // app's own root. The PNGs are vendored from the installed package
       // (New BSD, same as the library) into `public/openseadragon/images/`.
       prefixUrl: '/openseadragon/images/',
+      // There is exactly one tile source here, never a sequence, and rotation
+      // and flip controls were already off by these defaults — made explicit
+      // so the toolbar this page actually shows (zoom in/out, home, fullpage)
+      // is a decision recorded here rather than an accident of OpenSeadragon's
+      // defaults. `showSequenceControl` is the one that matters: left at its
+      // default `true`, it constructs a disabled previous/next pair regardless
+      // of `sequenceMode`, which both clutters the toolbar with two buttons
+      // that can never do anything on a single-image viewer and requests four
+      // PNGs this page has nothing to show them for.
+      showSequenceControl: false,
+      showRotationControl: false,
+      showFlipControl: false,
     })
   })
 

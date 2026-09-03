@@ -12,11 +12,18 @@ import { openMap } from './helpers/map'
  * and that is the point: a fresh clone must show no trace of it.
  */
 test.describe('the Tabula Peutingeriana network overlay', () => {
-  test('is hidden entirely when the feature flag is off', async ({ page }) => {
+  test('is hidden while the frontier switch stays offered when the feature flag is off', async ({
+    page,
+  }) => {
     await openMap(page)
     await page.getByRole('button', { name: /^Basemap:/ }).click()
 
-    await expect(page.getByRole('group', { name: 'Overlays' })).toHaveCount(0)
+    // The Overlays group itself is not gated on this flag — "Follow the
+    // limes" lives there too, and works on every basemap regardless of this
+    // licence-driven gate — so only the Tabula Peutingeriana entry inside it
+    // is asserted absent.
+    await expect(page.getByRole('group', { name: 'Overlays' })).toHaveCount(1)
+    await expect(page.getByRole('menuitemcheckbox', { name: /Follow the limes/ })).toHaveCount(1)
     await expect(
       page.getByRole('menuitemcheckbox', { name: /Tabula Peutingeriana network/ }),
     ).toHaveCount(0)

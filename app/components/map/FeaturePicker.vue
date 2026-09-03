@@ -49,9 +49,15 @@
     :enter-from-class="isCompact ? 'translate-y-full' : 'translate-x-full opacity-0'"
     :leave-to-class="isCompact ? 'translate-y-full' : 'translate-x-full opacity-0'"
   >
+    <!--
+      `absolute`, not `fixed` — see the same note in `LimesPanel.vue`.
+      `md:inset-y-0` on a `fixed` element reaches the browser's own top edge,
+      underneath this app's own header; `absolute` positions against
+      `MapCanvas`'s container instead, which already excludes it.
+    -->
     <aside
       v-if="isPickerOpen"
-      class="pointer-events-auto fixed inset-x-0 bottom-0 z-30 max-h-[78vh] overflow-y-auto rounded-t-lg bg-paper-50 shadow-lifted md:inset-y-0 md:left-auto md:right-0 md:max-h-none md:w-[26rem] md:rounded-none md:border-l md:border-paper-200 dark:bg-night-800 dark:md:border-night-700"
+      class="pointer-events-auto absolute inset-x-0 bottom-0 z-30 max-h-[78vh] overflow-y-auto rounded-t-lg bg-paper-50 shadow-lifted md:inset-y-0 md:left-auto md:right-0 md:max-h-none md:w-[26rem] md:rounded-none md:border-l md:border-paper-200 dark:bg-night-800 dark:md:border-night-700"
       aria-labelledby="feature-picker-heading"
     >
       <div class="sticky top-0 z-10 bg-paper-50 pt-2 dark:bg-night-800 md:pt-0">

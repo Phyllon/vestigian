@@ -468,8 +468,14 @@ const LIMES_COLOURS = {
  * — which, on the Rhine and the Danube, is most of its length, since the road
  * that supplied a frontier runs along it. The casing is what makes it
  * followable at a glance instead of traceable with effort.
+ *
+ * Exported for `useLimesOverlay`, which is what actually adds these layers to
+ * the map now — the frontier is drawn as a generic overlay above whichever
+ * basemap is showing, not baked into the Barrington style. `limes-installations`
+ * reads the `atlas` source and is only meaningful there; `useLimesOverlay`
+ * skips it when that source is not present.
  */
-const buildLimesLayers = (): LayerSpecification[] => [
+export const buildLimesLayers = (): LayerSpecification[] => [
   {
     id: 'limes-frontier-casing',
     type: 'line',
@@ -602,11 +608,15 @@ const LIMES_RECESSION = 0.42
  *
  * ## The frontier
  *
- * `limes` is a reading of this sheet, not a different sheet, so it is an option
- * here rather than a style of its own. Forking would have left two copies of a
- * hundred lines of layer specs to drift apart, and the layers a reader sees
- * with the switch off must be exactly the layers they saw before it existed —
- * which is a thing a test can assert only while there is one function.
+ * The frontier line itself is no longer drawn here — see `useLimesOverlay` —
+ * because it now has to be drawable over any basemap, not only this one. What
+ * stays is what this sheet does to make room for it: the rest of the atlas
+ * recedes (`LIMES_RECESSION`) and the general place layer stops drawing the
+ * military places the frontier's own layer draws instead, so `options.limes`
+ * survives as a flag this style still reads, just no longer one that adds a
+ * source or layers of its own. The layers a reader sees with the switch off
+ * must be exactly the layers they saw before it existed — which is a thing a
+ * test can assert only while there is one function.
  */
 const buildAtlasStyle = (
   source: BasemapSource,
@@ -622,16 +632,6 @@ const buildAtlasStyle = (
       maxzoom: 12,
       attribution: options.limes ? LIMES_ATTRIBUTION : ATLAS_ATTRIBUTION,
     },
-    ...(options.limes
-      ? {
-          limes: {
-            type: 'vector' as const,
-            tiles: [`${source.limesTilesUrl}/{z}/{x}/{y}.mvt`],
-            minzoom: 0,
-            maxzoom: 12,
-          },
-        }
-      : {}),
     /**
      * Relief, from the elevation tiles the terrain view already uses.
      *
@@ -818,7 +818,6 @@ const buildAtlasStyle = (
         'text-halo-width': 1.4,
       },
     },
-    ...(options.limes ? buildLimesLayers() : []),
   ],
 })
 
@@ -908,22 +907,25 @@ export const useBasemapStyle = () => {
   const sheetTone = computed(() => resolveSheetTone(view.value, isDark.value))
 
   /**
-   * A reading of the Barrington sheet, not a sixth view.
+   * An overlay, not a reading of one particular sheet.
    *
-   * It lives beside `view` rather than inside it because it is orthogonal to
-   * the choice of sheet in principle and constrained to one sheet in practice:
-   * `canFollowLimes` is what keeps it from being switched on over a modern
-   * road map, where a frontier drawn against present-day motorways would
-   * assert a continuity that is not there.
+   * Originally constrained to the Barrington view, on the reasoning that a
+   * frontier drawn against present-day motorways would assert a continuity
+   * that is not there — but the frontier line itself carries its own dates
+   * and reads as an assertion on any sheet, exactly the way the Tabula
+   * Peutingeriana overlay or a contributed tracing does, and `useLimesOverlay`
+   * now draws it the same way that overlay is drawn: above whichever basemap
+   * is showing, not baked into one vector style. `canFollowLimes` is kept as a
+   * named export, always true, so callers do not have to know that history.
    *
    * Not persisted, like `view`. The camera hash stays the only durable map
    * state, so a shared link opens on the reader's own choice of sheet.
    */
   const isLimesActive = useState<boolean>('limes-active', () => false)
 
-  const canFollowLimes = computed(() => view.value === 'antiquity-awmc')
+  const canFollowLimes = computed(() => true)
 
-  const isFollowingLimes = computed(() => canFollowLimes.value && isLimesActive.value)
+  const isFollowingLimes = computed(() => isLimesActive.value)
 
   /**
    * The Tabula Peutingeriana network — unlike the limes, an overlay drawn on
@@ -981,6 +983,7 @@ export const useBasemapStyle = () => {
     canFollowLimes,
     isFollowingLimes,
     setLimesActive,
+    limesTilesUrl: computed(() => source.value.limesTilesUrl),
     canShowTabulaPeutingerianaOverlay,
     isShowingTabulaPeutingerianaOverlay,
     setTabulaPeutingerianaOverlayActive,

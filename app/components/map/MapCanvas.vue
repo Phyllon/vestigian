@@ -16,7 +16,18 @@
    */
   const isLampLit = computed(() => isDark.value && isAntiquityView(view.value))
   const { camera: _, restoreCamera, rememberCamera } = useCameraState()
-  const { attachOverlay, keepOverlayThroughStyleChanges, findFeaturesAtPoint } = useViewportTiles()
+  const {
+    attachOverlay,
+    keepOverlayThroughStyleChanges,
+    refreshLimesDimming,
+    findFeaturesAtPoint,
+  } = useViewportTiles()
+  const {
+    isActive: isFollowingLimes,
+    attachLimesOverlay,
+    detachLimesOverlay,
+    keepLimesOverlayThroughStyleChanges,
+  } = useLimesOverlay()
   const {
     load: loadNotebook,
     overlay: notebookOverlay,
@@ -118,6 +129,24 @@
     attachTabulaPeutingerianaOverlay(map.value)
   })
 
+  /**
+   * The frontier switch no longer always changes `currentStyle`'s content —
+   * only the Barrington sheet reads `isFollowingLimes` at all — so toggling it
+   * over any other basemap cannot rely on the `currentStyle` watcher's
+   * `setStyle` call to reach it. Attached and dimmed directly instead; see
+   * `refreshLimesDimming`'s own docstring for why the dimming half needs this
+   * too.
+   */
+  watch(isFollowingLimes, (isActive) => {
+    if (!map.value) return
+    if (isActive) {
+      attachLimesOverlay(map.value)
+    } else {
+      detachLimesOverlay(map.value)
+    }
+    refreshLimesDimming(map.value)
+  })
+
   onMounted(() => {
     if (!container.value) return
 
@@ -128,8 +157,13 @@
     })
 
     instance.on('load', () => {
+      // Before the shared site overlay, so the frontier line sits under the
+      // markers it runs past rather than over them.
+      attachLimesOverlay(instance)
+      keepLimesOverlayThroughStyleChanges(instance)
       attachOverlay(instance)
       keepOverlayThroughStyleChanges(instance)
+      refreshLimesDimming(instance)
       // After the shared overlay, so the reader's rings draw above the markers
       // they annotate rather than under them.
       attachNotebookOverlay(instance)

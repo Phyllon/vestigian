@@ -61,6 +61,42 @@
     setTabulaPeutingerianaOverlayActive(!isShowingTabulaPeutingerianaOverlay.value)
   }
 
+  /**
+   * Both switches on any basemap now — the frontier stopped being a reading
+   * of the Barrington sheet specifically (see `isFollowingLimes` in
+   * `useBasemapStyle`) — so they sit together in one group rather than one
+   * being nested under the antiquity options and the other floating below
+   * both groups. `canShow` is always true for the frontier and reflects the
+   * server-side licence gate for the Tabula Peutingeriana network.
+   */
+  interface OverlayToggle {
+    key: string
+    canShow: boolean
+    isActive: boolean
+    label: string
+    hint: string
+    toggle: () => void
+  }
+
+  const overlayToggles = computed<OverlayToggle[]>(() => [
+    {
+      key: 'limes',
+      canShow: canFollowLimes.value,
+      isActive: isFollowingLimes.value,
+      label: t('basemapSwitcher.followLimes'),
+      hint: t('basemapSwitcher.followLimesHint'),
+      toggle: toggleLimes,
+    },
+    {
+      key: 'tabula-peutingeriana',
+      canShow: canShowTabulaPeutingerianaOverlay.value,
+      isActive: isShowingTabulaPeutingerianaOverlay.value,
+      label: t('basemapSwitcher.tabulaPeutingerianaOverlay'),
+      hint: t('basemapSwitcher.tabulaPeutingerianaOverlayHint'),
+      toggle: toggleTabulaPeutingerianaOverlay,
+    },
+  ])
+
   const activeLabel = computed(
     () => availableViews.find((option) => option.value === view.value)?.label ?? 'Vestigian',
   )
@@ -148,52 +184,6 @@
           </button>
 
           <!--
-            The frontier is a reading of the Barrington sheet, not a sixth
-            sheet, so it is a switch nested under that option rather than
-            another radio beside it — and it only exists once that sheet is
-            chosen, because there is nothing for it to be drawn on otherwise.
-
-            `menuitemcheckbox` rather than `switch`: inside a `menu` this is the
-            role that belongs there, and it is the one screen readers announce
-            with the checked state alongside the radios above it.
-          -->
-          <button
-            v-if="group === 'antiquity' && canFollowLimes"
-            type="button"
-            role="menuitemcheckbox"
-            :aria-checked="isFollowingLimes"
-            class="flex w-full items-center gap-3 border-t border-paper-200 bg-paper-100/60 px-4 py-3 text-left transition hover:bg-paper-200 dark:border-night-700 dark:bg-night-700/50 dark:hover:bg-night-700"
-            @click="toggleLimes"
-          >
-            <span
-              class="flex h-5 w-9 shrink-0 items-center rounded-full border transition"
-              :class="
-                isFollowingLimes
-                  ? 'justify-end border-oxide-600 bg-oxide-600/20 dark:border-oxide-300'
-                  : 'justify-start border-paper-300 bg-paper-200 dark:border-night-600 dark:bg-night-800'
-              "
-              aria-hidden="true"
-            >
-              <span
-                class="mx-0.5 size-4 rounded-full transition"
-                :class="
-                  isFollowingLimes
-                    ? 'bg-oxide-600 dark:bg-oxide-300'
-                    : 'bg-paper-50 dark:bg-night-600'
-                "
-              />
-            </span>
-            <span class="flex flex-col gap-0.5">
-              <span class="font-medium text-ink-900 dark:text-paper-100">
-                {{ t('basemapSwitcher.followLimes') }}
-              </span>
-              <span class="text-xs text-ink-500 dark:text-paper-400">
-                {{ t('basemapSwitcher.followLimesHint') }}
-              </span>
-            </span>
-          </button>
-
-          <!--
             Not a radio: the Tabula Peutingeriana is a schematic route
             diagram, not a georeferenced sheet, so it has no state to select
             here — it leaves the map for its own deep-zoom viewer instead.
@@ -224,58 +214,54 @@
         </div>
 
         <!--
-          Not nested under either group: unlike the frontier, this is a plain
-          `geojson` overlay drawn above whichever sheet is showing, not a
-          reading of one antiquity sheet in particular — see
-          `useTabulaPeutingerianaOverlay`. Hidden outright unless the server
-          has the feature turned on (`canShowTabulaPeutingerianaOverlay`),
-          since the source data's licence is unconfirmed.
+          Not nested under either group above: neither switch here is a
+          reading of one particular sheet any more (see `overlayToggles`) —
+          both are plain overlays drawn above whichever basemap is showing.
+          A toggle whose own `canShow` is false (only ever the Tabula
+          Peutingeriana network, gated on the server's licence flag) is
+          skipped rather than shown disabled, matching how the group itself
+          used to be hidden outright.
         -->
-        <div
-          v-if="canShowTabulaPeutingerianaOverlay"
-          role="group"
-          :aria-label="t('basemapSwitcher.groupOverlays')"
-        >
+        <div role="group" :aria-label="t('basemapSwitcher.groupOverlays')">
           <p
             class="eyebrow border-b border-paper-200 px-4 pb-1 pt-3 text-ink-500 dark:border-night-700 dark:text-paper-400"
           >
             {{ t('basemapSwitcher.groupOverlays') }}
           </p>
 
-          <button
-            type="button"
-            role="menuitemcheckbox"
-            :aria-checked="isShowingTabulaPeutingerianaOverlay"
-            class="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-paper-200 dark:hover:bg-night-700"
-            @click="toggleTabulaPeutingerianaOverlay"
-          >
-            <span
-              class="flex h-5 w-9 shrink-0 items-center rounded-full border transition"
-              :class="
-                isShowingTabulaPeutingerianaOverlay
-                  ? 'justify-end border-oxide-600 bg-oxide-600/20 dark:border-oxide-300'
-                  : 'justify-start border-paper-300 bg-paper-200 dark:border-night-600 dark:bg-night-800'
-              "
-              aria-hidden="true"
+          <template v-for="entry in overlayToggles" :key="entry.key">
+            <button
+              v-if="entry.canShow"
+              type="button"
+              role="menuitemcheckbox"
+              :aria-checked="entry.isActive"
+              class="flex w-full items-center gap-3 border-b border-paper-200 px-4 py-3 text-left transition last:border-b-0 hover:bg-paper-200 dark:border-night-700 dark:hover:bg-night-700"
+              @click="entry.toggle"
             >
               <span
-                class="mx-0.5 size-4 rounded-full transition"
+                class="flex h-5 w-9 shrink-0 items-center rounded-full border transition"
                 :class="
-                  isShowingTabulaPeutingerianaOverlay
-                    ? 'bg-oxide-600 dark:bg-oxide-300'
-                    : 'bg-paper-50 dark:bg-night-600'
+                  entry.isActive
+                    ? 'justify-end border-oxide-600 bg-oxide-600/20 dark:border-oxide-300'
+                    : 'justify-start border-paper-300 bg-paper-200 dark:border-night-600 dark:bg-night-800'
                 "
-              />
-            </span>
-            <span class="flex flex-col gap-0.5">
-              <span class="font-medium text-ink-900 dark:text-paper-100">
-                {{ t('basemapSwitcher.tabulaPeutingerianaOverlay') }}
+                aria-hidden="true"
+              >
+                <span
+                  class="mx-0.5 size-4 rounded-full transition"
+                  :class="
+                    entry.isActive
+                      ? 'bg-oxide-600 dark:bg-oxide-300'
+                      : 'bg-paper-50 dark:bg-night-600'
+                  "
+                />
               </span>
-              <span class="text-xs text-ink-500 dark:text-paper-400">
-                {{ t('basemapSwitcher.tabulaPeutingerianaOverlayHint') }}
+              <span class="flex flex-col gap-0.5">
+                <span class="font-medium text-ink-900 dark:text-paper-100">{{ entry.label }}</span>
+                <span class="text-xs text-ink-500 dark:text-paper-400">{{ entry.hint }}</span>
               </span>
-            </span>
-          </button>
+            </button>
+          </template>
         </div>
       </div>
     </Transition>

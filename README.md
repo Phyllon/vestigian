@@ -346,7 +346,3 @@ Honest list, so nothing here is a surprise:
 - **Off-box backups.** `docker/backup.sh` dumps Postgres nightly to a volume on the same VPS, and `pnpm db:snapshot` writes beside the database it copies. Neither leaves the machine yet.
 
 ### buy domain for Lettermint mail testing
-
-### check: OpenAPI
-
-the "follow the limes" feature switch is hidden, after choosing the barrington map. So rather place this switch below the map options button, when barrington has been chosen

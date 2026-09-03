@@ -274,6 +274,35 @@ export const useViewportTiles = () => {
   }
 
   /**
+   * Live-patches the dimming the frontier switch drives, without a style
+   * reload.
+   *
+   * `attachOverlay` reads `isFollowingLimes` once, when the layers are built,
+   * and relied on that being enough: toggling the switch used to always
+   * change `currentStyle`'s content too (the frontier was baked into the
+   * Barrington style), so `setStyle`'s diff always produced a real update and
+   * the `styledata` hook above rebuilt these layers with the current value.
+   * Now that the frontier can be switched on over *any* basemap, toggling it
+   * on a view that does not read `isFollowingLimes` at all — `vestigian`, say
+   * — leaves `buildBasemapStyle`'s output byte-identical, MapLibre's diff
+   * finds nothing to do, and the layers built at attach time would go stale
+   * silently. Called directly on every change instead of trusting a style
+   * swap to carry it.
+   */
+  const refreshLimesDimming = (map: MapLibreMap): void => {
+    if (!map.getSource(OVERLAY_SOURCE_ID)) return
+    const following = isFollowingLimes.value
+
+    map.setPaintProperty(CLUSTER_LAYER_ID, 'circle-opacity', following ? 0.35 : 0.85)
+    map.setPaintProperty(CLUSTER_COUNT_LAYER_ID, 'text-opacity', following ? 0.45 : 1)
+    map.setFilter(
+      SITE_LAYER_ID,
+      following ? (['!=', ['get', 'category'], 'fortification'] as FilterSpecification) : null,
+    )
+    map.setLayoutProperty(LIMES_FORT_LAYER_ID, 'visibility', following ? 'visible' : 'none')
+  }
+
+  /**
    * Everything under the tap, not just the topmost thing.
    *
    * `queryRenderedFeatures` returns hits in render order, so taking the first
@@ -317,6 +346,7 @@ export const useViewportTiles = () => {
   return {
     attachOverlay,
     keepOverlayThroughStyleChanges,
+    refreshLimesDimming,
     findFeaturesAtPoint,
     palette,
   }

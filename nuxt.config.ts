@@ -506,6 +506,27 @@ export default defineNuxtConfig({
       },
       crossOriginEmbedderPolicy: 'unsafe-none',
       strictTransportSecurity: isProduction ? { maxAge: 31536000, includeSubdomains: true } : false,
+      /**
+       * `nuxt-security`'s own default is `fullscreen: []` — `fullscreen=()`,
+       * disallowed even for this app's own origin — which broke the Tabula
+       * Peutingeriana viewer's "toggle full page" button in a way that looked
+       * like nothing happened at all. OpenSeadragon feature-detects the
+       * Fullscreen API as present (it is; the policy only blocks it at call
+       * time) and tries the real browser API first: `element.requestFullscreen()`
+       * rejects with "Disallowed by permissions policy", which fires a
+       * `fullscreenerror` event, which OpenSeadragon's own handler for that
+       * event answers by immediately reverting the CSS-only full-page mode it
+       * had *just* switched on a few lines earlier in the same call — a
+       * genuine on-screen flicker rather than a no-op, confirmed by the
+       * browser's own console warning, not assumed. `['self']` is the whole
+       * fix: fullscreen for this app's own pages, nothing granted to anything
+       * embedded from elsewhere. Camera, microphone, geolocation and
+       * display-capture stay at the module's default `[]` — nothing here uses
+       * them.
+       */
+      permissionsPolicy: {
+        fullscreen: ['self'],
+      },
     },
     rateLimiter: false,
     /**
