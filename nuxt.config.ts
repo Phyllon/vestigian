@@ -31,6 +31,19 @@ const mapAssetOrigins = [
 ]
 
 /**
+ * The Tabula Peutingeriana viewer's one origin. Kept separate from
+ * `mapAssetOrigins` above rather than folded in: nothing here is a MapLibre
+ * basemap — the manuscript is schematic, not georeferenced, and is shown in
+ * its own IIIF deep-zoom viewer (`/tabula-peutingeriana`), never draped under
+ * real coordinates. René Voorburg (Netherlands) hosts an IIIF Image API v3
+ * service for the manuscript scan, moved to Codeberg "as a commitment to
+ * European software independence" in his own words — the same person this
+ * project already has a courtesy-contact relationship with for image
+ * mirroring (see CLAUDE.md's import-pipeline section).
+ */
+const iiifAssetOrigins = ['https://iiif.omnesviae.org']
+
+/**
  * Every picture on the site is an imgproxy derivative, so imgproxy's origin has
  * to appear in `img-src` or the gallery is blocked outright. Declared once and
  * used both for the header and for the public runtime default, because the two
@@ -417,6 +430,19 @@ export default defineNuxtConfig({
          */
         glyphsUrl: '/fonts/{fontstack}/{range}.pbf',
       },
+      /**
+       * Off by default, deliberately — not a "no setup yet" default like the
+       * URLs above. `pnpm import:tabula-peutingeriana` populates
+       * `tabula_peutingeriana_places`/`_roads` regardless (the import itself
+       * touches nothing a visitor sees), but the source data
+       * (`omnesviae.org/data/omnesviae.json`) states no licence anywhere, so
+       * `server/api/tabula-peutingeriana/network.geojson.get.ts` 404s and the
+       * basemap switcher's toggle is hidden until an operator sets this to
+       * `true` — after confirming reuse is fine with René Voorburg, the same
+       * courtesy this project already extends to Åhlfeldt (DARE) and EOX. See
+       * CLAUDE.md's "The Tabula Peutingeriana network" section.
+       */
+      tabulaPeutingerianaEnabled: false,
     },
   },
 
@@ -424,12 +450,20 @@ export default defineNuxtConfig({
     headers: {
       contentSecurityPolicy: {
         'default-src': ["'self'"],
-        'img-src': ["'self'", 'data:', 'blob:', imageOrigin, ...mapAssetOrigins],
+        'img-src': [
+          "'self'",
+          'data:',
+          'blob:',
+          imageOrigin,
+          ...mapAssetOrigins,
+          ...iiifAssetOrigins,
+        ],
         'worker-src': ["'self'", 'blob:'],
         'child-src': ["'self'", 'blob:'],
         'connect-src': [
           "'self'",
           ...mapAssetOrigins,
+          ...iiifAssetOrigins,
           ...(isProduction ? [] : ['https://cdn.jsdelivr.net']),
         ],
         /**
@@ -646,7 +680,7 @@ export default defineNuxtConfig({
   },
 
   vite: {
-    optimizeDeps: { include: ['maplibre-gl', 'pmtiles'] },
+    optimizeDeps: { include: ['maplibre-gl', 'pmtiles', 'openseadragon'] },
     /**
      * Vite refuses requests whose Host header it does not recognise, which in
      * development means Alloy's metrics scrape — it reaches the dev server as

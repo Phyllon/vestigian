@@ -33,7 +33,19 @@
     "groupToday": "Today",
     "groupAntiquity": "Antiquity",
     "followLimes": "Follow the limes",
-    "followLimesHint": "The frontier, its walls and its forts"
+    "followLimesHint": "The frontier, its walls and its forts",
+    "tabulaPeutingeriana": "Tabula Peutingeriana",
+    "tabulaPeutingerianaHint": "The Roman road diagram, not a map — opens its own viewer",
+    "groupOverlays": "Overlays",
+    "tabulaPeutingerianaOverlay": "Tabula Peutingeriana network",
+    "tabulaPeutingerianaOverlayHint": "Places and roads from the manuscript, at their real coordinates"
+  },
+  "tabulaPeutingeriana": {
+    "title": "Tabula Peutingeriana",
+    "intro": "A medieval copy of a Roman map of the cursus publicus, the empire's road network — shown here as its own deep-zoom scan, not draped over real coordinates.",
+    "distortionNote": "The Tabula Peutingeriana is a schematic diagram, stretched roughly 18.5 times wider than tall — it is not geographically accurate, so it is not shown as a layer on the map itself.",
+    "viewerLabel": "Deep-zoom viewer of the Tabula Peutingeriana manuscript",
+    "attribution": "Manuscript: Austrian National Library, Vienna (Cod. 324). Digitisation and IIIF hosting:"
   },
   "legend": {
     "title": "What the marks mean",

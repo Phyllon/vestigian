@@ -33,7 +33,12 @@
     "groupToday": "Heute",
     "groupAntiquity": "Antike",
     "followLimes": "Folgen Sie den Limes",
-    "followLimesHint": "Die Grenze, ihre Mauern und ihre Festungen"
+    "followLimesHint": "Die Grenze, ihre Mauern und ihre Festungen",
+    "tabulaPeutingeriana": "Tabula Peutingeriana",
+    "tabulaPeutingerianaHint": "Das römische Straßendiagramm, keine Karte - öffnet seinen eigenen Betrachter",
+    "groupOverlays": "Überlagerungen",
+    "tabulaPeutingerianaOverlay": "Netz Tabula Peutingeriana",
+    "tabulaPeutingerianaOverlayHint": "Orte und Straßen aus dem Manuskript, an ihren wirklichen Koordinaten"
   },
   "legend": {
     "title": "Was die Markierungen bedeuten",
@@ -843,5 +848,12 @@
     "withBasemap": "mit Hintergrundkarte",
     "remove": "{name} entfernen",
     "removeFailed": "Dieser Bereich ließ sich nicht entfernen. Versuche es gleich noch einmal."
+  },
+  "tabulaPeutingeriana": {
+    "title": "Tabula Peutingeriana",
+    "intro": "Eine mittelalterliche Kopie einer römischen Karte des cursus publicus, des Straßennetzes des Imperiums - hier als eigener Tiefenzoom-Scan gezeigt, nicht über reale Koordinaten drapiert.",
+    "distortionNote": "Die Tabula Peutingeriana ist ein schematisches Diagramm, das etwa 18,5 Mal breiter als hoch ist - es ist nicht geografisch korrekt, so dass es nicht als Schicht auf der Karte selbst dargestellt wird.",
+    "viewerLabel": "Deep-Zoom-Viewer des Tabula Peutingeriana Manuskripts",
+    "attribution": "Handschrift: Österreichische Nationalbibliothek, Wien (Code 324). Digitalisierung und IIIF-Hosting:"
   }
 }

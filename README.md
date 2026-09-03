@@ -6,15 +6,52 @@ Built on data contributed to [Vici.org](https://vici.org) by René Voorburg and 
 
 ## Getting started
 
+### Prerequisites
+
+| Tool                                                       | Version    | Why                                                                      |
+| ---------------------------------------------------------- | ---------- | ------------------------------------------------------------------------ |
+| [Node.js](https://nodejs.org)                              | ≥22        | Runs the app and every `tsx` script                                      |
+| [pnpm](https://pnpm.io/installation)                       | 9.x        | This repo's package manager — `packageManager` in `package.json` pins it |
+| [Docker](https://docs.docker.com/get-docker/) + Compose v2 | any recent | Postgres/PostGIS, Valkey, MinIO, imgproxy, Mailpit — the whole dev stack |
+| `openssl`                                                  | any        | Generates the session and ALTCHA signup secrets                          |
+
+No database, cache, or object store to install by hand — the entire dev stack is one `docker compose` file, and `NUXT_PUBLIC_BASEMAP_PROVIDER=openfreemap` (the default) means no map API key either.
+
+### One command
+
 ```bash
-cp .env.example .env          # then set NUXT_SESSION_PASSWORD
+pnpm install
+pnpm setup
+```
+
+`pnpm setup` (`scripts/setup.sh`) checks the prerequisites above, creates `.env`
+from `.env.example` with a real, freshly generated `NUXT_SESSION_PASSWORD` and
+`NUXT_ALTCHA_SECRET` (everything else in `.env.example` is already a working
+local default), brings up the dev stack, and applies the database schema. It
+is safe to re-run: an existing `.env` is left untouched, and both the stack
+and the migrations are idempotent.
+
+It deliberately stops there. The next step — importing real data — is a
+multi-hour crawl of someone else's server and has no business running
+unattended from a setup script; see "Importing the vici.org data" below.
+
+```bash
+pnpm dev   # → http://localhost:3000
+```
+
+The map runs against OpenFreeMap out of the box, so nothing needs an API key to see it working. Site data will be empty until you run the import.
+
+### By hand, if you'd rather
+
+`pnpm setup` is exactly the following, in case you want to run it yourself or adapt a step:
+
+```bash
+cp .env.example .env          # then set NUXT_SESSION_PASSWORD and NUXT_ALTCHA_SECRET
 pnpm install
 pnpm stack:up                 # postgres+postgis, valkey, minio (+bucket), imgproxy, mailpit
 pnpm db:generate && pnpm db:migrate
 pnpm dev
 ```
-
-The map runs against OpenFreeMap out of the box, so nothing needs an API key to see it working. Site data will be empty until you run the import.
 
 ## Importing the vici.org data
 
@@ -47,19 +84,10 @@ Step 1 skips the download entirely if the dumps are already present — drop
 uses those. Files are validated by their gzip magic number, because GitHub
 answers a _page_ URL with a perfectly ordinary 200 and an HTML body.
 
-**Before running step 4 at full scale, contact René Voorburg.** The licences
-permit reuse; the bandwidth is his. Quote him the real numbers: **36,216
-requests** paced 1.2 s apart, roughly 10 GB. Prove the setup first with a short
-run — `MIRROR_LIMIT=5 pnpm import:images` — before committing his server to a day
-of traffic.
-
 ### Where the photographs actually live
 
-Not on `vici.org`. That host answers any `/uploads/…` path with **HTTP 200 and an
-HTML body reading "404 - file not found"**, which reaches an image pipeline as a
-corrupt file rather than as a missing one. Photographs are served from
-`images.vici.org` through a transform service, and originals are not exposed
-there at all.
+Photographs are served from
+`images.vici.org` through a transform service, and originals are not exposed there at all.
 
 The mirror therefore requests `https://images.vici.org/size/w{width}/uploads/{file}`
 — **width only**. `size/w2400xh2400` and `crop/w2400xh2400` both return exactly
@@ -119,7 +147,7 @@ One VPS, Docker Compose, orchestrated by [Dokploy](https://dokploy.com). Roughly
 | Cloudflare R2     | images and the PMTiles basemap, zero egress |
 | Cloudflare (free) | CDN                                         |
 
-`docker/compose.prod.yml` is the deployment unit. GitHub Actions runs the tests, builds a multi-stage image to GHCR, and calls the Dokploy webhook.
+`docker/compose.prod.yml` is the deployment unit. GitHub Actions builds a multi-stage image to GHCR, and calls the Dokploy webhook.
 
 The app is strictly 12-factor — env-only config, no local disk writes, `/api/health` and `/api/ready` probes — so moving to Kubernetes later is a translation rather than a rewrite.
 
@@ -217,7 +245,7 @@ in Valkey and fails open, so a cache outage silently removes every limit in
 
 The database and the object store are separate, and they fail apart. The records
 are reproducible (`import:convert` rebuilds them in minutes); **the mirrored
-photographs are not** — losing them means asking René's server for another 10 GB.
+photographs are not** — losing them means refetching.
 That inverts the moment the first real contribution lands, since accounts,
 revisions and uploads exist nowhere else.
 
@@ -270,7 +298,7 @@ The only predictable slow moment is the minutes after a data-version bump, when 
 The atlas is no longer append-only.
 
 - **Edit** at `/site/[slug]/edit`, reachable from both the map panel and the full entry. Edits carry an optional note explaining the change, which is what makes the history readable later.
-- **History** on every site page: who changed what, when, and whether it was auto-published or reviewed. Each entry expands into a field-level diff.
+- **File history** on every site page: who changed what, when, and whether it was auto-published or reviewed. Each entry expands into a field-level diff.
 - **Revert** is a moderator action that writes a _new_ revision restoring the earlier state, rather than deleting the offending one. History stays append-only, so the record of what was reverted and by whom survives.
 - **Slugs never change on edit.** A renamed site keeps its URL, because inbound links and citations point at it.
 
@@ -317,36 +345,8 @@ Honest list, so nothing here is a surprise:
 - **Offline tile caching.** The app is installable; it does not work without signal.
 - **Off-box backups.** `docker/backup.sh` dumps Postgres nightly to a volume on the same VPS, and `pnpm db:snapshot` writes beside the database it copies. Neither leaves the machine yet.
 
-## memento!
-
-### save plain file images from MinIO object storage to disk
-
-docker run --rm --network container:vestigian-dev-minio-1 \
--v "$PWD/image-archive:/out" minio/mc:latest sh -c \
-"mc alias set src http://127.0.0.1:9000 vestigian vestigian-dev-secret && mc mirror src/vestigian /out"
-
-### register -> brLMa34FghWLUFf
-
-### clicking username (top right corner) -> open overlay with useful information (which?) and logout button
-
-### check work flow of "add to atlas" (logged-in)
-
-### optimize components for mobile use -> heavy
-
-### github says after a push "Run failed: build and deploy / e2e failed in 33 seconds, verify failed in 8 seconds, publish skipped". Analyse why
-
-### add two-factor auth for security
-
-### how to login as an admin? How to self-grant admin rights?
-
-## TODO important
-
-### sitemap.xml is capped at 50,000 entries against 61,272 approved sites, so ~11,000 are silently unlisted. Unrelated to this work, but it is a real bug.
-
-### Nothing in compose.prod.yml mounts docker/traefik/ into a container — Dokploy supplies Traefik, so whether it reads these repo files is not determinable from here. Worth confirming on the box.
-
-### check claude.md for unnecessary information. If new contexts don't have to get the information (irrelevant), write it to ./ARCHITECTURE.md instead.
-
 ### buy domain for Lettermint mail testing
 
 ### check: OpenAPI
+
+the "follow the limes" feature switch is hidden, after choosing the barrington map. So rather place this switch below the map options button, when barrington has been chosen

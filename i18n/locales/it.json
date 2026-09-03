@@ -33,7 +33,12 @@
     "groupToday": "Oggi",
     "groupAntiquity": "Antiquariato",
     "followLimes": "Seguire le calce",
-    "followLimesHint": "La frontiera, le sue mura e i suoi forti"
+    "followLimesHint": "La frontiera, le sue mura e i suoi forti",
+    "tabulaPeutingeriana": "Tabula Peutingeriana",
+    "tabulaPeutingerianaHint": "Il diagramma stradale romano, non una mappa — apre il proprio spettatore",
+    "groupOverlays": "Sovrapposizioni",
+    "tabulaPeutingerianaOverlay": "Rete Tabula Peutingeriana",
+    "tabulaPeutingerianaOverlayHint": "Luoghi e strade dal manoscritto, alle loro vere coordinate"
   },
   "legend": {
     "title": "Cosa significano i segni",
@@ -843,5 +848,12 @@
     "withBasemap": "con mappa di sfondo",
     "remove": "Rimuovi {name}",
     "removeFailed": "Non è stato possibile rimuovere quell'area. Riprova tra poco."
+  },
+  "tabulaPeutingeriana": {
+    "title": "Tabula Peutingeriana",
+    "intro": "Una copia medievale di una mappa romana del cursus publicus, la rete stradale dell'impero — mostrata qui come la sua scansione profondo-zoom, non drappeggiato su coordinate reali.",
+    "distortionNote": "La Tabula Peutingeriana è un diagramma schematico, allungato circa 18,5 volte più largo dell'alto — non è geograficamente esatto, quindi non è mostrato come uno strato sulla mappa stessa.",
+    "viewerLabel": "Osservatore del manoscritto Tabula Peutingeriana",
+    "attribution": "Manoscritto: Biblioteca Nazionale Austriaca, Vienna (Cod. 324). Digitisation e IIIF hosting:"
   }
 }

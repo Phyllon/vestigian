@@ -33,7 +33,12 @@
     "groupToday": "Vandaag",
     "groupAntiquity": "Oudheid",
     "followLimes": "Volg de limoenen",
-    "followLimesHint": "De grens, de muren en de forten"
+    "followLimesHint": "De grens, de muren en de forten",
+    "tabulaPeutingeriana": "Tabula Peutingeriana",
+    "tabulaPeutingerianaHint": "Het Romeinse wegdiagram, geen kaart opent zijn eigen kijker",
+    "groupOverlays": "Overlays",
+    "tabulaPeutingerianaOverlay": "Tabula Peutingeriana netwerk",
+    "tabulaPeutingerianaOverlayHint": "Plaatsen en wegen uit het manuscript, op hun echte coördinaten"
   },
   "legend": {
     "title": "Wat de markeringen betekenen",
@@ -843,5 +848,12 @@
     "withBasemap": "met achtergrondkaart",
     "remove": "{name} verwijderen",
     "removeFailed": "Dat gebied kon niet worden verwijderd. Probeer het zo nog eens."
+  },
+  "tabulaPeutingeriana": {
+    "title": "Tabula Peutingeriana",
+    "intro": "Een middeleeuwse kopie van een Romeinse kaart van de cursus publicus, het wegennet van het imperium hier getoond als zijn eigen diepe-zoom scan, niet gedrapeerd over echte coördinaten.",
+    "distortionNote": "De Tabula Peutingeriana is een schematisch diagram, dat ongeveer 18,5 keer breder is dan de hoogte.",
+    "viewerLabel": "Deep-zoom viewer van het Tabula Peutingeriana manuscript",
+    "attribution": "Manuscript: Oostenrijkse Nationale Bibliotheek, Wenen (Cod. 324). Digitalisering en IIIF-hosting:"
   }
 }

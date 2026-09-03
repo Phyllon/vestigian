@@ -925,6 +925,35 @@ export const useBasemapStyle = () => {
 
   const isFollowingLimes = computed(() => canFollowLimes.value && isLimesActive.value)
 
+  /**
+   * The Tabula Peutingeriana network — unlike the limes, an overlay drawn on
+   * top of *any* basemap rather than baked into one vector style, since it is
+   * a plain `geojson` source layered above whatever sheet is showing (see
+   * `useTabulaPeutingerianaOverlay`), not a reading of one antiquity sheet in
+   * particular.
+   *
+   * `canShow` reflects the server-side gate — the source data states no
+   * licence, so `NUXT_PUBLIC_TABULA_PEUTINGERIANA_ENABLED` must be turned on
+   * deliberately (see `nuxt.config.ts`) before the toggle is even offered.
+   * Not persisted, for the same reason `isLimesActive` is not.
+   */
+  const isTabulaPeutingerianaOverlayActive = useState<boolean>(
+    'tabula-peutingeriana-overlay-active',
+    () => false,
+  )
+
+  const canShowTabulaPeutingerianaOverlay = computed(
+    () => config.public.tabulaPeutingerianaEnabled === true,
+  )
+
+  const isShowingTabulaPeutingerianaOverlay = computed(
+    () => canShowTabulaPeutingerianaOverlay.value && isTabulaPeutingerianaOverlayActive.value,
+  )
+
+  const setTabulaPeutingerianaOverlayActive = (next: boolean): void => {
+    isTabulaPeutingerianaOverlayActive.value = next
+  }
+
   const currentStyle = computed(() =>
     buildBasemapStyle({
       view: view.value,
@@ -952,5 +981,8 @@ export const useBasemapStyle = () => {
     canFollowLimes,
     isFollowingLimes,
     setLimesActive,
+    canShowTabulaPeutingerianaOverlay,
+    isShowingTabulaPeutingerianaOverlay,
+    setTabulaPeutingerianaOverlayActive,
   }
 }

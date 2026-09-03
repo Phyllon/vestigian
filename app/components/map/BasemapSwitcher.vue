@@ -2,8 +2,17 @@
   import { onClickOutside } from '@vueuse/core'
   import type { BasemapGroup, BasemapView } from '#shared/types'
 
-  const { view, setView, availableViews, canFollowLimes, isFollowingLimes, setLimesActive } =
-    useBasemapStyle()
+  const {
+    view,
+    setView,
+    availableViews,
+    canFollowLimes,
+    isFollowingLimes,
+    setLimesActive,
+    canShowTabulaPeutingerianaOverlay,
+    isShowingTabulaPeutingerianaOverlay,
+    setTabulaPeutingerianaOverlayActive,
+  } = useBasemapStyle()
   const { t } = useI18n()
   const isOpen = ref(false)
   const root = useTemplateRef('root')
@@ -46,6 +55,10 @@
    */
   const toggleLimes = (): void => {
     setLimesActive(!isFollowingLimes.value)
+  }
+
+  const toggleTabulaPeutingerianaOverlay = (): void => {
+    setTabulaPeutingerianaOverlayActive(!isShowingTabulaPeutingerianaOverlay.value)
   }
 
   const activeLabel = computed(
@@ -176,6 +189,90 @@
               </span>
               <span class="text-xs text-ink-500 dark:text-paper-400">
                 {{ t('basemapSwitcher.followLimesHint') }}
+              </span>
+            </span>
+          </button>
+
+          <!--
+            Not a radio: the Tabula Peutingeriana is a schematic route
+            diagram, not a georeferenced sheet, so it has no state to select
+            here — it leaves the map for its own deep-zoom viewer instead.
+            `role="menuitem"`, the plain-action role, rather than the radio or
+            checkbox roles above it.
+          -->
+          <NuxtLink
+            v-if="group === 'antiquity'"
+            to="/tabula-peutingeriana"
+            role="menuitem"
+            class="flex w-full items-center justify-between gap-3 border-t border-paper-200 px-4 py-3 text-left transition hover:bg-paper-200 dark:border-night-700 dark:hover:bg-night-700"
+            @click="close"
+          >
+            <span class="flex flex-col gap-0.5">
+              <span class="font-medium text-ink-900 dark:text-paper-100">
+                {{ t('basemapSwitcher.tabulaPeutingeriana') }}
+              </span>
+              <span class="text-xs text-ink-500 dark:text-paper-400">
+                {{ t('basemapSwitcher.tabulaPeutingerianaHint') }}
+              </span>
+            </span>
+            <UIcon
+              name="i-lucide-arrow-up-right"
+              class="size-4 shrink-0 text-ink-500 dark:text-paper-400"
+              aria-hidden="true"
+            />
+          </NuxtLink>
+        </div>
+
+        <!--
+          Not nested under either group: unlike the frontier, this is a plain
+          `geojson` overlay drawn above whichever sheet is showing, not a
+          reading of one antiquity sheet in particular — see
+          `useTabulaPeutingerianaOverlay`. Hidden outright unless the server
+          has the feature turned on (`canShowTabulaPeutingerianaOverlay`),
+          since the source data's licence is unconfirmed.
+        -->
+        <div
+          v-if="canShowTabulaPeutingerianaOverlay"
+          role="group"
+          :aria-label="t('basemapSwitcher.groupOverlays')"
+        >
+          <p
+            class="eyebrow border-b border-paper-200 px-4 pb-1 pt-3 text-ink-500 dark:border-night-700 dark:text-paper-400"
+          >
+            {{ t('basemapSwitcher.groupOverlays') }}
+          </p>
+
+          <button
+            type="button"
+            role="menuitemcheckbox"
+            :aria-checked="isShowingTabulaPeutingerianaOverlay"
+            class="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-paper-200 dark:hover:bg-night-700"
+            @click="toggleTabulaPeutingerianaOverlay"
+          >
+            <span
+              class="flex h-5 w-9 shrink-0 items-center rounded-full border transition"
+              :class="
+                isShowingTabulaPeutingerianaOverlay
+                  ? 'justify-end border-oxide-600 bg-oxide-600/20 dark:border-oxide-300'
+                  : 'justify-start border-paper-300 bg-paper-200 dark:border-night-600 dark:bg-night-800'
+              "
+              aria-hidden="true"
+            >
+              <span
+                class="mx-0.5 size-4 rounded-full transition"
+                :class="
+                  isShowingTabulaPeutingerianaOverlay
+                    ? 'bg-oxide-600 dark:bg-oxide-300'
+                    : 'bg-paper-50 dark:bg-night-600'
+                "
+              />
+            </span>
+            <span class="flex flex-col gap-0.5">
+              <span class="font-medium text-ink-900 dark:text-paper-100">
+                {{ t('basemapSwitcher.tabulaPeutingerianaOverlay') }}
+              </span>
+              <span class="text-xs text-ink-500 dark:text-paper-400">
+                {{ t('basemapSwitcher.tabulaPeutingerianaOverlayHint') }}
               </span>
             </span>
           </button>

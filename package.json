@@ -8,6 +8,7 @@
     "node": ">=22"
   },
   "scripts": {
+    "setup": "sh scripts/setup.sh",
     "dev": "nuxt dev --host",
     "build": "nuxt build",
     "preview": "nuxt preview",
@@ -47,6 +48,7 @@
     "import:basemap": "tsx --env-file-if-exists=.env scripts/import/04-mirror-basemap-tiles.ts",
     "import:atlas": "tsx --env-file-if-exists=.env scripts/import/05-antiquity-atlas.ts",
     "import:limes": "tsx --env-file-if-exists=.env scripts/import/06-limes.ts",
+    "import:tabula-peutingeriana": "tsx --env-file-if-exists=.env scripts/import/10-tabula-peutingeriana.ts",
     "glyphs:build": "tsx scripts/build-glyphs.ts",
     "og:build": "tsx scripts/generate-og-placeholders.ts",
     "icons:build": "tsx scripts/generate-app-icons.ts",
@@ -75,6 +77,7 @@
     "ioredis": "^5.4.1",
     "maplibre-gl": "^5.0.0",
     "nuxt": "^4.0.0",
+    "openseadragon": "^6.1.0",
     "pino": "^10.3.1",
     "pmtiles": "^4.1.0",
     "postgres": "^3.4.5",

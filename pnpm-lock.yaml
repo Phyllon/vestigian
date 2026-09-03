@@ -68,6 +68,9 @@ importers:
       nuxt:
         specifier: ^4.0.0
         version: 4.5.2(@babel/plugin-syntax-jsx@7.29.7(@babel/core@7.29.7))(@babel/plugin-syntax-typescript@7.29.7(@babel/core@7.29.7))(@oxc-project/types@0.146.0)(@rollup/plugin-babel@6.1.0(@babel/core@7.29.7)(rollup@4.62.4))(@types/node@22.20.1)(@vue/compiler-sfc@3.5.41)(cac@7.0.0)(db0@0.3.4(drizzle-orm@0.36.4(@opentelemetry/api@1.9.1)(mysql2@3.23.4(@types/node@22.20.1))(postgres@3.4.9))(mysql2@3.23.4(@types/node@22.20.1)))(drizzle-orm@0.36.4(@opentelemetry/api@1.9.1)(mysql2@3.23.4(@types/node@22.20.1))(postgres@3.4.9))(esbuild@0.19.12)(eslint@10.8.1(jiti@2.7.0))(ioredis@5.11.1)(lightningcss@1.33.0)(magicast@0.5.4)(mysql2@3.23.4(@types/node@22.20.1))(optionator@0.9.4)(oxc-parser@0.141.0)(rolldown@1.2.5)(rollup-plugin-visualizer@7.1.1(rolldown@1.2.5)(rollup@4.62.4))(rollup@4.62.4)(srvx@0.11.22)(terser@5.50.0)(tsx@4.23.12)(typescript@5.9.3)(vite@8.2.2(@types/node@22.20.1)(esbuild@0.19.12)(jiti@2.7.0)(terser@5.50.0)(tsx@4.23.12)(yaml@2.9.0))(vue-tsc@2.2.12(typescript@5.9.3))(yaml@2.9.0)
+      openseadragon:
+        specifier: ^6.1.0
+        version: 6.1.0
       pino:
         specifier: ^10.3.1
         version: 10.3.1
@@ -6394,6 +6397,9 @@ packages:
 
   openid-client@6.8.7:
     resolution: {integrity: sha512-gtKthNu7evSBvTdrrlHb4F3Fi9dcwlb5QaITlCs+9mfpvuOi0Q3qtBf5+iY4sEP8hy1qCoAdxBNPDcmZeVSDzQ==}
+
+  openseadragon@6.1.0:
+    resolution: {integrity: sha512-S2kEBO6zd2pbUByMVZ6PkEldvXHbB2kemL3tAhSltnHyjpArJPgXeM/AH/g8qsoXHy9pMHzx63XyJftE556MbA==}
 
   optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}
@@ -15038,6 +15044,8 @@ snapshots:
     dependencies:
       jose: 6.2.9
       oauth4webapi: 3.8.7
+
+  openseadragon@6.1.0: {}
 
   optionator@0.9.4:
     dependencies:

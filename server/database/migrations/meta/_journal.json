@@ -85,6 +85,13 @@
       "when": 1788427519862,
       "tag": "0011_glorious_exodus",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1788445875407,
+      "tag": "0012_slow_human_torch",
+      "breakpoints": true
     }
   ]
 }

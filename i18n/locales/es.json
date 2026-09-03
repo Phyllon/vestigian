@@ -33,7 +33,12 @@
     "groupToday": "Hoy",
     "groupAntiquity": "Antigüedad",
     "followLimes": "Seguir los limones",
-    "followLimesHint": "La frontera, sus paredes y sus fuertes"
+    "followLimesHint": "La frontera, sus paredes y sus fuertes",
+    "tabulaPeutingeriana": "Tabula Peutingeriana",
+    "tabulaPeutingerianaHint": "El diagrama de la carretera romana, no un mapa, abre su propio visor",
+    "groupOverlays": "Superficies",
+    "tabulaPeutingerianaOverlay": "Tabula Peutingeriana red",
+    "tabulaPeutingerianaOverlayHint": "Lugares y caminos del manuscrito, en sus coordenadas reales"
   },
   "legend": {
     "title": "Lo que significan las marcas",
@@ -843,5 +848,12 @@
     "withBasemap": "con mapa base",
     "remove": "Quitar {name}",
     "removeFailed": "No se pudo quitar esa zona. Inténtalo de nuevo en un momento."
+  },
+  "tabulaPeutingeriana": {
+    "title": "Tabula Peutingeriana",
+    "intro": "Una copia medieval de un mapa romano del cursus publicus, la red vial del imperio —que se muestra aquí como su propio escáner profundo del zooma, no envolvido sobre coordenadas reales.",
+    "distortionNote": "La Tabula Peutingeriana es un diagrama esquemático, estirado aproximadamente 18.5 veces más ancho que alto — no es geográficamente exacto, por lo que no se muestra como una capa en el mapa mismo.",
+    "viewerLabel": "Visor profundo del manuscrito de Tabula Peutingeriana",
+    "attribution": "Manuscrito: Biblioteca Nacional de Austria, Viena (Cod. 324). Digitisation and IIIF hosting:"
   }
 }

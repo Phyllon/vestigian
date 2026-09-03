@@ -24,6 +24,13 @@
     keepNotebookThroughStyleChanges,
     refreshNotebookOverlay,
   } = useNotebookOverlay()
+  const {
+    isActive: isShowingTabulaPeutingerianaOverlay,
+    load: loadTabulaPeutingerianaOverlay,
+    attachTabulaPeutingerianaOverlay,
+    detachTabulaPeutingerianaOverlay,
+    keepTabulaPeutingerianaOverlayThroughStyleChanges,
+  } = useTabulaPeutingerianaOverlay()
   const { chooseCandidate, offerOverlappingFeatures, clearSelection, selectedSiteId } =
     useSiteQuery()
 
@@ -101,6 +108,16 @@
     if (map.value) refreshNotebookOverlay(map.value)
   })
 
+  watch(isShowingTabulaPeutingerianaOverlay, async (isActive) => {
+    if (!map.value) return
+    if (!isActive) {
+      detachTabulaPeutingerianaOverlay(map.value)
+      return
+    }
+    await loadTabulaPeutingerianaOverlay()
+    attachTabulaPeutingerianaOverlay(map.value)
+  })
+
   onMounted(() => {
     if (!container.value) return
 
@@ -117,6 +134,7 @@
       // they annotate rather than under them.
       attachNotebookOverlay(instance)
       keepNotebookThroughStyleChanges(instance)
+      keepTabulaPeutingerianaOverlayThroughStyleChanges(instance)
       isReady.value = true
     })
 
