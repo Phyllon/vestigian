@@ -35,7 +35,7 @@ export const normaliseLicence = (raw: string | null | undefined): string => {
   if (!raw) return UNKNOWN_LICENCE
   const key = raw.trim().toLowerCase().replace(/\s+/g, ' ')
   if (!key) return UNKNOWN_LICENCE
-  return LICENCE_ALIASES[key] ?? (/^cc[- ]/i.test(key) ? UNKNOWN_LICENCE : UNKNOWN_LICENCE)
+  return LICENCE_ALIASES[key] ?? UNKNOWN_LICENCE
 }
 
 export const isPublishableLicence = (licence: string): boolean =>
@@ -60,7 +60,9 @@ export interface ImageRendition {
  */
 export const buildRenditionPath = (rendition: ImageRendition): string => {
   const source = `s3://${rendition.bucket}/${rendition.storageKey}`
-  const encoded = Buffer.from(source).toString('base64url').replace(/=+$/, '')
+  const encoded = Buffer.from(source)
+    .toString('base64url')
+    .replace(/={1,2}$/, '')
   const resize = rendition.fit === 'cover' ? 'fill' : 'fit'
   return `/rs:${resize}:${rendition.width}:${rendition.height}/g:sm/q:82/${encoded}.webp`
 }
@@ -75,7 +77,7 @@ export const signRenditionPath = (path: string, key: string, salt: string): stri
     .update(Buffer.from(salt, 'hex'))
     .update(path)
     .digest('base64url')
-    .replace(/=+$/, '')
+    .replace(/={1,2}$/, '')
   return `/${digest}${path}`
 }
 

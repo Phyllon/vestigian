@@ -32,12 +32,9 @@
      * collections, and a GeometryCollection carries no `coordinates` at all —
      * which the cast that used to stand here quietly hid.
      */
-    const ring =
-      geometry.type === 'Polygon'
-        ? geometry.coordinates[0]
-        : geometry.type === 'LineString'
-          ? geometry.coordinates
-          : null
+    let ring: GeoJSON.Position[] | null = null
+    if (geometry.type === 'Polygon') ring = geometry.coordinates[0] ?? null
+    else if (geometry.type === 'LineString') ring = geometry.coordinates
 
     if (!ring || ring.length === 0) return null
 

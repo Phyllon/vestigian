@@ -13,7 +13,8 @@ export const slugify = (title: string): string =>
     .replace(/[ßẞ]/g, 'ss')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
+    .replace(/^-/, '')
+    .replace(/-$/, '')
     .slice(0, 120)
 
 /** Appends a discriminator when a slug is already taken. */

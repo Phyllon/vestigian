@@ -56,8 +56,11 @@ export const metresBetween = (from: LonLat, to: LonLat): number => {
  */
 export const normaliseWikidataId = (value: string | null | undefined): string | null => {
   if (!value) return null
-  const trimmed = value.trim().replace(/\)+$/, '').toUpperCase()
-  return /^Q[0-9]+$/.test(trimmed) ? trimmed : null
+  const trimmed = value
+    .trim()
+    .replace(/\){1,3}$/, '')
+    .toUpperCase()
+  return /^Q\d+$/.test(trimmed) ? trimmed : null
 }
 
 /**

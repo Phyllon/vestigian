@@ -131,7 +131,8 @@ const slugify = (title: string): string =>
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
+    .replace(/^-/, '')
+    .replace(/-$/, '')
     .slice(0, 120)
 
 /**
@@ -504,6 +505,9 @@ const parseExternalIdentifiers = (raw: string | null): ExternalIdentifier[] => {
 
   const identifiers: ExternalIdentifier[] = []
 
+  // `[^>]*` cannot overlap with itself or the surrounding `<`/`>` literals, so
+  // this is the standard backtracking-safe way to split on tags, not a risk.
+  // eslint-disable-next-line sonarjs/super-linear-regex
   for (const fragment of raw.split(/<[^>]*>/)) {
     const text = fragment.trim()
     if (!text) continue

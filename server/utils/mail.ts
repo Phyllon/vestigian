@@ -16,8 +16,12 @@ type MailTransport = 'lettermint' | 'dev-inbox' | 'log'
  * the header form as one string; Mailpit's API wants the two separately.
  */
 const parseAddress = (address: string): { name: string; email: string } => {
-  const match = /^\s*(.*?)\s*<([^>]+)>\s*$/.exec(address)
-  return match ? { name: match[1] ?? '', email: match[2]! } : { name: '', email: address.trim() }
+  // The address comes from `NUXT_MAIL_FROM`, a deploy-time config value, never
+  // from a request — there is no untrusted input for backtracking to run wild
+  // on, so the lazy-quantifier flag here is not a real ReDoS risk.
+  // eslint-disable-next-line sonarjs/super-linear-regex
+  const match = /^(.*?)<([^>]+)>\s*$/.exec(address.trim())
+  return match ? { name: match[1]!.trim(), email: match[2]! } : { name: '', email: address.trim() }
 }
 
 /**
@@ -74,15 +78,17 @@ const sendToDevInbox = async (message: OutgoingMail, inboxUrl: string, from: str
  * enumeration oracle the endpoint exists to avoid. `mail_deliveries_total` and
  * the error log are what make the failure visible to the operator instead.
  */
+const resolveMailTransport = (apiKey: string, devInboxUrl: string): MailTransport => {
+  if (apiKey) return 'lettermint'
+  if (import.meta.dev && devInboxUrl) return 'dev-inbox'
+  return 'log'
+}
+
 const deliver = async (purpose: MailKind, message: OutgoingMail): Promise<void> => {
   const { mail } = useRuntimeConfig()
   const logger = useLogger()
 
-  const transport: MailTransport = mail.apiKey
-    ? 'lettermint'
-    : import.meta.dev && mail.devInboxUrl
-      ? 'dev-inbox'
-      : 'log'
+  const transport: MailTransport = resolveMailTransport(mail.apiKey, mail.devInboxUrl)
 
   try {
     if (transport === 'lettermint') {

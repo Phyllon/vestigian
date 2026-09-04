@@ -198,7 +198,7 @@ export const useOfflineAreas = () => {
     }))
     const tilesTotal = tilesByLayer.reduce((sum, entry) => sum + entry.tiles.length, 0)
 
-    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+    const id = crypto.randomUUID()
     const cache = await caches.open(cacheNameForArea(id))
 
     let tilesDone = 0

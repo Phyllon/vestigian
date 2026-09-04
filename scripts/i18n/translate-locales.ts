@@ -28,6 +28,9 @@ const LOCALES_DIR = fileURLToPath(new URL('../../i18n/locales/', import.meta.url
 const SOURCE_LOCALE = 'en'
 const TARGET_LOCALES = ['fr', 'es', 'de', 'it', 'nl'] as const
 
+// `[^}]+` cannot overlap with itself or with the surrounding `{`/`}` literals,
+// so this cannot backtrack super-linearly regardless of input.
+// eslint-disable-next-line sonarjs/super-linear-regex
 const PLACEHOLDER_PATTERN = /\{[^}]+\}/g
 
 export interface TextSegment {
@@ -72,8 +75,8 @@ export const unflatten = (flat: Record<string, string>): Record<string, unknown>
     const segments = path.split('.')
     let cursor = root
     for (const segment of segments.slice(0, -1)) {
-      const next = (cursor[segment] ??= {}) as Record<string, unknown>
-      cursor = next
+      if (cursor[segment] === undefined) cursor[segment] = {}
+      cursor = cursor[segment] as Record<string, unknown>
     }
     cursor[segments.at(-1) as string] = text
   }

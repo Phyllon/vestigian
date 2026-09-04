@@ -17,9 +17,14 @@ const source = readFileSync(
   'utf8',
 )
 
-/** Comments explain why these are absent, so only real code is examined. */
+/**
+ * Comments explain why these are absent, so only real code is examined.
+ * Runs once against this project's own source file, never against untrusted
+ * input, so the lazy-quantifier flag below is not a real ReDoS risk.
+ */
 const code = source
   .replace(/\/\*\*[\s\S]*?\*\//g, '')
+  // eslint-disable-next-line sonarjs/super-linear-regex
   .replace(/\/\/.*$/gm, '')
   .replace(/'[^']*'/g, "''")
 

@@ -17,6 +17,12 @@ const asDisplayValue = (value: unknown): string | null => {
   return String(value)
 }
 
+const changeKind = (previous: string | null, next: string | null): ChangeKind => {
+  if (previous === null) return 'added'
+  if (next === null) return 'removed'
+  return 'changed'
+}
+
 /**
  * A revision payload as it round-trips through a `jsonb` column.
  *
@@ -48,7 +54,7 @@ export const diffPayloads = (before: StoredPayload | null, after: StoredPayload)
 
     changes.push({
       field,
-      kind: previous === null ? 'added' : next === null ? 'removed' : 'changed',
+      kind: changeKind(previous, next),
       before: previous,
       after: next,
     })

@@ -37,7 +37,10 @@ test.describe('downloading an area', () => {
 
     await page.getByRole('button', { name: /download this area for offline use/i }).click()
 
-    const estimate = page.getByText(/≈.*(MB|GB).*tiles/i)
+    // Matches short, bounded locator text off the rendered page, never
+    // attacker-controlled input, so backtracking cost here is not a real risk.
+    // eslint-disable-next-line sonarjs/super-linear-regex
+    const estimate = page.getByText(/≈.*?(?:MB|GB).*?tiles/i)
     await expect(estimate).toBeVisible({ timeout: 15_000 })
   })
 

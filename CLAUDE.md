@@ -1706,3 +1706,4 @@ contradicts what they asked for. Those belong in the reply.
 - **EU/GDPR compliance** all packages or code dealing with user data or which are user-related must be GDPR compliant
 - **e2e-tests** add e2e-tests when new critical features were added. always run them before committing.
 - **i18n** always use i18n for defined languages (de, en, fr, es, it, nl)
+- **Deep nesting** never use nested terneries

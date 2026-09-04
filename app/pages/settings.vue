@@ -105,15 +105,10 @@
       toast.add({ title: t('settings.emailPending'), color: 'success' })
     } catch (error) {
       const status = (error as { statusCode?: number }).statusCode
-      toast.add({
-        title:
-          status === 403
-            ? t('settings.wrongPassword')
-            : status === 409
-              ? t('settings.emailTaken')
-              : t('settings.emailFailed'),
-        color: 'error',
-      })
+      let title = t('settings.emailFailed')
+      if (status === 403) title = t('settings.wrongPassword')
+      else if (status === 409) title = t('settings.emailTaken')
+      toast.add({ title, color: 'error' })
     } finally {
       isChangingEmail.value = false
     }

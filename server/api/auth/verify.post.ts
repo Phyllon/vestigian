@@ -4,6 +4,12 @@ import { emailTokens, users } from '~~/server/database/schema'
 
 export const bodySchema = z.object({ token: z.string().min(10).max(200) })
 
+const TOKEN_ERROR_MESSAGES: Record<'expired' | 'already-used' | 'unknown', string> = {
+  expired: 'That link has expired. Request a new one to continue.',
+  'already-used': 'That link has already been used. Try signing in.',
+  unknown: 'That link is not valid.',
+}
+
 /**
  * Redeems a token that proves someone can read an inbox. The token is looked up
  * by its hash, so the raw value never exists in the database at any point.
@@ -54,12 +60,7 @@ export default defineEventHandler(async (event) => {
   if (!check.valid) {
     throw createError({
       statusCode: 400,
-      message:
-        check.reason === 'expired'
-          ? 'That link has expired. Request a new one to continue.'
-          : check.reason === 'already-used'
-            ? 'That link has already been used. Try signing in.'
-            : 'That link is not valid.',
+      message: TOKEN_ERROR_MESSAGES[check.reason ?? 'unknown'],
     })
   }
 

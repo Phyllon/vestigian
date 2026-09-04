@@ -2,6 +2,7 @@
 import withNuxt from './.nuxt/eslint.config.mjs'
 import prettier from 'eslint-config-prettier'
 import vueA11y from 'eslint-plugin-vuejs-accessibility'
+import sonarjs from 'eslint-plugin-sonarjs'
 
 /**
  * ESLint covers correctness and the conventions in CLAUDE.md that a formatter
@@ -10,9 +11,15 @@ import vueA11y from 'eslint-plugin-vuejs-accessibility'
  *
  * The Nuxt-generated base knows the project's auto-imports, which is why
  * useHead and useSession do not read as undefined globals here.
+ *
+ * `eslint-plugin-sonarjs` runs the SonarQube "bug"/"code smell" rule set
+ * (cognitive complexity, duplicated logic, dead code) locally — this project
+ * has no hosted SonarQube instance to talk to, so this is the offline
+ * equivalent rather than a client for one.
  */
 export default withNuxt(
   ...vueA11y.configs['flat/recommended'],
+  sonarjs.configs.recommended,
 
   {
     name: 'vestigian/conventions',
@@ -33,6 +40,16 @@ export default withNuxt(
       // It needs type-aware linting, which across five generated tsconfigs
       // costs far more than the rule is worth — the codebase already uses
       // `import type` throughout.
+
+      // This project has exactly one deferred-work marker (nuxt.config.ts,
+      // blocked on `@nuxt/ui` and Nuxt agreeing on a vue-router major) and it
+      // carries its own paragraph of why it's deferred rather than done —
+      // the "forgotten task" this rule guards against. A SonarQube project
+      // would track that as a linked issue instead of flagging the comment
+      // forever; there is no ticket tracker here to link to, so the comment
+      // is where it lives.
+      'sonarjs/todo-tag': 'off',
+
       '@typescript-eslint/no-unused-vars': [
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrors: 'none' },
@@ -93,6 +110,21 @@ export default withNuxt(
     rules: {
       'max-params': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
+
+  {
+    // Every credential under e2e/ is a fixture for an @e2e.local account
+    // (`E2E_PASSWORD` in helpers/accounts.ts, or a deliberately-wrong literal
+    // asserting a 401/403), reset between runs by global-setup/teardown —
+    // never a real secret. `Math.random()` here jitters fixture coordinates
+    // so parallel test runs don't collide on the same site position, which
+    // has nothing to do with the crypto-strength concern the rule exists for.
+    name: 'vestigian/e2e',
+    files: ['e2e/**/*.ts'],
+    rules: {
+      'sonarjs/no-hardcoded-passwords': 'off',
+      'sonarjs/pseudo-random': 'off',
     },
   },
 

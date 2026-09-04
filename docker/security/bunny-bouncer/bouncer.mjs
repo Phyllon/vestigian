@@ -40,6 +40,10 @@
  * where it is caught, not in front of real traffic.
  */
 
+// http, not https: this is the default for the `crowdsec` hostname on the
+// compose network's internal Docker DNS, never a public address — TLS on a
+// container-to-container hop inside the same host offers nothing here.
+// eslint-disable-next-line sonarjs/no-clear-text-protocols
 const LAPI_URL = (process.env.CROWDSEC_LAPI_URL ?? 'http://crowdsec:8080').replace(/\/$/, '')
 const BOUNCER_KEY = process.env.CROWDSEC_BOUNCER_KEY
 const BUNNY_API_KEY = process.env.BUNNY_API_KEY

@@ -34,6 +34,12 @@ const escapeXml = (value: string): string =>
 /** Coordinates at six decimals — about 11 cm, well past what a handheld resolves. */
 const formatCoordinate = (value: number): string => value.toFixed(6)
 
+const describeVisit = (place: NotebookPlace): string => {
+  if (!place.visited) return 'To visit'
+  if (!place.visitedOn) return 'Visited'
+  return `Visited ${place.visitedOn}`
+}
+
 export interface FieldKitInput {
   places: NotebookPlace[]
   /** Appears in the file's metadata so a device shows whose kit it is. */
@@ -53,11 +59,7 @@ export const buildFieldKitGpx = (input: FieldKitInput): string => {
      */
     const symbol = place.visited ? 'Flag, Green' : 'Flag, Blue'
 
-    const description = [
-      place.visited ? `Visited${place.visitedOn ? ` ${place.visitedOn}` : ''}` : 'To visit',
-      place.modernPlace,
-      place.note,
-    ]
+    const description = [describeVisit(place), place.modernPlace, place.note]
       .filter((part): part is string => Boolean(part))
       .join(' — ')
 
@@ -71,12 +73,16 @@ export const buildFieldKitGpx = (input: FieldKitInput): string => {
     ].join('\n')
   })
 
+  const metadataDescription = escapeXml(
+    `${input.places.length} places from the notebook of ${input.authorName}.`,
+  )
+
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<gpx version="1.1" creator="Vestigian" xmlns="http://www.topografix.com/GPX/1/1">',
     '  <metadata>',
     '    <name>Vestigian field kit</name>',
-    `    <desc>${escapeXml(`${input.places.length} places from the notebook of ${input.authorName}.`)}</desc>`,
+    `    <desc>${metadataDescription}</desc>`,
     `    <time>${input.generatedAt.toISOString()}</time>`,
     '  </metadata>',
     ...waypoints,

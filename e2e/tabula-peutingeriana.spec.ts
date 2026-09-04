@@ -36,7 +36,7 @@ test.describe('the Tabula Peutingeriana viewer', () => {
     })
 
     await page.goto('/tabula-peutingeriana')
-    await page.waitForTimeout(3_000)
+    await expect.poll(() => tiles.length, { timeout: 15_000 }).toBeGreaterThan(0)
 
     expect(tiles.length, 'no IIIF request was made at all').toBeGreaterThan(0)
     expect(tiles.some((status) => status === 200)).toBe(true)
@@ -50,5 +50,8 @@ test.describe('the Tabula Peutingeriana viewer', () => {
     await page.goto('/tabula-peutingeriana')
     await page.goBack()
     await waitForMapReady(page)
+
+    await expect(page).toHaveURL('/')
+    await expect(page.getByRole('button', { name: /^Basemap:/ })).toBeVisible()
   })
 })

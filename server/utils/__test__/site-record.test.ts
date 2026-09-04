@@ -38,7 +38,11 @@ describe('buildExternalUrl', () => {
   })
 
   it('lowercases the value for a PECS lookup', () => {
+    // Perseus's own PECS pages are served over plain http with no https
+    // redirect — asserting the real URL `buildExternalUrl` produces, not a
+    // mistake to fix.
     expect(buildExternalUrl('pecs', 'Urso')).toBe(
+      // eslint-disable-next-line sonarjs/no-clear-text-protocols
       'http://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0006:id=urso',
     )
   })

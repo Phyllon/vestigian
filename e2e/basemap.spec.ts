@@ -43,7 +43,7 @@ test.describe('the basemap switcher', () => {
 
     await openMap(page)
     await chooseBasemap(page, 'Antiquity (Barrington)')
-    await page.waitForTimeout(3_000)
+    await expect.poll(() => atlas.length, { timeout: 15_000 }).toBeGreaterThan(0)
 
     // MapLibre builds tile requests inside a worker, where a root-relative URL
     // has no base and `new Request` throws — the source then loads nothing
@@ -80,7 +80,7 @@ test.describe('the basemap switcher', () => {
 
     await openMap(page)
     await chooseBasemap(page, 'Antiquity (DARE)')
-    await page.waitForTimeout(2_000)
+    await expect.poll(() => tiles.length, { timeout: 15_000 }).toBeGreaterThan(0)
 
     expect(tiles.length, 'no antiquity tile was requested at all').toBeGreaterThan(0)
     expect(tiles.some((status) => status === 200)).toBe(true)
@@ -102,7 +102,7 @@ test.describe('the basemap switcher', () => {
 
     await openMap(page)
     await chooseBasemap(page, 'Satellite')
-    await page.waitForTimeout(2_000)
+    await expect.poll(() => tiles.length, { timeout: 15_000 }).toBeGreaterThan(0)
 
     expect(tiles.length, 'no satellite tile was requested at all').toBeGreaterThan(0)
     expect(tiles.some((status) => status === 200)).toBe(true)

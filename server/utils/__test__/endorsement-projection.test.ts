@@ -17,7 +17,10 @@ import { fileURLToPath } from 'node:url'
 const read = (relativePath: string): string =>
   readFileSync(fileURLToPath(new URL(`../../${relativePath}`, import.meta.url)), 'utf8')
 
+// Runs once against this project's own source files, never against untrusted
+// input, so the lazy-quantifier flag below is not a real ReDoS risk.
 const stripComments = (source: string): string =>
+  // eslint-disable-next-line sonarjs/super-linear-regex
   source.replace(/\/\*\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '')
 
 describe('the endorsement count never exposes who endorsed', () => {
