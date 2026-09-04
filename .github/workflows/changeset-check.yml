@@ -1,0 +1,36 @@
+name: changeset check
+
+# The secondary versioning path: this repo mostly pushes directly to `main`
+# (see release.yml), but a branch/PR is still possible, and nothing there
+# enforces that a change carries a changeset the way a direct push to main
+# relies on the author remembering. This is a soft check, not a merge gate
+# on branch-protection — it reports, it does not block.
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 26, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+
+      - name: require a changeset for app-code changes
+        run: |
+          changed_files=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")
+
+          # Docs, workflow config and changeset files themselves never need a
+          # changeset of their own — only skip the check when every changed
+          # file falls into one of those categories.
+          if echo "$changed_files" | grep -qvE '^(\.changeset/|\.github/|.*\.md$)'; then
+            pnpm changeset:status
+          else
+            echo "docs/workflow-only change — no changeset required"
+          fi

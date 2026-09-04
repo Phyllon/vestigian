@@ -1,0 +1,78 @@
+name: release
+
+# The primary versioning path: this repo pushes directly to `main` (no
+# release PR to merge), so a push carrying pending changesets bumps the
+# version, updates the changelog, tags, and cuts a release in the same run.
+# See ".changeset/README.md" and "Versioning & releases" in CLAUDE.md.
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  version:
+    # The bump commit below carries this marker specifically so the push it
+    # creates does not re-trigger this workflow — it never adds a new
+    # changeset, so a second run would just be a wasted checkout.
+    if: "!contains(github.event.head_commit.message, '[skip release]')"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 26, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+
+      - name: check for pending changesets
+        id: changesets
+        run: |
+          if compgen -G ".changeset/*.md" > /dev/null; then
+            echo "pending=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "pending=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: apply version bump
+        if: steps.changesets.outputs.pending == 'true'
+        run: pnpm changeset:version
+
+      - name: read the bumped version
+        if: steps.changesets.outputs.pending == 'true'
+        id: package
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: commit and tag
+        if: steps.changesets.outputs.pending == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json CHANGELOG.md .changeset
+          git commit -m "bump version to ${{ steps.package.outputs.version }} [skip release]"
+          git tag "v${{ steps.package.outputs.version }}"
+          git push origin main --follow-tags
+
+      - name: extract this version's changelog section
+        if: steps.changesets.outputs.pending == 'true'
+        run: |
+          awk -v ver="${{ steps.package.outputs.version }}" '
+            $0 ~ "^## " ver "$" { found=1; next }
+            found && /^## / { exit }
+            found { print }
+          ' CHANGELOG.md > release-notes.md
+
+      - name: create GitHub release
+        if: steps.changesets.outputs.pending == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "v${{ steps.package.outputs.version }}" \
+            --title "v${{ steps.package.outputs.version }}" \
+            --notes-file release-notes.md
