@@ -164,6 +164,18 @@ NUXT_PUBLIC_BASEMAP_PMTILES_URL=https://your-bucket.r2.dev/europe.pmtiles
 
 PMTiles is read directly by the browser over HTTP range requests. There is no tile server to run.
 
+## Versioning
+
+Semantic versioning via [Changesets](https://github.com/changesets/changesets), not Conventional-Commits-driven tooling — this repo's `commit-msg` hook deliberately keeps commit subjects freeform (lowercase, imperative, no `feat:`/`fix:` prefix), so the version bump lives in its own file instead of being inferred from the message.
+
+```bash
+pnpm changeset          # record a change: pick major/minor/patch, write a summary
+pnpm changeset:status   # see what's pending, unreleased
+pnpm changeset:version  # apply pending changesets locally (normally CI does this)
+```
+
+Releases happen automatically: `.github/workflows/release.yml` runs on every push to `main` and, if changeset files are pending, bumps `package.json`, rewrites `CHANGELOG.md`, commits, tags `vX.Y.Z`, and cuts a GitHub Release — no release-PR step to merge, since this project pushes directly to `main`. A second workflow, `changeset-check.yml`, is a non-blocking reminder on pull requests for anyone working from a branch. Deploy images (`ghcr.io/…`) carry the version as a tag alongside `latest` and the commit SHA, so a specific release can be pulled or rolled back to by name. Full mechanism and rationale: "Versioning & releases" in `CLAUDE.md`.
+
 ## Testing
 
 ```bash
