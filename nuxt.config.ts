@@ -41,15 +41,15 @@ const mapAssetOrigins = [
  * project already has a courtesy-contact relationship with for image
  * mirroring (see CLAUDE.md's import-pipeline section).
  *
- * `digi.ub.uni-heidelberg.de` is Heidelberg University Library's IIIF API,
- * serving the Column of Marcus Aurelius's own scholarly plates (Petersen,
- * Domaszewski & Calderini, 1896) from `/columns`. Its human-facing HTML
- * viewer pages sit behind an Anubis bot challenge, but the IIIF manifest,
- * `info.json` and image-tile endpoints do not — verified live with real,
- * unauthenticated requests before this origin was added here, not assumed.
- * See CLAUDE.md's "Column reliefs" section.
+ * Heidelberg University Library's IIIF API (the Column of Marcus Aurelius's
+ * plates, from `/columns`) is deliberately **not** in this list — a real
+ * browser's cross-origin `fetch` to `digi.ub.uni-heidelberg.de` fails
+ * outright (reproduced directly, not assumed; see CLAUDE.md's "Column
+ * reliefs" section), so every request to it is proxied through this
+ * project's own `/api/columns/marcus-aurelius/*` routes instead. The
+ * browser never talks to that host at all, and the CSP reflects that.
  */
-const iiifAssetOrigins = ['https://iiif.omnesviae.org', 'https://digi.ub.uni-heidelberg.de']
+const iiifAssetOrigins = ['https://iiif.omnesviae.org']
 
 /**
  * Every picture on the site is an imgproxy derivative, so imgproxy's origin has
