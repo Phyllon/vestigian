@@ -14,12 +14,19 @@ export type { ImagePreset }
  * signature that keeps imgproxy from being an open proxy can only be made
  * where the key lives.
  */
+/** Whatever carries a licence obligation — a `SiteImage` or a
+ *  `ColumnReliefPlateSummary` alike — not just the site-photograph shape. */
+export interface CreditedImage {
+  attribution: string | null
+  licence: string
+}
+
 export const useImageUrl = () => {
   const buildUrl = (image: SiteImage, preset: ImagePreset): string =>
     `/api/images/${image.id}/${preset}`
 
   /** Attribution line rendered under every image, as the licences require. */
-  const buildCredit = (image: SiteImage): string => {
+  const buildCredit = (image: CreditedImage): string => {
     const parts = [image.attribution, image.licence].filter(Boolean)
     return parts.length > 0 ? parts.join(' · ') : 'Credit unknown'
   }

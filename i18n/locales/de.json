@@ -7,7 +7,10 @@
     "signIn": "Zeichen",
     "signOut": "Abmelden",
     "footerLicence": "Daten und Lizenzen",
-    "menu": "Menü"
+    "menu": "Menü",
+    "menuGroupColumns": "Säulenreliefs",
+    "menuGroupLegal": "Recht & Daten",
+    "menuGroupOffline": "Offline-Karten"
   },
   "account": {
     "menuFor": "Kontomenü, angemeldet als {name}",
@@ -896,5 +899,29 @@
     "distortionNote": "Die Tabula Peutingeriana ist ein schematisches Diagramm, das etwa 18,5 Mal breiter als hoch ist - es ist nicht geografisch korrekt, so dass es nicht als Schicht auf der Karte selbst dargestellt wird.",
     "viewerLabel": "Deep-Zoom-Viewer des Tabula Peutingeriana Manuskripts",
     "attribution": "Handschrift: Österreichische Nationalbibliothek, Wien (Code 324). Digitalisierung und IIIF-Hosting:"
+  },
+  "columns": {
+    "title": "Column Reliefs",
+    "intro": "Die Reliefs von zwei römischen Säulen, im Detail erforscht - Trajans Säule von gespiegelten wissenschaftlichen Platten, die Säule von Marcus Aurelius von einem Live-Tiefenzoom-Scan.",
+    "menuLabel": "Säulenreliefs",
+    "trajan": {
+      "tabLabel": "Trajan-Säule",
+      "intro": "Conrad Cichorius 1896-1900 Fotoplatten, die Standard-Szene-für-Szene-Referenz für die Spalte - gespiegelt von Wikimedia Commons, Public Domain.",
+      "loading": "Beladeplatten..",
+      "loadFailed": "Die Platten konnten nicht geladen werden. Versuchen Sie es gleich noch einmal.",
+      "empty": "Es wurden noch keine Platten veröffentlicht.",
+      "gridLabel": "Trajansche Reliefplatten",
+      "scene": "Szenerie{number}"
+    },
+    "marcusAurelius": {
+      "tabLabel": "Kolumne von Marcus Aurelius",
+      "intro": "Petersen, Domaszewski & Calderinis 1896 Platten, digitalisiert von der Universitätsbibliothek Heidelberg und hier als Live-Tiefenzoom-Scan, gemeinfrei.",
+      "viewerLabel": "Deep-Zoom-Viewer der Säule von Marcus Aurelius Platten",
+      "volume": "Plattenvolumen",
+      "tafeln-i-lxiv": "Tafeln I–LXIV",
+      "tafeln-lxv-cxxviii": "Tafeln LXV–CXXVIII",
+      "loading": "Beladen des Plattenvolumens..",
+      "loadFailed": "Dieser Band konnte nicht aus der Universitätsbibliothek Heidelberg geladen werden. Versuchen Sie es gleich noch einmal."
+    }
   }
 }

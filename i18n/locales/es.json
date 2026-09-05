@@ -7,7 +7,10 @@
     "signIn": "Iniciar sesión",
     "signOut": "Suscríbase",
     "footerLicence": "Licencias de datos",
-    "menu": "Menú"
+    "menu": "Menú",
+    "menuGroupColumns": "Alivios de columna",
+    "menuGroupLegal": "Datos jurídicos",
+    "menuGroupOffline": "Mapas de línea"
   },
   "account": {
     "menuFor": "Menú de la cuenta, sesión iniciada como {name}",
@@ -896,5 +899,29 @@
     "distortionNote": "La Tabula Peutingeriana es un diagrama esquemático, estirado aproximadamente 18.5 veces más ancho que alto — no es geográficamente exacto, por lo que no se muestra como una capa en el mapa mismo.",
     "viewerLabel": "Visor profundo del manuscrito de Tabula Peutingeriana",
     "attribution": "Manuscrito: Biblioteca Nacional de Austria, Viena (Cod. 324). Digitisation and IIIF hosting:"
+  },
+  "columns": {
+    "title": "Relieves de columna",
+    "intro": "Los relieves de dos columnas romanas, explorados en detalle — Columna de Trajan de placas académicas especiadas, la Columna de Marcus Aurelius de un escaneo de fondo vivo.",
+    "menuLabel": "Alivios de columna",
+    "trajan": {
+      "tabLabel": "Columna de Trajan",
+      "intro": "Las placas fotográficas 1896–1900 de Conrad Cichorius, la referencia de escena por escena estándar para la columna, reflejada en Wikimedia Commons, dominio público.",
+      "loading": "Cargando platos..",
+      "loadFailed": "Las placas no se podían cargar. Inténtalo de nuevo en breve.",
+      "empty": "Todavía no se publican placas.",
+      "gridLabel": "Placas de relieve de columna de Trajan",
+      "scene": "Escena{number}"
+    },
+    "marcusAurelius": {
+      "tabLabel": "Columna de Marco Aurelio",
+      "intro": "Petersen, las placas 1896 de Domaszewski & Calderini, digitalizadas por la Biblioteca de la Universidad de Heidelberg y mostradas aquí como un escáner de fondo vivo, dominio público.",
+      "viewerLabel": "Visor profundo de la Columna de Marco Aurelio placas",
+      "volume": "Volumen de placa",
+      "tafeln-i-lxiv": "Tafeln I-LXIV",
+      "tafeln-lxv-cxxviii": "Tafeln LXV-CXXVIII",
+      "loading": "Cargando el volumen de la placa..",
+      "loadFailed": "Este volumen no puede ser cargado de la Biblioteca de la Universidad de Heidelberg. Inténtalo de nuevo en breve."
+    }
   }
 }

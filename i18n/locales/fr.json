@@ -7,7 +7,10 @@
     "signIn": "Connexion",
     "signOut": "Déconnexion",
     "footerLicence": "Données et licences",
-    "menu": "Menu"
+    "menu": "Menu",
+    "menuGroupColumns": "Allégements de colonnes",
+    "menuGroupLegal": "Données juridiques",
+    "menuGroupOffline": "Cartes hors ligne"
   },
   "account": {
     "menuFor": "Menu du compte, connecté en tant que {name}",
@@ -896,5 +899,29 @@
     "distortionNote": "La Tabula Peutingeriana est un diagramme schématique, étiré environ 18,5 fois plus large que grand — il n'est pas géographiquement précis, donc il n'est pas montré comme une couche sur la carte elle-même.",
     "viewerLabel": "Vueur en profondeur du manuscrit Tabula Peutingeriana",
     "attribution": "Manuscrit: Bibliothèque nationale autrichienne, Vienne (Cod. 324). Numérisation et hébergement IIIF:"
+  },
+  "columns": {
+    "title": "Allégements de colonnes",
+    "intro": "Les reliefs de deux colonnes romaines, explorés en détail — la colonne de Trajan à partir de plaques savantes miroirs, la colonne de Marc Aurèle à partir d'un scan vivant de zoom profond.",
+    "menuLabel": "Allégements de colonnes",
+    "trajan": {
+      "tabLabel": "La colonne de Trajan",
+      "intro": "Les plaques photographiques de Conrad Cichorius de 1896 à 1900, la référence scénographique standard pour la colonne, sont reproduites de Wikimedia Commons, domaine public.",
+      "loading": "Chargement des plaques..",
+      "loadFailed": "Les plaques ne pouvaient pas être chargées. Essaie encore.",
+      "empty": "Aucune plaque n'est encore publiée.",
+      "gridLabel": "Plaques de relief de la colonne de Trajan",
+      "scene": "Scène{number}"
+    },
+    "marcusAurelius": {
+      "tabLabel": "Colonne de Marc Aurèle",
+      "intro": "Petersen, Domaszewski & Calderini de 1896, numérisé par la bibliothèque de l'Université de Heidelberg et présenté ici comme un scan en direct, domaine public.",
+      "viewerLabel": "Vueur en profondeur de la colonne des plaques de Marc Aurèle",
+      "volume": "Volume de la plaque",
+      "tafeln-i-lxiv": "Tafeln I–LXIV",
+      "tafeln-lxv-cxxviii": "Tafeln LXV-CXXVIII",
+      "loading": "Chargement du volume de la plaque..",
+      "loadFailed": "Ce volume n'a pas pu être chargé depuis la bibliothèque universitaire de Heidelberg. Essaie encore."
+    }
   }
 }

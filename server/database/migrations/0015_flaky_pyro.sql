@@ -1,0 +1,1 @@
+ALTER TABLE "column_relief_plates" ADD COLUMN "description" text;

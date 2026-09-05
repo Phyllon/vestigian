@@ -7,7 +7,10 @@
     "signIn": "Sign in",
     "signOut": "Sign out",
     "footerLicence": "Data & licences",
-    "menu": "Menu"
+    "menu": "Menu",
+    "menuGroupColumns": "Column reliefs",
+    "menuGroupLegal": "Legal & data",
+    "menuGroupOffline": "Offline maps"
   },
   "account": {
     "menuFor": "Account menu, signed in as {name}",
@@ -46,6 +49,30 @@
     "distortionNote": "The Tabula Peutingeriana is a schematic diagram, stretched roughly 18.5 times wider than tall — it is not geographically accurate, so it is not shown as a layer on the map itself.",
     "viewerLabel": "Deep-zoom viewer of the Tabula Peutingeriana manuscript",
     "attribution": "Manuscript: Austrian National Library, Vienna (Cod. 324). Digitisation and IIIF hosting:"
+  },
+  "columns": {
+    "title": "Column Reliefs",
+    "intro": "The reliefs of two Roman columns, explored in detail — Trajan's Column from mirrored scholarly plates, the Column of Marcus Aurelius from a live deep-zoom scan.",
+    "menuLabel": "Column reliefs",
+    "trajan": {
+      "tabLabel": "Trajan's Column",
+      "intro": "Conrad Cichorius's 1896–1900 photographic plates, the standard scene-by-scene reference for the column — mirrored from Wikimedia Commons, public domain.",
+      "loading": "Loading plates…",
+      "loadFailed": "The plates could not be loaded. Try again shortly.",
+      "empty": "No plates are published yet.",
+      "gridLabel": "Trajan's Column relief plates",
+      "scene": "Scene {number}"
+    },
+    "marcusAurelius": {
+      "tabLabel": "Column of Marcus Aurelius",
+      "intro": "Petersen, Domaszewski & Calderini's 1896 plates, digitised by Heidelberg University Library and shown here as a live deep-zoom scan, public domain.",
+      "viewerLabel": "Deep-zoom viewer of the Column of Marcus Aurelius plates",
+      "volume": "Plate volume",
+      "tafeln-i-lxiv": "Tafeln I–LXIV",
+      "tafeln-lxv-cxxviii": "Tafeln LXV–CXXVIII",
+      "loading": "Loading the plate volume…",
+      "loadFailed": "This volume could not be loaded from Heidelberg University Library. Try again shortly."
+    }
   },
   "legend": {
     "title": "What the marks mean",

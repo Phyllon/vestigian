@@ -439,6 +439,147 @@ records that are not ODbL. It is computed **on read and never stored**, and
 `/api/data/sites.geojson` gains no field from it, so what leaves is a Produced
 Work with both attributions attached. See the docstring on that endpoint.
 
+## Column reliefs — one monument mirrored, one monument live
+
+`/columns` explores the reliefs of two Roman columns in detail — a feature
+with no vici.org analogue at all, since vici's corpus is frontier/site
+archaeology, not monument photography. The two monuments deliberately use
+**different mechanisms**, each matching what its own source actually is,
+not a single uniform treatment:
+
+- **Trajan's Column**: Conrad Cichorius's 1896–1900 photographic plates —
+  the standard scene-by-scene scholarly reference for the column — from
+  Wikimedia Commons' [Cichorius Plates category](https://commons.wikimedia.org/wiki/Category:Trajan's_Column_-_Cichorius_Plates),
+  **mirrored** into this project's own storage (`scripts/import/11-column-reliefs.ts`,
+  `pnpm import:column-reliefs`) — the same shape as the DARE/satellite
+  basemap mirrors and the vici.org photograph mirror, because it's a
+  bounded, individually-licensed file set.
+- **The Column of Marcus Aurelius**: Eugen Petersen, Alfred von Domaszewski
+  & Guglielmo Calderini's 1896 _Die Marcus-Säule auf Piazza Colonna in Rom_
+  (128 plates, scenes I–CXVI) — the direct equivalent, for this column, of
+  Cichorius's work — digitised by Heidelberg University Library in two
+  plate volumes (`petersen1896tafeln1`, Tafeln I–LXIV; `petersen1896tafeln2`,
+  Tafeln LXV–CXXVIII) and served **live via IIIF**
+  (`ColumnMarcusAureliusViewer.vue`), the same OpenSeadragon pattern the
+  Tabula Peutingeriana viewer already established. Not mirrored: it's one
+  scanned book, not a bounded file pyramid, and OpenSeadragon's own
+  Presentation-manifest support turns the sequence controls into a
+  page-by-page browser for free.
+
+Both sources are unambiguously public domain (all contributors to both
+works have been dead for decades), but public domain content and a
+reachable, well-behaved _service_ are two different questions — the same
+distinction this project already applies to DARE, EOX and Voorburg.
+
+**Verified live before any of this was built, not assumed from a summary.**
+Three things this session's research got wrong on the first pass, each
+caught by actually running a real request rather than trusting a
+description:
+
+1. **Heidelberg's IIIF API is reachable; its HTML viewer pages are not.**
+   A scripted fetch of `digi.ub.uni-heidelberg.de/diglit/petersen1896tafeln1/0003`
+   (the human-facing page) returns an Anubis bot-challenge page — "Making
+   sure you're not a bot!" — even from a real headless-Chromium session. But
+   the IIIF endpoints themselves
+   (`digi.ub.uni-heidelberg.de/diglit/iiif/petersen1896tafeln1/manifest.json`,
+   its `info.json`s, and actual image tiles) answered 200 with real content
+   on a plain, unauthenticated `curl`, confirmed by fetching a real tile and
+   inspecting it with `file`. Anubis is deployed against the human-facing
+   book viewer, not the machine-readable API this project actually
+   consumes — the distinction that matters, and one no summary of Heidelberg's
+   site would have surfaced. `e2e/columns.spec.ts`'s Marcus Aurelius test
+   still occasionally shows a slower-than-usual first request against it
+   (30s timeout, not this suite's usual 15) — Playwright's own retry
+   absorbed one such case during development; treated as a known, if rare,
+   latency characteristic of the endpoint rather than a CSP or wiring bug.
+2. **Commons' "Cichorius Plates" category is not purely Cichorius's 138
+   numbered plates.** It also holds a handful of community-contributed
+   detail photographs of specific reliefs (titled descriptively, e.g.
+   "Tubicen", not via the "NNN Conrad Cichorius…, Tafel N" convention). The
+   import does not try to force a scene number onto these — `sceneNumber`
+   stays `null`, the same honest "don't guess" choice already documented
+   for the Tabula Peutingeriana import's unlocated places.
+3. **Commons' `imageinfo.url` now carries UTM tracking query parameters**
+   (`?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original`)
+   — confirmed by fetching a real API response, not assumed. A naive
+   `url.split('.').pop()` for the file extension read the query string's
+   own `commons.wikimedia.org` instead of the real extension before the
+   `?`, producing storage keys like
+   `column-reliefs/trajans-column/5074858.org&utm_campaign=imageinfo&utm_content=original`.
+   Fixed by reading the extension from `new URL(info.url).pathname` instead
+   — caught by actually running the mirror against live data and reading
+   the resulting rows, not by reasoning about the code.
+4. **A first full run mirrored only 5 of 138 plates, not because of a
+   licence or parsing bug but because the run was never actually completed**
+   — proving the setup with `MIRROR_LIMIT=5` (this script's own documented
+   first step, same as the basemap tile mirrors) and then not following up
+   with the unbounded run. Running it in full then surfaced a real, separate
+   bug: the main loop's failure path (`continue` on a non-mirrored outcome)
+   skipped `wait(REQUEST_INTERVAL)` entirely, so once Commons returned one
+   non-2xx response the next request fired with no pause at all — and a
+   sustained run showed long stretches of consecutive failures for exactly
+   this reason, confirmed by the fact that every individually-retested
+   "failing" URL succeeded immediately in isolation seconds later. Fixed two
+   ways: every real request now paces regardless of outcome (only the local
+   `isAlreadyStored` HEAD check skips the wait), and `mirrorPlate` retries a
+   `deferred` (not `absent` — see point 3's `isPermanentFailure` split,
+   restored here from the tile mirror's own pattern, which this script had
+   dropped) outcome up to twice with a short backoff before giving up for
+   the run. Together this took a single run from 45/138 mirrored (93
+   deferred) to 137/138, with the last straggler picked up by simply running
+   `pnpm import:column-reliefs` again — the resumable design doing exactly
+   what it's for, not a workaround.
+
+**Schema**: `column_relief_plates` (`server/database/schema/column-reliefs.ts`)
+is its own table, no `siteId`, no `status`/moderation column — the same
+reasoning that already keeps `antiquity_*` and `tabula_peutingeriana_*` out
+of `sites`/`site_images`: this is imported reference material, not a
+contributed record, so `applyRevision()`'s governance model doesn't apply,
+and `site_images.site_id` being `NOT NULL` besides means there's no
+existing precedent for a site-less image row to extend. `monument` is a
+free `varchar`, not an enum — cheap, and leaves room for a second mirrored
+monument later without a second near-identical table, though nothing here
+speculatively builds for that today. `source_url` is the import's own
+conflict target (`ON CONFLICT … DO UPDATE`), so re-running the mirror
+refreshes a row's metadata rather than duplicating it — resumability here
+is a deliberate hybrid of the tile mirror's bucket-state skip-if-exists and
+the vici.org photograph mirror's DB-driven metadata, cheap enough at ~140
+rows that there's no reason to skip the metadata refresh even when the
+object is already stored.
+
+**Licence normalisation is deliberately local to the import script, not
+`server/utils/images.ts`'s shared `LICENCE_ALIASES`.** That file also
+exports `buildImageUrl`, which calls the Nitro-only `useRuntimeConfig`, and
+`tsconfig.scripts.json` only whitelists server/utils files verified free of
+Nitro auto-imports (`uploads.ts`, `sanitize.ts`, `enrichment.ts`,
+`concordance-sources.ts`) — importing anything from `images.ts` into a
+script pulls that Nitro dependency into a context with none of the ambient
+types for it. A small, self-contained `COMMONS_LICENCE_ALIASES` map in the
+script itself is the correct fix, not widening that whitelist to a file
+that isn't pure. Commons' own `Copyrighted: "False"` structured field is
+checked ahead of the free-text `LicenseShortName`, so a stray non-PD file
+in the category still gets its own real licence rather than an assumption
+of perfect category uniformity — resolved to a canonical `PUBLIC-DOMAIN`
+value, kept distinct from `CC0-1.0`: a "no known copyright" mark is not the
+same legal act as an active CC0 dedication.
+
+**Serving**: `/api/column-reliefs` (list, filtered by `?monument=`) and
+`/api/column-reliefs/[id]/[preset]` (signed imgproxy redirect) are
+dedicated siblings of `/api/sites/search` and `/api/images/[id]/[preset]`
+rather than widened versions of them — this project never mixes licensing
+regimes behind one query, the same reasoning that keeps `antiquity_*`
+routes separate from `sites` ones. `useImageUrl.ts`'s `buildCredit` was
+loosened from a `SiteImage`-specific parameter to a small structural
+`CreditedImage` interface (`{ attribution, licence }`) so both the site
+gallery and this feature's plate credit line share one implementation
+rather than two copies of the same three lines.
+
+**Reached from the app menu (`AppMenu.vue`), not the basemap switcher's
+antiquity group.** The Tabula Peutingeriana viewer sits in that group
+because it's another way of looking at _the map_; this feature is
+monument-specific reference material with no geographic-view angle, so it
+doesn't belong there.
+
 ## OpenAPI
 
 Every route under `server/api/` declares `defineRouteMeta({ openAPI: {...} })`
@@ -808,6 +949,7 @@ app/
     moderation/ ReviewQueue RevisionDiff ContributorTable
     limes/     LimesPanel
     notebook/  NotebookControls MilestoneStamps
+    columns/   ColumnTrajanGallery ColumnMarcusAureliusViewer
     ui/        ThemeToggle LanguageSwitcher RevisionHistory
   composables/
     map/  useMapInstance useBasemapStyle useViewportTiles useGeolocation useSiteIcons
@@ -828,6 +970,7 @@ app/
          site/[slug] site/[slug]/edit tracing/[id] tracing/[id]/edit
          limes/index limes/[slug]
          moderation/index moderation/contributors
+         tabula-peutingeriana columns
 server/
   plugins/ observability.ts   the only per-request hook: id, access log, span
   middleware/ content-language.ts   sets Content-Language from the locale cookie
@@ -839,6 +982,7 @@ server/
        contributors/[name]
        moderation/  data/  limes/
        images/[id]/[preset]  sites/[id]/enrichment  health ready metrics openapi.json
+       column-reliefs/ (+ [id]/[preset])  tabula-peutingeriana/network.geojson
   routes/ robots.txt sitemap.xml sitemap-static.xml
           sitemap-sites/[page]  sitemap-tracings/[page]
   database/ schema/ (users sites notebook endorsements geo atlas) migrations/ migrate.ts
@@ -855,6 +999,7 @@ shared/utils/  password policy, authorization rules, the limes gazetteer, JSON-L
 scripts/import/  four-stage vici.org import + vici-licences.ts (shared vocabulary)
                  02c-geo-names.ts 04-mirror-basemap-tiles.ts 05-antiquity-atlas.ts
                  06-limes.ts 07-country-boundaries.ts 08-edh-findspots.ts 09-cities.ts
+                 10-tabula-peutingeriana.ts 11-column-reliefs.ts
 scripts/generate-og-placeholders.ts  static per-category Open Graph cards, run by hand
 scripts/warm-tiles.ts snapshot-database.ts reconcile-images.ts build-glyphs.ts
                  strip-description-html.ts backfill-country-codes.ts verify-concordances.ts
@@ -984,6 +1129,7 @@ pnpm import:edh-findspots       # → 29,861 inscription findspots, CC BY-SA 4.0
 pnpm exec tsx scripts/verify-concordances.ts --repair       # overnight-scale, see its own docstring
 pnpm import:cities              # → 235,666 modern cities and towns, CC BY 4.0
 pnpm import:tabula-peutingeriana # → 2,574 places, 2,397 roads; licence unconfirmed, off by default
+pnpm import:column-reliefs      # → Trajan's Column plates from Wikimedia Commons, public domain
 pnpm tiles:warm <url>
 ```
 
@@ -1744,3 +1890,12 @@ contradicts what they asked for. Those belong in the reply.
 - **e2e-tests** add e2e-tests when new critical features were added. always run them before committing.
 - **i18n** always use i18n for defined languages (de, en, fr, es, it, nl)
 - **Deep nesting** never use nested terneries
+- **Verify third-party sources before integrating them** — before mirroring or
+  linking to any external open-data, open-source, or IIIF/tile asset, confirm
+  its actual licence and reachability with a real request (fetch the source,
+  check its licence tags, hit the real endpoint), not from memory or
+  documentation alone. A source that looks reachable can sit behind a bot
+  wall that only shows up when actually queried (see the Heidelberg IIIF
+  manifest vs. its HTML viewer pages), and a licence tag can differ from what
+  a summary implies (PD-Mark is not CC0). Cite what was actually checked and
+  how.

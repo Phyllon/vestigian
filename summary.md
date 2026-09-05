@@ -173,6 +173,36 @@ load-bearing — never to be "quietly" weakened):
 - **Slugs never change on edit** — inbound links, citations, and the sitemap
   all depend on permanence.
 
+### 2.4 Versioning & releases
+
+Semantic versioning via [Changesets](https://github.com/changesets/changesets)
+— deliberately not Conventional-Commits-driven tooling (`semantic-release`,
+`standard-version`), because this repo's `commit-msg` hook protects a
+freeform, lowercase, imperative commit style with no type prefix, structural
+rather than convention-based. A changeset is a small file under
+`.changeset/`, independent of the commit message, recording what changed and
+how it should move the version.
+
+```mermaid
+flowchart LR
+    A["pnpm changeset\n(contributor records a bump)"] --> B[".changeset/*.md\ncommitted alongside the change"]
+    B --> C{"push to main"}
+    C -->|"pending changesets exist"| D["release.yml: bump package.json,\nrewrite CHANGELOG.md, commit,\ntag vX.Y.Z, cut GitHub Release"]
+    C -->|"none pending"| E["no-op"]
+    F["pull_request"] --> G["changeset-check.yml:\nsoft reminder, non-blocking"]
+```
+
+**The primary path is a direct push to `main`** — this project has no
+release-PR step to merge, commits land on `main` directly, so the release
+workflow runs the bump/tag/release in the same push rather than opening a
+"Version Packages" PR the way Changesets' own GitHub Action normally would.
+A `[skip release]` marker on the bump commit stops it from re-triggering
+itself. **The secondary path is a branch/PR** — a non-blocking check that a
+branch touching app code carries a changeset. Deploy images additionally
+carry a `v${version}` tag alongside `latest` and the commit SHA, so a
+specific release can be pulled or rolled back to by name rather than only by
+SHA.
+
 ---
 
 ## 3. Technology stack
@@ -836,6 +866,16 @@ but materially shape how trustworthy and maintainable this project is:
   VPS it's backing up, honestly documented under "Not built" as a real gap
   rather than glossed over, since one VPS is one failure domain until an
   off-site copy exists.
+- **Third-party sources are verified live, not assumed from memory or
+  documentation, before anything is built against them.** A source that
+  looks reachable can sit behind a bot wall that only shows up when actually
+  queried — Heidelberg University Library's IIIF API, evaluated for a
+  planned feature, turned out to be openly reachable even though its
+  human-facing HTML viewer pages are not, a distinction only a real request
+  revealed. A licence tag can also differ from what a summary implies (a
+  "no known copyright" Public Domain Mark is not the same legal act as an
+  active CC0 dedication). This check-before-build discipline is now a
+  standing rule in CLAUDE.md's "Also, always" list, not a one-off.
 
 ---
 

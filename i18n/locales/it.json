@@ -7,7 +7,10 @@
     "signIn": "Firma",
     "signOut": "Firma",
     "footerLicence": "Dati e licenze",
-    "menu": "Menu"
+    "menu": "Menu",
+    "menuGroupColumns": "Rilievi della colonna",
+    "menuGroupLegal": "Legali e dati",
+    "menuGroupOffline": "Mappa offline"
   },
   "account": {
     "menuFor": "Menu dell'account, connesso come {name}",
@@ -896,5 +899,29 @@
     "distortionNote": "La Tabula Peutingeriana è un diagramma schematico, allungato circa 18,5 volte più largo dell'alto — non è geograficamente esatto, quindi non è mostrato come uno strato sulla mappa stessa.",
     "viewerLabel": "Osservatore del manoscritto Tabula Peutingeriana",
     "attribution": "Manoscritto: Biblioteca Nazionale Austriaca, Vienna (Cod. 324). Digitisation e IIIF hosting:"
+  },
+  "columns": {
+    "title": "Rilievi di colonna",
+    "intro": "I rilievi di due colonne romane, esplorate in dettaglio — Colonna di Traiano da lastre studiose a specchio, la Colonna di Marco Aurelio da una scansione live profondo-zoom.",
+    "menuLabel": "Rilievi della colonna",
+    "trajan": {
+      "tabLabel": "Colonna di Traiano",
+      "intro": "Le targhe fotografiche del 1896–1900 di Conrad Cichorius, il riferimento di scena per scena standard per la colonna — rispecchiato da Wikimedia Commons, dominio pubblico.",
+      "loading": "Piastre di carico..",
+      "loadFailed": "I piatti non potevano essere caricati. Riprova tra poco.",
+      "empty": "Non sono ancora pubblicate le targhe.",
+      "gridLabel": "Piatti di rilievo della colonna di Trajan",
+      "scene": "Scena{number}"
+    },
+    "marcusAurelius": {
+      "tabLabel": "Colonna di Marco Aurelio",
+      "intro": "Petersen, Domaszewski & Calderini 1896 targhe, digitalizzate dalla Biblioteca Universitaria di Heidelberg e mostrate qui come una scansione live deep-zoom, pubblico dominio.",
+      "viewerLabel": "Osservatore di fondo della Colonna di Marco Aurelio piatti",
+      "volume": "Volume del piatto",
+      "tafeln-i-lxiv": "Tafeln I–LXIV",
+      "tafeln-lxv-cxxviii": "Tafeln LXV–CXXVIII",
+      "loading": "Caricamento del volume..",
+      "loadFailed": "Questo volume non poteva essere caricato dalla Heidelberg University Library. Riprova tra poco."
+    }
   }
 }

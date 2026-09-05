@@ -8,11 +8,24 @@
    */
   const { t } = useI18n()
 
+  // Three named groups, each its own array (which also draws the separator
+  // between them) with a non-interactive `type: 'label'` header — a plain
+  // flat list read fine with one item per row, but stopped being obvious
+  // once a second and third destination arrived with nothing to say which
+  // parts of the app they belonged to.
   const items = computed(() => [
     [
+      { type: 'label' as const, label: t('layout.menuGroupColumns') },
+      { label: t('columns.menuLabel'), icon: 'i-lucide-scroll', to: '/columns' },
+    ],
+    [
+      { type: 'label' as const, label: t('layout.menuGroupLegal') },
       { label: t('layout.footerLicence'), icon: 'i-lucide-scale', to: '/licence' },
       { label: t('privacy.title'), icon: 'i-lucide-shield-check', to: '/privacy' },
       { label: t('impressum.title'), icon: 'i-lucide-file-text', to: '/impressum' },
+    ],
+    [
+      { type: 'label' as const, label: t('layout.menuGroupOffline') },
       { label: t('offlinePage.menuLabel'), icon: 'i-lucide-download', to: '/offline' },
     ],
   ])

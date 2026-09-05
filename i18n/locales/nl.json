@@ -7,7 +7,10 @@
     "signIn": "Aanmelden",
     "signOut": "Afmelden",
     "footerLicence": "Gegevens & licenties",
-    "menu": "Menu"
+    "menu": "Menu",
+    "menuGroupColumns": "Kolomreliëf",
+    "menuGroupLegal": "Juridische gegevens",
+    "menuGroupOffline": "Offline kaarten"
   },
   "account": {
     "menuFor": "Accountmenu, aangemeld als {name}",
@@ -896,5 +899,29 @@
     "distortionNote": "De Tabula Peutingeriana is een schematisch diagram, dat ongeveer 18,5 keer breder is dan de hoogte.",
     "viewerLabel": "Deep-zoom viewer van het Tabula Peutingeriana manuscript",
     "attribution": "Manuscript: Oostenrijkse Nationale Bibliotheek, Wenen (Cod. 324). Digitalisering en IIIF-hosting:"
+  },
+  "columns": {
+    "title": "Kolomaflossingen",
+    "intro": "De reliëfs van twee Romeinse zuilen, in detail onderzocht Trajan's Column van gespiegelde wetenschappelijke platen, de Column van Marcus Aurelius van een levende diepe zoom scan.",
+    "menuLabel": "Kolomreliëf",
+    "trajan": {
+      "tabLabel": "Trajanus kolom",
+      "intro": "Conrad Cichorius' fotografische platen uit 1896.1900, de standaard scene-by-scene referentie voor de column, gespiegeld uit Wikimedia Commons, publiek domein.",
+      "loading": "Laden van platen..",
+      "loadFailed": "De platen konden niet geladen worden. Probeer het binnenkort nog eens.",
+      "empty": "Er zijn nog geen platen gepubliceerd.",
+      "gridLabel": "Trajan's Column reliëfplaten",
+      "scene": "Scène{number}"
+    },
+    "marcusAurelius": {
+      "tabLabel": "Kolom van Marcus Aurelius",
+      "intro": "Petersen, Domaszewski & Calderini's 1896 platen, gedigitaliseerd door de Universiteitsbibliotheek Heidelberg en hier getoond als een live deep-zoom scan, publiek domein.",
+      "viewerLabel": "Diepzoomkijker van de Colonne van Marcus Aurelius platen",
+      "volume": "Plate volume",
+      "tafeln-i-lxiv": "Tafeln I",
+      "tafeln-lxv-cxxviii": "Tafeln LXV",
+      "loading": "Laden van het plaatvolume..",
+      "loadFailed": "Dit volume kon niet worden geladen vanuit de Universiteitsbibliotheek Heidelberg. Probeer het binnenkort nog eens."
+    }
   }
 }

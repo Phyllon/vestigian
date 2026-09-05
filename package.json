@@ -49,6 +49,7 @@
     "import:atlas": "tsx --env-file-if-exists=.env scripts/import/05-antiquity-atlas.ts",
     "import:limes": "tsx --env-file-if-exists=.env scripts/import/06-limes.ts",
     "import:tabula-peutingeriana": "tsx --env-file-if-exists=.env scripts/import/10-tabula-peutingeriana.ts",
+    "import:column-reliefs": "tsx --env-file-if-exists=.env scripts/import/11-column-reliefs.ts",
     "glyphs:build": "tsx scripts/build-glyphs.ts",
     "og:build": "tsx scripts/generate-og-placeholders.ts",
     "icons:build": "tsx scripts/generate-app-icons.ts",
