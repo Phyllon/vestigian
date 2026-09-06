@@ -8,9 +8,9 @@
     "signOut": "Afmelden",
     "footerLicence": "Gegevens & licenties",
     "menu": "Menu",
-    "menuGroupColumns": "Kolomreliëf",
     "menuGroupLegal": "Juridische gegevens",
-    "menuGroupOffline": "Offline kaarten"
+    "menuGroupOffline": "Offline kaarten",
+    "menuGroupReference": "Referentie"
   },
   "account": {
     "menuFor": "Accountmenu, aangemeld als {name}",
@@ -421,7 +421,8 @@
     "label": "Zoekplaatsen, wegen en plaatsen",
     "placeholder": "Zoekplaatsen, wegen, plaatsen",
     "resultsLabel": "Zoekresultaten",
-    "modernPlace": "Moderne plaats · {country}"
+    "modernPlace": "Moderne plaats · {country}",
+    "ancientPlace": "Oude naam"
   },
   "mapCanvas": {
     "ariaLabel": "Kaart van archeologische sites",
@@ -916,7 +917,9 @@
       "loadFailed": "De platen konden niet geladen worden. Probeer het binnenkort nog eens.",
       "empty": "Er zijn nog geen platen gepubliceerd.",
       "gridLabel": "Trajan's Column reliëfplaten",
-      "scene": "Scène{number}"
+      "scene": "Scène{number}",
+      "zoomIn": "Inzoomen",
+      "zoomOut": "Uitzoomen"
     },
     "marcusAurelius": {
       "tabLabel": "Kolom van Marcus Aurelius",

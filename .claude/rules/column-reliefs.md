@@ -115,6 +115,30 @@ description:
    OpenSeadragon an _array_ of `info.json` URLs — the shape it actually
    understands for a multi-page sequence, at which point its own sequence
    controls do become a real page-by-page browser.
+   5b. **`OpenSeadragon({ tileSources: string[] })` does not paginate at all
+   unless `sequenceMode: true` is also set — a second, separate gap from
+   finding 5, found only by watching real network traffic, not by reading the
+   constructor's other options.** Without it, `open()`'s own array-handling
+   branch (`if (this.sequenceMode && $.isArray(tileSources))`, confirmed
+   against the library's source in `openseadragon.js`) never runs, and the
+   fallback path instead opens _every_ tileSource at once as simultaneous,
+   stacked images sharing one world — OpenSeadragon's multi-image-comparison
+   mode, meant for overlaying several views of the same subject, not a
+   paginated book. For a 64-plate volume this fetched a full `info.json` and
+   then a complete tile pyramid for every single plate on every open — several
+   hundred requests, all logged, all wasted — and rendered nothing
+   recognisable, matching a real report of "the viewer doesn't work, pictures
+   aren't loading, and there are a huge number of requests in the logs."
+   `showSequenceControl`/`showReferenceStrip` being set already was not
+   enough on their own to trigger this path; `sequenceMode: true` is the flag
+   that actually switches `open()`'s behaviour, confirmed by rebuilding with
+   it added and observing the request count drop to the current page's own
+   handful of tiles, with the navigator and book cover rendering correctly.
+   The same missing openseadragon image assets this finding exposed
+   (`next_*.png`/`previous_*.png` — only the zoom/home/fullpage icons had ever
+   been copied into `public/openseadragon/images/`, because the sequence
+   controls had never actually rendered before) are now mirrored alongside
+   the rest, from the package's own bundled `images/` directory.
 6. **An `info.json` response carries its own `@id` field pointing back at
    Heidelberg**, and OpenSeadragon builds every tile URL from that field,
    not from the URL it fetched the document at. Rewriting only the
@@ -203,6 +227,32 @@ The carousel is only mounted while the modal is open (`v-if`), so
 `start-index` re-applies fresh to whichever thumbnail was actually clicked
 each time, rather than needing an imperative `scrollTo` call after the
 fact.
+
+**The carousel's own arrow theme clips inside `UModal`.** Nuxt UI's default
+carousel theme positions `prev`/`next` _outside_ the carousel's own box from
+the `sm` breakpoint up (`sm:-start-12`/`sm:-end-12`), banking on there being
+open page margin around it — but `UModal`'s content panel is
+`overflow-hidden` (needed for its own rounded corners and scroll clipping),
+so the arrows rendered visibly cropped in half. Fixed by overriding
+`:ui="{ prev: 'start-2', next: 'end-2' }"` on `UCarousel` so both arrows
+stay inside the carousel's own bounds at every width, rather than widening
+the modal enough to give the default position room it was never guaranteed
+to have. The modal itself was also widened (`max-w-5xl w-[95vw]`) — the
+original `max-w-3xl` combined with a `max-h-[65vh]` image left a lot of the
+viewport unused for detail photography that benefits from screen space.
+
+**Zoom is a click/tap toggle into a scrollable frame, not a custom pan
+implementation.** At rest the plate image fits its frame
+(`object-contain`); clicking it (or the floating zoom button, kept for
+keyboard/AT reachability — a plain image click has no keyboard equivalent)
+removes the size cap so the image renders at its full delivered resolution
+inside a frame that switches to `overflow-auto`, and the browser's own
+touch-drag/trackpad/scrollbar panning takes over. Deliberately not
+OpenSeadragon or a hand-rolled pointer-drag: this gallery has exactly one
+resolution tier per plate (no deep-zoom pyramid the way the Marcus Aurelius
+viewer has), so there is nothing for a real tiled zoomer to buy here beyond
+what native scrolling already does for free, with none of the pointer-math
+edge cases a custom implementation would need to get right.
 
 **Reached from the app menu (`AppMenu.vue`), not the basemap switcher's
 antiquity group.** The Tabula Peutingeriana viewer sits in that group

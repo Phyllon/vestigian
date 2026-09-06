@@ -19,13 +19,33 @@
   })
 
   /**
-   * A site opens its detail panel; a modern place is not a Vestigian
-   * record — it has nothing to open, so this only moves the camera there.
+   * A site opens its detail panel; a modern or ancient place is not a
+   * Vestigian record — it has nothing to open, so this only moves the
+   * camera there. An ancient place gets a closer zoom than a modern town:
+   * it marks one small point on the Barrington sheet, not a settlement
+   * with its own extent.
    */
+  const RESULT_ZOOM: Record<MapSearchResult['kind'], number> = {
+    site: 15,
+    'ancient-place': 14,
+    place: 12,
+  }
+
+  const resultTitle = (result: MapSearchResult): string => {
+    if (result.kind === 'place') return result.name
+    return result.title
+  }
+
+  const resultSubtitle = (result: MapSearchResult): string => {
+    if (result.kind === 'site') return t(`categories.${result.category}`)
+    if (result.kind === 'ancient-place') return t('mapSearch.ancientPlace')
+    return t('mapSearch.modernPlace', { country: countryName(result.countryCode) })
+  }
+
   const goToResult = (result: MapSearchResult): void => {
     map.value?.flyTo({
       center: [result.position.lon, result.position.lat],
-      zoom: result.kind === 'site' ? 15 : 12,
+      zoom: RESULT_ZOOM[result.kind],
       duration: 1200,
       essential: true,
     })
@@ -78,14 +98,10 @@
           @click="goToResult(result)"
         >
           <span class="text-sm font-medium text-ink-900 dark:text-paper-100">
-            {{ result.kind === 'site' ? result.title : result.name }}
+            {{ resultTitle(result) }}
           </span>
           <span class="eyebrow">
-            {{
-              result.kind === 'site'
-                ? t(`categories.${result.category}`)
-                : t('mapSearch.modernPlace', { country: countryName(result.countryCode) })
-            }}
+            {{ resultSubtitle(result) }}
           </span>
         </button>
       </li>

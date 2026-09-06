@@ -8,9 +8,9 @@
     "signOut": "Firma",
     "footerLicence": "Dati e licenze",
     "menu": "Menu",
-    "menuGroupColumns": "Rilievi della colonna",
     "menuGroupLegal": "Legali e dati",
-    "menuGroupOffline": "Mappa offline"
+    "menuGroupOffline": "Mappa offline",
+    "menuGroupReference": "Riferimento"
   },
   "account": {
     "menuFor": "Menu dell'account, connesso come {name}",
@@ -421,7 +421,8 @@
     "label": "Siti di ricerca, strade e luoghi",
     "placeholder": "Siti di ricerca, strade, luoghi",
     "resultsLabel": "Risultati ricerca",
-    "modernPlace": "Luogo moderno · {country}"
+    "modernPlace": "Luogo moderno · {country}",
+    "ancientPlace": "Nome antico"
   },
   "mapCanvas": {
     "ariaLabel": "Mappa dei siti archeologici",
@@ -916,7 +917,9 @@
       "loadFailed": "I piatti non potevano essere caricati. Riprova tra poco.",
       "empty": "Non sono ancora pubblicate le targhe.",
       "gridLabel": "Piatti di rilievo della colonna di Trajan",
-      "scene": "Scena{number}"
+      "scene": "Scena{number}",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom fuori"
     },
     "marcusAurelius": {
       "tabLabel": "Colonna di Marco Aurelio",

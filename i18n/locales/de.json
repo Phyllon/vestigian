@@ -8,9 +8,9 @@
     "signOut": "Abmelden",
     "footerLicence": "Daten und Lizenzen",
     "menu": "Menü",
-    "menuGroupColumns": "Säulenreliefs",
     "menuGroupLegal": "Recht & Daten",
-    "menuGroupOffline": "Offline-Karten"
+    "menuGroupOffline": "Offline-Karten",
+    "menuGroupReference": "Referenz"
   },
   "account": {
     "menuFor": "Kontomenü, angemeldet als {name}",
@@ -421,7 +421,8 @@
     "label": "Suchorte, Straßen und Orte",
     "placeholder": "Suchorte, Straßen, Orte",
     "resultsLabel": "Suchergebnisse",
-    "modernPlace": "Moderner Ort · {country}"
+    "modernPlace": "Moderner Ort · {country}",
+    "ancientPlace": "Alte Bezeichnung"
   },
   "mapCanvas": {
     "ariaLabel": "Karte der archäologischen Stätten",
@@ -916,7 +917,9 @@
       "loadFailed": "Die Platten konnten nicht geladen werden. Versuchen Sie es gleich noch einmal.",
       "empty": "Es wurden noch keine Platten veröffentlicht.",
       "gridLabel": "Trajansche Reliefplatten",
-      "scene": "Szenerie{number}"
+      "scene": "Szenerie{number}",
+      "zoomIn": "Zoom",
+      "zoomOut": "Zoom raus"
     },
     "marcusAurelius": {
       "tabLabel": "Kolumne von Marcus Aurelius",

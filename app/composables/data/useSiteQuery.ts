@@ -1,5 +1,11 @@
 import { useDebounceFn } from '@vueuse/core'
-import type { MapSearchResult, PlaceSummary, SiteDetail, SiteSummary } from '#shared/types'
+import type {
+  AncientPlaceSummary,
+  MapSearchResult,
+  PlaceSummary,
+  SiteDetail,
+  SiteSummary,
+} from '#shared/types'
 
 /**
  * Reads for the detail panel and the search field. Tiles deliberately carry no
@@ -137,13 +143,15 @@ export const formatLength = (metres: number | null): string => {
 }
 
 /**
- * Backs the map search bar. Queries Vestigian's own sites and GeoNames'
- * modern cities/towns (`PlaceSummary` — `/api/places/search`) in parallel and
- * merges them into one ranked list, sites first: this atlas's own records are
- * the primary content, a modern place is here only to get a reader to the
- * right patch of map. `Promise.allSettled` rather than `Promise.all` so one
- * source failing (a places-table hiccup, say) still shows the other's
- * results instead of blanking the whole field.
+ * Backs the map search bar. Queries Vestigian's own sites, GeoNames' modern
+ * cities/towns (`PlaceSummary` — `/api/places/search`) and the Barrington
+ * sheet's own ancient names (`AncientPlaceSummary` — `/api/atlas/places/
+ * search`, e.g. "Bratananium" near modern Gauting) in parallel and merges
+ * them into one ranked list, sites first: this atlas's own records are the
+ * primary content, a modern or ancient place is here only to get a reader
+ * to the right patch of map. `Promise.allSettled` rather than `Promise.all`
+ * so one source failing (a places-table hiccup, say) still shows the
+ * others' results instead of blanking the whole field.
  */
 export const useSiteSearch = () => {
   const term = ref('')
@@ -167,9 +175,10 @@ export const useSiteSearch = () => {
     const token = ++requestToken
     isSearching.value = true
 
-    const [sites, places] = await Promise.allSettled([
+    const [sites, places, ancientPlaces] = await Promise.allSettled([
       $fetch<SiteSummary[]>('/api/sites/search', { query: { q: trimmed } }),
       $fetch<PlaceSummary[]>('/api/places/search', { query: { q: trimmed } }),
+      $fetch<AncientPlaceSummary[]>('/api/atlas/places/search', { query: { q: trimmed } }),
     ])
 
     if (token !== requestToken) return
@@ -180,6 +189,9 @@ export const useSiteSearch = () => {
         : []),
       ...(places.status === 'fulfilled'
         ? places.value.map((place) => ({ kind: 'place' as const, ...place }))
+        : []),
+      ...(ancientPlaces.status === 'fulfilled'
+        ? ancientPlaces.value.map((place) => ({ kind: 'ancient-place' as const, ...place }))
         : []),
     ]
     isSearching.value = false

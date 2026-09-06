@@ -8,9 +8,9 @@
     "signOut": "Suscríbase",
     "footerLicence": "Licencias de datos",
     "menu": "Menú",
-    "menuGroupColumns": "Alivios de columna",
     "menuGroupLegal": "Datos jurídicos",
-    "menuGroupOffline": "Mapas de línea"
+    "menuGroupOffline": "Mapas de línea",
+    "menuGroupReference": "Referencia"
   },
   "account": {
     "menuFor": "Menú de la cuenta, sesión iniciada como {name}",
@@ -421,7 +421,8 @@
     "label": "Sitios de búsqueda, carreteras y lugares",
     "placeholder": "Sitios de búsqueda, carreteras, lugares",
     "resultsLabel": "Resultados de la búsqueda",
-    "modernPlace": "Lugar moderno · {country}"
+    "modernPlace": "Lugar moderno · {country}",
+    "ancientPlace": "Nombre antiguo"
   },
   "mapCanvas": {
     "ariaLabel": "Mapa de sitios arqueológicos",
@@ -916,7 +917,9 @@
       "loadFailed": "Las placas no se podían cargar. Inténtalo de nuevo en breve.",
       "empty": "Todavía no se publican placas.",
       "gridLabel": "Placas de relieve de columna de Trajan",
-      "scene": "Escena{number}"
+      "scene": "Escena{number}",
+      "zoomIn": "Zoom en",
+      "zoomOut": "Zoom fuera"
     },
     "marcusAurelius": {
       "tabLabel": "Columna de Marco Aurelio",

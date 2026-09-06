@@ -59,6 +59,23 @@ export interface PlaceSummary {
   position: LonLat
 }
 
+/**
+ * An ancient name from AWMC/Pleiades' gazetteer (`antiquity_places`,
+ * `scripts/import/05-antiquity-atlas.ts`) — the names drawn on the
+ * Barrington sheet, e.g. "Bratananium" near modern Gauting. Not a
+ * Vestigian record, the same reasoning as `PlaceSummary`: no slug, no
+ * page, just somewhere on the map worth being able to find by name.
+ * `category` is nullable because Pleiades has landscape features with a
+ * name and no symbol on the sheet — still findable by name, but with
+ * nothing to badge them as.
+ */
+export interface AncientPlaceSummary {
+  id: number
+  title: string
+  category: SiteCategory | null
+  position: LonLat
+}
+
 export interface SiteImage {
   id: number
   storageKey: string

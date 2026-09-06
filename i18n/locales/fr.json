@@ -8,9 +8,9 @@
     "signOut": "Déconnexion",
     "footerLicence": "Données et licences",
     "menu": "Menu",
-    "menuGroupColumns": "Allégements de colonnes",
     "menuGroupLegal": "Données juridiques",
-    "menuGroupOffline": "Cartes hors ligne"
+    "menuGroupOffline": "Cartes hors ligne",
+    "menuGroupReference": "Référence"
   },
   "account": {
     "menuFor": "Menu du compte, connecté en tant que {name}",
@@ -421,7 +421,8 @@
     "label": "Sites de recherche, routes et lieux",
     "placeholder": "Sites de recherche, routes, lieux",
     "resultsLabel": "Résultats de la recherche",
-    "modernPlace": "Lieu moderne · {country}"
+    "modernPlace": "Lieu moderne · {country}",
+    "ancientPlace": "Nom ancien"
   },
   "mapCanvas": {
     "ariaLabel": "Carte des sites archéologiques",
@@ -916,7 +917,9 @@
       "loadFailed": "Les plaques ne pouvaient pas être chargées. Essaie encore.",
       "empty": "Aucune plaque n'est encore publiée.",
       "gridLabel": "Plaques de relief de la colonne de Trajan",
-      "scene": "Scène{number}"
+      "scene": "Scène{number}",
+      "zoomIn": "Zoom dans",
+      "zoomOut": "Zoom arrière"
     },
     "marcusAurelius": {
       "tabLabel": "Colonne de Marc Aurèle",

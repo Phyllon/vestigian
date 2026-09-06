@@ -15,7 +15,7 @@
   // parts of the app they belonged to.
   const items = computed(() => [
     [
-      { type: 'label' as const, label: t('layout.menuGroupColumns') },
+      { type: 'label' as const, label: t('layout.menuGroupReference') },
       { label: t('columns.menuLabel'), icon: 'i-lucide-scroll', to: '/columns' },
     ],
     [

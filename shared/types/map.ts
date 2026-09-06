@@ -1,4 +1,4 @@
-import type { LonLat, PlaceSummary, SiteSummary } from './site'
+import type { AncientPlaceSummary, LonLat, PlaceSummary, SiteSummary } from './site'
 
 /**
  * The views offered by the basemap switcher, in two families. 'vestigian' is a
@@ -97,4 +97,7 @@ export interface TileRenderPlan {
  * union rather than two separate lists so the field can render one ranked
  * list and the "no matches" state has one thing to be empty about.
  */
-export type MapSearchResult = ({ kind: 'site' } & SiteSummary) | ({ kind: 'place' } & PlaceSummary)
+export type MapSearchResult =
+  | ({ kind: 'site' } & SiteSummary)
+  | ({ kind: 'place' } & PlaceSummary)
+  | ({ kind: 'ancient-place' } & AncientPlaceSummary)

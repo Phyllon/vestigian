@@ -121,6 +121,15 @@
     osdViewer = OpenSeadragon({
       element: viewer.value,
       tileSources,
+      // Without this, `open()` with an array of tileSources does not
+      // paginate at all — OpenSeadragon instead opens every one of them at
+      // once as simultaneous, stacked images in the same world (its
+      // multi-image-comparison mode), which fetched a full tile pyramid
+      // for all ~70 plates in the volume on every open and rendered
+      // nothing recognisable. Confirmed against OpenSeadragon's own
+      // `open()` source: the array branch that builds a real page sequence
+      // only runs `if (this.sequenceMode && $.isArray(tileSources))`.
+      sequenceMode: true,
       showNavigator: true,
       navigatorPosition: 'BOTTOM_RIGHT',
       // No crossOriginPolicy needed — every tile now comes from this
@@ -132,6 +141,7 @@
       // viewer's single image), so the sequence controls turn into a real
       // page-by-page browser through this volume's plates.
       showSequenceControl: true,
+      showReferenceStrip: true,
       showRotationControl: false,
       showFlipControl: false,
     })

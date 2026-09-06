@@ -8,7 +8,7 @@
     "signOut": "Sign out",
     "footerLicence": "Data & licences",
     "menu": "Menu",
-    "menuGroupColumns": "Column reliefs",
+    "menuGroupReference": "Reference",
     "menuGroupLegal": "Legal & data",
     "menuGroupOffline": "Offline maps"
   },
@@ -66,7 +66,9 @@
       "loadFailed": "The plates could not be loaded. Try again shortly.",
       "empty": "No plates are published yet.",
       "gridLabel": "Trajan's Column relief plates",
-      "scene": "Scene {number}"
+      "scene": "Scene {number}",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out"
     },
     "marcusAurelius": {
       "tabLabel": "Column of Marcus Aurelius",
@@ -452,7 +454,8 @@
     "label": "Search sites, roads and places",
     "placeholder": "Search sites, roads, places",
     "resultsLabel": "Search results",
-    "modernPlace": "Modern place · {country}"
+    "modernPlace": "Modern place · {country}",
+    "ancientPlace": "Ancient name"
   },
   "mapCanvas": {
     "ariaLabel": "Map of archaeological sites",

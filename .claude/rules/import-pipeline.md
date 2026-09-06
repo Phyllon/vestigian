@@ -3,6 +3,8 @@ paths:
   - 'scripts/import/**'
   - 'scripts/backfill-country-codes.ts'
   - 'scripts/verify-concordances.ts'
+  - 'server/api/places/**'
+  - 'server/api/atlas/**'
 ---
 
 ## Known guesses that need verifying
@@ -191,6 +193,19 @@ actually wants. `useSiteSearch` (`app/composables/data/useSiteQuery.ts`) queries
 them into one ranked list (`MapSearchResult`, sites first), so one source failing does not
 blank the other's results. Selecting a place only moves the camera — `goToResult` calls
 `selectSite` for a site, never for a place, since a modern town has no detail panel to open.
+
+**Ancient names are searchable too, from data already imported.** The Barrington sheet
+draws names from `antiquity_places` (AWMC/Pleiades, `05-antiquity-atlas.ts`) that this
+atlas holds no separate opinion about — e.g. modern Gauting was ancient "Bratananium".
+Nothing new to import: `/api/atlas/places/search.get.ts` is a third sibling of
+`sites/search.get.ts` and `places/search.get.ts`, same trigram-fallback shape, over
+`antiquity_places.title` — needing its own hand-written `gin_trgm_ops` index
+(`0017_ancient_place_search.sql`), the same drizzle-kit limitation documented above for
+`cities_name_trgm_idx`. `useSiteSearch` now queries all three endpoints in parallel;
+`AncientPlaceSummary` (`shared/types/site.ts`) has no slug either, for the same reason
+`PlaceSummary` doesn't — there is no page for a name with nothing but a findspot behind
+it. `goToResult` zooms in closer for an ancient place (z14) than a modern town (z12): it
+marks one small point on the Barrington sheet, not a settlement with real extent.
 
 **Contact René Voorburg before mirroring images at scale.** The licences permit
 reuse; the bandwidth is his server's. Quote real figures — **36,216 requests**
