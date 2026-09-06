@@ -8,6 +8,8 @@ paths:
   - 'server/api/limes/**'
   - 'scripts/import/05-antiquity-atlas.ts'
   - 'scripts/import/06-limes.ts'
+  - 'scripts/import/12-antiquity-periods.ts'
+  - 'server/api/tiles/antiquity-periods/**'
   - 'app/components/limes/**'
   - 'app/composables/limes/**'
 ---
@@ -213,3 +215,121 @@ joined to `sites`. The one judgement call is `offsetMetres` in
 records that are not ODbL. It is computed **on read and never stored**, and
 `/api/data/sites.geojson` gains no field from it, so what leaves is a Produced
 Work with both attributions attached. See the docstring on that endpoint.
+
+## The period scrubber — a switch, not six switches
+
+Every antiquity view up to this point was a single fixed snapshot. Research
+requested by the user (verify third-party sources live, not from a summary)
+found AWMC actually publishes the empire's extent at three separate dates in
+its own `Cultural-Data/political_shading/` release — the same repo and the
+same ODbL licence `05-antiquity-atlas.ts` already imports from, confirmed by
+reading that repo's own `LICENSE.txt` and `README.md` directly, which state
+the licence covers **every** GeoJSON in the repo with no folder-level
+carve-out.
+
+**Two secondary mirrors of this data — DAI's `iDAI.geoserver` (Germany) and
+Project MERCURY (an EU-affiliated dataset index) — both tag it CC-BY-NC
+instead of ODbL.** The primary source wins: AWMC's GitHub repo is the one it
+actively maintains ("the GeoJSONs continue to provide the most up-to-date
+data"), and its own licence statement is unambiguous. The secondary tags are
+stale or simply wrong — the same "trust what's live and primary, not a
+downstream mirror's tag" lesson already learned once with PD-Mark vs CC0 and
+the Heidelberg Anubis red herring in the column-reliefs research.
+
+**`political_shading/` ships six Roman-period files; only three are usable,**
+confirmed by downloading and parsing every one of them, not by trusting a
+directory listing:
+
+- `roman_empire_bce_60.geojson` (74 Polygon fragments), `roman_empire_ce_117_extent.geojson`
+  (112 fragments) and `roman_empire_ce_200_extent.geojson` (112 fragments) —
+  used. The 200 CE file is the **same file `06-limes.ts` already fetches
+  transiently** to derive the frontier and explicitly discards ("storing them
+  would put a fourth copy of the empire's outline in a database that already
+  has three") — `12-antiquity-periods.ts` deliberately revisits that decision,
+  since a genuine multi-period feature is now a real reason to keep it.
+- `roman_empire_ce_200_provinces.geojson` — LineString topology with
+  `PROVINCE10`/`PROVINCE_1` fields, but these are opaque ArcInfo
+  polygon-adjacency codes (19 distinct numeric pairs found, e.g. `(144,
+123)`), not names, and AWMC publishes no lookup table anywhere. Not
+  imported — it would draw real internal province subdivisions with no way
+  to label a single one of them, the same restraint already applied to
+  Commons' un-numbered column-relief plates.
+- `roman_empire_provinces post_diocletian.geojson` (96 features) and
+  `roman_senatorial_provinces.geojson` (8 features) — every single feature in
+  both files carries an identical `Id: 0`, checked across every feature, not
+  the first one. Nothing to distinguish one polygon from another. Not
+  imported.
+- There is no 14 AD, 69 AD or 100 AD file anywhere in AWMC's current
+  repository. Those three dates only ever existed in an earlier, unverified
+  secondary-source summary (DAI/MERCURY's own listings) — a second real
+  instance, alongside the CC-BY-NC tag, of a downstream description being
+  simply wrong about the primary source's actual contents.
+
+**Unlike `06-limes.ts`'s frontier derivation, the import applies no
+mainland-span filter.** `spansDegrees()`/`MAINLAND_SPAN_DEGREES` exists
+specifically to keep tiny archipelago fragments from corrupting
+`ST_Boundary` when deriving a frontier _line_ — applying it here would drop
+real Roman territory (Sardinia, Sicily, Cyprus) from a map whose whole point
+is to draw the empire's actual filled extent. `ST_MakeValid` alone is
+enough, matching how the water import already handles ordinary geometry
+validity. One row per source polygon fragment, never dissolved into one
+shape per period — the same convention `antiquity_lines` already uses.
+
+**The scrubber is a switch on the Barrington sheet, not a fourth view** —
+the same shape as "Follow the limes": its own tile endpoint
+(`/api/tiles/antiquity-periods/:period/:z/:x/:y`) so a reader who never
+touches it requests nothing, but `buildAtlasStyle(source, { limes, period })`
+stays one function, extended rather than forked. Shown only while the
+Barrington sheet is the active view — the three dates are a property of
+_that_ sheet's own data, not a reading that makes sense over DARE or a
+modern basemap, so unlike the limes switch (which generalised to work over
+any basemap) this one stays scoped. `USlider` (Nuxt UI v3) moves over an
+**index domain**, not the year values themselves — 60 BCE to 117 CE is 177
+years, 117 to 200 is 83, and a value-mapped slider would draw those gaps as
+though they were even.
+
+**Nuxt UI's `<USlider>` forwards `aria-*` props only to `SliderRoot`, never
+to `SliderThumb`** — confirmed by reading both components' source in
+`reka-ui` and `@nuxt/ui`, not assumed. `SliderThumb` is the element actually
+carrying `role="slider"`, so a screen reader names the control from an
+element that never received the label at all; `aria-label`/`aria-valuetext`
+passed as ordinary props are silently inert. Fixed by setting both
+attributes directly on the thumb via a template ref and a `watchEffect`,
+kept in sync as the label changes — the smallest fix that doesn't mean
+dropping an established component for a hand-rolled `<input type="range">`
+over one missing attribute passthrough. A second, unrelated surprise on the
+way to that fix: **`useTemplateRef`'s own type only ever models a single
+instance, but a `ref` placed on an element inside a `v-for` block is
+collected into an array at runtime regardless of how many iterations
+actually render it** (this scrubber's markup sits inside the basemap
+switcher's `v-for="group in groups"`, guarded by its own `v-if` so it
+renders once) — confirmed by logging the raw ref value in a real browser,
+which is genuinely `[instance]`, not `instance`, and the type parameter has
+to be given as `{ $el?: HTMLElement }[]` for `nuxt typecheck` to agree with
+what actually happens at runtime.
+
+Visually confirmed in a real browser, not just asserted by a test: at 60
+BCE the fill covers only Italy and a strip of the Republic's early
+territory; at 200 CE the fill extends to the whole visible frontier, with
+no visible edge inside a typical viewport since the border sits further out
+— both exactly what the actual history should look like.
+
+**Researched and not pursued, for the record:**
+
+- **DARMC** (Harvard, CC BY-NC-SA 4.0) and **siriusbontea/roman-empire**'s
+  13-slice reconstructed series were the best leads _before_ AWMC's own
+  dated extents were confirmed reachable and ODbL. Redundant once the
+  authoritative source was in hand — DARMC's road network duplicates AWMC's
+  roads already in `antiquity_lines`, and siriusbontea's series is itself
+  partly derived from DARMC's NC-encumbered data.
+- **OpenRome** (Nolli 1748 / Lanciani ~3000-year map of the _city_ of Rome,
+  Stanford/Dartmouth/Oregon) — a genuinely different feature (urban
+  topography at city scale, not imperial political geography), and not
+  buildable regardless: no confirmed technical delivery mechanism surfaced
+  (no IIIF manifest, no live viewer URL) and no explicit licence, only a page
+  saying the data is _planned_ for Stanford's Digital Repository. Same
+  treatment as Rome Reborn and the Stanford Forma Urbis Romae project, both
+  already rejected for the same reason.
+- **Project MERCURY**'s wider 50-dataset catalogue (ceramics, ports, coinage,
+  Roman economic modelling) is unrelated to this feature — its only role
+  here was as a lead whose one relevant listing carried a stale licence tag.

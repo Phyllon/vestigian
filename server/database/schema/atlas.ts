@@ -136,6 +136,32 @@ export const antiquityPlaces = pgTable(
   ],
 )
 
+/**
+ * The empire's territorial extent at three dates AWMC actually publishes —
+ * 60 BCE, 117 CE, 200 CE — one row per source polygon fragment, never
+ * dissolved, the same convention `antiquity_lines` already uses. Same
+ * `Cultural-Data/political_shading/` release as the rest of this file's
+ * tables, same ODbL 1.0 licence stated in AWMC's own `LICENSE.txt` — no
+ * separate licence column needed, for the same reason none of the tables
+ * above have one. Two sibling files in that release (`..._provinces`,
+ * `..._post_diocletian`) were checked and not imported: one carries only
+ * opaque ArcInfo polygon-adjacency codes with no published name lookup, the
+ * other has every feature sharing an identical, empty id — see
+ * `.claude/rules/antiquity-basemaps.md`.
+ */
+export const antiquityPeriodExtents = pgTable(
+  'antiquity_period_extents',
+  {
+    id: serial('id').primaryKey(),
+    periodYear: integer('period_year').notNull(),
+    geom: polygonGeometry('geom').notNull(),
+  },
+  (table) => [
+    index('antiquity_period_extents_geom_idx').using('gist', table.geom),
+    index('antiquity_period_extents_year_idx').on(table.periodYear),
+  ],
+)
+
 export const limesSegmentKindEnum = pgEnum('limes_segment_kind', ['barrier', 'river', 'notional'])
 
 /**

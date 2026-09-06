@@ -41,7 +41,12 @@
     "tabulaPeutingerianaHint": "The Roman road diagram, not a map — opens its own viewer",
     "groupOverlays": "Overlays",
     "tabulaPeutingerianaOverlay": "Tabula Peutingeriana network",
-    "tabulaPeutingerianaOverlayHint": "Places and roads from the manuscript, at their real coordinates"
+    "tabulaPeutingerianaOverlayHint": "Places and roads from the manuscript, at their real coordinates",
+    "periodScrubber": "The empire, over time",
+    "periodOff": "Off",
+    "period60Bce": "60 BCE",
+    "period117Ce": "117 CE",
+    "period200Ce": "200 CE"
   },
   "tabulaPeutingeriana": {
     "title": "Tabula Peutingeriana",

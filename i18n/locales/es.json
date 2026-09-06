@@ -41,7 +41,12 @@
     "tabulaPeutingerianaHint": "El diagrama de la carretera romana, no un mapa, abre su propio visor",
     "groupOverlays": "Superficies",
     "tabulaPeutingerianaOverlay": "Tabula Peutingeriana red",
-    "tabulaPeutingerianaOverlayHint": "Lugares y caminos del manuscrito, en sus coordenadas reales"
+    "tabulaPeutingerianaOverlayHint": "Lugares y caminos del manuscrito, en sus coordenadas reales",
+    "periodScrubber": "El imperio, con el tiempo",
+    "periodOff": "Fuera",
+    "period60Bce": "60 BCE",
+    "period117Ce": "117 CE",
+    "period200Ce": "200 CE"
   },
   "legend": {
     "title": "Lo que significan las marcas",

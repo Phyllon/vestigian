@@ -292,8 +292,6 @@ this project.
   linking to any external open-data, open-source, or IIIF/tile asset, confirm
   its actual licence and reachability with a real request (fetch the source,
   check its licence tags, hit the real endpoint), not from memory or
-  documentation alone. A source that looks reachable can sit behind a bot
-  wall that only shows up when actually queried (see the Heidelberg IIIF
-  manifest vs. its HTML viewer pages), and a licence tag can differ from what
-  a summary implies (PD-Mark is not CC0). Cite what was actually checked and
+  documentation alone. Also you are free to use NC licenses. Cite what was actually checked and
   how.
+- **Maintain documentation** Keep documentation up-to-date (documents/, .claude/rules/)

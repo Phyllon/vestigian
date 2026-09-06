@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { buildAtlasCacheKey, buildAtlasTileSql, planAtlasRender } from '../atlas'
+import {
+  buildAtlasCacheKey,
+  buildAtlasTileSql,
+  buildPeriodExtentCacheKey,
+  buildPeriodExtentTileSql,
+  planAtlasRender,
+} from '../atlas'
 
 const tile = { z: 8, x: 134, y: 86 }
 
@@ -65,5 +71,43 @@ describe('buildAtlasCacheKey', () => {
     // approved a photograph.
     expect(buildAtlasCacheKey(tile, 3)).toBe('atlas:v3:8:134:86')
     expect(buildAtlasCacheKey(tile, 3)).not.toContain('tile:')
+  })
+})
+
+describe('buildPeriodExtentCacheKey', () => {
+  it('folds the period into the key, so 117 CE and 200 CE never collide', () => {
+    expect(buildPeriodExtentCacheKey(tile, 3, 117)).toBe('atlas:v3:period:117:8:134:86')
+    expect(buildPeriodExtentCacheKey(tile, 3, 117)).not.toBe(
+      buildPeriodExtentCacheKey(tile, 3, 200),
+    )
+  })
+
+  it('rides the atlas generation rather than a counter of its own', () => {
+    // Same reasoning as buildLimesCacheKey — this data changes on the same
+    // clock as the rest of the antiquity import, not its own.
+    expect(buildPeriodExtentCacheKey(tile, 5, -60)).toContain('atlas:v5:')
+  })
+})
+
+describe('buildPeriodExtentTileSql', () => {
+  it('filters to exactly one period, never the other two', () => {
+    const sql = buildPeriodExtentTileSql({ tile, periodYear: 117, simplifyTolerance: 0.01 })
+    expect(sql).toContain('antiquity_period_extents.period_year = 117')
+    expect(sql).not.toContain('period_year = -60')
+    expect(sql).not.toContain('period_year = 200')
+  })
+
+  it('compares in 4326 against the transformed envelope, never 3857', () => {
+    // The same GiST-index regression documented for buildAtlasTileSql and
+    // buildLimesTileSql: `ST_Transform(geom, 3857) && env` cannot use the
+    // index the stored geometry is built on.
+    const sql = buildPeriodExtentTileSql({ tile, periodYear: 200, simplifyTolerance: 0.01 })
+    expect(sql).toContain('antiquity_period_extents.geom && b.env_wgs')
+    expect(sql).not.toContain('ST_Transform(antiquity_period_extents.geom, 3857) &&')
+  })
+
+  it('produces one layer, named for the fill it is', () => {
+    const sql = buildPeriodExtentTileSql({ tile, periodYear: -60, simplifyTolerance: 0.01 })
+    expect(sql).toContain("'extent'")
   })
 })

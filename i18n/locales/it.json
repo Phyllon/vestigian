@@ -41,7 +41,12 @@
     "tabulaPeutingerianaHint": "Il diagramma stradale romano, non una mappa — apre il proprio spettatore",
     "groupOverlays": "Sovrapposizioni",
     "tabulaPeutingerianaOverlay": "Rete Tabula Peutingeriana",
-    "tabulaPeutingerianaOverlayHint": "Luoghi e strade dal manoscritto, alle loro vere coordinate"
+    "tabulaPeutingerianaOverlayHint": "Luoghi e strade dal manoscritto, alle loro vere coordinate",
+    "periodScrubber": "L'impero, nel tempo",
+    "periodOff": "Fuori",
+    "period60Bce": "60 BCE",
+    "period117Ce": "117 CE",
+    "period200Ce": "200 CE"
   },
   "legend": {
     "title": "Cosa significano i segni",

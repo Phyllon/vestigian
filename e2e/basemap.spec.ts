@@ -109,6 +109,41 @@ test.describe('the basemap switcher', () => {
     expect(problems.cspViolations, 'the satellite tile origin is not allowlisted').toEqual([])
   })
 
+  test('the period scrubber draws the empire from this application, requesting nothing until moved', async ({
+    page,
+  }) => {
+    const problems = watchForProblems(page)
+    const periodTiles: number[] = []
+
+    page.on('response', (response) => {
+      if (response.url().includes('/api/tiles/antiquity-periods/')) {
+        periodTiles.push(response.status())
+      }
+    })
+
+    await openMap(page)
+    await chooseBasemap(page, 'Antiquity (Barrington)')
+
+    // Choosing a basemap radio closes the whole dropdown — reopening it is
+    // what a real visitor would also have to do the first time they switch
+    // to this sheet, not a quirk of the test.
+    await page.getByRole('button', { name: /^Basemap:/ }).click()
+    await waitForTiles(page)
+    expect(
+      periodTiles.length,
+      'a reader who never touches the scrubber should request nothing',
+    ).toBe(0)
+
+    const slider = page.getByRole('slider', { name: 'The empire, over time' })
+    await slider.focus()
+    await page.keyboard.press('ArrowRight')
+    await expect.poll(() => periodTiles.length, { timeout: 15_000 }).toBeGreaterThan(0)
+
+    expect(periodTiles.some((status) => status === 200 || status === 204)).toBe(true)
+    expect(problems.cspViolations).toEqual([])
+    expect(problems.pageErrors).toEqual([])
+  })
+
   test('keeps the site overlay across a style swap', async ({ page }) => {
     const tileRequests: string[] = []
     page.on('request', (request) => {

@@ -45,6 +45,9 @@ export interface BasemapOption {
  */
 export type BasemapSheetTone = 'light' | 'dark'
 
+/** The only three dates AWMC's `political_shading` release actually covers. */
+export type PeriodExtentYear = -60 | 117 | 200
+
 export interface BasemapSource {
   provider: BasemapProvider
   pmtilesUrl: string
@@ -55,6 +58,8 @@ export interface BasemapSource {
   atlasTilesUrl: string
   /** The frontier layers, added to the Barrington sheet when it is switched on. */
   limesTilesUrl: string
+  /** The empire's extent at one of three dates, added when the period scrubber is set. */
+  periodExtentTilesUrl: string
   glyphsUrl: string
 }
 

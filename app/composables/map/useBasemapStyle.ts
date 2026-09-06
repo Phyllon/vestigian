@@ -13,6 +13,7 @@ import type {
   BasemapSource,
   BasemapView,
   LimesSegmentKind,
+  PeriodExtentYear,
 } from '#shared/types'
 
 let protocolRegistered = false
@@ -193,6 +194,10 @@ interface StyleRequest {
   source: BasemapSource
   /** Only the Barrington sheet reads this; every other view ignores it. */
   isFollowingLimes?: boolean
+  /** The empire's extent at this date is drawn under the sheet's own
+   *  linework. `null`/`undefined` means the scrubber is at its default
+   *  "off" position. Only the Barrington sheet reads this. */
+  periodYear?: PeriodExtentYear | null
 }
 
 const buildVectorSource = (source: BasemapSource) =>
@@ -391,6 +396,8 @@ interface AtlasColours {
   label: string
   labelHalo: string
   regionLabel: string
+  periodExtent: string
+  periodExtentLine: string
 }
 
 /**
@@ -411,6 +418,11 @@ const ATLAS_COLOURS: AtlasColours = {
   label: '#3d362e',
   labelHalo: '#faf7ef',
   regionLabel: '#6b6154',
+  // A wash distinct from urban's tan and infrastructure's oxide — the period
+  // scrubber's fill has to read as "territory at this date" without being
+  // mistaken for a city or a built structure.
+  periodExtent: '#c99b52',
+  periodExtentLine: '#8a6a2f',
 }
 
 /**
@@ -618,9 +630,17 @@ const LIMES_RECESSION = 0.42
  * must be exactly the layers they saw before it existed — which is a thing a
  * test can assert only while there is one function.
  */
+interface AtlasStyleOptions {
+  limes: boolean
+  /** `null` is the scrubber's default "off" position — no extent source is
+   *  even added to the style, so a reader who never touches it requests
+   *  nothing from `/api/tiles/antiquity-periods`. */
+  periodYear: PeriodExtentYear | null
+}
+
 const buildAtlasStyle = (
   source: BasemapSource,
-  options: { limes: boolean } = { limes: false },
+  options: AtlasStyleOptions,
 ): StyleSpecification => ({
   version: 8,
   glyphs: source.glyphsUrl,
@@ -632,6 +652,16 @@ const buildAtlasStyle = (
       maxzoom: 12,
       attribution: options.limes ? LIMES_ATTRIBUTION : ATLAS_ATTRIBUTION,
     },
+    ...(options.periodYear === null
+      ? {}
+      : {
+          'atlas-period': {
+            type: 'vector' as const,
+            tiles: [`${source.periodExtentTilesUrl}/${options.periodYear}/{z}/{x}/{y}.mvt`],
+            minzoom: 0,
+            maxzoom: 12,
+          },
+        }),
     /**
      * Relief, from the elevation tiles the terrain view already uses.
      *
@@ -684,6 +714,33 @@ const buildAtlasStyle = (
       filter: ['==', ['get', 'kind'], 'inland'],
       paint: { 'fill-color': ATLAS_COLOURS.inland },
     },
+    /**
+     * The period scrubber's fill — under the urban/road linework so a city
+     * or a route still reads as itself rather than being tinted by the wash
+     * under it, and only added to the style at all when a period is
+     * actually selected (see the conditional `atlas-period` source above).
+     */
+    ...(options.periodYear === null
+      ? []
+      : ([
+          {
+            id: 'atlas-period-extent',
+            type: 'fill',
+            source: 'atlas-period',
+            'source-layer': 'extent',
+            paint: { 'fill-color': ATLAS_COLOURS.periodExtent, 'fill-opacity': 0.22 },
+          },
+          {
+            id: 'atlas-period-extent-outline',
+            type: 'line',
+            source: 'atlas-period',
+            'source-layer': 'extent',
+            paint: {
+              'line-color': ATLAS_COLOURS.periodExtentLine,
+              'line-width': ['interpolate', ['linear'], ['zoom'], 3, 0.5, 10, 1.4],
+            },
+          },
+        ] satisfies LayerSpecification[])),
     {
       id: 'atlas-urban',
       type: 'fill',
@@ -824,7 +881,10 @@ const buildAtlasStyle = (
 export const buildBasemapStyle = (request: StyleRequest): StyleSpecification => {
   if (request.view === 'antiquity-dare') return buildDareStyle(request.source)
   if (request.view === 'antiquity-awmc') {
-    return buildAtlasStyle(request.source, { limes: request.isFollowingLimes === true })
+    return buildAtlasStyle(request.source, {
+      limes: request.isFollowingLimes === true,
+      periodYear: request.periodYear ?? null,
+    })
   }
   if (request.view === 'satellite') return buildSatelliteStyle(request.source)
 
@@ -863,6 +923,22 @@ export const BASEMAP_GROUP_LABELS: Record<BasemapGroup, string> = {
 }
 
 /**
+ * The scrubber's three stops, in chronological order — an index domain, not
+ * a value-mapped one. 60 BCE to 117 CE is 177 years; 117 to 200 is 83: a
+ * slider whose position tracked the year itself would draw the gaps as
+ * though they were even, which they are not. `i18nKey` rather than a plain
+ * label: BCE/CE era notation is not the same string in every locale this
+ * app ships (French `av./apr. J.-C.`, German `v./n. Chr.`), unlike the
+ * basemap view names above, which are proper nouns and stay English in
+ * every locale on purpose.
+ */
+export const PERIOD_EXTENT_YEARS: { year: PeriodExtentYear; i18nKey: string }[] = [
+  { year: -60, i18nKey: 'basemapSwitcher.period60Bce' },
+  { year: 117, i18nKey: 'basemapSwitcher.period117Ce' },
+  { year: 200, i18nKey: 'basemapSwitcher.period200Ce' },
+]
+
+/**
  * Switching a MapLibre style replaces every source and layer, which would take
  * the site overlay with it. The overlay is therefore re-attached on the
  * styledata event that follows each swap, and the camera is left untouched so
@@ -899,6 +975,7 @@ export const useBasemapStyle = () => {
     satelliteUrl: config.public.basemap.satelliteUrl,
     atlasTilesUrl: absolute(config.public.basemap.atlasTilesUrl),
     limesTilesUrl: absolute(config.public.basemap.limesTilesUrl),
+    periodExtentTilesUrl: absolute(config.public.basemap.periodExtentTilesUrl),
     glyphsUrl: config.public.basemap.glyphsUrl,
   }))
 
@@ -926,6 +1003,18 @@ export const useBasemapStyle = () => {
   const canFollowLimes = computed(() => true)
 
   const isFollowingLimes = computed(() => isLimesActive.value)
+
+  /**
+   * The period scrubber, unlike the frontier, stays a reading of the
+   * Barrington sheet specifically — the three dates it draws are a property
+   * of *that* sheet's own data, not a line that makes equal sense laid over
+   * a modern basemap. `canShowPeriodExtent` mirrors `canFollowLimes`'s
+   * shape (always true today) so `BasemapSwitcher` doesn't need to know
+   * that reasoning either. Not persisted, same reasoning as `isLimesActive`.
+   */
+  const periodYear = useState<PeriodExtentYear | null>('atlas-period-year', () => null)
+
+  const canShowPeriodExtent = computed(() => view.value === 'antiquity-awmc')
 
   /**
    * The Tabula Peutingeriana network — unlike the limes, an overlay drawn on
@@ -962,6 +1051,7 @@ export const useBasemapStyle = () => {
       isDark: isDark.value,
       source: source.value,
       isFollowingLimes: isFollowingLimes.value,
+      periodYear: canShowPeriodExtent.value ? periodYear.value : null,
     }),
   )
 
@@ -971,6 +1061,10 @@ export const useBasemapStyle = () => {
 
   const setLimesActive = (next: boolean): void => {
     isLimesActive.value = next
+  }
+
+  const setPeriodYear = (next: PeriodExtentYear | null): void => {
+    periodYear.value = next
   }
 
   return {
@@ -984,6 +1078,10 @@ export const useBasemapStyle = () => {
     isFollowingLimes,
     setLimesActive,
     limesTilesUrl: computed(() => source.value.limesTilesUrl),
+    canShowPeriodExtent,
+    periodYear,
+    setPeriodYear,
+    periodExtentYears: PERIOD_EXTENT_YEARS,
     canShowTabulaPeutingerianaOverlay,
     isShowingTabulaPeutingerianaOverlay,
     setTabulaPeutingerianaOverlayActive,

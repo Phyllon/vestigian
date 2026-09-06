@@ -41,7 +41,12 @@
     "tabulaPeutingerianaHint": "Das römische Straßendiagramm, keine Karte - öffnet seinen eigenen Betrachter",
     "groupOverlays": "Überlagerungen",
     "tabulaPeutingerianaOverlay": "Netz Tabula Peutingeriana",
-    "tabulaPeutingerianaOverlayHint": "Orte und Straßen aus dem Manuskript, an ihren wirklichen Koordinaten"
+    "tabulaPeutingerianaOverlayHint": "Orte und Straßen aus dem Manuskript, an ihren wirklichen Koordinaten",
+    "periodScrubber": "Das Imperium, im Laufe der Zeit",
+    "periodOff": "Ausgeschaltet",
+    "period60Bce": "60 BCE",
+    "period117Ce": "117 CE",
+    "period200Ce": "200 CE"
   },
   "legend": {
     "title": "Was die Markierungen bedeuten",

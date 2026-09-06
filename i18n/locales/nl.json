@@ -41,7 +41,12 @@
     "tabulaPeutingerianaHint": "Het Romeinse wegdiagram, geen kaart opent zijn eigen kijker",
     "groupOverlays": "Overlays",
     "tabulaPeutingerianaOverlay": "Tabula Peutingeriana netwerk",
-    "tabulaPeutingerianaOverlayHint": "Plaatsen en wegen uit het manuscript, op hun echte coördinaten"
+    "tabulaPeutingerianaOverlayHint": "Plaatsen en wegen uit het manuscript, op hun echte coördinaten",
+    "periodScrubber": "Het rijk, na verloop van tijd",
+    "periodOff": "Uit",
+    "period60Bce": "60 V.CHR",
+    "period117Ce": "117 CE",
+    "period200Ce": "200 CE"
   },
   "legend": {
     "title": "Wat de markeringen betekenen",

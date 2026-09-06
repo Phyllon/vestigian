@@ -214,3 +214,66 @@ export const buildAtlasTileSql = (query: AtlasTileQuery): string => {
     SELECT ${layers.map((layer) => `(${layer})`).join(' || ')} AS tile
   `
 }
+
+/**
+ * Tile assembly for the period scrubber — the fill the Barrington sheet gains
+ * when a reader drags the extent slider to one of the three dates AWMC
+ * publishes (60 BCE, 117 CE, 200 CE; see `12-antiquity-periods.ts`).
+ *
+ * Its own endpoint, same reasoning as `limes.ts`: most readers never touch
+ * the scrubber, and folding this into `/api/tiles/antiquity` would charge
+ * everyone who doesn't for a fill layer they never asked for. Shares the
+ * atlas cache generation — this data changes only when the antiquity import
+ * runs, same clock as everything else in this file.
+ */
+export const buildPeriodExtentCacheKey = (
+  tile: TileCoordinate,
+  atlasVersion: number,
+  periodYear: number,
+): string => `atlas:v${atlasVersion}:period:${periodYear}:${tile.z}:${tile.x}:${tile.y}`
+
+interface PeriodExtentTileQuery {
+  tile: TileCoordinate
+  periodYear: number
+  simplifyTolerance: number
+}
+
+/**
+ * One layer, one round trip. The 4326 filter rule from `buildAtlasTileSql`
+ * applies unchanged and for the same reason — `geom && b.env_wgs` uses the
+ * GiST index, `ST_Transform(geom, 3857) && env` cannot.
+ *
+ * `ST_Simplify`, not the topology-preserving form: this is a fill, not a
+ * line a reader is meant to trace, and the plain algorithm is what the sea
+ * layer above already uses for the same reason at the same kind of vertex
+ * count (AWMC's extent fragments carry OpenStreetMap-grade detail).
+ */
+export const buildPeriodExtentTileSql = (query: PeriodExtentTileQuery): string => {
+  const { tile, periodYear, simplifyTolerance } = query
+
+  const extentLayer = `
+    SELECT ST_AsMVT(e, 'extent', ${TILE_EXTENT}, 'geom', 'id') AS tile
+    FROM (
+      SELECT
+        antiquity_period_extents.id,
+        ST_AsMVTGeom(
+          ST_Simplify(
+            ST_Transform(antiquity_period_extents.geom, 3857), ${simplifyTolerance}
+          ),
+          b.env, ${TILE_EXTENT}, ${TILE_BUFFER}, true
+        ) AS geom
+      FROM antiquity_period_extents, bounds b
+      WHERE antiquity_period_extents.geom && b.env_wgs
+        AND antiquity_period_extents.period_year = ${periodYear}
+    ) AS e
+    WHERE e.geom IS NOT NULL
+  `
+
+  return `
+    WITH bounds AS (
+      SELECT env, ST_Transform(env, 4326) AS env_wgs
+      FROM (SELECT ST_TileEnvelope(${tile.z}, ${tile.x}, ${tile.y}) AS env) AS t
+    )
+    SELECT (${extentLayer}) AS tile
+  `
+}

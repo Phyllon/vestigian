@@ -41,7 +41,12 @@
     "tabulaPeutingerianaHint": "Le diagramme romain, pas une carte, ouvre son propre spectateur",
     "groupOverlays": "Couvertures",
     "tabulaPeutingerianaOverlay": "Réseau Tabula Peutingeriana",
-    "tabulaPeutingerianaOverlayHint": "Lieux et routes du manuscrit, à leurs coordonnées réelles"
+    "tabulaPeutingerianaOverlayHint": "Lieux et routes du manuscrit, à leurs coordonnées réelles",
+    "periodScrubber": "L'empire, avec le temps",
+    "periodOff": "Arrêt",
+    "period60Bce": "60 BCE",
+    "period117Ce": "117 CE",
+    "period200Ce": "200 CE"
   },
   "legend": {
     "title": "Ce que signifient les marques",

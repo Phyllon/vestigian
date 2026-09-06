@@ -442,6 +442,13 @@ export default defineNuxtConfig({
          */
         limesTilesUrl: '/api/tiles/limes',
         /**
+         * The empire's extent at 60 BCE, 117 CE or 200 CE — AWMC's own
+         * `political_shading` dates, the only three it actually publishes
+         * (see `.claude/rules/antiquity-basemaps.md`). Same PostGIS, own
+         * endpoint, same reasoning as the frontier above.
+         */
+        periodExtentTilesUrl: '/api/tiles/antiquity-periods',
+        /**
          * Label glyphs ship with the app rather than being fetched from a font
          * server, for the same reason `@fontsource` is used for the interface:
          * reading the map should tell no third party that you did. Same-origin,

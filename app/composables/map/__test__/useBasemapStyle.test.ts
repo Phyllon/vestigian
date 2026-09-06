@@ -23,6 +23,7 @@ const source: BasemapSource = {
   satelliteUrl: '',
   atlasTilesUrl: 'http://localhost:3000/api/tiles/antiquity',
   limesTilesUrl: 'http://localhost:3000/api/tiles/limes',
+  periodExtentTilesUrl: 'http://localhost:3000/api/tiles/antiquity-periods',
   glyphsUrl: '/fonts/{fontstack}/{range}.pbf',
 }
 
@@ -235,6 +236,39 @@ describe('the frontier — what the Barrington sheet itself still does for it', 
     // style itself only reacts to the flag by dimming and filtering.
     expect(limesStyle().sources.limes).toBeUndefined()
     expect(layerIds(limesStyle()).some((id) => id.startsWith('limes-'))).toBe(false)
+  })
+})
+
+describe('the period scrubber', () => {
+  const periodStyle = (periodYear: -60 | 117 | 200 | null) =>
+    buildBasemapStyle({ view: 'antiquity-awmc', isDark: false, source, periodYear })
+
+  it('adds no source or layers at all at the default "off" position', () => {
+    // A reader who never touches the scrubber should request nothing from
+    // /api/tiles/antiquity-periods — the same reasoning `useLimesOverlay`'s
+    // own tests already apply to the frontier.
+    const off = periodStyle(null)
+    expect(off.sources['atlas-period']).toBeUndefined()
+    expect(layerIds(off).some((id) => id.startsWith('atlas-period'))).toBe(false)
+  })
+
+  it('bakes the selected year into the tile URL, not a query param', () => {
+    const style = periodStyle(117)
+    const extentSource = style.sources['atlas-period'] as VectorSourceSpecification
+    expect(extentSource.tiles).toEqual([
+      'http://localhost:3000/api/tiles/antiquity-periods/117/{z}/{x}/{y}.mvt',
+    ])
+    expect(layerIds(style)).toEqual(
+      expect.arrayContaining(['atlas-period-extent', 'atlas-period-extent-outline']),
+    )
+  })
+
+  it('draws the fill under the urban and road linework', () => {
+    // A city or a route on the sheet should still read as itself, not be
+    // tinted by the extent wash under it.
+    const ids = layerIds(periodStyle(200))
+    expect(ids.indexOf('atlas-period-extent')).toBeLessThan(ids.indexOf('atlas-urban'))
+    expect(ids.indexOf('atlas-period-extent')).toBeLessThan(ids.indexOf('atlas-roads'))
   })
 
   it('says the frontier is derived rather than surveyed', () => {

@@ -9,6 +9,10 @@
     canFollowLimes,
     isFollowingLimes,
     setLimesActive,
+    canShowPeriodExtent,
+    periodYear,
+    setPeriodYear,
+    periodExtentYears,
     canShowTabulaPeutingerianaOverlay,
     isShowingTabulaPeutingerianaOverlay,
     setTabulaPeutingerianaOverlayActive,
@@ -60,6 +64,59 @@
   const toggleTabulaPeutingerianaOverlay = (): void => {
     setTabulaPeutingerianaOverlayActive(!isShowingTabulaPeutingerianaOverlay.value)
   }
+
+  /**
+   * An index domain, not the year itself — `USlider` moves its thumb by even
+   * steps, and 60 BCE to 117 CE (177 years) is not the same gap as 117 to
+   * 200 (83). Position 0 is the scrubber's own "off" state, so a fresh
+   * visitor sees nothing extra on the sheet until they actually drag it.
+   */
+  const periodSliderIndex = computed<number>({
+    get: () => {
+      if (periodYear.value === null) return 0
+      const index = periodExtentYears.findIndex((entry) => entry.year === periodYear.value)
+      return index === -1 ? 0 : index + 1
+    },
+    set: (index) => {
+      setPeriodYear(index <= 0 ? null : (periodExtentYears[index - 1]?.year ?? null))
+    },
+  })
+
+  const periodSliderLabel = computed<string>(() =>
+    periodYear.value === null
+      ? t('basemapSwitcher.periodOff')
+      : t(periodExtentYears.find((entry) => entry.year === periodYear.value)?.i18nKey ?? ''),
+  )
+
+  /**
+   * Nuxt UI's `<USlider>` forwards `aria-*` attrs only to `SliderRoot` — the
+   * wrapping element — never to `SliderThumb`, which is the actual element
+   * carrying `role="slider"` (confirmed by reading both components' source,
+   * not assumed). A screen reader names a slider from *that* element, so an
+   * `aria-label` passed as a normal prop is silently inert: it lands on a
+   * `<span>` nothing asks for a name. Setting it directly on the thumb once
+   * it exists, and keeping it in sync as the label changes, is the smallest
+   * fix that doesn't mean dropping an established component for a hand-rolled
+   * `<input type="range">` over one missing attribute passthrough.
+   */
+  /**
+   * `useTemplateRef`'s own type only ever models a single instance, but the
+   * `ref` here sits inside the `v-for="group in groups"` block above
+   * (guarded by its own `v-if`, so it renders once) — Vue still collects
+   * refs inside a `v-for` scope into an array at runtime regardless of how
+   * many iterations actually render the element, which the composable's
+   * type signature does not account for. Confirmed by logging the raw
+   * value during development, not assumed from the type alone.
+   */
+  const periodSlider = useTemplateRef<{ $el?: HTMLElement }[]>('periodSlider')
+
+  watchEffect(() => {
+    const root = periodSlider.value?.[0]?.$el
+    const thumb = root?.querySelector?.('[role="slider"]')
+    if (!thumb) return
+    thumb.setAttribute('aria-label', t('basemapSwitcher.periodScrubber'))
+    thumb.setAttribute('aria-valuetext', periodSliderLabel.value)
+  })
 
   /**
    * Both switches on any basemap now — the frontier stopped being a reading
@@ -182,6 +239,31 @@
             </span>
             <span class="text-xs text-ink-500 dark:text-paper-400">{{ option.hint }}</span>
           </button>
+
+          <!--
+            Only while the Barrington sheet is the active view — the three
+            dates it draws are a property of that sheet's own data, not a
+            reading that makes sense laid over DARE or a modern basemap.
+          -->
+          <div
+            v-if="group === 'antiquity' && canShowPeriodExtent"
+            class="border-b border-paper-200 px-4 py-3 dark:border-night-700"
+          >
+            <div class="mb-2 flex items-center justify-between gap-2">
+              <span class="text-sm font-medium text-ink-900 dark:text-paper-100">
+                {{ t('basemapSwitcher.periodScrubber') }}
+              </span>
+              <span class="text-xs text-ink-500 dark:text-paper-400">{{ periodSliderLabel }}</span>
+            </div>
+            <USlider
+              ref="periodSlider"
+              v-model="periodSliderIndex"
+              :min="0"
+              :max="periodExtentYears.length"
+              :step="1"
+              size="sm"
+            />
+          </div>
 
           <!--
             Not a radio: the Tabula Peutingeriana is a schematic route
