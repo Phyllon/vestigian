@@ -46,6 +46,14 @@ export const antiquityLineKindEnum = pgEnum('antiquity_line_kind', [
   'canal',
   'wall',
   'shoreline',
+  /** Roman field-division grids, AWMC's own `centuriation` shapefile layer
+   *  — see `.claude/rules/antiquity-basemaps.md`. */
+  'centuriation',
+  /** Both from the same shapefile release — geometrically lines, not the
+   *  points their layer names might suggest, confirmed by reading the
+   *  actual `.shp` geometry type rather than assumed from the DBF alone. */
+  'causeway',
+  'dike_levee',
 ])
 
 export const antiquityWaterKindEnum = pgEnum('antiquity_water_kind', ['sea', 'inland'])
@@ -137,28 +145,59 @@ export const antiquityPlaces = pgTable(
 )
 
 /**
- * The empire's territorial extent at three dates AWMC actually publishes —
- * 60 BCE, 117 CE, 200 CE — one row per source polygon fragment, never
- * dissolved, the same convention `antiquity_lines` already uses. Same
- * `Cultural-Data/political_shading/` release as the rest of this file's
- * tables, same ODbL 1.0 licence stated in AWMC's own `LICENSE.txt` — no
- * separate licence column needed, for the same reason none of the tables
- * above have one. Two sibling files in that release (`..._provinces`,
- * `..._post_diocletian`) were checked and not imported: one carries only
- * opaque ArcInfo polygon-adjacency codes with no published name lookup, the
- * other has every feature sharing an identical, empty id — see
- * `.claude/rules/antiquity-basemaps.md`.
+ * The Roman state's territorial extent as a continuous dated series — the
+ * period scrubber on the Barrington sheet. One row per time slice, each an
+ * interval (`start_year` inclusive, `end_year` exclusive) rather than a
+ * snapshot year, because that is how the source models it.
+ *
+ * **Source: OpenHistoricalMap, CC0 1.0** — confirmed against OHM's own
+ * `/copyright` page ("Except where otherwise noted, OpenHistoricalMap data
+ * is dedicated to the public domain under a Creative Commons CC0
+ * dedication"), and against the relations themselves: of the 87 Roman-state
+ * boundary relations, exactly two carry an explicit `license=*` tag and both
+ * say `CC0-1.0`. None carries CC BY or CC BY-SA, so the share-alike carve-out
+ * that page warns about does not apply to anything imported here.
+ *
+ * This is the one borrowed dataset in this file that is **not** ODbL, which
+ * is why it is its own table rather than more rows in a shared one. Nothing
+ * is lost by isolating it and a great deal is risked by mixing licences in a
+ * table, as the note at the top of this file explains for the opposite case.
+ *
+ * **It supersedes AWMC's `political_shading/` extents, which gave three
+ * dates.** This gives 52 inside the project's antiquity cutoff, is CC0
+ * rather than ODbL, and carries an `end_event` naming the conquest or loss
+ * that closes each slice. The trade-off is honest and worth stating: AWMC's
+ * three were drawn by academic cartographers, while these are drawn by OHM's
+ * contributors, some of whom openly tag their own boundary lines as still
+ * needing a source. This is an approximation of the frontier, and the
+ * interface says so rather than implying survey precision.
+ *
+ * Years are stored exactly as OHM writes them: a negative year is a
+ * traditional BCE count, so -509 is 509 BCE. Unlike Wikidata (see
+ * `13-battles.ts`, where -215 means 216 BCE) there is no astronomical
+ * off-by-one to undo — verified against slices whose dates are unambiguous
+ * in the historical record (264..-241 the First Punic War, -146 the fall of
+ * Carthage, -27 Augustus).
  */
-export const antiquityPeriodExtents = pgTable(
-  'antiquity_period_extents',
+export const antiquityEmpireExtents = pgTable(
+  'antiquity_empire_extents',
   {
     id: serial('id').primaryKey(),
-    periodYear: integer('period_year').notNull(),
-    geom: polygonGeometry('geom').notNull(),
+    /** The OHM relation this slice came from — the row's identity upstream. */
+    ohmRelationId: integer('ohm_relation_id').notNull(),
+    /** `Res Publica Romana`, `Imperium Romanum`, `... Occidentale`, `... Orientale`. */
+    stateName: varchar('state_name', { length: 120 }).notNull(),
+    startYear: integer('start_year').notNull(),
+    endYear: integer('end_year').notNull(),
+    /** OHM's own narrative for what ends the slice ("Trajan conquers
+     *  Armenia"). English only upstream — see the note in `useEmpirePeriods`. */
+    endEvent: text('end_event'),
+    geom: multiPolygonGeometry('geom').notNull(),
   },
   (table) => [
-    index('antiquity_period_extents_geom_idx').using('gist', table.geom),
-    index('antiquity_period_extents_year_idx').on(table.periodYear),
+    index('antiquity_empire_extents_geom_idx').using('gist', table.geom),
+    index('antiquity_empire_extents_start_idx').on(table.startYear),
+    uniqueIndex('antiquity_empire_extents_relation_idx').on(table.ohmRelationId),
   ],
 )
 
@@ -191,6 +230,143 @@ export const antiquityBattles = pgTable(
     uniqueIndex('antiquity_battles_wikidata_idx').on(table.wikidataId),
     index('antiquity_battles_geom_idx').using('gist', table.geom),
   ],
+)
+
+/**
+ * Ancient ports and harbours worldwide, from Arthur de Graauw's Catalogue
+ * of Ancient Ports (CC BY 4.0, ancientportsantiques.com), also deposited as
+ * the DARMC Scholarly Data Series (Harvard) — both credits travel together,
+ * see `.claude/rules/antiquity-basemaps.md`. `sourceRowId` is the
+ * workbook's own `NB` column, kept as text since it is sometimes fractional
+ * (Excel's own sub-numbering, e.g. "1.1"). `foundation` is free text, not a
+ * year: the source mixes single years, BCE ranges and blanks, and parsing
+ * it into a number would silently misrepresent entries that are ranges.
+ */
+export const antiquityPorts = pgTable(
+  'antiquity_ports',
+  {
+    id: serial('id').primaryKey(),
+    sourceRowId: varchar('source_row_id', { length: 20 }).notNull(),
+    /** `text`, not `varchar`: when the source has no ancient name, this
+     *  falls back to NAME_MOD's free-text description, up to 664 characters
+     *  in the actual workbook — a length limit would truncate real content. */
+    title: text('title').notNull(),
+    /** Only set when the source's NAME_MOD is a real modern name distinct
+     *  from the title, not the free-text description that fills its place
+     *  when the ancient name (NAME) is blank. */
+    modernName: text('modern_name'),
+    country: varchar('country', { length: 150 }),
+    foundation: varchar('foundation', { length: 200 }),
+    pleiadesUrl: varchar('pleiades_url', { length: 500 }),
+    wikipediaUrl: varchar('wikipedia_url', { length: 500 }),
+    geom: pointGeometry('geom').notNull(),
+  },
+  (table) => [
+    uniqueIndex('antiquity_ports_source_row_idx').on(table.sourceRowId),
+    index('antiquity_ports_geom_idx').using('gist', table.geom),
+  ],
+)
+
+/**
+ * The Roman-era transport network from ORBIS v2 (Meeks, Scheidel, Weiland,
+ * Arcenas, Stanford, 2014), CC BY 3.0 per the Stanford Digital Repository
+ * deposit — not the MIT licence on the GitHub mirror, which covers only
+ * Elijah Meeks's D3.js viewer, not the data it also carries. One row per
+ * `base_routes.geojson` edge; `sourceTitle`/`targetTitle` are looked up
+ * from `sites_extended.csv` at import time and left null when a node id
+ * isn't found there, rather than dropping the route.
+ */
+export const antiquityRouteKindEnum = pgEnum('antiquity_route_kind', [
+  'road',
+  'coastal',
+  'overseas',
+  'upstream',
+  'downstream',
+  'ferry',
+])
+
+export const antiquityRoutes = pgTable(
+  'antiquity_routes',
+  {
+    id: serial('id').primaryKey(),
+    sourceNodeId: integer('source_node_id').notNull(),
+    targetNodeId: integer('target_node_id').notNull(),
+    sourceTitle: varchar('source_title', { length: 200 }),
+    targetTitle: varchar('target_title', { length: 200 }),
+    routeType: antiquityRouteKindEnum('route_type').notNull(),
+    geom: lineGeometry('geom').notNull(),
+  },
+  (table) => [index('antiquity_routes_geom_idx').using('gist', table.geom)],
+)
+
+/**
+ * The small AWMC point layers that ship only in its "Cultural Shapefiles"
+ * release, never as GeoJSON: bridges, mines/quarries, dams, cemeteries,
+ * Barrington's own scattered forts (not the limes frontier's contributed
+ * fortifications — a different, much sparser layer, ten points worldwide)
+ * and tumuli. Unified into one table rather than six — the combined count
+ * is ~525 rows, and every one of these layers shares the same shape (a
+ * point, a name that is often blank, a source citation). Same ODbL 1.0 as
+ * every other AWMC table in this file, per the repo's own root
+ * `LICENSE.txt` (the README's "GeoJSONs are more up-to-date" caveat is
+ * about freshness, not licensing — see `.claude/rules/antiquity-basemaps.md`).
+ *
+ * Two more layers in the same shapefile release — `causeways` and
+ * `dikes_levees` — are named like points but are geometrically lines,
+ * confirmed by reading their actual `.shp` geometry type rather than
+ * assumed from the layer name; they live in `antiquity_lines` instead,
+ * alongside centuriation.
+ */
+export const antiquityFeatureKindEnum = pgEnum('antiquity_feature_kind', [
+  'bridge',
+  'mine_quarry',
+  'dam',
+  'cemetery',
+  'fort',
+  'tumulus',
+])
+
+export const antiquityFeatures = pgTable(
+  'antiquity_features',
+  {
+    id: serial('id').primaryKey(),
+    kind: antiquityFeatureKindEnum('kind').notNull(),
+    name: varchar('name', { length: 240 }),
+    /** Barrington Atlas map-sheet reference, e.g. "BAtlas_22" — most rows carry one, few carry a name. */
+    source: varchar('source', { length: 100 }),
+    /** Only meaningful for `mine_quarry`: chemical-symbol shorthand as the source gives it (e.g. "Fe", "Au, Ag"). */
+    material: varchar('material', { length: 100 }),
+    /** Only meaningful for `bridge`: which of the shapefile's five period-attestation flags were set, joined as "Roman, Late". */
+    periods: varchar('periods', { length: 100 }),
+    geom: pointGeometry('geom').notNull(),
+  },
+  (table) => [
+    index('antiquity_features_geom_idx').using('gist', table.geom),
+    index('antiquity_features_kind_idx').on(table.kind),
+  ],
+)
+
+/**
+ * Coin-hoard findspots from Coin Hoards of the Roman Republic (CHRR,
+ * numismatics.org/chrr). Licence is genuinely mixed between the site's own
+ * pages (ODbL 1.0) and its machine-readable VoID descriptors (CC BY-NC 3.0,
+ * copyright Kris Lockyear) — the stricter, machine-declared one is treated
+ * as authoritative here; NC is within this project's own stated policy.
+ * One row per findspot, not per hoard: `findspots.geojson` aggregates
+ * CHRR's 694 hoard records to 620 distinct locations with a hoard count
+ * each, and that aggregate is what this table holds — not a fabricated
+ * per-hoard breakdown this source doesn't cleanly publish in bulk.
+ */
+export const antiquityCoinHoards = pgTable(
+  'antiquity_coin_hoards',
+  {
+    id: serial('id').primaryKey(),
+    name: varchar('name', { length: 240 }).notNull(),
+    hoardCount: integer('hoard_count').notNull(),
+    geonamesUrl: varchar('geonames_url', { length: 300 }),
+    geom: pointGeometry('geom').notNull(),
+  },
+  (table) => [index('antiquity_coin_hoards_geom_idx').using('gist', table.geom)],
 )
 
 export const limesSegmentKindEnum = pgEnum('limes_segment_kind', ['barrier', 'river', 'notional'])

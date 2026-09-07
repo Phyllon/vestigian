@@ -45,9 +45,6 @@ export interface BasemapOption {
  */
 export type BasemapSheetTone = 'light' | 'dark'
 
-/** The only three dates AWMC's `political_shading` release actually covers. */
-export type PeriodExtentYear = -60 | 117 | 200
-
 export interface BasemapSource {
   provider: BasemapProvider
   pmtilesUrl: string
@@ -59,9 +56,17 @@ export interface BasemapSource {
   /** The frontier layers, added to the Barrington sheet when it is switched on. */
   limesTilesUrl: string
   /** The empire's extent at one of three dates, added when the period scrubber is set. */
-  periodExtentTilesUrl: string
+  empireExtentTilesUrl: string
   /** Ancient battles worldwide, added to any basemap when "Show battles" is on. */
   battleTilesUrl: string
+  /** Ancient ports and harbours worldwide, added when "Show ports" is on. */
+  portTilesUrl: string
+  /** The ORBIS route network, added when "Show ancient routes" is on. */
+  routeTilesUrl: string
+  /** AWMC's minor point features, added when "Show minor antiquities" is on. */
+  featureTilesUrl: string
+  /** CHRR coin-hoard findspots, added when "Show coin hoards" is on. */
+  coinHoardTilesUrl: string
   glyphsUrl: string
 }
 

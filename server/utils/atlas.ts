@@ -217,8 +217,8 @@ export const buildAtlasTileSql = (query: AtlasTileQuery): string => {
 
 /**
  * Tile assembly for the period scrubber — the fill the Barrington sheet gains
- * when a reader drags the extent slider to one of the three dates AWMC
- * publishes (60 BCE, 117 CE, 200 CE; see `12-antiquity-periods.ts`).
+ * when a reader drags the extent slider along the Roman timeline
+ * (`19-ohm-empire-extents.ts`, OpenHistoricalMap, CC0).
  *
  * Its own endpoint, same reasoning as `limes.ts`: most readers never touch
  * the scrubber, and folding this into `/api/tiles/antiquity` would charge
@@ -226,15 +226,15 @@ export const buildAtlasTileSql = (query: AtlasTileQuery): string => {
  * atlas cache generation — this data changes only when the antiquity import
  * runs, same clock as everything else in this file.
  */
-export const buildPeriodExtentCacheKey = (
+export const buildEmpireExtentCacheKey = (
   tile: TileCoordinate,
   atlasVersion: number,
-  periodYear: number,
-): string => `atlas:v${atlasVersion}:period:${periodYear}:${tile.z}:${tile.x}:${tile.y}`
+  year: number,
+): string => `atlas:v${atlasVersion}:empire:${year}:${tile.z}:${tile.x}:${tile.y}`
 
-interface PeriodExtentTileQuery {
+interface EmpireExtentTileQuery {
   tile: TileCoordinate
-  periodYear: number
+  year: number
   simplifyTolerance: number
 }
 
@@ -243,28 +243,39 @@ interface PeriodExtentTileQuery {
  * applies unchanged and for the same reason — `geom && b.env_wgs` uses the
  * GiST index, `ST_Transform(geom, 3857) && env` cannot.
  *
+ * **Selected by the year the reader is standing on, not by slice id.** The
+ * source models control as half-open intervals, and after 395 two of them
+ * are live at once — the Western and Eastern empires are separate relations
+ * covering the same years. Asking "which extents contain this year" draws
+ * both without the caller needing to know there are two, and makes the
+ * handful of overlapping refinements OHM carries (two slices both ending
+ * 439, two both ending 465) merge into the same fill instead of fighting.
+ *
  * `ST_Simplify`, not the topology-preserving form: this is a fill, not a
  * line a reader is meant to trace, and the plain algorithm is what the sea
  * layer above already uses for the same reason at the same kind of vertex
- * count (AWMC's extent fragments carry OpenStreetMap-grade detail).
+ * count. It matters more here than it did for AWMC's three snapshots — these
+ * 52 slices carry 2.9 million vertices between them.
  */
-export const buildPeriodExtentTileSql = (query: PeriodExtentTileQuery): string => {
-  const { tile, periodYear, simplifyTolerance } = query
+export const buildEmpireExtentTileSql = (query: EmpireExtentTileQuery): string => {
+  const { tile, year, simplifyTolerance } = query
 
   const extentLayer = `
     SELECT ST_AsMVT(e, 'extent', ${TILE_EXTENT}, 'geom', 'id') AS tile
     FROM (
       SELECT
-        antiquity_period_extents.id,
+        antiquity_empire_extents.id,
+        antiquity_empire_extents.state_name,
         ST_AsMVTGeom(
           ST_Simplify(
-            ST_Transform(antiquity_period_extents.geom, 3857), ${simplifyTolerance}
+            ST_Transform(antiquity_empire_extents.geom, 3857), ${simplifyTolerance}
           ),
           b.env, ${TILE_EXTENT}, ${TILE_BUFFER}, true
         ) AS geom
-      FROM antiquity_period_extents, bounds b
-      WHERE antiquity_period_extents.geom && b.env_wgs
-        AND antiquity_period_extents.period_year = ${periodYear}
+      FROM antiquity_empire_extents, bounds b
+      WHERE antiquity_empire_extents.geom && b.env_wgs
+        AND antiquity_empire_extents.start_year <= ${year}
+        AND antiquity_empire_extents.end_year > ${year}
     ) AS e
     WHERE e.geom IS NOT NULL
   `
