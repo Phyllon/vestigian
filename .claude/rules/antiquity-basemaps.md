@@ -8,11 +8,30 @@ paths:
   - 'server/api/limes/**'
   - 'scripts/import/05-antiquity-atlas.ts'
   - 'scripts/import/06-limes.ts'
-  - 'scripts/import/12-antiquity-periods.ts'
-  - 'server/api/tiles/antiquity-periods/**'
+  - 'scripts/import/19-ohm-empire-extents.ts'
+  - 'server/api/tiles/antiquity-empire/**'
+  - 'server/api/atlas/empire-periods.get.ts'
+  - 'app/composables/map/useEmpirePeriods.ts'
   - 'scripts/import/13-battles.ts'
   - 'server/utils/battles.ts'
   - 'server/api/tiles/antiquity-battles/**'
+  - 'scripts/import/14-ancient-ports.ts'
+  - 'server/utils/ports.ts'
+  - 'server/api/tiles/antiquity-ports/**'
+  - 'scripts/import/15-orbis-routes.ts'
+  - 'server/utils/orbis-routes.ts'
+  - 'server/api/tiles/antiquity-routes/**'
+  - 'scripts/import/16-awmc-minor-features.ts'
+  - 'scripts/import/17-awmc-minor-lines.ts'
+  - 'server/utils/minor-features.ts'
+  - 'server/api/tiles/antiquity-features/**'
+  - 'scripts/import/18-chrr-coin-hoards.ts'
+  - 'server/utils/coin-hoards.ts'
+  - 'server/api/tiles/antiquity-coin-hoards/**'
+  - 'app/composables/map/useMinorFeatureOverlay.ts'
+  - 'app/composables/map/useCoinHoardOverlay.ts'
+  - 'app/composables/map/usePortOverlay.ts'
+  - 'app/composables/map/useRouteOverlay.ts'
   - 'app/composables/map/useBattleOverlay.ts'
   - 'app/components/limes/**'
   - 'app/composables/limes/**'
@@ -220,7 +239,100 @@ records that are not ODbL. It is computed **on read and never stored**, and
 `/api/data/sites.geojson` gains no field from it, so what leaves is a Produced
 Work with both attributions attached. See the docstring on that endpoint.
 
-## The period scrubber — a switch, not six switches
+## The period scrubber — 51 steps from OpenHistoricalMap
+
+**The scrubber now moves through a continuous dated series, not three
+snapshots.** `19-ohm-empire-extents.ts` imports 52 time slices from
+OpenHistoricalMap covering 509 BCE to 476 CE; the AWMC three-date version
+described below is what it replaced, kept here because its licence research
+still stands and because the reasons the replacement is _not_ strictly better
+matter.
+
+**Source and licence, verified live.** OHM is **CC0 1.0** — its `/copyright`
+page states the whole database is "dedicated to the public domain under a
+Creative Commons CC0 dedication". This is not inherited from OpenStreetMap
+and is not ODbL; the difference was checked rather than assumed, because
+every other borrowed layer in this atlas _is_ share-alike. The page's one
+carve-out is that individual elements may carry `license=*` for CC BY /
+CC BY-SA content: of the 87 Roman-state boundary relations, exactly two set
+that tag and both say `CC0-1.0`. Nothing imported is encumbered. It is still
+credited (`EMPIRE_EXTENT_ATTRIBUTION`) even though CC0 compels nothing — OHM
+asks, and a reader judging a frontier line is owed the knowledge that this
+one is contributor-drawn.
+
+**What OHM actually holds**, found with an Overpass query against its own
+instance (`overpass-api.openhistoricalmap.org`), not from documentation:
+`type=boundary`, `admin_level=2`, `border_type=empire` relations, one per
+interval, tagged `start_date`/`end_date`, under four names — Res Publica
+Romana (20 slices, -509..-27), Imperium Romanum (19, -27..395), Imperium
+Romanum Occidentale (12, 395..476) and Imperium Romanum Orientale (36,
+395..1453). Many also carry `end_event`, a plain-language note on what closes
+the slice ("Trajan conquers Armenia", "Vandals conquer Africa"), which the
+scrubber shows under the slider.
+
+**Cutoff: slices beginning before 476**, the deposition of Romulus
+Augustulus — the same end-of-antiquity line `13-battles.ts` draws at 500,
+moved to the exact event because here there is one. That keeps the Eastern
+empire's first slice (395–476, contemporaneous with the West) and drops the
+35 Byzantine slices after it, which belong to a different atlas. **52 rows,
+51 distinct steps** (two pairs of slices share a start year).
+
+**The honest trade-off, stated because it is a real one.** AWMC's three
+extents were drawn by academic cartographers; OHM's 52 are drawn by
+volunteers, and some relations openly tag their own boundary lines as still
+needing a source. This is an approximation, and the scrubber says so in the
+interface (`basemapSwitcher.periodApproximate`) rather than implying survey
+precision. The judgement was that 51 dated steps a reader can actually watch
+the empire grow through is worth more than three precise ones, **given** that
+the interface admits what it is.
+
+**Dates are traditional BCE counts, not astronomical ones** — OHM's `-0509`
+is 509 BCE, not 510. This is the opposite of Wikidata's convention (see the
+battles section), so it was verified against slices whose dates are not in
+dispute — `-0264..-0241` the First Punic War, `-0146` the fall of Carthage,
+`-0027` Augustus — rather than assumed. Getting it backwards would have
+shifted the entire Republic by a year, silently.
+
+**Geometry is assembled with `osmtogeojson` (MIT), not by hand.** A relation
+is member ways, not a polygon: the 106–114 CE slice alone has 1,071 outer
+ways and 83,599 coordinates, and ring assembly with islands is the
+well-solved problem this project's conventions say to borrow. **Pin the
+stable 2.x** — npm's `latest` tag is a 3.0 beta, and the two versions differ
+in output shape: 2.x nests OSM tags under `properties.tags`, the beta
+flattens them onto `properties`. Reading the wrong shape yields `undefined`
+names with no error at all.
+
+**Served by year, not by slice id.** `/api/tiles/antiquity-empire/:year/...`
+selects every row whose half-open interval contains that year
+(`start_year <= y AND end_year > y`). After 395 that draws the Western and
+Eastern empires together without the caller knowing there are two, and the
+handful of overlapping refinements OHM carries merge into one fill instead of
+fighting. 2.9 million vertices across the 52 slices makes `ST_Simplify`
+matter here far more than it did for AWMC's three.
+
+**The steps are fetched, not hardcoded** (`/api/atlas/empire-periods`,
+`useEmpirePeriods.ts`). Three dates could live in a client constant; 51
+cannot, and they change when OHM's contributors refine a boundary. The
+request is made only when a reader opens the switcher _on the sheet that has
+a scrubber_ — the same restraint that keeps the extent tiles out of the style
+until a period is actually chosen. `end_event` is English-only upstream and
+deliberately **not** machine-translated: `translate-locales.ts` bootstraps
+interface strings, not historical claims. Era notation _is_ translated
+(`periodYearBce`/`periodYearCe`), since `v. Chr.` and `av. J.-C.` are not the
+same string.
+
+**`USlider` still moves over an index domain, not the year** — and the
+reasoning matters more now than with three dates: the gaps run from one year
+(116→117) to 171 (-509→-338), so a value-mapped slider would compress the
+entire early Republic into a few pixels.
+
+### What this replaced — AWMC's three dates (superseded, research retained)
+
+`12-antiquity-periods.ts`, `antiquity_period_extents` and
+`/api/tiles/antiquity-periods` are **gone**, dropped in the same migration
+that added `antiquity_empire_extents`. Keeping both would have meant either
+two scrubbers for one idea or a dead code path; the licence research below is
+kept because it is still the reason the _limes_ derivation trusts AWMC.
 
 Every antiquity view up to this point was a single fixed snapshot. Research
 requested by the user (verify third-party sources live, not from a summary)
@@ -320,6 +432,33 @@ no visible edge inside a typical viewport since the border sits further out
 
 **Researched and not pursued, for the record:**
 
+- **OldMapsOnline / Georeferencer (Klokan Technologies) — blocked by its own
+  terms, not by copyright.** Asked for directly as a way to extend the
+  scrubber. Its Terms of Use forbid exactly the intended use: content is
+  licensed "solely for your personal, non-commercial use", may not be
+  redistributed "to any third party", bars "commercial derivative works", and
+  — decisively — states that "manipulating or modifying map content, whether
+  as vectors, pixels, or underlying metadata, is expressly forbidden".
+  Pulling their georeferencing into another map is precisely that. This is a
+  contractual restriction layered on top of whatever the scanned sheet's own
+  copyright status is, so even a public-domain 1890 atlas page inherits it
+  once it is _their_ georeferenced copy. Verified by reading the clause text
+  from `web.archive.org`'s snapshot of `/en/terms` — the live site answers a
+  plain fetch with a Cloudflare challenge. Separately, it would have been the
+  wrong shape anyway: scanned historical sheets, not dated boundary vectors.
+- **Deriving extents from Wikipedia/Wikidata conquest dates — good dates, no
+  geometry.** A live SPARQL query for `wdt:P31/wdt:P279* wd:Q182547` ("Roman
+  province") returns 282 items, most carrying real dates (`P571`/`P576` or
+  `P580`/`P582`): Dacia 106–271, Roman Egypt 30 BCE–642, and so on. But
+  **zero of the 282 carry `P3896` (geoshape)** — checked, not assumed.
+  Wikidata records _when_ a province existed and never _where its border
+  ran_. Turning a sentence like "Augustus annexed Egypt in 30 BCE" into a
+  frontier polygon means doing the cartographic reconstruction ourselves,
+  which is inventing data rather than sourcing it. The idea was superseded
+  outright by OHM, which has both the dates and the boundaries. The province
+  dates remain a good future source for _labelling_ — "Dacia, Roman province
+  106–271 CE" on a polygon already drawn — which fabricates nothing.
+
 - **DARMC** (Harvard, CC BY-NC-SA 4.0) and **siriusbontea/roman-empire**'s
   13-slice reconstructed series were the best leads _before_ AWMC's own
   dated extents were confirmed reachable and ODbL. Redundant once the
@@ -391,8 +530,11 @@ takes the first row SPARQL returns and moves on, the same restraint
 as "215 BCE" before this was caught by a spot check against a battle with
 a well-known date. `13-battles.ts`'s `yearFromDate` converts a BCE
 astronomical year (`<= 0`) to this project's own negated-traditional-count
-convention (`antiquity_period_extents`/`antiquity_places`'s `-60` means
-"60 BCE", not astronomical year -60) before storing.
+convention (`antiquity_empire_extents`/`antiquity_places`'s `-60` means
+"60 BCE", not astronomical year -60) before storing. OpenHistoricalMap,
+the period scrubber's source, already writes traditional counts and needs
+no such conversion — the two upstreams disagree, and each import states
+which convention it is reading.
 
 **Schema**: `antiquity_battles` (`wikidata_id`, `title`, `year`,
 `location_precision`, `wikipedia_url`, `geom`) — a new table, not a column
@@ -431,3 +573,204 @@ canvas (Lucide is UI chrome only; no icon-font glyph appears on the map
 itself anywhere in this codebase). Always drawn as the reference/pencil
 variant: every row is borrowed from Wikidata, never a contribution, the
 same reasoning `registerLimesIcons`/`registerAtlasIcons` already give.
+
+## Ancient ports — an overlay, from "Project Mercury"'s catalogue
+
+Following up on "Project Mercury" (projectmercury.eu) — a Roman
+computational-modelling project, dormant since 2022, whose main asset
+turned out to be a curated link directory of ~45 third-party datasets, not
+data of its own. Its listing for the Catalogue of Ancient Ports pointed at
+a real, licensed, mirrorable source; two other candidates checked from the
+same catalogue — OxREP's stone quarries and mines databases — did not (see
+"Researched and rejected" below).
+
+**Source, verified live, not from memory**: `ancientportsantiques.com`,
+Arthur de Graauw's Catalogue of Ancient Ports, CC BY 4.0 — the page footer
+states this and links the real Creative Commons legal text. The actual
+workbook, not just the page, was downloaded and inspected before
+`scripts/import/14-ancient-ports.ts` was written:
+`.../wp-content/uploads/Documents/GE/AncientPorts.xlsx`, sheet `PLACES`,
+6,007 rows, all carrying coordinates. The workbook's own Read me sheet
+adds a second citation that travels with the CC BY credit: the same data
+is also deposited as the DARMC Scholarly Data Series (Harvard).
+
+**Not year-filtered**, unlike battles: the catalogue spans roughly 8,000
+years, Iceland to Sri Lanka, and its `FOUNDATION` column mixes single
+years, BCE ranges (`"-10000 to -5000"`) and blanks too inconsistently to
+filter reliably — imported as free text, in `foundation`, never parsed
+into a number. `title` reads `NAME || NAME_MOD`: the source's `NAME_MOD`
+column does double duty as a modern place name when an ancient name
+exists, or as the only descriptive text there is when it doesn't (e.g.
+"Alta, BA rock carvings showing many ships" for a Bronze Age Norwegian
+site) — `title`/`modernName` are both `text`, not `varchar`, since some of
+these descriptions run past 400 characters. Roughly 30 more flag columns
+(period flags, feature-type codes on the workbook's own "Key to codes"
+sheet) are real data, deliberately not imported in this pass — reproducible
+from the same workbook later, not silently dropped from anywhere that
+isn't.
+
+**Schema**: `antiquity_ports` (`source_row_id`, `title`, `modern_name`,
+`country`, `foundation`, `pleiades_url`, `wikipedia_url`, `geom`) —
+`source_row_id` is the workbook's own `NB` column, kept as text since it
+is sometimes fractional (Excel's own sub-numbering, e.g. "1.1").
+
+**Serving**: `server/utils/ports.ts`'s `buildPortTileSql`/
+`buildPortCacheKey` copy `battles.ts`'s shape exactly. Its own endpoint
+(`/api/tiles/antiquity-ports`), same reasoning as battles. One point
+layer, no simplification — at ~6,000 rows worldwide there is nothing to
+thin at any zoom.
+
+**Interaction**: not wired into the site/tracing selection machinery, same
+reasoning as battles — a plain MapLibre `Popup` (`usePortOverlay.ts`)
+showing title, modern name, country, foundation text, and Pleiades/
+Wikipedia links when the row carries them, reusing
+`useBattleOverlay.ts`'s exported `escapeHtmlForPopup`.
+
+**Mark**: a new hand-stroked anchor glyph (`PORT_ICON_PATH`/
+`registerPortIcon`), reference/pencil variant — every row is borrowed,
+never a contribution.
+
+## ORBIS routes — the Roman transport network, another overlay
+
+**Source, and a real licence discrepancy resolved.** ORBIS v2
+(Meeks/Scheidel/Weiland/Arcenas, Stanford, 2014) is mirrored on GitHub
+(`github.com/emeeks/orbis_v2`), which genuinely carries an MIT `LICENSE`
+file — fetched and read, copyright Elijah Meeks 2013. That covers Meeks's
+D3.js viewer application, not the network data the repo also happens to
+hold. The data's own licence comes from its authoritative deposit, the
+Stanford Digital Repository (`purl.stanford.edu/mn425tz9757`, "ORBIS (v2)
+Network Edge and Node Tables"): CC BY 3.0, stated verbatim on that page.
+`orbis.stanford.edu` itself states no data licence at all — its only
+rights line covers AWMC's own basemap tiles (CC BY-NC 3.0), which this
+import does not touch.
+
+**The network was downloaded and inspected before import, not assumed**:
+`base_routes.geojson` holds 1,215 edges — 1,206 `LineString`, 9
+`MultiLineString` (each component becomes its own row: 1,328 rows total,
+`scripts/import/15-orbis-routes.ts`'s `parseRoutes`). `t` is one of six
+route kinds (`road` 627, `coastal` 411, `overseas` 69, `upstream` 54,
+`downstream` 49, `ferry` 5); `sid`/`tid` node ids are resolved against
+`sites_extended.csv` (751 named sites) for popup labels. `e`/`s` are
+undocumented cost or duration figures with no verified meaning —
+deliberately not imported. A sibling file, `new_routes.geojson`, covers
+nearly the same edges with a seasonal `m` field replacing `upstream`;
+importing both would double-draw the same connections, so only
+`base_routes.geojson` is used.
+
+**Schema**: `antiquity_routes` (`source_node_id`, `target_node_id`,
+`source_title`, `target_title`, `route_type` — a `pgEnum`, the same
+pattern `limesSegmentKindEnum`/`antiquityLineKindEnum` already use for a
+small closed vocabulary — `geom`). `source_title`/`target_title` are left
+null when a node id isn't found in `sites_extended.csv`, rather than
+dropping the route.
+
+**Serving**: `server/utils/orbis-routes.ts`'s `buildRouteTileSql`/
+`buildRouteCacheKey`, same shape again. One line layer, no simplification
+— at ~1,300 rows worldwide there is nothing to thin. Drawn in a single hue
+(`ATLAS_MARK_INK`, the same reference tone as every other borrowed mark),
+never a second colour key: the six route kinds are told apart by dash
+pattern (`buildRouteLayer`'s `line-dasharray` match expression) instead,
+keeping to the design brief's "one hue for linear features" rule already
+applied to tracings and the limes.
+
+**Interaction**: not wired into the site/tracing selection machinery, same
+reasoning as battles and ports — a plain `Popup` (`useRouteOverlay.ts`)
+showing the translated route kind and, when both ends are known, "Source
+→ Target". Never the raw `e`/`s` figures.
+
+## AWMC's minor antiquities — six point kinds from one shapefile release
+
+`16-awmc-minor-features.ts` (`pnpm import:awmc-features`) imports **525
+points** from AWMC's shapefile release, the same repo and the same ODbL 1.0
+licence as everything else AWMC-sourced here: **368 bridges, 95 mines and
+quarries, 15 dams, 11 cemeteries, 10 forts, 26 tumuli**. One table,
+`antiquity_features`, keyed by an `antiquity_feature_kind` enum, rather than
+six tables — they share a shape (a point, a name, a source citation) and are
+drawn by one symbol layer with a `match` expression on `kind`.
+
+**Field names in a DBF are truncated to 10 characters by the format itself**,
+which is not corruption. The bridge layer's `Archaic`/`Classical`/`Hell_Rome`/
+`Roman`/`Late` columns turned out to be genuine 0/1 period booleans — checked
+by reading actual record _values_, not by inferring from the column names,
+and collapsed at import into the `periods` display string.
+
+**Two layers in that release are lines, not points — caught only by running
+the import.** `causeways` and `dikes_levees` sound like point features and sit
+beside the point layers, but their `.shp` geometry type is LineString /
+MultiLineString. The first run reported `causeway: 0` and `dike_levee: 0`
+against non-zero DBF record counts, which is what exposed it; the fix was to
+read `feature.geometry.type` through the real `shapefile` library rather than
+trust the DBF alone. They are now `antiquity_line_kind` values imported by
+`17-awmc-minor-lines.ts` instead — **1 causeway, 6 dikes/levees** — and the
+schema comment on that enum says so, because the next person will make the
+same assumption.
+
+**Centuriation** (Roman field-division grids) comes from the same script:
+**2,824 lines** into `antiquity_lines` and **221 polygons** into
+`antiquity_areas`. The polygons are what exposed a real pre-existing bug —
+`atlas-urban` had **no `kind` filter at all** and was drawing every row in the
+`areas` source-layer with city fill styling, so the new centuriation blocks
+would have rendered as mislabelled cities. Fixed by adding
+`filter: ['==', ['get', 'kind'], 'urban']` before the new
+`atlas-centuriation-blocks`/`atlas-centuriation-lines` layers went in.
+
+**Icon reuse over a redundant glyph**: `minorFeatureIconId('fort')` returns
+the existing `atlasIconId('fortification')` rather than a seventh new mark.
+Both mean "a referenced fortification, not a contribution", so
+`registerMinorFeatureIcons` deliberately skips `fort`.
+
+## CHRR coin hoards — 620 findspots, and a licence discrepancy resolved
+
+`18-chrr-coin-hoards.ts` (`pnpm import:chrr-coin-hoards`) imports **620**
+Roman Republican coin-hoard findspots from `numismatics.org/chrr`'s
+`findspots.geojson`, into `antiquity_coin_hoards` (`name`, `hoard_count`,
+`geonames_url`, `geom`).
+
+**CHRR states two different licences.** Its human-readable pages and its
+machine-readable VoID description disagree — ODbL in one place, CC BY-NC-SA
+in another. The stricter, machine-readable statement was treated as
+authoritative, and the layer is isolated accordingly: its own table, no
+foreign key to `sites`/`tracings`, its own tile endpoint, out of
+`/api/data/sites.geojson`. That is the same isolation the ODbL data already
+gets, for the same reason — see the note at the top of
+`server/database/schema/atlas.ts`.
+
+**CHRE (Coin Hoards of the Roman Empire, Oxford) is not imported, and the
+reason is an outage, not the licence.** Its CC BY-NC-SA 4.0 terms would be
+workable under exactly the isolation above. But its bulk export — the same
+`findspots.geojson` shape that made CHRR trivial — returns **HTTP 500**, as
+does its `apis/` documentation page, while the site's home page returns 200.
+Verified live. Scraping individual record pages instead was rejected as
+disproportionate for a layer this size. Worth re-checking if the export ever
+comes back.
+
+## Researched and rejected
+
+**OxREP's stone quarries (792 records) and mines (551 records) databases**
+have no verifiable licence. Both state only a citation requirement; the
+one page that might carry OxREP's site-wide terms
+(`oxrep.web.ox.ac.uk/copyright`) returns HTTP 403, gated behind an Oxford
+SSO login. No Zenodo/Figshare/ORA deposit was found for either dataset
+(OxREP's _Cities_ database does carry a Bodleian DOI — quarries and mines
+don't). Quarries' coordinates aren't even in the public HTML table, only
+"included in full in the PDF version," and explicitly only "accurate to
+within several kilometres." Not pursued as a mirror; the honest next step
+is a human one — someone emailing OxREP to ask for terms — not a
+workaround in code.
+
+**AWMC's bridges (368 points) and centuriation (2,824 lines) layers**
+exist and are ODbL-1.0 (same licence family this atlas already imports
+aqueducts/canals/walls/roads/urban_areas under from AWMC's GitHub repo,
+`scripts/import/05-antiquity-atlas.ts`) — but they ship only inside AWMC's
+"Cultural Shapefiles Apr 2024.zip", not in the GeoJSON files that import
+already fetches. Not yet built; a genuine follow-on, not blocked by
+licence.
+
+**Coin Hoards of the Roman Republic (CHRR)**, numismatics.org, ODbL —
+findspots with coordinates, map-relevant, not yet built. **Coin Hoards of
+the Roman Empire (CHRE)** is CC BY-NC-SA 4.0 — the NC this project's own
+conventions explicitly permit, but the SA (share-alike) is a real
+obligation weighed against nothing else in this codebase and was not
+pursued for that reason. **OCRE**/**CRRO** are coin _types_, not
+findspots — no coordinates, so neither is a map layer regardless of their
+licence (both ODbL).

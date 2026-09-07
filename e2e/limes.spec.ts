@@ -1,6 +1,6 @@
 import { expect, test } from './helpers/fixtures'
 import { watchForProblems } from './helpers/console'
-import { openMap, waitForTiles } from './helpers/map'
+import { openMap, showSites, waitForTiles } from './helpers/map'
 
 /**
  * The frontier is an overlay drawn above whichever basemap is showing, not a
@@ -71,6 +71,10 @@ test.describe('following the limes', () => {
     })
 
     await openMap(page)
+    // Sites are off by default (`isShowingSites`, `useBasemapStyle`) —
+    // switched on here since this test's whole point is proving the site
+    // overlay survives a style swap, not that it loads unasked.
+    await showSites(page)
     await chooseBasemap(page, 'Antiquity (Barrington)')
     await waitForTiles(page)
 

@@ -8,9 +8,9 @@
     "signOut": "Abmelden",
     "footerLicence": "Daten und Lizenzen",
     "menu": "Menü",
+    "menuGroupReference": "Referenz",
     "menuGroupLegal": "Recht & Daten",
-    "menuGroupOffline": "Offline-Karten",
-    "menuGroupReference": "Referenz"
+    "menuGroupOffline": "Offline-Karten"
   },
   "account": {
     "menuFor": "Kontomenü, angemeldet als {name}",
@@ -42,13 +42,56 @@
     "groupOverlays": "Überlagerungen",
     "tabulaPeutingerianaOverlay": "Netz Tabula Peutingeriana",
     "tabulaPeutingerianaOverlayHint": "Orte und Straßen aus dem Manuskript, an ihren wirklichen Koordinaten",
+    "showSites": "Fundstellen anzeigen",
+    "showSitesHint": "Beigetragene Fundstellen und Trassierungen – beim ersten Laden aus Geschwindigkeitsgründen ausgeschaltet",
+    "showBattles": "Schaugefechte",
+    "showBattlesHint": "Alte Schlachten weltweit, vor 500 CE",
+    "showPorts": "Häfen anzeigen",
+    "showPortsHint": "Antike Häfen und Anlegestellen weltweit (CC BY, de Graauw)",
+    "showRoutes": "Antike Routen anzeigen",
+    "showRoutesHint": "Straßen-, Fluss- und Seerouten der Römerzeit (ORBIS)",
+    "showFeatures": "Kleinere Altertümer anzeigen",
+    "showFeaturesHint": "Brücken, Bergwerke, Dämme, Gräberfelder, Kastelle und Grabhügel (AWMC)",
+    "showCoinHoards": "Münzhorte anzeigen",
+    "showCoinHoardsHint": "Fundorte republikanischer Münzhorte (CHRR)",
     "periodScrubber": "Das Imperium, im Laufe der Zeit",
     "periodOff": "Ausgeschaltet",
-    "period60Bce": "60 BCE",
-    "period117Ce": "117 CE",
-    "period200Ce": "200 CE",
-    "showBattles": "Schaugefechte",
-    "showBattlesHint": "Alte Schlachten weltweit, vor 500 CE"
+    "periodYearBce": "{year} v. Chr.",
+    "periodYearCe": "{year} n. Chr.",
+    "periodApproximate": "Grenzverläufe sind Näherungswerte, gezeichnet von OpenHistoricalMap-Mitwirkenden."
+  },
+  "tabulaPeutingeriana": {
+    "title": "Tabula Peutingeriana",
+    "intro": "Eine mittelalterliche Kopie einer römischen Karte des cursus publicus, des Straßennetzes des Imperiums - hier als eigener Tiefenzoom-Scan gezeigt, nicht über reale Koordinaten drapiert.",
+    "distortionNote": "Die Tabula Peutingeriana ist ein schematisches Diagramm, das etwa 18,5 Mal breiter als hoch ist - es ist nicht geografisch korrekt, so dass es nicht als Schicht auf der Karte selbst dargestellt wird.",
+    "viewerLabel": "Deep-Zoom-Viewer des Tabula Peutingeriana Manuskripts",
+    "attribution": "Handschrift: Österreichische Nationalbibliothek, Wien (Code 324). Digitalisierung und IIIF-Hosting:"
+  },
+  "columns": {
+    "title": "Column Reliefs",
+    "intro": "Die Reliefs von zwei römischen Säulen, im Detail erforscht - Trajans Säule von gespiegelten wissenschaftlichen Platten, die Säule von Marcus Aurelius von einem Live-Tiefenzoom-Scan.",
+    "menuLabel": "Säulenreliefs",
+    "trajan": {
+      "tabLabel": "Trajan-Säule",
+      "intro": "Conrad Cichorius 1896-1900 Fotoplatten, die Standard-Szene-für-Szene-Referenz für die Spalte - gespiegelt von Wikimedia Commons, Public Domain.",
+      "loading": "Beladeplatten..",
+      "loadFailed": "Die Platten konnten nicht geladen werden. Versuchen Sie es gleich noch einmal.",
+      "empty": "Es wurden noch keine Platten veröffentlicht.",
+      "gridLabel": "Trajansche Reliefplatten",
+      "scene": "Szenerie{number}",
+      "zoomIn": "Zoom",
+      "zoomOut": "Zoom raus"
+    },
+    "marcusAurelius": {
+      "tabLabel": "Kolumne von Marcus Aurelius",
+      "intro": "Petersen, Domaszewski & Calderinis 1896 Platten, digitalisiert von der Universitätsbibliothek Heidelberg und hier als Live-Tiefenzoom-Scan, gemeinfrei.",
+      "viewerLabel": "Deep-Zoom-Viewer der Säule von Marcus Aurelius Platten",
+      "volume": "Plattenvolumen",
+      "tafeln-i-lxiv": "Tafeln I–LXIV",
+      "tafeln-lxv-cxxviii": "Tafeln LXV–CXXVIII",
+      "loading": "Beladen des Plattenvolumens..",
+      "loadFailed": "Dieser Band konnte nicht aus der Universitätsbibliothek Heidelberg geladen werden. Versuchen Sie es gleich noch einmal."
+    }
   },
   "legend": {
     "title": "Was die Markierungen bedeuten",
@@ -56,10 +99,21 @@
     "showKey": "Schlüssel",
     "referencedNote": "Die gleichen Markierungen, die als dünne Umrisse ohne Scheibe gezeichnet sind, sind Orte, auf die aus dem Barrington Atlas und den Plejaden verwiesen wird - keine Aufzeichnungen, die hier beigetragen wurden.",
     "frontierTitle": "Die Grenze",
-    "basemapCreditDare": "Antike (DARE): © Johan Åhlfeldt, Universität Göteborg, CC BY-SA 3.0.",
-    "basemapCreditBarrington": "Antike (Barrington): Straßen, Küsten und Orte vom Ancient World Mapping Center (ODbL 1.0) und Plejaden (CC BY 3.0).",
     "battlesTitle": "Schlachten",
-    "battleMark": "Schlacht vor 500 CE"
+    "battleMark": "Schlacht vor 500 CE",
+    "portsTitle": "Antike Häfen",
+    "portMark": "Hafen oder Anlegestelle",
+    "routesTitle": "Antike Routen",
+    "routeKind": {
+      "road": "Straße",
+      "coastal": "Küsten- oder Flussroute",
+      "ferry": "Fährverbindung"
+    },
+    "featuresTitle": "Kleinere Altertümer",
+    "coinHoardsTitle": "Münzhorte",
+    "coinHoardMark": "Dokumentierter Münzhort-Fundort",
+    "basemapCreditDare": "Antike (DARE): © Johan Åhlfeldt, Universität Göteborg, CC BY-SA 3.0.",
+    "basemapCreditBarrington": "Antike (Barrington): Straßen, Küsten und Orte vom Ancient World Mapping Center (ODbL 1.0) und Plejaden (CC BY 3.0)."
   },
   "siteDetail": {
     "loading": "Beladung",
@@ -127,14 +181,14 @@
       "password": "Passwort",
       "passwordConfirmation": "Wiederholtes Passwort",
       "submit": "Konto erstellen",
+      "privacyNotice": "Erstellen eines Kontos speichert Ihre E-Mail-Adresse und den Anzeigenamen - siehe{link}für was das bedeutet und für wie lange.",
       "doneTitle": "Überprüfen Sie Ihren Posteingang",
       "doneDescription": "Bestätigen Sie Ihre Adresse, um die Einrichtung des Kontos abzuschließen. Der Link ist gut für einen Tag.",
       "errorDisplayName": "Mindestens drei Zeichen.",
       "errorEmail": "Sieht nicht aus wie eine E-Mail-Adresse.",
       "errorPasswordMismatch": "Die beiden Passwörter stimmen nicht überein.",
       "failedTitle": "Eintragung fehlgeschlagen",
-      "failedDefault": "Versuchen Sie es gleich noch einmal.",
-      "privacyNotice": "Erstellen eines Kontos speichert Ihre E-Mail-Adresse und den Anzeigenamen - siehe{link}für was das bedeutet und für wie lange."
+      "failedDefault": "Versuchen Sie es gleich noch einmal."
     },
     "passwordField": {
       "showPassword": "Passwort anzeigen",
@@ -432,6 +486,34 @@
     "ariaLabel": "Karte der archäologischen Stätten",
     "loading": "Entfaltung der Karte"
   },
+  "battlePopup": {
+    "viewOnWikipedia": "Ansicht auf Wikipedia"
+  },
+  "portPopup": {
+    "viewOnPleiades": "Auf Pleiades ansehen",
+    "viewOnWikipedia": "Auf Wikipedia ansehen"
+  },
+  "routePopup": {
+    "road": "Straße",
+    "coastal": "Küstenroute",
+    "overseas": "Seeroute",
+    "upstream": "Flussroute (stromaufwärts)",
+    "downstream": "Flussroute (stromabwärts)",
+    "ferry": "Fährverbindung"
+  },
+  "minorFeaturePopup": {
+    "kind": {
+      "bridge": "Brücke",
+      "mine_quarry": "Bergwerk oder Steinbruch",
+      "dam": "Damm",
+      "cemetery": "Gräberfeld",
+      "fort": "Kastell",
+      "tumulus": "Grabhügel"
+    }
+  },
+  "coinHoardPopup": {
+    "hoardCount": "Keine Horte verzeichnet | 1 verzeichneter Hort | {n} verzeichnete Horte"
+  },
   "siteExternalLinks": {
     "title": "Auch aufgezeichnet in",
     "opensNewTab": "(wird in einem neuen tab geöffnet)",
@@ -664,6 +746,7 @@
   },
   "tracingDetailPage": {
     "notFound": "Keine Rückverfolgung mit diesem Identifikator.",
+    "defaultDescription": "Ein nachgezeichnetes Merkmal, aufgezeichnet in Vestigian, einem Atlas der antiken Welt.",
     "tracedArea": "Rückverfolgungsgebiet",
     "tracedRoute": "Traced Route",
     "type": "Typ",
@@ -671,8 +754,7 @@
     "credit": "Kredit",
     "defaultAttribution": "Vestigian-Beiträge",
     "edit": "Edit",
-    "lastRevised": "Letzte Überarbeitung",
-    "defaultDescription": "Ein nachgezeichnetes Merkmal, aufgezeichnet in Vestigian, einem Atlas der antiken Welt."
+    "lastRevised": "Letzte Überarbeitung"
   },
   "siteEditPage": {
     "notFound": "Keine Website unter diesem Namen aufgezeichnet.",
@@ -902,41 +984,5 @@
     "withBasemap": "mit Hintergrundkarte",
     "remove": "{name} entfernen",
     "removeFailed": "Dieser Bereich ließ sich nicht entfernen. Versuche es gleich noch einmal."
-  },
-  "tabulaPeutingeriana": {
-    "title": "Tabula Peutingeriana",
-    "intro": "Eine mittelalterliche Kopie einer römischen Karte des cursus publicus, des Straßennetzes des Imperiums - hier als eigener Tiefenzoom-Scan gezeigt, nicht über reale Koordinaten drapiert.",
-    "distortionNote": "Die Tabula Peutingeriana ist ein schematisches Diagramm, das etwa 18,5 Mal breiter als hoch ist - es ist nicht geografisch korrekt, so dass es nicht als Schicht auf der Karte selbst dargestellt wird.",
-    "viewerLabel": "Deep-Zoom-Viewer des Tabula Peutingeriana Manuskripts",
-    "attribution": "Handschrift: Österreichische Nationalbibliothek, Wien (Code 324). Digitalisierung und IIIF-Hosting:"
-  },
-  "columns": {
-    "title": "Column Reliefs",
-    "intro": "Die Reliefs von zwei römischen Säulen, im Detail erforscht - Trajans Säule von gespiegelten wissenschaftlichen Platten, die Säule von Marcus Aurelius von einem Live-Tiefenzoom-Scan.",
-    "menuLabel": "Säulenreliefs",
-    "trajan": {
-      "tabLabel": "Trajan-Säule",
-      "intro": "Conrad Cichorius 1896-1900 Fotoplatten, die Standard-Szene-für-Szene-Referenz für die Spalte - gespiegelt von Wikimedia Commons, Public Domain.",
-      "loading": "Beladeplatten..",
-      "loadFailed": "Die Platten konnten nicht geladen werden. Versuchen Sie es gleich noch einmal.",
-      "empty": "Es wurden noch keine Platten veröffentlicht.",
-      "gridLabel": "Trajansche Reliefplatten",
-      "scene": "Szenerie{number}",
-      "zoomIn": "Zoom",
-      "zoomOut": "Zoom raus"
-    },
-    "marcusAurelius": {
-      "tabLabel": "Kolumne von Marcus Aurelius",
-      "intro": "Petersen, Domaszewski & Calderinis 1896 Platten, digitalisiert von der Universitätsbibliothek Heidelberg und hier als Live-Tiefenzoom-Scan, gemeinfrei.",
-      "viewerLabel": "Deep-Zoom-Viewer der Säule von Marcus Aurelius Platten",
-      "volume": "Plattenvolumen",
-      "tafeln-i-lxiv": "Tafeln I–LXIV",
-      "tafeln-lxv-cxxviii": "Tafeln LXV–CXXVIII",
-      "loading": "Beladen des Plattenvolumens..",
-      "loadFailed": "Dieser Band konnte nicht aus der Universitätsbibliothek Heidelberg geladen werden. Versuchen Sie es gleich noch einmal."
-    }
-  },
-  "battlePopup": {
-    "viewOnWikipedia": "Ansicht auf Wikipedia"
   }
 }

@@ -8,9 +8,9 @@
     "signOut": "Afmelden",
     "footerLicence": "Gegevens & licenties",
     "menu": "Menu",
+    "menuGroupReference": "Referentie",
     "menuGroupLegal": "Juridische gegevens",
-    "menuGroupOffline": "Offline kaarten",
-    "menuGroupReference": "Referentie"
+    "menuGroupOffline": "Offline kaarten"
   },
   "account": {
     "menuFor": "Accountmenu, aangemeld als {name}",
@@ -42,13 +42,56 @@
     "groupOverlays": "Overlays",
     "tabulaPeutingerianaOverlay": "Tabula Peutingeriana netwerk",
     "tabulaPeutingerianaOverlayHint": "Plaatsen en wegen uit het manuscript, op hun echte coördinaten",
+    "showSites": "Toon vindplaatsen",
+    "showSitesHint": "Bijgedragen vindplaatsen en tracés — bij het eerste laden uitgeschakeld voor snelheid",
+    "showBattles": "Toon gevechten",
+    "showBattlesHint": "Oude gevechten wereldwijd, voor 500 CE",
+    "showPorts": "Havens tonen",
+    "showPortsHint": "Antieke havens en ankerplaatsen wereldwijd (CC BY, de Graauw)",
+    "showRoutes": "Antieke routes tonen",
+    "showRoutesHint": "Weg-, rivier- en zeeroutes uit de Romeinse tijd (ORBIS)",
+    "showFeatures": "Kleine oudheden tonen",
+    "showFeaturesHint": "Bruggen, mijnen, dammen, grafvelden, forten en grafheuvels (AWMC)",
+    "showCoinHoards": "Muntschatten tonen",
+    "showCoinHoardsHint": "Vindplaatsen van republikeinse muntschatten (CHRR)",
     "periodScrubber": "Het rijk, na verloop van tijd",
     "periodOff": "Uit",
-    "period60Bce": "60 V.CHR",
-    "period117Ce": "117 CE",
-    "period200Ce": "200 CE",
-    "showBattles": "Toon gevechten",
-    "showBattlesHint": "Oude gevechten wereldwijd, voor 500 CE"
+    "periodYearBce": "{year} v.Chr.",
+    "periodYearCe": "{year} n.Chr.",
+    "periodApproximate": "Grenzen zijn bij benadering, getekend door OpenHistoricalMap-bijdragers."
+  },
+  "tabulaPeutingeriana": {
+    "title": "Tabula Peutingeriana",
+    "intro": "Een middeleeuwse kopie van een Romeinse kaart van de cursus publicus, het wegennet van het imperium hier getoond als zijn eigen diepe-zoom scan, niet gedrapeerd over echte coördinaten.",
+    "distortionNote": "De Tabula Peutingeriana is een schematisch diagram, dat ongeveer 18,5 keer breder is dan de hoogte.",
+    "viewerLabel": "Deep-zoom viewer van het Tabula Peutingeriana manuscript",
+    "attribution": "Manuscript: Oostenrijkse Nationale Bibliotheek, Wenen (Cod. 324). Digitalisering en IIIF-hosting:"
+  },
+  "columns": {
+    "title": "Kolomaflossingen",
+    "intro": "De reliëfs van twee Romeinse zuilen, in detail onderzocht Trajan's Column van gespiegelde wetenschappelijke platen, de Column van Marcus Aurelius van een levende diepe zoom scan.",
+    "menuLabel": "Kolomreliëf",
+    "trajan": {
+      "tabLabel": "Trajanus kolom",
+      "intro": "Conrad Cichorius' fotografische platen uit 1896.1900, de standaard scene-by-scene referentie voor de column, gespiegeld uit Wikimedia Commons, publiek domein.",
+      "loading": "Laden van platen..",
+      "loadFailed": "De platen konden niet geladen worden. Probeer het binnenkort nog eens.",
+      "empty": "Er zijn nog geen platen gepubliceerd.",
+      "gridLabel": "Trajan's Column reliëfplaten",
+      "scene": "Scène{number}",
+      "zoomIn": "Inzoomen",
+      "zoomOut": "Uitzoomen"
+    },
+    "marcusAurelius": {
+      "tabLabel": "Kolom van Marcus Aurelius",
+      "intro": "Petersen, Domaszewski & Calderini's 1896 platen, gedigitaliseerd door de Universiteitsbibliotheek Heidelberg en hier getoond als een live deep-zoom scan, publiek domein.",
+      "viewerLabel": "Diepzoomkijker van de Colonne van Marcus Aurelius platen",
+      "volume": "Plate volume",
+      "tafeln-i-lxiv": "Tafeln I",
+      "tafeln-lxv-cxxviii": "Tafeln LXV",
+      "loading": "Laden van het plaatvolume..",
+      "loadFailed": "Dit volume kon niet worden geladen vanuit de Universiteitsbibliotheek Heidelberg. Probeer het binnenkort nog eens."
+    }
   },
   "legend": {
     "title": "Wat de markeringen betekenen",
@@ -56,10 +99,21 @@
     "showKey": "Sleutel",
     "referencedNote": "Dezelfde markeringen getekend als dunne contouren, zonder een schijf, zijn plaatsen genoemd van de Barrington Atlas en Pleiades en geen platen bijgedragen hier.",
     "frontierTitle": "De grens",
-    "basemapCreditDare": "Oudheid (DARE): © Johan Åhlfeldt, Universiteit Göteborg, CC BY-SA 3.0.",
-    "basemapCreditBarrington": "Oudheid (Barrington): wegen, kustlijn en plaatsen vanaf het Oude Wereldkaartcentrum (ODbL 1.0) en Pleiades (CC BY 3.0).",
     "battlesTitle": "Gevechten",
-    "battleMark": "Gevecht, voor 500 CE"
+    "battleMark": "Gevecht, voor 500 CE",
+    "portsTitle": "Antieke havens",
+    "portMark": "Haven of ankerplaats",
+    "routesTitle": "Antieke routes",
+    "routeKind": {
+      "road": "Weg",
+      "coastal": "Kust- of rivierroute",
+      "ferry": "Veerverbinding"
+    },
+    "featuresTitle": "Kleine oudheden",
+    "coinHoardsTitle": "Muntschatten",
+    "coinHoardMark": "Geregistreerde vindplaats",
+    "basemapCreditDare": "Oudheid (DARE): © Johan Åhlfeldt, Universiteit Göteborg, CC BY-SA 3.0.",
+    "basemapCreditBarrington": "Oudheid (Barrington): wegen, kustlijn en plaatsen vanaf het Oude Wereldkaartcentrum (ODbL 1.0) en Pleiades (CC BY 3.0)."
   },
   "siteDetail": {
     "loading": "Laden",
@@ -127,14 +181,14 @@
       "password": "Wachtwoord",
       "passwordConfirmation": "Wachtwoord herhalen",
       "submit": "Account aanmaken",
+      "privacyNotice": "Het aanmaken van een account slaat uw e-mailadres en de naam van het scherm{link}voor wat dat betekent en voor hoe lang.",
       "doneTitle": "Controleer uw inbox",
       "doneDescription": "Bevestig uw adres om het account in te stellen. De link is goed voor één dag.",
       "errorDisplayName": "Minstens drie karakters.",
       "errorEmail": "Dat lijkt niet op een e-mailadres.",
       "errorPasswordMismatch": "De twee wachtwoorden komen niet overeen.",
       "failedTitle": "Registratie mislukt",
-      "failedDefault": "Probeer het binnenkort nog eens.",
-      "privacyNotice": "Het aanmaken van een account slaat uw e-mailadres en de naam van het scherm{link}voor wat dat betekent en voor hoe lang."
+      "failedDefault": "Probeer het binnenkort nog eens."
     },
     "passwordField": {
       "showPassword": "Wachtwoord tonen",
@@ -432,6 +486,34 @@
     "ariaLabel": "Kaart van archeologische sites",
     "loading": "Ontvouwen van de kaart"
   },
+  "battlePopup": {
+    "viewOnWikipedia": "Uitzicht op Wikipedia"
+  },
+  "portPopup": {
+    "viewOnPleiades": "Bekijk op Pleiades",
+    "viewOnWikipedia": "Bekijk op Wikipedia"
+  },
+  "routePopup": {
+    "road": "Weg",
+    "coastal": "Kustroute",
+    "overseas": "Zeeroute",
+    "upstream": "Rivierroute (stroomopwaarts)",
+    "downstream": "Rivierroute (stroomafwaarts)",
+    "ferry": "Veerverbinding"
+  },
+  "minorFeaturePopup": {
+    "kind": {
+      "bridge": "Brug",
+      "mine_quarry": "Mijn of groeve",
+      "dam": "Dam",
+      "cemetery": "Grafveld",
+      "fort": "Fort",
+      "tumulus": "Grafheuvel"
+    }
+  },
+  "coinHoardPopup": {
+    "hoardCount": "Geen schatten geregistreerd | 1 geregistreerde schat | {n} geregistreerde schatten"
+  },
   "siteExternalLinks": {
     "title": "Ook opgenomen in",
     "opensNewTab": "(opent in een nieuw tabblad)",
@@ -664,6 +746,7 @@
   },
   "tracingDetailPage": {
     "notFound": "Geen spoor met die identificatie.",
+    "defaultDescription": "Een getraceerd kenmerk opgenomen in Vestigian, een atlas van de oude wereld.",
     "tracedArea": "Getraceerd gebied",
     "tracedRoute": "Getraceerde route",
     "type": "Type",
@@ -671,8 +754,7 @@
     "credit": "Krediet",
     "defaultAttribution": "Medewerkers van Vestigian",
     "edit": "Bewerken",
-    "lastRevised": "Laatst herzien",
-    "defaultDescription": "Een getraceerd kenmerk opgenomen in Vestigian, een atlas van de oude wereld."
+    "lastRevised": "Laatst herzien"
   },
   "siteEditPage": {
     "notFound": "Geen site geregistreerd onder die naam.",
@@ -902,41 +984,5 @@
     "withBasemap": "met achtergrondkaart",
     "remove": "{name} verwijderen",
     "removeFailed": "Dat gebied kon niet worden verwijderd. Probeer het zo nog eens."
-  },
-  "tabulaPeutingeriana": {
-    "title": "Tabula Peutingeriana",
-    "intro": "Een middeleeuwse kopie van een Romeinse kaart van de cursus publicus, het wegennet van het imperium hier getoond als zijn eigen diepe-zoom scan, niet gedrapeerd over echte coördinaten.",
-    "distortionNote": "De Tabula Peutingeriana is een schematisch diagram, dat ongeveer 18,5 keer breder is dan de hoogte.",
-    "viewerLabel": "Deep-zoom viewer van het Tabula Peutingeriana manuscript",
-    "attribution": "Manuscript: Oostenrijkse Nationale Bibliotheek, Wenen (Cod. 324). Digitalisering en IIIF-hosting:"
-  },
-  "columns": {
-    "title": "Kolomaflossingen",
-    "intro": "De reliëfs van twee Romeinse zuilen, in detail onderzocht Trajan's Column van gespiegelde wetenschappelijke platen, de Column van Marcus Aurelius van een levende diepe zoom scan.",
-    "menuLabel": "Kolomreliëf",
-    "trajan": {
-      "tabLabel": "Trajanus kolom",
-      "intro": "Conrad Cichorius' fotografische platen uit 1896.1900, de standaard scene-by-scene referentie voor de column, gespiegeld uit Wikimedia Commons, publiek domein.",
-      "loading": "Laden van platen..",
-      "loadFailed": "De platen konden niet geladen worden. Probeer het binnenkort nog eens.",
-      "empty": "Er zijn nog geen platen gepubliceerd.",
-      "gridLabel": "Trajan's Column reliëfplaten",
-      "scene": "Scène{number}",
-      "zoomIn": "Inzoomen",
-      "zoomOut": "Uitzoomen"
-    },
-    "marcusAurelius": {
-      "tabLabel": "Kolom van Marcus Aurelius",
-      "intro": "Petersen, Domaszewski & Calderini's 1896 platen, gedigitaliseerd door de Universiteitsbibliotheek Heidelberg en hier getoond als een live deep-zoom scan, publiek domein.",
-      "viewerLabel": "Diepzoomkijker van de Colonne van Marcus Aurelius platen",
-      "volume": "Plate volume",
-      "tafeln-i-lxiv": "Tafeln I",
-      "tafeln-lxv-cxxviii": "Tafeln LXV",
-      "loading": "Laden van het plaatvolume..",
-      "loadFailed": "Dit volume kon niet worden geladen vanuit de Universiteitsbibliotheek Heidelberg. Probeer het binnenkort nog eens."
-    }
-  },
-  "battlePopup": {
-    "viewOnWikipedia": "Uitzicht op Wikipedia"
   }
 }

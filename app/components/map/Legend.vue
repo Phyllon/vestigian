@@ -7,7 +7,15 @@
    * that covers a quarter of it to explain nine glyphs is a poor trade until
    * the reader asks for it.
    */
-  const { view, isFollowingLimes, isShowingBattles } = useBasemapStyle()
+  const {
+    view,
+    isFollowingLimes,
+    isShowingBattles,
+    isShowingPorts,
+    isShowingRoutes,
+    isShowingFeatures,
+    isShowingCoinHoards,
+  } = useBasemapStyle()
   const { t } = useI18n()
   const isOpen = ref(false)
 
@@ -22,6 +30,24 @@
     { kind: 'river', label: 'River frontier, held from the bank', dashes: '7 3' },
     { kind: 'notional', label: 'Frontier without built works', dashes: '3 2.5' },
   ]
+
+  /** The order the minor-features legend renders in — every `MinorFeatureKind`, once. */
+  const MINOR_FEATURE_KINDS = [
+    'bridge',
+    'mine_quarry',
+    'dam',
+    'cemetery',
+    'fort',
+    'tumulus',
+  ] as const
+
+  /** Kept beside `buildRouteLayer`'s own dash expression for the same reason
+   *  `LIMES_LINE_KEY` is — an eight-pixel swatch, not the map's real dash array. */
+  const ROUTE_LINE_KEY = [
+    { kind: 'road', dashes: '4 2' },
+    { kind: 'coastal', dashes: '2 2' },
+    { kind: 'ferry', dashes: '1 2' },
+  ] as const
 
   const toggle = (): void => {
     isOpen.value = !isOpen.value
@@ -181,6 +207,117 @@
               </svg>
               <span class="text-xs text-ink-700 dark:text-paper-200">
                 {{ t('legend.battleMark') }}
+              </span>
+            </li>
+          </ul>
+        </template>
+
+        <!--
+          Ports are an overlay on any basemap, own key entry, same reasoning
+          as battles above.
+        -->
+        <template v-if="isShowingPorts">
+          <h2 class="eyebrow mb-2 mt-3 border-t border-paper-300 pt-2.5 dark:border-night-600">
+            {{ t('legend.portsTitle') }}
+          </h2>
+
+          <ul class="flex flex-col gap-1.5">
+            <li class="flex items-center gap-2">
+              <svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  :d="PORT_ICON_PATH"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              <span class="text-xs text-ink-700 dark:text-paper-200">
+                {{ t('legend.portMark') }}
+              </span>
+            </li>
+          </ul>
+        </template>
+
+        <!--
+          Routes are an overlay on any basemap, own key entry, same reasoning
+          as battles above. Dash patterns only, one hue — see `ROUTE_LINE_KEY`.
+        -->
+        <template v-if="isShowingRoutes">
+          <h2 class="eyebrow mb-2 mt-3 border-t border-paper-300 pt-2.5 dark:border-night-600">
+            {{ t('legend.routesTitle') }}
+          </h2>
+
+          <ul class="flex flex-col gap-1.5">
+            <li v-for="line in ROUTE_LINE_KEY" :key="line.kind" class="flex items-center gap-2">
+              <svg class="h-2 w-8 shrink-0" viewBox="0 0 32 8" aria-hidden="true">
+                <path
+                  d="M0 4h32"
+                  stroke="#8c8271"
+                  stroke-width="1.5"
+                  :stroke-dasharray="line.dashes"
+                />
+              </svg>
+              <span class="text-xs text-ink-700 dark:text-paper-200">
+                {{ t(`legend.routeKind.${line.kind}`) }}
+              </span>
+            </li>
+          </ul>
+        </template>
+
+        <!--
+          Minor features are an overlay on any basemap, own key entry, same
+          reasoning as battles above. `fort` reuses the atlas fortification
+          glyph (`SITE_ICON_PATHS.fortification`), not a mark of its own —
+          see `minorFeatureIconId`'s own docstring.
+        -->
+        <template v-if="isShowingFeatures">
+          <h2 class="eyebrow mb-2 mt-3 border-t border-paper-300 pt-2.5 dark:border-night-600">
+            {{ t('legend.featuresTitle') }}
+          </h2>
+
+          <ul class="grid grid-cols-2 gap-x-4 gap-y-1.5">
+            <li v-for="kind in MINOR_FEATURE_KINDS" :key="kind" class="flex items-center gap-2">
+              <svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  :d="
+                    kind === 'fort' ? SITE_ICON_PATHS.fortification : MINOR_FEATURE_ICON_PATHS[kind]
+                  "
+                  stroke="currentColor"
+                  stroke-width="1.1"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              <span class="text-xs text-ink-700 dark:text-paper-200">
+                {{ t(`minorFeaturePopup.kind.${kind}`) }}
+              </span>
+            </li>
+          </ul>
+        </template>
+
+        <!--
+          Coin hoards are an overlay on any basemap, own key entry, same
+          reasoning as battles above.
+        -->
+        <template v-if="isShowingCoinHoards">
+          <h2 class="eyebrow mb-2 mt-3 border-t border-paper-300 pt-2.5 dark:border-night-600">
+            {{ t('legend.coinHoardsTitle') }}
+          </h2>
+
+          <ul class="flex flex-col gap-1.5">
+            <li class="flex items-center gap-2">
+              <svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  :d="COIN_HOARD_ICON_PATH"
+                  stroke="currentColor"
+                  stroke-width="1.1"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              <span class="text-xs text-ink-700 dark:text-paper-200">
+                {{ t('legend.coinHoardMark') }}
               </span>
             </li>
           </ul>

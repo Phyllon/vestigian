@@ -344,3 +344,112 @@ export const registerBattleIcon = (map: MapLibreMap, palette: SiteIconPalette): 
   if (map.hasImage(BATTLE_ICON_ID)) map.removeImage(BATTLE_ICON_ID)
   map.addImage(BATTLE_ICON_ID, image, { pixelRatio: ICON_PIXEL_RATIO })
 }
+
+export const PORT_ICON_ID = 'vestigian-port'
+
+/**
+ * An anchor: ring, shank, stock and two flukes. Always drawn as the
+ * reference/pencil variant — every row behind it is borrowed from the
+ * Catalogue of Ancient Ports, never a contribution, the same reasoning
+ * `registerBattleIcon` already gives.
+ */
+export const PORT_ICON_PATH =
+  'M9.8 5a2.2 2.2 0 1 0 4.4 0a2.2 2.2 0 1 0 -4.4 0M12 7.2V17M8 9.5h8M12 17a6 6 0 0 1 -6 -4M12 17a6 6 0 0 0 6 -4'
+
+/**
+ * Registered alongside the other reference marks, for the same reason as
+ * `registerBattleIcon`: one more canvas, cheaper than a second hook that
+ * has to know whether "Show ports" is on.
+ */
+export const registerPortIcon = (map: MapLibreMap, palette: SiteIconPalette): void => {
+  const image = rasteriseIcon({
+    path: PORT_ICON_PATH,
+    ink: ATLAS_MARK_INK,
+    palette,
+    reference: true,
+  })
+  if (!image) return
+
+  if (map.hasImage(PORT_ICON_ID)) map.removeImage(PORT_ICON_ID)
+  map.addImage(PORT_ICON_ID, image, { pixelRatio: ICON_PIXEL_RATIO })
+}
+
+/**
+ * AWMC's minor point features — bridges, mines/quarries, dams, cemeteries
+ * and tumuli. `fort` has no glyph of its own here: it reuses
+ * `atlasIconId('fortification')`, the same reference mark already drawn
+ * for a Pleiades place classified as a fortification, since both are the
+ * same thing — a fortification referenced from a source, not contributed
+ * — and inventing a second glyph for it would draw two different marks
+ * for one idea.
+ */
+export type MinorFeatureKind = 'bridge' | 'mine_quarry' | 'dam' | 'cemetery' | 'fort' | 'tumulus'
+
+const MINOR_FEATURE_ICON_PREFIX = 'vestigian-feature-'
+
+export const minorFeatureIconId = (kind: MinorFeatureKind): string =>
+  kind === 'fort' ? atlasIconId('fortification') : `${MINOR_FEATURE_ICON_PREFIX}${kind}`
+
+/** An arch bridge in elevation: deck, two piers, the arch beneath. */
+export const BRIDGE_ICON_PATH = 'M4 14h16M6 14v4M18 14v4M4 14a8 5 0 0 1 16 0'
+
+/** A pickaxe, angled — the tool, not the place, the same convention `findspot`'s amphora already uses. */
+export const MINE_QUARRY_ICON_PATH = 'M5 19 15 9M13 7l4 4-2 2-4-4 2-2z'
+
+/** A dam wall holding water back, water shown as two short crests upstream of it. */
+export const DAM_ICON_PATH = 'M4 18h16M5 18v-7h4v-3h6v3h4v7M4 11h4M16 11h4'
+
+/** A headstone with a cross, the same weight as `burial`'s stele but a different shape for a different Barrington layer. */
+export const CEMETERY_ICON_PATH = 'M12 5v6M9.5 8h5M7 19a5 5 0 0 1 10 0z'
+
+/** A burial mound — a low arc on the ground line, against `burial`'s standing stele. */
+export const TUMULUS_ICON_PATH = 'M4 18.5h16M5 18.5a7 5 0 0 1 14 0'
+
+export const MINOR_FEATURE_ICON_PATHS: Partial<Record<MinorFeatureKind, string>> = {
+  bridge: BRIDGE_ICON_PATH,
+  mine_quarry: MINE_QUARRY_ICON_PATH,
+  dam: DAM_ICON_PATH,
+  cemetery: CEMETERY_ICON_PATH,
+  tumulus: TUMULUS_ICON_PATH,
+}
+
+/**
+ * Registered alongside the other reference marks, for the same reason as
+ * `registerBattleIcon`. `fort` is skipped here deliberately —
+ * `registerAtlasIcons` already registers `atlasIconId('fortification')`,
+ * and re-registering the same image id a second time would just repeat
+ * that work every style load.
+ */
+export const registerMinorFeatureIcons = (map: MapLibreMap, palette: SiteIconPalette): void => {
+  for (const [kind, path] of Object.entries(MINOR_FEATURE_ICON_PATHS)) {
+    const image = rasteriseIcon({ path, ink: ATLAS_MARK_INK, palette, reference: true })
+    if (!image) continue
+
+    const id = minorFeatureIconId(kind as MinorFeatureKind)
+    if (map.hasImage(id)) map.removeImage(id)
+    map.addImage(id, image, { pixelRatio: ICON_PIXEL_RATIO })
+  }
+}
+
+export const COIN_HOARD_ICON_ID = 'vestigian-coin-hoard'
+
+/** A stack of coins: three overlapping ellipses in elevation. */
+export const COIN_HOARD_ICON_PATH =
+  'M6 9.5a6 2 0 1 0 12 0a6 2 0 1 0 -12 0M6 9.5v5a6 2 0 0 0 12 0v-5M6 12a6 2 0 0 0 12 0'
+
+/**
+ * Registered alongside the other reference marks, for the same reason as
+ * `registerBattleIcon`.
+ */
+export const registerCoinHoardIcon = (map: MapLibreMap, palette: SiteIconPalette): void => {
+  const image = rasteriseIcon({
+    path: COIN_HOARD_ICON_PATH,
+    ink: ATLAS_MARK_INK,
+    palette,
+    reference: true,
+  })
+  if (!image) return
+
+  if (map.hasImage(COIN_HOARD_ICON_ID)) map.removeImage(COIN_HOARD_ICON_ID)
+  map.addImage(COIN_HOARD_ICON_ID, image, { pixelRatio: ICON_PIXEL_RATIO })
+}

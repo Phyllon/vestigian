@@ -17,7 +17,10 @@
   const isLampLit = computed(() => isDark.value && isAntiquityView(view.value))
   const { camera: _, restoreCamera, rememberCamera } = useCameraState()
   const {
+    isActive: isShowingSites,
     attachOverlay,
+    detachOverlay,
+    attachOverlayIcons,
     keepOverlayThroughStyleChanges,
     refreshLimesDimming,
     findFeaturesAtPoint,
@@ -34,6 +37,30 @@
     detachBattleOverlay,
     keepBattleOverlayThroughStyleChanges,
   } = useBattleOverlay()
+  const {
+    isActive: isShowingPorts,
+    attachPortOverlay,
+    detachPortOverlay,
+    keepPortOverlayThroughStyleChanges,
+  } = usePortOverlay()
+  const {
+    isActive: isShowingRoutes,
+    attachRouteOverlay,
+    detachRouteOverlay,
+    keepRouteOverlayThroughStyleChanges,
+  } = useRouteOverlay()
+  const {
+    isActive: isShowingFeatures,
+    attachFeatureOverlay,
+    detachFeatureOverlay,
+    keepFeatureOverlayThroughStyleChanges,
+  } = useMinorFeatureOverlay()
+  const {
+    isActive: isShowingCoinHoards,
+    attachCoinHoardOverlay,
+    detachCoinHoardOverlay,
+    keepCoinHoardOverlayThroughStyleChanges,
+  } = useCoinHoardOverlay()
   const {
     load: loadNotebook,
     overlay: notebookOverlay,
@@ -162,6 +189,51 @@
     }
   })
 
+  watch(isShowingSites, (isActive) => {
+    if (!map.value) return
+    if (isActive) {
+      attachOverlay(map.value)
+    } else {
+      detachOverlay(map.value)
+    }
+  })
+
+  watch(isShowingPorts, (isActive) => {
+    if (!map.value) return
+    if (isActive) {
+      attachPortOverlay(map.value)
+    } else {
+      detachPortOverlay(map.value)
+    }
+  })
+
+  watch(isShowingRoutes, (isActive) => {
+    if (!map.value) return
+    if (isActive) {
+      attachRouteOverlay(map.value)
+    } else {
+      detachRouteOverlay(map.value)
+    }
+  })
+
+  watch(isShowingFeatures, (isActive) => {
+    if (!map.value) return
+    if (isActive) {
+      attachFeatureOverlay(map.value)
+    } else {
+      detachFeatureOverlay(map.value)
+    }
+  })
+
+  watch(isShowingCoinHoards, (isActive) => {
+    if (!map.value) return
+    if (isActive) {
+      attachCoinHoardOverlay(map.value)
+    } else {
+      detachCoinHoardOverlay(map.value)
+    }
+  })
+
   onMounted(() => {
     if (!container.value) return
 
@@ -172,12 +244,24 @@
     })
 
     instance.on('load', () => {
+      // Before every overlay: the frontier and battle marks are drawn from
+      // this same icon registry, and both can be switched on while "Show
+      // sites" itself stays off.
+      attachOverlayIcons(instance)
       // Before the shared site overlay, so the frontier line sits under the
       // markers it runs past rather than over them.
       attachLimesOverlay(instance)
       keepLimesOverlayThroughStyleChanges(instance)
       attachBattleOverlay(instance)
       keepBattleOverlayThroughStyleChanges(instance)
+      attachPortOverlay(instance)
+      keepPortOverlayThroughStyleChanges(instance)
+      attachRouteOverlay(instance)
+      keepRouteOverlayThroughStyleChanges(instance)
+      attachFeatureOverlay(instance)
+      keepFeatureOverlayThroughStyleChanges(instance)
+      attachCoinHoardOverlay(instance)
+      keepCoinHoardOverlayThroughStyleChanges(instance)
       attachOverlay(instance)
       keepOverlayThroughStyleChanges(instance)
       refreshLimesDimming(instance)

@@ -8,9 +8,9 @@
     "signOut": "Firma",
     "footerLicence": "Dati e licenze",
     "menu": "Menu",
+    "menuGroupReference": "Riferimento",
     "menuGroupLegal": "Legali e dati",
-    "menuGroupOffline": "Mappa offline",
-    "menuGroupReference": "Riferimento"
+    "menuGroupOffline": "Mappa offline"
   },
   "account": {
     "menuFor": "Menu dell'account, connesso come {name}",
@@ -42,13 +42,56 @@
     "groupOverlays": "Sovrapposizioni",
     "tabulaPeutingerianaOverlay": "Rete Tabula Peutingeriana",
     "tabulaPeutingerianaOverlayHint": "Luoghi e strade dal manoscritto, alle loro vere coordinate",
+    "showSites": "Mostra siti",
+    "showSitesHint": "Siti e tracciati contribuiti dalla comunità — disattivati al primo caricamento per velocità",
+    "showBattles": "Mostra battaglie",
+    "showBattlesHint": "Antiche battaglie in tutto il mondo, prima del 500 CE",
+    "showPorts": "Mostra i porti",
+    "showPortsHint": "Porti e approdi antichi nel mondo (CC BY, de Graauw)",
+    "showRoutes": "Mostra le rotte antiche",
+    "showRoutesHint": "Strade, vie fluviali e rotte marittime di età romana (ORBIS)",
+    "showFeatures": "Mostra le testimonianze minori",
+    "showFeaturesHint": "Ponti, miniere, dighe, necropoli, forti e tumuli (AWMC)",
+    "showCoinHoards": "Mostra i ripostigli monetali",
+    "showCoinHoardsHint": "Luoghi di rinvenimento di ripostigli repubblicani (CHRR)",
     "periodScrubber": "L'impero, nel tempo",
     "periodOff": "Fuori",
-    "period60Bce": "60 BCE",
-    "period117Ce": "117 CE",
-    "period200Ce": "200 CE",
-    "showBattles": "Mostra battaglie",
-    "showBattlesHint": "Antiche battaglie in tutto il mondo, prima del 500 CE"
+    "periodYearBce": "{year} a.C.",
+    "periodYearCe": "{year} d.C.",
+    "periodApproximate": "I confini sono approssimativi, tracciati dai contributori di OpenHistoricalMap."
+  },
+  "tabulaPeutingeriana": {
+    "title": "Tabula Peutingeriana",
+    "intro": "Una copia medievale di una mappa romana del cursus publicus, la rete stradale dell'impero — mostrata qui come la sua scansione profondo-zoom, non drappeggiato su coordinate reali.",
+    "distortionNote": "La Tabula Peutingeriana è un diagramma schematico, allungato circa 18,5 volte più largo dell'alto — non è geograficamente esatto, quindi non è mostrato come uno strato sulla mappa stessa.",
+    "viewerLabel": "Osservatore del manoscritto Tabula Peutingeriana",
+    "attribution": "Manoscritto: Biblioteca Nazionale Austriaca, Vienna (Cod. 324). Digitisation e IIIF hosting:"
+  },
+  "columns": {
+    "title": "Rilievi di colonna",
+    "intro": "I rilievi di due colonne romane, esplorate in dettaglio — Colonna di Traiano da lastre studiose a specchio, la Colonna di Marco Aurelio da una scansione live profondo-zoom.",
+    "menuLabel": "Rilievi della colonna",
+    "trajan": {
+      "tabLabel": "Colonna di Traiano",
+      "intro": "Le targhe fotografiche del 1896–1900 di Conrad Cichorius, il riferimento di scena per scena standard per la colonna — rispecchiato da Wikimedia Commons, dominio pubblico.",
+      "loading": "Piastre di carico..",
+      "loadFailed": "I piatti non potevano essere caricati. Riprova tra poco.",
+      "empty": "Non sono ancora pubblicate le targhe.",
+      "gridLabel": "Piatti di rilievo della colonna di Trajan",
+      "scene": "Scena{number}",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom fuori"
+    },
+    "marcusAurelius": {
+      "tabLabel": "Colonna di Marco Aurelio",
+      "intro": "Petersen, Domaszewski & Calderini 1896 targhe, digitalizzate dalla Biblioteca Universitaria di Heidelberg e mostrate qui come una scansione live deep-zoom, pubblico dominio.",
+      "viewerLabel": "Osservatore di fondo della Colonna di Marco Aurelio piatti",
+      "volume": "Volume del piatto",
+      "tafeln-i-lxiv": "Tafeln I–LXIV",
+      "tafeln-lxv-cxxviii": "Tafeln LXV–CXXVIII",
+      "loading": "Caricamento del volume..",
+      "loadFailed": "Questo volume non poteva essere caricato dalla Heidelberg University Library. Riprova tra poco."
+    }
   },
   "legend": {
     "title": "Cosa significano i segni",
@@ -56,10 +99,21 @@
     "showKey": "Chiave",
     "referencedNote": "Gli stessi segni tratti da sottili contorni, senza disco, sono posti di riferimento dall'Atlante di Barrington e Pleiadi — non hanno contribuito qui i record.",
     "frontierTitle": "La frontiera",
-    "basemapCreditDare": "Antichità (DARE): © Johan Åhlfeldt, Gothenburg University, CC BY-SA 3.0.",
-    "basemapCreditBarrington": "Antichità (Barrington): strade, coste e luoghi dal centro di mappatura del mondo antico (ODbL 1.0) e Pleiades (CC BY 3.0).",
     "battlesTitle": "Battaglia",
-    "battleMark": "Battaglia, prima del 500 CE"
+    "battleMark": "Battaglia, prima del 500 CE",
+    "portsTitle": "Porti antichi",
+    "portMark": "Porto o approdo",
+    "routesTitle": "Rotte antiche",
+    "routeKind": {
+      "road": "Strada",
+      "coastal": "Rotta costiera o fluviale",
+      "ferry": "Traghetto"
+    },
+    "featuresTitle": "Testimonianze minori",
+    "coinHoardsTitle": "Ripostigli monetali",
+    "coinHoardMark": "Luogo di rinvenimento registrato",
+    "basemapCreditDare": "Antichità (DARE): © Johan Åhlfeldt, Gothenburg University, CC BY-SA 3.0.",
+    "basemapCreditBarrington": "Antichità (Barrington): strade, coste e luoghi dal centro di mappatura del mondo antico (ODbL 1.0) e Pleiades (CC BY 3.0)."
   },
   "siteDetail": {
     "loading": "Caricamento",
@@ -127,14 +181,14 @@
       "password": "Password",
       "passwordConfirmation": "Ripeti la password",
       "submit": "Crea account",
+      "privacyNotice": "Creazione di un account memorizza il tuo indirizzo e-mail e il nome della visualizzazione — vedere il{link}per quello che significa e per quanto tempo.",
       "doneTitle": "Controlla la casella",
       "doneDescription": "Conferma il tuo indirizzo per completare l'impostazione dell'account. Il link è buono per un giorno.",
       "errorDisplayName": "Almeno tre personaggi.",
       "errorEmail": "Questo non sembra un indirizzo email.",
       "errorPasswordMismatch": "Le due password non corrispondono.",
       "failedTitle": "Registrazione fallita",
-      "failedDefault": "Riprova tra poco.",
-      "privacyNotice": "Creazione di un account memorizza il tuo indirizzo e-mail e il nome della visualizzazione — vedere il{link}per quello che significa e per quanto tempo."
+      "failedDefault": "Riprova tra poco."
     },
     "passwordField": {
       "showPassword": "Mostra la password",
@@ -432,6 +486,34 @@
     "ariaLabel": "Mappa dei siti archeologici",
     "loading": "Spiegare la mappa"
   },
+  "battlePopup": {
+    "viewOnWikipedia": "Visualizza su Wikipedia"
+  },
+  "portPopup": {
+    "viewOnPleiades": "Vedi su Pleiades",
+    "viewOnWikipedia": "Vedi su Wikipedia"
+  },
+  "routePopup": {
+    "road": "Strada",
+    "coastal": "Rotta costiera",
+    "overseas": "Rotta marittima",
+    "upstream": "Via fluviale (a monte)",
+    "downstream": "Via fluviale (a valle)",
+    "ferry": "Traghetto"
+  },
+  "minorFeaturePopup": {
+    "kind": {
+      "bridge": "Ponte",
+      "mine_quarry": "Miniera o cava",
+      "dam": "Diga",
+      "cemetery": "Necropoli",
+      "fort": "Forte",
+      "tumulus": "Tumulo"
+    }
+  },
+  "coinHoardPopup": {
+    "hoardCount": "Nessun ripostiglio registrato qui | 1 ripostiglio registrato | {n} ripostigli registrati"
+  },
   "siteExternalLinks": {
     "title": "Anche registrato in",
     "opensNewTab": "(apre in una nuova scheda)",
@@ -664,6 +746,7 @@
   },
   "tracingDetailPage": {
     "notFound": "Nessun tracciamento con quell'identificatore.",
+    "defaultDescription": "Una caratteristica tracciata registrata in Vestigian, un atlante del mondo antico.",
     "tracedArea": "Area riservata",
     "tracedRoute": "Percorso tracciato",
     "type": "Tipo",
@@ -671,8 +754,7 @@
     "credit": "Credito",
     "defaultAttribution": "Vestigian contributori",
     "edit": "Modifica",
-    "lastRevised": "Ultimo aggiornamento",
-    "defaultDescription": "Una caratteristica tracciata registrata in Vestigian, un atlante del mondo antico."
+    "lastRevised": "Ultimo aggiornamento"
   },
   "siteEditPage": {
     "notFound": "Nessun sito registrato sotto quel nome.",
@@ -902,41 +984,5 @@
     "withBasemap": "con mappa di sfondo",
     "remove": "Rimuovi {name}",
     "removeFailed": "Non è stato possibile rimuovere quell'area. Riprova tra poco."
-  },
-  "tabulaPeutingeriana": {
-    "title": "Tabula Peutingeriana",
-    "intro": "Una copia medievale di una mappa romana del cursus publicus, la rete stradale dell'impero — mostrata qui come la sua scansione profondo-zoom, non drappeggiato su coordinate reali.",
-    "distortionNote": "La Tabula Peutingeriana è un diagramma schematico, allungato circa 18,5 volte più largo dell'alto — non è geograficamente esatto, quindi non è mostrato come uno strato sulla mappa stessa.",
-    "viewerLabel": "Osservatore del manoscritto Tabula Peutingeriana",
-    "attribution": "Manoscritto: Biblioteca Nazionale Austriaca, Vienna (Cod. 324). Digitisation e IIIF hosting:"
-  },
-  "columns": {
-    "title": "Rilievi di colonna",
-    "intro": "I rilievi di due colonne romane, esplorate in dettaglio — Colonna di Traiano da lastre studiose a specchio, la Colonna di Marco Aurelio da una scansione live profondo-zoom.",
-    "menuLabel": "Rilievi della colonna",
-    "trajan": {
-      "tabLabel": "Colonna di Traiano",
-      "intro": "Le targhe fotografiche del 1896–1900 di Conrad Cichorius, il riferimento di scena per scena standard per la colonna — rispecchiato da Wikimedia Commons, dominio pubblico.",
-      "loading": "Piastre di carico..",
-      "loadFailed": "I piatti non potevano essere caricati. Riprova tra poco.",
-      "empty": "Non sono ancora pubblicate le targhe.",
-      "gridLabel": "Piatti di rilievo della colonna di Trajan",
-      "scene": "Scena{number}",
-      "zoomIn": "Zoom in",
-      "zoomOut": "Zoom fuori"
-    },
-    "marcusAurelius": {
-      "tabLabel": "Colonna di Marco Aurelio",
-      "intro": "Petersen, Domaszewski & Calderini 1896 targhe, digitalizzate dalla Biblioteca Universitaria di Heidelberg e mostrate qui come una scansione live deep-zoom, pubblico dominio.",
-      "viewerLabel": "Osservatore di fondo della Colonna di Marco Aurelio piatti",
-      "volume": "Volume del piatto",
-      "tafeln-i-lxiv": "Tafeln I–LXIV",
-      "tafeln-lxv-cxxviii": "Tafeln LXV–CXXVIII",
-      "loading": "Caricamento del volume..",
-      "loadFailed": "Questo volume non poteva essere caricato dalla Heidelberg University Library. Riprova tra poco."
-    }
-  },
-  "battlePopup": {
-    "viewOnWikipedia": "Visualizza su Wikipedia"
   }
 }

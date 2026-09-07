@@ -62,3 +62,18 @@ export const openMap = async (page: Page): Promise<void> => {
   await waitForMapReady(page)
   await waitForTiles(page)
 }
+
+/**
+ * Turns on the vici-sourced site/tracing overlay, off by default so a first
+ * visit requests no data tiles at all. Anything that needs to see sites,
+ * tracings or the contributed limes forts on screen has to switch it on
+ * first — see `isShowingSites` in `useBasemapStyle`.
+ */
+export const showSites = async (page: Page): Promise<void> => {
+  await page.getByRole('button', { name: /^Basemap:/ }).click()
+  await page.getByRole('menuitemcheckbox', { name: 'Show sites' }).click()
+  // The overlay toggle deliberately leaves the menu open (it changes the
+  // sheet behind it rather than navigating anywhere) — closed here so a
+  // caller's next basemap interaction opens the menu instead of closing it.
+  await page.keyboard.press('Escape')
+}

@@ -23,8 +23,12 @@ const source: BasemapSource = {
   satelliteUrl: '',
   atlasTilesUrl: 'http://localhost:3000/api/tiles/antiquity',
   limesTilesUrl: 'http://localhost:3000/api/tiles/limes',
-  periodExtentTilesUrl: 'http://localhost:3000/api/tiles/antiquity-periods',
+  empireExtentTilesUrl: 'http://localhost:3000/api/tiles/antiquity-empire',
   battleTilesUrl: 'http://localhost:3000/api/tiles/antiquity-battles',
+  portTilesUrl: 'http://localhost:3000/api/tiles/antiquity-ports',
+  routeTilesUrl: 'http://localhost:3000/api/tiles/antiquity-routes',
+  featureTilesUrl: 'http://localhost:3000/api/tiles/antiquity-features',
+  coinHoardTilesUrl: 'http://localhost:3000/api/tiles/antiquity-coin-hoards',
   glyphsUrl: '/fonts/{fontstack}/{range}.pbf',
 }
 
@@ -223,6 +227,8 @@ describe('the frontier — what the Barrington sheet itself still does for it', 
       'atlas-sea',
       'atlas-inland-water',
       'atlas-urban',
+      'atlas-centuriation-blocks',
+      'atlas-centuriation-lines',
       'atlas-coast',
       'atlas-infrastructure',
       'atlas-roads-inferred',
@@ -257,7 +263,7 @@ describe('the period scrubber', () => {
     const style = periodStyle(117)
     const extentSource = style.sources['atlas-period'] as VectorSourceSpecification
     expect(extentSource.tiles).toEqual([
-      'http://localhost:3000/api/tiles/antiquity-periods/117/{z}/{x}/{y}.mvt',
+      'http://localhost:3000/api/tiles/antiquity-empire/117/{z}/{x}/{y}.mvt',
     ])
     expect(layerIds(style)).toEqual(
       expect.arrayContaining(['atlas-period-extent', 'atlas-period-extent-outline']),

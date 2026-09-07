@@ -57,7 +57,7 @@ const DARK_OVERLAY: OverlayPalette = {
  * on screen. This is what makes the viewport feel instant at continental zoom.
  */
 export const useViewportTiles = () => {
-  const { sheetTone, isFollowingLimes } = useBasemapStyle()
+  const { sheetTone, isFollowingLimes, isShowingSites } = useBasemapStyle()
 
   /**
    * Keyed on the sheet, not the theme. Over an antiquity raster the ground is
@@ -68,7 +68,33 @@ export const useViewportTiles = () => {
     sheetTone.value === 'dark' ? DARK_OVERLAY : LIGHT_OVERLAY,
   )
 
+  /**
+   * Registered once per style regardless of whether the site overlay itself
+   * is showing: the frontier and battle overlays draw their marks from this
+   * same registry, and both can be switched on while "Show sites" stays off.
+   * `hasImage` is the idempotency check — `setStyle` wipes the registry, so
+   * this runs again after every swap, but never twice for the same style.
+   */
+  const attachOverlayIcons = (map: MapLibreMap): void => {
+    if (map.hasImage(siteIconId('other'))) return
+    const colours = palette.value
+
+    registerSiteIcons(map, colours)
+    registerAtlasIcons(map, colours)
+    registerLimesIcons(map, colours)
+    registerBattleIcon(map, colours)
+    registerPortIcon(map, colours)
+    registerMinorFeatureIcons(map, colours)
+    registerCoinHoardIcon(map, colours)
+  }
+
+  /**
+   * Off by default (`isShowingSites`, `useBasemapStyle`) — this is the one
+   * overlay that used to request tiles on every first visit no matter what
+   * the reader actually wanted to look at.
+   */
   const attachOverlay = (map: MapLibreMap): void => {
+    if (!isShowingSites.value) return
     if (map.getSource(OVERLAY_SOURCE_ID)) return
     const colours = palette.value
 
@@ -80,24 +106,6 @@ export const useViewportTiles = () => {
       attribution:
         'Site data CC BY-SA, contributed to <a href="https://vici.org">Vici.org</a> and Vestigian',
     })
-
-    /**
-     * After the source and before the layers, and both halves matter.
-     *
-     * Before the layers, because MapLibre draws nothing for a symbol whose icon
-     * is not in the registry and says nothing about it either.
-     *
-     * After the source, because `addImage` and `removeImage` each fire a
-     * `styledata` event, which is the event this overlay is rebuilt on. Adding
-     * the source first is what makes the guard at the top of this function true
-     * for that re-entrant call. Registered first instead, the icons re-enter
-     * before there is a source to find, and the second view the reader switches
-     * to dies in `Maximum call stack size exceeded`.
-     */
-    registerSiteIcons(map, colours)
-    registerAtlasIcons(map, colours)
-    registerLimesIcons(map, colours)
-    registerBattleIcon(map, colours)
 
     map.addLayer({
       id: TRACING_LAYER_ID,
@@ -264,13 +272,38 @@ export const useViewportTiles = () => {
   }
 
   /**
+   * The reverse of `attachOverlay` — removes the site/tracing source and
+   * every layer that reads it, including the limes' own contributed forts
+   * (`LIMES_FORT_LAYER_ID`): those live in this same source, so turning
+   * "Show sites" off also hides them while the frontier switch stays on.
+   * Documented in `.claude/rules/map-and-tiles.md`, not silently accepted.
+   */
+  const detachOverlay = (map: MapLibreMap): void => {
+    for (const id of [
+      SITE_LABEL_LAYER_ID,
+      LIMES_FORT_LAYER_ID,
+      SITE_LAYER_ID,
+      SITE_HALO_LAYER_ID,
+      CLUSTER_COUNT_LAYER_ID,
+      CLUSTER_LAYER_ID,
+      TRACING_LAYER_ID,
+    ]) {
+      if (map.getLayer(id)) map.removeLayer(id)
+    }
+    if (map.getSource(OVERLAY_SOURCE_ID)) map.removeSource(OVERLAY_SOURCE_ID)
+  }
+
+  /**
    * Style swaps wipe every custom source and layer, so the overlay is rebuilt
    * on the styledata event that follows. Without this, switching to the modern
-   * view would silently empty the map of its content.
+   * view would silently empty the map of its content. The icon registry is
+   * rebuilt unconditionally here too — the frontier and battle overlays need
+   * it even while "Show sites" itself stays off.
    */
   const keepOverlayThroughStyleChanges = (map: MapLibreMap): void => {
     map.on('styledata', () => {
-      if (!map.getSource(OVERLAY_SOURCE_ID)) attachOverlay(map)
+      attachOverlayIcons(map)
+      if (isShowingSites.value && !map.getSource(OVERLAY_SOURCE_ID)) attachOverlay(map)
     })
   }
 
@@ -328,13 +361,22 @@ export const useViewportTiles = () => {
 
     const seen = new Set<string>()
 
+    // Filtered to layers that actually exist: `queryRenderedFeatures` throws
+    // for an unknown layer id rather than returning nothing, and every one of
+    // these lives in `OVERLAY_SOURCE_ID`, which is absent while "Show sites"
+    // is off.
+    const layers = [SITE_LAYER_ID, LIMES_FORT_LAYER_ID, CLUSTER_LAYER_ID, TRACING_LAYER_ID].filter(
+      (id) => map.getLayer(id),
+    )
+    if (layers.length === 0) return []
+
     return map
       .queryRenderedFeatures(box, {
         // The frontier layer has to be listed too. While the limes is showing
         // it is the only layer drawing fortifications, so leaving it out makes
         // every fort on the frontier untappable — and it is a hidden layer the
         // rest of the time, which `queryRenderedFeatures` skips on its own.
-        layers: [SITE_LAYER_ID, LIMES_FORT_LAYER_ID, CLUSTER_LAYER_ID, TRACING_LAYER_ID],
+        layers,
       })
       .filter((feature) => {
         const key = `${feature.layer.id}:${feature.id}`
@@ -345,7 +387,10 @@ export const useViewportTiles = () => {
   }
 
   return {
+    isActive: isShowingSites,
     attachOverlay,
+    detachOverlay,
+    attachOverlayIcons,
     keepOverlayThroughStyleChanges,
     refreshLimesDimming,
     findFeaturesAtPoint,

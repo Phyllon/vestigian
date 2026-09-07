@@ -12,13 +12,27 @@
     canShowPeriodExtent,
     periodYear,
     setPeriodYear,
-    periodExtentYears,
     canShowTabulaPeutingerianaOverlay,
     isShowingTabulaPeutingerianaOverlay,
     setTabulaPeutingerianaOverlayActive,
     canShowBattles,
     isShowingBattles,
     setBattlesActive,
+    canShowSites,
+    isShowingSites,
+    setSitesActive,
+    canShowPorts,
+    isShowingPorts,
+    setPortsActive,
+    canShowRoutes,
+    isShowingRoutes,
+    setRoutesActive,
+    canShowFeatures,
+    isShowingFeatures,
+    setFeaturesActive,
+    canShowCoinHoards,
+    isShowingCoinHoards,
+    setCoinHoardsActive,
   } = useBasemapStyle()
   const { t } = useI18n()
   const isOpen = ref(false)
@@ -72,27 +86,57 @@
     setBattlesActive(!isShowingBattles.value)
   }
 
+  const toggleSites = (): void => {
+    setSitesActive(!isShowingSites.value)
+  }
+
+  const togglePorts = (): void => {
+    setPortsActive(!isShowingPorts.value)
+  }
+
+  const toggleRoutes = (): void => {
+    setRoutesActive(!isShowingRoutes.value)
+  }
+
+  const toggleFeatures = (): void => {
+    setFeaturesActive(!isShowingFeatures.value)
+  }
+
+  const toggleCoinHoards = (): void => {
+    setCoinHoardsActive(!isShowingCoinHoards.value)
+  }
+
+  const { steps: periodSteps, load: loadPeriodSteps } = useEmpirePeriods()
+
   /**
    * An index domain, not the year itself — `USlider` moves its thumb by even
-   * steps, and 60 BCE to 117 CE (177 years) is not the same gap as 117 to
-   * 200 (83). Position 0 is the scrubber's own "off" state, so a fresh
-   * visitor sees nothing extra on the sheet until they actually drag it.
+   * steps, and the gaps in this series run from a single year (116 to 117)
+   * to 171 (509 to 338 BCE). Mapping the thumb to the year would compress
+   * the entire early Republic into a few pixels. Position 0 is the
+   * scrubber's own "off" state, so a fresh visitor sees nothing extra on the
+   * sheet until they actually drag it.
    */
   const periodSliderIndex = computed<number>({
     get: () => {
       if (periodYear.value === null) return 0
-      const index = periodExtentYears.findIndex((entry) => entry.year === periodYear.value)
+      const index = periodSteps.value.findIndex((step) => step.year === periodYear.value)
       return index === -1 ? 0 : index + 1
     },
     set: (index) => {
-      setPeriodYear(index <= 0 ? null : (periodExtentYears[index - 1]?.year ?? null))
+      setPeriodYear(index <= 0 ? null : (periodSteps.value[index - 1]?.year ?? null))
     },
   })
+
+  const currentPeriodStep = computed(() =>
+    periodYear.value === null
+      ? null
+      : (periodSteps.value.find((step) => step.year === periodYear.value) ?? null),
+  )
 
   const periodSliderLabel = computed<string>(() =>
     periodYear.value === null
       ? t('basemapSwitcher.periodOff')
-      : t(periodExtentYears.find((entry) => entry.year === periodYear.value)?.i18nKey ?? ''),
+      : formatPeriodYear(periodYear.value, (key, named) => t(key, named)),
   )
 
   /**
@@ -144,6 +188,14 @@
 
   const overlayToggles = computed<OverlayToggle[]>(() => [
     {
+      key: 'sites',
+      canShow: canShowSites.value,
+      isActive: isShowingSites.value,
+      label: t('basemapSwitcher.showSites'),
+      hint: t('basemapSwitcher.showSitesHint'),
+      toggle: toggleSites,
+    },
+    {
       key: 'limes',
       canShow: canFollowLimes.value,
       isActive: isFollowingLimes.value,
@@ -167,6 +219,38 @@
       hint: t('basemapSwitcher.showBattlesHint'),
       toggle: toggleBattles,
     },
+    {
+      key: 'ports',
+      canShow: canShowPorts.value,
+      isActive: isShowingPorts.value,
+      label: t('basemapSwitcher.showPorts'),
+      hint: t('basemapSwitcher.showPortsHint'),
+      toggle: togglePorts,
+    },
+    {
+      key: 'routes',
+      canShow: canShowRoutes.value,
+      isActive: isShowingRoutes.value,
+      label: t('basemapSwitcher.showRoutes'),
+      hint: t('basemapSwitcher.showRoutesHint'),
+      toggle: toggleRoutes,
+    },
+    {
+      key: 'features',
+      canShow: canShowFeatures.value,
+      isActive: isShowingFeatures.value,
+      label: t('basemapSwitcher.showFeatures'),
+      hint: t('basemapSwitcher.showFeaturesHint'),
+      toggle: toggleFeatures,
+    },
+    {
+      key: 'coin-hoards',
+      canShow: canShowCoinHoards.value,
+      isActive: isShowingCoinHoards.value,
+      label: t('basemapSwitcher.showCoinHoards'),
+      hint: t('basemapSwitcher.showCoinHoardsHint'),
+      toggle: toggleCoinHoards,
+    },
   ])
 
   const activeLabel = computed(
@@ -174,6 +258,22 @@
   )
 
   onClickOutside(root, close)
+
+  /**
+   * The scrubber's stops are fetched, not constant, so they have to arrive
+   * before the slider can be dragged — but only for a reader who actually
+   * opens the switcher on the sheet that has a scrubber. Watching both
+   * conditions rather than loading `onMounted` keeps that request off every
+   * first paint, the same restraint the extent tiles themselves already
+   * follow by staying out of the style until a period is chosen.
+   */
+  watch(
+    () => isOpen.value && canShowPeriodExtent.value,
+    (shouldLoad) => {
+      if (shouldLoad) void loadPeriodSteps()
+    },
+    { immediate: true },
+  )
 </script>
 
 <template>
@@ -268,16 +368,35 @@
               <span class="text-sm font-medium text-ink-900 dark:text-paper-100">
                 {{ t('basemapSwitcher.periodScrubber') }}
               </span>
-              <span class="text-xs text-ink-500 dark:text-paper-400">{{ periodSliderLabel }}</span>
+              <span class="font-mono text-xs text-ink-500 dark:text-paper-400">
+                {{ periodSliderLabel }}
+              </span>
             </div>
             <USlider
               ref="periodSlider"
               v-model="periodSliderIndex"
               :min="0"
-              :max="periodExtentYears.length"
+              :max="periodSteps.length"
               :step="1"
               size="sm"
+              :disabled="periodSteps.length === 0"
             />
+            <!--
+              What the source itself says ends this slice ("Trajan conquers
+              Armenia"). English only upstream and deliberately untranslated —
+              see `useEmpirePeriods`. `aria-live` because the text changes
+              under a slider the reader is already operating by keyboard.
+            -->
+            <p
+              v-if="currentPeriodStep?.endEvent"
+              class="mt-2 text-xs leading-snug text-ink-500 dark:text-paper-400"
+              aria-live="polite"
+            >
+              {{ currentPeriodStep.endEvent }}
+            </p>
+            <p class="mt-2 text-xs italic text-ink-400 dark:text-paper-500">
+              {{ t('basemapSwitcher.periodApproximate') }}
+            </p>
           </div>
 
           <!--

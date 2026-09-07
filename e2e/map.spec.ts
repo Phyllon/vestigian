@@ -1,6 +1,6 @@
 import { expect, test } from './helpers/fixtures'
 import { watchForProblems } from './helpers/console'
-import { openMap, waitForMapReady, waitForTiles } from './helpers/map'
+import { openMap, showSites, waitForMapReady, waitForTiles } from './helpers/map'
 
 /**
  * The map is the application. If this file fails, nothing else matters — and
@@ -31,7 +31,11 @@ test.describe('the map', () => {
       tileResponses.push({ status: response.status(), type, bytes: length })
     })
 
+    // Sites are off at first load (see `map.spec.ts`'s companion test in
+    // `basemap.spec.ts`), so nothing here fires until the switch is used.
     await openMap(page)
+    await showSites(page)
+    await waitForTiles(page)
 
     expect(tileResponses.length, 'the map requested no tiles at all').toBeGreaterThan(0)
 
@@ -48,6 +52,8 @@ test.describe('the map', () => {
 
   test('answers tiles from cache on a second visit', async ({ page }) => {
     await openMap(page)
+    await showSites(page)
+    await waitForTiles(page)
 
     const cacheHeaders: string[] = []
     page.on('response', (response) => {
@@ -56,8 +62,12 @@ test.describe('the map', () => {
       if (header) cacheHeaders.push(header)
     })
 
+    // The switch is not persisted (`isShowingSites`, `useBasemapStyle`) — a
+    // reload starts off again, same as any other fresh visit — so it has to
+    // be turned on a second time for the reload to request anything at all.
     await page.reload()
     await waitForMapReady(page)
+    await showSites(page)
     await waitForTiles(page)
 
     // Warmed by the first visit. A cache that never hits means the whole tile

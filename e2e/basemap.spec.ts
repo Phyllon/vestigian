@@ -1,6 +1,6 @@
 import { expect, test } from './helpers/fixtures'
 import { watchForProblems } from './helpers/console'
-import { openMap, waitForTiles } from './helpers/map'
+import { openMap, showSites, waitForTiles } from './helpers/map'
 
 /**
  * The antiquity views and the satellite view are the only raster basemaps in
@@ -116,7 +116,7 @@ test.describe('the basemap switcher', () => {
     const periodTiles: number[] = []
 
     page.on('response', (response) => {
-      if (response.url().includes('/api/tiles/antiquity-periods/')) {
+      if (response.url().includes('/api/tiles/antiquity-empire/')) {
         periodTiles.push(response.status())
       }
     })
@@ -140,6 +140,11 @@ test.describe('the basemap switcher', () => {
     await expect.poll(() => periodTiles.length, { timeout: 15_000 }).toBeGreaterThan(0)
 
     expect(periodTiles.some((status) => status === 200 || status === 204)).toBe(true)
+
+    // The first step is the founding of the Republic, and the scrubber's
+    // steps are fetched rather than hardcoded — so this also proves
+    // `/api/atlas/empire-periods` answered before the slider became usable.
+    await expect(page.getByText('509 BCE')).toBeVisible()
     expect(problems.cspViolations).toEqual([])
     expect(problems.pageErrors).toEqual([])
   })
@@ -171,6 +176,132 @@ test.describe('the basemap switcher', () => {
     expect(problems.pageErrors).toEqual([])
   })
 
+  test('ports draw over any basemap, requesting nothing until switched on', async ({ page }) => {
+    const problems = watchForProblems(page)
+    const portTiles: number[] = []
+
+    page.on('response', (response) => {
+      if (response.url().includes('/api/tiles/antiquity-ports/')) portTiles.push(response.status())
+    })
+
+    await openMap(page)
+    await waitForTiles(page)
+    expect(portTiles.length, 'a reader who never touches the switch should request nothing').toBe(0)
+
+    await page.getByRole('button', { name: /^Basemap:/ }).click()
+    await page.getByRole('menuitemcheckbox', { name: 'Show ports' }).click()
+    await expect.poll(() => portTiles.length, { timeout: 15_000 }).toBeGreaterThan(0)
+
+    expect(portTiles.some((status) => status === 200 || status === 204)).toBe(true)
+    expect(problems.cspViolations).toEqual([])
+    expect(problems.pageErrors).toEqual([])
+  })
+
+  test('ancient routes draw over any basemap, requesting nothing until switched on', async ({
+    page,
+  }) => {
+    const problems = watchForProblems(page)
+    const routeTiles: number[] = []
+
+    page.on('response', (response) => {
+      if (response.url().includes('/api/tiles/antiquity-routes/')) {
+        routeTiles.push(response.status())
+      }
+    })
+
+    await openMap(page)
+    await waitForTiles(page)
+    expect(routeTiles.length, 'a reader who never touches the switch should request nothing').toBe(
+      0,
+    )
+
+    await page.getByRole('button', { name: /^Basemap:/ }).click()
+    await page.getByRole('menuitemcheckbox', { name: 'Show ancient routes' }).click()
+    await expect.poll(() => routeTiles.length, { timeout: 15_000 }).toBeGreaterThan(0)
+
+    expect(routeTiles.some((status) => status === 200 || status === 204)).toBe(true)
+    expect(problems.cspViolations).toEqual([])
+    expect(problems.pageErrors).toEqual([])
+  })
+
+  test('minor antiquities draw over any basemap, requesting nothing until switched on', async ({
+    page,
+  }) => {
+    const problems = watchForProblems(page)
+    const featureTiles: number[] = []
+
+    page.on('response', (response) => {
+      if (response.url().includes('/api/tiles/antiquity-features/')) {
+        featureTiles.push(response.status())
+      }
+    })
+
+    await openMap(page)
+    await waitForTiles(page)
+    expect(
+      featureTiles.length,
+      'a reader who never touches the switch should request nothing',
+    ).toBe(0)
+
+    await page.getByRole('button', { name: /^Basemap:/ }).click()
+    await page.getByRole('menuitemcheckbox', { name: 'Show minor antiquities' }).click()
+    await expect.poll(() => featureTiles.length, { timeout: 15_000 }).toBeGreaterThan(0)
+
+    expect(featureTiles.some((status) => status === 200 || status === 204)).toBe(true)
+    expect(problems.cspViolations).toEqual([])
+    expect(problems.pageErrors).toEqual([])
+  })
+
+  test('coin hoards draw over any basemap, requesting nothing until switched on', async ({
+    page,
+  }) => {
+    const problems = watchForProblems(page)
+    const coinHoardTiles: number[] = []
+
+    page.on('response', (response) => {
+      if (response.url().includes('/api/tiles/antiquity-coin-hoards/')) {
+        coinHoardTiles.push(response.status())
+      }
+    })
+
+    await openMap(page)
+    await waitForTiles(page)
+    expect(
+      coinHoardTiles.length,
+      'a reader who never touches the switch should request nothing',
+    ).toBe(0)
+
+    await page.getByRole('button', { name: /^Basemap:/ }).click()
+    await page.getByRole('menuitemcheckbox', { name: 'Show coin hoards' }).click()
+    await expect.poll(() => coinHoardTiles.length, { timeout: 15_000 }).toBeGreaterThan(0)
+
+    expect(coinHoardTiles.some((status) => status === 200 || status === 204)).toBe(true)
+    expect(problems.cspViolations).toEqual([])
+    expect(problems.pageErrors).toEqual([])
+  })
+
+  test('sites draw over any basemap, requesting nothing until switched on', async ({ page }) => {
+    const problems = watchForProblems(page)
+    const siteTiles: number[] = []
+
+    page.on('response', (response) => {
+      // `/api/tiles/{z}/{x}/{y}.mvt` — the plain form every other tile route
+      // (antiquity, limes, battles, periods) nests a name under, so this is
+      // matched by its shape rather than mistaken for one of those instead.
+      if (/\/api\/tiles\/\d+\/\d+\/\d+\.mvt/.test(response.url())) siteTiles.push(response.status())
+    })
+
+    await openMap(page)
+    expect(siteTiles.length, 'a reader who never touches the switch should request nothing').toBe(0)
+
+    await showSites(page)
+    await expect.poll(() => siteTiles.length, { timeout: 15_000 }).toBeGreaterThan(0)
+
+    expect(siteTiles.some((status) => status === 200 || status === 204)).toBe(true)
+    expect(problems.cspViolations).toEqual([])
+    expect(problems.pageErrors).toEqual([])
+  })
+
   test('keeps the site overlay across a style swap', async ({ page }) => {
     const tileRequests: string[] = []
     page.on('request', (request) => {
@@ -178,6 +309,8 @@ test.describe('the basemap switcher', () => {
     })
 
     await openMap(page)
+    await showSites(page)
+    await waitForTiles(page)
     const beforeSwap = tileRequests.length
     expect(beforeSwap, 'the overlay never loaded in the first place').toBeGreaterThan(0)
 

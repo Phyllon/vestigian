@@ -13,7 +13,6 @@ import type {
   BasemapSource,
   BasemapView,
   LimesSegmentKind,
-  PeriodExtentYear,
 } from '#shared/types'
 
 let protocolRegistered = false
@@ -124,6 +123,19 @@ const ATLAS_ATTRIBUTION =
  */
 const LIMES_ATTRIBUTION = `${ATLAS_ATTRIBUTION}. Frontier derived from AWMC's extent of the empire at 200 CE`
 
+/**
+ * The period scrubber's own source, credited separately because it is the one
+ * layer on this sheet that is neither AWMC's nor Pleiades'.
+ *
+ * CC0 obliges nobody to credit anything. OHM asks anyway ("we greatly
+ * appreciate any credit"), the data is contributor-drawn rather than
+ * institutional, and a reader deciding how far to trust a frontier line is
+ * owed the knowledge that this one came from a volunteer project — so it is
+ * credited on the same terms as the sources that do require it.
+ */
+const EMPIRE_EXTENT_ATTRIBUTION =
+  'Extent over time © <a href="https://www.openhistoricalmap.org" target="_blank" rel="noopener">OpenHistoricalMap</a> contributors (CC0 1.0)'
+
 /** Neither antiquity view is a recolouring of the modern vector source. */
 export type AntiquityView = Extract<BasemapView, 'antiquity-dare' | 'antiquity-awmc'>
 
@@ -197,7 +209,7 @@ interface StyleRequest {
   /** The empire's extent at this date is drawn under the sheet's own
    *  linework. `null`/`undefined` means the scrubber is at its default
    *  "off" position. Only the Barrington sheet reads this. */
-  periodYear?: PeriodExtentYear | null
+  periodYear?: number | null
 }
 
 const buildVectorSource = (source: BasemapSource) =>
@@ -635,7 +647,7 @@ interface AtlasStyleOptions {
   /** `null` is the scrubber's default "off" position — no extent source is
    *  even added to the style, so a reader who never touches it requests
    *  nothing from `/api/tiles/antiquity-periods`. */
-  periodYear: PeriodExtentYear | null
+  periodYear: number | null
 }
 
 const buildAtlasStyle = (
@@ -657,9 +669,10 @@ const buildAtlasStyle = (
       : {
           'atlas-period': {
             type: 'vector' as const,
-            tiles: [`${source.periodExtentTilesUrl}/${options.periodYear}/{z}/{x}/{y}.mvt`],
+            tiles: [`${source.empireExtentTilesUrl}/${options.periodYear}/{z}/{x}/{y}.mvt`],
             minzoom: 0,
             maxzoom: 12,
+            attribution: EMPIRE_EXTENT_ATTRIBUTION,
           },
         }),
     /**
@@ -746,9 +759,37 @@ const buildAtlasStyle = (
       type: 'fill',
       source: 'atlas',
       'source-layer': 'areas',
+      filter: ['==', ['get', 'kind'], 'urban'],
       paint: {
         'fill-color': ATLAS_COLOURS.urban,
         'fill-opacity': options.limes ? 0.85 * LIMES_RECESSION : 0.85,
+      },
+    },
+    /**
+     * Centuriation blocks — a much fainter fill than urban areas, and its
+     * own outline: these are field grids, not settlements, and the fill
+     * above only reads as a city because `atlas-urban` was, until this
+     * layer's own `kind` filter was added, drawing every polygon in the
+     * `areas` layer regardless of what it actually was.
+     */
+    {
+      id: 'atlas-centuriation-blocks',
+      type: 'fill',
+      source: 'atlas',
+      'source-layer': 'areas',
+      filter: ['==', ['get', 'kind'], 'centuriation'],
+      paint: { 'fill-color': ATLAS_COLOURS.infrastructure, 'fill-opacity': 0.06 },
+    },
+    {
+      id: 'atlas-centuriation-lines',
+      type: 'line',
+      source: 'atlas',
+      'source-layer': 'lines',
+      filter: ['==', ['get', 'kind'], 'centuriation'],
+      paint: {
+        'line-color': ATLAS_COLOURS.infrastructure,
+        'line-opacity': 0.5,
+        'line-width': ['interpolate', ['linear'], ['zoom'], 7, 0.3, 14, 0.8],
       },
     },
     {
@@ -767,7 +808,11 @@ const buildAtlasStyle = (
       type: 'line',
       source: 'atlas',
       'source-layer': 'lines',
-      filter: ['in', ['get', 'kind'], ['literal', ['aqueduct', 'canal', 'wall']]],
+      filter: [
+        'in',
+        ['get', 'kind'],
+        ['literal', ['aqueduct', 'canal', 'wall', 'causeway', 'dike_levee']],
+      ],
       paint: {
         'line-color': ATLAS_COLOURS.infrastructure,
         'line-opacity': 0.75,
@@ -923,20 +968,14 @@ export const BASEMAP_GROUP_LABELS: Record<BasemapGroup, string> = {
 }
 
 /**
- * The scrubber's three stops, in chronological order — an index domain, not
- * a value-mapped one. 60 BCE to 117 CE is 177 years; 117 to 200 is 83: a
- * slider whose position tracked the year itself would draw the gaps as
- * though they were even, which they are not. `i18nKey` rather than a plain
- * label: BCE/CE era notation is not the same string in every locale this
- * app ships (French `av./apr. J.-C.`, German `v./n. Chr.`), unlike the
- * basemap view names above, which are proper nouns and stay English in
- * every locale on purpose.
+ * The scrubber's stops are no longer a constant — there are 51 of them, they
+ * come from the imported series, and they change when OpenHistoricalMap's
+ * contributors refine a boundary. `useEmpirePeriods()` fetches them; the
+ * index-domain reasoning that governed the old three-date constant still
+ * holds and now matters far more, since the gaps run from one year (116→117)
+ * to 171 (-509→-338). A slider tracking the year itself would give the
+ * Republic's first two centuries a single pixel.
  */
-export const PERIOD_EXTENT_YEARS: { year: PeriodExtentYear; i18nKey: string }[] = [
-  { year: -60, i18nKey: 'basemapSwitcher.period60Bce' },
-  { year: 117, i18nKey: 'basemapSwitcher.period117Ce' },
-  { year: 200, i18nKey: 'basemapSwitcher.period200Ce' },
-]
 
 /**
  * Switching a MapLibre style replaces every source and layer, which would take
@@ -975,8 +1014,12 @@ export const useBasemapStyle = () => {
     satelliteUrl: config.public.basemap.satelliteUrl,
     atlasTilesUrl: absolute(config.public.basemap.atlasTilesUrl),
     limesTilesUrl: absolute(config.public.basemap.limesTilesUrl),
-    periodExtentTilesUrl: absolute(config.public.basemap.periodExtentTilesUrl),
+    empireExtentTilesUrl: absolute(config.public.basemap.empireExtentTilesUrl),
     battleTilesUrl: absolute(config.public.basemap.battleTilesUrl),
+    portTilesUrl: absolute(config.public.basemap.portTilesUrl),
+    routeTilesUrl: absolute(config.public.basemap.routeTilesUrl),
+    featureTilesUrl: absolute(config.public.basemap.featureTilesUrl),
+    coinHoardTilesUrl: absolute(config.public.basemap.coinHoardTilesUrl),
     glyphsUrl: config.public.basemap.glyphsUrl,
   }))
 
@@ -1013,7 +1056,7 @@ export const useBasemapStyle = () => {
    * shape (always true today) so `BasemapSwitcher` doesn't need to know
    * that reasoning either. Not persisted, same reasoning as `isLimesActive`.
    */
-  const periodYear = useState<PeriodExtentYear | null>('atlas-period-year', () => null)
+  const periodYear = useState<number | null>('atlas-period-year', () => null)
 
   const canShowPeriodExtent = computed(() => view.value === 'antiquity-awmc')
 
@@ -1064,6 +1107,80 @@ export const useBasemapStyle = () => {
     isBattlesActive.value = next
   }
 
+  /**
+   * Off by default: the vici-sourced site/tracing overlay is the one layer
+   * that was still requesting tiles on every first visit regardless of what
+   * the reader actually wanted to look at. `canShowSites` mirrors
+   * `canFollowLimes`'s shape (always true) for the same reason. Not
+   * persisted, same reasoning as `isLimesActive` — a shared link should not
+   * silently carry a previous visitor's choice to hide the atlas's own data.
+   */
+  const isSitesActive = useState<boolean>('sites-active', () => false)
+
+  const canShowSites = computed(() => true)
+
+  const isShowingSites = computed(() => isSitesActive.value)
+
+  const setSitesActive = (next: boolean): void => {
+    isSitesActive.value = next
+  }
+
+  /**
+   * An overlay on any basemap, like the frontier and battles above — a
+   * port's location is a fact about the world, not a reading of one
+   * particular sheet. `canShowPorts` mirrors `canShowBattles`'s shape
+   * (always true) for the same reason. Not persisted, same reasoning as
+   * `isLimesActive`.
+   */
+  const isPortsActive = useState<boolean>('ports-active', () => false)
+
+  const canShowPorts = computed(() => true)
+
+  const isShowingPorts = computed(() => isPortsActive.value)
+
+  const setPortsActive = (next: boolean): void => {
+    isPortsActive.value = next
+  }
+
+  /**
+   * Same shape again, for the ORBIS route network.
+   */
+  const isRoutesActive = useState<boolean>('routes-active', () => false)
+
+  const canShowRoutes = computed(() => true)
+
+  const isShowingRoutes = computed(() => isRoutesActive.value)
+
+  const setRoutesActive = (next: boolean): void => {
+    isRoutesActive.value = next
+  }
+
+  /**
+   * Same shape again, for AWMC's minor point features.
+   */
+  const isFeaturesActive = useState<boolean>('features-active', () => false)
+
+  const canShowFeatures = computed(() => true)
+
+  const isShowingFeatures = computed(() => isFeaturesActive.value)
+
+  const setFeaturesActive = (next: boolean): void => {
+    isFeaturesActive.value = next
+  }
+
+  /**
+   * Same shape again, for CHRR coin-hoard findspots.
+   */
+  const isCoinHoardsActive = useState<boolean>('coin-hoards-active', () => false)
+
+  const canShowCoinHoards = computed(() => true)
+
+  const isShowingCoinHoards = computed(() => isCoinHoardsActive.value)
+
+  const setCoinHoardsActive = (next: boolean): void => {
+    isCoinHoardsActive.value = next
+  }
+
   const currentStyle = computed(() =>
     buildBasemapStyle({
       view: view.value,
@@ -1082,7 +1199,7 @@ export const useBasemapStyle = () => {
     isLimesActive.value = next
   }
 
-  const setPeriodYear = (next: PeriodExtentYear | null): void => {
+  const setPeriodYear = (next: number | null): void => {
     periodYear.value = next
   }
 
@@ -1100,7 +1217,6 @@ export const useBasemapStyle = () => {
     canShowPeriodExtent,
     periodYear,
     setPeriodYear,
-    periodExtentYears: PERIOD_EXTENT_YEARS,
     canShowTabulaPeutingerianaOverlay,
     isShowingTabulaPeutingerianaOverlay,
     setTabulaPeutingerianaOverlayActive,
@@ -1108,5 +1224,24 @@ export const useBasemapStyle = () => {
     isShowingBattles,
     setBattlesActive,
     battleTilesUrl: computed(() => source.value.battleTilesUrl),
+    canShowSites,
+    isShowingSites,
+    setSitesActive,
+    canShowPorts,
+    isShowingPorts,
+    setPortsActive,
+    portTilesUrl: computed(() => source.value.portTilesUrl),
+    canShowRoutes,
+    isShowingRoutes,
+    setRoutesActive,
+    routeTilesUrl: computed(() => source.value.routeTilesUrl),
+    canShowFeatures,
+    isShowingFeatures,
+    setFeaturesActive,
+    featureTilesUrl: computed(() => source.value.featureTilesUrl),
+    canShowCoinHoards,
+    isShowingCoinHoards,
+    setCoinHoardsActive,
+    coinHoardTilesUrl: computed(() => source.value.coinHoardTilesUrl),
   }
 }

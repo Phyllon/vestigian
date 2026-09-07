@@ -134,6 +134,27 @@
       "when": 1788730013051,
       "tag": "0018_far_night_nurse",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1788770792505,
+      "tag": "0019_rainy_lady_deathstrike",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1788774206103,
+      "tag": "0020_condemned_zemo",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1788788484502,
+      "tag": "0021_mushy_scarlet_witch",
+      "breakpoints": true
     }
   ]
 }

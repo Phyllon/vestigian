@@ -42,13 +42,23 @@
     "groupOverlays": "Overlays",
     "tabulaPeutingerianaOverlay": "Tabula Peutingeriana network",
     "tabulaPeutingerianaOverlayHint": "Places and roads from the manuscript, at their real coordinates",
+    "showSites": "Show sites",
+    "showSitesHint": "Contributed sites and tracings — off at first load for speed",
     "showBattles": "Show battles",
     "showBattlesHint": "Ancient battles worldwide, before 500 CE",
+    "showPorts": "Show ports",
+    "showPortsHint": "Ancient ports and harbours worldwide (CC BY, de Graauw)",
+    "showRoutes": "Show ancient routes",
+    "showRoutesHint": "Roman-era road, river and sea routes (ORBIS)",
+    "showFeatures": "Show minor antiquities",
+    "showFeaturesHint": "Bridges, mines, dams, cemeteries, forts and burial mounds (AWMC)",
+    "showCoinHoards": "Show coin hoards",
+    "showCoinHoardsHint": "Roman Republic coin-hoard findspots (CHRR)",
     "periodScrubber": "The empire, over time",
     "periodOff": "Off",
-    "period60Bce": "60 BCE",
-    "period117Ce": "117 CE",
-    "period200Ce": "200 CE"
+    "periodYearBce": "{year} BCE",
+    "periodYearCe": "{year} CE",
+    "periodApproximate": "Frontiers are approximate, drawn by OpenHistoricalMap contributors."
   },
   "tabulaPeutingeriana": {
     "title": "Tabula Peutingeriana",
@@ -91,6 +101,17 @@
     "frontierTitle": "The frontier",
     "battlesTitle": "Battles",
     "battleMark": "Battle, before 500 CE",
+    "portsTitle": "Ancient ports",
+    "portMark": "Port or harbour",
+    "routesTitle": "Ancient routes",
+    "routeKind": {
+      "road": "Road",
+      "coastal": "Coastal or river route",
+      "ferry": "Ferry crossing"
+    },
+    "featuresTitle": "Minor antiquities",
+    "coinHoardsTitle": "Coin hoards",
+    "coinHoardMark": "Recorded coin-hoard findspot",
     "basemapCreditDare": "Antiquity (DARE): © Johan Åhlfeldt, Gothenburg University, CC BY-SA 3.0.",
     "basemapCreditBarrington": "Antiquity (Barrington): roads, coastline and places from the Ancient World Mapping Center (ODbL 1.0) and Pleiades (CC BY 3.0)."
   },
@@ -467,6 +488,31 @@
   },
   "battlePopup": {
     "viewOnWikipedia": "View on Wikipedia"
+  },
+  "portPopup": {
+    "viewOnPleiades": "View on Pleiades",
+    "viewOnWikipedia": "View on Wikipedia"
+  },
+  "routePopup": {
+    "road": "Road",
+    "coastal": "Coastal route",
+    "overseas": "Overseas route",
+    "upstream": "River route (upstream)",
+    "downstream": "River route (downstream)",
+    "ferry": "Ferry crossing"
+  },
+  "minorFeaturePopup": {
+    "kind": {
+      "bridge": "Bridge",
+      "mine_quarry": "Mine or quarry",
+      "dam": "Dam",
+      "cemetery": "Cemetery",
+      "fort": "Fort",
+      "tumulus": "Burial mound"
+    }
+  },
+  "coinHoardPopup": {
+    "hoardCount": "No hoards recorded here | 1 recorded hoard | {n} recorded hoards"
   },
   "siteExternalLinks": {
     "title": "Also recorded in",

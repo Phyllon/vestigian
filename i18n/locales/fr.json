@@ -8,9 +8,9 @@
     "signOut": "Déconnexion",
     "footerLicence": "Données et licences",
     "menu": "Menu",
+    "menuGroupReference": "Référence",
     "menuGroupLegal": "Données juridiques",
-    "menuGroupOffline": "Cartes hors ligne",
-    "menuGroupReference": "Référence"
+    "menuGroupOffline": "Cartes hors ligne"
   },
   "account": {
     "menuFor": "Menu du compte, connecté en tant que {name}",
@@ -42,13 +42,56 @@
     "groupOverlays": "Couvertures",
     "tabulaPeutingerianaOverlay": "Réseau Tabula Peutingeriana",
     "tabulaPeutingerianaOverlayHint": "Lieux et routes du manuscrit, à leurs coordonnées réelles",
+    "showSites": "Afficher les sites",
+    "showSitesHint": "Sites et tracés contribués par la communauté — désactivés au premier chargement pour la vitesse",
+    "showBattles": "Afficher les batailles",
+    "showBattlesHint": "Anciens combats dans le monde, avant 500 CE",
+    "showPorts": "Afficher les ports",
+    "showPortsHint": "Ports et mouillages antiques dans le monde (CC BY, de Graauw)",
+    "showRoutes": "Afficher les routes antiques",
+    "showRoutesHint": "Routes terrestres, fluviales et maritimes de l'époque romaine (ORBIS)",
+    "showFeatures": "Afficher les petits vestiges",
+    "showFeaturesHint": "Ponts, mines, barrages, nécropoles, forts et tumulus (AWMC)",
+    "showCoinHoards": "Afficher les trésors monétaires",
+    "showCoinHoardsHint": "Lieux de découverte de trésors monétaires républicains (CHRR)",
     "periodScrubber": "L'empire, avec le temps",
     "periodOff": "Arrêt",
-    "period60Bce": "60 BCE",
-    "period117Ce": "117 CE",
-    "period200Ce": "200 CE",
-    "showBattles": "Afficher les batailles",
-    "showBattlesHint": "Anciens combats dans le monde, avant 500 CE"
+    "periodYearBce": "{year} av. J.-C.",
+    "periodYearCe": "{year} apr. J.-C.",
+    "periodApproximate": "Les frontières sont approximatives, tracées par les contributeurs d'OpenHistoricalMap."
+  },
+  "tabulaPeutingeriana": {
+    "title": "Tabula Peuingeriana",
+    "intro": "Une copie médiévale d'une carte romaine du cursus publicus, le réseau routier de l'empire — montré ici comme son propre scan de zoom profond, non drapé sur de véritables coordonnées.",
+    "distortionNote": "La Tabula Peutingeriana est un diagramme schématique, étiré environ 18,5 fois plus large que grand — il n'est pas géographiquement précis, donc il n'est pas montré comme une couche sur la carte elle-même.",
+    "viewerLabel": "Vueur en profondeur du manuscrit Tabula Peutingeriana",
+    "attribution": "Manuscrit: Bibliothèque nationale autrichienne, Vienne (Cod. 324). Numérisation et hébergement IIIF:"
+  },
+  "columns": {
+    "title": "Allégements de colonnes",
+    "intro": "Les reliefs de deux colonnes romaines, explorés en détail — la colonne de Trajan à partir de plaques savantes miroirs, la colonne de Marc Aurèle à partir d'un scan vivant de zoom profond.",
+    "menuLabel": "Allégements de colonnes",
+    "trajan": {
+      "tabLabel": "La colonne de Trajan",
+      "intro": "Les plaques photographiques de Conrad Cichorius de 1896 à 1900, la référence scénographique standard pour la colonne, sont reproduites de Wikimedia Commons, domaine public.",
+      "loading": "Chargement des plaques..",
+      "loadFailed": "Les plaques ne pouvaient pas être chargées. Essaie encore.",
+      "empty": "Aucune plaque n'est encore publiée.",
+      "gridLabel": "Plaques de relief de la colonne de Trajan",
+      "scene": "Scène{number}",
+      "zoomIn": "Zoom dans",
+      "zoomOut": "Zoom arrière"
+    },
+    "marcusAurelius": {
+      "tabLabel": "Colonne de Marc Aurèle",
+      "intro": "Petersen, Domaszewski & Calderini de 1896, numérisé par la bibliothèque de l'Université de Heidelberg et présenté ici comme un scan en direct, domaine public.",
+      "viewerLabel": "Vueur en profondeur de la colonne des plaques de Marc Aurèle",
+      "volume": "Volume de la plaque",
+      "tafeln-i-lxiv": "Tafeln I–LXIV",
+      "tafeln-lxv-cxxviii": "Tafeln LXV-CXXVIII",
+      "loading": "Chargement du volume de la plaque..",
+      "loadFailed": "Ce volume n'a pas pu être chargé depuis la bibliothèque universitaire de Heidelberg. Essaie encore."
+    }
   },
   "legend": {
     "title": "Ce que signifient les marques",
@@ -56,10 +99,21 @@
     "showKey": "Clé",
     "referencedNote": "Les mêmes marques dessinées que les contours fins, sans disque, sont des endroits référencés de l'Atlas de Barrington et des Pléiades — pas les enregistrements fournis ici.",
     "frontierTitle": "La frontière",
-    "basemapCreditDare": "Antiquité : © Johan Åhlfeldt, Université de Göteborg, CC BY-SA 3.0.",
-    "basemapCreditBarrington": "Antiquité (Barrington) : routes, côtes et lieux du Centre de cartographie du monde antique (ODbL 1.0) et des Pléiades (CC BY 3.0).",
     "battlesTitle": "Batailles",
-    "battleMark": "Bataille, avant 500 CE"
+    "battleMark": "Bataille, avant 500 CE",
+    "portsTitle": "Ports antiques",
+    "portMark": "Port ou mouillage",
+    "routesTitle": "Routes antiques",
+    "routeKind": {
+      "road": "Route",
+      "coastal": "Route côtière ou fluviale",
+      "ferry": "Bac"
+    },
+    "featuresTitle": "Petits vestiges",
+    "coinHoardsTitle": "Trésors monétaires",
+    "coinHoardMark": "Lieu de découverte répertorié",
+    "basemapCreditDare": "Antiquité : © Johan Åhlfeldt, Université de Göteborg, CC BY-SA 3.0.",
+    "basemapCreditBarrington": "Antiquité (Barrington) : routes, côtes et lieux du Centre de cartographie du monde antique (ODbL 1.0) et des Pléiades (CC BY 3.0)."
   },
   "siteDetail": {
     "loading": "Chargement",
@@ -127,14 +181,14 @@
       "password": "Mot de passe",
       "passwordConfirmation": "Répéter le mot de passe",
       "submit": "Créer un compte",
+      "privacyNotice": "Créer un compte stocke votre adresse e-mail et afficher le nom — voir la{link}pour ce que cela signifie et pour combien de temps.",
       "doneTitle": "Vérifiez votre boîte de réception",
       "doneDescription": "Confirmez votre adresse pour terminer la configuration du compte. Le lien est bon pour une journée.",
       "errorDisplayName": "Au moins trois caractères.",
       "errorEmail": "Cela ne ressemble pas à une adresse email.",
       "errorPasswordMismatch": "Les deux mots de passe ne correspondent pas.",
       "failedTitle": "L'enregistrement a échoué",
-      "failedDefault": "Essaie encore.",
-      "privacyNotice": "Créer un compte stocke votre adresse e-mail et afficher le nom — voir la{link}pour ce que cela signifie et pour combien de temps."
+      "failedDefault": "Essaie encore."
     },
     "passwordField": {
       "showPassword": "Afficher le mot de passe",
@@ -432,6 +486,34 @@
     "ariaLabel": "Carte des sites archéologiques",
     "loading": "Déplier la carte"
   },
+  "battlePopup": {
+    "viewOnWikipedia": "Affichage sur Wikipédia"
+  },
+  "portPopup": {
+    "viewOnPleiades": "Voir sur Pleiades",
+    "viewOnWikipedia": "Voir sur Wikipédia"
+  },
+  "routePopup": {
+    "road": "Route",
+    "coastal": "Route côtière",
+    "overseas": "Route maritime",
+    "upstream": "Route fluviale (amont)",
+    "downstream": "Route fluviale (aval)",
+    "ferry": "Bac"
+  },
+  "minorFeaturePopup": {
+    "kind": {
+      "bridge": "Pont",
+      "mine_quarry": "Mine ou carrière",
+      "dam": "Barrage",
+      "cemetery": "Nécropole",
+      "fort": "Fort",
+      "tumulus": "Tumulus"
+    }
+  },
+  "coinHoardPopup": {
+    "hoardCount": "Aucun trésor répertorié ici | 1 trésor répertorié | {n} trésors répertoriés"
+  },
   "siteExternalLinks": {
     "title": "Également enregistré en",
     "opensNewTab": "(ouvre dans un nouvel onglet)",
@@ -664,6 +746,7 @@
   },
   "tracingDetailPage": {
     "notFound": "Pas de trace avec cet identifiant.",
+    "defaultDescription": "Une caractéristique tracée enregistrée en Vestigian, un atlas du monde antique.",
     "tracedArea": "Zone traquée",
     "tracedRoute": "Voie traquée",
     "type": "Type",
@@ -671,8 +754,7 @@
     "credit": "Crédit",
     "defaultAttribution": "Les contributeurs de Vestigian",
     "edit": "Modifier",
-    "lastRevised": "Dernière révision",
-    "defaultDescription": "Une caractéristique tracée enregistrée en Vestigian, un atlas du monde antique."
+    "lastRevised": "Dernière révision"
   },
   "siteEditPage": {
     "notFound": "Aucun site enregistré sous ce nom.",
@@ -902,41 +984,5 @@
     "withBasemap": "avec fond de carte",
     "remove": "Retirer {name}",
     "removeFailed": "Cette zone n'a pas pu être retirée. Réessayez dans un instant."
-  },
-  "tabulaPeutingeriana": {
-    "title": "Tabula Peuingeriana",
-    "intro": "Une copie médiévale d'une carte romaine du cursus publicus, le réseau routier de l'empire — montré ici comme son propre scan de zoom profond, non drapé sur de véritables coordonnées.",
-    "distortionNote": "La Tabula Peutingeriana est un diagramme schématique, étiré environ 18,5 fois plus large que grand — il n'est pas géographiquement précis, donc il n'est pas montré comme une couche sur la carte elle-même.",
-    "viewerLabel": "Vueur en profondeur du manuscrit Tabula Peutingeriana",
-    "attribution": "Manuscrit: Bibliothèque nationale autrichienne, Vienne (Cod. 324). Numérisation et hébergement IIIF:"
-  },
-  "columns": {
-    "title": "Allégements de colonnes",
-    "intro": "Les reliefs de deux colonnes romaines, explorés en détail — la colonne de Trajan à partir de plaques savantes miroirs, la colonne de Marc Aurèle à partir d'un scan vivant de zoom profond.",
-    "menuLabel": "Allégements de colonnes",
-    "trajan": {
-      "tabLabel": "La colonne de Trajan",
-      "intro": "Les plaques photographiques de Conrad Cichorius de 1896 à 1900, la référence scénographique standard pour la colonne, sont reproduites de Wikimedia Commons, domaine public.",
-      "loading": "Chargement des plaques..",
-      "loadFailed": "Les plaques ne pouvaient pas être chargées. Essaie encore.",
-      "empty": "Aucune plaque n'est encore publiée.",
-      "gridLabel": "Plaques de relief de la colonne de Trajan",
-      "scene": "Scène{number}",
-      "zoomIn": "Zoom dans",
-      "zoomOut": "Zoom arrière"
-    },
-    "marcusAurelius": {
-      "tabLabel": "Colonne de Marc Aurèle",
-      "intro": "Petersen, Domaszewski & Calderini de 1896, numérisé par la bibliothèque de l'Université de Heidelberg et présenté ici comme un scan en direct, domaine public.",
-      "viewerLabel": "Vueur en profondeur de la colonne des plaques de Marc Aurèle",
-      "volume": "Volume de la plaque",
-      "tafeln-i-lxiv": "Tafeln I–LXIV",
-      "tafeln-lxv-cxxviii": "Tafeln LXV-CXXVIII",
-      "loading": "Chargement du volume de la plaque..",
-      "loadFailed": "Ce volume n'a pas pu être chargé depuis la bibliothèque universitaire de Heidelberg. Essaie encore."
-    }
-  },
-  "battlePopup": {
-    "viewOnWikipedia": "Affichage sur Wikipédia"
   }
 }

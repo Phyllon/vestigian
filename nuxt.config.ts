@@ -447,13 +447,38 @@ export default defineNuxtConfig({
          * (see `.claude/rules/antiquity-basemaps.md`). Same PostGIS, own
          * endpoint, same reasoning as the frontier above.
          */
-        periodExtentTilesUrl: '/api/tiles/antiquity-periods',
+        empireExtentTilesUrl: '/api/tiles/antiquity-empire',
         /**
          * Ancient battles worldwide, before year 500 — an overlay on any
          * basemap, like the frontier, not a reading of one antiquity sheet.
          * Same PostGIS, own endpoint, same reasoning as the frontier above.
          */
         battleTilesUrl: '/api/tiles/antiquity-battles',
+        /**
+         * Ancient ports and harbours worldwide — an overlay on any basemap,
+         * like the frontier and battles above. Same PostGIS, own endpoint,
+         * same reasoning.
+         */
+        portTilesUrl: '/api/tiles/antiquity-ports',
+        /**
+         * The ORBIS route network — an overlay on any basemap, like the
+         * frontier and battles above. Same PostGIS, own endpoint, same
+         * reasoning.
+         */
+        routeTilesUrl: '/api/tiles/antiquity-routes',
+        /**
+         * AWMC's minor point features (bridges, mines/quarries, dams,
+         * cemeteries, forts, tumuli) — an overlay on any basemap, like the
+         * frontier and battles above. Same PostGIS, own endpoint, same
+         * reasoning.
+         */
+        featureTilesUrl: '/api/tiles/antiquity-features',
+        /**
+         * CHRR coin-hoard findspots — an overlay on any basemap, like the
+         * frontier and battles above. Same PostGIS, own endpoint, same
+         * reasoning.
+         */
+        coinHoardTilesUrl: '/api/tiles/antiquity-coin-hoards',
         /**
          * Label glyphs ship with the app rather than being fetched from a font
          * server, for the same reason `@fontsource` is used for the interface:

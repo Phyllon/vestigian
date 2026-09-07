@@ -9,6 +9,59 @@ paths:
   - 'app/pages/offline.vue'
 ---
 
+## The vici-sourced site/tracing overlay is off by default
+
+`isShowingSites` (`useBasemapStyle.ts`) gates `OVERLAY_SOURCE_ID`
+(`useViewportTiles.ts`) — `false` on every fresh visit, not persisted, same
+as `isLimesActive`/`isBattlesActive`. Toggled from the "Overlays" group in
+`BasemapSwitcher.vue` ("Show sites"), same shape as the frontier and battle
+switches.
+
+**Why:** this was the one overlay with no on/off state — it requested tiles
+on every first visit regardless of what the reader actually wanted to look
+at, unlike the limes, battles, Tabula Peutingeriana overlay and period
+scrubber, which were all already gated.
+
+**What was actually measured, not guessed:** on a local, unthrottled
+connection, turning "Show sites" off removes the site/tracing tile requests
+entirely until the switch is used — 0 requests / 0 bytes vs. 12 requests /
+~14.5 KB for the same default camera view with it on. It does **not** move
+`mapReadyMs` (when MapLibre fires `load` and the "Unfolding the map"
+placeholder is removed): that milestone was never blocked by the overlay's
+tiles even before this change — `attachOverlay` requests them
+asynchronously, after `load`, the same way every other overlay's tiles are
+requested. The real saving is fewer concurrent requests and less data
+during the page's busiest window, not a faster "map ready" event — reported
+this way rather than as an invented "N ms faster" claim, since the number
+that would need to move to support that claim did not move on a fast local
+connection with near-zero latency. A throttled (CDP
+`Network.emulateNetworkConditions`) measurement was attempted but the
+emulation did not visibly take effect against a localhost target in this
+environment (identical request/byte counts with the toggle on and off,
+which the unthrottled comparison already contradicts) — not reported as a
+number for that reason, rather than papering over the discrepancy.
+
+**Known coupling, not fixed here:** `LIMES_FORT_LAYER_ID` (the contributed
+fortifications drawn on the frontier) reads `OVERLAY_SOURCE_ID`'s `sites`
+source-layer, same as every other site layer. Turning "Show sites" off also
+removes those forts from the map while "Follow the limes" stays on — the
+frontier line itself and its borrowed Pleiades military-place marks (drawn
+from the separate `limes`/`atlas` sources) are unaffected, only the
+contributed forts. Splitting the fort layer into its own source was judged
+out of scope for a performance toggle; if it becomes a real complaint, that
+split is the fix, not a workaround bolted onto this gate.
+
+`findFeaturesAtPoint` filters its `queryRenderedFeatures` layer list to
+layers that currently exist (`map.getLayer(id)`) — MapLibre throws for an
+unknown layer id rather than returning nothing, and every layer it queries
+lives in `OVERLAY_SOURCE_ID`, absent while the toggle is off. Icon
+registration (`registerSiteIcons`/`registerAtlasIcons`/`registerLimesIcons`/
+`registerBattleIcon`) was pulled out of `attachOverlay` into its own
+`attachOverlayIcons`, called unconditionally on `load` and on every
+`styledata`, before any overlay's `attach*` call — the frontier and battle
+marks are drawn from that same registry and both can be switched on while
+"Show sites" itself stays off.
+
 ## How the map stays fast
 
 1. `GET /api/tiles/{z}/{x}/{y}.mvt` → validate coordinate → check Valkey → `ST_AsMVT` against a GiST index.
