@@ -131,6 +131,32 @@ manual fallback if autoheal hasn't caught up yet, and the preflight check
 above is what turns a still-wedged arbiter into a clear message instead of a
 silent hang in the meantime.
 
+**Wordmarks and domain vocabulary are frozen — the translator never sees
+them.** `FROZEN_KEYS`/`FROZEN_KEY_PREFIXES` in `translate-locales.ts` list
+keys that are skipped entirely, because the resumability rule below cannot
+tell a deliberately-English wordmark from an untranslated string: it
+re-translates anything still equal to the English source, so every run
+re-mangled the same names. Left running, it produced `Wikidonnées` for
+Wikidata, `OuvrirStreetMap` for OpenStreetMap, `Plejaden`/`Pléiades`/
+`Pleiadi` for Pleiades, `Aracide` for Arachne, `iDAI.gazetteter` for
+iDAI.gazetteer, `Tabula Peu*i*ngeriana`, and it truncated `Tafeln I–LXIV`
+to `Tafeln I`. The second category is this atlas's own vocabulary, which a
+general model reads without any archaeology in scope: `Settlement` came back
+as `Abrechnung` and `Règlement` (the financial sense both times),
+`Legionary fortress` as `Fortaleza legislativa`, `Watchtower` as `La Tour de
+Garde` (the magazine), `Findspot` as `Zoeken` ("search") and `Trova il
+posto`, and `English` as `Changements climatiques`. 75 values across the five
+catalogues were corrected by hand when this was found.
+
+A frozen key is **not** forced to English: it keeps whatever the catalogue
+already holds and falls back to English only when the key is missing, so a
+considered translation (`Wikipédia`, `Kleinkastell`) is permanent and a newly
+added wordmark is safe before anyone has translated it. The `schemes.*`
+wordmarks are listed individually rather than freezing the namespace, so
+descriptive labels beside them (`schemes.dare`, "Digital Atlas of the Roman
+Empire") stay translatable — the cost is that **a new link scheme or site
+category has to be added to the list by hand**.
+
 **The pre-commit hook keeps the five locales from drifting.** When
 `i18n/locales/en.json` is staged, `.husky/pre-commit` runs
 `scripts/i18n/translate-locales.ts` before `lint-staged` and stages whatever

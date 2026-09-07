@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { flatten, splitOnPlaceholders, unflatten } from '../translate-locales'
+import { flatten, isFrozenKey, splitOnPlaceholders, unflatten } from '../translate-locales'
 
 describe('splitOnPlaceholders', () => {
   it('splits text around a single placeholder', () => {
@@ -54,5 +54,37 @@ describe('flatten / unflatten', () => {
 
   it('handles a top-level string', () => {
     expect(flatten('hello', 'greeting')).toEqual({ greeting: 'hello' })
+  })
+})
+
+describe('isFrozenKey', () => {
+  it('freezes a wordmark, so the translator never renames the project', () => {
+    // Every one of these is a name LibreTranslate has actually mangled:
+    // Wikidonnées, OuvrirStreetMap, Plejaden, Aracide, iDAI.gazetteter.
+    expect(isFrozenKey('siteExternalLinks.schemes.wikidata')).toBe(true)
+    expect(isFrozenKey('siteExternalLinks.schemes.osmway')).toBe(true)
+    expect(isFrozenKey('enrichment.sources.pleiades')).toBe(true)
+    expect(isFrozenKey('columns.marcusAurelius.tafeln-i-lxiv')).toBe(true)
+  })
+
+  it('freezes whole vocabulary namespaces', () => {
+    // "Settlement" reads as the financial sense to a general model, and
+    // "Watchtower" as the magazine.
+    expect(isFrozenKey('categories.settlement')).toBe(true)
+    expect(isFrozenKey('limesMarks.watchtower')).toBe(true)
+    expect(isFrozenKey('enrichment.languages.en')).toBe(true)
+  })
+
+  it('leaves a descriptive label in the same namespace translatable', () => {
+    // The point of listing wordmarks individually rather than freezing
+    // `siteExternalLinks.schemes.*` wholesale: these two are sentences, and a
+    // reader is better served by them in their own language.
+    expect(isFrozenKey('siteExternalLinks.schemes.dare')).toBe(false)
+    expect(isFrozenKey('siteExternalLinks.schemes.edh')).toBe(false)
+  })
+
+  it('leaves ordinary interface strings alone', () => {
+    expect(isFrozenKey('auth.login.email')).toBe(false)
+    expect(isFrozenKey('basemapSwitcher.showPorts')).toBe(false)
   })
 })

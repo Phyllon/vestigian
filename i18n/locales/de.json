@@ -141,8 +141,8 @@
       "fr": "Französisch"
     },
     "sources": {
-      "wikidata": "Wikidaten",
-      "pleiades": "Plejaden",
+      "wikidata": "Wikidata",
+      "pleiades": "Pleiades",
       "dare": "der digitale Atlas des Römischen Reiches"
     }
   },
@@ -402,21 +402,21 @@
     "tryAgain": "Versuchen Sie es noch einmal."
   },
   "categories": {
-    "settlement": "Abrechnung",
+    "settlement": "Siedlung",
     "fortification": "Befestigung",
     "sanctuary": "Heiligtum",
-    "burial": "Bestattung",
+    "burial": "Grabstätte",
     "infrastructure": "Infrastruktur",
     "villa": "Villa",
     "production": "Produktion",
-    "findspot": "Findspot",
-    "other": "Andere"
+    "findspot": "Fundstelle",
+    "other": "Sonstiges"
   },
   "limesMarks": {
     "watchtower": "Wachturm",
-    "fortlet": "Fortlet",
-    "fort": "Fort",
-    "fortress": "Legionäre Festung",
+    "fortlet": "Kleinkastell",
+    "fort": "Kastell",
+    "fortress": "Legionslager",
     "camp": "Marschlager"
   },
   "featurePicker": {
@@ -456,7 +456,7 @@
     "length": "Länge",
     "inUse": "In Gebrauch",
     "recordedOnIt": "Aufgenommen darin",
-    "pleiades": "Plejaden",
+    "pleiades": "Pleiades",
     "alongTheLine": "Entlang der Linie, von Westen nach Osten",
     "nothingRecorded": "Auf dieser Strecke ist noch nichts aufgezeichnet.",
     "fortification": "Befestigung",
@@ -520,14 +520,14 @@
     "verifiedTitle": "Abgeglichen mit {source}, {metres} m entfernt",
     "verifiedSummary": "Mit {count} von {total} verknüpften Quellen abgeglichen",
     "schemes": {
-      "pleiades": "Plejaden",
-      "wikidata": "Wikidaten",
+      "pleiades": "Pleiades",
+      "wikidata": "Wikidata",
       "vici": "Vici.org",
       "trismegistos": "Trismegistos",
       "dare": "Digitaler Atlas des Römischen Reiches",
       "livius": "Livius.org",
       "arachne": "Arachne",
-      "mithraeum": "Das neue Mithraeum",
+      "mithraeum": "The New Mithraeum",
       "omnesviae": "OmnesViae",
       "osmway": "OpenStreetMap",
       "osmnode": "OpenStreetMap",
@@ -537,7 +537,7 @@
       "wikipedia": "Wikipedia",
       "edh": "Epigraphische Datenbank Heidelberg",
       "idai-gazetteer": "iDAI.gazetteer",
-      "historic-england": "Historisches England"
+      "historic-england": "Historic England"
     }
   },
   "siteMetaList": {

@@ -87,8 +87,8 @@
       "intro": "Petersen, las placas 1896 de Domaszewski & Calderini, digitalizadas por la Biblioteca de la Universidad de Heidelberg y mostradas aquí como un escáner de fondo vivo, dominio público.",
       "viewerLabel": "Visor profundo de la Columna de Marco Aurelio placas",
       "volume": "Volumen de placa",
-      "tafeln-i-lxiv": "Tafeln I-LXIV",
-      "tafeln-lxv-cxxviii": "Tafeln LXV-CXXVIII",
+      "tafeln-i-lxiv": "Tafeln I–LXIV",
+      "tafeln-lxv-cxxviii": "Tafeln LXV–CXXVIII",
       "loading": "Cargando el volumen de la placa..",
       "loadFailed": "Este volumen no puede ser cargado de la Biblioteca de la Universidad de Heidelberg. Inténtalo de nuevo en breve."
     }
@@ -134,7 +134,7 @@
     "matchedThrough": "Atravesado{source},{metres}m de la posición grabada",
     "languages": {
       "en": "Inglés",
-      "nl": "Dutch",
+      "nl": "Neerlandés",
       "de": "Alemán",
       "es": "Español",
       "it": "Italiano",
@@ -402,22 +402,22 @@
     "tryAgain": "Inténtalo de nuevo."
   },
   "categories": {
-    "settlement": "Asentamientos",
+    "settlement": "Asentamiento",
     "fortification": "Fortificación",
     "sanctuary": "Santuario",
-    "burial": "Entierro",
+    "burial": "Enterramiento",
     "infrastructure": "Infraestructura",
     "villa": "Villa",
     "production": "Producción",
-    "findspot": "Findspot",
-    "other": "Otros"
+    "findspot": "Lugar de hallazgo",
+    "other": "Otro"
   },
   "limesMarks": {
-    "watchtower": "Atalaya",
-    "fortlet": "Fortlet",
-    "fort": "Fort",
-    "fortress": "Fortaleza legislativa",
-    "camp": "Campo de marcha"
+    "watchtower": "Torre de vigilancia",
+    "fortlet": "Fortín",
+    "fort": "Fuerte",
+    "fortress": "Fortaleza legionaria",
+    "camp": "Campamento de marcha"
   },
   "featurePicker": {
     "recordsHere": "{count}registros aquí",
@@ -527,7 +527,7 @@
       "dare": "Atlas Digital del Imperio Romano",
       "livius": "Livius.org",
       "arachne": "Arachne",
-      "mithraeum": "El Nuevo Mitraeum",
+      "mithraeum": "The New Mithraeum",
       "omnesviae": "OmnesViae",
       "osmway": "OpenStreetMap",
       "osmnode": "OpenStreetMap",
@@ -537,7 +537,7 @@
       "wikipedia": "Wikipedia",
       "edh": "Base de Datos Epigráfica de Heidelberg",
       "idai-gazetteer": "iDAI.gazetteer",
-      "historic-england": "Histórica Inglaterra"
+      "historic-england": "Historic England"
     }
   },
   "siteMetaList": {

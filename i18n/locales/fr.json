@@ -37,7 +37,7 @@
     "groupAntiquity": "Antiquité",
     "followLimes": "Suivre les chaux",
     "followLimesHint": "La frontière, ses murs et ses forts",
-    "tabulaPeutingeriana": "Tabula Peuingeriana",
+    "tabulaPeutingeriana": "Tabula Peutingeriana",
     "tabulaPeutingerianaHint": "Le diagramme romain, pas une carte, ouvre son propre spectateur",
     "groupOverlays": "Couvertures",
     "tabulaPeutingerianaOverlay": "Réseau Tabula Peutingeriana",
@@ -61,7 +61,7 @@
     "periodApproximate": "Les frontières sont approximatives, tracées par les contributeurs d'OpenHistoricalMap."
   },
   "tabulaPeutingeriana": {
-    "title": "Tabula Peuingeriana",
+    "title": "Tabula Peutingeriana",
     "intro": "Une copie médiévale d'une carte romaine du cursus publicus, le réseau routier de l'empire — montré ici comme son propre scan de zoom profond, non drapé sur de véritables coordonnées.",
     "distortionNote": "La Tabula Peutingeriana est un diagramme schématique, étiré environ 18,5 fois plus large que grand — il n'est pas géographiquement précis, donc il n'est pas montré comme une couche sur la carte elle-même.",
     "viewerLabel": "Vueur en profondeur du manuscrit Tabula Peutingeriana",
@@ -88,7 +88,7 @@
       "viewerLabel": "Vueur en profondeur de la colonne des plaques de Marc Aurèle",
       "volume": "Volume de la plaque",
       "tafeln-i-lxiv": "Tafeln I–LXIV",
-      "tafeln-lxv-cxxviii": "Tafeln LXV-CXXVIII",
+      "tafeln-lxv-cxxviii": "Tafeln LXV–CXXVIII",
       "loading": "Chargement du volume de la plaque..",
       "loadFailed": "Ce volume n'a pas pu être chargé depuis la bibliothèque universitaire de Heidelberg. Essaie encore."
     }
@@ -133,7 +133,7 @@
     "inLanguage": "Dans{language}",
     "matchedThrough": "Correspondance{source},{metres}m de la position enregistrée",
     "languages": {
-      "en": "Changements climatiques",
+      "en": "Anglais",
       "nl": "Néerlandais",
       "de": "Allemand",
       "es": "Espagnol",
@@ -141,8 +141,8 @@
       "fr": "Français"
     },
     "sources": {
-      "wikidata": "Wikidonnées",
-      "pleiades": "Pléiades",
+      "wikidata": "Wikidata",
+      "pleiades": "Pleiades",
       "dare": "l'Atlas numérique de l'Empire romain"
     }
   },
@@ -402,19 +402,19 @@
     "tryAgain": "Essaie encore."
   },
   "categories": {
-    "settlement": "Règlement",
+    "settlement": "Habitat",
     "fortification": "Fortification",
     "sanctuary": "Sanctuaire",
-    "burial": "Enterrement",
+    "burial": "Sépulture",
     "infrastructure": "Infrastructure",
     "villa": "Villa",
     "production": "Production",
-    "findspot": "Findspot",
-    "other": "Autres"
+    "findspot": "Lieu de découverte",
+    "other": "Autre"
   },
   "limesMarks": {
-    "watchtower": "La Tour de Garde",
-    "fortlet": "Forteau",
+    "watchtower": "Tour de guet",
+    "fortlet": "Fortin",
     "fort": "Fort",
     "fortress": "Forteresse légionnaire",
     "camp": "Camp de marche"
@@ -456,7 +456,7 @@
     "length": "Longueur",
     "inUse": "En usage",
     "recordedOnIt": "Enregistré dessus",
-    "pleiades": "Pléiades",
+    "pleiades": "Pleiades",
     "alongTheLine": "Le long de la ligne, d'ouest en est",
     "nothingRecorded": "Rien n'est encore enregistré sur ce tronçon.",
     "fortification": "Fortification",
@@ -520,24 +520,24 @@
     "verifiedTitle": "Vérifié avec {source}, à {metres} m",
     "verifiedSummary": "Recoupé avec {count} des {total} sources liées",
     "schemes": {
-      "pleiades": "Pléiades",
-      "wikidata": "Wikidonnées",
+      "pleiades": "Pleiades",
+      "wikidata": "Wikidata",
       "vici": "Vici.org",
       "trismegistos": "Trismegistos",
       "dare": "Atlas numérique de l'Empire romain",
       "livius": "Livius.org",
       "arachne": "Arachne",
-      "mithraeum": "Le nouveau Mithraeum",
+      "mithraeum": "The New Mithraeum",
       "omnesviae": "OmnesViae",
-      "osmway": "OuvrirStreetMap",
-      "osmnode": "OuvrirStreetMap",
+      "osmway": "OpenStreetMap",
+      "osmnode": "OpenStreetMap",
       "pecs": "Princeton Encyclopedia of Classical Sites",
       "romaq": "ROMAQ — Aqueducs romains",
       "archis": "Archis",
       "wikipedia": "Wikipédia",
       "edh": "Base de données épigraphique de Heidelberg",
-      "idai-gazetteer": "iDAI.gazetteter",
-      "historic-england": "Angleterre historique"
+      "idai-gazetteer": "iDAI.gazetteer",
+      "historic-england": "Historic England"
     }
   },
   "siteMetaList": {

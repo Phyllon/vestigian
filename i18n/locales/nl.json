@@ -87,8 +87,8 @@
       "intro": "Petersen, Domaszewski & Calderini's 1896 platen, gedigitaliseerd door de Universiteitsbibliotheek Heidelberg en hier getoond als een live deep-zoom scan, publiek domein.",
       "viewerLabel": "Diepzoomkijker van de Colonne van Marcus Aurelius platen",
       "volume": "Plate volume",
-      "tafeln-i-lxiv": "Tafeln I",
-      "tafeln-lxv-cxxviii": "Tafeln LXV",
+      "tafeln-i-lxiv": "Tafeln I–LXIV",
+      "tafeln-lxv-cxxviii": "Tafeln LXV–CXXVIII",
       "loading": "Laden van het plaatvolume..",
       "loadFailed": "Dit volume kon niet worden geladen vanuit de Universiteitsbibliotheek Heidelberg. Probeer het binnenkort nog eens."
     }
@@ -402,21 +402,21 @@
     "tryAgain": "Probeer het nog eens."
   },
   "categories": {
-    "settlement": "Afwikkeling",
-    "fortification": "Fortificatie",
-    "sanctuary": "Sanctuary",
-    "burial": "Begraven",
+    "settlement": "Nederzetting",
+    "fortification": "Versterking",
+    "sanctuary": "Heiligdom",
+    "burial": "Grafveld",
     "infrastructure": "Infrastructuur",
     "villa": "Villa",
-    "production": "Produktie",
-    "findspot": "Zoeken",
-    "other": "Andere"
+    "production": "Productie",
+    "findspot": "Vindplaats",
+    "other": "Overig"
   },
   "limesMarks": {
     "watchtower": "Wachttoren",
-    "fortlet": "Fortlet",
+    "fortlet": "Klein fort",
     "fort": "Fort",
-    "fortress": "Legionaire vesting",
+    "fortress": "Legioensvesting",
     "camp": "Marskamp"
   },
   "featurePicker": {
@@ -527,7 +527,7 @@
       "dare": "Digitale Atlas van het Romeinse Rijk",
       "livius": "Livius.org",
       "arachne": "Arachne",
-      "mithraeum": "Het nieuwe Mithraeum",
+      "mithraeum": "The New Mithraeum",
       "omnesviae": "OmnesViae",
       "osmway": "OpenStreetMap",
       "osmnode": "OpenStreetMap",
@@ -536,8 +536,8 @@
       "archis": "Archis",
       "wikipedia": "Wikipedia",
       "edh": "Epigrafische Databank Heidelberg",
-      "idai-gazetteer": "iDAI.gazetter",
-      "historic-england": "Historisch Engeland"
+      "idai-gazetteer": "iDAI.gazetteer",
+      "historic-england": "Historic England"
     }
   },
   "siteMetaList": {

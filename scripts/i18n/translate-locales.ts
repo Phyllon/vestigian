@@ -33,6 +33,81 @@ const TARGET_LOCALES = ['fr', 'es', 'de', 'it', 'nl'] as const
 // eslint-disable-next-line sonarjs/super-linear-regex
 const PLACEHOLDER_PATTERN = /\{[^}]+\}/g
 
+/**
+ * Keys the translator never sees, in any language.
+ *
+ * Two kinds of string end up here. **Wordmarks** — the names external projects
+ * and databases are actually called — must survive verbatim or they stop being
+ * the name of anything: LibreTranslate has variously produced `Wikidonnées`
+ * for Wikidata, `OuvrirStreetMap` for OpenStreetMap, `Plejaden` for Pleiades,
+ * `Aracide` for Arachne and `iDAI.gazetteter` for iDAI.gazetteer, and it
+ * dropped half of `Tafeln I–LXIV`. **Domain vocabulary** — this atlas's own
+ * site categories and frontier marks — is here because the model reads them as
+ * ordinary English words with no archaeology in scope: `Settlement` came back
+ * as `Abrechnung` and `Règlement` (both the financial sense), `Legionary
+ * fortress` as `Fortaleza legislativa`, and `Watchtower` as `La Tour de
+ * Garde`, which is a magazine.
+ *
+ * A frozen key is **not** forced to English — it keeps whatever the target
+ * catalogue already holds, so a considered human translation (`Wikipédia` in
+ * French, `Kleinkastell` in German) is permanent rather than something the
+ * next run overwrites. English is only the fallback when the key is missing
+ * entirely, which is also what makes a new wordmark safe to add here before
+ * anyone has translated it.
+ *
+ * This exists because the resumability rule below cannot tell the two cases
+ * apart on its own: it re-translates any key whose value still equals the
+ * English source, which is exactly what a correctly-untranslated wordmark
+ * looks like. Every run therefore re-mangled the same names.
+ *
+ * **A new external link scheme or site category belongs in this list** — the
+ * grouped prefixes are deliberately narrow so that descriptive labels in the
+ * same namespace (`schemes.dare`, "Digital Atlas of the Roman Empire") stay
+ * translatable, and the cost of that is having to add the next wordmark by
+ * hand.
+ */
+export const FROZEN_KEYS: readonly string[] = [
+  // Wordmarks: the name of a project, database or website.
+  'siteExternalLinks.schemes.pleiades',
+  'siteExternalLinks.schemes.wikidata',
+  'siteExternalLinks.schemes.wikipedia',
+  'siteExternalLinks.schemes.vici',
+  'siteExternalLinks.schemes.trismegistos',
+  'siteExternalLinks.schemes.livius',
+  'siteExternalLinks.schemes.arachne',
+  'siteExternalLinks.schemes.omnesviae',
+  'siteExternalLinks.schemes.osmway',
+  'siteExternalLinks.schemes.osmnode',
+  'siteExternalLinks.schemes.archis',
+  'siteExternalLinks.schemes.idai-gazetteer',
+  'siteExternalLinks.schemes.historic-england',
+  'siteExternalLinks.schemes.mithraeum',
+  'enrichment.sources.wikidata',
+  'enrichment.sources.pleiades',
+  'limesSectorPage.pleiades',
+  'basemapSwitcher.tabulaPeutingeriana',
+  'tabulaPeutingeriana.title',
+  // Plate volumes, named in German by the 1896 edition itself.
+  'columns.marcusAurelius.tafeln-i-lxiv',
+  'columns.marcusAurelius.tafeln-lxv-cxxviii',
+]
+
+/**
+ * Whole namespaces where every key is domain vocabulary — the nine site
+ * categories, the five frontier marks, and the six language names the
+ * enrichment panel labels borrowed prose with (`English` once became
+ * `Changements climatiques`).
+ */
+export const FROZEN_KEY_PREFIXES: readonly string[] = [
+  'categories.',
+  'limesMarks.',
+  'minorFeaturePopup.kind.',
+  'enrichment.languages.',
+]
+
+export const isFrozenKey = (key: string): boolean =>
+  FROZEN_KEYS.includes(key) || FROZEN_KEY_PREFIXES.some((prefix) => key.startsWith(prefix))
+
 export interface TextSegment {
   text: string
   isPlaceholder: boolean
@@ -175,6 +250,20 @@ const checkTranslateService = async (translateUrl: string): Promise<boolean> => 
   }
 }
 
+/**
+ * A frozen key keeps whatever the target catalogue already holds and falls
+ * back to English only when it holds nothing, so a newly added wordmark is
+ * filled in without ever being sent to the translator. Mutates `target`.
+ */
+const fillMissingFrozenKeys = (
+  target: Record<string, string>,
+  source: Record<string, string>,
+): void => {
+  for (const [key, text] of Object.entries(source)) {
+    if (isFrozenKey(key) && !target[key]) target[key] = text
+  }
+}
+
 const main = async (): Promise<void> => {
   const translateUrl = process.env.NUXT_TRANSLATE_URL
   if (!translateUrl) {
@@ -217,10 +306,14 @@ const main = async (): Promise<void> => {
     const emptyKeys: string[] = []
     let translatedCount = 0
 
+    fillMissingFrozenKeys(resultFlat, sourceFlat)
+
     const pending = Object.entries(sourceFlat).filter(
       // Resumable: a key already translated to something other than the
       // English source is left alone rather than re-spent against the model.
-      ([key, text]) => !(resultFlat[key] && resultFlat[key] !== text),
+      // A frozen key is skipped whatever its value — the resumability rule
+      // cannot tell a deliberately-English wordmark from an untranslated one.
+      ([key, text]) => !isFrozenKey(key) && !(resultFlat[key] && resultFlat[key] !== text),
     )
 
     console.log(

@@ -134,15 +134,15 @@
     "matchedThrough": "Corrispondenza{source}♪,{metres}m dalla posizione registrata",
     "languages": {
       "en": "Inglese",
-      "nl": "Paesi Bassi",
-      "de": "Germania",
+      "nl": "Olandese",
+      "de": "Tedesco",
       "es": "Spagnolo",
       "it": "Italiano",
       "fr": "Francese"
     },
     "sources": {
       "wikidata": "Wikidata",
-      "pleiades": "Pleiadi",
+      "pleiades": "Pleiades",
       "dare": "l'Atlante Digitale dell'Impero Romano"
     }
   },
@@ -402,21 +402,21 @@
     "tryAgain": "Riprova."
   },
   "categories": {
-    "settlement": "Settlement",
+    "settlement": "Insediamento",
     "fortification": "Fortificazione",
     "sanctuary": "Santuario",
     "burial": "Sepoltura",
-    "infrastructure": "Infrastrutture",
+    "infrastructure": "Infrastruttura",
     "villa": "Villa",
     "production": "Produzione",
-    "findspot": "Trova il posto",
-    "other": "Altri"
+    "findspot": "Luogo di rinvenimento",
+    "other": "Altro"
   },
   "limesMarks": {
-    "watchtower": "Torre di avvistamento",
-    "fortlet": "Fortezza",
+    "watchtower": "Torre di guardia",
+    "fortlet": "Fortino",
     "fort": "Forte",
-    "fortress": "Rocca Legione",
+    "fortress": "Fortezza legionaria",
     "camp": "Campo di marcia"
   },
   "featurePicker": {
@@ -456,7 +456,7 @@
     "length": "Lunghezza",
     "inUse": "In uso",
     "recordedOnIt": "Registrato su di esso",
-    "pleiades": "Pleiadi",
+    "pleiades": "Pleiades",
     "alongTheLine": "Lungo la linea, ovest ad est",
     "nothingRecorded": "Non è ancora registrato nulla su questo tratto.",
     "fortification": "Fortificazione",
@@ -520,15 +520,15 @@
     "verifiedTitle": "Verificato con {source}, a {metres} m",
     "verifiedSummary": "Confrontato con {count} di {total} fonti collegate",
     "schemes": {
-      "pleiades": "Pleiadi",
+      "pleiades": "Pleiades",
       "wikidata": "Wikidata",
       "vici": "Vici.org",
-      "trismegistos": "Trismegisto",
+      "trismegistos": "Trismegistos",
       "dare": "Atlante digitale dell'Impero Romano",
       "livius": "Livius.org",
-      "arachne": "Aracide",
-      "mithraeum": "Il nuovo Mithraeum",
-      "omnesviae": "OmnesVia",
+      "arachne": "Arachne",
+      "mithraeum": "The New Mithraeum",
+      "omnesviae": "OmnesViae",
       "osmway": "OpenStreetMap",
       "osmnode": "OpenStreetMap",
       "pecs": "Princeton Enciclopedia dei Siti Classici",
@@ -537,7 +537,7 @@
       "wikipedia": "Wikipedia",
       "edh": "Banca dati epigrafica di Heidelberg",
       "idai-gazetteer": "iDAI.gazetteer",
-      "historic-england": "Inghilterra storica"
+      "historic-england": "Historic England"
     }
   },
   "siteMetaList": {
