@@ -87,6 +87,13 @@ export const FROZEN_KEYS: readonly string[] = [
   'limesSectorPage.pleiades',
   'basemapSwitcher.tabulaPeutingeriana',
   'tabulaPeutingeriana.title',
+  // "Limes" as the Roman frontier, not the fruit. A general model reads it
+  // as the latter every time it stands alone as a short phrase: "Volg de
+  // limoenen" (Dutch), "Seguir los limones" (Spanish), "Suivre les chaux"
+  // (French, "follow the quicklime"), "Seguire le calce" (Italian, same).
+  // German alone survived untouched, because "der Limes" is also the
+  // correct German historical term.
+  'basemapSwitcher.followLimes',
   // Plate volumes, named in German by the 1896 edition itself.
   'columns.marcusAurelius.tafeln-i-lxiv',
   'columns.marcusAurelius.tafeln-lxv-cxxviii',

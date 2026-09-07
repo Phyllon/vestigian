@@ -298,8 +298,9 @@ page would override it.
 antiquity group.** The Tabula Peutingeriana viewer sits in that group
 because it's another way of looking at _the map_; this feature is
 monument-specific reference material with no geographic-view angle, so it
-doesn't belong there. The app menu itself is grouped under three
-non-interactive `type: 'label'` headers — Column reliefs; Legal & data
-(licence, privacy, impressum); Offline maps — once a second and then a
-third destination arrived with nothing left to say which parts of the app
-they belonged to.
+doesn't belong there. The app menu itself is grouped under non-interactive
+`type: 'label'` headers — Column reliefs; Legal & data (licence, privacy,
+impressum); Offline maps; Support this project (GitHub, and a donation
+link once an operator sets `NUXT_PUBLIC_DONATE_URL`) — once a second and
+then a third destination arrived with nothing left to say which parts of
+the app they belonged to.

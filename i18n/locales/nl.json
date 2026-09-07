@@ -10,7 +10,10 @@
     "menu": "Menu",
     "menuGroupReference": "Referentie",
     "menuGroupLegal": "Juridische gegevens",
-    "menuGroupOffline": "Offline kaarten"
+    "menuGroupOffline": "Offline kaarten",
+    "menuGroupSupport": "Ondersteun dit project",
+    "githubLink": "Bron tonen op GitHub",
+    "donateLink": "Ondersteuning met een donatie"
   },
   "account": {
     "menuFor": "Accountmenu, aangemeld als {name}",
@@ -35,7 +38,7 @@
     "menuLabel": "Basiskaart",
     "groupToday": "Vandaag",
     "groupAntiquity": "Oudheid",
-    "followLimes": "Volg de limoenen",
+    "followLimes": "Volg de limes",
     "followLimesHint": "De grens, de muren en de forten",
     "tabulaPeutingeriana": "Tabula Peutingeriana",
     "tabulaPeutingerianaHint": "Het Romeinse wegdiagram, geen kaart opent zijn eigen kijker",
@@ -319,11 +322,25 @@
     "imagesHeading": "Foto's",
     "imagesBody": "Elke foto draagt zijn eigen licentie en naamsvermelding, die onder de afbeelding zelf wordt getoond. Vergunningen variëren per record; controleer het beeld voordat het opnieuw wordt gebruikt apart van de site die het illustreert.",
     "barringtonHeading": "Oudheid (Barrington) basiskaart",
-    "barringtonBody": "Oude kustlijn, wegen, water en plaatsen zijn afkomstig uit het Oude Wereldkaartcentrum (ODbL 1.0) en Pleiades (CC BY 3.0). Beide zijn herbruikbaar, inclusief commercieel, met toeschrijving De share-alike van ODbL is van toepassing op de onderliggende database, niet op de weergegeven kaarttegels.",
+    "barringtonBody": "Oude kustlijn, wegen, water en plaatsen komen van het Ancient World Mapping Center (ODbL 1.0) en Pleiades (CC BY 3.0). Beide zijn herbruikbaar, ook commercieel, met naamsvermelding — de share-alike-clausule van ODbL geldt voor de onderliggende database, niet voor de gegenereerde karttegels.",
     "dareHeading": "Oudheid (DARE) basiskaart",
     "dareBody": "Deze basiskaart is CC BY-SA 3.0 van Johan Åhlfeldt (Digitale Atlas van het Romeinse Rijk, Universiteit Göteborg) maar twee van zijn eigen bronlagen zijn niet-commercieel (CC BY-NC 3.0 / CC BY-NC-SA), die de deken CC BY-SA niet kan overnemen. Behandel deze specifieke laag alleen als niet-commercieel gebruik.",
     "limesHeading": "De grens (limes)",
-    "limesBody": "De grenslijn is afgeleid van de omvang van het rijk (ODbL 1.0) en maakt geen deel uit van de databank."
+    "limesBody": "De grenslijn is afgeleid van de omvang van het rijk volgens het Ancient World Mapping Center (ODbL 1.0) en maakt geen deel uit van de bijgedragen database.",
+    "overlaysHeading": "Extra map-overlays",
+    "overlaysIntro": "Schakelbare lagen over de kaart, elk onder zijn eigen licentie, zichtbaar in de eigen attributie van de kaart terwijl ingeschakeld.",
+    "overlayBattles": "Veldslagen: Wikidata (CC0 1.0) — geen rechten voorbehouden.",
+    "overlayPorts": "Oude havens: Catalogus van oude havens, Arthur de Graauw (CC BY 4.0), ook gepubliceerd als de DARMC Scholarly Data Series (Harvard).",
+    "overlayRoutes": "Routes: ORBIS v2, Meeks, Scheidel, Weiland & Arcenas, Stanford University (CC BY 3.0).",
+    "overlayMinorFeatures": "Kleine antiquiteiten (bruggen, mijnen, steengroeven en meer): Ancient World Mapping Center (ODbL 1.0).",
+    "overlayCoinHoards": "Muntschatten: Coin Hoards of the Roman Republic, American Numismatic Society (CC BY-NC-SA 4.0) — uitsluitend niet-commercieel gebruik.",
+    "overlayEmpireExtents": "Omvang van het rijk in de tijd: bijdragers van OpenHistoricalMap (CC0 1.0).",
+    "columnReliefHeading": "Kolomreliëf",
+    "columnReliefBody": "De platen van de Zuil van Trajanus zijn gespiegeld vanuit de categorie 'Cichorius Plates' op Wikimedia Commons, waar ze als publiek domein zijn gemarkeerd. De platen van de Kolom van Marcus Aurelius worden live geserveerd vanuit de digitalisering door de Universiteitsbibliotheek Heidelberg van Petersen, Domaszewski & Calderini's studie uit 1896 — eveneens publiek domein; voor deze zuil wordt niets naar de eigen opslag van dit project gekopieerd.",
+    "placeNamesHeading": "Moderne plaatsnamen",
+    "placeNamesBody": "Namen van hedendaagse dorpen en steden die worden gebruikt bij het zoeken naar plaatsen komen van GeoNames.org (CC BY 4.0).",
+    "satelliteHeading": "Satelliet-basiskaart",
+    "satelliteBody": "De satellietweergave toont wolkenloze Sentinel-2-beelden van EOX IT Services (Wenen), opgebouwd uit open data van ESA Copernicus Sentinel-2. De versie die deze app gebruikt is CC BY-NC-SA 4.0 — alleen niet-commercieel gebruik, en elk hergebruik moet onder dezelfde licentie worden gedeeld."
   },
   "impressum": {
     "title": "Mededeling",
@@ -373,7 +390,8 @@
     "minorsHeading": "Leeftijd",
     "minorsBody": "Vestigian is niet gericht op kinderen. Als u jonger bent dan 16, maak dan geen rekening aan zonder de betrokkenheid van een ouder of voogd.",
     "changesHeading": "Wijzigingen",
-    "changesBody": "Deze pagina wordt bijgewerkt wanneer wat de dienst daadwerkelijk doet verandert. Het weerspiegelt de huidige versie van de lopende toepassing."
+    "changesBody": "Deze pagina wordt bijgewerkt wanneer wat de dienst daadwerkelijk doet verandert. Het weerspiegelt de huidige versie van de lopende toepassing.",
+    "recipientColumnReliefs": "Universiteitsbibliotheek Heidelberg (EU): het bekijken van de Column van Marcus Aurelius' platen wordt bediend door onze server die de eigen digitalisering van de bibliotheek doorgeeft, opnieuw zodat uw IP-adres niet direct met hen wordt gedeeld."
   },
   "geolocate": {
     "locationBlocked": "Locatie geblokkeerd",

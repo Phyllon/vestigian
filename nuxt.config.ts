@@ -407,6 +407,15 @@ export default defineNuxtConfig({
     public: {
       siteUrl: 'http://localhost:3000',
       imageBaseUrl,
+      /** The project's own repository — public information, not per-deployment config, so it is a constant rather than an env var. */
+      githubUrl: 'https://github.com/Phyllon/vestigia',
+      /**
+       * Empty until an operator picks a donation destination — the app menu's
+       * "Support this project" link is hidden while this is unset, the same
+       * gate `tabulaPeutingerianaEnabled` below uses for a feature nothing
+       * should show until someone has actually decided on it.
+       */
+      donateUrl: '',
       basemap: {
         /** 'openfreemap' for zero-setup development, 'pmtiles' for production. */
         provider: 'openfreemap',

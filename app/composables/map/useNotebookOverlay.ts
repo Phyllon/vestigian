@@ -72,6 +72,9 @@ export const useNotebookOverlay = () => {
         'circle-stroke-width': 2.5,
       },
     })
+
+    // See `useLimesOverlay`'s `attachLimesOverlay` for why this call is needed.
+    map.triggerRepaint()
   }
 
   /**

@@ -269,6 +269,9 @@ export const useViewportTiles = () => {
         'text-halo-width': 1.4,
       },
     })
+
+    // See `useLimesOverlay`'s `attachLimesOverlay` for why this call is needed.
+    map.triggerRepaint()
   }
 
   /**

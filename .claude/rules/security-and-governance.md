@@ -6,6 +6,7 @@ paths:
   - 'server/api/auth/**'
   - 'server/api/moderation/**'
   - 'server/api/contributions/**'
+  - 'server/database/schema/users.ts'
   - 'nuxt.config.ts'
 ---
 
@@ -16,6 +17,7 @@ paths:
 - **Every authorization rule lives in `shared/utils/authorization.ts`** and nowhere else — both sides import it, and the guards that throw are the only thing left in `server/utils/permissions.ts`. Casbin, CASL and Cerbos were assessed as replacements and rejected: three roles fixed in a `pgEnum` buy nothing from a runtime policy engine, and the rules that actually matter here are not the subject/action/resource shape they model. `users.trust_level` was dropped for the same reason — a derived column written by two hand-transcribed SQL copies of the threshold.
 - **Trust:** new accounts are queued. After **2 accepted contributions** (`evaluateTrust`), edits publish immediately. Moderators can revoke. Images do not count toward trust — uploading two photos is a weaker signal than two records surviving review.
 - **A moderator cannot approve their own contribution** (`canReviewRevision`).
+- **There is no bootstrap path to the first admin.** `role.post.ts` is the only write to `users.role`, and `checkRoleChange` requires the actor to already hold `admin` — by design, so nobody can self-promote. On a brand-new instance that means the very first admin can only be created outside the app, with a direct database write: `UPDATE users SET role = 'admin' WHERE email = '...';`. This is intentional, not a gap to close with a seed script or setup wizard — a bootstrap endpoint reachable before any admin exists is an unauthenticated role-escalation path by construction, which is a worse risk than "run one SQL statement once per instance." Role reads always hit the database (see below), so this takes effect on the admin's very next request, no restart or re-login needed.
 - **An edit that removes more than it adds is queued regardless of trust** (`isBlankingEdit`). This deliberately overrides the trust rule; a wrong auto-approval on a blanking edit costs far more than a moderator glance.
 - **Revert writes a new revision** restoring the prior state. Never delete a revision. History is append-only.
 - **Reverts do not increment the moderator's trust counter** — housekeeping is not contribution.
@@ -29,7 +31,7 @@ paths:
   the copy adapts, but a rejection with nothing in it is a decision the author
   cannot act on, which is why suspending is now two clicks with a field between
   them.
-- **Nobody can change their own role** (`checkRoleChange`), which is also what keeps an instance from losing its last admin — that rule's own `last-admin` branch cannot be reached, since removing the final admin requires being them. See the comments in the function.
+- **Nobody can change their own role, and no admin can demote another admin, ever** (`checkRoleChange`). This used to allow it once a second admin existed — the `last-admin` branch only blocked demoting the _final_ one, so granting someone admin also handed them the power to strip your own admin role back off, as long as a third account existed to keep the count above one. Reported directly as an unacceptable outcome ("even if I granted some other partner admin rights, this must hold") and closed by making the `admin-protected` branch unconditional: an admin can promote anyone up to admin, but taking admin away from an existing admin is refused regardless of how many others exist. Removing a rogue or compromised co-admin is deliberately left to the same database surgery that creates the first admin — see above — a slower path chosen on purpose over a button any admin could press against any other.
 - **Role and trust are re-read from the database inside every guard.** The session cookie is sealed at login and nothing refreshes it, so reading a role from it let a demoted moderator keep moderating until they logged out. `requireModerator`/`requireAdmin` cost one primary-key lookup and are the reason a demotion bites on the next request.
 - **Slugs never change on edit.** Inbound links, citations and the sitemap point at them.
 - Suspension leaves `approved_contributions` untouched, so restoring trust returns someone exactly where they were.

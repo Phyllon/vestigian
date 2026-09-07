@@ -221,12 +221,48 @@
 /* MapLibre's own chrome, restyled to sit inside the notebook rather than on it. */
 .maplibregl-ctrl-attrib {
   background-color: color-mix(in srgb, var(--surface-raised) 88%, transparent) !important;
+  /*
+   * The library's own `.maplibregl-compact` rule hardcodes `color:#000`
+   * (maplibre-gl.css), which the dark-mode background above turns into
+   * near-black-on-near-black. `!important` is required to win: that rule
+   * carries two classes to our one, so without it a plain declaration here
+   * loses on specificity even though it comes later in the cascade.
+   */
+  color: var(--text-body) !important;
   font-family: var(--font-mono);
   font-size: 10px;
 }
 
 .maplibregl-ctrl-attrib a {
   color: var(--text-muted);
+}
+
+/*
+ * The expanded (compact-show) attribution list has no height cap of its own
+ * and `.maplibregl-map` sets `overflow:hidden`, so with several overlays
+ * active at once — each contributing its own credit — the list grew taller
+ * than the map and was silently clipped at the top edge instead of wrapping
+ * or scrolling. `useBattleOverlay`/`usePortOverlay`/etc. each add one line
+ * here whenever their toggle is on, so the list is only as long as however
+ * many are switched on simultaneously — capped and scrollable rather than
+ * assuming a fixed maximum count.
+ */
+.maplibregl-ctrl-attrib.maplibregl-compact-show {
+  max-height: min(60vh, 16rem);
+  overflow-y: auto;
+}
+
+/*
+ * Raised above the floating panels that share the map's bottom edge on
+ * narrow viewports (LimesPanel, FeaturePicker) — both are full-width bottom
+ * sheets at `z-20`/`z-30` and previously sat on top of the attribution
+ * control's own stacking context (`z-index:2`, from maplibre-gl.css),
+ * hiding it — reported as "the limes-panel overflows it" while the limes
+ * overlay's frontier credit was the very attribution being hidden. The
+ * control must stay reachable regardless of which panel is open.
+ */
+.maplibregl-ctrl-bottom-right {
+  z-index: 35 !important;
 }
 
 .maplibregl-popup-content {

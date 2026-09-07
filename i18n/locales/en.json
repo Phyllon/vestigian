@@ -10,7 +10,10 @@
     "menu": "Menu",
     "menuGroupReference": "Reference",
     "menuGroupLegal": "Legal & data",
-    "menuGroupOffline": "Offline maps"
+    "menuGroupOffline": "Offline maps",
+    "menuGroupSupport": "Support this project",
+    "githubLink": "View source on GitHub",
+    "donateLink": "Support with a donation"
   },
   "account": {
     "menuFor": "Account menu, signed in as {name}",
@@ -328,8 +331,22 @@
     "barringtonBody": "Ancient coastline, roads, water and places are drawn from the Ancient World Mapping Center (ODbL 1.0) and Pleiades (CC BY 3.0). Both are reusable, including commercially, with attribution — ODbL's share-alike applies to the underlying database, not to the rendered map tiles.",
     "dareHeading": "Antiquity (DARE) basemap",
     "dareBody": "This basemap is CC BY-SA 3.0 from Johan Åhlfeldt (Digital Atlas of the Roman Empire, Gothenburg University) — but two of its own source layers are credited non-commercial (CC BY-NC 3.0 / CC BY-NC-SA), which the blanket CC BY-SA cannot override. Treat this specific layer as non-commercial use only.",
+    "satelliteHeading": "Satellite basemap",
+    "satelliteBody": "The satellite view is Sentinel-2 cloudless imagery from EOX IT Services (Vienna), built from ESA Copernicus Sentinel-2 open data. The vintage this app uses is CC BY-NC-SA 4.0 — non-commercial use only, and any reuse must be shared under the same licence.",
     "limesHeading": "The frontier (limes)",
-    "limesBody": "The frontier line is derived from the Ancient World Mapping Center's extent of the empire (ODbL 1.0) and is not part of the contributed database."
+    "limesBody": "The frontier line is derived from the Ancient World Mapping Center's extent of the empire (ODbL 1.0) and is not part of the contributed database.",
+    "overlaysHeading": "Additional map overlays",
+    "overlaysIntro": "Switchable layers over the map, each under its own licence — visible in the map's own attribution while switched on.",
+    "overlayBattles": "Battles: Wikidata (CC0 1.0) — no rights reserved.",
+    "overlayPorts": "Ancient ports: Catalogue of Ancient Ports, Arthur de Graauw (CC BY 4.0), also published as the DARMC Scholarly Data Series (Harvard).",
+    "overlayRoutes": "Routes: ORBIS v2, Meeks, Scheidel, Weiland & Arcenas, Stanford University (CC BY 3.0).",
+    "overlayMinorFeatures": "Minor antiquities (bridges, mines, quarries and more): Ancient World Mapping Center (ODbL 1.0).",
+    "overlayCoinHoards": "Coin hoards: Coin Hoards of the Roman Republic, American Numismatic Society (CC BY-NC-SA 4.0) — non-commercial use only.",
+    "overlayEmpireExtents": "Empire extent over time: OpenHistoricalMap contributors (CC0 1.0).",
+    "columnReliefHeading": "Column reliefs",
+    "columnReliefBody": "Trajan's Column plates are mirrored from Wikimedia Commons' Cichorius Plates category, marked public domain there. The Column of Marcus Aurelius's plates are served live from Heidelberg University Library's digitisation of Petersen, Domaszewski & Calderini's 1896 study — also public domain; nothing is mirrored into this project's own storage for that column.",
+    "placeNamesHeading": "Modern place names",
+    "placeNamesBody": "Present-day town and city names used in place search come from GeoNames.org (CC BY 4.0)."
   },
   "impressum": {
     "title": "Legal notice",
@@ -363,6 +380,7 @@
     "recipientMail": "Transactional email (Lettermint, Amsterdam): sends account and moderation emails — verification links, password resets, decisions on your contributions.",
     "recipientTranslate": "Machine translation (LibreTranslate): runs on our own server, not a third party — borrowed article text is translated there, never sent externally.",
     "recipientEnrichment": "Wikidata, Wikipedia and Pleiades (outside the EU): when a site's description can be supplemented from these public projects, our server — never your browser — makes that request, so your IP address is not shared with them.",
+    "recipientColumnReliefs": "Heidelberg University Library (EU): viewing the Column of Marcus Aurelius's plates is served by our server relaying that library's own digitisation, again so your IP address is not shared with them directly.",
     "recipientBasemap": "Map tile providers: some basemap layers are fetched directly by your browser from their own hosts, so your IP address reaches them the way it would visiting any site that embeds a map.",
     "recipientSecurity": "Automated abuse detection (CrowdSec): IP addresses our server locally flags as abusive are shared with CrowdSec's community threat-intelligence service, on the legitimate-interest basis of network security (Art. 6(1)(f)).",
     "rightsHeading": "Your rights",

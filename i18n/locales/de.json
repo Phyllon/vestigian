@@ -10,7 +10,10 @@
     "menu": "Menü",
     "menuGroupReference": "Referenz",
     "menuGroupLegal": "Recht & Daten",
-    "menuGroupOffline": "Offline-Karten"
+    "menuGroupOffline": "Offline-Karten",
+    "menuGroupSupport": "Unterstützen Sie dieses Projekt",
+    "githubLink": "Quelle auf GitHub anzeigen",
+    "donateLink": "Unterstützung mit einer Spende"
   },
   "account": {
     "menuFor": "Kontomenü, angemeldet als {name}",
@@ -35,7 +38,7 @@
     "menuLabel": "Basisplan",
     "groupToday": "Heute",
     "groupAntiquity": "Antike",
-    "followLimes": "Folgen Sie den Limes",
+    "followLimes": "Dem Limes folgen",
     "followLimesHint": "Die Grenze, ihre Mauern und ihre Festungen",
     "tabulaPeutingeriana": "Tabula Peutingeriana",
     "tabulaPeutingerianaHint": "Das römische Straßendiagramm, keine Karte - öffnet seinen eigenen Betrachter",
@@ -319,11 +322,25 @@
     "imagesHeading": "Fotografien",
     "imagesBody": "Jede Fotografie trägt ihre eigene Lizenz und Zuordnung, die unter dem Bild selbst gezeigt wird. Die Lizenzen variieren je nach Datensatz; Überprüfen Sie das Bild, bevor Sie es separat von der von ihm dargestellten Website wiederverwenden.",
     "barringtonHeading": "Antike (Barrington) basemap",
-    "barringtonBody": "Alte Küsten, Straßen, Wasser und Orte sind aus dem Ancient World Mapping Center (ODbL 1.0) und Plejaden (CC BY 3.0) gezogen. Beide sind wiederverwendbar, auch kommerziell, mit Attribution - der Anteil von ODbL gilt für die zugrunde liegende Datenbank, nicht für die gerenderten Kartenkacheln.",
+    "barringtonBody": "Alte Küsten, Straßen, Wasser und Orte sind aus dem Ancient World Mapping Center (ODbL 1.0) und Pleiades (CC BY 3.0) gezogen. Beide sind wiederverwendbar, auch kommerziell, mit Attribution — der Share-Alike-Anteil von ODbL gilt für die zugrunde liegende Datenbank, nicht für die gerenderten Kartenkacheln.",
     "dareHeading": "Antike (DARE) Basiskarte",
     "dareBody": "Diese Basiskarte ist CC BY-SA 3.0 von Johan Åhlfeldt (Digitaler Atlas des Römischen Reiches, Universität Göteborg) - aber zwei eigene Quellenebenen werden als nicht-kommerziell (CC BY-NC 3.0 / CC BY-NC-SA) bezeichnet, was die CC BY-SA nicht überschreiben kann. Behandeln Sie diese spezielle Schicht nur als nicht-kommerzielle Nutzung.",
     "limesHeading": "Die Grenze (limes)",
-    "limesBody": "Die Grenzlinie ergibt sich aus der Ausdehnung des Imperiums des Ancient World Mapping Center (ODbL 1.0) und ist nicht Teil der beigetragenen Datenbank."
+    "limesBody": "Die Grenzlinie ergibt sich aus der Ausdehnung des Reiches nach dem Ancient World Mapping Center (ODbL 1.0) und ist nicht Teil der beigetragenen Datenbank.",
+    "overlaysHeading": "Zusätzliche Kartenüberlagerungen",
+    "overlaysIntro": "Schaltbare Schichten über der Karte, jeweils unter eigener Lizenz — sichtbar in der eigenen Zuordnung der Karte beim Einschalten.",
+    "overlayBattles": "Schlachten: Wikidata (CC0 1.0) – keine Rechte vorbehalten.",
+    "overlayPorts": "Alte Häfen: Katalog der alten Häfen, Arthur de Graauw (CC BY 4.0), auch veröffentlicht als DARMC Scholarly Data Series (Harvard).",
+    "overlayRoutes": "Routen: ORBIS v2, Meeks, Scheidel, Weiland & Arcenas, Stanford University (CC BY 3.0).",
+    "overlayMinorFeatures": "Kleine Antiquitäten (Brücken, Minen, Steinbrüche und mehr): Ancient World Mapping Center (ODbL 1.0).",
+    "overlayCoinHoards": "Münzhorte: Münzhorte der Römischen Republik, American Numismatic Society (CC BY-NC-SA 4.0) - nur nicht kommerzielle Nutzung.",
+    "overlayEmpireExtents": "Ausdehnung des Reichs im Laufe der Zeit: OpenHistoricalMap-Mitwirkende (CC0 1.0).",
+    "columnReliefHeading": "Säulenreliefs",
+    "columnReliefBody": "Die Tafeln der Trajanssäule sind aus der Kategorie „Cichorius Plates“ von Wikimedia Commons gespiegelt und dort als gemeinfrei gekennzeichnet. Die Tafeln der Marcus-Säule werden live aus der Digitalisierung der Universitätsbibliothek Heidelberg von Petersen, Domaszewski & Calderinis Studie von 1896 ausgeliefert – ebenfalls gemeinfrei; für diese Säule wird nichts im eigenen Speicher dieses Projekts gespiegelt.",
+    "placeNamesHeading": "Moderne Ortsnamen",
+    "placeNamesBody": "Heutige Stadt- und Stadtnamen, die in der Ortssuche verwendet werden, stammen von GeoNames.org (CC BY 4.0).",
+    "satelliteHeading": "Satelliten-Basiskarte",
+    "satelliteBody": "Die Satellitenansicht zeigt wolkenlose Sentinel-2-Aufnahmen von EOX IT Services (Wien), erstellt aus offenen Daten von ESA Copernicus Sentinel-2. Die hier verwendete Aufnahme ist CC BY-NC-SA 4.0 — nur nicht-kommerzielle Nutzung, und jede Weiterverwendung muss unter derselben Lizenz geteilt werden."
   },
   "impressum": {
     "title": "Rechtliche Hinweise",
@@ -373,7 +390,8 @@
     "minorsHeading": "Alter",
     "minorsBody": "Vestigian richtet sich nicht an Kinder. Wenn sie unter 16 jahre alt sind, erstellen sie bitte kein konto ohne die beteiligung eines elternteils oder erziehungsberechtigten.",
     "changesHeading": "Änderungen",
-    "changesBody": "Diese Seite wird aktualisiert, wenn sich das, was der Dienst tatsächlich tut, ändert. Es spiegelt die aktuelle Version der laufenden Anwendung wider."
+    "changesBody": "Diese Seite wird aktualisiert, wenn sich das, was der Dienst tatsächlich tut, ändert. Es spiegelt die aktuelle Version der laufenden Anwendung wider.",
+    "recipientColumnReliefs": "Universitätsbibliothek Heidelberg (EU): Die Anzeige der Spalte von Marcus Aurelius-Platten wird von unserem Server bedient, der die eigene Digitalisierung dieser Bibliothek weiterleitet, damit Ihre IP-Adresse nicht direkt mit ihnen geteilt wird."
   },
   "geolocate": {
     "locationBlocked": "Standort blockiert",

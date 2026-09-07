@@ -100,6 +100,8 @@ export const useRouteOverlay = () => {
     })
 
     map.addLayer(buildRouteLayer())
+    // See `useLimesOverlay`'s `attachLimesOverlay` for why this call is needed.
+    map.triggerRepaint()
 
     map.on('click', ROUTE_LAYER_ID, (event) => showRoutePopup(map, event))
     map.on('mouseenter', ROUTE_LAYER_ID, () => {

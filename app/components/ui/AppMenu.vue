@@ -7,6 +7,7 @@
    * controls, and grows in one place as more site-wide links arrive.
    */
   const { t } = useI18n()
+  const config = useRuntimeConfig()
 
   // Three named groups, each its own array (which also draws the separator
   // between them) with a non-interactive `type: 'label'` header — a plain
@@ -27,6 +28,33 @@
     [
       { type: 'label' as const, label: t('layout.menuGroupOffline') },
       { label: t('offlinePage.menuLabel'), icon: 'i-lucide-download', to: '/offline' },
+    ],
+    // A fourth group, deliberately last and its own section rather than
+    // folded into "Reference": these two point off the site entirely,
+    // unlike every link above them, so they get their own separator to
+    // read as a clear step away from the app's own pages rather than one
+    // more destination inside it. The donation link is left out of the
+    // array entirely while `donateUrl` is unset, rather than rendered
+    // disabled — an operator hasn't chosen a destination yet, and a dead
+    // link is worse than no link.
+    [
+      { type: 'label' as const, label: t('layout.menuGroupSupport') },
+      {
+        label: t('layout.githubLink'),
+        icon: 'i-lucide-github',
+        to: config.public.githubUrl,
+        target: '_blank',
+      },
+      ...(config.public.donateUrl
+        ? [
+            {
+              label: t('layout.donateLink'),
+              icon: 'i-lucide-hand-coins',
+              to: config.public.donateUrl,
+              target: '_blank',
+            },
+          ]
+        : []),
     ],
   ])
 </script>

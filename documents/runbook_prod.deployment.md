@@ -1,5 +1,13 @@
 # Erstdeployment-Runbook (korrigiert: es gibt keine Cloud-Migration)
 
+**Status (2026-09-07): noch nicht ausgeführt.** Dies ist ein Plan, kein
+Protokoll — keiner der Schritte 0–6 ist bisher gelaufen, es existiert weder
+ein Bunny-Storage-Objekt noch ein deployter Server. Die Zahlen unter
+„Kontext" (28.630 Objekte, 7.527 pending etc.) sind der zuletzt geprüfte
+lokale Stand, nicht das Ergebnis eines Laufs dieses Runbooks — vor der
+tatsächlichen Ausführung mit `pnpm images:reconcile` erneut prüfen, falls
+seither Zeit vergangen ist.
+
 ## Kontext — was ich falsch angenommen hatte
 
 Das vorherige Runbook beschrieb eine Migration R2 → Bunny. **Die ist hinfällig:
@@ -82,7 +90,91 @@ es eine echte Backup-Strategie gibt.
 
 ---
 
-## 2. Basemap beschaffen
+## 2. Datenbank: lokal → Produktion
+
+**Die konkrete Frage war: Zip-Datei bauen, auf den VPS schieben, dort ein
+Skript entpacken und in die Produktions-DB laden lassen?** Antwort: nein,
+und zwar aus einem einfachen Grund — `pg_dump` im Custom-Format (`-Fc`)
+komprimiert bereits selbst (zlib, vergleichbar mit gzip). Eine zweite
+Kompressionsstufe (Zip) auf eine bereits komprimierte Datei bringt kaum
+etwas, dafür aber zwei zusätzliche, fehleranfällige Schritte (packen,
+entpacken) und ein selbstgeschriebenes Lade-Skript, wo Postgres bereits ein
+fertiges, genau dafür gebautes Werkzeugpaar mitbringt: `pg_dump` /
+`pg_restore`. Kein Skript nötig, das jemand pflegen müsste.
+
+**Größenordnung, gemessen statt geschätzt:** die lokale DB liegt laut
+`documents/summary.md` bei ~190 MB gesamt, davon ~75 MB allein
+`antiquity_*` (siehe unten). Für eine Datenmenge dieser Größe ist der
+einfachste Weg auch der richtige — es gibt hier kein Performance-Problem zu
+lösen, nur ein Korrektheits- und Sequenzproblem.
+
+**Eine echte Entscheidung, nicht nur Mechanik: `pnpm db:snapshot`
+NICHT verwenden.** Dieses Skript existiert für die _nächtlichen_ Backups
+und schließt `antiquity_*`-Zeilen absichtlich aus (Schema bleibt, Tabellen
+kommen leer wieder hoch) — richtig für ein Backup, das jede Nacht läuft und
+notfalls durch `pnpm import:atlas` & Co. wieder gefüllt wird, aber falsch
+für eine **einmalige** Erstbefüllung: das hieße, nach dem Restore auf dem
+VPS ein gutes Dutzend Import-Skripte nachzuziehen
+(`import:atlas`, `import:limes`, `import:tabula-peutingeriana`,
+`import:battles`, `import:ports`, `import:orbis-routes`,
+`import:awmc-features`, `import:awmc-lines`, `import:chrr-coin-hoards`,
+`import:ohm-empire-extents`, `import:column-reliefs`, `import:cities`,
+`import:edh-findspots`, `import:country-boundaries`), von denen jedes noch
+einmal eine andere dritte Quelle anfragt — bei 75 MB Ersparnis, gemessen an
+den ~190 MB Gesamtgröße, ist das ein schlechter Tausch für ein
+Ereignis, das genau einmal passiert. Stattdessen ein vollständiger Dump,
+ohne Ausschluss:
+
+```bash
+# Lokal: vollständiger Dump, nichts ausgeschlossen — anders als db:snapshot
+pg_dump "$NUXT_DATABASE_URL" -Fc --no-owner --no-acl -f vestigian-full.dump
+
+# Vor dem Versand: die Dump-Datei selbst prüfen, nicht erst nach dem Restore
+pg_restore --list vestigian-full.dump | wc -l   # grobe Plausibilität: Tabellenzahl
+
+# Übertragung — rsync statt scp, wegen --partial (fortsetzbar, falls die
+# Verbindung während der Übertragung abbricht; bei ~190 MB unwahrscheinlich,
+# aber ohne Zusatzkosten)
+rsync -avP vestigian-full.dump <vps>:/tmp/
+
+# Auf dem VPS: Postgres-Container muss stehen und initdb bereits gelaufen
+# sein (postgis/pg_trgm/unaccent-Extensions kommen aus
+# docker/initdb/01-extensions.sql beim allerersten Start des leeren Volumes),
+# aber NICHT `pnpm db:migrate` — der Dump bringt das komplette Schema schon
+# mit, ein vorheriges migrate würde auf bereits existierende Relationen
+# treffen.
+docker compose -f docker/compose.prod.yml up -d postgres
+docker exec -i vestigian-postgres-1 pg_restore \
+  --no-owner --no-acl --clean --if-exists \
+  -U vestigian -d vestigian < /tmp/vestigian-full.dump
+```
+
+`--clean --if-exists` macht den Restore wiederholbar, falls beim ersten
+Versuch etwas schiefgeht — ohne diese beiden Flags bricht ein zweiter
+Versuch an "relation already exists" ab. `--no-owner --no-acl`, weil der
+Dump-Rollenname (`vestigian`, lokal) und der Ziel-Rollenname zwar hier
+übereinstimmen, aber nichts garantiert, dass das immer so bleibt — billige
+Absicherung gegen einen Owner-Mismatch-Fehler, der den ganzen Restore
+abbrechen würde.
+
+**Bilder-Metadaten und Bild-Bytes laufen getrennt, müssen aber beide vor
+dem Go-Live fertig sein.** `site_images.storage_key` kommt mit diesem Dump
+mit; die eigentlichen Objekte wandern über den `rclone sync` aus Schritt 1.
+Storage-Keys leiten sich aus Datenbank-IDs ab, nie aus Dateinamen (siehe
+CLAUDE.md, "Security invariants") — solange beide Schritte irgendwann vor
+dem ersten echten Seitenaufruf abgeschlossen sind, spielt die Reihenfolge
+zwischen ihnen keine Rolle. Die Cichorius-Platten der Trajanssäule
+(`column_relief_plates`) hängen genauso von beidem ab und laufen über
+denselben `rclone sync`, nicht separat.
+
+**Kein Zwischenschritt für Valkey nötig.** Sitzungen, Rate-Limits und der
+Tile-Cache sind laut Design regenerierbar (siehe CLAUDE.md, "Valkey") — ein
+leerer Valkey auf dem VPS ist der korrekte Startzustand, kein
+Migrationsschritt.
+
+---
+
+## 3. Basemap beschaffen
 
 Existiert noch gar nicht. Produktion setzt `BASEMAP_PROVIDER=pmtiles` voraus.
 
@@ -97,14 +189,68 @@ Reproduzierbar, also risikolos — jederzeit neu beziehbar.
 
 ---
 
-## 3. Erstes Deployment
+## 4. Erstes Deployment
+
+### 4.0. Wie die Werte sicher auf den Server kommen
+
+**Geprüft, nicht angenommen** (`docs.dokploy.com/docs/core/variables` und
+`.../docker-compose`, live abgerufen): Variablen, die man in Dokploys eigener
+UI unter "Environment" einträgt, landen laut Dokploys eigener Dokumentation
+selbst **in einer `.env`-Datei im Deployment-Verzeichnis** — sie werden
+"nicht automatisch in Container injiziert", sondern müssen im Compose-File
+über `env_file` oder `${VAR}` referenziert werden, genau wie eine von Hand
+angelegte `.env` neben dem Compose-File auch. Ob diese Datei serverseitig
+zusätzlich verschlüsselt abgelegt wird, sagt Dokploys öffentliche
+Dokumentation nicht — **nicht verifizierbar, also nicht als Tatsache
+behandeln.** Praktisch heißt das: Dokploys UI bietet keinen nachweisbaren
+Sicherheitsgewinn gegenüber einer selbst verwalteten `.env`-Datei, nur eine
+andere Eingabemaske für dieselbe Ablageform.
+
+**Deshalb: Dokploys Variablen-UI für die echten Secrets gar nicht benutzen.**
+Stattdessen:
+
+1. `.env` lokal pflegen (liegt bereits in `.gitignore`, verlässt die eigene
+   Maschine nie unverschlüsselt außer per SSH).
+2. Einmalig auf den VPS kopieren — SSH ist ohnehin verschlüsselter Transport,
+   kein zusätzliches Werkzeug nötig:
+   ```bash
+   rsync -avP --chmod=600 .env <vps>:/pfad/zum/deployment-verzeichnis/.env
+   ```
+3. Auf dem VPS: `chmod 600 .env`, Eigentümer der Deploy-User, sonst niemand.
+   Docker Compose lädt diese Datei automatisch, ganz ohne Dokploy-Konfiguration
+   — genau der zweite, von Dokploys eigener Doku bestätigte Weg.
+4. Rotation eines Secrets bedeutet: lokal neu generieren, Datei erneut
+   `rsync`en, redeploy. Kein Live-Edit über die UI, wenn deren Weg ohnehin
+   umgangen wird.
+
+**Eine echte Verschlüsselung-bei-Ruhe, verifiziert:** Dokploy unterstützt
+sechs externe Secret-Provider (HashiCorp Vault/OpenBao, Infisical, AWS
+Secrets Manager, Doppler, Azure Key Vault, Scaleway Secret Manager) über die
+Syntax `${{vault.<provider>.<pfad>:<feld>}}` — laut eigener Doku werden
+diese Werte **"nie in der Dokploy-Datenbank gespeichert"**, sondern beim
+Deploy vom Provider abgerufen und direkt injiziert. Für dieses Projekt
+(ein VPS, eine handvoll Secrets, €27/Monat-Budget) ist ein zusätzlicher
+Vault-Dienst voraussichtlich unverhältnismäßig — dieselbe Abwägung, die
+CrowdSec-Alternativen wie Wazuh oder SafeLine schon aus Ressourcengründen
+ausschließt (siehe `.claude/rules/security-and-governance.md`). Falls doch
+gewünscht: **OpenBao** (Open-Source-Fork von Vault, keine Lizenzfrage —
+dieselbe Überlegung wie Valkey statt Redis) oder **Infisical** (ebenfalls
+quelloffen, selbst hostbar) passen besser zu diesem Projekt als eine
+US-SaaS wie Doppler, aus denselben EU/Open-Source-Gründen wie der Rest des
+Stacks.
+
+**Nie:** Secrets ins Dockerfile backen, per `docker run -e SECRET=...` auf
+einer geteilten Shell übergeben (landet in `docker inspect`/Shell-History),
+oder in einen Chat/E-Mail/Ticket einfügen, um sie "kurz rüberzuschicken" —
+die `.env`-Datei per `rsync` über SSH ist genauso schnell und verlässt nie
+einen unverschlüsselten Kanal.
 
 ```bash
 # Dokploy-Env
 BUNNY_S3_ENDPOINT / BUNNY_BUCKET / BUNNY_ACCESS_KEY_ID / BUNNY_SECRET_ACCESS_KEY
 IMAGE_BASE_URL=https://<pull-zone>.b-cdn.net
 PMTILES_URL=https://<pull-zone>.b-cdn.net/basemap.pmtiles
-NUXT_BEHIND_TRUSTED_PROXY=false        # bis Schritt 4 steht!
+NUXT_BEHIND_TRUSTED_PROXY=false        # bis Schritt 5 steht!
 ```
 
 Redeploy ist zwingend, nicht nur ein Env-Wechsel: `mapAssetOrigins` und
@@ -116,7 +262,7 @@ Prüfen: Karte laden, Konsole auf CSP-Verstöße ansehen, ein Site-Panel mit Fot
 
 ---
 
-## 4. Origin-Firewall — erst danach `BEHIND_TRUSTED_PROXY=true`
+## 5. Origin-Firewall — erst danach `BEHIND_TRUSTED_PROXY=true`
 
 `true` ohne diese Regel ist **schlechter als `false`**: die App glaubt dann einen
 Header, den jeder setzen kann, der die Hetzner-IP findet — und bekommt pro
@@ -135,7 +281,7 @@ Beides muss stimmen, dann `NUXT_BEHIND_TRUSTED_PROXY=true`.
 
 ---
 
-## 5. CrowdSec-Bouncer
+## 6. CrowdSec-Bouncer
 
 **Geändert seit der ersten Fassung dieses Runbooks: statt des
 Traefik-Plugin-Bouncers unten gibt es jetzt `docker/security/bunny-bouncer/`,
@@ -152,21 +298,21 @@ CrowdSec ist zweigeteilt: die Engine _erkennt_ und schreibt eine Entscheidung,
 ein _Bouncer_ liest sie und blockiert. Aktuell läuft nur die erste Hälfte —
 `cscli decisions list` zeigt Bans, der Client wird weiter bedient.
 
-### 5a. Was der Bunny-Bouncer tatsächlich braucht
+### 6a. Was der Bunny-Bouncer tatsächlich braucht
 
 Was er tut und warum, steht ausführlich im Kopfkommentar von
 `docker/security/bunny-bouncer/bouncer.mjs` — hier nur der Deploy-Teil.
 
-**Wichtig, weil oft missverstanden: der Bunny-Bouncer ersetzt weder Schritt 4
-(Origin-Firewall) noch braucht er das Traefik-Plugin aus 5b.** Er ist
-zusätzlich zu Schritt 4, nicht statt dessen — ohne die Hetzner-Firewall kann
+**Wichtig, weil oft missverstanden: der Bunny-Bouncer ersetzt weder Schritt 5
+(Origin-Firewall) noch braucht er das Traefik-Plugin aus 6b.** Er ist
+zusätzlich zu Schritt 5, nicht statt dessen — ohne die Hetzner-Firewall kann
 ein Angreifer Bunny komplett umgehen und die Hetzner-IP direkt ansprechen,
 womit jede Sperre, die der Bouncer bei Bunny setzt, wirkungslos wird. Das
-Traefik-Plugin aus 5b wird durch den Bunny-Bouncer dagegen tatsächlich
+Traefik-Plugin aus 6b wird durch den Bunny-Bouncer dagegen tatsächlich
 überflüssig — beides zu betreiben blockt doppelt und verwaltet zwei
 Entscheidungsquellen für dieselbe Sperre.
 
-Neue Env-Variablen (zusätzlich zu denen aus Schritt 3):
+Neue Env-Variablen (zusätzlich zu denen aus Schritt 4):
 
 ```bash
 CROWDSEC_BUNNY_BOUNCER_KEY=<eigener Key, unabhängig vom Traefik-Key>
@@ -195,7 +341,7 @@ Schlägt der 403 fehl, im Bunny-Dashboard nachsehen, was die Regel tatsächlich
 enthält, und `PatternMatchingType`/`Type` im Bouncer-Code danach korrigieren —
 nicht raten, sondern gegen das beobachtete Verhalten anpassen.
 
-### 5b. Traefik-Plugin-Bouncer (Alternative, aktuell nicht der gewählte Weg)
+### 6b. Traefik-Plugin-Bouncer (Alternative, aktuell nicht der gewählte Weg)
 
 ```bash
 docker exec vestigian-crowdsec-1 cscli bouncers add traefik-bouncer
@@ -229,23 +375,24 @@ Mechanismus setzen.
 
 ## Reihenfolge und Rollback
 
-0 → 1 → 2 → 3 → 4 → 5, einzeln deployen.
+0 → 1 → 2 → 3 → 4 → 5 → 6, einzeln deployen.
 
 | Schritt      | Rollback                                                                                                                                                                                                                           |
 | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1 Upload     | nichts zu tun, MinIO bleibt unangetastet                                                                                                                                                                                           |
-| 3 Deployment | Env zurück, redeploy                                                                                                                                                                                                               |
-| 4 Firewall   | Regel löschen, `BEHIND_TRUSTED_PROXY=false`                                                                                                                                                                                        |
-| 5 Bouncer    | `bunny-bouncer`-Service stoppen (`docker compose stop bunny-bouncer`); die Edge Rule bleibt liegen, aber deaktiviert sich selbst beim nächsten Zyklus nicht mehr — im Bunny-Dashboard manuell deaktivieren. Erkennung läuft weiter |
+| 2 Datenbank  | leeres `postgres-data`-Volume löschen und neu starten (nichts Produktives hat je darauf gelesen) — `docker compose down -v postgres && docker compose up -d postgres`, dann Restore erneut versuchen                               |
+| 4 Deployment | Env zurück, redeploy                                                                                                                                                                                                               |
+| 5 Firewall   | Regel löschen, `BEHIND_TRUSTED_PROXY=false`                                                                                                                                                                                        |
+| 6 Bouncer    | `bunny-bouncer`-Service stoppen (`docker compose stop bunny-bouncer`); die Edge Rule bleibt liegen, aber deaktiviert sich selbst beim nächsten Zyklus nicht mehr — im Bunny-Dashboard manuell deaktivieren. Erkennung läuft weiter |
 
 ## Offen
 
 - **Off-box-Backup der 15 GiB.** Bis Schritt 1 läuft, existieren sie einmal.
   Danach zweimal (lokal + Bunny), aber Bunny ist kein Backup, sondern
   Auslieferung. Das dringendste ungelöste Risiko.
-- ~~Edge-Bouncer statt Traefik-Bouncer~~ — **erledigt**, siehe 5a. Offen bleibt
+- ~~Edge-Bouncer statt Traefik-Bouncer~~ — **erledigt**, siehe 6a. Offen bleibt
   nur die Verifikation der Bunny-Enum-Werte gegen den echten Account (Schritt
-  5a, letzter Absatz) — ungetestet, weil aus dieser Umgebung kein Bunny-Account
+  6a, letzter Absatz) — ungetestet, weil aus dieser Umgebung kein Bunny-Account
   erreichbar ist.
 - Bunny Shield im Dashboard aktivieren (Free-Tier: WAF + L7-DDoS) — zusätzlich
   zum Bouncer, nicht statt dessen: Shield deckt volumetrische L7-Floods breiter

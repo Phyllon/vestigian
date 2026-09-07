@@ -10,7 +10,10 @@
     "menu": "Menu",
     "menuGroupReference": "Riferimento",
     "menuGroupLegal": "Legali e dati",
-    "menuGroupOffline": "Mappa offline"
+    "menuGroupOffline": "Mappa offline",
+    "menuGroupSupport": "Sostenere questo progetto",
+    "githubLink": "Visualizza fonte su GitHub",
+    "donateLink": "Supporto con una donazione"
   },
   "account": {
     "menuFor": "Menu dell'account, connesso come {name}",
@@ -35,7 +38,7 @@
     "menuLabel": "Mappa di base",
     "groupToday": "Oggi",
     "groupAntiquity": "Antiquariato",
-    "followLimes": "Seguire le calce",
+    "followLimes": "Seguire il limes",
     "followLimesHint": "La frontiera, le sue mura e i suoi forti",
     "tabulaPeutingeriana": "Tabula Peutingeriana",
     "tabulaPeutingerianaHint": "Il diagramma stradale romano, non una mappa — apre il proprio spettatore",
@@ -319,11 +322,25 @@
     "imagesHeading": "Fotografia",
     "imagesBody": "Ogni fotografia porta la propria licenza e attribuzione, mostrata sotto l'immagine stessa. Le licenze variano per record; controlla l'immagine prima di riutilizzarla separatamente dal sito che illustra.",
     "barringtonHeading": "Antiquity (Barrington) mappa di base",
-    "barringtonBody": "Antiche coste, strade, acqua e luoghi sono disegnati dal centro di mappatura del mondo antico (ODbL 1.0) e Pleiades (CC BY 3.0). Entrambi sono riutilizzabili, anche commercialmente, con attribuzione — la condivisione di ODbL si applica al database sottostante, non alle tessere di mappa resi.",
+    "barringtonBody": "Coste, strade, corsi d'acqua e luoghi antichi provengono dall'Ancient World Mapping Center (ODbL 1.0) e da Pleiades (CC BY 3.0). Entrambi sono riutilizzabili, anche commercialmente, con attribuzione — la clausola share-alike di ODbL si applica al database sottostante, non alle tessere di mappa generate.",
     "dareHeading": "Mappa di base dell'antichità (DARE)",
     "dareBody": "Questa basemap è CC BY-SA 3.0 di Johan Åhlfeldt (Atlante digitale dell'Impero Romano, Università di Goteborg) — ma due dei suoi strati di origine sono accreditati non commerciali (CC BY-NC 3.0 / CC BY-NC-SA), che la coperta CC BY-SA non può sovrascrivere. Trattare questo strato specifico come uso non commerciale solo.",
     "limesHeading": "La frontiera (limi)",
-    "limesBody": "La linea di frontiera deriva dalla portata dell'impero dell'Antico Mondo Mapping Center (ODbL 1.0) e non fa parte del database contribuito."
+    "limesBody": "La linea di frontiera deriva dall'estensione dell'impero dell'Ancient World Mapping Center (ODbL 1.0) e non fa parte del database contribuito.",
+    "overlaysHeading": "Ulteriori sovrapposizioni della mappa",
+    "overlaysIntro": "Strati commutabili sulla mappa, ciascuno sotto la propria licenza — visibili nella propria attribuzione della mappa mentre acceso.",
+    "overlayBattles": "Battaglie: Wikidata (CC0 1.0) — nessun diritto riservato.",
+    "overlayPorts": "Porti antichi: Catalogo dei Porti Antichi, Arthur de Graauw (CC BY 4.0), pubblicato anche come DARMC Scholarly Data Series (Harvard).",
+    "overlayRoutes": "Percorsi: ORBIS v2, Meeks, Scheidel, Weiland & Arcenas, Stanford University (CC BY 3.0).",
+    "overlayMinorFeatures": "Antichità minori (ponti, miniere, cave e altro): Ancient World Mapping Center (ODbL 1.0).",
+    "overlayCoinHoards": "Ripostigli monetari: Coin Hoards of the Roman Republic, American Numismatic Society (CC BY-NC-SA 4.0) — solo uso non commerciale.",
+    "overlayEmpireExtents": "Estensione dell'impero nel tempo: collaboratori di OpenHistoricalMap (CC0 1.0).",
+    "columnReliefHeading": "Rilievi della colonna",
+    "columnReliefBody": "Le tavole della Colonna di Traiano sono rispecchiate dalla categoria «Cichorius Plates» di Wikimedia Commons, dove sono indicate come di pubblico dominio. Le tavole della Colonna di Marco Aurelio sono servite dal vivo dalla digitalizzazione della Biblioteca Universitaria di Heidelberg dello studio di Petersen, Domaszewski & Calderini del 1896 — anch'esso di pubblico dominio; nulla viene copiato nell'archivio proprio di questo progetto per questa colonna.",
+    "placeNamesHeading": "Nomi locali moderni",
+    "placeNamesBody": "I nomi di città e città attuali utilizzati nella ricerca di luogo provengono da GeoNames.org (CC BY 4.0).",
+    "satelliteHeading": "Mappa base satellitare",
+    "satelliteBody": "La vista satellitare mostra immagini Sentinel-2 senza nuvole di EOX IT Services (Vienna), costruite a partire dai dati aperti ESA Copernicus Sentinel-2. La versione usata da questa app è CC BY-NC-SA 4.0 — solo uso non commerciale, e ogni riutilizzo deve essere condiviso con la stessa licenza."
   },
   "impressum": {
     "title": "Avviso legale",
@@ -373,7 +390,8 @@
     "minorsHeading": "Età",
     "minorsBody": "Vestigian non è rivolta ai bambini. Se hai meno di 16 anni, non creare un account senza il coinvolgimento di un genitore o di un tutore.",
     "changesHeading": "Cambiamenti",
-    "changesBody": "Questa pagina è aggiornata quando ciò che il servizio realmente cambia. Esso riflette la versione corrente dell'applicazione in esecuzione."
+    "changesBody": "Questa pagina è aggiornata quando ciò che il servizio realmente cambia. Esso riflette la versione corrente dell'applicazione in esecuzione.",
+    "recipientColumnReliefs": "Heidelberg University Library (EU): la visualizzazione della colonna delle targhe di Marcus Aurelius è servita dal nostro server che relaying che la digitalizzazione della libreria, di nuovo in modo che il vostro indirizzo IP non sia condiviso con loro direttamente."
   },
   "geolocate": {
     "locationBlocked": "Posizione bloccata",

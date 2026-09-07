@@ -180,6 +180,23 @@ its cartographic sense, which came back as superimposition
 each locale now carries its own mapping-software word for it — Calques,
 Capas, Livelli, Overlays.
 
+**A fourth category: a domain word that is also an ordinary word in the
+target language.** "Limes" — the Roman frontier — was never frozen because
+it never looked like a wordmark or an obviously specialist term, and stood
+alone as a short label ("Follow the limes"). Every Romance-language
+catalogue read it as the citrus fruit instead: "Volg de limoenen" (Dutch,
+"follow the limes/fruit"), "Seguir los limones" (Spanish, "follow the
+lemons"), "Suivre les chaux" (French, "follow the quicklime"), "Seguire le
+calce" (Italian, same). German alone came through correct, because "der
+Limes" happens to be the actual German historical term too — which is what
+let this sit unnoticed for a while: one of five locales looking right is
+not evidence the other four do. Caught only while checking the licence
+page for an unrelated request, by reading every locale's value side by
+side rather than trusting any single one. `basemapSwitcher.followLimes` is
+now frozen; `followLimesHint` was already fine in every locale, since it
+describes the frontier ("the border, its walls and its forts") rather than
+naming it.
+
 **The pre-commit hook keeps the five locales from drifting.** When
 `i18n/locales/en.json` is staged, `.husky/pre-commit` runs
 `scripts/i18n/translate-locales.ts` before `lint-staged` and stages whatever

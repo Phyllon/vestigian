@@ -29,6 +29,8 @@
     "db:migrate": "tsx --env-file-if-exists=.env server/database/migrate.ts",
     "db:studio": "drizzle-kit studio",
     "db:snapshot": "tsx --env-file-if-exists=.env scripts/snapshot-database.ts",
+    "dev:bundle": "tsx --env-file-if-exists=.env scripts/create-dev-bundle.ts",
+    "dev:bundle:restore": "tsx --env-file-if-exists=.env scripts/restore-dev-bundle.ts",
     "import:fetch": "tsx --env-file-if-exists=.env scripts/import/01-fetch-dump.ts",
     "import:convert": "tsx --env-file-if-exists=.env scripts/import/02-mysql-to-postgres.ts",
     "import:image-records": "tsx --env-file-if-exists=.env scripts/import/02b-image-records.ts",

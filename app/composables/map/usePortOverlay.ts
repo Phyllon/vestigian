@@ -95,6 +95,8 @@ export const usePortOverlay = () => {
     })
 
     map.addLayer(buildPortLayer())
+    // See `useLimesOverlay`'s `attachLimesOverlay` for why this call is needed.
+    map.triggerRepaint()
 
     map.on('click', PORT_LAYER_ID, (event) => showPortPopup(map, event))
     map.on('mouseenter', PORT_LAYER_ID, () => {

@@ -6,7 +6,7 @@ This document is a technical deep-dive for interested, technically literate
 readers. It covers accessibility, security, architecture, the technology
 stack, the request lifecycle, the full feature set, how borrowed data is
 cross-checked and enriched, and the legal/GDPR posture. It reflects the
-codebase and its documented design decisions as of **2026-09-03**.
+codebase and its documented design decisions as of **2026-09-07**.
 
 ---
 
@@ -165,8 +165,9 @@ load-bearing — never to be "quietly" weakened):
   A moderator can never approve their own contribution.
 - **An edit that removes more than it adds is always queued**, regardless of
   the author's trust level (`isBlankingEdit`).
-- **Nobody can change their own role**, which also structurally prevents an
-  instance from losing its last admin.
+- **Nobody can change their own role, and no admin can demote another
+  admin** — removing an admin requires direct database access, the same as
+  creating the very first one.
 - **Role/trust are re-read from the database on every guarded request** —
   never trusted from the session cookie, so a demotion takes effect on the
   very next request rather than at next login.
@@ -234,7 +235,7 @@ mindmap
       MinIO/Bunny object storage
     External data sources
       vici.org import (MySQL dump)
-      AWMC (Barrington Atlas, ODbL)
+      AWMC (Barrington Atlas + minor antiquities, ODbL)
       Pleiades (CC BY)
       DARE raster tiles (CC BY-SA/NC mix)
       EOX Sentinel-2 (CC BY-NC-SA)
@@ -242,6 +243,13 @@ mindmap
       EDH findspots (CC BY-SA)
       Natural Earth country boundaries (public domain)
       OmnesViae / Tabula Peutingeriana (unlicensed, gated)
+      Wikidata battles (CC0)
+      Catalogue of Ancient Ports (CC BY)
+      ORBIS v2 routes (CC BY)
+      CHRR coin hoards (CC BY-NC-SA)
+      OpenHistoricalMap empire extents (CC0)
+      Wikimedia Commons Cichorius Plates, mirrored (public domain)
+      Heidelberg UL IIIF, Column of Marcus Aurelius, live proxy (public domain)
     Observability
       Grafana Alloy
       Loki / Tempo / Prometheus / Alertmanager
@@ -378,7 +386,24 @@ sequenceDiagram
 - **Tabula Peutingeriana** — a standalone IIIF deep-zoom viewer of the
   actual manuscript (OpenSeadragon), plus a separate, off-by-default
   **network overlay** showing the roads and towns it records at their real
-  coordinates.
+  coordinates (gated behind an operator flag — its source states no
+  licence, so nothing is served until that's confirmed with the maintainer).
+- **A dedicated overlay switcher**, separate from the basemap menu, holding
+  every switchable layer over the map: contributed sites, the limes
+  frontier, the Tabula Peutingeriana network, Wikidata battles, the
+  Catalogue of Ancient Ports, ORBIS Roman routes, AWMC's minor antiquities
+  (bridges, mines, quarries and more), and CHRR coin hoards — each off by
+  default, each crediting its own source in the map's own attribution the
+  moment it's switched on.
+- **Column reliefs** (`/columns`) — Trajan's Column, mirrored from Wikimedia
+  Commons' Cichorius Plates into this project's own storage, and the Column
+  of Marcus Aurelius, served live via a server-side IIIF proxy onto
+  Heidelberg University Library's own digitisation (a direct browser fetch
+  to that host fails outright; only a server-side request succeeds). Both
+  use an OpenSeadragon deep-zoom viewer — real pan/zoom-to-pointer, not a
+  scrolling image frame — with a shared, typeable page pager; the Marcus
+  Aurelius viewer additionally remembers the volume and plate a reader left
+  off at.
 - **Full-text-lite site search** across contributed titles/summaries _and_
   235k+ modern city/town names (self-hosted GeoNames table, ranked so exact
   prefix matches beat fuzzy trigram noise).
@@ -456,7 +481,9 @@ source catalogue through a self-hosted LibreTranslate instance.
 - A public, machine-readable **OpenAPI document** (dev-only — 404s in
   production), built by merging Nitro's auto-generated shape with each
   route's real zod validation schema, so documentation can never silently
-  drift from what a handler actually enforces.
+  drift from what a handler actually enforces. Interactive UI at
+  `http://localhost:3000/_scalar` while `pnpm dev` is running; raw document
+  at `/api/openapi.json`.
 
 ---
 
@@ -752,13 +779,14 @@ banner.
 
 ### 9.3 Third-party / cross-border data flows
 
-| Recipient                                                    | What reaches them                                                                                                | Basis / mitigation                                                                                                   |
-| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| **Wikidata / Wikipedia / Pleiades**                          | Nothing from the visitor — the server proxies every enrichment call, so only the app server's own IP is exposed. |
-| **CrowdSec central blocklist**                               | IP addresses already flagged as abusive, shared with the community blocklist (`DISABLE_ONLINE_API: false`)       | Legitimate interest (abuse prevention); documented in the privacy policy's recipients section.                       |
-| **Mapterhorn basemap tiles**                                 | Visitor IP, fetched **directly by the browser**, the same as any embedded map tile host                          | Hosting jurisdiction **not yet confirmed** — flagged as needing verification before the privacy policy is finalized. |
-| **DARE (Gothenburg), EOX (Vienna), OmnesViae (Netherlands)** | Visitor IP, for basemap/manuscript tile requests, until a self-hosted mirror is built and pointed at             | Courtesy-contact relationships established with each maintainer before any at-scale traffic; EU-hosted throughout.   |
-| **Lettermint**                                               | Recipient email + display name, for transactional mail only                                                      | EU-hosted, replaced a US provider specifically to keep this data inside the EU.                                      |
+| Recipient                                                    | What reaches them                                                                                                                                                                                      | Basis / mitigation                                                                                                   |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| **Wikidata / Wikipedia / Pleiades**                          | Nothing from the visitor — the server proxies every enrichment call, so only the app server's own IP is exposed.                                                                                       |
+| **Heidelberg University Library**                            | Nothing from the visitor — viewing the Column of Marcus Aurelius's plates is served by a server-side IIIF proxy, for the same reason: a direct browser request to that host fails outright regardless. |
+| **CrowdSec central blocklist**                               | IP addresses already flagged as abusive, shared with the community blocklist (`DISABLE_ONLINE_API: false`)                                                                                             | Legitimate interest (abuse prevention); documented in the privacy policy's recipients section.                       |
+| **Mapterhorn basemap tiles**                                 | Visitor IP, fetched **directly by the browser**, the same as any embedded map tile host                                                                                                                | Hosting jurisdiction **not yet confirmed** — flagged as needing verification before the privacy policy is finalized. |
+| **DARE (Gothenburg), EOX (Vienna), OmnesViae (Netherlands)** | Visitor IP, for basemap/manuscript tile requests, until a self-hosted mirror is built and pointed at                                                                                                   | Courtesy-contact relationships established with each maintainer before any at-scale traffic; EU-hosted throughout.   |
+| **Lettermint**                                               | Recipient email + display name, for transactional mail only                                                                                                                                            | EU-hosted, replaced a US provider specifically to keep this data inside the EU.                                      |
 
 ### 9.4 Licensing discipline as a legal control, not just an attribution nicety
 
@@ -774,6 +802,15 @@ a footnote:
   is imported into its own tables but never served** until an operator
   explicitly enables it — the import touches nothing a visitor can see;
   serving is a separate, consciously flipped switch.
+- **Every later overlay (battles, ports, routes, minor antiquities, coin
+  hoards) got the same own-table, own-attribution treatment from the start**
+  — and for four of them (ports CC BY, routes CC BY, minor antiquities
+  ODbL, coin hoards CC BY-NC-SA) crediting the source on the map is the
+  licence condition itself, not a courtesy. This was missed on first build
+  — none of the seven newer overlay sources set a MapLibre `attribution` at
+  all — and surfaced only once the vici-sourced site overlay went off by
+  default, since that source had been carrying the map's one visible credit
+  line for everything else.
 - **Image licences are tracked per record** (`licence`, `attribution`
   columns are non-null), because unlike the text/metadata (CC BY-SA/CC0
   uniformly), image rights vary photograph by photograph.

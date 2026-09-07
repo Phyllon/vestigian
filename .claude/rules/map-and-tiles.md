@@ -5,9 +5,79 @@ paths:
   - 'server/api/tiles/**'
   - 'server/utils/mvt.ts'
   - 'server/utils/basemap-pmtiles.ts'
+  - 'server/utils/cache.ts'
   - 'service-worker/**'
   - 'app/pages/offline.vue'
 ---
+
+## Cache invalidation is version counters, not deletion — nothing to run by hand
+
+Every tile response is cached in Redis/Valkey keyed by coordinates plus a
+generation counter (`server/utils/cache.ts`), not by content hash and not
+cleared on write. Two independent counters exist, on separate clocks:
+
+- `vestigian:data-version` — bumped by `bumpDataVersion()` whenever a
+  revision is approved (`applyRevision`), which is the only writer.
+- `vestigian:atlas-version` — bumped only by `pnpm import:atlas` after a
+  rebuild, kept separate so a photo approval doesn't invalidate the
+  antiquity atlas's unrelated coastline/road tiles, and vice versa.
+
+Bumping the counter doesn't delete old cache entries — it just changes which
+key future requests compute, so stale entries age out on their own TTL
+(`EX 3600` for a real tile, `86400` for a confirmed-empty one, both set in
+`server/api/tiles/[z]/[x]/[y].get.ts`). This means **normal use needs no
+manual cache invalidation in production** — every path that changes what a
+tile shows already goes through `bumpDataVersion`/`bumpAtlasVersion`.
+
+The one case that needs a manual bump is writing to Postgres from outside
+the app — e.g. restoring `scripts/restore-dev-bundle.ts`'s dump directly
+onto a database whose tiles are already cached. Nothing in that path calls
+either bump function, so do it by hand once, against the same Redis/Valkey
+instance the app uses: `INCR vestigian:data-version` and
+`INCR vestigian:atlas-version`. Skipping this doesn't corrupt anything —
+Postgres and Redis are just out of step until the existing TTLs expire — but
+readers see stale tiles for up to an hour in the meantime.
+
+A bump failure (Redis unreachable) is caught and logged as an error
+(`'tile cache not invalidated: approved changes may not reach the map'`)
+rather than thrown, per the project's fail-open convention for caches — but
+nothing surfaces that failure to the moderator who approved the edit, so if
+approvals stop reaching the map, check for this log line before assuming
+the revision pipeline itself is broken.
+
+The offline service-worker cache (`service-worker/sw.ts`) is unrelated to
+either counter — it is per-visitor Cache Storage, written only by that
+visitor's own explicit "download this area" action, so there is no
+production-side invalidation for it at all.
+
+## Toggling an overlay didn't always redraw the map until the reader scrolled
+
+Reported directly: "show battles" (and, plausibly, any overlay) sometimes
+drew nothing when switched on, and only appeared once the reader panned or
+zoomed the map. Attempted reproduction in a real Chromium instance against
+the dev server — toggling immediately after load, after an 8-second idle
+period, at the default zoom, with screenshots taken as early as 100ms after
+the toggle — never once reproduced it; the layer painted correctly every
+time. That does not mean the report was wrong, only that whatever condition
+triggers it (production network latency, a throttled/backgrounded tab, an
+OS-level power-saving mode affecting `requestAnimationFrame` scheduling) is
+not present in a fast, foregrounded, local Chromium session, and none of
+those were reproducible here (the same class of environment gap the offline
+feature's throttling attempt hit — see "Offline maps" below).
+
+**The fix applied is defensive, not diagnostic**: every overlay's
+`attach*Overlay` now calls `map.triggerRepaint()` immediately after its
+`addSource`/`addLayer` calls (`useLimesOverlay`, `useBattleOverlay`,
+`usePortOverlay`, `useRouteOverlay`, `useMinorFeatureOverlay`,
+`useCoinHoardOverlay`, `useViewportTiles`, `useTabulaPeutingerianaOverlay`,
+`useNotebookOverlay`). MapLibre stops its internal render loop once idle and
+is _supposed_ to resume it on its own when a source or layer is added, but
+`triggerRepaint()` is the library's own public escape hatch for exactly this
+"I changed the style, make sure a frame gets scheduled" case, and calling it
+is free when a repaint was already going to happen regardless. If this
+report recurs, the next step is capturing it live (screen recording or a
+production-network repro) rather than more local Playwright attempts, since
+local reproduction has now been tried and failed twice.
 
 ## Every overlay credits its own source, and shipped without doing so
 

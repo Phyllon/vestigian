@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { count, eq } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 import { users } from '~~/server/database/schema'
 import { checkRoleChange, describeRoleChangeRejection } from '#shared/utils/authorization'
 
@@ -13,7 +13,7 @@ defineRouteMeta({
     tags: ['moderation'],
     summary: "Change a user's role",
     description:
-      'Admin only. Nobody can change their own role, which is also what keeps an instance from losing its last admin.',
+      'Admin only. Nobody can change their own role, and no admin can demote another admin — removing an admin requires direct database access.',
   },
 })
 
@@ -31,18 +31,11 @@ export default defineEventHandler(async (event) => {
 
   if (!target) throw createError({ statusCode: 404, message: 'No such account.' })
 
-  // Counted so `checkRoleChange` can refuse to demote the last admin.
-  const [admins] = await database
-    .select({ total: count() })
-    .from(users)
-    .where(eq(users.role, 'admin'))
-
   const check = checkRoleChange({
     actor,
     targetUserId: userId,
     targetCurrentRole: target.role,
     nextRole: role,
-    adminCount: admins!.total,
   })
 
   if (!check.allowed) {

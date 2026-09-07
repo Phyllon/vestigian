@@ -108,6 +108,8 @@ export const useMinorFeatureOverlay = () => {
     })
 
     map.addLayer(buildFeatureLayer())
+    // See `useLimesOverlay`'s `attachLimesOverlay` for why this call is needed.
+    map.triggerRepaint()
 
     map.on('click', FEATURE_LAYER_ID, (event) => showFeaturePopup(map, event))
     map.on('mouseenter', FEATURE_LAYER_ID, () => {

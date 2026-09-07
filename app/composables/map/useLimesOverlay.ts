@@ -39,6 +39,23 @@ export const useLimesOverlay = () => {
       if ('source' in layer && layer.source === 'atlas' && !map.getSource('atlas')) continue
       map.addLayer(layer)
     }
+
+    /**
+     * Reported: switching an overlay on drew nothing until the reader
+     * scrolled or zoomed the map, at which point it appeared correctly —
+     * the source and layer were always right, only the paint was missing.
+     * MapLibre stops its render loop once idle and only resumes it via
+     * `triggerRepaint()`; `addSource`/`addLayer` are supposed to call that
+     * internally, but a toggle fired from a Vue event handler while the map
+     * has been sitting untouched is exactly the condition under which that
+     * internal scheduling has been seen to miss (also reported for
+     * `useBattleOverlay`, `usePortOverlay`, `useRouteOverlay`,
+     * `useMinorFeatureOverlay`, `useCoinHoardOverlay`, `useViewportTiles` —
+     * every overlay that adds a layer after the map has already loaded).
+     * Calling it explicitly here costs nothing when the map was already
+     * about to repaint on its own, and fixes the case when it wasn't.
+     */
+    map.triggerRepaint()
   }
 
   const detachLimesOverlay = (map: MapLibreMap): void => {

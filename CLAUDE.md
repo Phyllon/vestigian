@@ -94,7 +94,7 @@ checking `.claude/rules/` first, every time, not just this once.
 - **An edit that removes more than it adds is queued regardless of trust** (`isBlankingEdit`) — a wrong auto-approval on a blanking edit costs far more than a moderator glance.
 - **Revert writes a new revision** restoring the prior state. Never delete a revision. History is append-only, and reverts do not increment the moderator's trust counter.
 - **A decision reaches the person it was made about** — review and trust decisions mail the author after the write, never before (reverts excluded: their author is the moderator).
-- **Nobody can change their own role** (`checkRoleChange`) — this is also what protects the last admin.
+- **Nobody can change their own role, and no admin can demote another admin** (`checkRoleChange`) — removing an admin requires direct database access, same as creating the first one.
 - **Role and trust are re-read from the database inside every guard**, never from the session cookie.
 - **Slugs never change on edit.**
 - Suspension leaves `approved_contributions` untouched, so restoring trust returns someone exactly where they were.

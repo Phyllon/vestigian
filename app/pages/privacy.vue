@@ -133,6 +133,7 @@
         <li>{{ t('privacy.recipientMail') }}</li>
         <li>{{ t('privacy.recipientTranslate') }}</li>
         <li>{{ t('privacy.recipientEnrichment') }}</li>
+        <li>{{ t('privacy.recipientColumnReliefs') }}</li>
         <li>{{ t('privacy.recipientBasemap') }}</li>
         <li>{{ t('privacy.recipientSecurity') }}</li>
       </ul>

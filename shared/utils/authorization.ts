@@ -98,7 +98,7 @@ export const evaluateTrust = (user: TrustInput): TrustEvaluation => {
 export const countsTowardsTrust = (kind: ContributionKind): boolean =>
   kind === 'site' || kind === 'tracing'
 
-export type RoleChangeRejection = 'not-admin' | 'self' | 'above-own-rank' | 'last-admin'
+export type RoleChangeRejection = 'not-admin' | 'self' | 'above-own-rank' | 'admin-protected'
 
 export interface RoleChangeCheck {
   allowed: boolean
@@ -110,25 +110,30 @@ export interface RoleChangeRequest {
   targetUserId: number
   targetCurrentRole: UserRole
   nextRole: UserRole
-  /** How many admins exist, so the last one cannot be demoted. */
-  adminCount: number
 }
 
 /**
  * Who may change whose role.
  *
- * Three rules, each closing a way an instance can be locked or captured:
- * only admins may change roles at all; nobody may change their own, so a
- * moderator cannot self-promote; and the last admin cannot be demoted, because
- * an instance with no admin has no way back short of database surgery.
+ * Three rules, each closing a way an instance can be locked or captured: only
+ * admins may change roles at all; nobody may change their own, so a moderator
+ * cannot self-promote and an admin cannot be demoted by pressure on their own
+ * account; and **no admin can ever demote another admin through this
+ * endpoint, full stop** — not "while more than one admin exists," an
+ * unconditional block. Granting someone admin used to also hand them the
+ * power to strip it back off you; an admin granted in good faith is not
+ * assumed to stay one, and this closes that gap. Removing a rogue or
+ * compromised co-admin is deliberately left to the same database surgery
+ * that creates the first admin (see the security-and-governance notes) —
+ * a slower path, chosen on purpose over a button any admin could press
+ * against any other.
  *
- * Only the first two can actually fire — see the comments on the other two
- * branches. That is worth knowing before relaxing either of them, because the
- * invariants the unreachable rules describe are currently being held by the
- * reachable ones rather than by themselves.
+ * Only the first two rules can actually fire for a demotion *between two
+ * different accounts* now that the third is unconditional — an admin can
+ * still promote anyone up to admin, just never take admin away from one.
  */
 export const checkRoleChange = (request: RoleChangeRequest): RoleChangeCheck => {
-  const { actor, targetUserId, targetCurrentRole, nextRole, adminCount } = request
+  const { actor, targetUserId, targetCurrentRole, nextRole } = request
 
   if (!hasAtLeastRole(actor.role, 'admin')) return { allowed: false, reason: 'not-admin' }
   if (actor.id === targetUserId) return { allowed: false, reason: 'self' }
@@ -140,15 +145,8 @@ export const checkRoleChange = (request: RoleChangeRequest): RoleChangeCheck => 
     return { allowed: false, reason: 'above-own-rank' }
   }
 
-  // Also unreachable, and less obviously so. Reaching it needs an admin actor
-  // demoting a *different* admin while only one admin exists — which is a
-  // contradiction, since the actor is an admin too. The "an instance always has
-  // an admin" invariant is really held by the `self` rule above, verified by
-  // demoting admins down to one and finding no way to remove the last. Kept as
-  // the explicit statement of the invariant, and because it still catches the
-  // race where `adminCount` was read before a concurrent demotion landed.
-  if (targetCurrentRole === 'admin' && nextRole !== 'admin' && adminCount <= 1) {
-    return { allowed: false, reason: 'last-admin' }
+  if (targetCurrentRole === 'admin' && nextRole !== 'admin') {
+    return { allowed: false, reason: 'admin-protected' }
   }
 
   return { allowed: true, reason: null }
@@ -159,7 +157,7 @@ export const describeRoleChangeRejection = (reason: RoleChangeRejection): string
     'not-admin': 'Only an administrator can change roles.',
     self: 'You cannot change your own role.',
     'above-own-rank': 'You cannot grant a role above your own.',
-    'last-admin': 'This is the only administrator. Promote someone else first.',
+    'admin-protected': 'An administrator cannot be demoted here — this requires database access.',
   }
   return messages[reason]
 }

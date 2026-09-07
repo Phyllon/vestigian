@@ -6,6 +6,8 @@ paths:
 
 ## OpenAPI
 
+**Reach the interactive UI at `http://localhost:3000/_scalar` while `pnpm dev` is running** — confirmed live (200 response), not assumed from Nitro's docs. That's Nitro's own default route for `nitro.openAPI.ui.scalar`, not something this project chose or configured a path for; the raw merged document is `/api/openapi.json`. Both 404 in production — see below.
+
 Every route under `server/api/` declares `defineRouteMeta({ openAPI: {...} })`
 for `tags`, `summary` and `description` — and only those three. **`defineRouteMeta`
 is a build-time macro, not a runtime call**: its argument is parsed as an AST

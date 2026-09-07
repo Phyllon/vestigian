@@ -76,6 +76,8 @@ export const useCoinHoardOverlay = () => {
     })
 
     map.addLayer(buildCoinHoardLayer())
+    // See `useLimesOverlay`'s `attachLimesOverlay` for why this call is needed.
+    map.triggerRepaint()
 
     map.on('click', COIN_HOARD_LAYER_ID, (event) => showCoinHoardPopup(map, event))
     map.on('mouseenter', COIN_HOARD_LAYER_ID, () => {

@@ -506,7 +506,7 @@ const OPERATION_OVERRIDES: Record<
       security: SESSION_SECURITY,
       parameters: paramsFromSchema(moderationUsersQuery, 'query'),
       responses: {
-        200: jsonResponse('{ adminCount, contributors: [...] }'),
+        200: jsonResponse('{ contributors: [...] }'),
         401: COMMON_RESPONSES[401],
         403: COMMON_RESPONSES[403],
         429: COMMON_RESPONSES[429],

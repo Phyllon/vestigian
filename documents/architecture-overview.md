@@ -46,13 +46,21 @@ GET /api/tiles/{z}/{x}/{y}.mvt
    → Valkey SET, return binary tile
 ```
 
-The same pattern repeats for two more tile families, each a separate route so
-a reader who never asks for them pays nothing:
+The same pattern repeats for several more tile families, each a separate
+route so a reader who never asks for them pays nothing:
 
 - `/api/tiles/antiquity/{z}/{x}/{y}.mvt` — the Barrington sheet (AWMC + Pleiades
   data, imported once, its own cache generation)
 - `/api/tiles/limes/{z}/{x}/{y}.mvt` — the Roman frontier, drawn over the
   Barrington sheet when switched on, riding the same cache generation
+- `/api/tiles/antiquity-{battles,ports,routes,features,coin-hoards,empire}/{z}/{x}/{y}.mvt`
+  — one route per switchable overlay (Wikidata battles, ancient ports,
+  ORBIS routes, AWMC minor antiquities, CHRR coin hoards, OpenHistoricalMap
+  empire extents), each off by default and each with its own MapLibre
+  `attribution` string
+- `/api/tiles/basemap/{z}/{x}/{y}.get.ts` — reads one tile out of the
+  production PMTiles archive server-side, used only by the offline
+  download flow so it gets one ordinary, cacheable HTTP response per tile
 
 ## Data layer
 
@@ -65,10 +73,13 @@ a reader who never asks for them pays nothing:
 
 ## Background work (not request-driven)
 
-- **Import pipeline** (`scripts/import/`): a six-stage, resumable pipeline that
-  pulls vici.org's MySQL dump, converts it to the Postgres schema, mirrors
-  photographs and the DARE raster basemap, and builds the Barrington/limes
-  vector data. Run once per environment, not per request.
+- **Import pipeline** (`scripts/import/`): a resumable, numbered pipeline
+  (19 stages and growing) that pulls vici.org's MySQL dump, converts it to
+  the Postgres schema, mirrors photographs and the DARE raster basemap,
+  builds the Barrington/limes vector data, and imports every later overlay
+  (battles, ports, routes, minor antiquities, coin hoards, empire extents,
+  Tabula Peutingeriana, column relief plates, modern cities). Run once per
+  environment, not per request.
 - **`pnpm tiles:warm`**: pre-populates the Valkey tile cache after a deploy or
   bulk import so the first visitors don't pay for cold PostGIS renders.
 - **`pnpm db:snapshot`** / **`pnpm images:reconcile`**: nightly-ish maintenance,
@@ -135,18 +146,19 @@ Kubernetes would be a translation of the same containers, not a rewrite.
 
 ## Directory-to-architecture map
 
-| Layer                                       | Where                                                          |
-| ------------------------------------------- | -------------------------------------------------------------- |
-| UI / map rendering                          | `app/components/map/`, `app/composables/map/`                  |
-| Record detail, contribution forms           | `app/components/site/`, `contribute/`, `moderation/`           |
-| Domain vocabulary shared by client + server | `shared/types/`, `shared/utils/`                               |
-| API routes                                  | `server/api/**` (one file per route, Nitro file-based routing) |
-| Tile SQL generation                         | `server/utils/mvt.ts`, `atlas.ts`, `limes.ts`                  |
-| Governance (revisions, trust, permissions)  | `server/utils/revisions.ts`, `permissions.ts`                  |
-| DB schema (Drizzle)                         | `server/database/schema/`                                      |
-| Hand-written SQL migrations                 | `server/database/migrations/`                                  |
-| One-off data pipelines                      | `scripts/import/`, `scripts/*.ts`                              |
-| Container definitions                       | `docker/`                                                      |
+| Layer                                       | Where                                                                                        |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| UI / map rendering                          | `app/components/map/` (basemap switcher + separate overlay switcher), `app/composables/map/` |
+| Column relief viewers (OpenSeadragon)       | `app/components/columns/`, `app/composables/columns/`                                        |
+| Record detail, contribution forms           | `app/components/site/`, `contribute/`, `moderation/`                                         |
+| Domain vocabulary shared by client + server | `shared/types/`, `shared/utils/`                                                             |
+| API routes                                  | `server/api/**` (one file per route, Nitro file-based routing)                               |
+| Tile SQL generation                         | `server/utils/mvt.ts`, `atlas.ts`, `limes.ts`                                                |
+| Governance (revisions, trust, permissions)  | `server/utils/revisions.ts`, `permissions.ts`                                                |
+| DB schema (Drizzle)                         | `server/database/schema/`                                                                    |
+| Hand-written SQL migrations                 | `server/database/migrations/`                                                                |
+| One-off data pipelines                      | `scripts/import/`, `scripts/*.ts`                                                            |
+| Container definitions                       | `docker/`                                                                                    |
 
 ## What this diagram leaves out
 

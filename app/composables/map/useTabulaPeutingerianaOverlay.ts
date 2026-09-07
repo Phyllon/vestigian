@@ -148,6 +148,9 @@ export const useTabulaPeutingerianaOverlay = () => {
         'text-halo-width': 1.2,
       },
     })
+
+    // See `useLimesOverlay`'s `attachLimesOverlay` for why this call is needed.
+    map.triggerRepaint()
   }
 
   const detachTabulaPeutingerianaOverlay = (map: MapLibreMap): void => {

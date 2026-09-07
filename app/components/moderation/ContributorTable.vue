@@ -14,7 +14,6 @@
   }
 
   interface ContributorList {
-    adminCount: number
     contributors: ContributorRow[]
   }
 
@@ -66,8 +65,9 @@
 
   /**
    * Mirrors `checkRoleChange` rather than restating a subset of it, so the
-   * select is absent in exactly the cases the endpoint would refuse — including
-   * the last admin, which this component used to offer and then 403 on.
+   * select is absent in exactly the cases the endpoint would refuse —
+   * including any admin row, since no admin can demote another through this
+   * endpoint any more, only through direct database access.
    */
   const mayChangeRole = (row: ContributorRow): boolean =>
     currentUser.value !== null &&
@@ -76,9 +76,8 @@
       targetUserId: row.id,
       targetCurrentRole: row.role,
       // The demotion is the case that can be refused; asking about it is what
-      // reveals whether this row is the last admin.
+      // reveals whether this row is protected.
       nextRole: 'contributor',
-      adminCount: data.value?.adminCount ?? 0,
     }).allowed
 
   const startSuspension = (row: ContributorRow): void => {

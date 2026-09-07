@@ -95,6 +95,10 @@ export const useBattleOverlay = () => {
     })
 
     map.addLayer(buildBattleLayer())
+    // See `useLimesOverlay`'s `attachLimesOverlay` for why this is needed —
+    // MapLibre does not reliably schedule a repaint on its own when a layer
+    // is added while the map is otherwise idle.
+    map.triggerRepaint()
 
     map.on('click', BATTLE_LAYER_ID, (event) => showBattlePopup(map, event))
     map.on('mouseenter', BATTLE_LAYER_ID, () => {

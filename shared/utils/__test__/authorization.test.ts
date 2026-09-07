@@ -152,7 +152,6 @@ describe('checkRoleChange', () => {
       targetUserId: 2,
       targetCurrentRole: 'contributor',
       nextRole: 'moderator',
-      adminCount: 2,
       ...overrides,
     })
 
@@ -172,20 +171,14 @@ describe('checkRoleChange', () => {
     expect(change({ nextRole: 'admin' }).allowed).toBe(true)
   })
 
-  it('refuses demoting the last admin', () => {
-    expect(
-      change({ targetCurrentRole: 'admin', nextRole: 'contributor', adminCount: 1 }).reason,
-    ).toBe('last-admin')
-  })
-
-  it('allows demoting an admin while another remains', () => {
-    expect(
-      change({ targetCurrentRole: 'admin', nextRole: 'contributor', adminCount: 2 }).allowed,
-    ).toBe(true)
+  it('refuses demoting any admin, even with others remaining', () => {
+    expect(change({ targetCurrentRole: 'admin', nextRole: 'contributor' }).reason).toBe(
+      'admin-protected',
+    )
   })
 
   it('has a message for every rejection', () => {
-    const reasons = ['not-admin', 'self', 'above-own-rank', 'last-admin'] as const
+    const reasons = ['not-admin', 'self', 'above-own-rank', 'admin-protected'] as const
     for (const reason of reasons) {
       expect(describeRoleChangeRejection(reason)).toMatch(/\S/)
     }

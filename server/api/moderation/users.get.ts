@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { and, asc, count, desc, eq, ilike, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, ilike, sql } from 'drizzle-orm'
 import { revisions, users } from '~~/server/database/schema'
 
 export const querySchema = z.object({
@@ -47,17 +47,7 @@ export default defineEventHandler(async (event) => {
     .orderBy(desc(users.approvedContributions), asc(users.id))
     .limit(limit)
 
-  // Counted over the whole table rather than over `rows`, which is a filtered
-  // and truncated page. The contributor table needs it to hide the role select
-  // on the last admin — the rule `checkRoleChange` enforces, mirrored so the
-  // control is absent rather than present and 403ing.
-  const [admins] = await database
-    .select({ total: count() })
-    .from(users)
-    .where(eq(users.role, 'admin'))
-
   return {
-    adminCount: admins?.total ?? 0,
     // `role`, `trust_revoked` and `approved_contributions` go over the wire
     // instead of a derived trust level, so the table applies `evaluateTrust`
     // itself and cannot disagree with the endpoints that queue an edit.

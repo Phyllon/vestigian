@@ -354,7 +354,7 @@ Tapping a traced route opens its own panel, with the course length computed by P
 - **Revert** from any site's history.
 - **Contributors** at `/moderation/contributors`: suspend or restore automatic publishing, and — for administrators — change roles.
 
-Suspension leaves the accepted-contribution count untouched, so restoring trust returns someone to exactly where they were. Three rules guard role changes: only admins may make them, nobody may change their own, and the last admin cannot be demoted, because an instance with no administrator has no way back short of database surgery.
+Suspension leaves the accepted-contribution count untouched, so restoring trust returns someone to exactly where they were. Three rules guard role changes: only admins may make them, nobody may change their own, and no admin can demote another admin — removing one requires direct database access, the same as creating the very first one.
 
 ## Photographs
 
