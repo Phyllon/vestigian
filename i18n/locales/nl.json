@@ -31,10 +31,10 @@
   },
   "languageSwitcher": {
     "label": "Taal",
-    "current": "Taal:{name}"
+    "current": "Taal: {name}"
   },
   "basemapSwitcher": {
-    "label": "Basiskaart:{label}",
+    "label": "Basiskaart: {label}",
     "menuLabel": "Basiskaart",
     "groupToday": "Vandaag",
     "groupAntiquity": "Oudheid",
@@ -66,17 +66,17 @@
   "tabulaPeutingeriana": {
     "title": "Tabula Peutingeriana",
     "intro": "Een middeleeuwse kopie van een Romeinse kaart van de cursus publicus, het wegennet van het imperium hier getoond als zijn eigen diepe-zoom scan, niet gedrapeerd over echte coördinaten.",
-    "distortionNote": "De Tabula Peutingeriana is een schematisch diagram, dat ongeveer 18,5 keer breder is dan de hoogte.",
+    "distortionNote": "De Tabula Peutingeriana is een schematisch diagram, ongeveer 18,5 keer breder dan hoog — het is niet geografisch nauwkeurig, dus het wordt niet als laag op de kaart zelf getoond.",
     "viewerLabel": "Deep-zoom viewer van het Tabula Peutingeriana manuscript",
     "attribution": "Manuscript: Oostenrijkse Nationale Bibliotheek, Wenen (Cod. 324). Digitalisering en IIIF-hosting:"
   },
   "columns": {
     "title": "Kolomreliëfs",
-    "intro": "De reliëfs van twee Romeinse zuilen, in detail onderzocht Trajan's Column van gespiegelde wetenschappelijke platen, de Column van Marcus Aurelius van een levende diepe zoom scan.",
-    "menuLabel": "Kolomreliëf",
+    "intro": "De reliëfs van twee Romeinse zuilen, in detail onderzocht — de Zuil van Trajanus aan de hand van gespiegelde wetenschappelijke platen, de Kolom van Marcus Aurelius via een live deep-zoom scan.",
+    "menuLabel": "Kolomreliëfs",
     "trajan": {
       "tabLabel": "Zuil van Trajanus",
-      "intro": "Conrad Cichorius' fotografische platen uit 1896.1900, de standaard scene-by-scene referentie voor de column, gespiegeld uit Wikimedia Commons, publiek domein.",
+      "intro": "Conrad Cichorius' fotografische platen uit 1896–1900, de standaard scène-voor-scène referentie voor de zuil, gespiegeld vanuit Wikimedia Commons, publiek domein.",
       "loading": "Laden van platen..",
       "loadFailed": "De platen konden niet geladen worden. Probeer het binnenkort nog eens.",
       "empty": "Er zijn nog geen platen gepubliceerd.",
@@ -87,8 +87,8 @@
     "marcusAurelius": {
       "tabLabel": "Kolom van Marcus Aurelius",
       "intro": "Petersen, Domaszewski & Calderini's 1896 platen, gedigitaliseerd door de Universiteitsbibliotheek Heidelberg en hier getoond als een live deep-zoom scan, publiek domein.",
-      "viewerLabel": "Diepzoomkijker van de Colonne van Marcus Aurelius platen",
-      "volume": "Plate volume",
+      "viewerLabel": "Deep-zoomviewer van de platen van de Kolom van Marcus Aurelius",
+      "volume": "Platenvolume",
       "tafeln-i-lxiv": "Tafeln I–LXIV",
       "tafeln-lxv-cxxviii": "Tafeln LXV–CXXVIII",
       "loading": "Laden van het plaatvolume..",
@@ -106,7 +106,7 @@
     "title": "Wat de markeringen betekenen",
     "hideKey": "Sleutel verbergen",
     "showKey": "Sleutel",
-    "referencedNote": "Dezelfde markeringen getekend als dunne contouren, zonder een schijf, zijn plaatsen genoemd van de Barrington Atlas en Pleiades en geen platen bijgedragen hier.",
+    "referencedNote": "Dezelfde markeringen, getekend als dunne contouren zonder vulling, zijn plaatsen genoemd door de Barrington Atlas en Pleiades — geen hier bijgedragen vermeldingen.",
     "frontierTitle": "De grens",
     "battlesTitle": "Gevechten",
     "battleMark": "Gevecht, voor 500 CE",
@@ -120,13 +120,13 @@
     },
     "featuresTitle": "Kleine oudheden",
     "coinHoardsTitle": "Muntschatten",
-    "coinHoardMark": "Geregistreerde vindplaats",
+    "coinHoardMark": "Geregistreerde vindplaats van een muntschat",
     "basemapCreditDare": "Oudheid (DARE): © Johan Åhlfeldt, Universiteit Göteborg, CC BY-SA 3.0.",
     "basemapCreditBarrington": "Oudheid (Barrington): wegen, kustlijn en plaatsen vanaf het Oude Wereldkaartcentrum (ODbL 1.0) en Pleiades (CC BY 3.0)."
   },
   "siteDetail": {
     "loading": "Laden",
-    "recordsHere": "{count}slaat hier op",
+    "recordsHere": "{count} dossiers hier",
     "close": "Sitegegevens sluiten",
     "openFullEntry": "Het volledige item openen",
     "edit": "Bewerken",
@@ -138,9 +138,9 @@
   },
   "enrichment": {
     "sectionTitle": "Elders",
-    "machineTranslatedFrom": "Vertaald uit{language}",
-    "inLanguage": "In{language}",
-    "matchedThrough": "Overeengekomen door{source},{metres}m vanaf de geregistreerde positie",
+    "machineTranslatedFrom": "Vertaald uit het {language}",
+    "inLanguage": "In het {language}",
+    "matchedThrough": "Gevonden via {source}, {metres} m van de geregistreerde positie",
     "languages": {
       "en": "Engels",
       "nl": "Nederlands",
@@ -172,12 +172,12 @@
         "title": "Voer uw code in",
         "introCode": "Open uw aanmeldingsapp en voer de 6-cijferige code in.",
         "introBackup": "Voer een van de back-upcodes in die je hebt opgeslagen toen je dit aanzette.",
-        "code": "Rubriek",
+        "code": "Code",
         "backupCode": "Reservekopiecode",
         "submit": "Verifiëren",
         "useBackupInstead": "In plaats daarvan een reservekopiecode gebruiken",
         "useCodeInstead": "Gebruik in plaats daarvan uw aanmeldapp",
-        "startOver": "Overnieuw beginnen",
+        "startOver": "Opnieuw beginnen",
         "failedTitle": "Die code werkte niet",
         "failedDescription": "Controleer de code en probeer het opnieuw."
       }
@@ -185,12 +185,12 @@
     "register": {
       "title": "Word lid van Vestigian",
       "intro": "Uw eerste twee bijdragen worden gecontroleerd door een moderator. Daarna publiceren ze zoals je ze schrijft.",
-      "displayName": "Naam tonen",
+      "displayName": "Weergavenaam",
       "email": "E-mail",
       "password": "Wachtwoord",
       "passwordConfirmation": "Wachtwoord herhalen",
       "submit": "Account aanmaken",
-      "privacyNotice": "Het aanmaken van een account slaat uw e-mailadres en de naam van het scherm{link}voor wat dat betekent en voor hoe lang.",
+      "privacyNotice": "Het aanmaken van een account slaat je e-mailadres en weergavenaam op — zie {link} voor wat dat betekent en voor hoe lang.",
       "doneTitle": "Controleer uw inbox",
       "doneDescription": "Bevestig uw adres om het account in te stellen. De link is goed voor één dag.",
       "errorDisplayName": "Minstens drie karakters.",
@@ -207,7 +207,7 @@
       "met": "met",
       "notMet": "nog niet voldaan",
       "rules": {
-        "length": "Tussen{min}en{max}tekens",
+        "length": "Tussen {min} en {max} tekens",
         "capital": "Eén hoofdletter",
         "special": "Een bijzonder karakter"
       }
@@ -216,7 +216,7 @@
   "moderation": {
     "reviewQueue": {
       "loading": "De wachtrij wordt geladen..",
-      "selectedCount": "{count}geselecteerd",
+      "selectedCount": "{count} geselecteerd",
       "batchNotePlaceholder": "Opmerking, verzonden aan elke auteur (facultatief)",
       "publishAll": "Alles publiceren",
       "rejectAll": "Alles verwerpen",
@@ -224,23 +224,23 @@
       "selectAll": "Alles selecteren",
       "nothingWaitingTitle": "Niets wachten.",
       "nothingWaitingHint": "Nieuwe bijdragen van niet-vertrouwde rekeningen zullen hier verschijnen.",
-      "selectRevision": "Revisie selecteren{id}",
-      "editToA": "bewerken naar a",
+      "selectRevision": "Revisie {id} selecteren",
+      "editToA": "wijziging van een",
       "newEntity": "nieuw",
-      "revision": "herziening{id}",
+      "revision": "revisie {id}",
       "deletedAccount": "Verwijderde account",
-      "acceptedCount": "{count}aanvaard",
-      "blankingWarning": "Deze bewerking verwijdert meer dan het toevoegt. Controleer het op de live plaat voordat je het publiceert.",
+      "acceptedCount": "{count} aanvaard",
+      "blankingWarning": "Deze bewerking verwijdert meer dan hij toevoegt. Controleer de actuele vermelding voordat je publiceert.",
       "substantialNote": "Een substantiële herschrijven.",
-      "noteToAuthor": "Bericht aan{name}",
+      "noteToAuthor": "Bericht aan {name}",
       "theContributor": "de bijdrager",
       "noteHint": "Gemaild met de beslissing",
       "notePlaceholder": "Waarom vooral als dit een afwijzing is. Een medewerker kan de wachtrij niet zien.",
       "publish": "Publiceren",
-      "publishAria": "Publiceren{title}",
+      "publishAria": "{title} publiceren",
       "reject": "Weigeren",
-      "rejectAria": "Weigeren{title}",
-      "batchFailedTitle": "Charge-evaluatie mislukt",
+      "rejectAria": "{title} weigeren",
+      "batchFailedTitle": "Batchbeoordeling mislukt",
       "reviewFailedTitle": "Evaluatie mislukt",
       "tryAgain": "Probeer het nog eens.",
       "published": "Gepubliceerd",
@@ -248,35 +248,35 @@
       "approvedPlural": "goedgekeurd",
       "rejectedPlural": "verworpen",
       "batchResultTitle": "{count} {decision}.",
-      "batchResultSkipped": "{count}overgeslagen."
+      "batchResultSkipped": "{count} overgeslagen."
     },
     "contributorTable": {
       "findPlaceholder": "Zoek een medewerker",
-      "accepted": "{count}aanvaard",
-      "waiting": "{count}wachten",
+      "accepted": "{count} aanvaard",
+      "waiting": "{count} wachtend",
       "restoreTrust": "Vertrouwen herstellen",
-      "restoreTrustAria": "Vertrouwen herstellen voor{name}",
+      "restoreTrustAria": "Vertrouwen herstellen voor {name}",
       "suspendPublishing": "Publicatie onderbreken",
-      "suspendPublishingAria": "Publiceren onderbreken voor{name}",
-      "roleAria": "Rol voor{name}",
-      "suspendPrompt": "Waarom is{name}geschorst worden?",
+      "suspendPublishingAria": "Publiceren onderbreken voor {name}",
+      "roleAria": "Rol voor {name}",
+      "suspendPrompt": "Waarom wordt {name} geschorst?",
       "suspendHint": "Aan hen gemaild, letterlijk",
       "suspendReasonPlaceholder": "Drie bewerkingen verwijderd brontekst zonder te zeggen waarom.",
       "cancel": "Annuleren",
       "untouchedNote": "Hun geaccepteerde bijdragen zijn onaangetast.",
       "noMatches": "Dat komt niet overeen.",
       "standing": {
-        "moderator": "Uitgeverijen op rol",
+        "moderator": "Publiceert op basis van rol",
         "revoked": "Elke bewerking in de wachtrij onderbroken",
         "earned": "Publiceert onmiddellijk",
         "probation": "In de wachtrij{remaining}te gaan"
       },
       "trustSuspended": "Automatische publicatie opgeschort.",
       "trustRestored": "Vertrouwen hersteld.",
-      "toldByEmail": "{name}is verteld via e-mail.",
+      "toldByEmail": "{name} is per e-mail op de hoogte gebracht.",
       "trustFailedTitle": "Kon vertrouwen niet wijzigen",
       "tryAgain": "Probeer het nog eens.",
-      "nowRole": "{name}is nu een{role}.",
+      "nowRole": "{name} is nu {role}.",
       "roleFailedTitle": "Kon rol niet veranderen",
       "roles": {
         "contributor": "Medewerker",
@@ -294,7 +294,7 @@
         "periodFrom": "Periode van",
         "periodTo": "Periode tot",
         "geometry": "Vorm",
-        "editSummary": "Notificatie bewerken"
+        "editSummary": "Bewerkingsnotitie"
       },
       "kinds": {
         "added": "toegevoegd",
@@ -306,23 +306,23 @@
     "queuePage": {
       "title": "Wachtrij bekijken",
       "intro": "Bijdragen van rekeningen die nog niet automatisch gepubliceerd zijn.",
-      "contributorsLink": "Bijdragen"
+      "contributorsLink": "Bijdragers"
     },
     "contributorsPage": {
-      "title": "Bijdragen",
+      "title": "Bijdragers",
       "backToQueue": "Wachtrij bekijken",
-      "intro": "Suspending publishing houdt het record van een donateur intact en herstelt het keert ze terug naar precies waar ze waren."
+      "intro": "Het onderbreken van publiceren houdt het record van een bijdrager intact — het herstellen ervan brengt iemand terug naar precies waar ze waren."
     }
   },
   "licence": {
     "title": "Gegevens & licenties",
-    "intro": "Vestigian is gebouwd op gegevens die anderen vrij herbruikbaar maakten. Termen verschillen per laag Hier is wat van toepassing is op elk.",
+    "intro": "Vestigian is gebouwd op gegevens die anderen vrij herbruikbaar hebben gemaakt. Voorwaarden verschillen per laag — hier is wat op elk van toepassing is.",
     "recordsHeading": "Bijdragen",
-    "recordsBody": "Site en tracing tekst is CC BY-SA  De gestructureerde metadata (coördinaten, data, categorieën) is CC0 .",
+    "recordsBody": "Site- en tracingtekst is CC BY-SA — vrij te hergebruiken en aan te passen, ook commercieel, mits wijzigingen onder dezelfde licentie worden gedeeld en de bron wordt vermeld. De gestructureerde metadata (coördinaten, data, categorieën) is CC0 — geen rechten voorbehouden.",
     "imagesHeading": "Foto's",
     "imagesBody": "Elke foto draagt zijn eigen licentie en naamsvermelding, die onder de afbeelding zelf wordt getoond. Vergunningen variëren per record; controleer het beeld voordat het opnieuw wordt gebruikt apart van de site die het illustreert.",
     "barringtonHeading": "Oudheid (Barrington) basiskaart",
-    "barringtonBody": "Oude kustlijn, wegen, water en plaatsen komen van het Ancient World Mapping Center (ODbL 1.0) en Pleiades (CC BY 3.0). Beide zijn herbruikbaar, ook commercieel, met naamsvermelding — de share-alike-clausule van ODbL geldt voor de onderliggende database, niet voor de gegenereerde karttegels.",
+    "barringtonBody": "Antieke kustlijn, wegen, water en plaatsen komen van het Ancient World Mapping Center (ODbL 1.0) en Pleiades (CC BY 3.0). Beide zijn herbruikbaar, ook commercieel, met naamsvermelding — de share-alike-clausule van ODbL geldt voor de onderliggende database, niet voor de gegenereerde kaarttegels.",
     "dareHeading": "Oudheid (DARE) basiskaart",
     "dareBody": "Deze basiskaart is CC BY-SA 3.0 van Johan Åhlfeldt (Digitale Atlas van het Romeinse Rijk, Universiteit Göteborg) maar twee van zijn eigen bronlagen zijn niet-commercieel (CC BY-NC 3.0 / CC BY-NC-SA), die de deken CC BY-SA niet kan overnemen. Behandel deze specifieke laag alleen als niet-commercieel gebruik.",
     "limesHeading": "De grens (limes)",
@@ -346,15 +346,15 @@
     "title": "Mededeling",
     "intro": "Informatie die vereist is krachtens de Duitse wet op digitale diensten (DDG, voorheen de TMG).",
     "operatorHeading": "Dienstverlener",
-    "operatorPlaceholder": "[OPERATOR NAAM]\n[STRAAT EN NUMMER]\n[POSTALE CODE EN STAD]\n[KANTOOR]",
+    "operatorPlaceholder": "[NAAM VAN DE EXPLOITANT]\n[STRAAT EN NUMMER]\n[POSTCODE EN PLAATS]\n[LAND]",
     "contactHeading": "Contactpersoon",
     "contactPlaceholder": "E-mail: [CONTACTEMAIL]",
     "disputeHeading": "Geschillenbeslechting",
-    "disputeBody": "De Europese Commissie biedt een platform voor online geschillenbeslechting (ODR): ec.europa.eu/consuments/odr. Wij zijn niet verplicht en zijn niet bereid deel te nemen aan geschillenbeslechtingsprocedures voor een consumentenarbitragecommissie."
+    "disputeBody": "De Europese Commissie biedt een platform voor onlinegeschillenbeslechting (ODR): ec.europa.eu/consumers/odr. Wij zijn niet verplicht en niet bereid deel te nemen aan geschillenbeslechting voor een consumentenarbitragecommissie."
   },
   "privacy": {
     "title": "Privacybeleid",
-    "intro": "Deze pagina geeft aan wat Vestigian verzamelt, waarom, voor hoe lang, en wie anders ziet het . . . . . . . en bijpassen wat de code eigenlijk doet in plaats van een generiek sjabloon. Het is geen vervanging voor het lezen van de bron, die open is.",
+    "intro": "Deze pagina geeft aan wat Vestigian verzamelt, waarom, voor hoe lang, en wie het verder nog ziet — duidelijk, en in overeenstemming met wat de code daadwerkelijk doet in plaats van een generiek sjabloon. Het is geen vervanging voor het lezen van de broncode, die open is.",
     "controllerHeading": "Verwerkingsverantwoordelijke",
     "controllerBody": "De dienstverlener die in de wettelijke kennisgeving wordt genoemd, is de verwerkingsverantwoordelijke (\"wij\") voor de hieronder beschreven verwerking. Contactgegevens zijn dezelfde als op die pagina.",
     "accountHeading": "Account aanmaken",
@@ -362,22 +362,22 @@
     "contributionHeading": "Bijdragen",
     "contributionBody": "Een site, tracing of afbeelding die u indient is gekoppeld aan uw account zodat de bewerkingsgeschiedenis leesbaar blijft en vertrouwen kan worden geëvalueerd. Goedgekeurde bijdragen zijn openbaar, net als het feit dat uw account ze gemaakt heeft.Dit is hoe de herzieningsgeschiedenis van de atlas werkt, en het is de kern van wat de dienst is. Als u uw account verwijdert, wordt deze link geanonimiseerd (zie \"Uw rechten\" hieronder) in plaats van de bijdrage wordt verwijderd, om de redenen die daar zijn vermeld.",
     "photographHeading": "Foto's",
-    "photographBody": "Elke geüploade afbeelding wordt opnieuw gecodeerd op onze server voor opslag, die EXIF metadata .",
+    "photographBody": "Elke geüploade afbeelding wordt op onze server opnieuw gecodeerd voor opslag, wat EXIF-metadata verwijdert — inclusief eventuele GPS-coördinaten of camera/apparaat-identificatoren — zodat niets daarvan de opslag of een andere bezoeker bereikt.",
     "cookiesHeading": "Cookies",
-    "cookiesBody": "Drie cookies, allemaal strikt noodzakelijk voor de functionaliteit die u direct hebt aangevraagd, geen gebruikt voor het volgen of adverteren: een sessiecookie (tot 7 dagen bewaard, of totdat u zich afmeldt) die u aanmeldt; een cookie die uw voorkeur voor licht/donker onthoudt; en een cookie die uw gekozen interfacetaal onthoudt. Omdat geen van hen optioneel is, kan geen van hen tracking, en geen van hen ondersteunt reclame, de Duitse wetgeving (§25(2) TDDDG, de tenuitvoerlegging van de ePrivacy-richtlijn) hoeft niet om toestemming te vragen voordat ze worden ingesteld, zodat er geen cookie banner hier. Dit deel is die openbaarmaking.",
+    "cookiesBody": "Drie cookies, allemaal strikt noodzakelijk voor de functionaliteit die je direct hebt aangevraagd, geen gebruikt voor tracking of adverteren: een sessiecookie (bewaard voor 7 dagen, of tot je je afmeldt) dat je aangemeld houdt; een cookie die je voorkeur voor licht/donker onthoudt; en een cookie die je gekozen interfacetaal onthoudt. Omdat geen van deze optioneel is, kan geen ervan tracking zijn, en ondersteunt geen ervan reclame, waardoor de Duitse wetgeving (§25(2) TDDDG, de uitvoering van de ePrivacy-richtlijn) niet vereist dat er vooraf toestemming wordt gevraagd — er is hier dus geen cookiebanner. Dit gedeelte vormt die informatieverstrekking.",
     "logsHeading": "Serverlogs en beveiliging",
     "logsBody": "Elk verzoek wordt geregistreerd met het IP-adres van de bezoeker, gedurende 30 dagen bewaard, op de legitieme-interest basis van de exploitatie en beveiliging van de dienst (art. 6(1)(f))  Wachtwoorden, e-mailadressen en authenticatie tokens worden nooit naar logs geschreven. Rate-limiting slaat uw IP-adres (meestal één uur) kort op om fair-use limieten af te dwingen en geautomatiseerde aanmelding en schrapen te stoppen.",
     "recipientsHeading": "Wie verwerkt anders gegevens, en waar",
-    "recipientsIntro": "De volgende procesgegevens namens ons of ontvangen deze als onderdeel van de exploitatie van de dienst. Geen van hen mag het voor eigen doeleinden gebruiken.",
+    "recipientsIntro": "De volgende partijen verwerken gegevens namens ons of ontvangen ze als onderdeel van het draaien van de dienst. Geen van hen mag ze voor eigen doeleinden gebruiken.",
     "recipientHosting": "Hosting: de applicatie en database draaien op een server in de EU.",
     "recipientCdn": "CDN- en objectopslag (Bunny.net): dient beelden en kaarttegels; beëindigt versleutelde verbindingen binnen de EU.",
     "recipientMail": "Transactie e-mail (Lettermint, Amsterdam): verzendt account en matiging e-mails Verificatie links, wachtwoord resetten, beslissingen over uw bijdragen.",
     "recipientTranslate": "Machine vertaling (LibreTranslate): draait op onze eigen server, niet een derde partij geleende artikel tekst wordt daar vertaald, nooit extern verzonden.",
     "recipientEnrichment": "Wikidata, Wikipedia en Pleiades (buiten de EU): wanneer de beschrijving van een site kan worden aangevuld met deze openbare projecten, onze server, nooit uw browser maakt dat verzoek, zodat uw IP-adres wordt niet gedeeld met hen.",
-    "recipientBasemap": "Kaart tile providers: sommige basemap lagen worden direct door uw browser van hun eigen hosts opgehaald, zodat uw IP-adres bereikt hen de manier waarop het een site zou bezoeken die een kaart insluit.",
-    "recipientSecurity": "Automatische opsporing van misbruik (CrowdSec): IP adresseert onze server lokale vlaggen als misbruik worden gedeeld met CrowdSec's community threat-intelligence service, op de legitieme-interest basis van netwerkbeveiliging (art. 6(1)(f)).",
+    "recipientBasemap": "Kaarttegel-providers: sommige basiskaartlagen worden rechtstreeks door je browser bij hun eigen hosts opgehaald, zodat je IP-adres hen bereikt op dezelfde manier als bij het bezoeken van elke site die een kaart insluit.",
+    "recipientSecurity": "Automatische opsporing van misbruik (CrowdSec): IP-adressen die onze server lokaal als misbruik markeert, worden gedeeld met CrowdSec's community threat-intelligence-dienst, op basis van het legitieme belang van netwerkbeveiliging (art. 6(1)(f)).",
     "rightsHeading": "Uw rechten",
-    "rightsBody": "U kunt een kopie aanvragen van wat we hebben over uw account en de bijdragen ervan, en u kunt uw account verwijderen, zowel binnen de app eenmaal aangemeld in de export geeft alles terug als een bestand dat u kunt houden; verwijdering verwijdert uw e-mailadres en schermnaam en kan niet ongedaan worden gemaakt. Het verwijderen van uw account verwijdert uw goedgekeurde bijdragen niet uit de atlas, die blijven, toegeschreven aan een verwijderde rekening in plaats van aan u, op basis van het historische verslag van wat werd geregistreerd en wanneer is zelf informatie van openbaar en wetenschappelijk belang (art. 17(3)(d)) en consistent met hoe een andere bewerking geschiedenis wordt gehouden. U kunt ons ook rechtstreeks vragen om rectificatie, beperking van de verwerking, of om bezwaar te maken tegen verwerking op basis van legitiem belang, en u hebt het recht om een klacht in te dienen bij een toezichthoudende autoriteit voor gegevensbescherming.",
+    "rightsBody": "Je kunt een kopie aanvragen van wat we over je account en de bijdragen ervan bewaren, en je kunt je account verwijderen, beide vanuit de app eenmaal aangemeld — export geeft je alles terug als een bestand dat je kunt bewaren; verwijdering wist je e-mailadres en weergavenaam en kan niet ongedaan worden gemaakt. Het verwijderen van je account verwijdert je goedgekeurde bijdragen niet uit de atlas — die blijven bestaan, toegeschreven aan een verwijderd account in plaats van aan jou, op basis van het feit dat het historische verslag van wat is geregistreerd en wanneer op zichzelf informatie van openbaar en wetenschappelijk belang is (art. 17(3)(d)) en consistent is met hoe de geschiedenis van elke andere wijziging wordt bewaard. Je kunt ons ook rechtstreeks vragen om rectificatie, beperking van de verwerking, of bezwaar maken tegen verwerking op basis van gerechtvaardigd belang, en je hebt het recht om een klacht in te dienen bij een toezichthoudende autoriteit voor gegevensbescherming.",
     "exportAction": "Mijn gegevens downloaden",
     "exportFailed": "Kon uw gegevens niet exporteren. Probeer het binnenkort nog eens.",
     "deleteAction": "Mijn account verwijderen",
@@ -398,7 +398,7 @@
     "stopFollowing": "Stop met het volgen van uw positie",
     "showPosition": "Uw positie tonen",
     "errors": {
-      "denied": "De locatie is geblokkeerd. Laat het in uw browserinstellingen om dit te gebruiken.",
+      "denied": "De locatie is geblokkeerd. Sta dit toe in je browserinstellingen om dit te kunnen gebruiken.",
       "timeout": "Nog geen oplossing. Ga ergens heen met een duidelijker zicht op de hemel.",
       "unavailable": "Locatie is nu niet beschikbaar op dit apparaat.",
       "insecureContext": "Locatie heeft een veilige verbinding en een apparaat met GPS nodig."
@@ -411,7 +411,7 @@
     "edited": "Uitgegeven",
     "revert": "terugzetten",
     "unknownAuthor": "Onbekend",
-    "publishedAutomatically": "Gepubliceerd automatisch De auteur heeft vertrouwen verdiend.",
+    "publishedAutomatically": "Automatisch gepubliceerd — de auteur heeft vertrouwen verdiend.",
     "reviewedBy": "Beoordeeld door{reviewer}.",
     "published": "Gepubliceerd.",
     "restoreEarlier": "De versie hiervoor herstellen",
@@ -438,39 +438,39 @@
     "camp": "Marskamp"
   },
   "featurePicker": {
-    "recordsHere": "{count}slaat hier op",
+    "recordsHere": "{count} dossiers hier",
     "dismiss": "De lijst van dossiers hier verwerpen",
     "alongThisLine": "Langs deze lijn",
     "atThisPoint": "Op dit punt",
-    "metresAway": "{metres}m",
-    "kilometresAway": "{kilometres}km"
+    "metresAway": "{metres} m verderop",
+    "kilometresAway": "{kilometres} km verderop"
   },
   "limesFormat": {
-    "bc": "{year}BC",
-    "ad": "AD{year}",
-    "toYear": "tot{year}",
-    "fromYear": "van{year}",
-    "yearRange": "{from}Wat{to}",
+    "bc": "{year} v.Chr.",
+    "ad": "{year} n.Chr.",
+    "toYear": "tot {year}",
+    "fromYear": "vanaf {year}",
+    "yearRange": "{from} – {to}",
     "atTheStart": "bij het begin",
-    "kmAlong": "{km}km"
+    "kmAlong": "{km} km langs de route"
   },
   "limesPanel": {
     "title": "De Romeinse grens",
     "backToFrontier": "Terug naar de hele grens",
     "loading": "Laden",
-    "theLimes": "De limoenen",
+    "theLimes": "De limes",
     "showFrontier": "Grens tonen",
     "hideFrontier": "De grens verbergen",
-    "introBody": "Vijfduizend kilometer grens, in het rekt de bronnaam. Kies er een om het einde te volgen.",
-    "unrolling": "De grens opentrekken..",
+    "introBody": "Vijfduizend kilometer grens, in de stukken die de bronnen benoemen. Kies er een om hem van begin tot eind te volgen.",
+    "unrolling": "De grens ontrollen…",
     "readingRoll": "De rol lezen..",
-    "recorded": "{count}geregistreerd",
+    "recorded": "{count} geregistreerd",
     "readStretch": "Lees dit stuk",
     "referenced": "waarnaar verwezen"
   },
   "limesSectorPage": {
-    "breadcrumb": "Broodkruimels",
-    "theLimes": "De limoenen",
+    "breadcrumb": "Kruimelpad",
+    "theLimes": "De limes",
     "length": "Lengte",
     "inUse": "In gebruik",
     "recordedOnIt": "Opgenomen",
@@ -478,24 +478,24 @@
     "alongTheLine": "Langs de lijn, west naar oost",
     "nothingRecorded": "Er is nog niets opgenomen op dit stuk.",
     "fortification": "Fortificatie",
-    "contributedRecords": "{count}bijgedragen records",
-    "referencedPlaces": "{count}referentieplaatsen",
-    "notFound": "Er is geen grens."
+    "contributedRecords": "{count} bijgedragen records —",
+    "referencedPlaces": "{count} referentieplaatsen —",
+    "notFound": "Dit stuk grens bestaat niet."
   },
   "limesIndexPage": {
-    "title": "De limoenen",
+    "title": "De limes",
     "description": "De grens van het Romeinse rijk, sector per sector: zijn muren, zijn rivieren en de forten en wachttorens langs hen.",
-    "intro": "De rand van de Romeinse wereld, van de Solway tot de Eufraat. Het was nooit een ding: een gemortelde muur over het Raetiaanse plateau, een rivier gepatrouilleerd van de westelijke oever, een lijn van forten bij het laatste betrouwbare water voor de woestijn. Wat volgt is die rand in de stretchs de bronnaam, getrokken uit de omvang van het Oude World Mapping Center van het imperium op 200 CE en uit het verslag van de muren die eigenlijk werden gebouwd.",
-    "acrossStretches": "{length}over{count}rekt",
-    "attribution": "Grens afgeleid van de{link}De omvang van het imperium en zijn muurlijnwerk, ODbL 1.0. De namen en de noten hierboven zijn deze atlas eigen; de geometrie is niet.",
+    "intro": "De rand van de Romeinse wereld, van de Solway tot de Eufraat. Het was nooit één ding: een gemetselde muur over het Reto-plateau, een rivier gepatrouilleerd vanaf zijn westelijke oever, een reeks forten bij het laatste betrouwbare water voor de woestijn. Wat volgt is die rand in de stukken die de bronnen benoemen, ontleend aan de omvang van het rijk rond 200 n.Chr. volgens het Ancient World Mapping Center en aan zijn registratie van de muren die daadwerkelijk gebouwd zijn.",
+    "acrossStretches": "{length} over {count} stukken",
+    "attribution": "Grens afgeleid van {link}, de omvang van het imperium en zijn muurlijnwerk, ODbL 1.0. De namen en de bovenstaande notities zijn eigen aan deze atlas; de geometrie is dat niet.",
     "attributionLinkText": "Ancient World Mapping Center"
   },
   "mapSearch": {
     "searching": "Zoeken",
     "noMatches": "Geen overeenkomsten",
     "matches": "{count}overeenkomsten",
-    "label": "Zoekplaatsen, wegen en plaatsen",
-    "placeholder": "Zoekplaatsen, wegen, plaatsen",
+    "label": "Zoek plaatsen, wegen en plaatsen",
+    "placeholder": "Zoek plaatsen, wegen, plaatsen",
     "resultsLabel": "Zoekresultaten",
     "modernPlace": "Moderne plaats · {country}",
     "ancientPlace": "Oude naam"
@@ -505,7 +505,7 @@
     "loading": "Ontvouwen van de kaart"
   },
   "battlePopup": {
-    "viewOnWikipedia": "Uitzicht op Wikipedia"
+    "viewOnWikipedia": "Bekijken op Wikipedia"
   },
   "portPopup": {
     "viewOnPleiades": "Bekijk op Pleiades",
@@ -563,22 +563,22 @@
     "period": "Periode",
     "near": "Nabij",
     "position": "Positie",
-    "copyCoordinates": "Coördinaten kopiëren{coordinates}"
+    "copyCoordinates": "De coördinaten {coordinates} kopiëren"
   },
   "siteGallery": {
     "defaultAlt": "Foto van de site",
     "choosePhotograph": "Kies een foto",
-    "showImage": "Afbeelding tonen{index}van{count}"
+    "showImage": "Afbeelding {index} van {count} tonen"
   },
   "tracingDetail": {
     "area": "Gebied",
     "route": "Route",
-    "recordsHere": "{count}slaat hier op",
+    "recordsHere": "{count} dossiers hier",
     "closeDetails": "Traceergegevens sluiten",
     "panelLabel": "Traceergegevens",
     "type": "Type",
     "length": "Lengte",
-    "tracedNote": "Getraceerde routes worden getraceerd omdat een tracing een interpretatie is van waar iets liep, niet een overzicht ervan.",
+    "tracedNote": "Getraceerde routes worden gestippeld getekend, omdat een tracing een interpretatie is van waar iets liep, niet een opmeting ervan.",
     "openFullEntry": "Het volledige item openen",
     "edit": "Bewerken",
     "defaultAttribution": "Medewerkers van Vestigian"
@@ -592,18 +592,18 @@
     "saveFailedTitle": "Kon niet opslaan",
     "title": "Foto's",
     "intro": "De eerste afbeelding is die op de kaart. Terugtrekken verbergt een foto zonder de plaat te wissen dat het hier was.",
-    "captionPlaceholder": "Titel",
+    "captionPlaceholder": "Bijschrift",
     "whoTookItPlaceholder": "Wie nam het mee",
     "save": "Opslaan",
     "cancel": "Annuleren",
     "noCaption": "Geen bijschrift",
     "creditUnknown": "Krediet onbekend",
-    "moveEarlier": "Verplaatsen{name}eerder",
-    "moveLater": "Verplaatsen{name}later",
-    "editCaptionAndCredit": "Bewerk het bijschrift en het krediet van{name}",
+    "moveEarlier": "{name} naar voren verplaatsen",
+    "moveLater": "{name} naar achteren verplaatsen",
+    "editCaptionAndCredit": "Bijschrift en credit van {name} bewerken",
     "edit": "Bewerken",
-    "withdraw": "Terugtrekken{name}",
-    "withdrawButton": "Terugtrekken",
+    "withdraw": "{name} intrekken",
+    "withdrawButton": "Intrekken",
     "noPhotographs": "Nog geen foto's."
   },
   "contributionPanel": {
@@ -611,7 +611,7 @@
     "title": "Toevoegen aan de atlas",
     "whatDidYouFind": "Wat heb je gevonden?",
     "aPlace": "Een plaats",
-    "aPlaceDescription": "Een fort, villa, toevluchtsoord, vindplek, alles met één positie.",
+    "aPlaceDescription": "Een fort, villa, heiligdom, vindplaats — alles met één positie.",
     "aRoute": "Een route of lijn",
     "aRouteDescription": "Een weg, aquaduct of muur getraceerd door het landschap.",
     "cancel": "Annuleren",
@@ -626,15 +626,15 @@
     "dropHint": "JPEG, PNG of WebP, tot 15 MB",
     "chooseAria": "Kies een foto van JPEG, PNG of WebP, tot 15 MB",
     "sizeLimitHint": "Foto's moeten kleiner zijn dan 15 MB.",
-    "caption": "Titel",
+    "caption": "Bijschrift",
     "captionPlaceholder": "De noordelijke poort, gezien van binnenuit",
     "whoTookIt": "Wie nam het mee",
     "shownAsCredit": "Getoond als het krediet",
     "licence": "Vergunning",
     "licenceHint": "Alleen afbeeldingen uploaden die u op deze manier mag licentieren",
     "licenceOptions": {
-      "ccBySa": "CC BY-SA 4.0",
-      "ccBy": "CC BY 4.0 ",
+      "ccBySa": "CC BY-SA 4.0 — gelijk delen",
+      "ccBy": "CC BY 4.0 — naamsvermelding vereist",
       "cc0": "CC0: geen rechten voorbehouden"
     },
     "upload": "Foto uploaden",
@@ -644,7 +644,7 @@
   "siteEditorForm": {
     "nameTooShort": "Geef de site een naam van ten minste drie tekens.",
     "editsPublishImmediately": "Uw bewerkingen publiceren onmiddellijk.",
-    "reviewNotice": "Een moderator beoordeelt dit voordat het verschijnt.{count}meer geaccepteerd{contributionWord}en je bewerkingen gaan direct live.",
+    "reviewNotice": "Een moderator beoordeelt dit voordat het verschijnt. Nog {count} geaccepteerde {contributionWord} en je bewerkingen zijn direct live.",
     "contribution": "bijdrage",
     "contributions": "bijdragen",
     "saveFailedTitle": "Dat kon niet worden opgeslagen",
@@ -657,7 +657,7 @@
     "summary": "Overzicht met één regel",
     "summaryHint": "In zoekresultaten weergegeven",
     "from": "Van",
-    "fromHint": "Negatief voor BC",
+    "fromHint": "Negatief voor v.Chr.",
     "to": "Aan",
     "description": "Omschrijving",
     "whatChanged": "Wat heb je veranderd?",
@@ -680,8 +680,8 @@
     "editTitle": "Dit traceren bewerken",
     "traceTitle": "Een route volgen",
     "editHint": "Pas de bestaande punten aan, of herteken de koers volledig.",
-    "traceHint": "Klik op de cursus en pas de punten aan. Getraceerde routes verschijnen vervaagd op de kaart, omdat een tracing eerder een interpretatie is dan een enquête.",
-    "pointsCaptured": "{count}gevangen punten",
+    "traceHint": "Klik langs het traject en pas daarna de punten aan. Getraceerde routes verschijnen gestippeld op de kaart, omdat een tracing eerder een interpretatie is dan een opmeting.",
+    "pointsCaptured": "{count} vastgelegde punten",
     "name": "Naam",
     "namePlaceholder": "Via Claudia Augusta, noordelijke sectie",
     "type": "Type",
@@ -697,7 +697,7 @@
     "cancel": "Annuleren"
   },
   "geometryDrawTool": {
-    "traceLine": "Traceer een regel",
+    "traceLine": "Traceer een lijn",
     "outlineArea": "Omlijn een gebied",
     "adjustPoints": "Punten aanpassen",
     "toolbarLabel": "Tekengereedschap",
@@ -712,9 +712,9 @@
   },
   "indexPage": {
     "title": "Kaart",
-    "srHeading": "Vestigian ",
+    "srHeading": "Vestigian — een atlas van de oude wereld",
     "addToAtlas": "Toevoegen aan de atlas",
-    "description": "Vestigian in kaart brengen van de sporen van de oude wereld nederzettingen, wegen, vestingwerken en vindplaatsen, geregistreerd door de mensen die hen bezoeken."
+    "description": "Vestigian brengt de sporen van de oude wereld in kaart — nederzettingen, wegen, vestingwerken en vindplaatsen, geregistreerd door de mensen die ze bezoeken."
   },
   "forgotPasswordPage": {
     "title": "Uw wachtwoord resetten",
@@ -723,7 +723,7 @@
     "checkInboxBody": "Als dat adres een account heeft, is er een resetlink onderweg. Het werkt voor een uur.",
     "intro": "We sturen een link om een nieuwe in te stellen.",
     "email": "E-mail",
-    "sendLink": "Verwijzing versturen"
+    "sendLink": "Link versturen"
   },
   "resetPasswordPage": {
     "title": "Een nieuw wachtwoord instellen",
@@ -750,12 +750,12 @@
     "startAgain": "Opnieuw beginnen"
   },
   "periodFormat": {
-    "bc": "{year}BC",
-    "ad": "AD{year}",
+    "bc": "{year} v.Chr.",
+    "ad": "{year} n.Chr.",
     "undated": "Niet gedateerd",
-    "fromYear": "Van{year}",
-    "untilYear": "Tot{year}",
-    "yearRange": "{from}Wat{to}"
+    "fromYear": "Van {year}",
+    "untilYear": "Tot {year}",
+    "yearRange": "{from} – {to}"
   },
   "siteDetailPage": {
     "showOnMap": "Op de kaart tonen",
@@ -776,7 +776,7 @@
   },
   "siteEditPage": {
     "notFound": "Geen site geregistreerd onder die naam.",
-    "editingTitle": "Bewerken{title}",
+    "editingTitle": "{title} wordt bewerkt",
     "backToEntry": "Terug naar het item",
     "nothingChanged": "Er is niets veranderd.",
     "position": "Positie",
@@ -786,8 +786,8 @@
   },
   "tracingEditPage": {
     "notFound": "Geen spoor met die identificatie.",
-    "editingTitle": "Bewerken{title}",
-    "srHeading": "Bewerken{title}",
+    "editingTitle": "{title} wordt bewerkt",
+    "srHeading": "{title} bewerken",
     "editorAriaLabel": "Traceerbewerker"
   },
   "notebook": {
@@ -940,7 +940,7 @@
       "scanIntro": "Scan dit met een authenticator-app (Google Authenticator, 1Password, Authy, of vergelijkbaar), voer dan de code die het toont om te bevestigen.",
       "qrAlt": "QR-code voor twee-factor setup",
       "manualKey": "Of voer deze sleutel met de hand in",
-      "confirmCode": "Rubriek",
+      "confirmCode": "Code",
       "confirm": "Bevestigen en inschakelen",
       "enabled": "Twee-factor authenticatie staat aan. Bewaar je back-up codes ergens veilig.",
       "backupCodesIntro": "Bewaar deze tien back-up codes ergens veilig. Elk werkt eenmaal, en dit is de enige keer dat ze worden getoond.",

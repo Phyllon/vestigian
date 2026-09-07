@@ -5,12 +5,12 @@
     "tagline": "rastros de antigüedad",
     "queue": "Cola",
     "signIn": "Iniciar sesión",
-    "signOut": "Suscríbase",
+    "signOut": "Cerrar sesión",
     "footerLicence": "Licencias de datos",
     "menu": "Menú",
     "menuGroupReference": "Referencia",
     "menuGroupLegal": "Datos jurídicos",
-    "menuGroupOffline": "Mapas de línea",
+    "menuGroupOffline": "Mapas sin conexión",
     "menuGroupSupport": "Apoyar este proyecto",
     "githubLink": "Ver fuente en GitHub",
     "donateLink": "Soporte con una donación"
@@ -31,10 +31,10 @@
   },
   "languageSwitcher": {
     "label": "Idioma",
-    "current": "Idioma:{name}"
+    "current": "Idioma: {name}"
   },
   "basemapSwitcher": {
-    "label": "Base de referencia:{label}",
+    "label": "Mapa base: {label}",
     "menuLabel": "Base de referencia",
     "groupToday": "Hoy",
     "groupAntiquity": "Antigüedad",
@@ -65,19 +65,19 @@
   },
   "tabulaPeutingeriana": {
     "title": "Tabula Peutingeriana",
-    "intro": "Una copia medieval de un mapa romano del cursus publicus, la red vial del imperio —que se muestra aquí como su propio escáner profundo del zooma, no envolvido sobre coordenadas reales.",
+    "intro": "Una copia medieval de un mapa romano del cursus publicus, la red vial del imperio — mostrada aquí mediante su propio escaneo de zoom profundo, sin proyectar sobre coordenadas reales.",
     "distortionNote": "La Tabula Peutingeriana es un diagrama esquemático, estirado aproximadamente 18.5 veces más ancho que alto — no es geográficamente exacto, por lo que no se muestra como una capa en el mapa mismo.",
     "viewerLabel": "Visor profundo del manuscrito de Tabula Peutingeriana",
-    "attribution": "Manuscrito: Biblioteca Nacional de Austria, Viena (Cod. 324). Digitisation and IIIF hosting:"
+    "attribution": "Manuscrito: Biblioteca Nacional de Austria, Viena (Cod. 324). Digitalización y alojamiento IIIF:"
   },
   "columns": {
     "title": "Relieves de columna",
-    "intro": "Los relieves de dos columnas romanas, explorados en detalle — Columna de Trajan de placas académicas especiadas, la Columna de Marcus Aurelius de un escaneo de fondo vivo.",
-    "menuLabel": "Alivios de columna",
+    "intro": "Los relieves de dos columnas romanas, examinados en detalle — la Columna de Trajano a partir de placas académicas reflejadas, la Columna de Marco Aurelio a partir de un escaneo de zoom profundo en vivo.",
+    "menuLabel": "Relieves de columna",
     "trajan": {
       "tabLabel": "Columna de Trajano",
       "intro": "Las placas fotográficas 1896–1900 de Conrad Cichorius, la referencia de escena por escena estándar para la columna, reflejada en Wikimedia Commons, dominio público.",
-      "loading": "Cargando platos..",
+      "loading": "Cargando láminas…",
       "loadFailed": "Las placas no se podían cargar. Inténtalo de nuevo en breve.",
       "empty": "Todavía no se publican placas.",
       "gridLabel": "Placas de relieve de columna de Trajan",
@@ -86,8 +86,8 @@
     },
     "marcusAurelius": {
       "tabLabel": "Columna de Marco Aurelio",
-      "intro": "Petersen, las placas 1896 de Domaszewski & Calderini, digitalizadas por la Biblioteca de la Universidad de Heidelberg y mostradas aquí como un escáner de fondo vivo, dominio público.",
-      "viewerLabel": "Visor profundo de la Columna de Marco Aurelio placas",
+      "intro": "Las placas de 1896 de Petersen, Domaszewski y Calderini, digitalizadas por la Biblioteca de la Universidad de Heidelberg y mostradas aquí como un escaneo de zoom profundo en vivo, dominio público.",
+      "viewerLabel": "Visor de zoom profundo de las placas de la Columna de Marco Aurelio",
       "volume": "Volumen de placa",
       "tafeln-i-lxiv": "Tafeln I–LXIV",
       "tafeln-lxv-cxxviii": "Tafeln LXV–CXXVIII",
@@ -126,9 +126,9 @@
   },
   "siteDetail": {
     "loading": "Cargando",
-    "recordsHere": "{count}registros aquí",
+    "recordsHere": "{count} registros aquí",
     "close": "Cerrar detalles del sitio",
-    "openFullEntry": "Abra la entrada completa",
+    "openFullEntry": "Abrir la entrada completa",
     "edit": "Editar",
     "revised": "Revisada",
     "notFound": "Ese sitio no puede ser cargado. Puede haber sido eliminado o está pendiente de revisión.",
@@ -138,9 +138,9 @@
   },
   "enrichment": {
     "sectionTitle": "En otro lugar",
-    "machineTranslatedFrom": "Traducción automática de{language}",
-    "inLanguage": "In{language}",
-    "matchedThrough": "Atravesado{source},{metres}m de la posición grabada",
+    "machineTranslatedFrom": "Traducción automática de {language}",
+    "inLanguage": "En {language}",
+    "matchedThrough": "Coincidencia mediante {source}, a {metres} m de la posición registrada",
     "languages": {
       "en": "Inglés",
       "nl": "Neerlandés",
@@ -165,13 +165,13 @@
       "noAccount": "¿Todavía no tiene cuenta?",
       "createOne": "Crear uno",
       "errorEmail": "Eso no parece una dirección de correo electrónico.",
-      "errorPassword": "Introduzca su contraseña.",
-      "failedTitle": "No podía firmar",
+      "errorPassword": "Introduce tu contraseña.",
+      "failedTitle": "No se pudo iniciar sesión",
       "failedDescription": "Revisa tus datos e intenta de nuevo.",
       "twoFactor": {
         "title": "Introduzca su código",
-        "introCode": "Abra su aplicación de autenticador e ingrese el código de 6 dígitos que muestra.",
-        "introBackup": "Introduzca uno de los códigos de copia de seguridad que guardó cuando encendió esto.",
+        "introCode": "Abre tu aplicación de autenticación e introduce el código de 6 dígitos que muestra.",
+        "introBackup": "Introduce uno de los códigos de copia de seguridad que guardaste cuando activaste esto.",
         "code": "Código",
         "backupCode": "Código de respaldo",
         "submit": "Verificar",
@@ -184,7 +184,7 @@
     },
     "register": {
       "title": "Únase a Vestigian",
-      "intro": "Sus dos primeras contribuciones son comprobadas por un moderador. Después de eso publican como los escribes.",
+      "intro": "Tus dos primeras contribuciones son revisadas por un moderador. Después de eso se publican tal como las escribes.",
       "displayName": "Nombre de visualización",
       "email": "Email",
       "password": "Contraseña",
@@ -193,7 +193,7 @@
       "privacyNotice": "Crear una cuenta almacena su dirección de correo electrónico y el nombre de la pantalla — ver{link}por lo que eso significa y por cuánto tiempo.",
       "doneTitle": "Revisa tu buzón de entrada",
       "doneDescription": "Confirme su dirección para terminar de configurar la cuenta. El enlace es bueno para un día.",
-      "errorDisplayName": "Al menos tres personajes.",
+      "errorDisplayName": "Al menos tres caracteres.",
       "errorEmail": "Eso no parece una dirección de correo electrónico.",
       "errorPasswordMismatch": "Las dos contraseñas no coinciden.",
       "failedTitle": "El registro falló",
@@ -204,42 +204,42 @@
       "hidePassword": "Ocultar contraseña"
     },
     "passwordRequirements": {
-      "met": "- nos conocimos",
-      "notMet": "— aún no se han encontrado",
+      "met": "— cumplido",
+      "notMet": "— aún no cumplido",
       "rules": {
-        "length": "Entre{min}y{max}personajes",
-        "capital": "Una carta de capital",
-        "special": "Un personaje especial"
+        "length": "Entre {min} y {max} caracteres",
+        "capital": "Una letra mayúscula",
+        "special": "Un carácter especial"
       }
     }
   },
   "moderation": {
     "reviewQueue": {
       "loading": "Cargando la cola..",
-      "selectedCount": "{count}seleccionado",
+      "selectedCount": "{count} seleccionado",
       "batchNotePlaceholder": "Nota, enviada a cada autor (opcional)",
       "publishAll": "Publicar todo",
       "rejectAll": "Rechazar todo",
-      "clear": "Despejado",
-      "selectAll": "Seleccione todo",
+      "clear": "Borrar",
+      "selectAll": "Seleccionar todo",
       "nothingWaitingTitle": "Nada esperando.",
       "nothingWaitingHint": "Aquí aparecerán nuevas contribuciones de cuentas no confiadas.",
-      "selectRevision": "Seleccione la revisión{id}",
+      "selectRevision": "Seleccionar la revisión {id}",
       "editToA": "editar a un",
       "newEntity": "nuevo",
-      "revision": "revisión{id}",
+      "revision": "revisión {id}",
       "deletedAccount": "Cuenta suprimida",
-      "acceptedCount": "{count}aceptadas",
+      "acceptedCount": "{count} aceptadas",
       "blankingWarning": "Esta edición elimina más de lo que añade. Revise contra el registro en vivo antes de publicar.",
       "substantialNote": "Una reescritura sustancial.",
-      "noteToAuthor": "Nota a{name}",
+      "noteToAuthor": "Nota a {name}",
       "theContributor": "el contribuyente",
       "noteHint": "Correo electrónico con la decisión",
       "notePlaceholder": "Por qué, especialmente si esto es un rechazo. Un contribuyente no puede ver la cola.",
       "publish": "Publicar",
-      "publishAria": "Publish{title}",
-      "reject": "Rechazo",
-      "rejectAria": "Rechazo{title}",
+      "publishAria": "Publicar {title}",
+      "reject": "Rechazar",
+      "rejectAria": "Rechazar {title}",
       "batchFailedTitle": "Falló la revisión de los lotes",
       "reviewFailedTitle": "La revisión falló",
       "tryAgain": "Inténtalo de nuevo.",
@@ -248,38 +248,38 @@
       "approvedPlural": "aprobado",
       "rejectedPlural": "rechazado",
       "batchResultTitle": "{count} {decision}.",
-      "batchResultSkipped": "{count}saltado."
+      "batchResultSkipped": "{count} omitido."
     },
     "contributorTable": {
       "findPlaceholder": "Encuentre un contribuyente",
-      "accepted": "{count}aceptadas",
-      "waiting": "{count}esperando",
+      "accepted": "{count} aceptadas",
+      "waiting": "{count} esperando",
       "restoreTrust": "Restaurar la confianza",
-      "restoreTrustAria": "Restaurar la confianza para{name}",
+      "restoreTrustAria": "Restaurar la confianza para {name}",
       "suspendPublishing": "Suspender publicación",
-      "suspendPublishingAria": "Editorial Suspend{name}",
-      "roleAria": "Papel{name}",
-      "suspendPrompt": "¿Por qué{name}¿ser suspendido?",
+      "suspendPublishingAria": "Suspender la publicación de {name}",
+      "roleAria": "Rol de {name}",
+      "suspendPrompt": "¿Por qué se suspende a {name}?",
       "suspendHint": "Correo electrónico a ellos, verbatim",
       "suspendReasonPlaceholder": "Tres ediciones eliminan texto fuente sin decir por qué.",
       "cancel": "Cancelar",
-      "untouchedNote": "Sus contribuciones aceptadas son intocables.",
+      "untouchedNote": "Tus contribuciones aceptadas permanecen intactas.",
       "noMatches": "Ningún contribuyente coincide con eso.",
       "standing": {
         "moderator": "Publica por su rol",
-        "revoked": "Suspended — cada edición queued",
+        "revoked": "Suspendido — cada edición pasa a la cola",
         "earned": "Publica inmediatamente",
-        "probation": "Queued —{remaining}para ir"
+        "probation": "En cola — quedan {remaining}"
       },
       "trustSuspended": "Publicación automática suspendida.",
       "trustRestored": "Confianza restaurada.",
-      "toldByEmail": "{name}ha sido dicho por correo electrónico.",
+      "toldByEmail": "{name} ha sido informado/a por correo electrónico.",
       "trustFailedTitle": "No puede cambiar la confianza",
       "tryAgain": "Inténtalo de nuevo.",
-      "nowRole": "{name}es ahora{role}.",
+      "nowRole": "{name} ahora es {role}.",
       "roleFailedTitle": "No podría cambiar el papel",
       "roles": {
-        "contributor": "Contributor",
+        "contributor": "Colaborador",
         "moderator": "Moderador",
         "admin": "Administrador"
       }
@@ -298,32 +298,32 @@
       },
       "kinds": {
         "added": "añadido",
-        "removed": "retirada",
+        "removed": "eliminado",
         "changed": "cambiado"
       },
       "noChanges": "Sin campos cambiados."
     },
     "queuePage": {
-      "title": "Consulta",
+      "title": "Cola de revisión",
       "intro": "Contribuciones de cuentas que aún no han obtenido publicación automática.",
       "contributorsLink": "Colaboradores"
     },
     "contributorsPage": {
       "title": "Colaboradores",
-      "backToQueue": "Consulta",
-      "intro": "La publicación pendiente mantiene intacto el registro de un contribuyente, restituyéndolo los devuelve exactamente donde estaban."
+      "backToQueue": "Cola de revisión",
+      "intro": "Suspender la publicación mantiene intacto el registro de un colaborador — restaurarla lo devuelve exactamente a donde estaba."
     }
   },
   "licence": {
     "title": "Licencias de datos",
     "intro": "Vestigian se basa en datos que otros hicieron libremente reutilizables. Los términos difieren por capa — aquí es lo que se aplica a cada uno.",
-    "recordsHeading": "Registros gentiles",
-    "recordsBody": "El texto de localización y localización es CC BY-SA, libre de reutilización y adaptación, incluso comercialmente, siempre que los cambios se compartan con la misma licencia y se acredita la fuente. Los metadatos estructurados (coordinados, fechas, categorías) son CAC0, sin derechos reservados.",
+    "recordsHeading": "Registros aportados",
+    "recordsBody": "El texto de sitios y trazados es CC BY-SA, libre de reutilizar y adaptar, incluso comercialmente, siempre que los cambios se compartan con la misma licencia y se acredite la fuente. Los metadatos estructurados (coordenadas, fechas, categorías) son CC0, sin derechos reservados.",
     "imagesHeading": "Fotografías",
     "imagesBody": "Cada fotografía lleva su propia licencia y atribución, mostrada bajo la imagen misma. Las licencias varían por registro; comprueba la imagen antes de reutilizarla por separado del sitio que ilustra.",
-    "barringtonHeading": "Antigüedad (Barrington) basemap",
+    "barringtonHeading": "Antigüedad (Barrington), mapa base",
     "barringtonBody": "La costa, las rutas, el agua y los lugares antiguos proceden del Ancient World Mapping Center (ODbL 1.0) y de Pleiades (CC BY 3.0). Ambos son reutilizables, incluso comercialmente, con atribución — la cláusula compartir-igual de ODbL se aplica a la base de datos subyacente, no a las teselas de mapa generadas.",
-    "dareHeading": "Antigüedad (DARE)",
+    "dareHeading": "Antigüedad (DARE), mapa base",
     "dareBody": "Esta base es CC BY-SA 3.0 de Johan Åhlfeldt ( Atlas Digital del Imperio Romano, Universidad de Gotemburgo), pero dos de sus propias capas fuente se acreditan no comerciales (CC BY-NC 3.0 / CC BY-NC-SA), que la manta CC BY-SA no puede anular. Tratar esta capa específica como uso no comercial solamente.",
     "limesHeading": "La frontera (limes)",
     "limesBody": "La línea de frontera se deriva de la extensión del imperio del Ancient World Mapping Center (ODbL 1.0) y no forma parte de la base de datos aportada.",
@@ -335,7 +335,7 @@
     "overlayMinorFeatures": "Antigüedades menores (puentes, minas, canteras y más): Ancient World Mapping Center (ODbL 1.0).",
     "overlayCoinHoards": "Tesoros de monedas: Tesoros de Monedas de la República Romana, American Numismatic Society (CC BY-NC-SA 4.0) — solo uso no comercial.",
     "overlayEmpireExtents": "Extensión del imperio a lo largo del tiempo: colaboradores de OpenHistoricalMap (CC0 1.0).",
-    "columnReliefHeading": "Alivios de columna",
+    "columnReliefHeading": "Relieves de columna",
     "columnReliefBody": "Las placas de la Columna de Trajano están reflejadas desde la categoría «Cichorius Plates» de Wikimedia Commons, marcadas allí como dominio público. Las placas de la Columna de Marco Aurelio se sirven en directo desde la digitalización de la Biblioteca de la Universidad de Heidelberg del estudio de Petersen, Domaszewski & Calderini de 1896 — también dominio público; nada se copia en el almacenamiento propio de este proyecto para esa columna.",
     "placeNamesHeading": "Nombres de lugar modernos",
     "placeNamesBody": "Los nombres de pueblos y ciudades actuales usados en la búsqueda de lugares proceden de GeoNames.org (CC BY 4.0).",
@@ -346,9 +346,9 @@
     "title": "Aviso legal",
     "intro": "Información obligatoria conforme a la Ley alemana de Servicios Digitales (DDG, antes TMG).",
     "operatorHeading": "Proveedor de servicios",
-    "operatorPlaceholder": "[NOMBRE DEL ORRATOR]\n[STREET AND NUMBER]\n[POSTAL CODE AND CITY]\n[PADRE]",
+    "operatorPlaceholder": "[NOMBRE DEL OPERADOR]\n[CALLE Y NÚMERO]\n[CÓDIGO POSTAL Y CIUDAD]\n[PAÍS]",
     "contactHeading": "Contacto",
-    "contactPlaceholder": "Correo electrónico: [CONTACT EMAIL]",
+    "contactPlaceholder": "Correo electrónico: [CORREO DE CONTACTO]",
     "disputeHeading": "Resolución de controversias",
     "disputeBody": "La Comisión Europea proporciona una plataforma para la solución de controversias en línea (ODR): ec.europa.eu/consumers/odr. No estamos obligados y no estamos dispuestos a participar en procedimientos de solución de controversias ante una junta de arbitraje del consumidor."
   },
@@ -358,13 +358,13 @@
     "controllerHeading": "Controlador",
     "controllerBody": "El proveedor de servicios nombrado en el aviso legal es el controlador (\"nosotros\") para el procesamiento descrito a continuación. Los datos de contacto son los mismos que en esa página.",
     "accountHeading": "Crear una cuenta",
-    "accountBody": "Registro almacena su dirección de correo electrónico, nombre de pantalla y un hash de contraseña salada (argon2id - la contraseña en sí nunca se almacena). Esto se procesa para cumplir el contrato de proporcionar una cuenta (artículo 6 1) b) del Reglamento Financiero). Su dirección se utiliza sólo para verificarla, para permitirle iniciar y restablecer una contraseña olvidada, y para informarle sobre las decisiones sobre sus propias contribuciones o cuenta — nunca para el marketing, y no hay newsletter.",
+    "accountBody": "Registrarse almacena tu dirección de correo electrónico, nombre visualizado y un hash de contraseña salada (argon2id — la contraseña en sí nunca se almacena). Esto se trata para ejecutar el contrato de proporcionar una cuenta (RGPD, art. 6.1.b). Tu dirección se usa solo para verificarla, para permitirte iniciar sesión y restablecer una contraseña olvidada, y para comunicarte decisiones sobre tus propias contribuciones o cuenta — nunca para marketing, y no hay boletín informativo.",
     "contributionHeading": "Contribuciones",
     "contributionBody": "Un sitio, localización o imagen que usted envía está vinculado a su cuenta para que la historia de edición permanezca legible y así se puede evaluar la confianza. Las contribuciones aprobadas son públicas, como es el hecho de que su cuenta las hizo, así es como funciona la historia de revisión del atlas, y es fundamental para lo que es el servicio. Si elimina su cuenta, este enlace es anónimo (ver \"Sus derechos\" a continuación) en lugar de la contribución que se está eliminando, por las razones indicadas allí.",
     "photographHeading": "Fotografías",
     "photographBody": "Cada imagen subida es re-codificada en nuestro servidor antes del almacenamiento, que tira metadatos EXIF —incluyendo cualquier coordenadas GPS incrustadas o identificadores de cámara/dispositivo— por lo que nada de eso llega al almacenamiento u otro visitante.",
     "cookiesHeading": "Cookies",
-    "cookiesBody": "Tres cookies, todas estrictamente necesarias para la funcionalidad que usted solicitó directamente, ninguna utilizada para el seguimiento o la publicidad: una cookie de sesión (aprox. 7 días, o hasta que se firme) que mantiene su firma; una cookie que recuerda su preferencia de luz / oscuro; y una cookie que recuerda su idioma de interfaz elegido. Debido a que ninguno de ellos es opcional, ninguno de ellos puede estar rastreando, y ninguno de ellos apoya la publicidad, la ley alemana (§25(2) TDDDG, implementando la Directiva ePrivacy) no requiere pedir consentimiento antes de establecerlos, por lo que no hay banner de cookies aquí. Esta sección es esa revelación.",
+    "cookiesBody": "Tres cookies, todas estrictamente necesarias para la funcionalidad que solicitaste directamente, ninguna usada para el seguimiento o la publicidad: una cookie de sesión (conservada 7 días, o hasta que cierres sesión) que te mantiene conectado; una cookie que recuerda tu preferencia de claro/oscuro; y una cookie que recuerda el idioma de interfaz elegido. Como ninguna de ellas es opcional, ninguna de ellas puede servir para rastrear, y ninguna de ellas da soporte a la publicidad, la ley alemana (§25(2) TDDDG, que implementa la Directiva ePrivacy) no exige pedir consentimiento antes de establecerlas — así que aquí no hay banner de cookies. Esta sección constituye esa divulgación.",
     "logsHeading": "Registros de servidores y seguridad",
     "logsBody": "Cada solicitud se registra con la dirección IP del visitante, mantenida durante 30 días, sobre la base de interés legítimo de operar y asegurar el servicio (Art. 6(1)(f)) – investigar abusos, depurar fallas y defender contra ataques automatizados. Las contraseñas, direcciones de correo electrónico y fichas de autenticación nunca se escriben a los registros. La limitación de tarifas almacena brevemente su dirección IP (a la mayor parte de una hora) para hacer cumplir los límites de uso justo y parar el registro y la chatarra automatizada.",
     "recipientsHeading": "¿Quién más procesa datos y dónde",
@@ -375,9 +375,9 @@
     "recipientTranslate": "Traducción automática (LibreTranslate): se ejecuta en nuestro propio servidor, no en un tercero — el texto prestado del artículo se traduce allí, nunca enviado externamente.",
     "recipientEnrichment": "Wikidata, Wikipedia y Pleiades (fuera de la UE): cuando la descripción de un sitio se puede complementar con estos proyectos públicos, nuestro servidor —nunca su navegador— hace esa solicitud, por lo que su dirección IP no es compartida con ellos.",
     "recipientBasemap": "Proveedores de azulejos de mapa: algunas capas de mapa de base son capturadas directamente por su navegador de sus propios anfitriones, por lo que su dirección IP llega a ellos la forma en que visitaría cualquier sitio que incrusta un mapa.",
-    "recipientSecurity": "Detección de abusos automatizados (CrowdSec): IP dirige nuestro servidor localmente banderas como abusivas se comparten con el servicio comunitario de inteligencia de amenazas de CrowdSec, sobre la base de interés legítimo de la seguridad de la red (Art. 6(1)(f)).",
+    "recipientSecurity": "Detección de abusos automatizada (CrowdSec): las direcciones IP que nuestro servidor marca localmente como abusivas se comparten con el servicio comunitario de inteligencia de amenazas de CrowdSec, sobre la base del interés legítimo en la seguridad de la red (art. 6(1)(f)).",
     "rightsHeading": "Sus derechos",
-    "rightsBody": "Usted puede solicitar una copia de lo que tenemos sobre su cuenta y sus contribuciones, y puede eliminar su cuenta, tanto desde dentro de la aplicación una vez firmada en — exporta todo como un archivo que puede guardar; la eliminación elimina su dirección de correo electrónico y el nombre de la pantalla y no se puede deshacer. Eliminar su cuenta no elimina sus contribuciones aprobadas del atlas —las que quedan, atribuidas a una cuenta eliminada en lugar de a usted, sobre la base de que el registro histórico de lo que se registró y cuándo es en sí misma información de interés público y científico (Art. 17(3)(d)))) y consistente con cómo se guarda la historia de cualquier otra edición. También puede solicitarnos directamente la rectificación, restricción del procesamiento o oponerse al procesamiento basado en intereses legítimos, y tiene derecho a presentar una denuncia ante una autoridad supervisora de protección de datos.",
+    "rightsBody": "Puedes solicitar una copia de lo que tenemos sobre tu cuenta y sus contribuciones, y puedes eliminar tu cuenta, ambas cosas desde dentro de la aplicación una vez iniciada sesión — la exportación te devuelve todo como un archivo que puedes conservar; la eliminación borra tu dirección de correo electrónico y nombre visualizado y no se puede deshacer. Eliminar tu cuenta no elimina tus contribuciones aprobadas del atlas — esas permanecen, atribuidas a una cuenta eliminada en lugar de a ti, sobre la base de que el registro histórico de lo que se registró y cuándo es en sí mismo información de interés público y científico (art. 17(3)(d)) y coherente con cómo se conserva el historial de cualquier otra edición. También puedes solicitarnos directamente la rectificación, la limitación del tratamiento, o oponerte al tratamiento basado en un interés legítimo, y tienes derecho a presentar una reclamación ante una autoridad de control de protección de datos.",
     "exportAction": "Descargar mis datos",
     "exportFailed": "No podía exportar sus datos. Inténtalo de nuevo en breve.",
     "deleteAction": "Suprimir mi cuenta",
@@ -398,7 +398,7 @@
     "stopFollowing": "Deja de seguir tu posición",
     "showPosition": "Mostrar su posición",
     "errors": {
-      "denied": "La ubicación está bloqueada. Permite que en la configuración de su navegador use esto.",
+      "denied": "La ubicación está bloqueada. Actívala en la configuración de tu navegador para poder usar esto.",
       "timeout": "Todavía no. Muévete a algún lado con una visión más clara del cielo.",
       "unavailable": "La ubicación no está disponible en este dispositivo ahora mismo.",
       "insecureContext": "La ubicación necesita una conexión segura y un dispositivo con GPS."
@@ -412,7 +412,7 @@
     "revert": "revertir",
     "unknownAuthor": "Desconocido",
     "publishedAutomatically": "Publicado automáticamente — el autor ha ganado confianza.",
-    "reviewedBy": "Reviewed by{reviewer}.",
+    "reviewedBy": "Revisado por {reviewer}.",
     "published": "Publicado.",
     "restoreEarlier": "Restaurar la versión antes de esto",
     "reverted": "Revertido. La versión anterior está viva de nuevo.",
@@ -438,71 +438,71 @@
     "camp": "Campamento de marcha"
   },
   "featurePicker": {
-    "recordsHere": "{count}registros aquí",
-    "dismiss": "Descargue la lista de registros aquí",
+    "recordsHere": "{count} registros aquí",
+    "dismiss": "Cerrar la lista de registros de aquí",
     "alongThisLine": "A lo largo de esta línea",
     "atThisPoint": "En este punto",
-    "metresAway": "{metres}m away",
-    "kilometresAway": "{kilometres}km"
+    "metresAway": "{metres} m de distancia",
+    "kilometresAway": "{kilometres} km de distancia"
   },
   "limesFormat": {
-    "bc": "{year}BC",
-    "ad": "AD{year}",
-    "toYear": "a{year}",
-    "fromYear": "desde{year}",
-    "yearRange": "{from}–{to}",
+    "bc": "{year} a. C.",
+    "ad": "{year} d. C.",
+    "toYear": "hasta {year}",
+    "fromYear": "desde {year}",
+    "yearRange": "{from} – {to}",
     "atTheStart": "al principio",
-    "kmAlong": "{km}km"
+    "kmAlong": "{km} km a lo largo"
   },
   "limesPanel": {
     "title": "La frontera romana",
     "backToFrontier": "Volver a toda la frontera",
     "loading": "Cargando",
-    "theLimes": "Los limones",
+    "theLimes": "El limes",
     "showFrontier": "Mostrar la frontera",
     "hideFrontier": "Ocultar la frontera",
     "introBody": "Cinco mil kilómetros de frontera, en los tramos el nombre de las fuentes. Elija uno para seguirlo final a fin.",
-    "unrolling": "Desrollando la frontera..",
+    "unrolling": "Desenrollando la frontera…",
     "readingRoll": "Leyendo el rollo..",
-    "recorded": "{count}registrado",
+    "recorded": "{count} registrado",
     "readStretch": "Lea este tramo",
-    "referenced": "referenciad"
+    "referenced": "referenciado"
   },
   "limesSectorPage": {
-    "breadcrumb": "Breadcrumb",
-    "theLimes": "Los limones",
-    "length": "Duración",
+    "breadcrumb": "Ruta de navegación",
+    "theLimes": "El limes",
+    "length": "Longitud",
     "inUse": "En uso",
     "recordedOnIt": "Grabado en él",
     "pleiades": "Pleiades",
     "alongTheLine": "A lo largo de la línea, oeste a este",
     "nothingRecorded": "Todavía no se registra nada en este tramo.",
     "fortification": "Fortificación",
-    "contributedRecords": "{count}contribuyeron a los registros",
-    "referencedPlaces": "{count}lugares de referencia -",
+    "contributedRecords": "{count} registros aportados —",
+    "referencedPlaces": "{count} lugares de referencia —",
     "notFound": "No hay tal extensión de frontera."
   },
   "limesIndexPage": {
-    "title": "Los limones",
+    "title": "El limes",
     "description": "La frontera del imperio romano, sector por sector: sus muros, sus ríos y las fortalezas y torres a lo largo de ellos.",
-    "intro": "El borde del mundo romano, desde el Solway hasta el Eufrates. Nunca fue una cosa: una pared mortificada a través de la meseta de Raetian, un río patrullado desde su banco occidental, una línea de fuertes en el último agua confiable antes del desierto. Lo que sigue es que borde en los tramos el nombre de las fuentes, extraído de la extensión del Imperio del Centro Mundial Antiguo a 200 CE y de su registro de las paredes que fueron construidas.",
-    "acrossStretches": "{length}enfrente{count}estiramientos",
-    "attribution": "Frontera derivada de la{link}’s extensión del imperio y su linework mural, ODbL 1.0. Los nombres y las notas anteriores son los propios de este atlas; la geometría no es.",
-    "attributionLinkText": "Antiguo World Mapping Center"
+    "intro": "El límite del mundo romano, desde el Solway hasta el Éufrates. Nunca fue una sola cosa: un muro de mampostería a través de la meseta rética, un río patrullado desde su orilla occidental, una línea de fuertes en el último punto de agua fiable antes del desierto. Lo que sigue es ese límite en los tramos que las fuentes nombran, extraído de la extensión del imperio hacia el 200 d. C. según el Ancient World Mapping Center y de su registro de los muros que realmente se construyeron.",
+    "acrossStretches": "{length} a lo largo de {count} tramos",
+    "attribution": "Frontera derivada de la extensión del imperio y el trazado de sus muros según {link}, ODbL 1.0. Los nombres y las notas anteriores son propios de este atlas; la geometría no lo es.",
+    "attributionLinkText": "Ancient World Mapping Center"
   },
   "mapSearch": {
     "searching": "Búsqueda",
     "noMatches": "No hay coincidencias",
     "matches": "{count}coincidencias",
-    "label": "Sitios de búsqueda, carreteras y lugares",
-    "placeholder": "Sitios de búsqueda, carreteras, lugares",
+    "label": "Buscar sitios, carreteras y lugares",
+    "placeholder": "Buscar sitios, carreteras, lugares",
     "resultsLabel": "Resultados de la búsqueda",
     "modernPlace": "Lugar moderno · {country}",
     "ancientPlace": "Nombre antiguo"
   },
   "mapCanvas": {
     "ariaLabel": "Mapa de sitios arqueológicos",
-    "loading": "Despliegue el mapa"
+    "loading": "Desplegando el mapa"
   },
   "battlePopup": {
     "viewOnWikipedia": "Ver en Wikipedia"
@@ -534,7 +534,7 @@
   },
   "siteExternalLinks": {
     "title": "También se registró en",
-    "opensNewTab": "(opens en una nueva pestaña)",
+    "opensNewTab": "(se abre en una nueva pestaña)",
     "verifiedTitle": "Verificado con {source}, a {metres} m",
     "verifiedSummary": "Cotejado con {count} de {total} fuentes vinculadas",
     "schemes": {
@@ -563,28 +563,28 @@
     "period": "Período",
     "near": "Cerca",
     "position": "Posición",
-    "copyCoordinates": "Copia las coordenadas{coordinates}"
+    "copyCoordinates": "Copiar las coordenadas {coordinates}"
   },
   "siteGallery": {
     "defaultAlt": "Fotografía del sitio",
     "choosePhotograph": "Elige una fotografía",
-    "showImage": "Mostrar imagen{index}de{count}"
+    "showImage": "Mostrar imagen {index} de {count}"
   },
   "tracingDetail": {
     "area": "Zona",
     "route": "Ruta",
-    "recordsHere": "{count}registros aquí",
-    "closeDetails": "Cerrar detalles de localización",
-    "panelLabel": "Detalles de localización",
+    "recordsHere": "{count} registros aquí",
+    "closeDetails": "Cerrar detalles del trazado",
+    "panelLabel": "Detalles del trazado",
     "type": "Tipo",
-    "length": "Duración",
-    "tracedNote": "Las rutas trazadas se dibujan destrozadas porque un rastreo es una interpretación de donde algo funcionó, no una encuesta de ella.",
-    "openFullEntry": "Abra la entrada completa",
+    "length": "Longitud",
+    "tracedNote": "Las rutas trazadas se dibujan a trazos discontinuos porque un trazado es una interpretación de por dónde discurría algo, no un levantamiento topográfico de ello.",
+    "openFullEntry": "Abrir la entrada completa",
     "edit": "Editar",
     "defaultAttribution": "Colaboradores de Vestigian"
   },
   "siteGalleryManager": {
-    "defaultPhotographName": "fotografía{index}",
+    "defaultPhotographName": "fotografía {index}",
     "reorderFailedTitle": "No podría reordenar",
     "tryAgain": "Inténtalo de nuevo.",
     "withdrawn": "Fotografía retirada de la galería.",
@@ -592,18 +592,18 @@
     "saveFailedTitle": "No podía salvar",
     "title": "Fotografías",
     "intro": "La primera imagen es la que se muestra en el mapa. Retirar esconde una fotografía sin borrar el registro de que estaba aquí.",
-    "captionPlaceholder": "Caption",
+    "captionPlaceholder": "Descripción",
     "whoTookItPlaceholder": "¿Quién lo tomó",
     "save": "Guardar",
     "cancel": "Cancelar",
-    "noCaption": "Sin gorra",
+    "noCaption": "Sin título",
     "creditUnknown": "Crédito desconocido",
-    "moveEarlier": "Moveos{name}antes",
-    "moveLater": "Moveos{name}más tarde",
-    "editCaptionAndCredit": "Editar el título y el crédito de{name}",
+    "moveEarlier": "Mover {name} antes",
+    "moveLater": "Mover {name} más tarde",
+    "editCaptionAndCredit": "Editar la descripción y el crédito de {name}",
     "edit": "Editar",
-    "withdraw": "Retirada{name}",
-    "withdrawButton": "Retirada",
+    "withdraw": "Retirar {name}",
+    "withdrawButton": "Retirar",
     "noPhotographs": "Todavía no hay fotografías."
   },
   "contributionPanel": {
@@ -626,7 +626,7 @@
     "dropHint": "JPEG, PNG o WebP, hasta 15 MB",
     "chooseAria": "Elija una fotografía — JPEG, PNG o WebP, hasta 15 MB",
     "sizeLimitHint": "Las fotografías deben pesar menos de 15 MB.",
-    "caption": "Caption",
+    "caption": "Descripción",
     "captionPlaceholder": "La puerta norte, vista desde dentro",
     "whoTookIt": "¿Quién lo tomó",
     "shownAsCredit": "Muestra como el crédito",
@@ -644,13 +644,13 @@
   "siteEditorForm": {
     "nameTooShort": "Dar al sitio un nombre de al menos tres caracteres.",
     "editsPublishImmediately": "Sus ediciones publican inmediatamente.",
-    "reviewNotice": "Un moderador revisa esto antes de que aparezca.{count}más aceptadas{contributionWord}y tus ediciones van en directo.",
+    "reviewNotice": "Un moderador revisa esto antes de que aparezca. {count} más {contributionWord} aceptadas y tus ediciones se publican de inmediato.",
     "contribution": "contribución",
     "contributions": "contribuciones",
-    "saveFailedTitle": "Eso no puede ser salvado",
+    "saveFailedTitle": "Eso no se pudo guardar.",
     "tryAgainMoment": "Inténtalo de nuevo en un momento.",
     "editTitle": "Editar este sitio",
-    "recordTitle": "Grabar un sitio",
+    "recordTitle": "Registrar un sitio",
     "name": "Nombre",
     "namePlaceholder": "Kastell Saalburg",
     "type": "Tipo",
@@ -662,7 +662,7 @@
     "description": "Descripción",
     "whatChanged": "¿Qué cambiaste?",
     "whatChangedHint": "Muestra en la historia del sitio",
-    "editSummaryPlaceholder": "Corregidos las citas",
+    "editSummaryPlaceholder": "Corregida la datación",
     "saveChanges": "Guardar cambios",
     "saveSite": "Guardar sitio",
     "cancel": "Cancelar"
@@ -675,13 +675,13 @@
       "other": "Algo más"
     },
     "drawFirst": "Dibuja la línea primero, luego salva.",
-    "saveFailedTitle": "Eso no puede ser salvado",
+    "saveFailedTitle": "Eso no se pudo guardar.",
     "tryAgainShortly": "Inténtalo de nuevo en breve.",
     "editTitle": "Editar este rastreo",
     "traceTitle": "Trace una ruta",
-    "editHint": "Ajustar los puntos existentes, o redireccionar el curso completamente.",
-    "traceHint": "Haga clic a lo largo del curso, luego ajustar los puntos. Las rutas transitadas aparecen destrozadas en el mapa, porque un rastreo es una interpretación en lugar de una encuesta.",
-    "pointsCaptured": "{count}puntos capturados",
+    "editHint": "Ajusta los puntos existentes, o vuelve a trazar el curso por completo.",
+    "traceHint": "Haz clic a lo largo del curso, luego ajusta los puntos. Las rutas trazadas aparecen a trazos discontinuos en el mapa, porque un trazado es una interpretación más que un levantamiento topográfico.",
+    "pointsCaptured": "{count} puntos capturados",
     "name": "Nombre",
     "namePlaceholder": "Via Claudia Augusta, sección norte",
     "type": "Tipo",
@@ -698,11 +698,11 @@
   },
   "geometryDrawTool": {
     "traceLine": "Trace una línea",
-    "outlineArea": "Esquema de una zona",
-    "adjustPoints": "Ajuste de puntos",
+    "outlineArea": "Delimitar una zona",
+    "adjustPoints": "Ajustar puntos",
     "toolbarLabel": "Herramientas de dibujo",
     "useShape": "Usa esta forma",
-    "clear": "Despejado"
+    "clear": "Borrar"
   },
   "loginPage": {
     "title": "Iniciar sesión"
@@ -731,8 +731,8 @@
     "newPassword": "Nueva contraseña",
     "repeatIt": "Repítelo",
     "savePassword": "Guardar contraseña",
-    "changed": "La contraseña cambió. Firme con el nuevo.",
-    "resetFailedTitle": "No se puede reasentar",
+    "changed": "La contraseña cambió. Inicia sesión con la nueva.",
+    "resetFailedTitle": "No se pudo restablecer",
     "askForNewLink": "Pide un nuevo enlace."
   },
   "verifyPage": {
@@ -750,12 +750,12 @@
     "startAgain": "Empieza de nuevo"
   },
   "periodFormat": {
-    "bc": "{year}BC",
-    "ad": "AD{year}",
+    "bc": "{year} a. C.",
+    "ad": "{year} d. C.",
     "undated": "Sin fecha",
-    "fromYear": "Desde{year}",
-    "untilYear": "Hasta{year}",
-    "yearRange": "{from}–{to}"
+    "fromYear": "Desde {year}",
+    "untilYear": "Hasta {year}",
+    "yearRange": "{from} – {to}"
   },
   "siteDetailPage": {
     "showOnMap": "Mostrar en el mapa",
@@ -765,10 +765,10 @@
   "tracingDetailPage": {
     "notFound": "No hay rastreo con ese identificador.",
     "defaultDescription": "Una característica trazada registrada en Vestigian, un atlas del mundo antiguo.",
-    "tracedArea": "Zona de tracción",
-    "tracedRoute": "Ruta transitada",
+    "tracedArea": "Zona trazada",
+    "tracedRoute": "Ruta trazada",
     "type": "Tipo",
-    "length": "Duración",
+    "length": "Longitud",
     "credit": "Crédito",
     "defaultAttribution": "Colaboradores de Vestigian",
     "edit": "Editar",
@@ -776,7 +776,7 @@
   },
   "siteEditPage": {
     "notFound": "No hay sitio registrado bajo ese nombre.",
-    "editingTitle": "Edición{title}",
+    "editingTitle": "Edición de {title}",
     "backToEntry": "Volver a la entrada",
     "nothingChanged": "Nada cambió.",
     "position": "Posición",
@@ -786,8 +786,8 @@
   },
   "tracingEditPage": {
     "notFound": "No hay rastreo con ese identificador.",
-    "editingTitle": "Edición{title}",
-    "srHeading": "Editar{title}",
+    "editingTitle": "Edición de {title}",
+    "srHeading": "Editar {title}",
     "editorAriaLabel": "Editor de trazado"
   },
   "notebook": {
@@ -933,11 +933,11 @@
     "cancel": "Cancelar",
     "twoFactor": {
       "heading": "Autenticación de dos factores",
-      "body": "Un código extra de una aplicación de autenticador, encima de su contraseña, cuando se registra.",
+      "body": "Un código extra de una aplicación de autenticación, además de tu contraseña, cuando inicias sesión.",
       "enable": "Activa la autenticación de dos factores",
       "setupFailed": "Eso no se puede configurar. Inténtalo de nuevo en un momento.",
       "wrongCode": "Ese código no está bien.",
-      "scanIntro": "Escríbelo con una aplicación de autenticador (Google Authenticator, 1Password, Authy, o similar), y luego introduce el código que muestra para confirmar.",
+      "scanIntro": "Escanéalo con una aplicación de autenticación (Google Authenticator, 1Password, Authy, o similar), y luego introduce el código que muestra para confirmar.",
       "qrAlt": "Código QR para la configuración de dos factores",
       "manualKey": "O entra esta llave a mano",
       "confirmCode": "Código",
@@ -956,7 +956,7 @@
       "disableHeading": "Apaga la autenticación de dos factores",
       "disable": "Apaga",
       "disabled": "La autenticación de dos factores está apagada.",
-      "disableFailed": "Eso no funcionó. Compruebe su contraseña y código e inténtelo de nuevo."
+      "disableFailed": "Eso no funcionó. Comprueba tu contraseña y código e inténtalo de nuevo."
     }
   },
   "contributor": {

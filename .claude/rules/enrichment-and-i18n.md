@@ -197,6 +197,18 @@ now frozen; `followLimesHint` was already fine in every locale, since it
 describes the frontier ("the border, its walls and its forts") rather than
 naming it.
 
+**A full five-locale human audit (2026-09-07) found the "limes" bug had three more instances the frozen-key list had missed** — `limesPanel.theLimes`, `limesSectorPage.theLimes` and `limesIndexPage.title` (all just "The limes" as a standalone page title or panel heading) read as "Les chaux"/"Los limones"/"Le calce"/"De limoenen" in fr/es/it/nl, the exact same fruit/quicklime confusion `followLimes` had already been fixed for. All three are now frozen too (see `translate-locales.ts`). The lesson repeats the original one: one correct locale (German, where "der Limes" happens to also be right) is never evidence the other four are — the bug has now recurred twice in the same file for the same reason, missed both times until someone read every locale side by side rather than trusting the pipeline's own idea of "already fixed."
+
+That audit went well beyond "limes" and corrected roughly 600 translations across all five locales — five parallel review passes (one per locale, comparing against `en.json` key by key), not spot checks. Recurring bug classes found, most of them **not** specific to any one locale:
+
+- **A dropped space around an interpolated placeholder**, e.g. German `"{count}ausgewählt"` instead of `"{count} ausgewählt"` — the exact class of bug `restoreSurroundingSpace` (below) exists to prevent, but it had reached dozens of keys across every locale regardless, mostly ones translated in later, smaller batches after the original fix landed. Worth treating as a standing risk for any future batch translation, not a one-time cleanup.
+- **False friends from literal machine translation**: "Sign in" → "Firma" (Italian, actually "signature") on five separate keys, including `layout.signIn` and `layout.signOut` both reading identically; "Save" → "Sparen"/"Salvado" (German/Spanish "economize"/"rescue a soul" rather than persist data); "Caption" → "Gorra"/"Titel" (Spanish "cap [hat]", Dutch/German "title"); "Cancel" → "Stornierung" (German, "cancellation of an order", a noun, not the verb a button needs).
+- **Truncated body text**, worst in Dutch: `licence.recordsBody` and `privacy.photographBody` were cut off mid-clause, dropping the actual GDPR-relevant content (what EXIF stripping removes, what the CC licence permits) and leaving only the lead-in.
+- **Untranslated debris left mid-sentence** from a bulk translation pass: `"kept 7 giorni"`, `"a más de un'ora"` (which also _inverted_ the meaning of "at most one hour"), a stray "♪" character, brand names mangled ("1Password" → "1Mot de passe" in French).
+- **Register drift within a single file** — most locales settle on one formality level (e.g. Dutch informal "je", French formal "vous") but individual keys or whole sections (commonly `settings.twoFactor.*`, translated in a separate batch) slip into the other register, including switching pronoun mid-sentence in the same string.
+
+None of this is fixable by freezing more keys — freezing only helps proper nouns and short standalone labels a general model reliably mis-senses. The rest is ordinary translation quality drift from iterative machine-translation batches never getting a full human read-through end to end. There is no automated guard for it; this was a manual audit and will need to be repeated periodically, not something the pre-commit pipeline below catches.
+
 **The pre-commit hook keeps the five locales from drifting.** When
 `i18n/locales/en.json` is staged, `.husky/pre-commit` runs
 `scripts/i18n/translate-locales.ts` before `lint-staged` and stages whatever

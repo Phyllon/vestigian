@@ -92,8 +92,16 @@ export const FROZEN_KEYS: readonly string[] = [
   // limoenen" (Dutch), "Seguir los limones" (Spanish), "Suivre les chaux"
   // (French, "follow the quicklime"), "Seguire le calce" (Italian, same).
   // German alone survived untouched, because "der Limes" is also the
-  // correct German historical term.
+  // correct German historical term. A full five-locale audit later found
+  // the same bug in three more keys that this list had missed entirely —
+  // "Le limes" rendered as "Les chaux"/"Los limones"/"Le calce"/"De
+  // limoenen" — because they are also short standalone labels ("The
+  // limes" as a page title or panel heading) with nothing around them to
+  // disambiguate the sense.
   'basemapSwitcher.followLimes',
+  'limesPanel.theLimes',
+  'limesSectorPage.theLimes',
+  'limesIndexPage.title',
   // Plate volumes, named in German by the 1896 edition itself.
   'columns.marcusAurelius.tafeln-i-lxiv',
   'columns.marcusAurelius.tafeln-lxv-cxxviii',
