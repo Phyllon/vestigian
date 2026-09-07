@@ -144,6 +144,33 @@ test.describe('the basemap switcher', () => {
     expect(problems.pageErrors).toEqual([])
   })
 
+  test('battles draw over any basemap, requesting nothing until switched on', async ({ page }) => {
+    const problems = watchForProblems(page)
+    const battleTiles: number[] = []
+
+    page.on('response', (response) => {
+      if (response.url().includes('/api/tiles/antiquity-battles/')) {
+        battleTiles.push(response.status())
+      }
+    })
+
+    // Default basemap is 'Vestigian', not an antiquity sheet — proving the
+    // overlay is not gated to one sheet the way the period scrubber is.
+    await openMap(page)
+    await waitForTiles(page)
+    expect(battleTiles.length, 'a reader who never touches the switch should request nothing').toBe(
+      0,
+    )
+
+    await page.getByRole('button', { name: /^Basemap:/ }).click()
+    await page.getByRole('menuitemcheckbox', { name: 'Show battles' }).click()
+    await expect.poll(() => battleTiles.length, { timeout: 15_000 }).toBeGreaterThan(0)
+
+    expect(battleTiles.some((status) => status === 200 || status === 204)).toBe(true)
+    expect(problems.cspViolations).toEqual([])
+    expect(problems.pageErrors).toEqual([])
+  })
+
   test('keeps the site overlay across a style swap', async ({ page }) => {
     const tileRequests: string[] = []
     page.on('request', (request) => {

@@ -29,6 +29,12 @@
     keepLimesOverlayThroughStyleChanges,
   } = useLimesOverlay()
   const {
+    isActive: isShowingBattles,
+    attachBattleOverlay,
+    detachBattleOverlay,
+    keepBattleOverlayThroughStyleChanges,
+  } = useBattleOverlay()
+  const {
     load: loadNotebook,
     overlay: notebookOverlay,
     attachNotebookOverlay,
@@ -147,6 +153,15 @@
     refreshLimesDimming(map.value)
   })
 
+  watch(isShowingBattles, (isActive) => {
+    if (!map.value) return
+    if (isActive) {
+      attachBattleOverlay(map.value)
+    } else {
+      detachBattleOverlay(map.value)
+    }
+  })
+
   onMounted(() => {
     if (!container.value) return
 
@@ -161,6 +176,8 @@
       // markers it runs past rather than over them.
       attachLimesOverlay(instance)
       keepLimesOverlayThroughStyleChanges(instance)
+      attachBattleOverlay(instance)
+      keepBattleOverlayThroughStyleChanges(instance)
       attachOverlay(instance)
       keepOverlayThroughStyleChanges(instance)
       refreshLimesDimming(instance)

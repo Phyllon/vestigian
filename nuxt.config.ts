@@ -449,6 +449,12 @@ export default defineNuxtConfig({
          */
         periodExtentTilesUrl: '/api/tiles/antiquity-periods',
         /**
+         * Ancient battles worldwide, before year 500 — an overlay on any
+         * basemap, like the frontier, not a reading of one antiquity sheet.
+         * Same PostGIS, own endpoint, same reasoning as the frontier above.
+         */
+        battleTilesUrl: '/api/tiles/antiquity-battles',
+        /**
          * Label glyphs ship with the app rather than being fetched from a font
          * server, for the same reason `@fontsource` is used for the interface:
          * reading the map should tell no third party that you did. Same-origin,

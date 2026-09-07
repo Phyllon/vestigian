@@ -46,7 +46,9 @@
     "periodOff": "Uit",
     "period60Bce": "60 V.CHR",
     "period117Ce": "117 CE",
-    "period200Ce": "200 CE"
+    "period200Ce": "200 CE",
+    "showBattles": "Toon gevechten",
+    "showBattlesHint": "Oude gevechten wereldwijd, voor 500 CE"
   },
   "legend": {
     "title": "Wat de markeringen betekenen",
@@ -55,7 +57,9 @@
     "referencedNote": "Dezelfde markeringen getekend als dunne contouren, zonder een schijf, zijn plaatsen genoemd van de Barrington Atlas en Pleiades en geen platen bijgedragen hier.",
     "frontierTitle": "De grens",
     "basemapCreditDare": "Oudheid (DARE): © Johan Åhlfeldt, Universiteit Göteborg, CC BY-SA 3.0.",
-    "basemapCreditBarrington": "Oudheid (Barrington): wegen, kustlijn en plaatsen vanaf het Oude Wereldkaartcentrum (ODbL 1.0) en Pleiades (CC BY 3.0)."
+    "basemapCreditBarrington": "Oudheid (Barrington): wegen, kustlijn en plaatsen vanaf het Oude Wereldkaartcentrum (ODbL 1.0) en Pleiades (CC BY 3.0).",
+    "battlesTitle": "Gevechten",
+    "battleMark": "Gevecht, voor 500 CE"
   },
   "siteDetail": {
     "loading": "Laden",
@@ -931,5 +935,8 @@
       "loading": "Laden van het plaatvolume..",
       "loadFailed": "Dit volume kon niet worden geladen vanuit de Universiteitsbibliotheek Heidelberg. Probeer het binnenkort nog eens."
     }
+  },
+  "battlePopup": {
+    "viewOnWikipedia": "Uitzicht op Wikipedia"
   }
 }

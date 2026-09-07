@@ -314,3 +314,33 @@ export const buildLimesReferenceIconExpression = (): ExpressionSpecification =>
     ...LIMES_MARKS.flatMap((mark) => [mark, `${limesIconId(mark)}-reference`]),
     '',
   ] as unknown as ExpressionSpecification
+
+export const BATTLE_ICON_ID = 'vestigian-battle'
+
+/**
+ * Two crossed blades, hilts out at the bottom corners — the one mark on this
+ * map for an event rather than a place. Always drawn as the reference/pencil
+ * variant: every row behind it is borrowed from Wikidata, never a
+ * contribution, the same reasoning `registerLimesIcons` and
+ * `registerAtlasIcons` already give for the marks they draw.
+ */
+export const BATTLE_ICON_PATH =
+  'M6 6l12 12M18 6L6 18M6 6l-1.5-.5M6 6l-.5-1.5M18 6l1.5-.5M18 6l.5-1.5M6 18l-1.5.5M6 18l-.5 1.5M18 18l1.5.5M18 18l.5 1.5'
+
+/**
+ * Registered alongside the other reference marks, for the same reason: one
+ * more canvas, drawn once per style change, cheaper than a second hook that
+ * has to know whether "Show battles" is on.
+ */
+export const registerBattleIcon = (map: MapLibreMap, palette: SiteIconPalette): void => {
+  const image = rasteriseIcon({
+    path: BATTLE_ICON_PATH,
+    ink: ATLAS_MARK_INK,
+    palette,
+    reference: true,
+  })
+  if (!image) return
+
+  if (map.hasImage(BATTLE_ICON_ID)) map.removeImage(BATTLE_ICON_ID)
+  map.addImage(BATTLE_ICON_ID, image, { pixelRatio: ICON_PIXEL_RATIO })
+}

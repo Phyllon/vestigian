@@ -16,6 +16,9 @@
     canShowTabulaPeutingerianaOverlay,
     isShowingTabulaPeutingerianaOverlay,
     setTabulaPeutingerianaOverlayActive,
+    canShowBattles,
+    isShowingBattles,
+    setBattlesActive,
   } = useBasemapStyle()
   const { t } = useI18n()
   const isOpen = ref(false)
@@ -63,6 +66,10 @@
 
   const toggleTabulaPeutingerianaOverlay = (): void => {
     setTabulaPeutingerianaOverlayActive(!isShowingTabulaPeutingerianaOverlay.value)
+  }
+
+  const toggleBattles = (): void => {
+    setBattlesActive(!isShowingBattles.value)
   }
 
   /**
@@ -151,6 +158,14 @@
       label: t('basemapSwitcher.tabulaPeutingerianaOverlay'),
       hint: t('basemapSwitcher.tabulaPeutingerianaOverlayHint'),
       toggle: toggleTabulaPeutingerianaOverlay,
+    },
+    {
+      key: 'battles',
+      canShow: canShowBattles.value,
+      isActive: isShowingBattles.value,
+      label: t('basemapSwitcher.showBattles'),
+      hint: t('basemapSwitcher.showBattlesHint'),
+      toggle: toggleBattles,
     },
   ])
 

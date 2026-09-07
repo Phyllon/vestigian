@@ -46,7 +46,9 @@
     "periodOff": "Fuori",
     "period60Bce": "60 BCE",
     "period117Ce": "117 CE",
-    "period200Ce": "200 CE"
+    "period200Ce": "200 CE",
+    "showBattles": "Mostra battaglie",
+    "showBattlesHint": "Antiche battaglie in tutto il mondo, prima del 500 CE"
   },
   "legend": {
     "title": "Cosa significano i segni",
@@ -55,7 +57,9 @@
     "referencedNote": "Gli stessi segni tratti da sottili contorni, senza disco, sono posti di riferimento dall'Atlante di Barrington e Pleiadi — non hanno contribuito qui i record.",
     "frontierTitle": "La frontiera",
     "basemapCreditDare": "Antichità (DARE): © Johan Åhlfeldt, Gothenburg University, CC BY-SA 3.0.",
-    "basemapCreditBarrington": "Antichità (Barrington): strade, coste e luoghi dal centro di mappatura del mondo antico (ODbL 1.0) e Pleiades (CC BY 3.0)."
+    "basemapCreditBarrington": "Antichità (Barrington): strade, coste e luoghi dal centro di mappatura del mondo antico (ODbL 1.0) e Pleiades (CC BY 3.0).",
+    "battlesTitle": "Battaglia",
+    "battleMark": "Battaglia, prima del 500 CE"
   },
   "siteDetail": {
     "loading": "Caricamento",
@@ -931,5 +935,8 @@
       "loading": "Caricamento del volume..",
       "loadFailed": "Questo volume non poteva essere caricato dalla Heidelberg University Library. Riprova tra poco."
     }
+  },
+  "battlePopup": {
+    "viewOnWikipedia": "Visualizza su Wikipedia"
   }
 }

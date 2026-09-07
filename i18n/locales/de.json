@@ -46,7 +46,9 @@
     "periodOff": "Ausgeschaltet",
     "period60Bce": "60 BCE",
     "period117Ce": "117 CE",
-    "period200Ce": "200 CE"
+    "period200Ce": "200 CE",
+    "showBattles": "Schaugefechte",
+    "showBattlesHint": "Alte Schlachten weltweit, vor 500 CE"
   },
   "legend": {
     "title": "Was die Markierungen bedeuten",
@@ -55,7 +57,9 @@
     "referencedNote": "Die gleichen Markierungen, die als dünne Umrisse ohne Scheibe gezeichnet sind, sind Orte, auf die aus dem Barrington Atlas und den Plejaden verwiesen wird - keine Aufzeichnungen, die hier beigetragen wurden.",
     "frontierTitle": "Die Grenze",
     "basemapCreditDare": "Antike (DARE): © Johan Åhlfeldt, Universität Göteborg, CC BY-SA 3.0.",
-    "basemapCreditBarrington": "Antike (Barrington): Straßen, Küsten und Orte vom Ancient World Mapping Center (ODbL 1.0) und Plejaden (CC BY 3.0)."
+    "basemapCreditBarrington": "Antike (Barrington): Straßen, Küsten und Orte vom Ancient World Mapping Center (ODbL 1.0) und Plejaden (CC BY 3.0).",
+    "battlesTitle": "Schlachten",
+    "battleMark": "Schlacht vor 500 CE"
   },
   "siteDetail": {
     "loading": "Beladung",
@@ -931,5 +935,8 @@
       "loading": "Beladen des Plattenvolumens..",
       "loadFailed": "Dieser Band konnte nicht aus der Universitätsbibliothek Heidelberg geladen werden. Versuchen Sie es gleich noch einmal."
     }
+  },
+  "battlePopup": {
+    "viewOnWikipedia": "Ansicht auf Wikipedia"
   }
 }

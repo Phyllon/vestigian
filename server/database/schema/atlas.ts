@@ -162,6 +162,37 @@ export const antiquityPeriodExtents = pgTable(
   ],
 )
 
+/**
+ * Ancient battles, worldwide — not scoped to Rome. Wikidata (CC0), not
+ * Pleiades: a live query found Pleiades' own "battlefield" place-type used
+ * by zero rows in the full gazetteer this file already imports, since
+ * Pleiades catalogues continuously-occupied places, not one-off
+ * engagements. One row per Wikidata item with a coordinate and a
+ * point-in-time date before year 500 (the conventional end of antiquity) —
+ * see `.claude/rules/antiquity-basemaps.md` for the exact query and the
+ * verified counts. `year` is a single point, never a range: every row
+ * comes from Wikidata's P585 (point in time), not a start/end pair.
+ */
+export const antiquityBattles = pgTable(
+  'antiquity_battles',
+  {
+    id: serial('id').primaryKey(),
+    wikidataId: varchar('wikidata_id', { length: 16 }).notNull(),
+    title: varchar('title', { length: 300 }).notNull(),
+    /** BCE negative, matching antiquity_places.min_year/max_year. */
+    year: integer('year').notNull(),
+    /** Collapsed from Wikidata's geoPrecision the same two-value way
+     *  `isLocatedPrecisely` already reads Pleiades' own vocabulary. */
+    locationPrecision: varchar('location_precision', { length: 24 }).notNull(),
+    wikipediaUrl: varchar('wikipedia_url', { length: 500 }),
+    geom: pointGeometry('geom').notNull(),
+  },
+  (table) => [
+    uniqueIndex('antiquity_battles_wikidata_idx').on(table.wikidataId),
+    index('antiquity_battles_geom_idx').using('gist', table.geom),
+  ],
+)
+
 export const limesSegmentKindEnum = pgEnum('limes_segment_kind', ['barrier', 'river', 'notional'])
 
 /**

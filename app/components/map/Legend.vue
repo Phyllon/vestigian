@@ -7,7 +7,7 @@
    * that covers a quarter of it to explain nine glyphs is a poor trade until
    * the reader asks for it.
    */
-  const { view, isFollowingLimes } = useBasemapStyle()
+  const { view, isFollowingLimes, isShowingBattles } = useBasemapStyle()
   const { t } = useI18n()
   const isOpen = ref(false)
 
@@ -153,6 +153,34 @@
               </svg>
               <span class="text-xs text-ink-700 dark:text-paper-200">
                 {{ t(`limesMarks.${mark}`) }}
+              </span>
+            </li>
+          </ul>
+        </template>
+
+        <!--
+          Battles are an overlay on any basemap, not a reading of the
+          Barrington sheet — its own key entry, not folded into the
+          frontier's, so it still shows when the frontier switch is off.
+        -->
+        <template v-if="isShowingBattles">
+          <h2 class="eyebrow mb-2 mt-3 border-t border-paper-300 pt-2.5 dark:border-night-600">
+            {{ t('legend.battlesTitle') }}
+          </h2>
+
+          <ul class="flex flex-col gap-1.5">
+            <li class="flex items-center gap-2">
+              <svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  :d="BATTLE_ICON_PATH"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              <span class="text-xs text-ink-700 dark:text-paper-200">
+                {{ t('legend.battleMark') }}
               </span>
             </li>
           </ul>

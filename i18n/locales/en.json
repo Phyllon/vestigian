@@ -42,6 +42,8 @@
     "groupOverlays": "Overlays",
     "tabulaPeutingerianaOverlay": "Tabula Peutingeriana network",
     "tabulaPeutingerianaOverlayHint": "Places and roads from the manuscript, at their real coordinates",
+    "showBattles": "Show battles",
+    "showBattlesHint": "Ancient battles worldwide, before 500 CE",
     "periodScrubber": "The empire, over time",
     "periodOff": "Off",
     "period60Bce": "60 BCE",
@@ -87,6 +89,8 @@
     "showKey": "Key",
     "referencedNote": "The same marks drawn as thin outlines, without a disc, are places referenced from the Barrington Atlas and Pleiades — not records contributed here.",
     "frontierTitle": "The frontier",
+    "battlesTitle": "Battles",
+    "battleMark": "Battle, before 500 CE",
     "basemapCreditDare": "Antiquity (DARE): © Johan Åhlfeldt, Gothenburg University, CC BY-SA 3.0.",
     "basemapCreditBarrington": "Antiquity (Barrington): roads, coastline and places from the Ancient World Mapping Center (ODbL 1.0) and Pleiades (CC BY 3.0)."
   },
@@ -460,6 +464,9 @@
   "mapCanvas": {
     "ariaLabel": "Map of archaeological sites",
     "loading": "Unfolding the map"
+  },
+  "battlePopup": {
+    "viewOnWikipedia": "View on Wikipedia"
   },
   "siteExternalLinks": {
     "title": "Also recorded in",

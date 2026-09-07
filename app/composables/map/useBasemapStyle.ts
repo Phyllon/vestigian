@@ -976,6 +976,7 @@ export const useBasemapStyle = () => {
     atlasTilesUrl: absolute(config.public.basemap.atlasTilesUrl),
     limesTilesUrl: absolute(config.public.basemap.limesTilesUrl),
     periodExtentTilesUrl: absolute(config.public.basemap.periodExtentTilesUrl),
+    battleTilesUrl: absolute(config.public.basemap.battleTilesUrl),
     glyphsUrl: config.public.basemap.glyphsUrl,
   }))
 
@@ -1045,6 +1046,24 @@ export const useBasemapStyle = () => {
     isTabulaPeutingerianaOverlayActive.value = next
   }
 
+  /**
+   * An overlay on any basemap, like the frontier — a battle's date and
+   * location are facts about the world, not a reading of one particular
+   * sheet. `canShowBattles` is kept as a named export, always true, for the
+   * same reason `canFollowLimes` is: so `BasemapSwitcher` does not need to
+   * know that either overlay could in principle have been sheet-specific.
+   * Not persisted, same reasoning as `isLimesActive`.
+   */
+  const isBattlesActive = useState<boolean>('battles-active', () => false)
+
+  const canShowBattles = computed(() => true)
+
+  const isShowingBattles = computed(() => isBattlesActive.value)
+
+  const setBattlesActive = (next: boolean): void => {
+    isBattlesActive.value = next
+  }
+
   const currentStyle = computed(() =>
     buildBasemapStyle({
       view: view.value,
@@ -1085,5 +1104,9 @@ export const useBasemapStyle = () => {
     canShowTabulaPeutingerianaOverlay,
     isShowingTabulaPeutingerianaOverlay,
     setTabulaPeutingerianaOverlayActive,
+    canShowBattles,
+    isShowingBattles,
+    setBattlesActive,
+    battleTilesUrl: computed(() => source.value.battleTilesUrl),
   }
 }

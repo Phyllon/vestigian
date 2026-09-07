@@ -97,6 +97,7 @@ export const useViewportTiles = () => {
     registerSiteIcons(map, colours)
     registerAtlasIcons(map, colours)
     registerLimesIcons(map, colours)
+    registerBattleIcon(map, colours)
 
     map.addLayer({
       id: TRACING_LAYER_ID,

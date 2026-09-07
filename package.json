@@ -51,6 +51,7 @@
     "import:tabula-peutingeriana": "tsx --env-file-if-exists=.env scripts/import/10-tabula-peutingeriana.ts",
     "import:column-reliefs": "tsx --env-file-if-exists=.env scripts/import/11-column-reliefs.ts",
     "import:antiquity-periods": "tsx --env-file-if-exists=.env scripts/import/12-antiquity-periods.ts",
+    "import:battles": "tsx --env-file-if-exists=.env scripts/import/13-battles.ts",
     "glyphs:build": "tsx scripts/build-glyphs.ts",
     "og:build": "tsx scripts/generate-og-placeholders.ts",
     "icons:build": "tsx scripts/generate-app-icons.ts",

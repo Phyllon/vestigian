@@ -60,6 +60,8 @@ export interface BasemapSource {
   limesTilesUrl: string
   /** The empire's extent at one of three dates, added when the period scrubber is set. */
   periodExtentTilesUrl: string
+  /** Ancient battles worldwide, added to any basemap when "Show battles" is on. */
+  battleTilesUrl: string
   glyphsUrl: string
 }
 

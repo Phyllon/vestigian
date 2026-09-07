@@ -46,7 +46,9 @@
     "periodOff": "Arrêt",
     "period60Bce": "60 BCE",
     "period117Ce": "117 CE",
-    "period200Ce": "200 CE"
+    "period200Ce": "200 CE",
+    "showBattles": "Afficher les batailles",
+    "showBattlesHint": "Anciens combats dans le monde, avant 500 CE"
   },
   "legend": {
     "title": "Ce que signifient les marques",
@@ -55,7 +57,9 @@
     "referencedNote": "Les mêmes marques dessinées que les contours fins, sans disque, sont des endroits référencés de l'Atlas de Barrington et des Pléiades — pas les enregistrements fournis ici.",
     "frontierTitle": "La frontière",
     "basemapCreditDare": "Antiquité : © Johan Åhlfeldt, Université de Göteborg, CC BY-SA 3.0.",
-    "basemapCreditBarrington": "Antiquité (Barrington) : routes, côtes et lieux du Centre de cartographie du monde antique (ODbL 1.0) et des Pléiades (CC BY 3.0)."
+    "basemapCreditBarrington": "Antiquité (Barrington) : routes, côtes et lieux du Centre de cartographie du monde antique (ODbL 1.0) et des Pléiades (CC BY 3.0).",
+    "battlesTitle": "Batailles",
+    "battleMark": "Bataille, avant 500 CE"
   },
   "siteDetail": {
     "loading": "Chargement",
@@ -931,5 +935,8 @@
       "loading": "Chargement du volume de la plaque..",
       "loadFailed": "Ce volume n'a pas pu être chargé depuis la bibliothèque universitaire de Heidelberg. Essaie encore."
     }
+  },
+  "battlePopup": {
+    "viewOnWikipedia": "Affichage sur Wikipédia"
   }
 }

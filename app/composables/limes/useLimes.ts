@@ -71,6 +71,14 @@ interface FrontierYearsRequest {
 }
 
 /**
+ * One year as a reader would say it — "216 BC", not "-216". Shared beyond
+ * the frontier itself: `useBattleOverlay`'s popup reuses this rather than a
+ * second BCE/CE formatter and a second pair of i18n keys.
+ */
+export const formatYear = (value: number, t: FrontierTranslate): string =>
+  value < 0 ? t('limesFormat.bc', { year: Math.abs(value) }) : t('limesFormat.ad', { year: value })
+
+/**
  * A sector's date range as a reader would say it.
  *
  * Negative years are BC, matching `formatPeriod` in `useSiteQuery`. The frontier
@@ -83,13 +91,9 @@ interface FrontierYearsRequest {
  */
 export const formatFrontierYears = ({ from, to, t }: FrontierYearsRequest): string => {
   if (from === null && to === null) return ''
-  const year = (value: number): string =>
-    value < 0
-      ? t('limesFormat.bc', { year: Math.abs(value) })
-      : t('limesFormat.ad', { year: value })
-  if (from === null) return t('limesFormat.toYear', { year: year(to!) })
-  if (to === null) return t('limesFormat.fromYear', { year: year(from) })
-  return t('limesFormat.yearRange', { from: year(from), to: year(to) })
+  if (from === null) return t('limesFormat.toYear', { year: formatYear(to!, t) })
+  if (to === null) return t('limesFormat.fromYear', { year: formatYear(from, t) })
+  return t('limesFormat.yearRange', { from: formatYear(from, t), to: formatYear(to, t) })
 }
 
 /**

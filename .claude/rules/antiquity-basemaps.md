@@ -10,6 +10,10 @@ paths:
   - 'scripts/import/06-limes.ts'
   - 'scripts/import/12-antiquity-periods.ts'
   - 'server/api/tiles/antiquity-periods/**'
+  - 'scripts/import/13-battles.ts'
+  - 'server/utils/battles.ts'
+  - 'server/api/tiles/antiquity-battles/**'
+  - 'app/composables/map/useBattleOverlay.ts'
   - 'app/components/limes/**'
   - 'app/composables/limes/**'
 ---
@@ -333,3 +337,97 @@ no visible edge inside a typical viewport since the border sits further out
 - **Project MERCURY**'s wider 50-dataset catalogue (ceramics, ports, coinage,
   Roman economic modelling) is unrelated to this feature — its only role
   here was as a lead whose one relevant listing carried a stale licence tag.
+
+## Battle sites — an overlay, worldwide, not scoped to Rome
+
+Ancient battles, drawn as a "Show battles" switch — the same overlay
+shape `useLimesOverlay` established for the frontier: above whichever
+basemap is showing, not a reading of one antiquity sheet, since a
+battle's date and location are facts about the world regardless of which
+sheet is on screen. `useBattleOverlay.ts` mirrors `useLimesOverlay.ts`
+structurally; the one real difference is interaction — see below.
+
+**Source: Wikidata's public SPARQL endpoint, CC0** — already this
+project's trusted enrichment backbone. Two candidates were checked and
+rejected first, both live, not from memory:
+
+- **Pleiades** has a "battlefield" place-type in its own vocabulary
+  (confirmed by fetching `pleiades.stoa.org/vocabularies/place-types`),
+  but a query against the full Pleiades CSV `05-antiquity-atlas.ts`
+  already imports (all ~42,000 places) found **zero rows using it**.
+  Pleiades catalogues continuously-occupied places, not one-off
+  engagements — the vocabulary term exists but nobody applies it.
+- **OpenStreetMap**'s `historic=battlefield` tag skews overwhelmingly
+  modern in sampling (WWII, the Falklands), and a name-filtered Overpass
+  query for well-known ancient battles came back empty.
+
+**Cutoff: before year 500**, the conventional end of antiquity (the fall
+of the Western Roman Empire, 476 CE, rounded) — chosen so the layer stays
+inside the project's own scope rather than sliding into the medieval
+period. Query: every item that is an instance of (transitively) `battle`
+(Q178561) with a coordinate (P625), dated by a point-in-time (P585) at
+year-precision-or-finer. Verified live: **458** such battles, from the
+Battle of Megiddo (1457 BCE) onward, worldwide — Kadesh, Marathon,
+Gaugamela, Qarqar and the Chinese Spring-and-Autumn battles alongside
+Cannae, not a Roman-only set.
+
+**A point-in-time date alone misses every multi-day siege.** The Battle
+of Alesia has no P585 at all — only a start time (P580) and an end time
+(P582), since it lasted months — found only because it was conspicuously
+absent from the first import run, not assumed from the schema. A second
+query fetches P580 for the same class and the two result sets are merged
+client-side in `13-battles.ts`, P585 preferred where an item has both.
+Doing this as one combined SPARQL query (`FILTER NOT EXISTS`) timed out
+twice against the public endpoint (60s+) where each query alone answers
+in under 5s — the merge happens in the import script instead. The P580
+query adds 30 more battles, for **488 total** actually imported. 24 of
+the 488 items carry more than one candidate coordinate or date (rival
+scholarly hypotheses, e.g. the Assyrian siege of Jerusalem) — the import
+takes the first row SPARQL returns and moves on, the same restraint
+`isLocatedPrecisely` already applies to Pleiades' own judgment calls.
+
+**Wikidata's ISO dates are astronomical year numbers, not BCE/CE counts**
+— year 0 is 1 BCE, year -215 is 216 BCE. A first import run stored Cannae
+as "215 BCE" before this was caught by a spot check against a battle with
+a well-known date. `13-battles.ts`'s `yearFromDate` converts a BCE
+astronomical year (`<= 0`) to this project's own negated-traditional-count
+convention (`antiquity_period_extents`/`antiquity_places`'s `-60` means
+"60 BCE", not astronomical year -60) before storing.
+
+**Schema**: `antiquity_battles` (`wikidata_id`, `title`, `year`,
+`location_precision`, `wikipedia_url`, `geom`) — a new table, not a column
+on `antiquity_places`: a battle is an event with a Wikidata id and a
+single year, not a Pleiades place with a `min_year`/`max_year` range.
+`location_precision` collapses Wikidata's numeric `geoPrecision` (degrees)
+into the same `'precise'`/`'rough'` two-value vocabulary
+`isLocatedPrecisely` already reads off Pleiades — not a new scale.
+
+**Serving**: `server/utils/battles.ts`'s `buildBattleTileSql`/
+`buildBattleCacheKey` copy `limes.ts`'s shape exactly — `WITH bounds AS
+(...)`, `geom && b.env_wgs` in 4326, cache key folded into the shared
+`vestigian:atlas-version` counter. Its own endpoint
+(`/api/tiles/antiquity-battles`), for the same reason the frontier has
+one: most readers never switch it on, and it draws over every basemap, so
+it could not live inside `/api/tiles/antiquity` even if everyone wanted
+it. One point layer, no simplification — at ~490 rows worldwide there is
+nothing to thin at any zoom.
+
+**Interaction is deliberately not wired into the site/tracing selection
+machinery** (`useSiteQuery`'s `MapFeatureCandidate`, whose `kind` is only
+`'site' | 'tracing'`, dispatching to a detail panel that expects a slug).
+A battle has neither. `useBattleOverlay.ts` binds its own
+`map.on('click', BATTLE_LAYER_ID, ...)` and opens a plain MapLibre
+`Popup` — the first use of `Popup` in this codebase, though
+`maplibre-gl` was already a dependency — with the title, year and a
+"View on Wikipedia ↗" link. `Popup.setHTML` renders raw markup, unlike
+every Vue template in this app, so `useBattleOverlay.ts`'s own
+`escapeHtmlForPopup` runs on every value before it reaches the popup,
+including the Wikipedia URL going into an `href`.
+
+**Mark**: a new hand-stroked crossed-blades glyph in `useSiteIcons.ts`
+(`BATTLE_ICON_PATH`/`registerBattleIcon`), the same 24×24 stroked-path
+convention as every other mark on this map — not a Lucide icon on the
+canvas (Lucide is UI chrome only; no icon-font glyph appears on the map
+itself anywhere in this codebase). Always drawn as the reference/pencil
+variant: every row is borrowed from Wikidata, never a contribution, the
+same reasoning `registerLimesIcons`/`registerAtlasIcons` already give.

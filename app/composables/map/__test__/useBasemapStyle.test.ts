@@ -24,6 +24,7 @@ const source: BasemapSource = {
   atlasTilesUrl: 'http://localhost:3000/api/tiles/antiquity',
   limesTilesUrl: 'http://localhost:3000/api/tiles/limes',
   periodExtentTilesUrl: 'http://localhost:3000/api/tiles/antiquity-periods',
+  battleTilesUrl: 'http://localhost:3000/api/tiles/antiquity-battles',
   glyphsUrl: '/fonts/{fontstack}/{range}.pbf',
 }
 
