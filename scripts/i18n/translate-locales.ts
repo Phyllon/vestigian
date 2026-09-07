@@ -90,6 +90,26 @@ export const FROZEN_KEYS: readonly string[] = [
   // Plate volumes, named in German by the 1896 edition itself.
   'columns.marcusAurelius.tafeln-i-lxiv',
   'columns.marcusAurelius.tafeln-lxv-cxxviii',
+  // A monument, its sculpture, and the numbered plates that record it. A
+  // general model reads none of these in an archaeological sense: "Column
+  // Reliefs" came back as financial relief ("Kolomaflossingen",
+  // "Allégements de colonnes"), and "plate" as a licence plate
+  // ("Kennnummer des Kennzeichens", "Nummerplaat") or a dinner plate
+  // ("Numero piatto") rather than the printing plate a Cichorius Tafel is.
+  'columns.title',
+  'columns.menuLabel',
+  'columns.trajan.tabLabel',
+  'columns.trajan.scene',
+  'columns.trajan.viewerLabel',
+  'columns.marcusAurelius.tabLabel',
+  'columns.marcusAurelius.viewerLabel',
+  // "Overlay" as the cartographic term. Translated literally it becomes
+  // superimposition ("Überlagerungen"), covers ("Couvertures") or surfaces
+  // ("Superficies") — each locale's own mapping-software word is used
+  // instead (Calques, Capas, Livelli).
+  'basemapSwitcher.groupOverlays',
+  'overlaySwitcher.title',
+  'overlaySwitcher.menuLabel',
 ]
 
 /**
@@ -103,6 +123,9 @@ export const FROZEN_KEY_PREFIXES: readonly string[] = [
   'limesMarks.',
   'minorFeaturePopup.kind.',
   'enrichment.languages.',
+  // Every string in the plate pager names a plate — see the note on
+  // `columns.title` above for what a general model does with that word.
+  'columns.pager.',
 ]
 
 export const isFrozenKey = (key: string): boolean =>
@@ -192,6 +215,21 @@ const translateSegment = async (
 }
 
 /**
+ * LibreTranslate returns a trimmed string, and the space before a placeholder
+ * lives at the end of the segment in front of it — so "Scene {number}" split
+ * into "Scene " and "{number}" came back joined as "Szenerie{number}", with
+ * the word and the number run together in every locale. The same loss made
+ * "of {total}" into "von{total}". Whatever whitespace the source segment
+ * ended or began with is put back around the translated text; nothing else
+ * about the reply is touched.
+ */
+export const restoreSurroundingSpace = (source: string, translated: string): string => {
+  const leading = source.slice(0, source.length - source.trimStart().length)
+  const trailing = source.slice(source.trimEnd().length)
+  return `${leading}${translated.trim()}${trailing}`
+}
+
+/**
  * Translates the non-placeholder segments of `text` and splices the
  * placeholders back in untouched. A segment of only whitespace is passed
  * through as-is rather than sent to the translator — there is nothing in it
@@ -214,7 +252,7 @@ const translateOne = async (
 
     const result = await translateSegment(translator, segment.text)
     if (result === null) return null
-    translated.push(result)
+    translated.push(restoreSurroundingSpace(segment.text, result))
   }
 
   return translated.join('')

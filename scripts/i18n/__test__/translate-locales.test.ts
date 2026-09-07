@@ -1,5 +1,31 @@
 import { describe, expect, it } from 'vitest'
-import { flatten, isFrozenKey, splitOnPlaceholders, unflatten } from '../translate-locales'
+import {
+  flatten,
+  isFrozenKey,
+  restoreSurroundingSpace,
+  splitOnPlaceholders,
+  unflatten,
+} from '../translate-locales'
+
+describe('restoreSurroundingSpace', () => {
+  /**
+   * LibreTranslate trims its reply, and the space before a placeholder lives
+   * at the end of the segment in front of it — losing it ran the word and the
+   * number together in every locale ("Szenerie{number}", "von{total}").
+   */
+  it('puts back the space a trimmed reply dropped', () => {
+    expect(restoreSurroundingSpace('Scene ', 'Szene')).toBe('Szene ')
+    expect(restoreSurroundingSpace(' of ', 'von')).toBe(' von ')
+  })
+
+  it('leaves a segment with no surrounding space alone', () => {
+    expect(restoreSurroundingSpace('Overlays', 'Overlays')).toBe('Overlays')
+  })
+
+  it('trims whitespace the translator added of its own accord', () => {
+    expect(restoreSurroundingSpace('Scene', '  Szene ')).toBe('Szene')
+  })
+})
 
 describe('splitOnPlaceholders', () => {
   it('splits text around a single placeholder', () => {

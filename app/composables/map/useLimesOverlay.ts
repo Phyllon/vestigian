@@ -1,5 +1,5 @@
 import type { Map as MapLibreMap } from 'maplibre-gl'
-import { buildLimesLayers } from './useBasemapStyle'
+import { LIMES_ATTRIBUTION, buildLimesLayers } from './useBasemapStyle'
 
 export const LIMES_SOURCE_ID = 'limes'
 
@@ -32,6 +32,7 @@ export const useLimesOverlay = () => {
       tiles: [`${limesTilesUrl.value}/{z}/{x}/{y}.mvt`],
       minzoom: 0,
       maxzoom: 12,
+      attribution: LIMES_ATTRIBUTION,
     })
 
     for (const layer of buildLimesLayers()) {

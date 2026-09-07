@@ -1,6 +1,7 @@
 import { Popup } from 'maplibre-gl'
 import type { Map as MapLibreMap, MapLayerMouseEvent, SymbolLayerSpecification } from 'maplibre-gl'
 import { escapeHtmlForPopup } from './useBattleOverlay'
+import { PORT_ATTRIBUTION } from './useBasemapStyle'
 import { PORT_ICON_ID } from './useSiteIcons'
 
 export const PORT_SOURCE_ID = 'ports'
@@ -90,6 +91,7 @@ export const usePortOverlay = () => {
       tiles: [`${portTilesUrl.value}/{z}/{x}/{y}.mvt`],
       minzoom: 0,
       maxzoom: 12,
+      attribution: PORT_ATTRIBUTION,
     })
 
     map.addLayer(buildPortLayer())

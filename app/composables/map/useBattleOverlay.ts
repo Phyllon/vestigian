@@ -2,6 +2,7 @@ import { Popup } from 'maplibre-gl'
 import type { Map as MapLibreMap, MapLayerMouseEvent, SymbolLayerSpecification } from 'maplibre-gl'
 import type { FrontierTranslate } from '../limes/useLimes'
 import { formatYear } from '../limes/useLimes'
+import { BATTLE_ATTRIBUTION } from './useBasemapStyle'
 import { BATTLE_ICON_ID } from './useSiteIcons'
 
 export const BATTLE_SOURCE_ID = 'battles'
@@ -90,6 +91,7 @@ export const useBattleOverlay = () => {
       tiles: [`${battleTilesUrl.value}/{z}/{x}/{y}.mvt`],
       minzoom: 0,
       maxzoom: 12,
+      attribution: BATTLE_ATTRIBUTION,
     })
 
     map.addLayer(buildBattleLayer())

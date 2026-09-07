@@ -63,7 +63,12 @@
         <div class="w-full max-w-sm">
           <MapSearchField />
         </div>
-        <MapBasemapSwitcher class="ml-auto" />
+        <!--
+          Two controls, not one menu: the sheet under the map, and what is
+          drawn over it. See `OverlaySwitcher.vue` for why they split.
+        -->
+        <MapOverlaySwitcher class="ml-auto" />
+        <MapBasemapSwitcher />
       </div>
 
       <!--

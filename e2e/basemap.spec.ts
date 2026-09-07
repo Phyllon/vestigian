@@ -1,6 +1,6 @@
 import { expect, test } from './helpers/fixtures'
 import { watchForProblems } from './helpers/console'
-import { openMap, showSites, waitForTiles } from './helpers/map'
+import { openMap, openOverlays, showSites, toggleOverlay, waitForTiles } from './helpers/map'
 
 /**
  * The antiquity views and the satellite view are the only raster basemaps in
@@ -167,7 +167,7 @@ test.describe('the basemap switcher', () => {
       0,
     )
 
-    await page.getByRole('button', { name: /^Basemap:/ }).click()
+    await openOverlays(page)
     await page.getByRole('menuitemcheckbox', { name: 'Show battles' }).click()
     await expect.poll(() => battleTiles.length, { timeout: 15_000 }).toBeGreaterThan(0)
 
@@ -188,7 +188,7 @@ test.describe('the basemap switcher', () => {
     await waitForTiles(page)
     expect(portTiles.length, 'a reader who never touches the switch should request nothing').toBe(0)
 
-    await page.getByRole('button', { name: /^Basemap:/ }).click()
+    await openOverlays(page)
     await page.getByRole('menuitemcheckbox', { name: 'Show ports' }).click()
     await expect.poll(() => portTiles.length, { timeout: 15_000 }).toBeGreaterThan(0)
 
@@ -215,7 +215,7 @@ test.describe('the basemap switcher', () => {
       0,
     )
 
-    await page.getByRole('button', { name: /^Basemap:/ }).click()
+    await openOverlays(page)
     await page.getByRole('menuitemcheckbox', { name: 'Show ancient routes' }).click()
     await expect.poll(() => routeTiles.length, { timeout: 15_000 }).toBeGreaterThan(0)
 
@@ -243,7 +243,7 @@ test.describe('the basemap switcher', () => {
       'a reader who never touches the switch should request nothing',
     ).toBe(0)
 
-    await page.getByRole('button', { name: /^Basemap:/ }).click()
+    await openOverlays(page)
     await page.getByRole('menuitemcheckbox', { name: 'Show minor antiquities' }).click()
     await expect.poll(() => featureTiles.length, { timeout: 15_000 }).toBeGreaterThan(0)
 
@@ -271,7 +271,7 @@ test.describe('the basemap switcher', () => {
       'a reader who never touches the switch should request nothing',
     ).toBe(0)
 
-    await page.getByRole('button', { name: /^Basemap:/ }).click()
+    await openOverlays(page)
     await page.getByRole('menuitemcheckbox', { name: 'Show coin hoards' }).click()
     await expect.poll(() => coinHoardTiles.length, { timeout: 15_000 }).toBeGreaterThan(0)
 
@@ -327,5 +327,29 @@ test.describe('the basemap switcher', () => {
     await chooseBasemap(page, 'Vestigian')
     await waitForTiles(page)
     expect(tileRequests.length).toBeGreaterThan(afterAntiquity)
+  })
+
+  /**
+   * Attribution is the licence condition itself for most of these sources —
+   * de Graauw's ports are CC BY 4.0, ORBIS CC BY 3.0, CHRR CC BY-NC-SA, AWMC
+   * ODbL — and every one of them shipped without any. The gap was invisible
+   * until the vici site overlay went off by default, taking with it the one
+   * credit line the others were leaning on.
+   */
+  test('credits an overlay source while that overlay is switched on', async ({ page }) => {
+    await openMap(page)
+
+    const attribution = page.locator('.maplibregl-ctrl-attrib')
+    await expect(attribution).toContainText('OpenStreetMap')
+    await expect(attribution).not.toContainText('de Graauw')
+
+    await toggleOverlay(page, 'Show ports')
+    await expect(attribution).toContainText('de Graauw')
+    await expect(attribution).toContainText('CC BY 4.0')
+
+    // And leaves with it: a credit for a layer nobody is looking at would be
+    // as wrong as a missing one.
+    await toggleOverlay(page, 'Show ports')
+    await expect(attribution).not.toContainText('de Graauw')
   })
 })

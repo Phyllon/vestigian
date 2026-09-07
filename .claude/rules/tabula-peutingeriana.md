@@ -162,7 +162,7 @@ consistent about not doing that on an unconfirmed licence. The resolution:
 populates `tabula_peutingeriana_places`/`_roads` regardless — the import
 touches nothing a visitor ever sees — but
 `server/api/tabula-peutingeriana/network.geojson.get.ts` 404s and the
-switcher's toggle is hidden outright unless
+overlay switcher's toggle is hidden outright unless
 `NUXT_PUBLIC_TABULA_PEUTINGERIANA_ENABLED=true` is set, which an operator
 should do only after confirming reuse is fine with Voorburg — the same
 courtesy this project already extends to Åhlfeldt (DARE) and EOX, applied

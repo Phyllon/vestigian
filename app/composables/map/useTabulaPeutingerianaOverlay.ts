@@ -1,5 +1,5 @@
 import type { Map as MapLibreMap } from 'maplibre-gl'
-import { MAP_LABEL_FONT } from './useBasemapStyle'
+import { MAP_LABEL_FONT, TABULA_PEUTINGERIANA_ATTRIBUTION } from './useBasemapStyle'
 
 export const TABULA_PEUTINGERIANA_SOURCE_ID = 'vestigian-tabula-peutingeriana'
 const ROADS_LAYER_ID = 'vestigian-tabula-peutingeriana-roads'
@@ -69,7 +69,11 @@ export const useTabulaPeutingerianaOverlay = () => {
     if (!isShowingTabulaPeutingerianaOverlay.value || !data.value) return
     if (map.getSource(TABULA_PEUTINGERIANA_SOURCE_ID)) return
 
-    map.addSource(TABULA_PEUTINGERIANA_SOURCE_ID, { type: 'geojson', data: data.value })
+    map.addSource(TABULA_PEUTINGERIANA_SOURCE_ID, {
+      type: 'geojson',
+      data: data.value,
+      attribution: TABULA_PEUTINGERIANA_ATTRIBUTION,
+    })
 
     map.addLayer({
       id: ROADS_LAYER_ID,

@@ -68,19 +68,18 @@
     "attribution": "Manuscript: Oostenrijkse Nationale Bibliotheek, Wenen (Cod. 324). Digitalisering en IIIF-hosting:"
   },
   "columns": {
-    "title": "Kolomaflossingen",
+    "title": "Kolomreliëfs",
     "intro": "De reliëfs van twee Romeinse zuilen, in detail onderzocht Trajan's Column van gespiegelde wetenschappelijke platen, de Column van Marcus Aurelius van een levende diepe zoom scan.",
     "menuLabel": "Kolomreliëf",
     "trajan": {
-      "tabLabel": "Trajanus kolom",
+      "tabLabel": "Zuil van Trajanus",
       "intro": "Conrad Cichorius' fotografische platen uit 1896.1900, de standaard scene-by-scene referentie voor de column, gespiegeld uit Wikimedia Commons, publiek domein.",
       "loading": "Laden van platen..",
       "loadFailed": "De platen konden niet geladen worden. Probeer het binnenkort nog eens.",
       "empty": "Er zijn nog geen platen gepubliceerd.",
       "gridLabel": "Trajan's Column reliëfplaten",
-      "scene": "Scène{number}",
-      "zoomIn": "Inzoomen",
-      "zoomOut": "Uitzoomen"
+      "scene": "Scène {number}",
+      "viewerLabel": "Deep-zoomviewer van de reliëfplaten van de Zuil van Trajanus"
     },
     "marcusAurelius": {
       "tabLabel": "Kolom van Marcus Aurelius",
@@ -91,6 +90,13 @@
       "tafeln-lxv-cxxviii": "Tafeln LXV–CXXVIII",
       "loading": "Laden van het plaatvolume..",
       "loadFailed": "Dit volume kon niet worden geladen vanuit de Universiteitsbibliotheek Heidelberg. Probeer het binnenkort nog eens."
+    },
+    "pager": {
+      "label": "Plaatnavigatie",
+      "previous": "Vorige plaat",
+      "next": "Volgende plaat",
+      "pageNumber": "Plaatnummer",
+      "of": "van {total}"
     }
   },
   "legend": {
@@ -325,13 +331,7 @@
     "operatorHeading": "Dienstverlener",
     "operatorPlaceholder": "[OPERATOR NAAM]\n[STRAAT EN NUMMER]\n[POSTALE CODE EN STAD]\n[KANTOOR]",
     "contactHeading": "Contactpersoon",
-    "contactPlaceholder": "E-mail: [CONTACTEMAIL]\nTelefoon: [CONTACTFONE, indien verstrekt]",
-    "registerHeading": "Registerinvoer",
-    "registerPlaceholder": "[Commercieel register, registratienummer en registratierechtbank, indien van toepassing. Verwijder deze sectie volledig voor een particuliere, niet-commerciële exploitant.]",
-    "vatHeading": "BTW-identificatienummer",
-    "vatPlaceholder": "[BTW-ID onder §27a UStG, indien van toepassing, niet aanwezig indien geen.]",
-    "responsibleHeading": "Verantwoordelijk voor de inhoud onder §18(2) MSTV",
-    "responsiblePlaceholder": "[Naam en adres, indien verschillend van de dienstverlener hierboven.]",
+    "contactPlaceholder": "E-mail: [CONTACTEMAIL]",
     "disputeHeading": "Geschillenbeslechting",
     "disputeBody": "De Europese Commissie biedt een platform voor online geschillenbeslechting (ODR): ec.europa.eu/consuments/odr. Wij zijn niet verplicht en zijn niet bereid deel te nemen aan geschillenbeslechtingsprocedures voor een consumentenarbitragecommissie."
   },
@@ -984,5 +984,11 @@
     "withBasemap": "met achtergrondkaart",
     "remove": "{name} verwijderen",
     "removeFailed": "Dat gebied kon niet worden verwijderd. Probeer het zo nog eens."
+  },
+  "overlaySwitcher": {
+    "title": "Overlays",
+    "menuLabel": "Overlays",
+    "labelNone": "Overlays: geen actief",
+    "labelActive": "Overlays: {count} actief"
   }
 }

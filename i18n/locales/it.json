@@ -39,7 +39,7 @@
     "followLimesHint": "La frontiera, le sue mura e i suoi forti",
     "tabulaPeutingeriana": "Tabula Peutingeriana",
     "tabulaPeutingerianaHint": "Il diagramma stradale romano, non una mappa — apre il proprio spettatore",
-    "groupOverlays": "Sovrapposizioni",
+    "groupOverlays": "Livelli",
     "tabulaPeutingerianaOverlay": "Rete Tabula Peutingeriana",
     "tabulaPeutingerianaOverlayHint": "Luoghi e strade dal manoscritto, alle loro vere coordinate",
     "showSites": "Mostra siti",
@@ -78,9 +78,8 @@
       "loadFailed": "I piatti non potevano essere caricati. Riprova tra poco.",
       "empty": "Non sono ancora pubblicate le targhe.",
       "gridLabel": "Piatti di rilievo della colonna di Trajan",
-      "scene": "Scena{number}",
-      "zoomIn": "Zoom in",
-      "zoomOut": "Zoom fuori"
+      "scene": "Scena {number}",
+      "viewerLabel": "Visualizzatore deep-zoom delle tavole in rilievo della Colonna Traiana"
     },
     "marcusAurelius": {
       "tabLabel": "Colonna di Marco Aurelio",
@@ -91,6 +90,13 @@
       "tafeln-lxv-cxxviii": "Tafeln LXV–CXXVIII",
       "loading": "Caricamento del volume..",
       "loadFailed": "Questo volume non poteva essere caricato dalla Heidelberg University Library. Riprova tra poco."
+    },
+    "pager": {
+      "label": "Navigazione delle tavole",
+      "previous": "Tavola precedente",
+      "next": "Tavola successiva",
+      "pageNumber": "Numero della tavola",
+      "of": "di {total}"
     }
   },
   "legend": {
@@ -325,13 +331,7 @@
     "operatorHeading": "Fornitore di servizi",
     "operatorPlaceholder": "[NOME OPERATORE]\n[STREET E NUMERO]\n[CODE POSTALE E CITTÀ]\n[COUNTRY]",
     "contactHeading": "Contatto",
-    "contactPlaceholder": "Email: [CONTACT EMAIL]\nTelefono: [CONTATTO PHONE, se fornito]",
-    "registerHeading": "Registrazione",
-    "registerPlaceholder": "[Registro commerciale, numero di registro e tribunale di registrazione — se applicabile. Rimuovere questa sezione interamente per un operatore privato e non commerciale.]",
-    "vatHeading": "Numero di identificazione IVA",
-    "vatPlaceholder": "[VAT ID ai sensi del §27a UStG, se applicabile — omettere se nessuno.]",
-    "responsibleHeading": "Responsabile del contenuto ai sensi del §18(2) MStV",
-    "responsiblePlaceholder": "[Nome e indirizzo, se diverso dal fornitore di servizi sopra.]",
+    "contactPlaceholder": "Email: [CONTACT EMAIL]",
     "disputeHeading": "Risoluzione delle controversie",
     "disputeBody": "La Commissione europea fornisce una piattaforma per la risoluzione delle controversie online (ODR): ec.europa.eu/consumers/odr. Non siamo obbligati e non siamo disposti a partecipare a procedimenti di risoluzione delle controversie prima di un consiglio di arbitrato del consumatore."
   },
@@ -984,5 +984,11 @@
     "withBasemap": "con mappa di sfondo",
     "remove": "Rimuovi {name}",
     "removeFailed": "Non è stato possibile rimuovere quell'area. Riprova tra poco."
+  },
+  "overlaySwitcher": {
+    "title": "Livelli",
+    "menuLabel": "Livelli",
+    "labelNone": "Livelli: nessuno attivo",
+    "labelActive": "Livelli: {count} attivi"
   }
 }

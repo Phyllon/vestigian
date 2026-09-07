@@ -9,6 +9,7 @@ import type {
 import type { BasemapSource } from '#shared/types'
 import {
   BASEMAP_VIEWS,
+  LIMES_ATTRIBUTION,
   MAP_LABEL_FONT,
   buildBasemapStyle,
   isAntiquityView,
@@ -281,10 +282,18 @@ describe('the period scrubber', () => {
   it('says the frontier is derived rather than surveyed', () => {
     // It is the boundary of AWMC's extent of the empire with the coast taken
     // out of it, not a dataset anyone published. A reader is owed that before
-    // they cite it.
+    // they cite it — and it is carried on the frontier's *own* source
+    // (`useLimesOverlay`), not the antiquity sheet's, because the frontier is
+    // drawn over basemaps that have no `atlas` source at all.
+    expect(LIMES_ATTRIBUTION).toContain('Ancient World Mapping Center')
+    expect(LIMES_ATTRIBUTION).toContain('derived')
+    expect(LIMES_ATTRIBUTION).toContain('ODbL')
+
+    // The sheet itself credits its own two sources either way, so turning the
+    // frontier on never drops AWMC and Pleiades from the sheet's credit line.
     const attribution = (limesStyle().sources.atlas as VectorSourceSpecification).attribution ?? ''
     expect(attribution).toContain('Ancient World Mapping Center')
-    expect(attribution).toContain('derived')
+    expect(attribution).toContain('Pleiades')
   })
 
   it('pushes the rest of the sheet back so the frontier can be the subject', () => {

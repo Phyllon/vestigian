@@ -56,11 +56,25 @@
     }[]
   }
 
+  /**
+   * Which volume, and which plate inside it, both survive leaving the page.
+   * Two of the three volumes' worth of reading here is done a few plates at a
+   * time, and the route carries no page — see `useColumnPlatePosition` for
+   * where the position lives and why it is not `useState`. The volume is
+   * stored through the same numeric map, as an index into `VOLUMES`, so a
+   * volume removed later reads as "none remembered" through the same clamp
+   * the page indices already get.
+   */
+  const VOLUME_MEMORY_KEY = 'marcus-aurelius-volume'
+
   const { t } = useI18n()
+  const { recall, remember } = useColumnPlatePosition()
 
   const activeVolume = ref<Volume>('tafeln-i-lxiv')
   const isLoading = ref(false)
   const loadFailed = ref(false)
+  const currentPage = ref(0)
+  const plateCount = ref(0)
   const viewer = useTemplateRef('viewer')
   let osdViewer: Viewer | null = null
 
@@ -118,9 +132,13 @@
       return
     }
 
+    plateCount.value = tileSources.length
+    currentPage.value = recall(volume, tileSources.length)
+
     osdViewer = OpenSeadragon({
       element: viewer.value,
       tileSources,
+      initialPage: currentPage.value,
       // Without this, `open()` with an array of tileSources does not
       // paginate at all — OpenSeadragon instead opens every one of them at
       // once as simultaneous, stacked images in the same world (its
@@ -145,21 +163,43 @@
       showRotationControl: false,
       showFlipControl: false,
     })
+
+    // OpenSeadragon's own arrows, the reference strip and `goToPage` below
+    // all land here, so the counter and the stored position stay right
+    // whichever of them the reader actually used.
+    osdViewer.addHandler('page', (event) => {
+      currentPage.value = event.page
+      remember(volume, event.page)
+    })
+
     isLoading.value = false
   }
 
   const openVolume = (volume: Volume): void => {
     activeVolume.value = volume
+    remember(VOLUME_MEMORY_KEY, VOLUMES.indexOf(volume))
+    releaseFullPage(osdViewer)
     osdViewer?.destroy()
     osdViewer = null
     void createViewer(volume)
   }
 
+  const goToPlate = (page: number): void => {
+    osdViewer?.goToPage(page)
+  }
+
   onMounted(() => {
+    activeVolume.value = VOLUMES[recall(VOLUME_MEMORY_KEY, VOLUMES.length)] ?? VOLUMES[0]
     void createViewer(activeVolume.value)
   })
 
   onBeforeUnmount(() => {
+    // Full page has to be left before the viewer goes, or every child of
+    // `document.body` stays hidden and the application is gone — see
+    // `releaseFullPage`. Here the trigger would be navigating away from
+    // `/columns` while full-page; the Trajan viewer removes the control
+    // outright, because inside a modal there is no safe teardown at all.
+    releaseFullPage(osdViewer)
     osdViewer?.destroy()
     osdViewer = null
   })
@@ -196,6 +236,14 @@
       class="leaf mt-4 h-[60vh] min-h-80 w-full overflow-hidden"
       role="application"
       :aria-label="t('columns.marcusAurelius.viewerLabel')"
+    />
+
+    <ColumnsColumnPlatePager
+      v-if="!isLoading && !loadFailed"
+      class="mt-3"
+      :page="currentPage"
+      :total="plateCount"
+      @update:page="goToPlate"
     />
   </div>
 </template>

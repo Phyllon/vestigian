@@ -1,5 +1,6 @@
 import { Popup } from 'maplibre-gl'
 import type { LineLayerSpecification, Map as MapLibreMap, MapLayerMouseEvent } from 'maplibre-gl'
+import { ROUTE_ATTRIBUTION } from './useBasemapStyle'
 import { ATLAS_MARK_INK } from './useSiteIcons'
 import { escapeHtmlForPopup } from './useBattleOverlay'
 
@@ -95,6 +96,7 @@ export const useRouteOverlay = () => {
       tiles: [`${routeTilesUrl.value}/{z}/{x}/{y}.mvt`],
       minzoom: 0,
       maxzoom: 12,
+      attribution: ROUTE_ATTRIBUTION,
     })
 
     map.addLayer(buildRouteLayer())

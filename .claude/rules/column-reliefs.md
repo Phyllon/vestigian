@@ -6,6 +6,7 @@ paths:
   - 'server/api/column-reliefs/**'
   - 'scripts/import/11-column-reliefs.ts'
   - 'server/database/schema/column-reliefs.ts'
+  - 'app/composables/columns/**'
   - 'shared/types/column-reliefs.ts'
 ---
 
@@ -217,42 +218,81 @@ signed rendition — because nothing about the Marcus Aurelius plates is
 mirrored into this project's own storage; see finding 1 above for why they
 have to exist at all.
 
-**The Trajan gallery is a grid _and_ a carousel, not a grid that opens one
-image at a time.** Clicking a thumbnail opens a `UModal` containing a
-`UCarousel` (Nuxt UI's own `embla-carousel-vue` wrapper — already a
-transitive dependency of `@nuxt/ui`, so no new library was added) started
-at that plate's index; swiping, dragging or the built-in prev/next arrows
-move through every plate in order without closing and reopening the modal.
-The carousel is only mounted while the modal is open (`v-if`), so
-`start-index` re-applies fresh to whichever thumbnail was actually clicked
-each time, rather than needing an imperative `scrollTo` call after the
-fact.
+**The Trajan gallery is a grid of thumbnails over an OpenSeadragon
+sequence.** Clicking a thumbnail opens a `UModal` holding
+`ColumnTrajanViewer.client.vue`, an OpenSeadragon viewer in `sequenceMode`
+over every plate, started at that thumbnail's index. The viewer is only
+mounted while the modal is open (`v-if`), so `start-index` applies fresh
+each time and no viewer instance outlives the panel it was drawn in.
 
-**The carousel's own arrow theme clips inside `UModal`.** Nuxt UI's default
-carousel theme positions `prev`/`next` _outside_ the carousel's own box from
-the `sm` breakpoint up (`sm:-start-12`/`sm:-end-12`), banking on there being
-open page margin around it — but `UModal`'s content panel is
-`overflow-hidden` (needed for its own rounded corners and scroll clipping),
-so the arrows rendered visibly cropped in half. Fixed by overriding
-`:ui="{ prev: 'start-2', next: 'end-2' }"` on `UCarousel` so both arrows
-stay inside the carousel's own bounds at every width, rather than widening
-the modal enough to give the default position room it was never guaranteed
-to have. The modal itself was also widened (`max-w-5xl w-[95vw]`) — the
-original `max-w-3xl` combined with a `max-h-[65vh]` image left a lot of the
-viewport unused for detail photography that benefits from screen space.
+**This replaced a `UCarousel` of `<img>` elements in an `overflow-auto`
+frame, and the note that used to stand here — "there is nothing for a real
+tiled zoomer to buy beyond what native scrolling already does for free" —
+was wrong on four counts, every one of them reported from real use:**
 
-**Zoom is a click/tap toggle into a scrollable frame, not a custom pan
-implementation.** At rest the plate image fits its frame
-(`object-contain`); clicking it (or the floating zoom button, kept for
-keyboard/AT reachability — a plain image click has no keyboard equivalent)
-removes the size cap so the image renders at its full delivered resolution
-inside a frame that switches to `overflow-auto`, and the browser's own
-touch-drag/trackpad/scrollbar panning takes over. Deliberately not
-OpenSeadragon or a hand-rolled pointer-drag: this gallery has exactly one
-resolution tier per plate (no deep-zoom pyramid the way the Marcus Aurelius
-viewer has), so there is nothing for a real tiled zoomer to buy here beyond
-what native scrolling already does for free, with none of the pointer-math
-edge cases a custom implementation would need to get right.
+1. The plate rendered cropped at rest and the panel grew its own scrollbar:
+   the image, its caption and the modal's chrome were three independently
+   sized things competing for one fixed height, and nothing reconciled them.
+2. Zoom always went to the top-left corner. `overflow-auto` starts at scroll
+   origin and native scrolling has no "zoom about the pointer", so clicking a
+   detail on the right of a plate threw the reader to the opposite corner.
+3. Panning meant the scrollbars. Native drag-scroll is touch-only, so on the
+   desktop where the detail is actually legible there was no way to move
+   around a zoomed plate at all — the one thing the frame existed to do.
+4. The carousel arrows were clipped by `UModal`'s `overflow-hidden`, patched
+   once by repositioning them (`:ui="{ prev: 'start-2', next: 'end-2' }"`),
+   and clipped again as soon as the frame grew.
+
+OpenSeadragon answers all four, was already a dependency for the other two
+viewers, and draws its controls _inside_ its own canvas so nothing can clip
+them. The general lesson is the project convention it should have followed
+the first time: reach for the established component rather than assembling
+scroll behaviour out of CSS.
+
+**`type: 'image'` tile sources, not IIIF** — unlike the Marcus volumes there
+is no deep-zoom pyramid behind these, just one mirrored JPEG per plate from
+`/api/column-reliefs/:id/full`. OpenSeadragon builds its own downsampled
+levels from the loaded image and does it with `drawImage` alone (checked in
+OpenSeadragon 6's `ImageTileSource._buildLevels`: no `toDataURL`, no
+`getImageData`), so the cross-origin redirect to imgproxy taints the canvas
+harmlessly rather than throwing `SecurityError`. **No `crossOriginPolicy` is
+set for that reason** — setting one would demand CORS headers imgproxy does
+not send here, and would break what currently works. `showReferenceStrip` is
+off: the grid behind the modal already is the reference strip, and one here
+would fetch every plate's image to build its thumbnails.
+
+OpenSeadragon's published types admit `{ type: 'image', url }` for a single
+tile source but narrow the _array_ form to
+`string | TileSource | { type: 'openstreetmaps' }` — a gap in the types, not
+a real restriction (the runtime hands each array entry to the same
+`TileSource.determineType`), and the same class of gap as `.open()`'s array
+signature. `buildTileSources()` carries the one cast.
+
+**Both viewers get a plate counter, and the Marcus viewer remembers where
+you were.** OpenSeadragon's own sequence control is two arrows and nothing
+else: reaching plate 90 of 128 meant 89 clicks with no indication of where
+you had got to. `ColumnPlatePager.vue` is shared by both viewers — prev/next
+plus a `type="number"` field the reader can type into. Pages are 0-based in
+code (what `goToPage`/`currentPage` speak) and 1-based on screen (what a
+plate is called); the conversion happens in that component, once. An
+out-of-range or non-numeric entry is **refused, not clamped** — silently
+turning "500" into plate 128 reads as the field having ignored what was
+typed — and the field commits on `change`/Enter rather than `input`, so
+typing "1" on the way to "12" does not re-render the viewer at plate 1.
+
+The Marcus viewer additionally stores its volume and its page through
+`useColumnPlatePosition` (`app/composables/columns/`), so leaving the page
+and coming back resumes where the reader stopped. `localStorage`, not
+`useState`: a client-side navigation is the smallest gap it has to survive
+and a reload the next evening is the case that matters — and it is read only
+from `recall()`, never from a `useState` factory, because that factory runs
+during SSR and Nuxt hydrates the client from the serialised result rather
+than re-invoking it, so a "client-only" branch inside one never runs (the
+same trap that cost this project its offline-area list). A remembered page
+past the end of a shortened volume reads as "none remembered" rather than as
+the last plate. The Trajan gallery deliberately does **not** remember: the
+thumbnail the reader clicked is an explicit choice, and restoring a stored
+page would override it.
 
 **Reached from the app menu (`AppMenu.vue`), not the basemap switcher's
 antiquity group.** The Tabula Peutingeriana viewer sits in that group

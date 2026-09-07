@@ -70,10 +70,23 @@ export const openMap = async (page: Page): Promise<void> => {
  * first — see `isShowingSites` in `useBasemapStyle`.
  */
 export const showSites = async (page: Page): Promise<void> => {
-  await page.getByRole('button', { name: /^Basemap:/ }).click()
-  await page.getByRole('menuitemcheckbox', { name: 'Show sites' }).click()
-  // The overlay toggle deliberately leaves the menu open (it changes the
-  // sheet behind it rather than navigating anywhere) — closed here so a
-  // caller's next basemap interaction opens the menu instead of closing it.
+  await toggleOverlay(page, 'Show sites')
+}
+
+/**
+ * Opens the overlay switcher — its own control since the overlays stopped
+ * being readings of one particular basemap, so no longer reachable through
+ * the basemap menu. See `OverlaySwitcher.vue`.
+ */
+export const openOverlays = async (page: Page): Promise<void> => {
+  await page.getByRole('button', { name: /^Overlays:/ }).click()
+}
+
+export const toggleOverlay = async (page: Page, name: string): Promise<void> => {
+  await openOverlays(page)
+  await page.getByRole('menuitemcheckbox', { name }).click()
+  // A toggle deliberately leaves the menu open (it changes the map behind it
+  // rather than navigating anywhere) — closed here so a caller's next
+  // interaction with a control opens its menu instead of closing this one.
   await page.keyboard.press('Escape')
 }

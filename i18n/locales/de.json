@@ -39,7 +39,7 @@
     "followLimesHint": "Die Grenze, ihre Mauern und ihre Festungen",
     "tabulaPeutingeriana": "Tabula Peutingeriana",
     "tabulaPeutingerianaHint": "Das römische Straßendiagramm, keine Karte - öffnet seinen eigenen Betrachter",
-    "groupOverlays": "Überlagerungen",
+    "groupOverlays": "Overlays",
     "tabulaPeutingerianaOverlay": "Netz Tabula Peutingeriana",
     "tabulaPeutingerianaOverlayHint": "Orte und Straßen aus dem Manuskript, an ihren wirklichen Koordinaten",
     "showSites": "Fundstellen anzeigen",
@@ -68,19 +68,18 @@
     "attribution": "Handschrift: Österreichische Nationalbibliothek, Wien (Code 324). Digitalisierung und IIIF-Hosting:"
   },
   "columns": {
-    "title": "Column Reliefs",
+    "title": "Säulenreliefs",
     "intro": "Die Reliefs von zwei römischen Säulen, im Detail erforscht - Trajans Säule von gespiegelten wissenschaftlichen Platten, die Säule von Marcus Aurelius von einem Live-Tiefenzoom-Scan.",
     "menuLabel": "Säulenreliefs",
     "trajan": {
-      "tabLabel": "Trajan-Säule",
+      "tabLabel": "Trajanssäule",
       "intro": "Conrad Cichorius 1896-1900 Fotoplatten, die Standard-Szene-für-Szene-Referenz für die Spalte - gespiegelt von Wikimedia Commons, Public Domain.",
       "loading": "Beladeplatten..",
       "loadFailed": "Die Platten konnten nicht geladen werden. Versuchen Sie es gleich noch einmal.",
       "empty": "Es wurden noch keine Platten veröffentlicht.",
       "gridLabel": "Trajansche Reliefplatten",
-      "scene": "Szenerie{number}",
-      "zoomIn": "Zoom",
-      "zoomOut": "Zoom raus"
+      "scene": "Szene {number}",
+      "viewerLabel": "Deep-Zoom-Betrachter der Reliefstafeln der Trajanssäule"
     },
     "marcusAurelius": {
       "tabLabel": "Kolumne von Marcus Aurelius",
@@ -91,6 +90,13 @@
       "tafeln-lxv-cxxviii": "Tafeln LXV–CXXVIII",
       "loading": "Beladen des Plattenvolumens..",
       "loadFailed": "Dieser Band konnte nicht aus der Universitätsbibliothek Heidelberg geladen werden. Versuchen Sie es gleich noch einmal."
+    },
+    "pager": {
+      "label": "Tafelnavigation",
+      "previous": "Vorherige Tafel",
+      "next": "Nächste Tafel",
+      "pageNumber": "Tafelnummer",
+      "of": "von {total}"
     }
   },
   "legend": {
@@ -325,13 +331,7 @@
     "operatorHeading": "Dienstleister",
     "operatorPlaceholder": "[NAME DES BETREIBERS]\n[STRASSE UND ZAHL]\n[POSTCODE UND STADT]\n[LAND]",
     "contactHeading": "Kontakt",
-    "contactPlaceholder": "E-Mail: [CONTACT EMAIL]\nTelefon: [KONTAKT, falls vorhanden]",
-    "registerHeading": "Registereintrag",
-    "registerPlaceholder": "[Handelsregister, Registernummer und Eintragungsgericht — falls zutreffend] Entfernen Sie diesen Abschnitt vollständig für einen privaten, nicht kommerziellen Betreiber",
-    "vatHeading": "MwSt.-Identifikationsnummer",
-    "vatPlaceholder": "[MwSt.-ID nach §27a UStG, falls zutreffend — Nichtzutreffendes streichen.]",
-    "responsibleHeading": "Verantwortlich für Inhalte nach §18 (2) MStV",
-    "responsiblePlaceholder": "[Name und Anschrift, falls abweichend von dem oben genannten Dienstleister.]",
+    "contactPlaceholder": "E-Mail: [CONTACT EMAIL]",
     "disputeHeading": "Streitbeilegung",
     "disputeBody": "Die Europäische Kommission bietet eine Plattform für Online-Streitbeilegung (ODR): ec.europa.eu/consumers/odr. Wir sind nicht verpflichtet und nicht bereit, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen."
   },
@@ -984,5 +984,11 @@
     "withBasemap": "mit Hintergrundkarte",
     "remove": "{name} entfernen",
     "removeFailed": "Dieser Bereich ließ sich nicht entfernen. Versuche es gleich noch einmal."
+  },
+  "overlaySwitcher": {
+    "title": "Overlays",
+    "menuLabel": "Overlays",
+    "labelNone": "Overlays: keine aktiv",
+    "labelActive": "Overlays: {count} aktiv"
   }
 }

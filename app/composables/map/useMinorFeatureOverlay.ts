@@ -5,6 +5,7 @@ import type {
   MapLayerMouseEvent,
   SymbolLayerSpecification,
 } from 'maplibre-gl'
+import { MINOR_FEATURE_ATTRIBUTION } from './useBasemapStyle'
 import { escapeHtmlForPopup } from './useBattleOverlay'
 import { type MinorFeatureKind, minorFeatureIconId } from './useSiteIcons'
 
@@ -103,6 +104,7 @@ export const useMinorFeatureOverlay = () => {
       tiles: [`${featureTilesUrl.value}/{z}/{x}/{y}.mvt`],
       minzoom: 0,
       maxzoom: 12,
+      attribution: MINOR_FEATURE_ATTRIBUTION,
     })
 
     map.addLayer(buildFeatureLayer())

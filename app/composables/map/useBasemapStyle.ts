@@ -115,13 +115,18 @@ const ATLAS_ATTRIBUTION =
   'Antiquity data © <a href="https://github.com/AWMC/geodata" target="_blank" rel="noopener">Ancient World Mapping Center</a> (ODbL 1.0) and <a href="https://pleiades.stoa.org" target="_blank" rel="noopener">Pleiades</a> (CC BY 3.0)'
 
 /**
- * The same sources, plus what the frontier actually is.
+ * What the frontier actually is, credited on the frontier's own source.
  *
  * "Derived from" rather than a bare credit, because the line is not a dataset
  * anyone published: it is the boundary of AWMC's extent of the empire with the
  * coast taken out of it. A reader is owed that before they cite it.
+ *
+ * Self-contained rather than appended to `ATLAS_ATTRIBUTION` the way it used
+ * to be: the frontier is drawn over any basemap now, including ones where the
+ * `atlas` source — and so AWMC's own credit — is not in the style at all.
  */
-const LIMES_ATTRIBUTION = `${ATLAS_ATTRIBUTION}. Frontier derived from AWMC's extent of the empire at 200 CE`
+export const LIMES_ATTRIBUTION =
+  'Frontier derived from <a href="https://github.com/AWMC/geodata" target="_blank" rel="noopener">Ancient World Mapping Center</a>\'s extent of the empire at 200 CE (ODbL 1.0)'
 
 /**
  * The period scrubber's own source, credited separately because it is the one
@@ -135,6 +140,46 @@ const LIMES_ATTRIBUTION = `${ATLAS_ATTRIBUTION}. Frontier derived from AWMC's ex
  */
 const EMPIRE_EXTENT_ATTRIBUTION =
   'Extent over time © <a href="https://www.openhistoricalmap.org" target="_blank" rel="noopener">OpenHistoricalMap</a> contributors (CC0 1.0)'
+
+/**
+ * One credit per overlay, set on the overlay's own MapLibre source so it
+ * appears with the layer and leaves with it — MapLibre's `AttributionControl`
+ * collects attribution from the sources currently in the style, which is
+ * exactly the right granularity for switchable layers.
+ *
+ * **These were missing entirely, and for four of these sources attribution is
+ * the licence condition itself** — de Graauw's ports and ORBIS are CC BY,
+ * CHRR is CC BY-NC-SA, AWMC's minor antiquities are ODbL, all four requiring
+ * credit on any produced work. The gap only became visible once the
+ * vici-sourced site overlay was switched off by default (see
+ * `.claude/rules/map-and-tiles.md`): that source carried the one credit line
+ * every other overlay was silently leaning on, and with it off a reader who
+ * turned on ports and routes saw nothing but "© OpenStreetMap contributors".
+ * Wikidata's battles are CC0 and compel nothing; they are credited on the
+ * same terms as `EMPIRE_EXTENT_ATTRIBUTION`, for the reason given there.
+ *
+ * The Tabula Peutingeriana network states no licence at all (see
+ * `.claude/rules/tabula-peutingeriana.md`, which is why the whole layer is
+ * behind an operator flag) — naming its compiler is the least this can do
+ * while it is switched on.
+ */
+export const BATTLE_ATTRIBUTION =
+  'Battles: <a href="https://www.wikidata.org" target="_blank" rel="noopener">Wikidata</a> (CC0 1.0)'
+
+export const PORT_ATTRIBUTION =
+  'Ports: <a href="https://www.ancientportsantiques.com/the-catalogue/" target="_blank" rel="noopener">Catalogue of Ancient Ports</a>, Arthur de Graauw (CC BY 4.0), also published as the DARMC Scholarly Data Series (Harvard)'
+
+export const ROUTE_ATTRIBUTION =
+  'Routes: <a href="https://purl.stanford.edu/mn425tz9757" target="_blank" rel="noopener">ORBIS v2</a>, Meeks, Scheidel, Weiland & Arcenas, Stanford University (CC BY 3.0)'
+
+export const MINOR_FEATURE_ATTRIBUTION =
+  'Minor antiquities: <a href="https://github.com/AWMC/geodata" target="_blank" rel="noopener">Ancient World Mapping Center</a> (ODbL 1.0)'
+
+export const COIN_HOARD_ATTRIBUTION =
+  'Coin hoards: <a href="http://numismatics.org/chrr/" target="_blank" rel="noopener">Coin Hoards of the Roman Republic</a>, American Numismatic Society (CC BY-NC-SA 4.0)'
+
+export const TABULA_PEUTINGERIANA_ATTRIBUTION =
+  'Tabula Peutingeriana network compiled by René Voorburg, <a href="https://omnesviae.org" target="_blank" rel="noopener">omnesviae.org</a>'
 
 /** Neither antiquity view is a recolouring of the modern vector source. */
 export type AntiquityView = Extract<BasemapView, 'antiquity-dare' | 'antiquity-awmc'>
@@ -662,7 +707,7 @@ const buildAtlasStyle = (
       tiles: [`${source.atlasTilesUrl}/{z}/{x}/{y}.mvt`],
       minzoom: 0,
       maxzoom: 12,
-      attribution: options.limes ? LIMES_ATTRIBUTION : ATLAS_ATTRIBUTION,
+      attribution: ATLAS_ATTRIBUTION,
     },
     ...(options.periodYear === null
       ? {}

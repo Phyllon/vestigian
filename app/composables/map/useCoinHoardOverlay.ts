@@ -1,6 +1,7 @@
 import { Popup } from 'maplibre-gl'
 import type { Map as MapLibreMap, MapLayerMouseEvent, SymbolLayerSpecification } from 'maplibre-gl'
 import { escapeHtmlForPopup } from './useBattleOverlay'
+import { COIN_HOARD_ATTRIBUTION } from './useBasemapStyle'
 import { COIN_HOARD_ICON_ID } from './useSiteIcons'
 
 export const COIN_HOARD_SOURCE_ID = 'coin-hoards'
@@ -71,6 +72,7 @@ export const useCoinHoardOverlay = () => {
       tiles: [`${coinHoardTilesUrl.value}/{z}/{x}/{y}.mvt`],
       minzoom: 0,
       maxzoom: 12,
+      attribution: COIN_HOARD_ATTRIBUTION,
     })
 
     map.addLayer(buildCoinHoardLayer())

@@ -39,7 +39,7 @@
     "followLimesHint": "La frontera, sus paredes y sus fuertes",
     "tabulaPeutingeriana": "Tabula Peutingeriana",
     "tabulaPeutingerianaHint": "El diagrama de la carretera romana, no un mapa, abre su propio visor",
-    "groupOverlays": "Superficies",
+    "groupOverlays": "Capas",
     "tabulaPeutingerianaOverlay": "Tabula Peutingeriana red",
     "tabulaPeutingerianaOverlayHint": "Lugares y caminos del manuscrito, en sus coordenadas reales",
     "showSites": "Mostrar sitios",
@@ -72,15 +72,14 @@
     "intro": "Los relieves de dos columnas romanas, explorados en detalle — Columna de Trajan de placas académicas especiadas, la Columna de Marcus Aurelius de un escaneo de fondo vivo.",
     "menuLabel": "Alivios de columna",
     "trajan": {
-      "tabLabel": "Columna de Trajan",
+      "tabLabel": "Columna de Trajano",
       "intro": "Las placas fotográficas 1896–1900 de Conrad Cichorius, la referencia de escena por escena estándar para la columna, reflejada en Wikimedia Commons, dominio público.",
       "loading": "Cargando platos..",
       "loadFailed": "Las placas no se podían cargar. Inténtalo de nuevo en breve.",
       "empty": "Todavía no se publican placas.",
       "gridLabel": "Placas de relieve de columna de Trajan",
-      "scene": "Escena{number}",
-      "zoomIn": "Zoom en",
-      "zoomOut": "Zoom fuera"
+      "scene": "Escena {number}",
+      "viewerLabel": "Visor de zoom profundo de las láminas en relieve de la Columna de Trajano"
     },
     "marcusAurelius": {
       "tabLabel": "Columna de Marco Aurelio",
@@ -91,6 +90,13 @@
       "tafeln-lxv-cxxviii": "Tafeln LXV–CXXVIII",
       "loading": "Cargando el volumen de la placa..",
       "loadFailed": "Este volumen no puede ser cargado de la Biblioteca de la Universidad de Heidelberg. Inténtalo de nuevo en breve."
+    },
+    "pager": {
+      "label": "Navegación de láminas",
+      "previous": "Lámina anterior",
+      "next": "Lámina siguiente",
+      "pageNumber": "Número de lámina",
+      "of": "de {total}"
     }
   },
   "legend": {
@@ -325,13 +331,7 @@
     "operatorHeading": "Proveedor de servicios",
     "operatorPlaceholder": "[NOMBRE DEL ORRATOR]\n[STREET AND NUMBER]\n[POSTAL CODE AND CITY]\n[PADRE]",
     "contactHeading": "Contacto",
-    "contactPlaceholder": "Correo electrónico: [CONTACT EMAIL]\nTeléfono: [CONTACT PHONE, si se proporciona]",
-    "registerHeading": "Registro",
-    "registerPlaceholder": "[Registro comercial, número de registro y tribunal de registro, si procede. Retire esta sección completamente para un operador privado, no comercial.]",
-    "vatHeading": "Número de identificación",
-    "vatPlaceholder": "[Número de IVA conforme al §27a UStG, si procede — omitir si no aplica.]",
-    "responsibleHeading": "Responsable del contenido bajo §18(2) MStV",
-    "responsiblePlaceholder": "[Nombre y dirección, si es diferente del proveedor de servicios arriba.]",
+    "contactPlaceholder": "Correo electrónico: [CONTACT EMAIL]",
     "disputeHeading": "Resolución de controversias",
     "disputeBody": "La Comisión Europea proporciona una plataforma para la solución de controversias en línea (ODR): ec.europa.eu/consumers/odr. No estamos obligados y no estamos dispuestos a participar en procedimientos de solución de controversias ante una junta de arbitraje del consumidor."
   },
@@ -984,5 +984,11 @@
     "withBasemap": "con mapa base",
     "remove": "Quitar {name}",
     "removeFailed": "No se pudo quitar esa zona. Inténtalo de nuevo en un momento."
+  },
+  "overlaySwitcher": {
+    "title": "Capas",
+    "menuLabel": "Capas",
+    "labelNone": "Capas: ninguna activa",
+    "labelActive": "Capas: {count} activas"
   }
 }

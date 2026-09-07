@@ -60,6 +60,12 @@
     "periodYearCe": "{year} CE",
     "periodApproximate": "Frontiers are approximate, drawn by OpenHistoricalMap contributors."
   },
+  "overlaySwitcher": {
+    "title": "Overlays",
+    "menuLabel": "Overlays",
+    "labelNone": "Overlays: none on",
+    "labelActive": "Overlays: {count} on"
+  },
   "tabulaPeutingeriana": {
     "title": "Tabula Peutingeriana",
     "intro": "A medieval copy of a Roman map of the cursus publicus, the empire's road network — shown here as its own deep-zoom scan, not draped over real coordinates.",
@@ -79,8 +85,7 @@
       "empty": "No plates are published yet.",
       "gridLabel": "Trajan's Column relief plates",
       "scene": "Scene {number}",
-      "zoomIn": "Zoom in",
-      "zoomOut": "Zoom out"
+      "viewerLabel": "Deep-zoom viewer of Trajan's Column relief plates"
     },
     "marcusAurelius": {
       "tabLabel": "Column of Marcus Aurelius",
@@ -91,6 +96,13 @@
       "tafeln-lxv-cxxviii": "Tafeln LXV–CXXVIII",
       "loading": "Loading the plate volume…",
       "loadFailed": "This volume could not be loaded from Heidelberg University Library. Try again shortly."
+    },
+    "pager": {
+      "label": "Plate navigation",
+      "previous": "Previous plate",
+      "next": "Next plate",
+      "pageNumber": "Plate number",
+      "of": "of {total}"
     }
   },
   "legend": {
@@ -325,13 +337,7 @@
     "operatorHeading": "Service provider",
     "operatorPlaceholder": "[OPERATOR NAME]\n[STREET AND NUMBER]\n[POSTAL CODE AND CITY]\n[COUNTRY]",
     "contactHeading": "Contact",
-    "contactPlaceholder": "Email: [CONTACT EMAIL]\nPhone: [CONTACT PHONE, if provided]",
-    "registerHeading": "Register entry",
-    "registerPlaceholder": "[Commercial register, register number and registration court — if applicable. Remove this section entirely for a private, non-commercial operator.]",
-    "vatHeading": "VAT identification number",
-    "vatPlaceholder": "[VAT ID under §27a UStG, if applicable — omit if none.]",
-    "responsibleHeading": "Responsible for content under §18(2) MStV",
-    "responsiblePlaceholder": "[Name and address, if different from the service provider above.]",
+    "contactPlaceholder": "Email: [CONTACT EMAIL]",
     "disputeHeading": "Dispute resolution",
     "disputeBody": "The European Commission provides a platform for online dispute resolution (ODR): ec.europa.eu/consumers/odr. We are not obliged and not willing to take part in dispute resolution proceedings before a consumer arbitration board."
   },

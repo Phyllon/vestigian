@@ -87,4 +87,78 @@ test.describe('the column reliefs page', () => {
     await expect(page).toHaveURL('/')
     await expect(page.getByRole('button', { name: /^Basemap:/ })).toBeVisible()
   })
+
+  test('opening a Trajan plate gives a real zoom viewer, not a scrolling frame', async ({
+    page,
+  }) => {
+    const problems = watchForProblems(page, { ignore: [IMGPROXY_OVER_HTTP] })
+
+    await page.goto('/columns')
+    const grid = page.getByRole('list', { name: "Trajan's Column relief plates" })
+    await expect(grid.getByRole('listitem').first()).toBeVisible({ timeout: 15_000 })
+
+    // The third thumbnail, so the pager has to show 3 rather than passing by
+    // starting at the beginning of the sequence.
+    await grid.getByRole('listitem').nth(2).getByRole('button').click()
+
+    const dialog = page.getByRole('dialog')
+    await expect(dialog.locator('.openseadragon-canvas canvas').first()).toBeVisible({
+      timeout: 20_000,
+    })
+
+    const plateNumber = dialog.getByRole('spinbutton', { name: 'Plate number' })
+    await expect(plateNumber).toHaveValue('3')
+
+    // Typed directly, not clicked to. The old carousel had no way to do this
+    // at all — reaching plate 90 meant 89 clicks.
+    await plateNumber.fill('7')
+    await plateNumber.press('Enter')
+    await expect(plateNumber).toHaveValue('7')
+
+    // Refused rather than clamped: silently turning 500 into the last plate
+    // looks like the field ignored what was typed.
+    await plateNumber.fill('500')
+    await plateNumber.press('Enter')
+    await expect(plateNumber).toHaveValue('7')
+
+    /**
+     * Full page is deliberately absent here. `setFullPage(true)` hides every
+     * child of `document.body` and moves the viewer element out to the body,
+     * and only `setFullPage(false)` restores them — so unmounting this viewer
+     * while full-page (closing the modal, Escape, a route change) leaves the
+     * whole application hidden with nothing able to bring it back. Reported
+     * exactly that way: "the whole page is gone, even after pressing Esc".
+     */
+    await expect(dialog.locator('.openseadragon-container [title="Toggle full page"]')).toHaveCount(
+      0,
+    )
+
+    expect(problems.cspViolations).toEqual([])
+    expect(problems.pageErrors).toEqual([])
+  })
+
+  test('remembers the Marcus Aurelius plate a reader left off at', async ({ page }) => {
+    await page.goto('/columns')
+    await page.getByRole('tab', { name: 'Column of Marcus Aurelius' }).click()
+    await expect(page.locator('.openseadragon-canvas canvas').first()).toBeVisible({
+      timeout: 20_000,
+    })
+
+    const plateNumber = page.getByRole('spinbutton', { name: 'Plate number' })
+    await plateNumber.fill('9')
+    await plateNumber.press('Enter')
+    await expect(plateNumber).toHaveValue('9')
+
+    // Away and back by client-side navigation, which is the case that used to
+    // drop the position — the route carries no page, so nothing but the
+    // stored one can bring it back.
+    await page.getByRole('link', { name: 'Vestigian' }).first().click()
+    await waitForMapReady(page)
+    await page.goBack()
+
+    await page.getByRole('tab', { name: 'Column of Marcus Aurelius' }).click()
+    await expect(page.getByRole('spinbutton', { name: 'Plate number' })).toHaveValue('9', {
+      timeout: 20_000,
+    })
+  })
 })

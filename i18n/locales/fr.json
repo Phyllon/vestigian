@@ -39,7 +39,7 @@
     "followLimesHint": "La frontière, ses murs et ses forts",
     "tabulaPeutingeriana": "Tabula Peutingeriana",
     "tabulaPeutingerianaHint": "Le diagramme romain, pas une carte, ouvre son propre spectateur",
-    "groupOverlays": "Couvertures",
+    "groupOverlays": "Calques",
     "tabulaPeutingerianaOverlay": "Réseau Tabula Peutingeriana",
     "tabulaPeutingerianaOverlayHint": "Lieux et routes du manuscrit, à leurs coordonnées réelles",
     "showSites": "Afficher les sites",
@@ -68,7 +68,7 @@
     "attribution": "Manuscrit: Bibliothèque nationale autrichienne, Vienne (Cod. 324). Numérisation et hébergement IIIF:"
   },
   "columns": {
-    "title": "Allégements de colonnes",
+    "title": "Reliefs des colonnes",
     "intro": "Les reliefs de deux colonnes romaines, explorés en détail — la colonne de Trajan à partir de plaques savantes miroirs, la colonne de Marc Aurèle à partir d'un scan vivant de zoom profond.",
     "menuLabel": "Allégements de colonnes",
     "trajan": {
@@ -78,9 +78,8 @@
       "loadFailed": "Les plaques ne pouvaient pas être chargées. Essaie encore.",
       "empty": "Aucune plaque n'est encore publiée.",
       "gridLabel": "Plaques de relief de la colonne de Trajan",
-      "scene": "Scène{number}",
-      "zoomIn": "Zoom dans",
-      "zoomOut": "Zoom arrière"
+      "scene": "Scène {number}",
+      "viewerLabel": "Visionneuse à zoom profond des planches en relief de la colonne Trajane"
     },
     "marcusAurelius": {
       "tabLabel": "Colonne de Marc Aurèle",
@@ -91,6 +90,13 @@
       "tafeln-lxv-cxxviii": "Tafeln LXV–CXXVIII",
       "loading": "Chargement du volume de la plaque..",
       "loadFailed": "Ce volume n'a pas pu être chargé depuis la bibliothèque universitaire de Heidelberg. Essaie encore."
+    },
+    "pager": {
+      "label": "Navigation des planches",
+      "previous": "Planche précédente",
+      "next": "Planche suivante",
+      "pageNumber": "Numéro de planche",
+      "of": "sur {total}"
     }
   },
   "legend": {
@@ -325,13 +331,7 @@
     "operatorHeading": "Fournisseur de services",
     "operatorPlaceholder": "[NOM DE L'OPÉRATEUR]\n[STREET ET NUMÉRO]\n[CODE POSTAL ET VILLE]\n[COUNTRY]",
     "contactHeading": "Personne à contacter",
-    "contactPlaceholder": "Courriel: [EMAIL CONTACT]\nTéléphone: [PHONE DE CONTACT, le cas échéant]",
-    "registerHeading": "Inscription au registre",
-    "registerPlaceholder": "[Registre commercial, numéro de registre et tribunal d'enregistrement — le cas échéant. Supprimer cette section entièrement pour un opérateur privé non commercial.]",
-    "vatHeading": "Numéro d'identification TVA",
-    "vatPlaceholder": "[VAT ID sous §27a UStG, le cas échéant — omettre si aucune.]",
-    "responsibleHeading": "Responsable du contenu au §18(2) MStV",
-    "responsiblePlaceholder": "[Nom et adresse, si différent du fournisseur de services ci-dessus.]",
+    "contactPlaceholder": "Courriel: [EMAIL CONTACT]",
     "disputeHeading": "Règlement des différends",
     "disputeBody": "La Commission européenne fournit une plate-forme pour le règlement des litiges en ligne (ODR): ec.europa.eu/consumers/odr. Nous ne sommes pas obligés et disposés à participer à une procédure de règlement des différends devant un conseil d'arbitrage des consommateurs."
   },
@@ -984,5 +984,11 @@
     "withBasemap": "avec fond de carte",
     "remove": "Retirer {name}",
     "removeFailed": "Cette zone n'a pas pu être retirée. Réessayez dans un instant."
+  },
+  "overlaySwitcher": {
+    "title": "Calques",
+    "menuLabel": "Calques",
+    "labelNone": "Calques : aucun actif",
+    "labelActive": "Calques : {count} actifs"
   }
 }

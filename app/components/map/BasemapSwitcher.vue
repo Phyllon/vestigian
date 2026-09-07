@@ -2,38 +2,13 @@
   import { onClickOutside } from '@vueuse/core'
   import type { BasemapGroup, BasemapView } from '#shared/types'
 
-  const {
-    view,
-    setView,
-    availableViews,
-    canFollowLimes,
-    isFollowingLimes,
-    setLimesActive,
-    canShowPeriodExtent,
-    periodYear,
-    setPeriodYear,
-    canShowTabulaPeutingerianaOverlay,
-    isShowingTabulaPeutingerianaOverlay,
-    setTabulaPeutingerianaOverlayActive,
-    canShowBattles,
-    isShowingBattles,
-    setBattlesActive,
-    canShowSites,
-    isShowingSites,
-    setSitesActive,
-    canShowPorts,
-    isShowingPorts,
-    setPortsActive,
-    canShowRoutes,
-    isShowingRoutes,
-    setRoutesActive,
-    canShowFeatures,
-    isShowingFeatures,
-    setFeaturesActive,
-    canShowCoinHoards,
-    isShowingCoinHoards,
-    setCoinHoardsActive,
-  } = useBasemapStyle()
+  /**
+   * The sheet, and the one control that redraws the sheet itself. Every
+   * overlay switch moved out to `OverlaySwitcher.vue` — see its docstring for
+   * why, and for why the scrubber below did not go with them.
+   */
+  const { view, setView, availableViews, canShowPeriodExtent, periodYear, setPeriodYear } =
+    useBasemapStyle()
   const { t } = useI18n()
   const isOpen = ref(false)
   const root = useTemplateRef('root')
@@ -66,44 +41,6 @@
   const choose = (next: BasemapView): void => {
     setView(next)
     close()
-  }
-
-  /**
-   * The menu deliberately stays open. The switch changes the sheet behind it
-   * rather than navigating anywhere, so closing would hide the only feedback
-   * that anything happened — and a reader who wanted it off again would have to
-   * reopen the menu to find out whether it was on.
-   */
-  const toggleLimes = (): void => {
-    setLimesActive(!isFollowingLimes.value)
-  }
-
-  const toggleTabulaPeutingerianaOverlay = (): void => {
-    setTabulaPeutingerianaOverlayActive(!isShowingTabulaPeutingerianaOverlay.value)
-  }
-
-  const toggleBattles = (): void => {
-    setBattlesActive(!isShowingBattles.value)
-  }
-
-  const toggleSites = (): void => {
-    setSitesActive(!isShowingSites.value)
-  }
-
-  const togglePorts = (): void => {
-    setPortsActive(!isShowingPorts.value)
-  }
-
-  const toggleRoutes = (): void => {
-    setRoutesActive(!isShowingRoutes.value)
-  }
-
-  const toggleFeatures = (): void => {
-    setFeaturesActive(!isShowingFeatures.value)
-  }
-
-  const toggleCoinHoards = (): void => {
-    setCoinHoardsActive(!isShowingCoinHoards.value)
   }
 
   const { steps: periodSteps, load: loadPeriodSteps } = useEmpirePeriods()
@@ -169,90 +106,6 @@
     thumb.setAttribute('aria-valuetext', periodSliderLabel.value)
   })
 
-  /**
-   * Both switches on any basemap now — the frontier stopped being a reading
-   * of the Barrington sheet specifically (see `isFollowingLimes` in
-   * `useBasemapStyle`) — so they sit together in one group rather than one
-   * being nested under the antiquity options and the other floating below
-   * both groups. `canShow` is always true for the frontier and reflects the
-   * server-side licence gate for the Tabula Peutingeriana network.
-   */
-  interface OverlayToggle {
-    key: string
-    canShow: boolean
-    isActive: boolean
-    label: string
-    hint: string
-    toggle: () => void
-  }
-
-  const overlayToggles = computed<OverlayToggle[]>(() => [
-    {
-      key: 'sites',
-      canShow: canShowSites.value,
-      isActive: isShowingSites.value,
-      label: t('basemapSwitcher.showSites'),
-      hint: t('basemapSwitcher.showSitesHint'),
-      toggle: toggleSites,
-    },
-    {
-      key: 'limes',
-      canShow: canFollowLimes.value,
-      isActive: isFollowingLimes.value,
-      label: t('basemapSwitcher.followLimes'),
-      hint: t('basemapSwitcher.followLimesHint'),
-      toggle: toggleLimes,
-    },
-    {
-      key: 'tabula-peutingeriana',
-      canShow: canShowTabulaPeutingerianaOverlay.value,
-      isActive: isShowingTabulaPeutingerianaOverlay.value,
-      label: t('basemapSwitcher.tabulaPeutingerianaOverlay'),
-      hint: t('basemapSwitcher.tabulaPeutingerianaOverlayHint'),
-      toggle: toggleTabulaPeutingerianaOverlay,
-    },
-    {
-      key: 'battles',
-      canShow: canShowBattles.value,
-      isActive: isShowingBattles.value,
-      label: t('basemapSwitcher.showBattles'),
-      hint: t('basemapSwitcher.showBattlesHint'),
-      toggle: toggleBattles,
-    },
-    {
-      key: 'ports',
-      canShow: canShowPorts.value,
-      isActive: isShowingPorts.value,
-      label: t('basemapSwitcher.showPorts'),
-      hint: t('basemapSwitcher.showPortsHint'),
-      toggle: togglePorts,
-    },
-    {
-      key: 'routes',
-      canShow: canShowRoutes.value,
-      isActive: isShowingRoutes.value,
-      label: t('basemapSwitcher.showRoutes'),
-      hint: t('basemapSwitcher.showRoutesHint'),
-      toggle: toggleRoutes,
-    },
-    {
-      key: 'features',
-      canShow: canShowFeatures.value,
-      isActive: isShowingFeatures.value,
-      label: t('basemapSwitcher.showFeatures'),
-      hint: t('basemapSwitcher.showFeaturesHint'),
-      toggle: toggleFeatures,
-    },
-    {
-      key: 'coin-hoards',
-      canShow: canShowCoinHoards.value,
-      isActive: isShowingCoinHoards.value,
-      label: t('basemapSwitcher.showCoinHoards'),
-      hint: t('basemapSwitcher.showCoinHoardsHint'),
-      toggle: toggleCoinHoards,
-    },
-  ])
-
   const activeLabel = computed(
     () => availableViews.find((option) => option.value === view.value)?.label ?? 'Vestigian',
   )
@@ -314,8 +167,8 @@
       leave-to-class="opacity-0 translate-y-1"
     >
       <!--
-        Capped against the viewport rather than sized to the content: four
-        entries in two groups plus the frontier switch is taller than a phone in
+        Capped against the viewport rather than sized to the content: two
+        groups of sheets plus the period scrubber is taller than a phone in
         landscape, and a menu that runs off the bottom of the screen has no way
         back.
       -->
@@ -427,57 +280,6 @@
               aria-hidden="true"
             />
           </NuxtLink>
-        </div>
-
-        <!--
-          Not nested under either group above: neither switch here is a
-          reading of one particular sheet any more (see `overlayToggles`) —
-          both are plain overlays drawn above whichever basemap is showing.
-          A toggle whose own `canShow` is false (only ever the Tabula
-          Peutingeriana network, gated on the server's licence flag) is
-          skipped rather than shown disabled, matching how the group itself
-          used to be hidden outright.
-        -->
-        <div role="group" :aria-label="t('basemapSwitcher.groupOverlays')">
-          <p
-            class="eyebrow border-b border-paper-200 px-4 pb-1 pt-3 text-ink-500 dark:border-night-700 dark:text-paper-400"
-          >
-            {{ t('basemapSwitcher.groupOverlays') }}
-          </p>
-
-          <template v-for="entry in overlayToggles" :key="entry.key">
-            <button
-              v-if="entry.canShow"
-              type="button"
-              role="menuitemcheckbox"
-              :aria-checked="entry.isActive"
-              class="flex w-full items-center gap-3 border-b border-paper-200 px-4 py-3 text-left transition last:border-b-0 hover:bg-paper-200 dark:border-night-700 dark:hover:bg-night-700"
-              @click="entry.toggle"
-            >
-              <span
-                class="flex h-5 w-9 shrink-0 items-center rounded-full border transition"
-                :class="
-                  entry.isActive
-                    ? 'justify-end border-oxide-600 bg-oxide-600/20 dark:border-oxide-300'
-                    : 'justify-start border-paper-300 bg-paper-200 dark:border-night-600 dark:bg-night-800'
-                "
-                aria-hidden="true"
-              >
-                <span
-                  class="mx-0.5 size-4 rounded-full transition"
-                  :class="
-                    entry.isActive
-                      ? 'bg-oxide-600 dark:bg-oxide-300'
-                      : 'bg-paper-50 dark:bg-night-600'
-                  "
-                />
-              </span>
-              <span class="flex flex-col gap-0.5">
-                <span class="font-medium text-ink-900 dark:text-paper-100">{{ entry.label }}</span>
-                <span class="text-xs text-ink-500 dark:text-paper-400">{{ entry.hint }}</span>
-              </span>
-            </button>
-          </template>
         </div>
       </div>
     </Transition>

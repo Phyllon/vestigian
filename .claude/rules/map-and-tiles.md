@@ -9,13 +9,63 @@ paths:
   - 'app/pages/offline.vue'
 ---
 
+## Every overlay credits its own source, and shipped without doing so
+
+`attribution` is set on each overlay's own MapLibre source
+(`useLimesOverlay`, `useBattleOverlay`, `usePortOverlay`, `useRouteOverlay`,
+`useMinorFeatureOverlay`, `useCoinHoardOverlay`,
+`useTabulaPeutingerianaOverlay`), with the strings themselves in
+`useBasemapStyle.ts` beside the basemap credits that were already there.
+`AttributionControl` collects from the sources currently in the style, so a
+credit appears with its layer and leaves with it — which is the right
+granularity for switchable layers and is asserted end to end in
+`e2e/basemap.spec.ts` ("credits an overlay source while that overlay is
+switched on"), both directions.
+
+**None of them had one.** For four of these sources attribution is the
+licence condition itself — de Graauw's ports are CC BY 4.0, ORBIS CC BY 3.0,
+CHRR CC BY-NC-SA 4.0, AWMC's minor antiquities ODbL 1.0 — so this was a
+licence breach, not a polish item. It was invisible while the vici site
+overlay was on by default, because that source carried the one credit line
+(`useViewportTiles`) everything else was silently leaning on; switching it
+off (below) left a map with ports, routes and coin hoards drawn on it and
+"© OpenStreetMap contributors" as the entire credit. Wikidata's battles and
+OpenHistoricalMap's extents are CC0 and compel nothing; they are credited on
+the same terms anyway, for the reason `EMPIRE_EXTENT_ATTRIBUTION` gives.
+
+`LIMES_ATTRIBUTION` was folded into the antiquity sheet's `atlas` source and
+is now the frontier's own, self-contained: the frontier draws over basemaps
+that have no `atlas` source at all, so appending it there credited AWMC
+exactly where the credit was not needed and nowhere it was.
+
+## Overlays are their own control, not a group inside the basemap menu
+
+`OverlaySwitcher.vue` sits beside `BasemapSwitcher.vue` in the map's control
+row. The switches lived inside the basemap menu because they began as
+readings of one particular sheet; none of them is any more, so a reader
+looking for "show me the ports" was opening a menu named after the thing
+they were not changing and scrolling past two groups of radio buttons to
+reach a checkbox at the bottom of it. The closed button carries a count,
+because with the panel shut nothing else on screen says how many layers are
+drawn — several of them (routes at low zoom, coin hoards outside Italy) are
+easy to leave on without noticing.
+
+The period scrubber and the Tabula Peutingeriana viewer link stayed in the
+basemap switcher: the scrubber redraws the antiquity sheet itself and only
+exists while that sheet is showing, and the viewer link is another way of
+looking at the map rather than a layer over it. The i18n keys did **not**
+move — the toggles are still `basemapSwitcher.show*`, since renaming ~16
+keys across six catalogues buys nothing a reader can see.
+
+e2e reaches the toggles through `openOverlays`/`toggleOverlay`
+(`e2e/helpers/map.ts`), never through the basemap button.
+
 ## The vici-sourced site/tracing overlay is off by default
 
 `isShowingSites` (`useBasemapStyle.ts`) gates `OVERLAY_SOURCE_ID`
 (`useViewportTiles.ts`) — `false` on every fresh visit, not persisted, same
-as `isLimesActive`/`isBattlesActive`. Toggled from the "Overlays" group in
-`BasemapSwitcher.vue` ("Show sites"), same shape as the frontier and battle
-switches.
+as `isLimesActive`/`isBattlesActive`. Toggled from `OverlaySwitcher.vue`
+("Show sites"), same shape as the frontier and battle switches.
 
 **Why:** this was the one overlay with no on/off state — it requested tiles
 on every first visit regardless of what the reader actually wanted to look

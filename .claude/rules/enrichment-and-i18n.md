@@ -148,6 +148,18 @@ Garde` (the magazine), `Findspot` as `Zoeken` ("search") and `Trova il
 posto`, and `English` as `Changements climatiques`. 75 values across the five
 catalogues were corrected by hand when this was found.
 
+**The space before a placeholder was being eaten, in every locale.** The
+script splits a string around its placeholders and translates the segments
+between them, so "Scene {number}" goes to LibreTranslate as "Scene " — and
+LibreTranslate returns a trimmed string, so the reply joined back as
+"Szenerie{number}". Every locale carried it, and it was read as a
+translation-quality problem rather than a mechanical one for a while;
+"of {total}" arriving as "von{total}" is what made it obvious.
+`restoreSurroundingSpace` puts back whatever whitespace the source segment
+began or ended with, and trims whatever the translator added of its own
+accord. The fix is in the splice, not in the catalogues — the affected
+values were then re-translated normally.
+
 A frozen key is **not** forced to English: it keeps whatever the catalogue
 already holds and falls back to English only when the key is missing, so a
 considered translation (`Wikipédia`, `Kleinkastell`) is permanent and a newly
@@ -156,6 +168,17 @@ wordmarks are listed individually rather than freezing the namespace, so
 descriptive labels beside them (`schemes.dare`, "Digital Atlas of the Roman
 Empire") stay translatable — the cost is that **a new link scheme or site
 category has to be added to the list by hand**.
+
+The list has since grown a third category beyond wordmarks and site
+vocabulary: **monument and printing terms**. "Column Reliefs" came back as
+financial relief (`Kolomaflossingen`, `Allégements de colonnes`), and
+"plate" — a Cichorius Tafel — as a licence plate (`Kennnummer des
+Kennzeichens`, `Nummerplaat`) or a dinner plate (`Numero piatto`), so
+`columns.pager.*` and the monument titles are frozen too. So is "Overlay" in
+its cartographic sense, which came back as superimposition
+(`Überlagerungen`), covers (`Couvertures`) and surfaces (`Superficies`);
+each locale now carries its own mapping-software word for it — Calques,
+Capas, Livelli, Overlays.
 
 **The pre-commit hook keeps the five locales from drifting.** When
 `i18n/locales/en.json` is staged, `.husky/pre-commit` runs

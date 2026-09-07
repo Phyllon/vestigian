@@ -1,6 +1,6 @@
 import { expect, test } from './helpers/fixtures'
 import { watchForProblems } from './helpers/console'
-import { openMap, showSites, waitForTiles } from './helpers/map'
+import { openMap, openOverlays, showSites, toggleOverlay, waitForTiles } from './helpers/map'
 
 /**
  * The frontier is an overlay drawn above whichever basemap is showing, not a
@@ -18,24 +18,23 @@ const chooseBasemap = async (page: Parameters<typeof openMap>[0], label: string)
 }
 
 const toggleLimes = async (page: Parameters<typeof openMap>[0]): Promise<void> => {
-  await page.getByRole('button', { name: /^Basemap:/ }).click()
-  await page.getByRole('menuitemcheckbox', { name: /Follow the limes/ }).click()
-  await page.keyboard.press('Escape')
+  await toggleOverlay(page, 'Follow the limes')
 }
 
 test.describe('following the limes', () => {
-  test('is offered on any basemap, in the shared Overlays group', async ({ page }) => {
+  test('is offered on any basemap, from the overlay switcher', async ({ page }) => {
     await openMap(page)
-    await page.getByRole('button', { name: /^Basemap:/ }).click()
+    await openOverlays(page)
 
     // The default view is 'vestigian', a modern road map — the switch used to
-    // be hidden here entirely. It lives beside the Tabula Peutingeriana
-    // overlay toggle now, not nested under either basemap group.
-    const overlays = page.getByRole('group', { name: 'Overlays' })
+    // be hidden here entirely. It lives in the overlay switcher now, which is
+    // not tied to any one basemap at all.
+    const overlays = page.getByRole('menu', { name: 'Overlays' })
     await expect(overlays.getByRole('menuitemcheckbox', { name: /Follow the limes/ })).toBeVisible()
 
-    await page.getByRole('menuitemradio', { name: 'Antiquity (Barrington)' }).click()
-    await page.getByRole('button', { name: /^Basemap:/ }).click()
+    await page.keyboard.press('Escape')
+    await chooseBasemap(page, 'Antiquity (Barrington)')
+    await openOverlays(page)
     await expect(overlays.getByRole('menuitemcheckbox', { name: /Follow the limes/ })).toBeVisible()
   })
 

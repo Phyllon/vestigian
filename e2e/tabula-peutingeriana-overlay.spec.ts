@@ -1,5 +1,5 @@
 import { expect, test } from './helpers/fixtures'
-import { openMap } from './helpers/map'
+import { openMap, openOverlays } from './helpers/map'
 
 /**
  * The Tabula Peutingeriana network overlay (places and roads reconstructed
@@ -16,13 +16,13 @@ test.describe('the Tabula Peutingeriana network overlay', () => {
     page,
   }) => {
     await openMap(page)
-    await page.getByRole('button', { name: /^Basemap:/ }).click()
+    await openOverlays(page)
 
-    // The Overlays group itself is not gated on this flag — "Follow the
+    // The overlay switcher itself is not gated on this flag — "Follow the
     // limes" lives there too, and works on every basemap regardless of this
     // licence-driven gate — so only the Tabula Peutingeriana entry inside it
     // is asserted absent.
-    await expect(page.getByRole('group', { name: 'Overlays' })).toHaveCount(1)
+    await expect(page.getByRole('menu', { name: 'Overlays' })).toHaveCount(1)
     await expect(page.getByRole('menuitemcheckbox', { name: /Follow the limes/ })).toHaveCount(1)
     await expect(
       page.getByRole('menuitemcheckbox', { name: /Tabula Peutingeriana network/ }),
