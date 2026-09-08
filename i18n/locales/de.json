@@ -76,7 +76,7 @@
     "menuLabel": "Säulenreliefs",
     "trajan": {
       "tabLabel": "Trajanssäule",
-      "intro": "Conrad Cichorius 1896-1900 Fotoplatten, die Standard-Szene-für-Szene-Referenz für die Spalte - gespiegelt von Wikimedia Commons, Public Domain.",
+      "intro": "Conrad Cichorius' Fotoplatten von 1896-1900, die Standard-Szene-für-Szene-Referenz für die Säule, gespiegelt von Wikimedia Commons, gemeinfrei.",
       "loading": "Tafeln werden geladen…",
       "loadFailed": "Die Platten konnten nicht geladen werden. Versuchen Sie es gleich noch einmal.",
       "empty": "Es wurden noch keine Platten veröffentlicht.",
@@ -85,7 +85,7 @@
       "viewerLabel": "Deep-Zoom-Betrachter der Reliefstafeln der Trajanssäule"
     },
     "marcusAurelius": {
-      "tabLabel": "Kolumne von Marcus Aurelius",
+      "tabLabel": "Säule von Marcus Aurelius",
       "intro": "Petersen, Domaszewski & Calderinis 1896 Platten, digitalisiert von der Universitätsbibliothek Heidelberg und hier als Live-Tiefenzoom-Scan, gemeinfrei.",
       "viewerLabel": "Deep-Zoom-Viewer der Säule von Marcus Aurelius Platten",
       "volume": "Plattenvolumen",
@@ -391,7 +391,7 @@
     "minorsBody": "Vestigian richtet sich nicht an Kinder. Wenn Sie unter 16 Jahre alt sind, erstellen Sie bitte kein Konto ohne die Mitwirkung eines Elternteils oder Erziehungsberechtigten.",
     "changesHeading": "Änderungen",
     "changesBody": "Diese Seite wird aktualisiert, wenn sich das, was der Dienst tatsächlich tut, ändert. Es spiegelt die aktuelle Version der laufenden Anwendung wider.",
-    "recipientColumnReliefs": "Universitätsbibliothek Heidelberg (EU): Die Anzeige der Spalte von Marcus Aurelius-Platten wird von unserem Server bedient, der die eigene Digitalisierung dieser Bibliothek weiterleitet, damit Ihre IP-Adresse nicht direkt mit ihnen geteilt wird."
+    "recipientColumnReliefs": "Universitätsbibliothek Heidelberg (EU): Die Anzeige der Platten der Säule von Marcus Aurelius wird von unserem Server bedient, der die eigene Digitalisierung dieser Bibliothek weiterleitet, damit Ihre IP-Adresse nicht direkt mit ihnen geteilt wird."
   },
   "geolocate": {
     "locationBlocked": "Standort blockiert",
