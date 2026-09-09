@@ -4,6 +4,16 @@ An atlas of the traces antiquity left behind — settlements, roads, fortificati
 
 Built on data contributed to [Vici.org](https://vici.org) by René Voorburg and its contributors, reused under CC BY-SA. Vestigian is an independent reimplementation, not a fork of the vici.org codebase.
 
+## Further documentation
+
+This file covers what a new contributor needs first. Deeper, topic-scoped detail lives in:
+
+- **`CLAUDE.md`** — the full current project layout, code conventions, governance and security invariants; the source of truth kept up to date as the project changes.
+- **`.claude/rules/*.md`** — one file per area (import pipeline, antiquity basemaps, i18n, security, deployment, observability, and more), loaded only when that area is touched.
+- **[`documents/scripts.md`](documents/scripts.md)** — every script this project wrote itself: what it does and how to run it.
+- **[`documents/architecture-overview.md`](documents/architecture-overview.md)** — the system shape and data flow.
+- **[`documents/runbook_prod.deployment.md`](documents/runbook_prod.deployment.md)** — the production deployment runbook.
+
 ## Getting started
 
 ### Prerequisites
@@ -57,7 +67,11 @@ pnpm dev
 
 Four resumable steps rather than one command, because the middle of it is a
 multi-hour crawl of someone else's server. Run them in order; each one is safe
-to re-run and picks up where it stopped.
+to re-run and picks up where it stopped. Beyond vici.org itself, the atlas
+also carries the limes frontier, Barrington-style antiquity cartography,
+Trajan's Column, the Tabula Peutingeriana, ancient ports, ORBIS routes,
+battles and more — each its own numbered, independently re-runnable import
+script. **Full list, sources and licences: [`documents/scripts.md`](documents/scripts.md).**
 
 ```bash
 # The scratch MariaDB is NOT part of pnpm stack:up — the dumps are read once
@@ -122,18 +136,29 @@ Signup is protected by a self-hosted ALTCHA proof-of-work challenge, a honeypot 
 
 ```
 app/
-  components/     map · site · contribute · auth · moderation · ui
-  composables/    map · data · auth · ui   (unit tests in __test__/)
+  components/     map · site · tracing · contribute · auth · moderation ·
+                  limes · notebook · columns · ui
+  composables/    map · data · auth · user · limes · ui   (unit tests in __test__/)
   layouts/ pages/ middleware/
 server/
-  api/            tiles · sites · auth · contributions · moderation · health
+  api/            tiles · sites · tracings · contributions · moderation ·
+                  auth · me · contributors · limes · images · health
   database/       drizzle schema and migrations
-  utils/          mvt · trust · permissions · ratelimit · images · argon (tests in __test__/)
+  utils/          mvt · trust · permissions · ratelimit · images · argon ·
+                  revisions · notifications · enrichment (tests in __test__/)
 shared/types/     the vocabulary both sides share
-scripts/import/   the four-stage vici.org import
-scripts/          snapshot-database · reconcile-images · warm-tiles
-docker/           Dockerfile, dev and production compose, Traefik
+scripts/import/   the vici.org import plus every antiquity/reference overlay
+scripts/          snapshot-database · reconcile-images · warm-tiles · setup.sh
+docker/           Dockerfile, dev and production compose, Traefik, observability
 ```
+
+The full, current layout — every folder, every page and API route — lives in
+`CLAUDE.md`, kept in sync as the source of truth for anyone (or any agent)
+picking the project up; this section stays a sketch. Component/script
+detail beyond the sketch above: **[`documents/scripts.md`](documents/scripts.md)**
+for every script this project wrote itself, and
+**[`documents/architecture-overview.md`](documents/architecture-overview.md)**
+for the data-flow view.
 
 Components put `<script setup>` before `<template>`, use inline Tailwind, and keep lifecycle hooks at the bottom of the script block.
 
@@ -370,14 +395,12 @@ The queue supports multi-select with publish-all and reject-all, capped at fifty
 
 ## What is not built yet
 
-Honest list, so nothing here is a surprise:
+Honest list, so nothing here is a surprise — kept in sync with CLAUDE.md's
+own "Not built" section, which is the authoritative copy:
 
 - **Purging withdrawn images** from object storage. Withdrawal is reversible by design; there is no operation that actually deletes bytes.
-- **Notifications.** A contributor learns their edit was accepted by looking, not by being told.
+- **Notifications beyond mail.** A review decision and a trust change reach the person by email, and it can be turned off from `/settings` — but a role change and a revert still send nothing, and there is nothing in the interface itself.
 - **Full-text search across descriptions.** Search covers titles and summaries only.
-- **RDF / Pelagios output.** The GeoJSON feed exists; linked data does not.
-- **Image reordering and deletion** — `sort_order` exists and is unused.
-- **Offline tile caching.** The app is installable; it does not work without signal.
+- **RDF / Pelagios linked data.** The GeoJSON feed at `/api/data/sites.geojson` exists; linked data does not.
+- **Full i18n component coverage.** See "i18n" in CLAUDE.md for what is and is not migrated.
 - **Off-box backups.** `docker/backup.sh` dumps Postgres nightly to a volume on the same VPS, and `pnpm db:snapshot` writes beside the database it copies. Neither leaves the machine yet.
-
-### buy domain for Lettermint mail testing
