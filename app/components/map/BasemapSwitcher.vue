@@ -251,35 +251,6 @@
               {{ t('basemapSwitcher.periodApproximate') }}
             </p>
           </div>
-
-          <!--
-            Not a radio: the Tabula Peutingeriana is a schematic route
-            diagram, not a georeferenced sheet, so it has no state to select
-            here — it leaves the map for its own deep-zoom viewer instead.
-            `role="menuitem"`, the plain-action role, rather than the radio or
-            checkbox roles above it.
-          -->
-          <NuxtLink
-            v-if="group === 'antiquity'"
-            to="/tabula-peutingeriana"
-            role="menuitem"
-            class="flex w-full items-center justify-between gap-3 border-t border-paper-200 px-4 py-3 text-left transition hover:bg-paper-200 dark:border-night-700 dark:hover:bg-night-700"
-            @click="close"
-          >
-            <span class="flex flex-col gap-0.5">
-              <span class="font-medium text-ink-900 dark:text-paper-100">
-                {{ t('basemapSwitcher.tabulaPeutingeriana') }}
-              </span>
-              <span class="text-xs text-ink-500 dark:text-paper-400">
-                {{ t('basemapSwitcher.tabulaPeutingerianaHint') }}
-              </span>
-            </span>
-            <UIcon
-              name="i-lucide-arrow-up-right"
-              class="size-4 shrink-0 text-ink-500 dark:text-paper-400"
-              aria-hidden="true"
-            />
-          </NuxtLink>
         </div>
       </div>
     </Transition>

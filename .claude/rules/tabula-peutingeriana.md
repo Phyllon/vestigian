@@ -9,8 +9,14 @@ paths:
 ## The Tabula Peutingeriana — a viewer, not a sixth basemap
 
 `/tabula-peutingeriana` is a standalone IIIF deep-zoom page (OpenSeadragon,
-New BSD), reached from a link inside the basemap switcher's antiquity group —
-deliberately not a fifth `BasemapView`. The manuscript is a schematic route
+New BSD), reached from the app menu's Reference group (`AppMenu.vue`,
+alongside Column Reliefs) — deliberately not a fifth `BasemapView`. It used
+to sit as a link inside the basemap switcher's antiquity group instead, next
+to the two real sheets; moved out on request, since a link to a different
+page was the only non-`menuitemradio` entry in a menu otherwise entirely
+about choosing the active sheet, and read as one more basemap option despite
+the switcher's own docstring already explaining it wasn't. The manuscript is
+a schematic route
 diagram, 113,664×6,144px at roughly 18.5:1, not a georeferenced map: draping
 it as a MapLibre raster source the way DARE or the satellite view are would
 misplace every road relative to the real coordinates it would sit beside. It

@@ -46,7 +46,6 @@
     "followLimes": "Follow the limes",
     "followLimesHint": "The frontier, its walls and its forts",
     "tabulaPeutingeriana": "Tabula Peutingeriana",
-    "tabulaPeutingerianaHint": "The Roman road diagram, not a map — opens its own viewer",
     "groupOverlays": "Overlays",
     "tabulaPeutingerianaOverlay": "Tabula Peutingeriana network",
     "tabulaPeutingerianaOverlayHint": "Places and roads from the manuscript, at their real coordinates",
@@ -525,6 +524,10 @@
   "portPopup": {
     "viewOnPleiades": "View on Pleiades",
     "viewOnWikipedia": "View on Wikipedia"
+  },
+  "atlasPlacePopup": {
+    "viewOnPleiades": "View on Pleiades",
+    "locationApproximate": "Location is approximate"
   },
   "routePopup": {
     "road": "Road",

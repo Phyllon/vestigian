@@ -18,6 +18,11 @@
     [
       { type: 'label' as const, label: t('layout.menuGroupReference') },
       { label: t('columns.menuLabel'), icon: 'i-lucide-scroll', to: '/columns' },
+      {
+        label: t('basemapSwitcher.tabulaPeutingeriana'),
+        icon: 'i-lucide-map',
+        to: '/tabula-peutingeriana',
+      },
     ],
     [
       { type: 'label' as const, label: t('layout.menuGroupLegal') },

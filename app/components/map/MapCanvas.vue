@@ -68,6 +68,7 @@
     keepNotebookThroughStyleChanges,
     refreshNotebookOverlay,
   } = useNotebookOverlay()
+  const { attachAtlasPlaceOverlay } = useAtlasPlaceOverlay()
   const {
     isActive: isShowingTabulaPeutingerianaOverlay,
     load: loadTabulaPeutingerianaOverlay,
@@ -265,6 +266,9 @@
       attachOverlay(instance)
       keepOverlayThroughStyleChanges(instance)
       refreshLimesDimming(instance)
+      // No `keep*ThroughStyleChanges` companion — see the composable's own
+      // docstring for why a delegated listener needs registering only once.
+      attachAtlasPlaceOverlay(instance)
       // After the shared overlay, so the reader's rings draw above the markers
       // they annotate rather than under them.
       attachNotebookOverlay(instance)

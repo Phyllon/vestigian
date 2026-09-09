@@ -296,8 +296,34 @@
   color: var(--accent);
 }
 
+/*
+ * Reported: the "×" only closed a popup when clicked "beside the icon", not on
+ * the icon itself. Tailwind's preflight resets every `button` to `padding: 0`
+ * (confirmed live — `getComputedStyle` on the real element measured a 7.6px by
+ * 18.8px hit target), and `maplibregl-popup-close-button` in `maplibre-gl.css`
+ * sets no width, height or padding of its own, relying entirely on the
+ * browser's UA default button padding to give the glyph room — which Tailwind
+ * had already stripped. A real click aimed at the visible × character was
+ * landing on the map behind the popup, which closes it too
+ * (`closeOnClick: true`, the `Popup` default), so it looked like closing
+ * worked "beside" the button rather than on it. Given an explicit square
+ * target instead of trusting the UA default.
+ */
 .maplibregl-popup-close-button {
+  display: grid !important;
+  place-items: center;
+  width: 1.75rem !important;
+  height: 1.75rem !important;
+  padding: 0 !important;
+  font-size: 1rem !important;
+  line-height: 1 !important;
   color: var(--text-muted) !important;
+  border-radius: var(--radius-notebook) !important;
+}
+
+.maplibregl-popup-close-button:hover {
+  background-color: var(--surface-sunken) !important;
+  color: var(--text-strong) !important;
 }
 
 .maplibregl-popup-tip {

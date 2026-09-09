@@ -177,6 +177,10 @@ const ICON_DISPLAY_PIXELS = 23
 const ICON_PIXEL_RATIO = 2
 const ICON_RASTER_PIXELS = ICON_DISPLAY_PIXELS * ICON_PIXEL_RATIO
 
+/** Width and colour for the halo drawn behind a reference mark on DARE/satellite, in 24-unit space. */
+const REFERENCE_HALO_WIDTH = 3.2
+const REFERENCE_HALO_COLOUR = 'rgba(250, 247, 239, 0.85)'
+
 export interface SiteIconPalette {
   /** Line work for most categories. */
   ink: string
@@ -253,8 +257,16 @@ const rasteriseIcon = (request: IconRasterRequest): ImageData | null => {
 
     if (request.reference && request.palette.haloOnRaster) {
       context.lineJoin = 'round'
-      context.strokeStyle = 'rgba(250, 247, 239, 0.85)'
-      context.lineWidth = 26
+      context.strokeStyle = REFERENCE_HALO_COLOUR
+      // `context.lineWidth` is read in the *native* 512-unit game-icon space
+      // this block is scaled into, not the 24-unit space every other glyph
+      // draws in — a width of `REFERENCE_HALO_WIDTH` here would come out
+      // `GAME_ICON_SCALE` times thinner once rendered (was set to a flat
+      // `26`, rendering under 1px on screen — invisible in practice, which
+      // is exactly the "still bad on DARE/satellite" report). Dividing
+      // undoes that compounding so the halo reads the same width as the
+      // outline family's below, confirmed by comparing rendered pixel widths.
+      context.lineWidth = REFERENCE_HALO_WIDTH / GAME_ICON_SCALE
       context.stroke(path)
     }
 
@@ -265,8 +277,8 @@ const rasteriseIcon = (request: IconRasterRequest): ImageData | null => {
   }
 
   if (request.reference && request.palette.haloOnRaster) {
-    context.strokeStyle = 'rgba(250, 247, 239, 0.85)'
-    context.lineWidth = 3.2
+    context.strokeStyle = REFERENCE_HALO_COLOUR
+    context.lineWidth = REFERENCE_HALO_WIDTH
     context.stroke(path)
   }
 

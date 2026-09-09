@@ -41,7 +41,6 @@
     "followLimes": "Dem Limes folgen",
     "followLimesHint": "Die Grenze, ihre Mauern und ihre Festungen",
     "tabulaPeutingeriana": "Tabula Peutingeriana",
-    "tabulaPeutingerianaHint": "Das römische Straßendiagramm, keine Karte - öffnet seinen eigenen Betrachter",
     "groupOverlays": "Overlays",
     "tabulaPeutingerianaOverlay": "Netz Tabula Peutingeriana",
     "tabulaPeutingerianaOverlayHint": "Orte und Straßen aus dem Manuskript, an ihren wirklichen Koordinaten",
@@ -514,6 +513,10 @@
   "portPopup": {
     "viewOnPleiades": "Auf Pleiades ansehen",
     "viewOnWikipedia": "Auf Wikipedia ansehen"
+  },
+  "atlasPlacePopup": {
+    "viewOnPleiades": "Auf Pleiades ansehen",
+    "locationApproximate": "Standort ist ungefähr"
   },
   "routePopup": {
     "road": "Straße",

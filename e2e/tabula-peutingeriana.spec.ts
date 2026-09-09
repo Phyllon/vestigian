@@ -8,19 +8,21 @@ import { openMap, waitForMapReady } from './helpers/map'
  * never draped under real coordinates. This suite covers the two failure
  * classes a raster basemap test in this project always covers (CSP refusal
  * of the third-party origin, the tile request never firing at all) plus the
- * entry point from the basemap switcher.
+ * entry point from the app menu's Reference group, alongside Column Reliefs
+ * — it moved out of the basemap switcher entirely since it isn't a sheet.
  */
 test.describe('the Tabula Peutingeriana viewer', () => {
-  test('is reachable from the basemap switcher, not offered as a sheet', async ({ page }) => {
+  test('is reachable from the app menu, not offered as a basemap sheet', async ({ page }) => {
     await openMap(page)
     await page.getByRole('button', { name: /^Basemap:/ }).click()
 
     const antiquity = page.getByRole('group', { name: 'Antiquity' })
-    // Still exactly two radios in the group — the entry point is a link, not
-    // a third sheet to select.
     await expect(antiquity.getByRole('menuitemradio')).toHaveCount(2)
+    await expect(antiquity.getByRole('menuitem', { name: /Tabula Peutingeriana/ })).toHaveCount(0)
+    await page.keyboard.press('Escape')
 
-    const link = antiquity.getByRole('menuitem', { name: /Tabula Peutingeriana/ })
+    await page.getByRole('button', { name: 'Menu' }).click()
+    const link = page.getByRole('menuitem', { name: /Tabula Peutingeriana/ })
     await expect(link).toBeVisible()
     await link.click()
 

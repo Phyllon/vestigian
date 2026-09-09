@@ -106,6 +106,70 @@ list whenever `view !== 'antiquity-awmc'` while "Follow the limes" is on,
 rather than leaving a reader to notice the marks vanish with no explanation
 when they switch basemaps.
 
+## The Barrington sheet's own places (`atlas-places`) were never clickable at all
+
+Reported as two things at once — "get more information on the Barrington
+map's default sites" and, separately, "differentiate clickable icons from
+non-clickable ones" — that turned out to be the same bug. The legend already
+promises `legend.tapForDetails` ("Tap or click a mark on the map to open what
+is recorded about it") for **every** mark, disc or pencil-style reference
+alike, and every other reference layer (battles, ports, minor features, coin
+hoards) really does open a popup on click. `atlas-places` — Pleiades'
+~38,000 places drawn straight into the Barrington style by
+`useBasemapStyle.ts` (`buildAtlasStyle`, not through the toggleable-overlay
+pattern the others use) — was the one silent exception: no click handler was
+ever registered for it anywhere in the codebase, confirmed by grepping every
+`on('click', ...)` registration in `app/composables/map/`. The mark looked
+exactly like a clickable reference glyph and did nothing.
+
+Fixed with `useAtlasPlaceOverlay.ts`, attached once from `MapCanvas.vue`'s
+`load` handler with no `attach`/`detach`/`keep*ThroughStyleChanges` trio
+unlike every other overlay in this file: there is no source or layer to add
+or remove here, only a delegated `map.on('click'|'mouseenter'|'mouseleave',
+layerId, ...)` registration, and MapLibre's delegated listener filters by
+`getLayer(layerId)` **at event time**, not at registration time (read
+straight out of `maplibre-gl`'s own `_createDelegatedListener` before relying
+on it) — so registering once, regardless of which basemap is active, is
+correct and complete. It quietly does nothing on every basemap but
+Barrington and starts firing again the moment the reader switches back.
+
+**Two layer ids, not one** — `ATLAS_PLACE_LAYER_IDS = ['atlas-places',
+'limes-installations']`. The second is the military subset of the first,
+promoted to its own layer with the frontier's own plan marks while "Follow
+the limes" is on (`useBasemapStyle.ts`'s `'limes-installations'` layer,
+same `atlas`/`places` source and property shape). Missing it would have
+made every fort and watchtower on the frontier stop responding to a tap
+the moment the switch was flipped on, while everything drawn the identical
+pencil-and-no-disc way elsewhere on the sheet kept working — the exact
+inconsistency this fix exists to close, not a second bug.
+
+**The tile SQL was also missing half its own columns.** `antiquity_places`
+already carries `description`, `feature_types`, `min_year`, `max_year` and
+`location_precision` — none of them were in `buildAtlasTileSql`'s `places`
+`SELECT` before this, only `id`/`pleiades_id`/`title`/`category`/`military`/
+`mark`. Added all five (`server/utils/atlas.ts`), so the popup can show a
+category or raw feature type, a date range (via `formatFrontierYears`, the
+same BC/AD helper the limes panel already uses), a truncated description
+(capped at 280 characters client-side — some Pleiades entries run past
+1,300, most average 90, checked against the live table rather than
+guessed), a "location is approximate" note when Pleiades' own precision is
+`rough`, and a "View on Pleiades ↗" link. **Changing the tile SQL without a
+schema migration still needed a cache bust**: the atlas tile cache is keyed
+by a version counter (`vestigian:atlas-version`), not by query content, so
+already-cached tiles kept serving the old five-column shape until every
+`atlas:v*` key was cleared by hand in Redis/Valkey — a code-only change to
+what a tile selects is invisible to that counter, and needs the same manual
+cache flush an operator would do after this kind of deploy.
+
+With this fix, every icon on the main map now genuinely does what
+`legend.tapForDetails` already claimed — the "differentiate clickable from
+non-clickable" report and the "more information on Barrington's sites"
+report were the same missing wire, not two separate features. The only
+non-clickable marker left is the Tabula Peutingeriana network overlay's
+place dots (`useTabulaPeutingerianaOverlay.ts`) — a different page entirely
+(`/tabula-peutingeriana`, its own IIIF deep-zoom viewer), not something the
+map's own legend or click-affordance promises anything about.
+
 ## Marker glyphs are Lucide paths, not hand-drawn — one exception, plan-view fort marks
 
 `useSiteIcons.ts`'s category, battle and port glyphs were originally drawn by
@@ -230,6 +294,24 @@ image registry, which `setStyle` wipes on every basemap switch — DARE ⇄
 satellite ⇄ anything else always re-registers with the current `haloOnRaster`
 value, the same mechanism `sheetTone` already relies on.
 
+**The halo was real but nearly invisible for every filled game-icons glyph**
+(settlement, production, other, cemetery, bridge), reported again after the
+fix above shipped — "icon contrast is still bad on satellite and DARE." The
+filled-icon branch of `rasteriseIcon` draws inside a second, nested
+transform (`translate(GAME_ICON_OFFSET)` then `scale(GAME_ICON_SCALE,
+GAME_ICON_SCALE)`, `GAME_ICON_SCALE = 18/512 ≈ 0.0352`) so the 512-unit
+game-icons path fits the 24-unit space every other glyph draws in — and the
+halo's `lineWidth` was set to a flat `26` measured in that same doubly-scaled
+space. Once rendered, that line width is `GAME_ICON_SCALE` times thinner
+than it reads on paper: worked out and confirmed with a standalone canvas
+comparison (not guessed), `26` in native units came out under 1 real screen
+pixel, next to ~3px for the outline family's halo at its own fixed `3.2`.
+Fixed by keeping one shared `REFERENCE_HALO_WIDTH` constant defined in the
+same 24-unit space the outline halo already uses, and dividing by
+`GAME_ICON_SCALE` only for the filled branch (`REFERENCE_HALO_WIDTH /
+GAME_ICON_SCALE`) so both families render the same visual thickness —
+confirmed with the same standalone canvas rendering both before and after.
+
 ## Overlay popups are a themed card, not text painted on the map
 
 Reported directly: popup text was hard to read — dark-mode text over the
@@ -251,6 +333,22 @@ reported cases (dark-on-light-sheet, light-on-dark-photo) because the card's
 own background no longer depends on the basemap at all. `strong`/`a`/the
 close button get their own token-based colours (`--text-strong`, `--accent`,
 `--text-muted`) rather than inheriting whatever `currentColor` resolves to.
+
+**The close button's own hit target was nearly invisible to a pointer, not
+just to the eye.** Reported as "the × doesn't close it, only clicking beside
+the icon does" — confirmed live with `getComputedStyle`: the real element
+measured **7.6px by 18.8px**, and `padding: 0px`. `maplibre-gl.css`'s
+`.maplibregl-popup-close-button` sets no width, height or padding of its
+own, relying entirely on the browser's UA default button padding to give the
+"×" glyph room to be clicked — and Tailwind's preflight resets every
+`button` to zero padding project-wide, stripping exactly that. A real click
+aimed at the visible glyph was landing on the map behind the popup instead,
+which closes it too (`closeOnClick: true`, the `Popup` default), so closing
+looked like it only worked "beside" the button. Fixed by giving the button
+an explicit `1.75rem` square target, centred content, and a hover state —
+verified by re-measuring the computed style (**28px by 28px** after the
+fix) and by clicking 3px off-centre in a real page and confirming the popup
+still closes.
 
 ## Cache invalidation is version counters, not deletion — nothing to run by hand
 

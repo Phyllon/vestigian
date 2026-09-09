@@ -41,7 +41,6 @@
     "followLimes": "Volg de limes",
     "followLimesHint": "De grens, de muren en de forten",
     "tabulaPeutingeriana": "Tabula Peutingeriana",
-    "tabulaPeutingerianaHint": "Het Romeinse wegdiagram, geen kaart opent zijn eigen kijker",
     "groupOverlays": "Overlays",
     "tabulaPeutingerianaOverlay": "Tabula Peutingeriana netwerk",
     "tabulaPeutingerianaOverlayHint": "Plaatsen en wegen uit het manuscript, op hun echte coördinaten",
@@ -514,6 +513,10 @@
   "portPopup": {
     "viewOnPleiades": "Bekijk op Pleiades",
     "viewOnWikipedia": "Bekijk op Wikipedia"
+  },
+  "atlasPlacePopup": {
+    "viewOnPleiades": "Bekijk op Pleiades",
+    "locationApproximate": "Locatie is bij benadering"
   },
   "routePopup": {
     "road": "Weg",

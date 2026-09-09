@@ -41,7 +41,6 @@
     "followLimes": "Seguir el limes",
     "followLimesHint": "La frontera, sus paredes y sus fuertes",
     "tabulaPeutingeriana": "Tabula Peutingeriana",
-    "tabulaPeutingerianaHint": "El diagrama de la carretera romana, no un mapa, abre su propio visor",
     "groupOverlays": "Capas",
     "tabulaPeutingerianaOverlay": "Tabula Peutingeriana red",
     "tabulaPeutingerianaOverlayHint": "Lugares y caminos del manuscrito, en sus coordenadas reales",
@@ -514,6 +513,10 @@
   "portPopup": {
     "viewOnPleiades": "Ver en Pleiades",
     "viewOnWikipedia": "Ver en Wikipedia"
+  },
+  "atlasPlacePopup": {
+    "viewOnPleiades": "Ver en Pleiades",
+    "locationApproximate": "Ubicación aproximada"
   },
   "routePopup": {
     "road": "Calzada",

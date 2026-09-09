@@ -190,6 +190,11 @@ export const buildAtlasTileSql = (query: AtlasTileQuery): string => {
         antiquity_places.pleiades_id,
         antiquity_places.title,
         antiquity_places.category::text AS category,
+        antiquity_places.description,
+        antiquity_places.feature_types,
+        antiquity_places.min_year,
+        antiquity_places.max_year,
+        antiquity_places.location_precision,
         (antiquity_places.feature_types ~ '${buildMilitaryFeatureTypePattern()}') AS military,
         ${buildPleiadesMarkSql('antiquity_places.feature_types')} AS mark,
         ST_AsMVTGeom(

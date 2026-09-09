@@ -41,7 +41,6 @@
     "followLimes": "Seguire il limes",
     "followLimesHint": "La frontiera, le sue mura e i suoi forti",
     "tabulaPeutingeriana": "Tabula Peutingeriana",
-    "tabulaPeutingerianaHint": "Il diagramma stradale romano, non una mappa — apre il proprio spettatore",
     "groupOverlays": "Livelli",
     "tabulaPeutingerianaOverlay": "Rete Tabula Peutingeriana",
     "tabulaPeutingerianaOverlayHint": "Luoghi e strade dal manoscritto, alle loro vere coordinate",
@@ -514,6 +513,10 @@
   "portPopup": {
     "viewOnPleiades": "Vedi su Pleiades",
     "viewOnWikipedia": "Vedi su Wikipedia"
+  },
+  "atlasPlacePopup": {
+    "viewOnPleiades": "Vedi su Pleiades",
+    "locationApproximate": "La posizione è approssimativa"
   },
   "routePopup": {
     "road": "Strada",
