@@ -107,6 +107,38 @@ looks identical to a dead service) with its own 5s timeout before starting.
 Without it a dead arbiter (below) hangs the whole run instead of failing fast
 with a message that says what to do.
 
+**No browser-language auto-detection — every visitor starts on English,
+on request.** `nuxt.config.ts`'s `i18n` block used to carry a
+`detectBrowserLanguage` option that switched a first-time visitor straight to
+their browser's `navigator.language`, before they had ever opened the
+language switcher. Since every non-English catalogue here is a machine
+translation that gets a manual audit only occasionally (see the translation-bug
+history below), that handed a first-time visitor the least-checked text on the
+site as their only view, with nothing telling them a more reliable one exists.
+Removed outright, not reconfigured — `defaultLocale: 'en'` alone now decides
+every fresh visit, and switching is still one click away in
+`LanguageSwitcher.vue`, still remembered in the same `vestigian-locale`
+cookie once chosen. **A running dev server does not pick this up on its
+own** — `@nuxtjs/i18n`'s config is read at Nuxt's build/init step, and unlike
+a plain `.vue` file edit (which HMRs immediately) a change to the `i18n` block
+in `nuxt.config.ts` needs the dev server actually restarted before a fresh
+visitor stops seeing the old `i18n_redirected` cookie and browser-language
+redirect; confirmed live — a long-running dev server kept issuing the old
+cookie after this edit until restarted.
+
+`LanguageNotice.vue` (`app/components/ui/`, mounted from both `default.vue`
+and `reading.vue`, just after the skip link) is the other half of the same
+decision: a small dismissible notice, shown only while a non-English locale is
+active, saying English is the version to rely on. Dismissal is remembered in
+`localStorage` **keyed by locale**, read only in `onMounted` — reading it
+inside a `useState` factory is the exact bug `useOfflineAreas` hit once
+already (see `.claude/rules/map-and-tiles.md`'s offline-maps section): the
+factory runs during SSR, where `localStorage` doesn't exist, and Nuxt then
+hydrates the client from whatever the factory returned on the server rather
+than re-running it. `settings.languageHelp` carries the same message as a
+field caption under the language picker in `/settings`, for a signed-in
+reader who goes looking for it directly rather than meeting it as a banner.
+
 **LibreTranslate's gunicorn arbiter has been observed dropping to zero
 workers, twice, and `init: true` alone does not fix it.** Its own entrypoint
 runs gunicorn with `--max-requests 250`; the burst of small requests
@@ -208,6 +240,16 @@ That audit went well beyond "limes" and corrected roughly 600 translations acros
 - **Register drift within a single file** — most locales settle on one formality level (e.g. Dutch informal "je", French formal "vous") but individual keys or whole sections (commonly `settings.twoFactor.*`, translated in a separate batch) slip into the other register, including switching pronoun mid-sentence in the same string.
 
 None of this is fixable by freezing more keys — freezing only helps proper nouns and short standalone labels a general model reliably mis-senses. The rest is ordinary translation quality drift from iterative machine-translation batches never getting a full human read-through end to end. There is no automated guard for it; this was a manual audit and will need to be repeated periodically, not something the pre-commit pipeline below catches.
+
+**A follow-up pass (2026-09-08), after the overlay work for ports/routes/AWMC minor features/coin hoards/empire extents added roughly 90 new keys, found the same class of bug recurring, plus one new one specific to German:**
+
+- **"Site" (an archaeological record) mistranslated as "Website" (a web page) — German only, 13 keys.** `siteEditorForm.saveSite` had already correctly settled on "Fundort", but `recordsBody`, `contributionBody`, `siteDetail.notFound`, `siteEditorForm.{editTitle,recordTitle,nameTooShort,whatChangedHint}`, `siteGalleryManager.defaultAlt`, `contributionPanel.{tapTheMap,sitePublished}`, `notebook.readyBody` and `siteEditPage.{notFound,positionHint}` all used "Website" instead — a false friend a general translation model reaches for by default, since German genuinely does borrow "Website" for "web page" and has no cognate for "archaeological site". Fixed to "Fundort" (with correct case/gender agreement per string). One occurrence of "Website" is correct and left alone: `privacy.recipientBasemap` is actually about third-party web pages that embed a map, not about a Vestigian site record — check the English source's sense before treating every hit as the bug.
+- **"Blanket [licence]" (idiomatic — "overarching") translated as a literal bedding blanket** in `licence.dareBody`, across fr ("couverture"), it ("coperta") and nl ("deken") — all three read as "the CC BY-SA bedspread cannot override this". Fixed to each language's own "general licence" phrasing. Spanish had independently mistranslated the same sentence's "blanket" as "manta" (also literally a blanket) and additionally had a stray leading space inside a parenthetical citation — both fixed in the same string.
+- **The map-legend toggle ("Key" / "Hide key") translated as a literal lock-and-door key** in all five locales — German "Schlüssel", French "Clé", Spanish "Llave"/"Clave", Italian "Chiave", Dutch "Sleutel" — rather than the cartographic sense (German "Legende", French "Légende", Spanish "Leyenda", Italian/Dutch "Legenda"). `legend.title` itself ("What the marks mean") was translated correctly in every locale since it avoids the ambiguous word entirely; only the two short button labels hit the ambiguity, the same pattern as the "limes" and "site" bugs above — a word with two senses is safe in a full sentence and wrong in a one- or two-word label.
+- **Italian-specific: singular for a plural section heading, and an adjective-agreement error.** `legend.battlesTitle` read "Battaglia" ("Battle") instead of "Battaglie" for a heading grouping many battle marks; `legend.coinHoardsTitle` read "Ripostigli monetali" where the correct plural adjective is "monetari" — inconsistent with `licence.overlayCoinHoards`, translated correctly in the same file.
+- **`siteExternalLinks.schemes.pecs` ("Princeton Encyclopedia of Classical Sites") translated in de/it/nl but left as English in fr/es** — the sibling keys `dare` and `edh` (same shape: an English institution name with a descriptive rather than proper title) are translated in all five, so the inconsistency was the bug, not either direction on its own. Brought fr/es in line with the other three.
+
+Structural checks (key parity, placeholder parity) pass clean on all five locales as of this pass — every finding above required reading the actual rendered string against `en.json` side by side, which is also why this stays a periodic manual audit rather than something scriptable.
 
 **Translation-engine alternatives were investigated (2026-09-08) and rejected — LibreTranslate stays.** Four self-hosted, open-source alternatives were built and benchmarked against the live dev LibreTranslate instance, not just read about:
 

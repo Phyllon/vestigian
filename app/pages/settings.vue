@@ -314,7 +314,7 @@
         <UTextarea id="settings-bio" v-model="bio" :rows="3" maxlength="280" class="w-full" />
       </UFormField>
 
-      <UFormField :label="t('settings.language')">
+      <UFormField :label="t('settings.language')" :help="t('settings.languageHelp')">
         <USelectMenu
           :model-value="locale"
           :items="availableLocales.map((entry) => ({ label: entry.name, value: entry.code }))"

@@ -13,6 +13,8 @@
       {{ t('layout.skipToContent') }}
     </a>
 
+    <UiLanguageNotice />
+
     <header class="border-b border-paper-200 dark:border-night-700">
       <div class="mx-auto flex max-w-3xl items-center gap-3 px-5 py-3">
         <UiAppMenu />

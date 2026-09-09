@@ -28,6 +28,8 @@
       {{ t('layout.skipToMap') }}
     </a>
 
+    <UiLanguageNotice />
+
     <header
       class="z-40 flex shrink-0 items-center gap-3 border-b border-paper-200 bg-paper-50 px-4 py-2 dark:border-night-700 dark:bg-night-800"
     >

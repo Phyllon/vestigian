@@ -99,6 +99,18 @@ export default defineNuxtConfig({
    * implied by `lang` — which language a crawler is seeing, since Google
    * will only ever index whichever locale resolves for an anonymous crawl
    * (the default, `en`, absent a cookie).
+   *
+   * `detectBrowserLanguage` is deliberately absent (not merely defaulted):
+   * every non-English catalogue here is a machine translation
+   * (`translate-locales.ts`, bootstrapped via LibreTranslate) that gets a
+   * manual audit pass only occasionally, not on every change — see
+   * `.claude/rules/enrichment-and-i18n.md`'s translation-bug history.
+   * Silently switching a first-time visitor to their browser's language
+   * hands them the least-checked text on the site as their *only* view,
+   * with no signal that a more reliable one exists. Every visitor now
+   * starts on `en` regardless of browser locale; switching is still one
+   * click away in `LanguageSwitcher.vue`, and the choice is still
+   * remembered in the same `vestigian-locale` cookie once made.
    */
   i18n: {
     strategy: 'no_prefix',
@@ -112,11 +124,6 @@ export default defineNuxtConfig({
       { code: 'it', name: 'Italiano', file: 'it.json' },
       { code: 'nl', name: 'Nederlands', file: 'nl.json' },
     ],
-    detectBrowserLanguage: {
-      useCookie: true,
-      cookieKey: 'vestigian-locale',
-      redirectOn: 'no prefix',
-    },
   },
 
   /**
