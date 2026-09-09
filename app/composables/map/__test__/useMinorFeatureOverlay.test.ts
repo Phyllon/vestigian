@@ -47,8 +47,40 @@ describe('buildFeaturePopupHtml', () => {
       { kind: 'mine_quarry', name: null, source: null, material: 'Fe', periods: null },
       t,
     )
-    expect(html).toContain('Fe')
+    expect(html).toContain('Iron')
     expect(html).toContain('Mine or quarry')
+  })
+
+  it('expands a material abbreviation code, including multi-commodity rows', () => {
+    const html = buildFeaturePopupHtml(
+      { kind: 'mine_quarry', name: null, source: null, material: 'Au, Fe', periods: null },
+      t,
+    )
+    expect(html).toContain('Gold, Iron')
+  })
+
+  it('shows an unrecognised material code verbatim rather than guessing', () => {
+    const html = buildFeaturePopupHtml(
+      { kind: 'mine_quarry', name: null, source: null, material: 'Cn', periods: null },
+      t,
+    )
+    expect(html).toContain('Cn')
+  })
+
+  it('expands a period letter code, marking an uncertain attestation', () => {
+    const html = buildFeaturePopupHtml(
+      { kind: 'mine_quarry', name: null, source: null, material: null, periods: 'H?R?' },
+      t,
+    )
+    expect(html).toContain('Hellenistic (uncertain), Roman (uncertain)')
+  })
+
+  it('leaves an already-expanded bridge period string untouched', () => {
+    const html = buildFeaturePopupHtml(
+      { kind: 'bridge', name: null, source: null, material: null, periods: 'Archaic, Roman' },
+      t,
+    )
+    expect(html).toContain('Archaic, Roman')
   })
 
   it('escapes a source citation before it reaches setHTML', () => {

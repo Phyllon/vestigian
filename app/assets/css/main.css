@@ -265,10 +265,39 @@
   z-index: 35 !important;
 }
 
+/*
+ * Reported: popup text was hard to read — dark-mode text over the Barrington
+ * and DARE sheets (both fixed to a light tone regardless of theme, see
+ * `resolveSheetTone`), and light-mode text over the satellite view (real
+ * photography, sometimes dark underneath). The content had no background of
+ * its own — `transparent` let the map itself show through — so its colour,
+ * inherited from `body`'s theme-driven `--text-body`, had no fixed contrast
+ * against whatever basemap or sheet happened to be underneath. Given its own
+ * `.leaf`-style card instead: contrast is then against `--surface-raised`,
+ * which is theme-aware and always the ground the reader is already reading
+ * every other panel in the app against, regardless of what's on the map
+ * beneath the popup.
+ */
 .maplibregl-popup-content {
-  padding: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
+  padding: 0.625rem 0.75rem !important;
+  background-color: var(--surface-raised) !important;
+  color: var(--text-body) !important;
+  border-radius: var(--radius-notebook) !important;
+  box-shadow: var(--shadow-leaf) !important;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.maplibregl-popup-content strong {
+  color: var(--text-strong);
+}
+
+.maplibregl-popup-content a {
+  color: var(--accent);
+}
+
+.maplibregl-popup-close-button {
+  color: var(--text-muted) !important;
 }
 
 .maplibregl-popup-tip {

@@ -108,6 +108,7 @@
     "showKey": "Legenda",
     "referencedNote": "Gli stessi segni tratti da sottili contorni, senza disco, sono posti di riferimento dall'Atlante di Barrington e Pleiadi — non hanno contribuito qui i record.",
     "frontierTitle": "La frontiera",
+    "frontierMarksBarringtonOnly": "Questi simboli di fortificazione provengono dalla mappa di Barrington e compaiono solo quando questa è la mappa di base attiva. La linea di frontiera stessa è mostrata su ogni mappa di base.",
     "battlesTitle": "Battaglie",
     "battleMark": "Battaglia, prima del 500 CE",
     "portsTitle": "Porti antichi",

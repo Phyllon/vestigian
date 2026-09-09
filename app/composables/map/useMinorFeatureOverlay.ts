@@ -55,6 +55,69 @@ export interface FeaturePopupTranslate {
   (key: `minorFeaturePopup.kind.${MinorFeatureKind}`): string
 }
 
+/**
+ * AWMC's `mines_quarries` layer records commodity/material as chemical or
+ * geological shorthand rather than a word — confirmed against the real DBF
+ * values (`Fe`, `Pb`, `Ag`, `Au`, `Cu`, `Zn`, `M`, `Ls`, `Ss`, `Gr`), not
+ * documented anywhere in AWMC's own release, which ships no metadata file for
+ * this layer. A code this list doesn't recognise (e.g. the single `Cn` row)
+ * is shown verbatim rather than guessed at. Multi-commodity rows are
+ * comma-separated in the source (`"Au, Fe"`) and decoded term by term.
+ */
+const MATERIAL_LABELS: Record<string, string> = {
+  fe: 'Iron',
+  cu: 'Copper',
+  pb: 'Lead',
+  ag: 'Silver',
+  au: 'Gold',
+  zn: 'Zinc',
+  m: 'Marble',
+  ls: 'Limestone',
+  ss: 'Sandstone',
+  gr: 'Granite',
+}
+
+const expandMaterial = (material: string): string =>
+  material
+    .split(',')
+    .map((code) => {
+      const trimmed = code.trim()
+      return MATERIAL_LABELS[trimmed.toLowerCase()] ?? trimmed
+    })
+    .join(', ')
+
+/**
+ * Every AWMC minor-feature layer except bridges records period attestation
+ * as a run of single-letter codes — `A`(rchaic) `C`(lassical) `H`(ellenistic)
+ * `R`(oman) `L`(ate Antique) — with a trailing `?` marking the *preceding*
+ * letter uncertain (`"R?L"`, `"H?R?"`, `"C?H?R?"`, confirmed against real
+ * rows across mines/quarries, dams, cemeteries and forts). Bridges use their
+ * own five 0/1 flag columns, already expanded to full words by
+ * `bridgePeriods()` at import time, so this decoder is skipped for that kind
+ * — running it on an already-expanded string would find no matching letters
+ * and just pass it through unchanged, but skipping is more honest about why.
+ */
+const PERIOD_LETTER_LABELS: Record<string, string> = {
+  A: 'Archaic',
+  C: 'Classical',
+  H: 'Hellenistic',
+  R: 'Roman',
+  L: 'Late Antique',
+}
+
+const expandPeriods = (periods: string): string => {
+  const labels: string[] = []
+  for (let index = 0; index < periods.length; index += 1) {
+    const letter = periods[index]
+    const label = letter ? PERIOD_LETTER_LABELS[letter] : undefined
+    if (!label) continue
+    const isUncertain = periods[index + 1] === '?'
+    if (isUncertain) index += 1
+    labels.push(isUncertain ? `${label} (uncertain)` : label)
+  }
+  return labels.length > 0 ? labels.join(', ') : periods
+}
+
 export const buildFeaturePopupHtml = (
   properties: FeatureProperties,
   t: FeaturePopupTranslate,
@@ -65,8 +128,12 @@ export const buildFeaturePopupHtml = (
   ]
 
   if (properties.name) lines.push(kindLabel)
-  if (properties.material) lines.push(escapeHtmlForPopup(properties.material))
-  if (properties.periods) lines.push(escapeHtmlForPopup(properties.periods))
+  if (properties.material) lines.push(escapeHtmlForPopup(expandMaterial(properties.material)))
+  if (properties.periods) {
+    const periods =
+      properties.kind === 'bridge' ? properties.periods : expandPeriods(properties.periods)
+    lines.push(escapeHtmlForPopup(periods))
+  }
   if (properties.source) lines.push(escapeHtmlForPopup(properties.source))
 
   return lines.join('<br>')

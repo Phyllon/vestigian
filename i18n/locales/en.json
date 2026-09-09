@@ -120,6 +120,7 @@
     "showKey": "Key",
     "referencedNote": "The same marks drawn as thin outlines, without a disc, are places referenced from the Barrington Atlas and Pleiades — not records contributed here.",
     "frontierTitle": "The frontier",
+    "frontierMarksBarringtonOnly": "These fortification marks are drawn from the Barrington Atlas sheet and only appear while it is the active basemap. The frontier line itself is shown on every basemap.",
     "battlesTitle": "Battles",
     "battleMark": "Battle, before 500 CE",
     "portsTitle": "Ancient ports",

@@ -263,15 +263,51 @@ Structural checks (key parity, placeholder parity) pass clean on all five locale
 
 **Verdict: stay on LibreTranslate/Argos.** OPUS-MT is a real, measured upgrade on throughput and several specific bugs, but the gain doesn't clear the bar of committing to build and maintain a bespoke production server for it, given no existing tool does that job. Revisit only if a maintained OPUS-MT server appears, or if GPU capacity ever makes LTEngine's latency viable.
 
-**The pre-commit hook keeps the five locales from drifting.** When
-`i18n/locales/en.json` is staged, `.husky/pre-commit` runs
-`scripts/i18n/translate-locales.ts` before `lint-staged` and stages whatever
-it changes — the script is already resumable and a no-op in well under a
-second when nothing is pending, so this costs nothing on a commit that didn't
-touch strings. A translation failure (LibreTranslate unreachable, most likely)
-blocks the commit with the same message the script prints standalone, rather
-than letting an English source change ship with four stale locales and a
-fifth that quietly reads the same as English.
+## Locales are hand-translated now — the pre-commit hook no longer calls LibreTranslate
+
+**Superseding the "stay on LibreTranslate/Argos" verdict above.** That
+verdict was correct on its own terms — nothing benchmarked beat LibreTranslate
+on throughput, licence and reliability together — but throughput was never
+the actual problem. The two audits directly above it (2026-09-07, ~600
+corrected translations; 2026-09-08, another batch) both found the same thing:
+real, repeated meaning errors — dropped clauses, wrong conjugations, false
+friends, register drift, truncated sentences — that only surface on a human
+read-through, not something a faster or cheaper engine fixes. Given the
+project is on 2026-09-09, decided: **every new locale key from here on is
+translated directly by Claude in the same commit that adds the English
+string**, not bootstrapped by any machine-translation engine first and
+audited later. English already carries the "reference language" status
+`LanguageNotice.vue` and `settings.languageHelp` tell readers about; the
+other five should not regress behind it while waiting for the next periodic
+audit to catch what LibreTranslate got wrong.
+
+**`.husky/pre-commit` no longer runs `scripts/i18n/translate-locales.ts`
+automatically.** It only prints a reminder, per untranslated locale file not
+staged alongside `en.json`, that the key needs a hand translation rather than
+a machine one — non-blocking, since not every `en.json` change adds a
+translatable string (reordering, removing a key). A key left untranslated
+falls back to English (`@nuxtjs/i18n`'s normal fallback), which is a safe,
+honest default now that English is the stated reference language, not a
+silent gap.
+
+**`scripts/i18n/translate-locales.ts` and `pnpm i18n:translate` are kept, not
+deleted**, but are no longer part of the standard workflow — historical
+tooling for bootstrapping a brand-new locale from scratch, or a documented,
+deliberate one-off, never the default path for new keys. Its `FROZEN_KEYS`
+research (wordmarks, domain vocabulary, monument/printing terms, "limes")
+stays useful reference for exactly which words a general translation model
+gets wrong in this domain, even now that a model isn't doing the translating.
+
+**The pre-commit hook used to keep the five locales from drifting
+automatically.** When `i18n/locales/en.json` was staged, `.husky/pre-commit`
+ran `scripts/i18n/translate-locales.ts` before `lint-staged` and staged
+whatever it changed — the script was resumable and a no-op in well under a
+second when nothing was pending, so it cost nothing on a commit that didn't
+touch strings. A translation failure (LibreTranslate unreachable, most
+likely) blocked the commit with the same message the script printed
+standalone, rather than letting an English source change ship with four
+stale locales and a fifth that quietly read the same as English. Kept here
+for context on what changed and why; this is no longer what happens.
 
 `app/composables/ui/useUiLocale.ts` wraps `useI18n()` the way `useColorScheme.ts`
 wraps `useColorMode()` — except colour mode leans entirely on `@nuxt/ui`'s

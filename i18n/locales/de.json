@@ -108,6 +108,7 @@
     "showKey": "Legende",
     "referencedNote": "Die gleichen Markierungen, die als dünne Umrisse ohne Scheibe gezeichnet sind, sind Orte, auf die aus dem Barrington Atlas und den Plejaden verwiesen wird - keine Aufzeichnungen, die hier beigetragen wurden.",
     "frontierTitle": "Die Grenze",
+    "frontierMarksBarringtonOnly": "Diese Befestigungszeichen stammen aus dem Barrington-Blatt und erscheinen nur, solange es die aktive Kartengrundlage ist. Die Grenzlinie selbst wird auf jeder Kartengrundlage angezeigt.",
     "battlesTitle": "Schlachten",
     "battleMark": "Schlacht vor 500 CE",
     "portsTitle": "Antike Häfen",

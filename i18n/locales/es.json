@@ -108,6 +108,7 @@
     "showKey": "Leyenda",
     "referencedNote": "Las mismas marcas dibujadas como esbozos delgados, sin un disco, son lugares referenciados del Atlas Barrington y Pleiades — no registros contribuidos aquí.",
     "frontierTitle": "La frontera",
+    "frontierMarksBarringtonOnly": "Estas marcas de fortificación proceden de la hoja de Barrington y solo aparecen mientras esta es el mapa base activo. La línea de la frontera en sí se muestra en todos los mapas base.",
     "battlesTitle": "Batallas",
     "battleMark": "Batalla, antes de 500 CE",
     "portsTitle": "Puertos antiguos",

@@ -1,5 +1,6 @@
 <script setup lang="ts">
   import type { SiteCategory } from '#shared/types'
+  import type { IconGlyph } from '~/composables/map/useSiteIcons'
 
   /**
    * What to do when a tap lands on more than one record.
@@ -19,8 +20,8 @@
   const { overlappingFeatures, isPickerOpen, chooseCandidate, clearSelection } = useSiteQuery()
   const { isCompact } = useBreakpoint()
 
-  const iconPathFor = (category: string): string =>
-    SITE_ICON_PATHS[category as SiteCategory] ?? SITE_ICON_PATHS.other
+  const iconGlyphFor = (category: string): IconGlyph =>
+    SITE_ICON_GLYPHS[category as SiteCategory] ?? SITE_ICON_GLYPHS.other
 
   const labelFor = (category: string): string =>
     te(`categories.${category}`) ? t(`categories.${category}`) : t('categories.other')
@@ -103,7 +104,14 @@
                 stroke-width="1"
               />
               <path
-                :d="iconPathFor(candidate.category)"
+                v-if="iconGlyphFor(candidate.category).filled"
+                :d="iconGlyphFor(candidate.category).path"
+                :transform="`translate(${GAME_ICON_OFFSET} ${GAME_ICON_OFFSET}) scale(${GAME_ICON_SCALE})`"
+                class="fill-ink-800 dark:fill-paper-200"
+              />
+              <path
+                v-else
+                :d="iconGlyphFor(candidate.category).path"
                 :class="
                   candidate.kind === 'tracing' || candidate.category === 'infrastructure'
                     ? 'stroke-bronze-600 dark:stroke-bronze-300'

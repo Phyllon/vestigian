@@ -1,4 +1,6 @@
 <script setup lang="ts">
+  import type { IconGlyph } from '~/composables/map/useSiteIcons'
+
   /**
    * The key to the marks on the map, drawn from the same path data the markers
    * are rasterised from, so the two cannot drift apart.
@@ -41,6 +43,15 @@
     'tumulus',
   ] as const
 
+  /**
+   * `fort` reuses the atlas fortification glyph, not a mark of its own — see
+   * `minorFeatureIconId`'s own docstring. Every other kind is a lookup, and
+   * every one of them (bridge, mine_quarry, dam, cemetery, tumulus) is
+   * present in `MINOR_FEATURE_ICON_GLYPHS`.
+   */
+  const minorFeatureGlyph = (kind: (typeof MINOR_FEATURE_KINDS)[number]): IconGlyph =>
+    kind === 'fort' ? SITE_ICON_GLYPHS.fortification : MINOR_FEATURE_ICON_GLYPHS[kind]!
+
   /** Kept beside `buildRouteLayer`'s own dash expression for the same reason
    *  `LIMES_LINE_KEY` is — an eight-pixel swatch, not the map's real dash array. */
   const ROUTE_LINE_KEY = [
@@ -65,7 +76,7 @@
       <div
         v-if="isOpen"
         id="map-legend"
-        class="rounded-notebook border border-paper-300 bg-paper-50/95 p-3 shadow-leaf backdrop-blur-sm dark:border-night-600 dark:bg-night-800/95"
+        class="max-h-[min(70vh,32rem)] overflow-y-auto rounded-notebook border border-paper-300 bg-paper-50/95 p-3 shadow-leaf backdrop-blur-sm dark:border-night-600 dark:bg-night-800/95"
       >
         <h2 class="eyebrow mb-1">{{ t('legend.title') }}</h2>
         <p class="mb-2 max-w-64 text-xs leading-snug text-ink-500 dark:text-paper-400">
@@ -91,7 +102,14 @@
                 stroke-width="1"
               />
               <path
-                :d="SITE_ICON_PATHS[category]"
+                v-if="SITE_ICON_GLYPHS[category].filled"
+                :d="SITE_ICON_GLYPHS[category].path"
+                :transform="`translate(${GAME_ICON_OFFSET} ${GAME_ICON_OFFSET}) scale(${GAME_ICON_SCALE})`"
+                class="fill-ink-800 dark:fill-paper-200"
+              />
+              <path
+                v-else
+                :d="SITE_ICON_GLYPHS[category].path"
                 :class="
                   category === 'infrastructure'
                     ? 'stroke-bronze-600 dark:stroke-bronze-300'
@@ -185,6 +203,20 @@
               </span>
             </li>
           </ul>
+
+          <!--
+            `limes-installations` (the Pleiades-sourced military places
+            promoted to these plan marks) reads the `atlas` vector source,
+            which only exists on the Barrington sheet — see the docstring on
+            `useLimesOverlay`'s `attachLimesOverlay`. The frontier line itself
+            still draws on every basemap; only these marks don't.
+          -->
+          <p
+            v-if="view !== 'antiquity-awmc'"
+            class="mt-2 max-w-64 text-xs leading-snug text-ink-500 dark:text-paper-400"
+          >
+            {{ t('legend.frontierMarksBarringtonOnly') }}
+          </p>
         </template>
 
         <!--
@@ -271,7 +303,7 @@
         <!--
           Minor features are an overlay on any basemap, own key entry, same
           reasoning as battles above. `fort` reuses the atlas fortification
-          glyph (`SITE_ICON_PATHS.fortification`), not a mark of its own —
+          glyph (`SITE_ICON_GLYPHS.fortification`), not a mark of its own —
           see `minorFeatureIconId`'s own docstring.
         -->
         <template v-if="isShowingFeatures">
@@ -283,9 +315,14 @@
             <li v-for="kind in MINOR_FEATURE_KINDS" :key="kind" class="flex items-center gap-2">
               <svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path
-                  :d="
-                    kind === 'fort' ? SITE_ICON_PATHS.fortification : MINOR_FEATURE_ICON_PATHS[kind]
-                  "
+                  v-if="minorFeatureGlyph(kind).filled"
+                  :d="minorFeatureGlyph(kind).path"
+                  :transform="`translate(${GAME_ICON_OFFSET} ${GAME_ICON_OFFSET}) scale(${GAME_ICON_SCALE})`"
+                  fill="currentColor"
+                />
+                <path
+                  v-else
+                  :d="minorFeatureGlyph(kind).path"
                   stroke="currentColor"
                   stroke-width="1.1"
                   stroke-linecap="round"

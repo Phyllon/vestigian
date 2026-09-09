@@ -215,7 +215,7 @@
                     :d="
                       installation.mark
                         ? LIMES_ICON_PATHS[installation.mark]
-                        : SITE_ICON_PATHS.fortification
+                        : SITE_ICON_GLYPHS.fortification.path
                     "
                     :stroke="installation.slug ? 'currentColor' : '#8c8271'"
                     stroke-width="1.5"

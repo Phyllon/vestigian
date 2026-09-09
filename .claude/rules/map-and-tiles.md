@@ -36,6 +36,34 @@ one hop away:
   already rendered (`buildPortPopupHtml`, `buildFeaturePopupHtml`). Nothing
   to add there.
 
+**A follow-up report: the minor-antiquities popup showed cryptic codes like
+"Fe", "CHR", "M" for a mine or quarry, with no explanation.** These are real
+AWMC data, not corruption — confirmed against the actual DBF values in
+`.import/awmc-minor-features/cultural-shapefiles.zip` (queried live from
+Postgres, not guessed at), and undocumented anywhere in AWMC's own release:
+`mines_quarries` ships no `.shp.xml` metadata file, unlike several sibling
+layers in the same zip. `Material` is a commodity/rock-type code —
+`Fe`/`Cu`/`Pb`/`Ag`/`Au`/`Zn` are chemical symbols (iron, copper, lead,
+silver, gold, zinc), `M`/`Ls`/`Ss`/`Gr` are rock abbreviations (marble,
+limestone, sandstone, granite) — sometimes multiple, comma-separated
+(`"Au, Fe"`). `Period`/`timeperiod` (present on every non-bridge kind:
+mines/quarries, dams, cemeteries, forts, tumuli — confirmed by querying all
+of them, not assumed from one) is a run of single-letter period codes,
+`A`/`C`/`H`/`R`/`L` (Archaic/Classical/Hellenistic/Roman/Late Antique), each
+optionally followed by `?` marking that one period's attestation uncertain
+(`"R?L"`, `"H?R?"`, `"C?H?R?"`). Bridges are the one exception: their own
+five 0/1 flag columns are already expanded to full words by `bridgePeriods()`
+at import time, so `buildFeaturePopupHtml`'s `expandPeriods` is skipped for
+that kind — running it on an already-expanded string would find no matching
+letters and just pass it through, but skipping is the more honest statement
+of why. An unrecognised code (the one `Cn` row, whatever it stands for) is
+shown verbatim rather than guessed at, the same restraint applied everywhere
+else in this codebase to data whose meaning isn't fully known (see ORBIS's
+`e`/`s` figures above). Decoding happens in `useMinorFeatureOverlay.ts` at
+popup-render time, not at import — the raw codes stay in Postgres exactly as
+AWMC published them, reproducible and re-decodable if the mapping ever needs
+correcting.
+
 **Routes are the one case where more genuinely isn't available without new
 work.** `antiquity_routes` was never given `e`/`s` columns at all —
 `15-orbis-routes.ts` reads ORBIS's own cost/duration figures and discards
@@ -57,6 +85,26 @@ key describes, so one line does the job. This is not a full fix for
 discoverability (a reader has to open the key at least once to see it), but
 it is the honest, low-effort answer that fits the existing "the key explains
 the marks" mechanism rather than adding a new one.
+
+**The legend panel can outgrow the map.** Reported: with several overlays
+switched on at once, each contributing its own key section, the panel grew
+taller than the viewport and overran the top edge. `Legend.vue`'s panel
+(`#map-legend`) now carries `max-h-[min(70vh,32rem)] overflow-y-auto` —
+capped and scrollable rather than assuming a fixed maximum section count,
+the same shape `.maplibregl-ctrl-attrib.maplibregl-compact-show` already
+uses above for the same reason (several overlay credits stacking up).
+
+**The frontier's own plan marks (watchtower, fort, fortlet, fortress, camp)
+only render while Barrington is the active basemap — reported as confusing
+with no explanation on screen.** `useLimesOverlay.ts`'s own docstring already
+states why: `limes-installations` (the Pleiades-sourced military places
+promoted to these marks) reads the `atlas` vector source, which exists only
+on the Barrington sheet, and is silently skipped on every other basemap —
+the frontier line itself and contributed forts still draw everywhere.
+`Legend.vue` now shows `legend.frontierMarksBarringtonOnly` under the marks
+list whenever `view !== 'antiquity-awmc'` while "Follow the limes" is on,
+rather than leaving a reader to notice the marks vanish with no explanation
+when they switch basemaps.
 
 ## Marker glyphs are Lucide paths, not hand-drawn — one exception, plan-view fort marks
 
@@ -116,6 +164,93 @@ character the design brief describes — a generic icon set reads slightly
 more like a modern app than a bespoke elevation would. Recorded as a
 deliberate call, made on explicit direction, not something to silently
 re-litigate back to hand-drawn glyphs later.
+
+## Six glyphs are filled game-icons.net silhouettes, not stroked Lucide outlines
+
+Reported directly: settlement, infrastructure, production, "other" (site
+categories), cemetery and bridge (minor antiquities) read as too generic and
+too modern to belong on an ancient-world atlas — a skyline, a factory, a
+crosshair, a plain cross and a Lucide arch don't say "ancient" the way a
+purpose-picked icon can. Researched across Flaticon, Noun Project and
+game-icons.net (candidates saved to an artifact for the user to choose from
+first — see the icon-candidates research); the user picked, per category:
+delapouite's `village` (settlement), Lucide's `cog` (infrastructure, kept
+from Lucide since it was already a good fit), delapouite's `anvil` credited
+to Lorc (production), delapouite's `menhir` (other), delapouite's `graveyard`
+(cemetery) and delapouite's `stone-bridge` (bridge). Every game-icons.net
+pick is **CC BY 3.0**, checked directly against the site's own licence page,
+attribution owed to the credited artist — Delapouite for four of the five,
+Lorc for the anvil.
+
+**Game-icons.net silhouettes are filled, authored edge-to-edge in a 512×512
+viewBox — nothing like Lucide's 24×24 stroked outlines**, and `rasteriseIcon`
+only ever knew how to stroke a path. Rather than force a filled silhouette
+through the stroke pipeline (which draws only the path's own outline edges —
+visually broken for a shape meant to be solid), `IconGlyph` (`useSiteIcons.ts`)
+carries `viewBox`/`filled` alongside the path, and `rasteriseIcon` branches:
+fill for a filled glyph, stroke for an outline one. A filled glyph is scaled
+and centred into an 18-unit box inside the shared 24-unit icon space
+(`GAME_ICON_TARGET_SIZE`/`GAME_ICON_OFFSET`/`GAME_ICON_SCALE`) — roughly the
+same padding a Lucide outline already carries inside its own 24-unit box —
+rather than letting a silhouette authored edge-to-edge touch the disc's own
+ring. `Legend.vue` and `FeaturePicker.vue` apply the identical transform via
+SVG's own `transform` attribute on the `<path>`, so the map, the key and the
+picker cannot drift apart on how a filled glyph sits in its circle — the same
+"the paths are also the legend" principle this file already documents for
+the Lucide set. `SITE_ICON_PATHS`/`MINOR_FEATURE_ICON_PATHS` (plain path
+strings) were renamed `SITE_ICON_GLYPHS`/`MINOR_FEATURE_ICON_GLYPHS`
+(`Record<_, IconGlyph>`) throughout — every consumer needs to know whether to
+fill or stroke, not just what to draw.
+
+## Reference marks over raster basemaps get a halo — DARE and satellite only
+
+Reported directly: icon contrast was poor on the Antiquity (DARE) and
+Satellite views, in both themes. Every reference mark (a borrowed row, no
+disc — battles, ports, coin hoards, minor antiquities, Pleiades' military
+places on the frontier) is drawn in a single fixed mid-tone ink
+(`ATLAS_MARK_INK`) with no backing disc, which is legible against a flat
+vector sheet — Vestigian's own recolouring, or the Barrington sheet, both a
+known, controlled colour — but not against real photography, where the ink
+can land on a pixel of any value at all.
+
+Fixed with a halo, not a colour change: `SiteIconPalette.haloOnRaster`, set
+in `useViewportTiles.ts`'s `palette` computed from `view.value ===
+'antiquity-dare' || view.value === 'satellite'` — **not**
+`isAntiquityView(view)`, which also covers the Barrington sheet. Barrington
+is our own flat vector fill, the same category of "known colour" as the
+Vestigian recolouring, so it's deliberately excluded even though
+`resolveSheetTone` groups it with DARE for a different reason (tone, not
+contrast). When set, `rasteriseIcon` draws a translucent light stroke behind
+the mark before the ink — wider for a filled glyph (drawn in its own scaled
+sub-space) than for a stroked outline — the standard cartographic
+halo-behind-a-line technique, the same idea `useBasemapStyle.ts`'s own
+`labelHalo` already applies to map labels. Re-registration already happens
+for free: `attachOverlayIcons`'s `hasImage` idempotency check is keyed to the
+image registry, which `setStyle` wipes on every basemap switch — DARE ⇄
+satellite ⇄ anything else always re-registers with the current `haloOnRaster`
+value, the same mechanism `sheetTone` already relies on.
+
+## Overlay popups are a themed card, not text painted on the map
+
+Reported directly: popup text was hard to read — dark-mode text over the
+Barrington and DARE sheets (both fixed to a light tone by `resolveSheetTone`
+regardless of the reader's theme), and light-mode text over the satellite
+view (real photography, sometimes dark underneath). The cause:
+`.maplibregl-popup-content` had `background: transparent !important` and no
+colour of its own, so the text's colour — inherited from `body`'s
+theme-driven `--text-body` — had no fixed contrast against whatever was
+underneath. A dark-mode reader got light text with nothing behind it,
+floating directly over a light parchment sheet.
+
+Fixed by giving the popup content the same `.leaf` treatment every other
+panel in the app already gets: `background-color: var(--surface-raised)`,
+`color: var(--text-body)`, `box-shadow: var(--shadow-leaf)`, a real border
+radius. Contrast is then against a theme-aware surface token, not against
+whatever the map happens to be showing — the same fix works for all three
+reported cases (dark-on-light-sheet, light-on-dark-photo) because the card's
+own background no longer depends on the basemap at all. `strong`/`a`/the
+close button get their own token-based colours (`--text-strong`, `--accent`,
+`--text-muted`) rather than inheriting whatever `currentColor` resolves to.
 
 ## Cache invalidation is version counters, not deletion — nothing to run by hand
 

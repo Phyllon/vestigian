@@ -108,6 +108,7 @@
     "showKey": "Légende",
     "referencedNote": "Les mêmes marques dessinées que les contours fins, sans disque, sont des endroits référencés de l'Atlas de Barrington et des Pléiades — pas les enregistrements fournis ici.",
     "frontierTitle": "La frontière",
+    "frontierMarksBarringtonOnly": "Ces symboles de fortification proviennent de la carte de Barrington et n'apparaissent que lorsqu'elle est le fond de carte actif. La ligne de frontière elle-même s'affiche sur tous les fonds de carte.",
     "battlesTitle": "Batailles",
     "battleMark": "Bataille, avant 500 CE",
     "portsTitle": "Ports antiques",

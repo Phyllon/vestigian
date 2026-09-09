@@ -57,16 +57,26 @@ const DARK_OVERLAY: OverlayPalette = {
  * on screen. This is what makes the viewport feel instant at continental zoom.
  */
 export const useViewportTiles = () => {
-  const { sheetTone, isFollowingLimes, isShowingSites } = useBasemapStyle()
+  const { sheetTone, isFollowingLimes, isShowingSites, view } = useBasemapStyle()
 
   /**
    * Keyed on the sheet, not the theme. Over an antiquity raster the ground is
    * parchment whatever the reader chose, and the night palette drawn there is a
    * pale marker on a pale sheet — the overlay vanishes with nothing logged.
+   *
+   * `haloOnRaster` is keyed on the basemap itself, not the sheet tone: DARE and
+   * satellite are real photography, where a reference mark's fixed mid-tone
+   * ink can land on a pixel of any value at all — reported as poor icon
+   * contrast on exactly those two. The Barrington sheet is `isAntiquityView`
+   * too but is our own flat vector fill, a known colour a mark already
+   * contrasts against, so it's excluded here even though `sheetTone` groups
+   * it with DARE.
    */
-  const palette = computed<OverlayPalette>(() =>
-    sheetTone.value === 'dark' ? DARK_OVERLAY : LIGHT_OVERLAY,
-  )
+  const palette = computed<OverlayPalette>(() => {
+    const base = sheetTone.value === 'dark' ? DARK_OVERLAY : LIGHT_OVERLAY
+    const haloOnRaster = view.value === 'antiquity-dare' || view.value === 'satellite'
+    return { ...base, haloOnRaster }
+  })
 
   /**
    * Registered once per style regardless of whether the site overlay itself
