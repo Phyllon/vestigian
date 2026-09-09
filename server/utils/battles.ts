@@ -38,6 +38,8 @@ export const buildBattleTileSql = (tile: TileCoordinate): string => `
       antiquity_battles.id,
       antiquity_battles.title,
       antiquity_battles.year,
+      antiquity_battles.wikidata_id,
+      antiquity_battles.location_precision,
       antiquity_battles.wikipedia_url,
       ST_AsMVTGeom(
         ST_Transform(antiquity_battles.geom, 3857), b.env, ${TILE_EXTENT}, ${TILE_BUFFER}, true

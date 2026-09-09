@@ -23,6 +23,8 @@ describe('buildBattleTileSql', () => {
     const sql = buildBattleTileSql(tile)
     expect(sql).toContain('antiquity_battles.title')
     expect(sql).toContain('antiquity_battles.year')
+    expect(sql).toContain('antiquity_battles.wikidata_id')
+    expect(sql).toContain('antiquity_battles.location_precision')
     expect(sql).toContain('antiquity_battles.wikipedia_url')
   })
 

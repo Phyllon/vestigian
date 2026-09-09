@@ -10,6 +10,113 @@ paths:
   - 'app/pages/offline.vue'
 ---
 
+## Overlay popups show everything the database actually has, plus a tap-to-open hint
+
+Investigated on request: whether the battle/port/route/minor-feature/coin-hoard
+overlay popups could show more than they did. Checked every column each
+`antiquity_*` table actually carries against what its tile SQL selects and
+what its popup builder renders — three real gaps found, all fixed rather than
+just reported, since each was a one-line addition with data already sitting
+one hop away:
+
+- **Coin hoards had `geonames_url` flowing all the way from the database
+  through the MVT tile into `CoinHoardFeatureProperties` and then simply
+  never being read.** `buildCoinHoardPopupHtml` built its two lines and
+  stopped. Fixed: a "View on GeoNames ↗" link, same pattern as the port
+  popup's Pleiades/Wikipedia links.
+- **Battles never selected `wikidata_id` or `location_precision` into the
+  tile at all**, even though both columns exist on every row
+  (`antiquity_battles.wikidata_id` is `.notNull()`). Added both to
+  `buildBattleTileSql`, and the popup now always links to the Wikidata item
+  (`https://www.wikidata.org/wiki/{id}`) and adds an "approximate location"
+  caveat when Wikidata's own `geoPrecision` was coarse (`location_precision
+= 'rough'`, from `13-battles.ts`'s own `locationPrecision()`).
+- **Ports and minor features were already complete** — every column
+  `antiquityPorts`/`antiquityFeatures` carries is already selected and
+  already rendered (`buildPortPopupHtml`, `buildFeaturePopupHtml`). Nothing
+  to add there.
+
+**Routes are the one case where more genuinely isn't available without new
+work.** `antiquity_routes` was never given `e`/`s` columns at all —
+`15-orbis-routes.ts` reads ORBIS's own cost/duration figures and discards
+them at import time, undocumented and with no verified unit or meaning (see
+`.claude/rules/antiquity-basemaps.md`'s ORBIS section). Surfacing them would
+mean a schema migration, a re-import, and — the actual blocker — reverse-
+engineering what the numbers mean well enough to label them honestly. Not
+attempted here; flagged rather than guessed at, same restraint the original
+import already applied.
+
+**Clickability indicator.** Every overlay layer already sets
+`cursor: pointer` on `mouseenter` — but that affordance is invisible on a
+touch device, which has no hover state at all, and this project is mobile
+first. Rather than inventing a decorative on-map cue (a ring, a pulse) that
+the design brief's minimal-linework rule would fight, `Legend.vue` gained one
+sentence, `legend.tapForDetails`, shown once under the panel title rather
+than repeated in each of its five overlay sections — true of every layer the
+key describes, so one line does the job. This is not a full fix for
+discoverability (a reader has to open the key at least once to see it), but
+it is the honest, low-effort answer that fits the existing "the key explains
+the marks" mechanism rather than adding a new one.
+
+## Marker glyphs are Lucide paths, not hand-drawn — one exception, plan-view fort marks
+
+`useSiteIcons.ts`'s category, battle and port glyphs were originally drawn by
+hand as bespoke Path2D strings, framed as elevations a notebook-carrying
+visitor would sketch. Reconsidered and replaced: Lucide is already this
+project's icon system everywhere else in the interface (`i-lucide-*` via
+`@nuxt/icon`, self-hosted through the `@iconify-json/lucide` devDependency,
+never a runtime fetch — see `nuxt.config.ts`), so the map's own markers
+hand-rolling an approximation of icons the app already ships was the
+inconsistency, not the norm. Licence checked directly against
+`node_modules/@iconify-json/lucide` and the upstream `LICENSE` before
+reuse: ISC for Lucide's own icons, MIT for the small Feather-derived subset
+— both permissive, rehosting and modifying is explicitly allowed by either.
+
+Paths are copied verbatim from Lucide's 24×24 `stroke-width:2` source
+(`node_modules/@iconify-json/lucide/icons.json`), which is why no rescaling
+was needed — the project's own glyphs already used that exact viewBox.
+Multi-element icons (several `<path>`s, or a `<circle>`) are flattened into
+one `d` string, since `rasteriseIcon` takes a single path and `Path2D`
+parses the full SVG path grammar — including arcs — from one concatenated
+string as well as from several separate elements. A `<circle cx cy r>`
+becomes two arc commands: `M ${cx-r} ${cy} A ${r} ${r} 0 1 0 ${cx+r} ${cy}
+A ${r} ${r} 0 1 0 ${cx-r} ${cy}` (used for `anchor`'s ring and
+`crosshair`'s outer circle). Verified rendered, not just typechecked — both
+the canvas-rasterised map markers and `Legend.vue`'s inline-SVG copies were
+screenshotted in a running dev server after the change.
+
+Current mapping: `settlement`→`building-2`, `fortification`→`castle`,
+`sanctuary`→`landmark`, `burial`→`pyramid`, `infrastructure`→`milestone`,
+`villa`→`house`, `production`→`factory`, `findspot`→`amphora`,
+`other`→`crosshair`, battles→`swords`, ports→`anchor`,
+`mine_quarry`→`pickaxe`, `cemetery`→`cross`.
+
+**Two families deliberately stayed hand-drawn — not an oversight, no
+matching Lucide icon exists for either concept:**
+
+- `LIMES_ICON_PATHS` — these are fort _plans_, drawn from above (playing-card
+  rectangle, rounded corners, gates), not elevations. No general-purpose
+  icon set represents "a Roman fort seen from above"; forcing a
+  building/castle icon here would lose the exact distinction (tower vs.
+  fortlet vs. fort vs. fortress, told apart by nested-rectangle size) the
+  hand-drawn plans exist to carry.
+- `BRIDGE_ICON_PATH`, `DAM_ICON_PATH`, `TUMULUS_ICON_PATH`,
+  `COIN_HOARD_ICON_PATH` (the AWMC minor-feature and coin-hoard glyphs) —
+  no Lucide icon covers a dam, a burial mound in elevation, or a stack of
+  coins drawn side-on. `cemetery`'s cross and `mine_quarry`'s pickaxe _were_
+  swapped to Lucide, since those two have exact matches; the other four in
+  the same family did not, and mixing sourced and hand-drawn paths within
+  one family is fine visually — `rasteriseIcon` applies the same stroke
+  weight, ink colour and reference/ground treatment regardless of where a
+  path came from, so the rendering treatment is what actually keeps the
+  sheet consistent, not a shared origin for the path data.
+
+This does trade away some of the literal "sketched in a field notebook"
+character the design brief describes — a generic icon set reads slightly
+more like a modern app than a bespoke elevation would. Recorded as a
+deliberate call, made on explicit direction, not something to silently
+re-litigate back to hand-drawn glyphs later.
+
 ## Cache invalidation is version counters, not deletion — nothing to run by hand
 
 Every tile response is cached in Redis/Valkey keyed by coordinates plus a

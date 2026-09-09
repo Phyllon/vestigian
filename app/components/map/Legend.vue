@@ -67,7 +67,10 @@
         id="map-legend"
         class="rounded-notebook border border-paper-300 bg-paper-50/95 p-3 shadow-leaf backdrop-blur-sm dark:border-night-600 dark:bg-night-800/95"
       >
-        <h2 class="eyebrow mb-2">{{ t('legend.title') }}</h2>
+        <h2 class="eyebrow mb-1">{{ t('legend.title') }}</h2>
+        <p class="mb-2 max-w-64 text-xs leading-snug text-ink-500 dark:text-paper-400">
+          {{ t('legend.tapForDetails') }}
+        </p>
 
         <ul class="grid grid-cols-2 gap-x-4 gap-y-1.5">
           <li v-for="category in SITE_CATEGORIES" :key="category" class="flex items-center gap-2">

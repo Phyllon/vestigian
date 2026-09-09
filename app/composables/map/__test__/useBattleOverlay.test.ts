@@ -10,7 +10,17 @@ const t = (key: string, params?: Record<string, unknown>): string => {
   if (key === 'limesFormat.bc') return `${params?.year} BC`
   if (key === 'limesFormat.ad') return `AD ${params?.year}`
   if (key === 'battlePopup.viewOnWikipedia') return 'View on Wikipedia'
+  if (key === 'battlePopup.viewOnWikidata') return 'View on Wikidata'
+  if (key === 'battlePopup.locationApproximate') return 'Location is approximate'
   return key
+}
+
+const baseProperties = {
+  title: 'Battle of Cannae',
+  year: -216,
+  wikidata_id: 'Q193562',
+  location_precision: 'precise' as const,
+  wikipedia_url: null,
 }
 
 describe('buildBattleLayer', () => {
@@ -32,28 +42,26 @@ describe('buildBattleLayer', () => {
 
 describe('buildBattlePopupHtml', () => {
   it('names the battle and its year', () => {
-    const html = buildBattlePopupHtml(
-      { title: 'Battle of Cannae', year: -216, wikipedia_url: null },
-      t,
-    )
+    const html = buildBattlePopupHtml(baseProperties, t)
     expect(html).toContain('Battle of Cannae')
     expect(html).toContain('216 BC')
   })
 
   it('formats a CE year without a sign', () => {
     const html = buildBattlePopupHtml(
-      { title: 'Battle of Actium', year: -31, wikipedia_url: null },
+      { ...baseProperties, title: 'Battle of Actium', year: -31 },
       t,
     )
     expect(html).toContain('31 BC')
 
-    const ce = buildBattlePopupHtml({ title: 'A battle', year: 9, wikipedia_url: null }, t)
+    const ce = buildBattlePopupHtml({ ...baseProperties, title: 'A battle', year: 9 }, t)
     expect(ce).toContain('AD 9')
   })
 
   it('links to Wikipedia only when a link exists', () => {
     const withLink = buildBattlePopupHtml(
       {
+        ...baseProperties,
         title: 'Battle of Alesia',
         year: -52,
         wikipedia_url: 'https://en.wikipedia.org/wiki/Battle_of_Alesia',
@@ -64,15 +72,29 @@ describe('buildBattlePopupHtml', () => {
     expect(withLink).toContain('View on Wikipedia')
 
     const withoutLink = buildBattlePopupHtml(
-      { title: 'Unlinked battle', year: -100, wikipedia_url: null },
+      { ...baseProperties, title: 'Unlinked battle', year: -100 },
       t,
     )
-    expect(withoutLink).not.toContain('href')
+    expect(withoutLink).not.toContain('View on Wikipedia')
+  })
+
+  it('always links to Wikidata, every battle carries an id', () => {
+    const html = buildBattlePopupHtml({ ...baseProperties, wikidata_id: 'Q127330' }, t)
+    expect(html).toContain('href="https://www.wikidata.org/wiki/Q127330"')
+    expect(html).toContain('View on Wikidata')
+  })
+
+  it("notes an approximate location only when Wikidata's own precision is rough", () => {
+    const precise = buildBattlePopupHtml({ ...baseProperties, location_precision: 'precise' }, t)
+    expect(precise).not.toContain('Location is approximate')
+
+    const rough = buildBattlePopupHtml({ ...baseProperties, location_precision: 'rough' }, t)
+    expect(rough).toContain('Location is approximate')
   })
 
   it('escapes a title before it reaches setHTML, unlike a Vue template', () => {
     const html = buildBattlePopupHtml(
-      { title: '<script>alert(1)</script>', year: -1, wikipedia_url: null },
+      { ...baseProperties, title: '<script>alert(1)</script>', year: -1 },
       t,
     )
     expect(html).not.toContain('<script>')

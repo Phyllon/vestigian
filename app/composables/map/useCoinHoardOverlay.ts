@@ -26,7 +26,10 @@ export const buildCoinHoardLayer = (): SymbolLayerSpecification => ({
   },
 })
 
-export type CoinHoardPopupTranslate = (key: 'coinHoardPopup.hoardCount', count: number) => string
+export type CoinHoardPopupTranslate = (
+  key: 'coinHoardPopup.hoardCount' | 'coinHoardPopup.viewOnGeonames',
+  count?: number,
+) => string
 
 export const buildCoinHoardPopupHtml = (
   properties: CoinHoardFeatureProperties,
@@ -36,6 +39,12 @@ export const buildCoinHoardPopupHtml = (
     `<strong>${escapeHtmlForPopup(properties.name)}</strong>`,
     escapeHtmlForPopup(t('coinHoardPopup.hoardCount', properties.hoard_count)),
   ]
+
+  if (properties.geonames_url) {
+    const href = escapeHtmlForPopup(properties.geonames_url)
+    const label = t('coinHoardPopup.viewOnGeonames')
+    lines.push(`<a href="${href}" target="_blank" rel="noopener noreferrer">${label} ↗</a>`)
+  }
 
   return lines.join('<br>')
 }

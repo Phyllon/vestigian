@@ -6,47 +6,69 @@ import { LIMES_MARKS, VICI_MARKS } from '#shared/utils/limes'
  * A drawn mark per category, so a fort reads as a fort at a glance rather than
  * as a coloured dot that has to be opened to be identified.
  *
- * Each glyph is a stroked path in a 24×24 box, drawn the way the rest of the
- * project is written: line work in ink, no fills, nothing that reads as a
- * pin dropped by a modern mapping app. They are elevations of the thing itself
- * — battlements, an arcade, a temple front — because that is what someone
- * sketching a site in a notebook would draw.
+ * Each glyph is a Lucide icon (ISC — MIT for the small subset of
+ * Feather-derived glyphs, both permissive, verified against
+ * `node_modules/@iconify-json/lucide` before use), not hand-drawn: Lucide is
+ * already the project's icon system everywhere else (`i-lucide-*` via
+ * `@nuxt/icon`, self-hosted through `@iconify-json/lucide` per
+ * `nuxt.config.ts`), so map markers hand-drawing their own approximation of
+ * icons the app already ships was the odd one out, not the norm. Paths are
+ * taken verbatim from Lucide's 24×24, `stroke-width:2` source — multi-path
+ * icons have their `<path>`/`<circle>` elements concatenated into one `d`
+ * string (a circle becomes two arc commands), since `rasteriseIcon` below
+ * takes a single path and `Path2D` parses the full SVG path grammar,
+ * including arcs, from one string just as happily as from several.
  *
  * The paths are also the legend: `MapLegend` renders these same strings as
  * inline SVG, so the key on screen cannot drift from the marks on the map.
+ *
+ * Two families deliberately were not moved to Lucide: `LIMES_ICON_PATHS`
+ * below (fort plans drawn in *plan* view, not elevation — nothing in a
+ * general-purpose icon set represents "playing-card rectangle with two
+ * gates seen from above") and the AWMC minor-feature/coin-hoard glyphs
+ * further down this file (`BRIDGE_ICON_PATH`, `DAM_ICON_PATH`,
+ * `TUMULUS_ICON_PATH`, `COIN_HOARD_ICON_PATH` — no Lucide icon covers a dam,
+ * a burial mound in elevation, or a stack of coins drawn side-on). Forcing a
+ * weak match there would have been worse than the specific-purpose glyph
+ * already in place.
  */
 export const SITE_ICON_PREFIX = 'vestigian-site-'
 
 export const SITE_ICON_PATHS: Record<SiteCategory, string> = {
-  /** A skyline of roofs — several dwellings, which is what a town is. */
-  settlement: 'M5 18.5h14M7 18.5v-4.5l2.75-2.5 2.75 2.5v4.5M12.5 18.5v-6.25l2.75-2.5 2.75 2.5v6.25',
+  /** Lucide `building-2` — a two-building skyline, which is what a town is. */
+  settlement:
+    'M10 12h4m-4-4h4m0 13v-3a2 2 0 0 0-4 0v3 M6 10H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2 M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16',
 
-  /** Crenellations. The one silhouette nothing else on the map can be mistaken for. */
-  fortification: 'M5 18.5V10h2.8v2.6h2.8V10h2.8v2.6h2.8V10h2.8v8.5',
+  /** Lucide `castle` — battlements, gate and towers; nothing else reads as a fort at a glance. */
+  fortification:
+    'M10 5V3m4 2V3m1 18v-3a3 3 0 0 0-6 0v3m9-18v8m0-6H6m16 6H2 M22 9v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9m4-6v8',
 
-  /** A temple front: pediment, three columns, stylobate. */
-  sanctuary: 'M5 11.5 12 6.2l7 5.3M6.5 11.5v7M12 11.5v7M17.5 11.5v7M5 18.5h14',
+  /** Lucide `landmark` — pediment, columns, stylobate: a temple front by name. */
+  sanctuary:
+    'M10 18v-7m1.119-8.795a2 2 0 0 1 1.762 0l7.84 3.846A.5.5 0 0 1 20.5 7h-17a.5.5 0 0 1-.22-.949zM14 18v-7m4 7v-7M3 22h18M6 18v-7',
 
-  /** A round-topped stele, inscribed, standing on the ground it marks. */
-  burial: 'M5.5 18.5h13M8.8 18.5v-5.4a3.2 3.2 0 0 1 6.4 0v5.4M10.6 15.2h2.8',
+  /** Lucide `pyramid` — a burial monument shape, not the modern-cemetery cross `cemetery` below uses. */
+  burial:
+    'M2.5 16.88a1 1 0 0 1-.32-1.43l9-13.02a1 1 0 0 1 1.64 0l9 13.01a1 1 0 0 1-.32 1.44l-8.51 4.86a2 2 0 0 1-1.98 0ZM12 2v20',
 
-  /** An arcade under a deck — aqueduct, bridge and road all at once. */
+  /** Lucide `milestone` — a roadside marker, standing in for the aqueduct/bridge/road category as a whole. */
   infrastructure:
-    'M5 9.5h14M5 9.5v9M12 9.5v9M19 9.5v9M5 16a3.5 3.5 0 0 1 7 0M12 16a3.5 3.5 0 0 1 7 0',
+    'M12 13v8m0-18v3m6.172 0a2 2 0 0 1 1.414.586l2.06 2.06a1.207 1.207 0 0 1 0 1.708l-2.06 2.06a2 2 0 0 1-1.414.586H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z',
 
-  /** One dwelling with a wing, against the settlement's several roofs. */
-  villa: 'M5 18.5h14M6.5 18.5v-5L10 10.5l3.5 3v5M13.5 18.5v-3.9h5v3.9',
+  /** Lucide `house` — one dwelling, against `settlement`'s several roofs. */
+  villa:
+    'M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8 M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',
 
-  /** A kiln: domed, stoke-hole arched under it, flue off the top. */
+  /** Lucide `factory` — an industrial silhouette for kilns, workshops and mines alike. */
   production:
-    'M5.5 18.5h13M7 18.5v-3.5a5 5 0 0 1 10 0v3.5M10 18.5v-3.1a2 2 0 0 1 4 0v3.1M10.6 10.3V7.2h2.8v3.1',
+    'M12 16h.01M16 16h.01M3 19a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.5a.5.5 0 0 0-.769-.422l-4.462 2.844A.5.5 0 0 1 15 10.5v-2a.5.5 0 0 0-.769-.422L9.77 10.922A.5.5 0 0 1 9 10.5V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2zm5-3h.01',
 
-  /** An amphora — the object, not the place. */
+  /** Lucide `amphora` — the object, not the place. */
   findspot:
-    'M9.2 6.2h5.6M10.9 6.2C8.4 9 7.3 12 8.7 15.1 9.5 16.9 10.7 18.3 12 19.2M13.1 6.2c2.5 2.8 3.6 5.8 2.2 8.9-.8 1.8-2 3.2-3.3 4.1M10.4 6.6 8.6 9.4M13.6 6.6l1.8 2.8',
+    'M10 2v5.632c0 .424-.272.795-.653.982A6 6 0 0 0 6 14c.006 4 3 7 5 8 M10 5H8a2 2 0 0 0 0 4h.68M14 2v5.632c0 .424.272.795.652.982A6 6 0 0 1 18 14c0 4-3 7-5 8 M14 5h2a2 2 0 0 1 0 4h-.68M18 22H6M9 2h6',
 
-  /** A surveyor's mark: a point recorded, nothing claimed about it. */
-  other: 'M14 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0M12 6.5v2M12 15.5v2M6.5 12h2M15.5 12h2',
+  /** Lucide `crosshair` — a point recorded, nothing claimed about it. Circle converted to two arc commands, see file header. */
+  other: 'M2 12A10 10 0 1 0 22 12A10 10 0 1 0 2 12 M22 12h-4M6 12H2m10-6V2m0 20v-4',
 }
 
 export const SITE_CATEGORIES = Object.keys(SITE_ICON_PATHS) as SiteCategory[]
@@ -318,14 +340,14 @@ export const buildLimesReferenceIconExpression = (): ExpressionSpecification =>
 export const BATTLE_ICON_ID = 'vestigian-battle'
 
 /**
- * Two crossed blades, hilts out at the bottom corners — the one mark on this
- * map for an event rather than a place. Always drawn as the reference/pencil
- * variant: every row behind it is borrowed from Wikidata, never a
- * contribution, the same reasoning `registerLimesIcons` and
- * `registerAtlasIcons` already give for the marks they draw.
+ * Lucide `swords` — the one mark on this map for an event rather than a
+ * place. Always drawn as the reference/pencil variant: every row behind it
+ * is borrowed from Wikidata, never a contribution, the same reasoning
+ * `registerLimesIcons` and `registerAtlasIcons` already give for the marks
+ * they draw.
  */
 export const BATTLE_ICON_PATH =
-  'M6 6l12 12M18 6L6 18M6 6l-1.5-.5M6 6l-.5-1.5M18 6l1.5-.5M18 6l.5-1.5M6 18l-1.5.5M6 18l-.5 1.5M18 18l1.5.5M18 18l.5 1.5'
+  'M14.5 17.5L3 6V3h3l11.5 11.5M13 19l6-6m-3 3l4 4m-1 1l2-2M14.5 6.5L18 3h3v3l-3.5 3.5M5 14l4 4m-2-1l-3 3m-1-1l2 2'
 
 /**
  * Registered alongside the other reference marks, for the same reason: one
@@ -348,13 +370,13 @@ export const registerBattleIcon = (map: MapLibreMap, palette: SiteIconPalette): 
 export const PORT_ICON_ID = 'vestigian-port'
 
 /**
- * An anchor: ring, shank, stock and two flukes. Always drawn as the
- * reference/pencil variant — every row behind it is borrowed from the
- * Catalogue of Ancient Ports, never a contribution, the same reasoning
- * `registerBattleIcon` already gives.
+ * Lucide `anchor`. Always drawn as the reference/pencil variant — every row
+ * behind it is borrowed from the Catalogue of Ancient Ports, never a
+ * contribution, the same reasoning `registerBattleIcon` already gives.
+ * Circle converted to two arc commands, see the file header.
  */
 export const PORT_ICON_PATH =
-  'M9.8 5a2.2 2.2 0 1 0 4.4 0a2.2 2.2 0 1 0 -4.4 0M12 7.2V17M8 9.5h8M12 17a6 6 0 0 1 -6 -4M12 17a6 6 0 0 0 6 -4'
+  'M10 4A2 2 0 1 0 14 4A2 2 0 1 0 10 4 M12 6v16m7-9l2-1a9 9 0 0 1-18 0l2 1m4-2h6'
 
 /**
  * Registered alongside the other reference marks, for the same reason as
@@ -393,16 +415,18 @@ export const minorFeatureIconId = (kind: MinorFeatureKind): string =>
 /** An arch bridge in elevation: deck, two piers, the arch beneath. */
 export const BRIDGE_ICON_PATH = 'M4 14h16M6 14v4M18 14v4M4 14a8 5 0 0 1 16 0'
 
-/** A pickaxe, angled — the tool, not the place, the same convention `findspot`'s amphora already uses. */
-export const MINE_QUARRY_ICON_PATH = 'M5 19 15 9M13 7l4 4-2 2-4-4 2-2z'
+/** Lucide `pickaxe` — the tool, not the place, the same convention `findspot`'s amphora uses. */
+export const MINE_QUARRY_ICON_PATH =
+  'm14 13l-8.381 8.38a1 1 0 0 1-3.001-3L11 9.999m4.973-5.972A13 13 0 0 0 5.902 2.373c-1.398.342-1.092 2.158.277 2.601a19.9 19.9 0 0 1 5.822 3.024m4 4.001a19.9 19.9 0 0 1 3.024 5.824c.444 1.369 2.26 1.676 2.603.278A13 13 0 0 0 20 8.069 M18.352 3.352a1.205 1.205 0 0 0-1.704 0l-5.296 5.296a1.205 1.205 0 0 0 0 1.704l2.296 2.296a1.205 1.205 0 0 0 1.704 0l5.296-5.296a1.205 1.205 0 0 0 0-1.704z'
 
-/** A dam wall holding water back, water shown as two short crests upstream of it. */
+/** A dam wall holding water back, water shown as two short crests upstream of it. No Lucide icon covers this. */
 export const DAM_ICON_PATH = 'M4 18h16M5 18v-7h4v-3h6v3h4v7M4 11h4M16 11h4'
 
-/** A headstone with a cross, the same weight as `burial`'s stele but a different shape for a different Barrington layer. */
-export const CEMETERY_ICON_PATH = 'M12 5v6M9.5 8h5M7 19a5 5 0 0 1 10 0z'
+/** Lucide `cross` — the everyday cemetery symbol, against `burial`'s pyramid for an unmarked ancient grave. */
+export const CEMETERY_ICON_PATH =
+  'M4 9a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h4a1 1 0 0 1 1 1v4a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-4a1 1 0 0 1 1-1h4a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-4a1 1 0 0 1-1-1V4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4a1 1 0 0 1-1 1z'
 
-/** A burial mound — a low arc on the ground line, against `burial`'s standing stele. */
+/** A burial mound — a low arc on the ground line, against `burial`'s pyramid. No Lucide icon covers this. */
 export const TUMULUS_ICON_PATH = 'M4 18.5h16M5 18.5a7 5 0 0 1 14 0'
 
 export const MINOR_FEATURE_ICON_PATHS: Partial<Record<MinorFeatureKind, string>> = {

@@ -5,9 +5,10 @@ import {
   buildCoinHoardPopupHtml,
 } from '../useCoinHoardOverlay'
 
-const t = (key: string, count: number): string => {
+const t = (key: string, count?: number): string => {
   if (key === 'coinHoardPopup.hoardCount')
     return count === 1 ? '1 recorded hoard' : `${count} recorded hoards`
+  if (key === 'coinHoardPopup.viewOnGeonames') return 'View on GeoNames'
   return key
 }
 
@@ -42,5 +43,20 @@ describe('buildCoinHoardPopupHtml', () => {
       t,
     )
     expect(html).not.toContain('<script>')
+  })
+
+  it('links to GeoNames only when a link exists', () => {
+    const withLink = buildCoinHoardPopupHtml(
+      { name: 'Abertura (Spain)', hoard_count: 1, geonames_url: 'https://www.geonames.org/123' },
+      t,
+    )
+    expect(withLink).toContain('href="https://www.geonames.org/123"')
+    expect(withLink).toContain('View on GeoNames')
+
+    const withoutLink = buildCoinHoardPopupHtml(
+      { name: 'Unlinked findspot', hoard_count: 1, geonames_url: null },
+      t,
+    )
+    expect(withoutLink).not.toContain('View on GeoNames')
   })
 })

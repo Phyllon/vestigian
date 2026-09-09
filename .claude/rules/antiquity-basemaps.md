@@ -566,13 +566,14 @@ every Vue template in this app, so `useBattleOverlay.ts`'s own
 `escapeHtmlForPopup` runs on every value before it reaches the popup,
 including the Wikipedia URL going into an `href`.
 
-**Mark**: a new hand-stroked crossed-blades glyph in `useSiteIcons.ts`
-(`BATTLE_ICON_PATH`/`registerBattleIcon`), the same 24×24 stroked-path
-convention as every other mark on this map — not a Lucide icon on the
-canvas (Lucide is UI chrome only; no icon-font glyph appears on the map
-itself anywhere in this codebase). Always drawn as the reference/pencil
-variant: every row is borrowed from Wikidata, never a contribution, the
-same reasoning `registerLimesIcons`/`registerAtlasIcons` already give.
+**Mark**: `BATTLE_ICON_PATH` (`useSiteIcons.ts`) is Lucide's `swords` path,
+copied verbatim rather than hand-drawn — see the "Marker glyphs are Lucide
+paths" section of `.claude/rules/map-and-tiles.md` for the full reasoning
+and licence check; that section supersedes this one having once said no
+icon-font glyph ever appears on the map. Always drawn as the
+reference/pencil variant: every row is borrowed from Wikidata, never a
+contribution, the same reasoning `registerLimesIcons`/`registerAtlasIcons`
+already give.
 
 ## Ancient ports — an overlay, from "Project Mercury"'s catalogue
 
@@ -626,9 +627,9 @@ showing title, modern name, country, foundation text, and Pleiades/
 Wikipedia links when the row carries them, reusing
 `useBattleOverlay.ts`'s exported `escapeHtmlForPopup`.
 
-**Mark**: a new hand-stroked anchor glyph (`PORT_ICON_PATH`/
-`registerPortIcon`), reference/pencil variant — every row is borrowed,
-never a contribution.
+**Mark**: `PORT_ICON_PATH` is Lucide's `anchor` path (see
+`.claude/rules/map-and-tiles.md`), reference/pencil variant — every row is
+borrowed, never a contribution.
 
 ## ORBIS routes — the Roman transport network, another overlay
 

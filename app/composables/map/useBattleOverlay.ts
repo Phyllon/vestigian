@@ -11,6 +11,8 @@ export const BATTLE_LAYER_ID = 'vestigian-battles'
 export interface BattleFeatureProperties {
   title: string
   year: number
+  wikidata_id: string
+  location_precision: 'precise' | 'rough'
   wikipedia_url: string | null
 }
 
@@ -46,11 +48,21 @@ export const buildBattlePopupHtml = (
     escapeHtmlForPopup(year),
   ]
 
+  if (properties.location_precision === 'rough') {
+    lines.push(escapeHtmlForPopup(t('battlePopup.locationApproximate')))
+  }
+
   if (properties.wikipedia_url) {
     const href = escapeHtmlForPopup(properties.wikipedia_url)
     const label = t('battlePopup.viewOnWikipedia')
     lines.push(`<a href="${href}" target="_blank" rel="noopener noreferrer">${label} ↗</a>`)
   }
+
+  const wikidataHref = escapeHtmlForPopup(`https://www.wikidata.org/wiki/${properties.wikidata_id}`)
+  const wikidataLabel = t('battlePopup.viewOnWikidata')
+  lines.push(
+    `<a href="${wikidataHref}" target="_blank" rel="noopener noreferrer">${wikidataLabel} ↗</a>`,
+  )
 
   return lines.join('<br>')
 }
