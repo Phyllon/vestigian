@@ -104,11 +104,11 @@
   },
   "legend": {
     "title": "Cosa significano i segni",
-    "hideKey": "Nascondi la chiave",
-    "showKey": "Chiave",
+    "hideKey": "Nascondi la legenda",
+    "showKey": "Legenda",
     "referencedNote": "Gli stessi segni tratti da sottili contorni, senza disco, sono posti di riferimento dall'Atlante di Barrington e Pleiadi — non hanno contribuito qui i record.",
     "frontierTitle": "La frontiera",
-    "battlesTitle": "Battaglia",
+    "battlesTitle": "Battaglie",
     "battleMark": "Battaglia, prima del 500 CE",
     "portsTitle": "Porti antichi",
     "portMark": "Porto o approdo",
@@ -119,10 +119,11 @@
       "ferry": "Traghetto"
     },
     "featuresTitle": "Testimonianze minori",
-    "coinHoardsTitle": "Ripostigli monetali",
+    "coinHoardsTitle": "Ripostigli monetari",
     "coinHoardMark": "Luogo di rinvenimento registrato",
     "basemapCreditDare": "Antichità (DARE): © Johan Åhlfeldt, Gothenburg University, CC BY-SA 3.0.",
-    "basemapCreditBarrington": "Antichità (Barrington): strade, coste e luoghi dal centro di mappatura del mondo antico (ODbL 1.0) e Pleiades (CC BY 3.0)."
+    "basemapCreditBarrington": "Antichità (Barrington): strade, coste e luoghi dal centro di mappatura del mondo antico (ODbL 1.0) e Pleiades (CC BY 3.0).",
+    "tapForDetails": "Toccare o fare clic su un segno sulla mappa per aprire ciò che è registrato su di esso."
   },
   "siteDetail": {
     "loading": "Caricamento",
@@ -324,7 +325,7 @@
     "barringtonHeading": "Antiquity (Barrington) mappa di base",
     "barringtonBody": "Coste, strade, corsi d'acqua e luoghi antichi provengono dall'Ancient World Mapping Center (ODbL 1.0) e da Pleiades (CC BY 3.0). Entrambi sono riutilizzabili, anche commercialmente, con attribuzione — la clausola share-alike di ODbL si applica al database sottostante, non alle tessere di mappa generate.",
     "dareHeading": "Mappa di base dell'antichità (DARE)",
-    "dareBody": "Questa basemap è CC BY-SA 3.0 di Johan Åhlfeldt (Atlante digitale dell'Impero Romano, Università di Goteborg) — ma due dei suoi strati di origine sono accreditati non commerciali (CC BY-NC 3.0 / CC BY-NC-SA), che la coperta CC BY-SA non può sovrascrivere. Trattare questo strato specifico come uso non commerciale solo.",
+    "dareBody": "Questa basemap è CC BY-SA 3.0 di Johan Åhlfeldt (Atlante digitale dell'Impero Romano, Università di Goteborg) — ma due dei suoi strati di origine sono accreditati non commerciali (CC BY-NC 3.0 / CC BY-NC-SA), che la licenza CC BY-SA generale non può sostituire. Trattare questo strato specifico come uso non commerciale solo.",
     "limesHeading": "La frontiera (limes)",
     "limesBody": "La linea di frontiera deriva dall'estensione dell'impero dell'Ancient World Mapping Center (ODbL 1.0) e non fa parte del database contribuito.",
     "overlaysHeading": "Ulteriori sovrapposizioni della mappa",
@@ -505,7 +506,9 @@
     "loading": "Dispiegamento della mappa…"
   },
   "battlePopup": {
-    "viewOnWikipedia": "Visualizza su Wikipedia"
+    "viewOnWikipedia": "Visualizza su Wikipedia",
+    "viewOnWikidata": "Visualizza su Wikidata",
+    "locationApproximate": "La posizione è approssimativa"
   },
   "portPopup": {
     "viewOnPleiades": "Vedi su Pleiades",
@@ -530,7 +533,8 @@
     }
   },
   "coinHoardPopup": {
-    "hoardCount": "Nessun ripostiglio registrato qui | 1 ripostiglio registrato | {n} ripostigli registrati"
+    "hoardCount": "Nessun ripostiglio registrato qui | 1 ripostiglio registrato | {n} ripostigli registrati",
+    "viewOnGeonames": "Visualizza su GeoNames"
   },
   "siteExternalLinks": {
     "title": "Anche registrato in",
@@ -571,7 +575,7 @@
     "showImage": "Mostra immagine {index} di {count}"
   },
   "tracingDetail": {
-    "area": "Area",
+    "area": "Settore",
     "route": "Itinerario",
     "recordsHere": "{count} record qui",
     "closeDetails": "Chiudi dettagli di tracciamento",
@@ -957,7 +961,8 @@
       "disable": "Spegnilo",
       "disabled": "L'autenticazione a due fattori è disattivata.",
       "disableFailed": "Non ha funzionato. Controlla la password e il codice e riprova."
-    }
+    },
+    "languageHelp": "L'inglese è mantenuto più accurato. Le altre lingue sono tradotte automaticamente e verificate solo occasionalmente, quindi il significato può variare — in caso di dubbio, l'inglese è la versione affidabile."
   },
   "contributor": {
     "notFound": "Nessun collaboratore con questo nome.",
@@ -1008,5 +1013,10 @@
     "menuLabel": "Livelli",
     "labelNone": "Livelli: nessuno attivo",
     "labelActive": "Livelli: {count} attivi"
+  },
+  "languageNotice": {
+    "body": "Questa pagina è mostrata in {language}. L'inglese è la lingua più affidabile qui — le altre possono avere un significato leggermente diverso.",
+    "switchToEnglish": "Passa all'inglese",
+    "dismiss": "Chiudi questo avviso"
   }
 }

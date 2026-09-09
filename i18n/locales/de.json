@@ -104,8 +104,8 @@
   },
   "legend": {
     "title": "Was die Markierungen bedeuten",
-    "hideKey": "Schlüssel ausblenden",
-    "showKey": "Schlüssel",
+    "hideKey": "Legende ausblenden",
+    "showKey": "Legende",
     "referencedNote": "Die gleichen Markierungen, die als dünne Umrisse ohne Scheibe gezeichnet sind, sind Orte, auf die aus dem Barrington Atlas und den Plejaden verwiesen wird - keine Aufzeichnungen, die hier beigetragen wurden.",
     "frontierTitle": "Die Grenze",
     "battlesTitle": "Schlachten",
@@ -122,7 +122,8 @@
     "coinHoardsTitle": "Münzhorte",
     "coinHoardMark": "Dokumentierter Münzhort-Fundort",
     "basemapCreditDare": "Antike (DARE): © Johan Åhlfeldt, Universität Göteborg, CC BY-SA 3.0.",
-    "basemapCreditBarrington": "Antike (Barrington): Straßen, Küsten und Orte vom Ancient World Mapping Center (ODbL 1.0) und Plejaden (CC BY 3.0)."
+    "basemapCreditBarrington": "Antike (Barrington): Straßen, Küsten und Orte vom Ancient World Mapping Center (ODbL 1.0) und Plejaden (CC BY 3.0).",
+    "tapForDetails": "Tippen oder klicken Sie auf eine Markierung auf der Karte, um zu öffnen, was darüber aufgezeichnet ist."
   },
   "siteDetail": {
     "loading": "Wird geladen…",
@@ -131,7 +132,7 @@
     "openFullEntry": "Öffnen Sie den vollständigen Eintrag",
     "edit": "Bearbeiten",
     "revised": "Überarbeitet",
-    "notFound": "Diese Website konnte nicht geladen werden. Es wurde möglicherweise entfernt oder wartet auf eine Überprüfung.",
+    "notFound": "Dieser Fundort konnte nicht geladen werden. Er wurde möglicherweise entfernt oder wartet auf eine Überprüfung.",
     "endorse": "Als hilfreich markieren",
     "endorsedByMe": "Von dir als hilfreich markiert",
     "endorsementCount": "Noch niemand hat das als hilfreich markiert | 1 Person fand das hilfreich | {n} Personen fanden das hilfreich"
@@ -318,9 +319,9 @@
     "title": "Daten und Lizenzen",
     "intro": "Vestigian basiert auf Daten, die andere frei wiederverwendbar gemacht haben. Begriffe unterscheiden sich je nach Schicht - hier ist, was für jeden gilt.",
     "recordsHeading": "Beitragende Aufzeichnungen",
-    "recordsBody": "Website und Tracing-Text ist CC BY-SA - frei zu verwenden und anzupassen, auch kommerziell, sofern Änderungen unter derselben Lizenz geteilt werden und die Quelle gutgeschrieben wird. Die strukturierten Metadaten (Koordinaten, Daten, Kategorien) sind CC0 — keine Rechte vorbehalten.",
+    "recordsBody": "Fundort- und Tracing-Text ist CC BY-SA - frei zu verwenden und anzupassen, auch kommerziell, sofern Änderungen unter derselben Lizenz geteilt werden und die Quelle gutgeschrieben wird. Die strukturierten Metadaten (Koordinaten, Daten, Kategorien) sind CC0 — keine Rechte vorbehalten.",
     "imagesHeading": "Fotografien",
-    "imagesBody": "Jede Fotografie trägt ihre eigene Lizenz und Zuordnung, die unter dem Bild selbst gezeigt wird. Die Lizenzen variieren je nach Datensatz; Überprüfen Sie das Bild, bevor Sie es separat von der von ihm dargestellten Website wiederverwenden.",
+    "imagesBody": "Jede Fotografie trägt ihre eigene Lizenz und Zuordnung, die unter dem Bild selbst gezeigt wird. Die Lizenzen variieren je nach Datensatz; Überprüfen Sie das Bild, bevor Sie es separat von dem von ihm dargestellten Fundort wiederverwenden.",
     "barringtonHeading": "Antike (Barrington) Basiskarte",
     "barringtonBody": "Alte Küsten, Straßen, Wasser und Orte sind aus dem Ancient World Mapping Center (ODbL 1.0) und Pleiades (CC BY 3.0) gezogen. Beide sind wiederverwendbar, auch kommerziell, mit Attribution — der Share-Alike-Anteil von ODbL gilt für die zugrunde liegende Datenbank, nicht für die gerenderten Kartenkacheln.",
     "dareHeading": "Antike (DARE) Basiskarte",
@@ -360,7 +361,7 @@
     "accountHeading": "Erstellen eines Accounts",
     "accountBody": "Die Registrierung speichert Ihre E-Mail-Adresse, den Anzeigenamen und einen gesalzenen Passwort-Hash (argon2id - das Passwort selbst wird nie gespeichert). Dies wird verarbeitet, um den Vertrag über die Bereitstellung eines Kontos zu erfüllen (DSGVO Art. 6(1)(b)). Ihre Adresse wird nur verwendet, um sie zu überprüfen, damit Sie sich anmelden und ein vergessenes Passwort zurücksetzen können, und um Sie über Entscheidungen über Ihre eigenen Beiträge oder Ihr Konto zu informieren - niemals für Marketing, und es gibt keinen Newsletter.",
     "contributionHeading": "Beiträge",
-    "contributionBody": "Eine Website, ein Tracing oder ein Bild, das Sie einreichen, ist mit Ihrem Konto verknüpft, so dass der Bearbeitungsverlauf lesbar bleibt und das Vertrauen ausgewertet werden kann. Genehmigte Beiträge sind öffentlich, ebenso wie die Tatsache, dass Ihr Konto sie erstellt hat - so funktioniert die Revisionsgeschichte des Atlas und ist der Kern dessen, was der Dienst ist. Wenn Sie Ihr Konto löschen, wird dieser Link anonymisiert (siehe \"Ihre Rechte\" unten), anstatt dass der Beitrag aus den dort genannten Gründen entfernt wird.",
+    "contributionBody": "Ein Fundort, ein Tracing oder ein Bild, das Sie einreichen, ist mit Ihrem Konto verknüpft, so dass der Bearbeitungsverlauf lesbar bleibt und das Vertrauen ausgewertet werden kann. Genehmigte Beiträge sind öffentlich, ebenso wie die Tatsache, dass Ihr Konto sie erstellt hat - so funktioniert die Revisionsgeschichte des Atlas und ist der Kern dessen, was der Dienst ist. Wenn Sie Ihr Konto löschen, wird dieser Link anonymisiert (siehe \"Ihre Rechte\" unten), anstatt dass der Beitrag aus den dort genannten Gründen entfernt wird.",
     "photographHeading": "Fotografien",
     "photographBody": "Jedes hochgeladene Bild wird vor der Speicherung auf unserem Server neu codiert, wodurch EXIF-Metadaten – einschließlich eingebetteter GPS-Koordinaten oder Kamera- / Gerätekennungen – entfernt werden, so dass keine davon den Speicher oder einen anderen Besucher erreicht.",
     "cookiesHeading": "Cookies",
@@ -373,7 +374,7 @@
     "recipientCdn": "CDN- und Objektspeicher (Bunny.net): bedient Bilder und Kartenkacheln; beendet verschlüsselte Verbindungen innerhalb der EU.",
     "recipientMail": "Transaktions-E-Mail (Lettermint, Amsterdam): sendet Konto- und Moderations-E-Mails - Verifizierungslinks, Passwort-Resets, Entscheidungen über Ihre Beiträge.",
     "recipientTranslate": "Maschinelle Übersetzung (LibreTranslate): läuft auf unserem eigenen Server, nicht auf einem Dritten - ausgeliehener Artikeltext wird dort übersetzt, niemals extern gesendet.",
-    "recipientEnrichment": "Wikidata, Wikipedia und Pleiades (außerhalb der EU): Wenn die Beschreibung einer Website aus diesen öffentlichen Projekten ergänzt werden kann, stellt unser Server - niemals Ihr Browser - diese Anfrage, sodass Ihre IP-Adresse nicht mit ihnen geteilt wird.",
+    "recipientEnrichment": "Wikidata, Wikipedia und Pleiades (außerhalb der EU): Wenn die Beschreibung eines Fundorts aus diesen öffentlichen Projekten ergänzt werden kann, stellt unser Server - niemals Ihr Browser - diese Anfrage, sodass Ihre IP-Adresse nicht mit ihnen geteilt wird.",
     "recipientBasemap": "Kartenkachel-Anbieter: Einige Basemap-Layer werden direkt von Ihrem Browser von ihren eigenen Hosts abgerufen, so dass Ihre IP-Adresse sie so erreicht, wie sie jede Website besuchen würde, die eine Karte einbettet.",
     "recipientSecurity": "Automatisierte Missbrauchserkennung (CrowdSec): IP-Adressen, die unsere Server lokal als missbräuchlich kennzeichnen, werden mit dem Community Threat-Intelligence-Service von CrowdSec auf der Grundlage des berechtigten Interesses der Netzwerksicherheit geteilt (Art. 6(1)(f)).",
     "rightsHeading": "Ihre Rechte",
@@ -488,7 +489,7 @@
     "intro": "Der Rand der römischen Welt, vom Solway bis zum Euphrat. Er war nie ein Einzelnes: eine gemauerte Mauer über das rätische Plateau, ein Fluss, patrouilliert von seinem Westufer, eine Reihe von Kastellen am letzten verlässlichen Wasser vor der Wüste. Was folgt, ist dieser Rand in den Abschnitten, die die Quellen benennen, gezogen aus dem Ausmaß des Imperiums um 200 n. Chr. des Ancient World Mapping Center und aus dessen Aufzeichnung der tatsächlich errichteten Mauern.",
     "acrossStretches": "{length} über {count} Abschnitte",
     "attribution": "Grenze abgeleitet aus der {link}, dem Ausmaß des Imperiums und seiner Mauerlinie, ODbL 1.0. Die Namen und die obigen Anmerkungen sind die dieses Atlas; die Geometrie ist es nicht.",
-    "attributionLinkText": "Ancient World Mapping Center"
+    "attributionLinkText": "Aktivitäten in der Nähe von Ancient World Mapping Center"
   },
   "mapSearch": {
     "searching": "Suche",
@@ -505,7 +506,9 @@
     "loading": "Entfaltung der Karte"
   },
   "battlePopup": {
-    "viewOnWikipedia": "Ansicht auf Wikipedia"
+    "viewOnWikipedia": "Auf Wikipedia ansehen",
+    "viewOnWikidata": "Auf Wikidata ansehen",
+    "locationApproximate": "Standort ist ungefähr"
   },
   "portPopup": {
     "viewOnPleiades": "Auf Pleiades ansehen",
@@ -530,7 +533,8 @@
     }
   },
   "coinHoardPopup": {
-    "hoardCount": "Keine Horte verzeichnet | 1 verzeichneter Hort | {n} verzeichnete Horte"
+    "hoardCount": "Keine Horte verzeichnet | 1 verzeichneter Hort | {n} verzeichnete Horte",
+    "viewOnGeonames": "Auf GeoNames ansehen"
   },
   "siteExternalLinks": {
     "title": "Auch aufgezeichnet in",
@@ -566,7 +570,7 @@
     "copyCoordinates": "Die Koordinaten {coordinates} kopieren"
   },
   "siteGallery": {
-    "defaultAlt": "Foto der Website",
+    "defaultAlt": "Foto des Fundorts",
     "choosePhotograph": "Wählen Sie ein Foto",
     "showImage": "Bild {index} von {count} anzeigen"
   },
@@ -616,8 +620,8 @@
     "aRouteDescription": "Eine Straße, ein Aquädukt oder eine Wand, die über die Landschaft geführt wird.",
     "cancel": "Abbrechen",
     "whereIsIt": "Wo ist er?",
-    "tapTheMap": "Tippen Sie auf die Karte an der Position der Website. Sie können es danach anpassen.",
-    "sitePublished": "Website veröffentlicht. Fügen Sie Fotos hinzu, während Sie hier sind, oder schließen Sie dieses Panel.",
+    "tapTheMap": "Tippen Sie auf die Karte an der Position des Fundorts. Sie können es danach anpassen.",
+    "sitePublished": "Fundort veröffentlicht. Fügen Sie Fotos hinzu, während Sie hier sind, oder schließen Sie dieses Panel.",
     "done": "Fertig"
   },
   "imageUploader": {
@@ -642,15 +646,15 @@
     "tryDifferentFile": "Versuchen Sie eine andere Datei."
   },
   "siteEditorForm": {
-    "nameTooShort": "Geben Sie der Website einen Namen mit mindestens drei Zeichen.",
+    "nameTooShort": "Geben Sie dem Fundort einen Namen mit mindestens drei Zeichen.",
     "editsPublishImmediately": "Ihre Edits veröffentlichen sofort.",
     "reviewNotice": "Ein Moderator prüft dies, bevor es erscheint. {count} weitere akzeptierte {contributionWord} und deine Änderungen sind sofort live.",
     "contribution": "beitrag",
     "contributions": "beiträge",
     "saveFailedTitle": "Das konnte nicht gespeichert werden",
     "tryAgainMoment": "Versuchen Sie es gleich noch einmal.",
-    "editTitle": "Bearbeiten Sie diese Website",
-    "recordTitle": "Aufzeichnen einer Website",
+    "editTitle": "Bearbeiten Sie diesen Fundort",
+    "recordTitle": "Aufzeichnen eines Fundorts",
     "name": "Name",
     "namePlaceholder": "Kastell Saalburg",
     "type": "Typ",
@@ -661,7 +665,7 @@
     "to": "Bis",
     "description": "Beschreibung",
     "whatChanged": "Was hast du verändert?",
-    "whatChangedHint": "Gezeigt in der Geschichte der Website",
+    "whatChangedHint": "Gezeigt in der Geschichte des Fundorts",
     "editSummaryPlaceholder": "Datierung korrigiert",
     "saveChanges": "Änderungen speichern",
     "saveSite": "Fundort speichern",
@@ -743,7 +747,7 @@
     "oneMoment": "Ein Moment",
     "confirmed": "Bestätigt",
     "accountReady": "Ihr Konto ist bereit",
-    "readyBody": "Melden Sie sich an und notieren Sie Ihre erste Website. Die ersten beiden gehen an einem moderator vorbei; danach veröffentlichen sie, während sie sie schreiben.",
+    "readyBody": "Melden Sie sich an und notieren Sie Ihren ersten Fundort. Die ersten beiden gehen an einem Moderator vorbei; danach veröffentlichen sie, während sie sie schreiben.",
     "signIn": "Anmelden",
     "notConfirmed": "Nicht bestätigt",
     "linkDidNotWork": "Dieser Link funktionierte nicht",
@@ -775,12 +779,12 @@
     "lastRevised": "Letzte Überarbeitung"
   },
   "siteEditPage": {
-    "notFound": "Keine Website unter diesem Namen aufgezeichnet.",
+    "notFound": "Kein Fundort unter diesem Namen aufgezeichnet.",
     "editingTitle": "{title} wird bearbeitet",
     "backToEntry": "Zurück zum Eintrag",
     "nothingChanged": "Nichts wurde geändert.",
     "position": "Position",
-    "positionHint": "Ändern Sie dies nur, wenn die aufgezeichnete Position falsch ist. Das Verschieben einer Website ist eine erhebliche Bearbeitung.",
+    "positionHint": "Ändern Sie dies nur, wenn die aufgezeichnete Position falsch ist. Das Verschieben eines Fundorts ist eine erhebliche Bearbeitung.",
     "latitude": "Breitengrad",
     "longitude": "Längengrad"
   },
@@ -957,7 +961,8 @@
       "disable": "Abschalten",
       "disabled": "Die Zwei-Faktor-Authentifizierung ist ausgeschaltet.",
       "disableFailed": "Das hat nicht funktioniert. Überprüfen Sie Ihr Passwort und Ihren Code und versuchen Sie es erneut."
-    }
+    },
+    "languageHelp": "Englisch wird am genauesten gehalten. Andere Sprachen sind maschinell übersetzt und werden nur gelegentlich überprüft, sodass die Bedeutung abweichen kann – im Zweifel ist Englisch die verlässlichste Version."
   },
   "contributor": {
     "notFound": "Diese Person gibt es nicht.",
@@ -1008,5 +1013,10 @@
     "menuLabel": "Overlays",
     "labelNone": "Overlays: keine aktiv",
     "labelActive": "Overlays: {count} aktiv"
+  },
+  "languageNotice": {
+    "body": "Diese Seite wird in {language} angezeigt. Englisch ist hier die Sprache, auf die man sich am meisten verlassen kann – andere Sprachen können eine etwas andere Bedeutung haben.",
+    "switchToEnglish": "Zu Englisch wechseln",
+    "dismiss": "Diesen Hinweis schließen"
   }
 }

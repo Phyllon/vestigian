@@ -104,8 +104,8 @@
   },
   "legend": {
     "title": "Wat de markeringen betekenen",
-    "hideKey": "Sleutel verbergen",
-    "showKey": "Sleutel",
+    "hideKey": "Legenda verbergen",
+    "showKey": "Legenda",
     "referencedNote": "Dezelfde markeringen, getekend als dunne contouren zonder vulling, zijn plaatsen genoemd door de Barrington Atlas en Pleiades — geen hier bijgedragen vermeldingen.",
     "frontierTitle": "De grens",
     "battlesTitle": "Gevechten",
@@ -122,7 +122,8 @@
     "coinHoardsTitle": "Muntschatten",
     "coinHoardMark": "Geregistreerde vindplaats van een muntschat",
     "basemapCreditDare": "Oudheid (DARE): © Johan Åhlfeldt, Universiteit Göteborg, CC BY-SA 3.0.",
-    "basemapCreditBarrington": "Oudheid (Barrington): wegen, kustlijn en plaatsen vanaf het Oude Wereldkaartcentrum (ODbL 1.0) en Pleiades (CC BY 3.0)."
+    "basemapCreditBarrington": "Oudheid (Barrington): wegen, kustlijn en plaatsen vanaf het Oude Wereldkaartcentrum (ODbL 1.0) en Pleiades (CC BY 3.0).",
+    "tapForDetails": "Tik op of klik op een teken op de kaart om te openen wat er over is opgenomen."
   },
   "siteDetail": {
     "loading": "Laden",
@@ -172,7 +173,7 @@
         "title": "Voer uw code in",
         "introCode": "Open uw aanmeldingsapp en voer de 6-cijferige code in.",
         "introBackup": "Voer een van de back-upcodes in die je hebt opgeslagen toen je dit aanzette.",
-        "code": "Code",
+        "code": "Rubriek",
         "backupCode": "Reservekopiecode",
         "submit": "Verifiëren",
         "useBackupInstead": "In plaats daarvan een reservekopiecode gebruiken",
@@ -324,7 +325,7 @@
     "barringtonHeading": "Oudheid (Barrington) basiskaart",
     "barringtonBody": "Antieke kustlijn, wegen, water en plaatsen komen van het Ancient World Mapping Center (ODbL 1.0) en Pleiades (CC BY 3.0). Beide zijn herbruikbaar, ook commercieel, met naamsvermelding — de share-alike-clausule van ODbL geldt voor de onderliggende database, niet voor de gegenereerde kaarttegels.",
     "dareHeading": "Oudheid (DARE) basiskaart",
-    "dareBody": "Deze basiskaart is CC BY-SA 3.0 van Johan Åhlfeldt (Digitale Atlas van het Romeinse Rijk, Universiteit Göteborg) maar twee van zijn eigen bronlagen zijn niet-commercieel (CC BY-NC 3.0 / CC BY-NC-SA), die de deken CC BY-SA niet kan overnemen. Behandel deze specifieke laag alleen als niet-commercieel gebruik.",
+    "dareBody": "Deze basiskaart is CC BY-SA 3.0 van Johan Åhlfeldt (Digitale Atlas van het Romeinse Rijk, Universiteit Göteborg) maar twee van zijn eigen bronlagen zijn niet-commercieel (CC BY-NC 3.0 / CC BY-NC-SA), die de algemene CC BY-SA-licentie niet kan overschrijven. Behandel deze specifieke laag alleen als niet-commercieel gebruik.",
     "limesHeading": "De grens (limes)",
     "limesBody": "De grenslijn is afgeleid van de omvang van het rijk volgens het Ancient World Mapping Center (ODbL 1.0) en maakt geen deel uit van de bijgedragen database.",
     "overlaysHeading": "Extra map-overlays",
@@ -450,7 +451,7 @@
     "ad": "{year} n.Chr.",
     "toYear": "tot {year}",
     "fromYear": "vanaf {year}",
-    "yearRange": "{from} – {to}",
+    "yearRange": "{from} Wat {to}",
     "atTheStart": "bij het begin",
     "kmAlong": "{km} km langs de route"
   },
@@ -505,7 +506,9 @@
     "loading": "Ontvouwen van de kaart"
   },
   "battlePopup": {
-    "viewOnWikipedia": "Bekijken op Wikipedia"
+    "viewOnWikipedia": "Bekijken op Wikipedia",
+    "viewOnWikidata": "Bekijken op Wikidata",
+    "locationApproximate": "Locatie is bij benadering"
   },
   "portPopup": {
     "viewOnPleiades": "Bekijk op Pleiades",
@@ -530,7 +533,8 @@
     }
   },
   "coinHoardPopup": {
-    "hoardCount": "Geen schatten geregistreerd | 1 geregistreerde schat | {n} geregistreerde schatten"
+    "hoardCount": "Geen schatten geregistreerd | 1 geregistreerde schat | {n} geregistreerde schatten",
+    "viewOnGeonames": "Bekijken op GeoNames"
   },
   "siteExternalLinks": {
     "title": "Ook opgenomen in",
@@ -755,7 +759,7 @@
     "undated": "Niet gedateerd",
     "fromYear": "Van {year}",
     "untilYear": "Tot {year}",
-    "yearRange": "{from} – {to}"
+    "yearRange": "{from} Wat {to}"
   },
   "siteDetailPage": {
     "showOnMap": "Op de kaart tonen",
@@ -940,7 +944,7 @@
       "scanIntro": "Scan dit met een authenticator-app (Google Authenticator, 1Password, Authy, of vergelijkbaar), voer dan de code die het toont om te bevestigen.",
       "qrAlt": "QR-code voor twee-factor setup",
       "manualKey": "Of voer deze sleutel met de hand in",
-      "confirmCode": "Code",
+      "confirmCode": "Rubriek",
       "confirm": "Bevestigen en inschakelen",
       "enabled": "Twee-factor authenticatie staat aan. Bewaar je back-up codes ergens veilig.",
       "backupCodesIntro": "Bewaar deze tien back-up codes ergens veilig. Elk werkt eenmaal, en dit is de enige keer dat ze worden getoond.",
@@ -957,7 +961,8 @@
       "disable": "Uitzetten",
       "disabled": "Twee-factor authenticatie is uitgeschakeld.",
       "disableFailed": "Dat werkte niet. Controleer uw wachtwoord en code en probeer het opnieuw."
-    }
+    },
+    "languageHelp": "Engels wordt het meest accuraat gehouden. Andere talen zijn machinaal vertaald en worden slechts af en toe gecontroleerd, waardoor de betekenis kan afwijken — bij twijfel is Engels de betrouwbaarste versie."
   },
   "contributor": {
     "notFound": "Deze bijdrager bestaat niet.",
@@ -1008,5 +1013,10 @@
     "menuLabel": "Overlays",
     "labelNone": "Overlays: geen actief",
     "labelActive": "Overlays: {count} actief"
+  },
+  "languageNotice": {
+    "body": "Deze pagina wordt weergegeven in {language}. Engels is hier de taal om het meest op te vertrouwen — andere talen kunnen een iets andere betekenis hebben.",
+    "switchToEnglish": "Naar Engels wisselen",
+    "dismiss": "Melding sluiten"
   }
 }

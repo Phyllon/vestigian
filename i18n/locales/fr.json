@@ -104,8 +104,8 @@
   },
   "legend": {
     "title": "Ce que signifient les marques",
-    "hideKey": "Masquer la clé",
-    "showKey": "Clé",
+    "hideKey": "Masquer la légende",
+    "showKey": "Légende",
     "referencedNote": "Les mêmes marques dessinées que les contours fins, sans disque, sont des endroits référencés de l'Atlas de Barrington et des Pléiades — pas les enregistrements fournis ici.",
     "frontierTitle": "La frontière",
     "battlesTitle": "Batailles",
@@ -122,7 +122,8 @@
     "coinHoardsTitle": "Trésors monétaires",
     "coinHoardMark": "Lieu de découverte répertorié",
     "basemapCreditDare": "Antiquité : © Johan Åhlfeldt, Université de Göteborg, CC BY-SA 3.0.",
-    "basemapCreditBarrington": "Antiquité (Barrington) : routes, côtes et lieux du Centre de cartographie du monde antique (ODbL 1.0) et des Pléiades (CC BY 3.0)."
+    "basemapCreditBarrington": "Antiquité (Barrington) : routes, côtes et lieux du Centre de cartographie du monde antique (ODbL 1.0) et des Pléiades (CC BY 3.0).",
+    "tapForDetails": "Appuyez ou cliquez sur une marque sur la carte pour ouvrir ce qui est enregistré à ce sujet."
   },
   "siteDetail": {
     "loading": "Chargement",
@@ -289,8 +290,8 @@
         "title": "Nom",
         "category": "Type",
         "summary": "Résumé",
-        "description": "Description",
-        "position": "Position",
+        "description": "Désignation des marchandises",
+        "position": "Fonction",
         "periodFrom": "Période (début)",
         "periodTo": "Période (fin)",
         "geometry": "Forme",
@@ -324,7 +325,7 @@
     "barringtonHeading": "Carte de base de l'antiquité (Barrington)",
     "barringtonBody": "Les côtes anciennes, les routes, l'eau et les lieux sont tirés de l'Ancient World Mapping Center (ODbL 1.0) et de Pleiades (CC BY 3.0). Les deux sont réutilisables, y compris commercialement, avec attribution — le partage à l'identique d'ODbL s'applique à la base de données sous-jacente, pas aux tuiles de carte produites.",
     "dareHeading": "Carte de base de l'antiquité (DARE)",
-    "dareBody": "Cette carte de base est CC BY-SA 3.0 de Johan Åhlfeldt (Atlas numérique de l'Empire romain, Université de Göteborg) — mais deux de ses propres couches de source sont créditées non commerciales (CC BY-NC 3.0 / CC BY-NC-SA), que la couverture CC BY-SA ne peut pas surcharger. Traiter cette couche comme une utilisation non commerciale seulement.",
+    "dareBody": "Cette carte de base est CC BY-SA 3.0 de Johan Åhlfeldt (Atlas numérique de l'Empire romain, Université de Göteborg) — mais deux de ses propres couches de source sont créditées non commerciales (CC BY-NC 3.0 / CC BY-NC-SA), que la licence CC BY-SA générale ne peut pas remplacer. Traiter cette couche comme une utilisation non commerciale seulement.",
     "limesHeading": "La frontière (limes)",
     "limesBody": "La ligne de frontière est dérivée de l'étendue de l'empire de l'Ancient World Mapping Center (ODbL 1.0) et ne fait pas partie de la base contribuée.",
     "overlaysHeading": "Superpositions de cartes supplémentaires",
@@ -505,7 +506,9 @@
     "loading": "Déplier la carte"
   },
   "battlePopup": {
-    "viewOnWikipedia": "Voir sur Wikipédia"
+    "viewOnWikipedia": "Voir sur Wikipédia",
+    "viewOnWikidata": "Voir sur Wikidata",
+    "locationApproximate": "Emplacement approximatif"
   },
   "portPopup": {
     "viewOnPleiades": "Voir sur Pleiades",
@@ -530,7 +533,8 @@
     }
   },
   "coinHoardPopup": {
-    "hoardCount": "Aucun trésor répertorié ici | 1 trésor répertorié | {n} trésors répertoriés"
+    "hoardCount": "Aucun trésor répertorié ici | 1 trésor répertorié | {n} trésors répertoriés",
+    "viewOnGeonames": "Voir sur GeoNames"
   },
   "siteExternalLinks": {
     "title": "Également enregistré en",
@@ -549,7 +553,7 @@
       "omnesviae": "OmnesViae",
       "osmway": "OpenStreetMap",
       "osmnode": "OpenStreetMap",
-      "pecs": "Princeton Encyclopedia of Classical Sites",
+      "pecs": "Princeton Encyclopédie des sites classiques",
       "romaq": "ROMAQ — Aqueducs romains",
       "archis": "Archis",
       "wikipedia": "Wikipédia",
@@ -562,7 +566,7 @@
     "locationNotResolved": "Emplacement non résolu",
     "period": "Période",
     "near": "Près",
-    "position": "Position",
+    "position": "Fonction",
     "copyCoordinates": "Copier les coordonnées {coordinates}"
   },
   "siteGallery": {
@@ -659,7 +663,7 @@
     "from": "De",
     "fromHint": "Négatif pour BC",
     "to": "Aux",
-    "description": "Description",
+    "description": "Désignation des marchandises",
     "whatChanged": "Qu'avez-vous changé ?",
     "whatChangedHint": "Montré dans l'histoire du site",
     "editSummaryPlaceholder": "Corrigé la date",
@@ -779,7 +783,7 @@
     "editingTitle": "Modification de {title}",
     "backToEntry": "Retour à l'entrée",
     "nothingChanged": "Rien n'a été changé.",
-    "position": "Position",
+    "position": "Fonction",
     "positionHint": "Ne changez cela que si la position enregistrée est erronée. Déplacement d'un site est une modification substantielle.",
     "latitude": "Latitude",
     "longitude": "Longitude"
@@ -957,7 +961,8 @@
       "disable": "Éteignez",
       "disabled": "L'authentification à deux facteurs est désactivée.",
       "disableFailed": "Ça n'a pas marché. Vérifiez votre mot de passe et votre code et essayez à nouveau."
-    }
+    },
+    "languageHelp": "L'anglais est la version la plus fiable. Les autres langues sont traduites automatiquement et vérifiées seulement de temps en temps, si bien que le sens peut légèrement dériver — en cas de doute, fiez-vous à l'anglais."
   },
   "contributor": {
     "notFound": "Aucun contributeur de ce nom.",
@@ -1008,5 +1013,10 @@
     "menuLabel": "Calques",
     "labelNone": "Calques : aucun actif",
     "labelActive": "Calques : {count} actifs"
+  },
+  "languageNotice": {
+    "body": "Cette page est affichée dans {language}. L'anglais est la langue la plus fiable ici — les autres peuvent avoir un sens légèrement différent.",
+    "switchToEnglish": "Passer à l'anglais",
+    "dismiss": "Ignorer cet avis"
   }
 }

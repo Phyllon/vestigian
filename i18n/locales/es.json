@@ -104,8 +104,8 @@
   },
   "legend": {
     "title": "Lo que significan las marcas",
-    "hideKey": "Ocultar la llave",
-    "showKey": "Clave",
+    "hideKey": "Ocultar la leyenda",
+    "showKey": "Leyenda",
     "referencedNote": "Las mismas marcas dibujadas como esbozos delgados, sin un disco, son lugares referenciados del Atlas Barrington y Pleiades — no registros contribuidos aquí.",
     "frontierTitle": "La frontera",
     "battlesTitle": "Batallas",
@@ -122,7 +122,8 @@
     "coinHoardsTitle": "Tesoros monetarios",
     "coinHoardMark": "Lugar de hallazgo registrado",
     "basemapCreditDare": "Antigüedad (DARE): © Johan Åhlfeldt, Universidad de Gotemburgo, CC BY-SA 3.0.",
-    "basemapCreditBarrington": "Antigüedad (Barrington): carreteras, costa y lugares del Centro de Mapping del Mundo Antiguo (ODbL 1.0) y Pléyades (CC BY 3.0)."
+    "basemapCreditBarrington": "Antigüedad (Barrington): carreteras, costa y lugares del Centro de Mapping del Mundo Antiguo (ODbL 1.0) y Pléyades (CC BY 3.0).",
+    "tapForDetails": "Pulse o haga clic en una marca en el mapa para abrir lo que se registra al respecto."
   },
   "siteDetail": {
     "loading": "Cargando",
@@ -324,7 +325,7 @@
     "barringtonHeading": "Antigüedad (Barrington), mapa base",
     "barringtonBody": "La costa, las rutas, el agua y los lugares antiguos proceden del Ancient World Mapping Center (ODbL 1.0) y de Pleiades (CC BY 3.0). Ambos son reutilizables, incluso comercialmente, con atribución — la cláusula compartir-igual de ODbL se aplica a la base de datos subyacente, no a las teselas de mapa generadas.",
     "dareHeading": "Antigüedad (DARE), mapa base",
-    "dareBody": "Esta base es CC BY-SA 3.0 de Johan Åhlfeldt ( Atlas Digital del Imperio Romano, Universidad de Gotemburgo), pero dos de sus propias capas fuente se acreditan no comerciales (CC BY-NC 3.0 / CC BY-NC-SA), que la manta CC BY-SA no puede anular. Tratar esta capa específica como uso no comercial solamente.",
+    "dareBody": "Esta base es CC BY-SA 3.0 de Johan Åhlfeldt (Atlas Digital del Imperio Romano, Universidad de Gotemburgo), pero dos de sus propias capas fuente se acreditan no comerciales (CC BY-NC 3.0 / CC BY-NC-SA), que la licencia CC BY-SA general no puede anular. Tratar esta capa específica como uso no comercial solamente.",
     "limesHeading": "La frontera (limes)",
     "limesBody": "La línea de frontera se deriva de la extensión del imperio del Ancient World Mapping Center (ODbL 1.0) y no forma parte de la base de datos aportada.",
     "overlaysHeading": "Superposiciones adicionales del mapa",
@@ -488,7 +489,7 @@
     "intro": "El límite del mundo romano, desde el Solway hasta el Éufrates. Nunca fue una sola cosa: un muro de mampostería a través de la meseta rética, un río patrullado desde su orilla occidental, una línea de fuertes en el último punto de agua fiable antes del desierto. Lo que sigue es ese límite en los tramos que las fuentes nombran, extraído de la extensión del imperio hacia el 200 d. C. según el Ancient World Mapping Center y de su registro de los muros que realmente se construyeron.",
     "acrossStretches": "{length} a lo largo de {count} tramos",
     "attribution": "Frontera derivada de la extensión del imperio y el trazado de sus muros según {link}, ODbL 1.0. Los nombres y las notas anteriores son propios de este atlas; la geometría no lo es.",
-    "attributionLinkText": "Ancient World Mapping Center"
+    "attributionLinkText": "Antiguo World Mapping Center"
   },
   "mapSearch": {
     "searching": "Búsqueda",
@@ -505,7 +506,9 @@
     "loading": "Desplegando el mapa"
   },
   "battlePopup": {
-    "viewOnWikipedia": "Ver en Wikipedia"
+    "viewOnWikipedia": "Ver en Wikipedia",
+    "viewOnWikidata": "Ver en Wikidata",
+    "locationApproximate": "Ubicación aproximada"
   },
   "portPopup": {
     "viewOnPleiades": "Ver en Pleiades",
@@ -530,7 +533,8 @@
     }
   },
   "coinHoardPopup": {
-    "hoardCount": "Ningún tesoro registrado aquí | 1 tesoro registrado | {n} tesoros registrados"
+    "hoardCount": "Ningún tesoro registrado aquí | 1 tesoro registrado | {n} tesoros registrados",
+    "viewOnGeonames": "Ver en GeoNames"
   },
   "siteExternalLinks": {
     "title": "También se registró en",
@@ -549,7 +553,7 @@
       "omnesviae": "OmnesViae",
       "osmway": "OpenStreetMap",
       "osmnode": "OpenStreetMap",
-      "pecs": "Princeton Encyclopedia of Classical Sites",
+      "pecs": "Princeton Enciclopedia de los Sitios Clásicos",
       "romaq": "ROMAQ — Acueductos romanos",
       "archis": "Archis",
       "wikipedia": "Wikipedia",
@@ -957,7 +961,8 @@
       "disable": "Apaga",
       "disabled": "La autenticación de dos factores está apagada.",
       "disableFailed": "Eso no funcionó. Comprueba tu contraseña y código e inténtalo de nuevo."
-    }
+    },
+    "languageHelp": "El inglés se mantiene más preciso. Los demás idiomas están traducidos automáticamente y se revisan solo de vez en cuando, por lo que el significado puede variar — en caso de duda, el inglés es la versión de confianza."
   },
   "contributor": {
     "notFound": "No existe ese colaborador.",
@@ -1008,5 +1013,10 @@
     "menuLabel": "Capas",
     "labelNone": "Capas: ninguna activa",
     "labelActive": "Capas: {count} activas"
+  },
+  "languageNotice": {
+    "body": "Esta página se muestra en {language}. El inglés es el idioma en el que más se puede confiar aquí — otros pueden tener un significado ligeramente distinto.",
+    "switchToEnglish": "Cambiar a inglés",
+    "dismiss": "Descartar este aviso"
   }
 }

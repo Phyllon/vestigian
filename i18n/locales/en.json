@@ -33,6 +33,11 @@
     "label": "Language",
     "current": "Language: {name}"
   },
+  "languageNotice": {
+    "body": "This page is shown in {language}. English is the language relied on most here — others may carry slightly different meaning.",
+    "switchToEnglish": "Switch to English",
+    "dismiss": "Dismiss this notice"
+  },
   "basemapSwitcher": {
     "label": "Basemap: {label}",
     "menuLabel": "Basemap",
@@ -110,6 +115,7 @@
   },
   "legend": {
     "title": "What the marks mean",
+    "tapForDetails": "Tap or click a mark on the map to open what is recorded about it.",
     "hideKey": "Hide key",
     "showKey": "Key",
     "referencedNote": "The same marks drawn as thin outlines, without a disc, are places referenced from the Barrington Atlas and Pleiades — not records contributed here.",
@@ -511,7 +517,9 @@
     "loading": "Unfolding the map"
   },
   "battlePopup": {
-    "viewOnWikipedia": "View on Wikipedia"
+    "viewOnWikipedia": "View on Wikipedia",
+    "viewOnWikidata": "View on Wikidata",
+    "locationApproximate": "Location is approximate"
   },
   "portPopup": {
     "viewOnPleiades": "View on Pleiades",
@@ -536,7 +544,8 @@
     }
   },
   "coinHoardPopup": {
-    "hoardCount": "No hoards recorded here | 1 recorded hoard | {n} recorded hoards"
+    "hoardCount": "No hoards recorded here | 1 recorded hoard | {n} recorded hoards",
+    "viewOnGeonames": "View on GeoNames"
   },
   "siteExternalLinks": {
     "title": "Also recorded in",
@@ -909,6 +918,7 @@
     "bio": "About you",
     "bioHelp": "Shown only on your public page, and only if you switch that on.",
     "language": "Language",
+    "languageHelp": "English is kept most accurate. Other languages are machine-translated and audited only occasionally, so meaning can drift — when in doubt, English is the version to trust.",
     "publicProfile": "Give me a public contributor page",
     "publicProfileHelp": "Off by default. It shows your display name, this description and the records you have published — never your email, never what you have visited.",
     "publicProfileLink": "See it",
