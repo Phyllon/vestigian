@@ -65,37 +65,120 @@ export const useViewportTiles = () => {
    * pale marker on a pale sheet — the overlay vanishes with nothing logged.
    *
    * `haloOnRaster` is keyed on the basemap itself, not the sheet tone: DARE and
-   * satellite are real photography, where a reference mark's fixed mid-tone
-   * ink can land on a pixel of any value at all — reported as poor icon
-   * contrast on exactly those two. The Barrington sheet is `isAntiquityView`
-   * too but is our own flat vector fill, a known colour a mark already
-   * contrasts against, so it's excluded here even though `sheetTone` groups
-   * it with DARE.
+   * satellite are real photography, where a reference mark's fixed ink can
+   * land on a pixel of any value at all.
+   *
+   * `referenceInk`/`haloColour` set a per-basemap colour for reference marks,
+   * requested explicitly after a darker version of the same mid-tone still
+   * read as "barely viewable in some conditions": every one of the four
+   * `BasemapView`s gets its own answer rather than one shared compromise.
+   *
+   * - `antiquity-dare` and `antiquity-awmc` → `base.ink`, the same dark ink a
+   *   contributed marker's disc already carries. Measured against
+   *   Barrington's four flat fills (land/sea/inland/urban): 7.9–12.8:1, up
+   *   from `ATLAS_MARK_INK`'s 2.26–3.24:1 (under WCAG 1.4.11's 3:1 floor for
+   *   graphical objects in three of the four). The two stay told apart from a
+   *   contributed marker by the disc alone, not by a second mid-tone.
+   * - `vestigian` → `base.ink` too, but **only in light mode**, on request —
+   *   `sheetTone` already resolves to the reader's real theme choice on this
+   *   view (unlike the two antiquity sheets and satellite, which force
+   *   `'light'` regardless), so dark mode is left exactly as it was rather
+   *   than guessing a second colour nobody reported a problem with.
+   * - `satellite` → a fixed high-visibility yellow
+   *   (`SATELLITE_REFERENCE_INK`), not a darker ink at all: real photography
+   *   ranges from near-black water to bright sand, and no single dark tone
+   *   survives both. Paired with a **dark** `haloColour` instead of the
+   *   default pale one — a light ink over a light halo would fail together
+   *   against the same pale sand or snow a photograph can just as easily
+   *   show. Measured against real sampled satellite tile colours: the
+   *   yellow alone reaches 4.1–11.6:1 against a dark forest, ocean or
+   *   mid-green tile but only 1.2–2.1:1 against snow, sand or light urban
+   *   roofs; the dark halo underneath reaches 5.9–16.5:1 against exactly
+   *   those light tiles. One half of the pair contrasts with whatever the
+   *   photograph actually shows at a given pixel, where either colour alone
+   *   can fail outright.
    */
   const palette = computed<OverlayPalette>(() => {
     const base = sheetTone.value === 'dark' ? DARK_OVERLAY : LIGHT_OVERLAY
     const haloOnRaster = view.value === 'antiquity-dare' || view.value === 'satellite'
-    return { ...base, haloOnRaster }
+
+    if (view.value === 'satellite') {
+      return {
+        ...base,
+        haloOnRaster,
+        referenceInk: SATELLITE_REFERENCE_INK,
+        haloColour: 'rgba(28, 24, 21, 0.85)',
+      }
+    }
+
+    // Only the two antiquity sheets are left after `satellite`'s early return
+    // above, plus `vestigian` — and `vestigian` is the one view where
+    // `sheetTone` reflects the reader's real theme choice rather than being
+    // forced to `'light'`, so it's the only case that can still say "no".
+    const isDarkVestigian = view.value === 'vestigian' && sheetTone.value === 'dark'
+    const referenceInk = isDarkVestigian ? undefined : base.ink
+
+    return { ...base, haloOnRaster, referenceInk }
   })
 
   /**
    * Registered once per style regardless of whether the site overlay itself
    * is showing: the frontier and battle overlays draw their marks from this
    * same registry, and both can be switched on while "Show sites" stays off.
-   * `hasImage` is the idempotency check — `setStyle` wipes the registry, so
-   * this runs again after every swap, but never twice for the same style.
+   *
+   * **`hasImage` alone used to be the idempotency check, on the assumption
+   * that `setStyle` wipes the registry — it does not.** `MapCanvas.vue` calls
+   * `map.setStyle(style)` with no options, which defaults to `diff: true`;
+   * MapLibre's diffed style swap only reconciles sources and layers and
+   * deliberately leaves runtime `addImage` state alone, since images are
+   * request-scoped API state, not part of the style document. Confirmed by
+   * instrumenting a real page: switching from Vestigian to Satellite fires
+   * `styledata` and calls this function exactly as expected, but
+   * `map.hasImage(siteIconId('other'))` is still `true` — so every register
+   * call after the very first page load was silently skipped, for every
+   * `SiteIconPalette` change this file has ever made, including the
+   * DARE/satellite halo. Reported three times as "the icon colour didn't
+   * change" before this was found; the halo and colour code were both
+   * correct, this gate just never let them run again. Now also compares a
+   * serialised snapshot of the current palette against the last one actually
+   * registered, so a real palette change (a basemap switch, a theme toggle)
+   * always re-runs regardless of whether MapLibre happened to keep the old
+   * images around, while a `styledata` event that changes nothing relevant
+   * still costs nothing.
+   *
+   * **`isRegisteringIcons` guards a second bug the signature check alone
+   * uncovered: `map.addImage` fires `styledata` synchronously**, and
+   * `keepOverlayThroughStyleChanges` below calls this function on every
+   * `styledata`. Without the guard, the first `addImage` call inside the
+   * loop re-enters this function while `hasImage('other')` (the last
+   * category registered) is still `false`, so the reopened gate let it
+   * through — restarting the whole loop from `settlement` every time,
+   * forever, without ever reaching `other`. Caught live: a debug build
+   * logged over 70,000 identical registration calls in under a minute
+   * before this guard went in.
    */
-  const attachOverlayIcons = (map: MapLibreMap): void => {
-    if (map.hasImage(siteIconId('other'))) return
-    const colours = palette.value
+  let lastRegisteredPalette: string | null = null
+  let isRegisteringIcons = false
 
-    registerSiteIcons(map, colours)
-    registerAtlasIcons(map, colours)
-    registerLimesIcons(map, colours)
-    registerBattleIcon(map, colours)
-    registerPortIcon(map, colours)
-    registerMinorFeatureIcons(map, colours)
-    registerCoinHoardIcon(map, colours)
+  const attachOverlayIcons = (map: MapLibreMap): void => {
+    if (isRegisteringIcons) return
+    const colours = palette.value
+    const signature = JSON.stringify(colours)
+    if (map.hasImage(siteIconId('other')) && lastRegisteredPalette === signature) return
+
+    isRegisteringIcons = true
+    try {
+      lastRegisteredPalette = signature
+      registerSiteIcons(map, colours)
+      registerAtlasIcons(map, colours)
+      registerLimesIcons(map, colours)
+      registerBattleIcon(map, colours)
+      registerPortIcon(map, colours)
+      registerMinorFeatureIcons(map, colours)
+      registerCoinHoardIcon(map, colours)
+    } finally {
+      isRegisteringIcons = false
+    }
   }
 
   /**

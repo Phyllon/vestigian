@@ -177,8 +177,9 @@ const ICON_DISPLAY_PIXELS = 23
 const ICON_PIXEL_RATIO = 2
 const ICON_RASTER_PIXELS = ICON_DISPLAY_PIXELS * ICON_PIXEL_RATIO
 
-/** Width and colour for the halo drawn behind a reference mark on DARE/satellite, in 24-unit space. */
+/** Width for the halo drawn behind a reference mark, in 24-unit space. Colour comes from the palette. */
 const REFERENCE_HALO_WIDTH = 3.2
+/** The default halo colour — a pale wash, for a dark reference ink. */
 const REFERENCE_HALO_COLOUR = 'rgba(250, 247, 239, 0.85)'
 
 export interface SiteIconPalette {
@@ -191,15 +192,48 @@ export interface SiteIconPalette {
   /** The disc's edge. */
   ring: string
   /**
-   * Reported: reference marks (no disc, a fixed mid-tone ink) were hard to
-   * make out over DARE's raster imagery and the satellite view — unlike the
-   * flat, known colour of every vector sheet, a real photograph can land the
-   * ink on a pixel of any value at all. Set only while one of those two
-   * basemaps is active (`useViewportTiles`'s `palette`, from
-   * `useBasemapStyle`'s `view`) — a vector sheet's contrast problem, if any,
-   * is a palette problem, not something a halo fixes.
+   * Reported: a halo alone still left reference marks (no disc, previously a
+   * fixed mid-tone `ATLAS_MARK_INK`) too faint to read over DARE's raster
+   * imagery and the satellite view. Set only while one of those two basemaps
+   * is active (`useViewportTiles`'s `palette`, from `useBasemapStyle`'s
+   * `view`) — a vector sheet's contrast problem, if any, is a palette
+   * problem, not something a halo fixes.
    */
   haloOnRaster?: boolean
+  /**
+   * Reported directly, twice more, after the halo above: reference marks
+   * were "still barely viewable in some conditions" and needed "a whole
+   * different colour" per basemap, not just a darker version of the same
+   * one. `useViewportTiles`'s `palette` now sets this per `view`:
+   * `antiquity-dare` and `antiquity-awmc` get `LIGHT_OVERLAY.ink` (the same
+   * dark ink a contributed marker's disc already uses — measured at
+   * 7.9–12.8:1 against Barrington's four flat fills, up from
+   * `ATLAS_MARK_INK`'s 2.26–3.24:1, under WCAG 1.4.11's 3:1 floor for
+   * graphical objects in three of the four); `vestigian` gets it too, but
+   * only in light mode, on request, left unset in dark mode; `satellite`
+   * gets a fixed high-visibility yellow (`SATELLITE_REFERENCE_INK`) instead
+   * of a darker version of the same ink, since real photography ranges from
+   * near-black water to bright sand and no single dark tone survives all of
+   * it — see `haloColour` below for the half of that pairing this field
+   * alone can't cover.
+   */
+  referenceInk?: string
+  /**
+   * The halo's own colour, overriding `REFERENCE_HALO_COLOUR`'s default pale
+   * wash. Only `satellite` sets this (to a dark tone, `useViewportTiles.ts`):
+   * pairing a light reference ink with a light halo leaves both halves of
+   * the pair failing together against the same pale sand or snow a
+   * photograph can just as easily show. Measured against real sampled
+   * satellite tile colours: `SATELLITE_REFERENCE_INK` alone reaches
+   * 4.1–11.6:1 against dark forest/ocean/mid-green tiles but only 1.2–2.1:1
+   * against snow, sand or light urban roofs; a dark halo underneath reaches
+   * 5.9–16.5:1 against exactly those light tiles. Together, one half of the
+   * pair contrasts with whatever the photograph actually shows at that
+   * pixel — the same reasoning `haloOnRaster` already relies on, just with
+   * the ink and the halo swapped from "dark ink, pale halo" to "light ink,
+   * dark halo" for this one basemap.
+   */
+  haloColour?: string
 }
 
 interface IconRasterRequest {
@@ -257,7 +291,7 @@ const rasteriseIcon = (request: IconRasterRequest): ImageData | null => {
 
     if (request.reference && request.palette.haloOnRaster) {
       context.lineJoin = 'round'
-      context.strokeStyle = REFERENCE_HALO_COLOUR
+      context.strokeStyle = request.palette.haloColour ?? REFERENCE_HALO_COLOUR
       // `context.lineWidth` is read in the *native* 512-unit game-icon space
       // this block is scaled into, not the 24-unit space every other glyph
       // draws in — a width of `REFERENCE_HALO_WIDTH` here would come out
@@ -277,7 +311,7 @@ const rasteriseIcon = (request: IconRasterRequest): ImageData | null => {
   }
 
   if (request.reference && request.palette.haloOnRaster) {
-    context.strokeStyle = REFERENCE_HALO_COLOUR
+    context.strokeStyle = request.palette.haloColour ?? REFERENCE_HALO_COLOUR
     context.lineWidth = REFERENCE_HALO_WIDTH
     context.stroke(path)
   }
@@ -313,8 +347,26 @@ export const registerSiteIcons = (map: MapLibreMap, palette: SiteIconPalette): v
   }
 }
 
-/** Line work for a borrowed place — the same glyphs, drawn as annotation. */
+/** Line work for a borrowed place — the same glyphs, drawn as annotation. Superseded per-basemap by `SiteIconPalette.referenceInk`; kept as the fallback for any view that doesn't set one. */
 export const ATLAS_MARK_INK = '#8c8271'
+
+/**
+ * A fixed high-visibility yellow, not a darker version of `ATLAS_MARK_INK` —
+ * real satellite photography ranges from near-black water to bright sand,
+ * and no single dark tone reads against all of it (measured: a dark ink
+ * reaches only 1.0–2.3:1 against a dark forest, ocean or mid-green tile in
+ * this app's own imagery). This red instead reaches 4.1–11.6:1 against
+ * those same dark tiles; `SiteIconPalette.haloColour`'s dark override
+ * covers the light tiles (snow, sand, pale roofs) this colour alone can't.
+ * Set only for `satellite` (`useViewportTiles.ts`'s `palette`) — a
+ * deliberate, requested exception to this app's "one accent, the oxide red"
+ * rule, since it exists for legibility over unpredictable photography, not
+ * for decoration.
+ */
+export const SATELLITE_REFERENCE_INK = '#ff4000'
+
+/** `palette.referenceInk` where the active basemap sets one, `ATLAS_MARK_INK` everywhere else — see `SiteIconPalette.referenceInk`'s docstring. */
+const referenceInk = (palette: SiteIconPalette): string => palette.referenceInk ?? ATLAS_MARK_INK
 
 /**
  * The antiquity sheet's own marks, registered alongside the record markers
@@ -327,7 +379,7 @@ export const registerAtlasIcons = (map: MapLibreMap, palette: SiteIconPalette): 
   for (const category of SITE_CATEGORIES) {
     const image = rasteriseIcon({
       glyph: SITE_ICON_GLYPHS[category],
-      ink: ATLAS_MARK_INK,
+      ink: referenceInk(palette),
       palette,
       reference: true,
     })
@@ -426,7 +478,7 @@ export const registerLimesIcons = (map: MapLibreMap, palette: SiteIconPalette): 
     for (const reference of [false, true]) {
       const image = rasteriseIcon({
         glyph: outline(LIMES_ICON_PATHS[mark]),
-        ink: reference ? ATLAS_MARK_INK : palette.ink,
+        ink: reference ? referenceInk(palette) : palette.ink,
         palette,
         reference,
       })
@@ -492,7 +544,7 @@ export const BATTLE_ICON_PATH =
 export const registerBattleIcon = (map: MapLibreMap, palette: SiteIconPalette): void => {
   const image = rasteriseIcon({
     glyph: outline(BATTLE_ICON_PATH),
-    ink: ATLAS_MARK_INK,
+    ink: referenceInk(palette),
     palette,
     reference: true,
   })
@@ -521,7 +573,7 @@ export const PORT_ICON_PATH =
 export const registerPortIcon = (map: MapLibreMap, palette: SiteIconPalette): void => {
   const image = rasteriseIcon({
     glyph: outline(PORT_ICON_PATH),
-    ink: ATLAS_MARK_INK,
+    ink: referenceInk(palette),
     palette,
     reference: true,
   })
@@ -576,7 +628,7 @@ export const MINOR_FEATURE_ICON_GLYPHS: Partial<Record<MinorFeatureKind, IconGly
  */
 export const registerMinorFeatureIcons = (map: MapLibreMap, palette: SiteIconPalette): void => {
   for (const [kind, glyph] of Object.entries(MINOR_FEATURE_ICON_GLYPHS)) {
-    const image = rasteriseIcon({ glyph, ink: ATLAS_MARK_INK, palette, reference: true })
+    const image = rasteriseIcon({ glyph, ink: referenceInk(palette), palette, reference: true })
     if (!image) continue
 
     const id = minorFeatureIconId(kind as MinorFeatureKind)
@@ -598,7 +650,7 @@ export const COIN_HOARD_ICON_PATH =
 export const registerCoinHoardIcon = (map: MapLibreMap, palette: SiteIconPalette): void => {
   const image = rasteriseIcon({
     glyph: outline(COIN_HOARD_ICON_PATH),
-    ink: ATLAS_MARK_INK,
+    ink: referenceInk(palette),
     palette,
     reference: true,
   })

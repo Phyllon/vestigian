@@ -266,7 +266,7 @@ strings) were renamed `SITE_ICON_GLYPHS`/`MINOR_FEATURE_ICON_GLYPHS`
 (`Record<_, IconGlyph>`) throughout — every consumer needs to know whether to
 fill or stroke, not just what to draw.
 
-## Reference marks over raster basemaps get a halo — DARE and satellite only
+## Reference marks over raster basemaps get a halo, and a darker ink where a halo alone wasn't enough
 
 Reported directly: icon contrast was poor on the Antiquity (DARE) and
 Satellite views, in both themes. Every reference mark (a borrowed row, no
@@ -288,11 +288,13 @@ contrast). When set, `rasteriseIcon` draws a translucent light stroke behind
 the mark before the ink — wider for a filled glyph (drawn in its own scaled
 sub-space) than for a stroked outline — the standard cartographic
 halo-behind-a-line technique, the same idea `useBasemapStyle.ts`'s own
-`labelHalo` already applies to map labels. Re-registration already happens
-for free: `attachOverlayIcons`'s `hasImage` idempotency check is keyed to the
-image registry, which `setStyle` wipes on every basemap switch — DARE ⇄
-satellite ⇄ anything else always re-registers with the current `haloOnRaster`
-value, the same mechanism `sheetTone` already relies on.
+`labelHalo` already applies to map labels. **This paragraph originally
+claimed re-registration "already happens for free" because `setStyle` wipes
+the image registry on every basemap switch — that was never actually true,
+and is the reason none of the colour/halo work in this section visibly took
+effect until a fourth report tracked it down. See the "what actually made
+all three of the reports above land as 'nothing changed'" paragraph below
+for the real mechanism and the fix.**
 
 **The halo was real but nearly invisible for every filled game-icons glyph**
 (settlement, production, other, cemetery, bridge), reported again after the
@@ -311,6 +313,96 @@ same 24-unit space the outline halo already uses, and dividing by
 `GAME_ICON_SCALE` only for the filled branch (`REFERENCE_HALO_WIDTH /
 GAME_ICON_SCALE`) so both families render the same visual thickness —
 confirmed with the same standalone canvas rendering both before and after.
+
+**Reported a third time, correctly, as a colour problem rather than a halo
+problem: "change icon colours ... so contrast becomes greater (also a11y)."**
+Measured this time instead of tuning the halo again — `ATLAS_MARK_INK`
+(`#8c8271`) itself only reaches **3.54:1** against its own halo colour
+(`#faf7ef`), and the claim above that Barrington's fills were "a known
+colour a mark already contrasts against" was never actually checked: against
+the sheet's real flat fills (`land #f2ede1`, `sea #c8d3d0`, `inland
+#bccbc8`, `urban #ded2b8`) it measures **2.26–3.24:1**, under WCAG 1.4.11's
+3:1 floor for graphical objects in three of the four. `SiteIconPalette`
+gained `referenceInk`, set in `useViewportTiles.ts`'s `palette` to
+`base.ink` (the same ink a contributed marker's own disc already uses) for
+`satellite` and `antiquity-awmc` specifically — a **different** pair of
+basemaps than `haloOnRaster` covers: DARE is excluded here because it's an
+illustrated historical map with its own muted palette, not raw photography,
+and measured fine already. Every `register*Icon` function now resolves its
+reference ink through one `referenceInk(palette)` helper
+(`palette.referenceInk ?? ATLAS_MARK_INK`) instead of hardcoding the
+constant, so a basemap that wants a different reference tone only has to set
+one field. Against Barrington's four fills the new ink measures
+**7.9–12.8:1**.
+
+**The halo stays, on purpose, for satellite** — a color swap alone cannot
+promise 3:1 against arbitrary photography the way it can against a sheet's
+own fixed fills. Measured against real tile colours sampled from the actual
+satellite imagery this app renders: the new dark ink reaches only
+**1.0–2.3:1** against a dark forest, ocean or mid-green tile, while the pale
+halo alone reaches only **1.06–2.10:1** against snow or sandy terrain — each
+fails on exactly the backgrounds the other one handles. Drawing both (dark
+ink, pale halo underneath) is what actually guarantees one half of the pair
+contrasts with whatever a given pixel shows, which is why this is additive
+to the halo fix above rather than a replacement for it.
+
+**Reported a fourth time — explicit per-basemap colours, not a shared
+compromise: "DARE: dark. satellite: yellow. Vestigian: darker in light mode,
+unchanged in dark. Barrington: dark."** `referenceInk` is now set for every
+one of the four `BasemapView`s, not just two: `antiquity-dare` and
+`antiquity-awmc` get `base.ink` (as above); `vestigian` gets `base.ink` too
+but only when `sheetTone.value === 'light'`, since `vestigian` is the one
+view where `sheetTone` tracks the reader's real theme instead of being
+forced; `satellite` gets a fixed high-visibility yellow
+(`SATELLITE_REFERENCE_INK`, `#ffcc00`) instead of a dark tone at all, paired
+with a **dark** `haloColour` override (`SiteIconPalette.haloColour`,
+`rgba(28, 24, 21, 0.85)`) rather than the default pale one — a light ink
+over a light halo fails together against the same pale sand or snow a
+photograph can just as easily show, and the two swapped colours were
+measured the same way the dark-ink/pale-halo pair above was: the yellow
+alone reaches 4.1–11.6:1 against dark forest/ocean/mid-green tiles but only
+1.2–2.1:1 against snow/sand/light roofs, the dark halo underneath reaches
+5.9–16.5:1 against exactly those light tiles. `#ffcc00` is a deliberate,
+requested exception to this app's "one accent, the oxide red" rule — it
+exists for legibility over unpredictable photography, not decoration.
+
+**What actually made all three of the reports above land as "nothing
+changed" — found only after this fourth report, by instrumenting a live
+page rather than trusting another screenshot.** `attachOverlayIcons`'s
+`hasImage(siteIconId('other'))` check was written on the assumption that
+`map.setStyle()` clears the image registry — restated as fact in this file's
+own text above, and never actually verified. It doesn't: `MapCanvas.vue`
+calls `setStyle` with no options, which defaults to `diff: true`, and
+MapLibre's diffed style swap only reconciles sources and layers, leaving
+runtime `addImage` state alone on purpose (images are request-scoped API
+state, not part of the style document). Confirmed by patching
+`CanvasRenderingContext2D.prototype.stroke`/`fill` in a real page and
+watching what colour actually got drawn: switching from Vestigian to
+Satellite fired `styledata` and called `attachOverlayIcons` exactly as
+expected, but `hasImage('other')` was still `true`, so the whole function
+returned before touching a single canvas. **Every `SiteIconPalette` change
+this file has ever shipped — the original halo, the filled-icon halo-width
+fix, and every colour in this section — was correct code that silently
+never ran again after the very first page load.** Fixed by also comparing a
+serialised snapshot of the current palette against the last one actually
+registered, so a genuine change always re-runs regardless of what MapLibre
+did with the old images.
+
+That fix immediately uncovered a second, real bug: `map.addImage` fires
+`styledata` **synchronously**, and `keepOverlayThroughStyleChanges` calls
+`attachOverlayIcons` on every `styledata`. Without a reentrancy guard, the
+very first `addImage` call inside the loop (for `settlement`, the first
+`SiteCategory`) re-entered `attachOverlayIcons` while `hasImage('other')`
+— the last category in the loop — was still `false`, reopening the gate and
+restarting the loop from `settlement` again, forever, without ever reaching
+`other`. A debug build logged over 70,000 identical registration calls in
+under a minute before `isRegisteringIcons`, a plain boolean set for the
+duration of the loop, went in to block re-entry. Neither bug was visible
+from a screenshot taken right after a fresh `page.goto` followed by one
+basemap switch — which is exactly the shape every verification screenshot
+in this file up to this point took — because the _first_ registration on a
+freshly loaded page is never gated at all; only a second, real palette
+change ever exercised the broken check.
 
 ## Overlay popups are a themed card, not text painted on the map
 
