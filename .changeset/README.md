@@ -61,4 +61,10 @@ git tag vX.Y.Z && git push origin main --follow-tags
 ```
 
 A `pull_request` workflow still checks that a branch touching app code
-carries a changeset, as a safety net for anyone working from a branch.
+carries a changeset, as a safety net for anyone working from a branch. The
+same check also runs locally in the `pre-push` hook (`.husky/pre-push`),
+since this repo mostly pushes straight to `main` rather than through a PR
+that workflow would ever see — it prints a red reminder if app code is
+about to be pushed with no pending changeset, but never blocks the push:
+the bump level and summary are a judgment call the tool asks a human for,
+not something a hook should guess at or enforce.
