@@ -196,10 +196,10 @@ Semantic versioning via [Changesets](https://github.com/changesets/changesets), 
 ```bash
 pnpm changeset          # record a change: pick major/minor/patch, write a summary
 pnpm changeset:status   # see what's pending, unreleased
-pnpm changeset:version  # apply pending changesets locally (normally CI does this)
+pnpm changeset:version  # apply pending changesets, bump package.json, rewrite CHANGELOG.md
 ```
 
-Releases happen automatically: `.github/workflows/release.yml` runs on every push to `main` and, if changeset files are pending, bumps `package.json`, rewrites `CHANGELOG.md`, commits, tags `vX.Y.Z`, and cuts a GitHub Release — no release-PR step to merge, since this project pushes directly to `main`. A second workflow, `changeset-check.yml`, is a non-blocking reminder on pull requests for anyone working from a branch. Deploy images (`ghcr.io/…`) carry the version as a tag alongside `latest` and the commit SHA, so a specific release can be pulled or rolled back to by name. Full mechanism and rationale: "Versioning & releases" in `CLAUDE.md`.
+Cutting a release is a deliberate action, not something every push triggers: run the **release** workflow from the Actions tab and pick a `bump` (patch/minor/major) from the dropdown. It used to run automatically on every push to `main`, but a bot committing and pushing straight to `main` with no branch in the loop could land at the same moment as a human push, diverging `main` and rejecting the human's push — so it now only runs on `workflow_dispatch`. The chosen bump is a floor, not an override: a pending changeset recorded at a higher severity still wins. A second workflow, `changeset-check.yml`, is a non-blocking reminder on pull requests for anyone working from a branch. Deploy images (`ghcr.io/…`) carry the version as a tag alongside `latest` and the commit SHA, so a specific release can be pulled or rolled back to by name. Full mechanism and rationale: "Versioning & releases" in `CLAUDE.md`.
 
 ## Testing
 

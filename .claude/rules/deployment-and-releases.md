@@ -70,16 +70,31 @@ version — see `.changeset/README.md` for the contributor-facing how-to and
 what warrants patch/minor/major on a `private: true` app that is never
 published to a registry.
 
-**The primary path is a direct push to `main`.** This project has no
-release-PR step to merge — commits land on `main` directly, so
-`.github/workflows/release.yml` runs on every push there: if pending
-changeset files exist, it runs `pnpm changeset:version` (bumps
-`package.json` and rewrites `CHANGELOG.md`, consuming the changeset files),
-commits that with `[skip release]` in the message, tags `vX.Y.Z`, and cuts a
-GitHub Release with that version's changelog section as its notes. The
-`[skip release]` marker is what stops the bump commit's own push from
-re-triggering the workflow — without it every release would be followed by
-a second, no-op run checking (correctly) that no changesets remain.
+**Releases are cut by hand, not on every push.** `.github/workflows/release.yml`
+used to run on every push to `main`, apply pending changesets, commit the
+bump with `[skip release]`, tag, and cut a GitHub Release — automatically,
+with no branch, PR or human decision in the loop. It raced: a bot committing
+and pushing straight to `main` outside of any branch could land at the same
+moment as a person's own push, diverging `main` and rejecting the person's
+push with "Updates were rejected because the remote contains work that you
+do not have locally" — confusing, since nothing had actually conflicted, two
+unrelated commits had simply landed on the same ref back to back.
+
+`release.yml` now triggers only on `workflow_dispatch` — a maintainer opens
+the Actions tab, picks **release**, and chooses a `bump` (patch/minor/major)
+from a dropdown before it runs. That one click is what used to happen
+silently on every push, so the same race is now something a maintainer has
+to choose to do, not something that ambient pushes trigger on their own.
+
+The `bump` input is a **floor, not an override**: Changesets bumps a package
+by the highest severity among its pending changeset files, and there is no
+CLI flag to force a lower one. The workflow writes one throwaway changeset
+at the chosen level before running `changeset:version`, which guarantees
+the release is at least that severity — but a pending changeset already
+recorded as `major` still produces a major release even if `patch` was
+picked in the dropdown, since silently downgrading a documented breaking
+change would be the more dangerous of the two surprises. Check
+`changeset:status` before releasing if that distinction matters.
 
 **The secondary path is a branch/PR.** `.github/workflows/changeset-check.yml`
 runs on `pull_request` against `main` and reports (does not block — no

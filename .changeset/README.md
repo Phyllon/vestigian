@@ -42,9 +42,23 @@ CI config, this README) needs no changeset at all.
 ## How the version actually moves
 
 See "Versioning & releases" in `CLAUDE.md` for the full mechanism. In short:
-`.github/workflows/release.yml` bumps `package.json` and `CHANGELOG.md`
-directly on `main` whenever pending changesets exist, tags the commit, and
-cuts a GitHub Release — no separate "Version Packages" PR step, since this
-project pushes directly to `main` rather than merging release PRs. A
-`pull_request` workflow checks that a branch touching app code carries a
-changeset, as a secondary safety net for anyone working from a branch.
+`.github/workflows/release.yml` no longer runs on every push to `main` —
+that raced a human's own push and diverged the branch. It now runs only on
+`workflow_dispatch`: a maintainer opens the Actions tab, runs **release**,
+and picks a `bump` (patch/minor/major) from a dropdown. The workflow then
+applies pending changesets — plus one it writes itself recording the chosen
+bump, so a release is never _less_ than what was picked, though a pending
+changeset already at a higher severity still wins — bumps `package.json`,
+rewrites `CHANGELOG.md`, commits, tags `vX.Y.Z`, and cuts a GitHub Release.
+
+To cut a release locally instead (e.g. the workflow is unavailable):
+
+```bash
+pnpm changeset:version   # bumps package.json, rewrites CHANGELOG.md, consumes .changeset/*.md
+git add package.json CHANGELOG.md .changeset
+git commit -m "bump version to vX.Y.Z"
+git tag vX.Y.Z && git push origin main --follow-tags
+```
+
+A `pull_request` workflow still checks that a branch touching app code
+carries a changeset, as a safety net for anyone working from a branch.

@@ -1,23 +1,34 @@
 name: release
 
-# The primary versioning path: this repo pushes directly to `main` (no
-# release PR to merge), so a push carrying pending changesets bumps the
-# version, updates the changelog, tags, and cuts a release in the same run.
-# See ".changeset/README.md" and "Versioning & releases" in CLAUDE.md.
+# Manual, one-shot: a human clicks "Run workflow" and picks the bump level,
+# rather than a bot bumping and pushing to `main` on every push. The previous
+# version of this workflow did exactly that (`on: push: branches: [main]`) and
+# was removed after it raced a human's own push to `main` — a bot commit and a
+# person's commit landing on the same ref back to back diverges the branch and
+# rejects the person's push with a "fetch first" error that looks like a real
+# conflict but isn't one. Triggering only on an explicit button press makes
+# that race a choice a maintainer would have to make on purpose, not something
+# that happens on an ordinary push.
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Minimum bump for this release (a pending changeset with a higher severity still wins — see below)'
+        required: true
+        type: choice
+        options: [patch, minor, major]
+        default: patch
+      summary:
+        description: 'Changelog line for the manual bump changeset (skip if pending changesets already describe this release)'
+        required: false
+        type: string
 
 concurrency:
   group: release
   cancel-in-progress: false
 
 jobs:
-  version:
-    # The bump commit below carries this marker specifically so the push it
-    # creates does not re-trigger this workflow — it never adds a new
-    # changeset, so a second run would just be a wasted checkout.
-    if: "!contains(github.event.head_commit.message, '[skip release]')"
+  release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -31,36 +42,43 @@ jobs:
         with: { node-version: 26, cache: pnpm }
       - run: pnpm install --frozen-lockfile
 
-      - name: check for pending changesets
-        id: changesets
+      # Changesets bumps a package by the *highest* severity among its pending
+      # changeset files, not by a single top-level flag — there is no "force
+      # this exact bump" switch in the CLI. Writing one throwaway changeset
+      # here at the level the human picked guarantees the release is at least
+      # that severity: if every already-pending changeset is `patch` and the
+      # input is `minor`, this file is what makes the release actually minor.
+      # It does not cap the other direction — a pending `major` changeset still
+      # produces a major release even if `patch` was picked here, since a
+      # human-selected floor overriding a documented breaking change would be
+      # the more dangerous silent behaviour of the two.
+      - name: record the chosen bump as a changeset
         run: |
-          if compgen -G ".changeset/*.md" > /dev/null; then
-            echo "pending=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "pending=false" >> "$GITHUB_OUTPUT"
-          fi
+          cat > ".changeset/manual-release-${{ github.run_id }}.md" <<EOF
+          ---
+          'vestigian': ${{ inputs.bump }}
+          ---
+
+          ${{ inputs.summary || 'Release.' }}
+          EOF
 
       - name: apply version bump
-        if: steps.changesets.outputs.pending == 'true'
         run: pnpm changeset:version
 
       - name: read the bumped version
-        if: steps.changesets.outputs.pending == 'true'
         id: package
         run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
 
       - name: commit and tag
-        if: steps.changesets.outputs.pending == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add package.json CHANGELOG.md .changeset
-          git commit -m "bump version to ${{ steps.package.outputs.version }} [skip release]"
+          git commit -m "bump version to ${{ steps.package.outputs.version }}"
           git tag "v${{ steps.package.outputs.version }}"
           git push origin main --follow-tags
 
       - name: extract this version's changelog section
-        if: steps.changesets.outputs.pending == 'true'
         run: |
           awk -v ver="${{ steps.package.outputs.version }}" '
             $0 ~ "^## " ver "$" { found=1; next }
@@ -69,7 +87,6 @@ jobs:
           ' CHANGELOG.md > release-notes.md
 
       - name: create GitHub release
-        if: steps.changesets.outputs.pending == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
