@@ -482,6 +482,41 @@ either counter — it is per-visitor Cache Storage, written only by that
 visitor's own explicit "download this area" action, so there is no
 production-side invalidation for it at all.
 
+## A missing SDF glyph range 404s cleanly now — it used to fall through to a full SSR page render
+
+Reported: the server log filled with `[Vue Router warn]: No match found for
+location with path "/fonts/Noto%20Sans%20Regular/11520-11775.pbf"` alongside
+the matching browser-console 404s and MapLibre's "Rendering codepoint ...
+locally instead" fallback message.
+
+The 404 itself is correct and intentional — see the `RANGES` comment in
+`scripts/build-glyphs.ts`. Only nine of the 256 possible ranges are rendered
+and committed (Latin, Greek, Cyrillic and their extensions, plus the
+punctuation/letterlike blocks the imported titles actually use); anything
+else — Hebrew, Georgian, the Cyrillic-Supplement/Armenian block, Arabic —
+was deliberately never generated, because MapLibre's own fallback for a
+missing range is to render that codepoint from the reader's local system
+font, and a range file full of glyphs nobody asked for would cost 200+ KB
+each for scripts this atlas's data barely touches.
+
+What was not intentional: Nitro serves an existing file under
+`public/fonts/` directly and fast, but a _missing_ one used to fall through
+past that static-asset handler with nothing else registered for `/fonts/`,
+landing on Nuxt's SSR page renderer as the last resort. That renderer asks
+Vue Router to match `/fonts/Noto Sans Regular/11520-11775.pbf` as a page
+route, fails, logs the warning, and only then produces a 404 — a full SSR
+pass spent on every single unshipped glyph range MapLibre asks for, once per
+range per session, purely to arrive at the same status code a static
+handler would have returned for free.
+
+Fixed with `server/routes/fonts/[...path].get.ts`, an explicit handler that
+throws a plain 404 immediately. It never intercepts a range that actually
+exists — Nitro's static-asset serving still answers those first and
+terminates the request before any custom route is consulted, confirmed by
+curling both an existing (`0-255.pbf`, `200`) and a missing (`1280-1535.pbf`,
+`404`) range after adding the route. Verified again after `pnpm check`: 434
+tests, lint, typecheck and format all clean.
+
 ## Toggling an overlay didn't always redraw the map until the reader scrolled
 
 Reported directly: "show battles" (and, plausibly, any overlay) sometimes
