@@ -1,6 +1,13 @@
 import { expect, test } from './helpers/fixtures'
 import { watchForProblems } from './helpers/console'
-import { openMap, openOverlays, showSites, toggleOverlay, waitForTiles } from './helpers/map'
+import {
+  openMap,
+  openOverlays,
+  openPeriods,
+  showSites,
+  toggleOverlay,
+  waitForTiles,
+} from './helpers/map'
 
 /**
  * The antiquity views and the satellite view are the only raster basemaps in
@@ -109,7 +116,7 @@ test.describe('the basemap switcher', () => {
     expect(problems.cspViolations, 'the satellite tile origin is not allowlisted').toEqual([])
   })
 
-  test('the period scrubber draws the empire from this application, requesting nothing until moved', async ({
+  test('the period scrubber draws the empire over any basemap, requesting nothing until moved', async ({
     page,
   }) => {
     const problems = watchForProblems(page)
@@ -121,20 +128,18 @@ test.describe('the basemap switcher', () => {
       }
     })
 
+    // Default basemap is 'Vestigian', not an antiquity sheet — proving the
+    // scrubber is no longer gated to the Barrington sheet the way it used to
+    // be (see `PeriodSwitcher.vue`'s own docstring).
     await openMap(page)
-    await chooseBasemap(page, 'Antiquity (Barrington)')
-
-    // Choosing a basemap radio closes the whole dropdown — reopening it is
-    // what a real visitor would also have to do the first time they switch
-    // to this sheet, not a quirk of the test.
-    await page.getByRole('button', { name: /^Basemap:/ }).click()
     await waitForTiles(page)
     expect(
       periodTiles.length,
       'a reader who never touches the scrubber should request nothing',
     ).toBe(0)
 
-    const slider = page.getByRole('slider', { name: 'The empire, over time' })
+    await openPeriods(page)
+    const slider = page.getByRole('slider', { name: 'The Roman Empire, over time' })
     await slider.focus()
     await page.keyboard.press('ArrowRight')
     await expect.poll(() => periodTiles.length, { timeout: 15_000 }).toBeGreaterThan(0)
@@ -160,7 +165,8 @@ test.describe('the basemap switcher', () => {
     })
 
     // Default basemap is 'Vestigian', not an antiquity sheet — proving the
-    // overlay is not gated to one sheet the way the period scrubber is.
+    // overlay is not gated to one sheet, the same as every overlay in this
+    // file including the period scrubber above.
     await openMap(page)
     await waitForTiles(page)
     expect(battleTiles.length, 'a reader who never touches the switch should request nothing').toBe(

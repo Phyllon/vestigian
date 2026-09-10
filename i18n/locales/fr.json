@@ -55,12 +55,7 @@
     "showFeatures": "Afficher les petits vestiges",
     "showFeaturesHint": "Ponts, mines, barrages, nécropoles, forts et tumulus (AWMC)",
     "showCoinHoards": "Afficher les trésors monétaires",
-    "showCoinHoardsHint": "Lieux de découverte de trésors monétaires républicains (CHRR)",
-    "periodScrubber": "L'empire, avec le temps",
-    "periodOff": "Arrêt",
-    "periodYearBce": "{year} av. J.-C.",
-    "periodYearCe": "{year} apr. J.-C.",
-    "periodApproximate": "Les frontières sont approximatives, tracées par les contributeurs d'OpenHistoricalMap."
+    "showCoinHoardsHint": "Lieux de découverte de trésors monétaires républicains (CHRR)"
   },
   "tabulaPeutingeriana": {
     "title": "Tabula Peutingeriana",
@@ -1017,6 +1012,17 @@
     "menuLabel": "Calques",
     "labelNone": "Calques : aucun actif",
     "labelActive": "Calques : {count} actifs"
+  },
+  "periodSwitcher": {
+    "label": "Empire romain : {state}",
+    "menuLabel": "L'Empire romain, à travers le temps",
+    "title": "Empire romain",
+    "heading": "Étendue dans le temps",
+    "scrubberLabel": "L'Empire romain, à travers le temps",
+    "off": "Arrêt",
+    "yearBce": "{year} av. J.-C.",
+    "yearCe": "{year} apr. J.-C.",
+    "approximate": "Les frontières sont approximatives, tracées par les contributeurs d'OpenHistoricalMap."
   },
   "languageNotice": {
     "body": "Cette page est affichée dans {language}. L'anglais est la langue la plus fiable ici — les autres peuvent avoir un sens légèrement différent.",

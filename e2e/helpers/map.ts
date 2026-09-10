@@ -90,3 +90,13 @@ export const toggleOverlay = async (page: Page, name: string): Promise<void> => 
   // interaction with a control opens its menu instead of closing this one.
   await page.keyboard.press('Escape')
 }
+
+/**
+ * Opens the period scrubber's own control — extracted out of the basemap
+ * switcher (`PeriodSwitcher.vue`) the same way the overlay toggles were, once
+ * the extent-over-time fill stopped being a reading of the Barrington sheet
+ * specifically and started drawing over any basemap.
+ */
+export const openPeriods = async (page: Page): Promise<void> => {
+  await page.getByRole('button', { name: /^Roman Empire:/ }).click()
+}

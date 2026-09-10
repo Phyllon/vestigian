@@ -55,12 +55,7 @@
     "showFeatures": "Kleine oudheden tonen",
     "showFeaturesHint": "Bruggen, mijnen, dammen, grafvelden, forten en grafheuvels (AWMC)",
     "showCoinHoards": "Muntschatten tonen",
-    "showCoinHoardsHint": "Vindplaatsen van republikeinse muntschatten (CHRR)",
-    "periodScrubber": "Het rijk, na verloop van tijd",
-    "periodOff": "Uit",
-    "periodYearBce": "{year} v.Chr.",
-    "periodYearCe": "{year} n.Chr.",
-    "periodApproximate": "Grenzen zijn bij benadering, getekend door OpenHistoricalMap-bijdragers."
+    "showCoinHoardsHint": "Vindplaatsen van republikeinse muntschatten (CHRR)"
   },
   "tabulaPeutingeriana": {
     "title": "Tabula Peutingeriana",
@@ -1017,6 +1012,17 @@
     "menuLabel": "Overlays",
     "labelNone": "Overlays: geen actief",
     "labelActive": "Overlays: {count} actief"
+  },
+  "periodSwitcher": {
+    "label": "Romeinse Rijk: {state}",
+    "menuLabel": "Het Romeinse Rijk in de tijd",
+    "title": "Romeinse Rijk",
+    "heading": "Omvang in de tijd",
+    "scrubberLabel": "Het Romeinse Rijk in de tijd",
+    "off": "Uit",
+    "yearBce": "{year} v.Chr.",
+    "yearCe": "{year} n.Chr.",
+    "approximate": "Grenzen zijn bij benadering, getekend door OpenHistoricalMap-bijdragers."
   },
   "languageNotice": {
     "body": "Deze pagina wordt weergegeven in {language}. Engels is hier de taal om het meest op te vertrouwen — andere talen kunnen een iets andere betekenis hebben.",

@@ -64,10 +64,12 @@
           <MapSearchField />
         </div>
         <!--
-          Two controls, not one menu: the sheet under the map, and what is
-          drawn over it. See `OverlaySwitcher.vue` for why they split.
+          Three controls, not one menu: the sheet under the map, what is
+          drawn over it, and when it is drawn as of. See `OverlaySwitcher.vue`
+          and `PeriodSwitcher.vue` for why each split out on its own.
         -->
         <MapOverlaySwitcher class="ml-auto" />
+        <MapPeriodSwitcher />
         <MapBasemapSwitcher />
       </div>
 

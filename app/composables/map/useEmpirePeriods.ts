@@ -51,5 +51,5 @@ export const formatPeriodYear = (
   translate: (key: string, named: Record<string, unknown>) => string,
 ): string =>
   year < 0
-    ? translate('basemapSwitcher.periodYearBce', { year: Math.abs(year) })
-    : translate('basemapSwitcher.periodYearCe', { year })
+    ? translate('periodSwitcher.yearBce', { year: Math.abs(year) })
+    : translate('periodSwitcher.yearCe', { year })

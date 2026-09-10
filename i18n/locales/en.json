@@ -60,18 +60,24 @@
     "showFeatures": "Show minor antiquities",
     "showFeaturesHint": "Bridges, mines, dams, cemeteries, forts and burial mounds (AWMC)",
     "showCoinHoards": "Show coin hoards",
-    "showCoinHoardsHint": "Roman Republic coin-hoard findspots (CHRR)",
-    "periodScrubber": "The empire, over time",
-    "periodOff": "Off",
-    "periodYearBce": "{year} BCE",
-    "periodYearCe": "{year} CE",
-    "periodApproximate": "Frontiers are approximate, drawn by OpenHistoricalMap contributors."
+    "showCoinHoardsHint": "Roman Republic coin-hoard findspots (CHRR)"
   },
   "overlaySwitcher": {
     "title": "Overlays",
     "menuLabel": "Overlays",
     "labelNone": "Overlays: none on",
     "labelActive": "Overlays: {count} on"
+  },
+  "periodSwitcher": {
+    "label": "Roman Empire: {state}",
+    "menuLabel": "Roman Empire, over time",
+    "title": "Roman Empire",
+    "heading": "Extent over time",
+    "scrubberLabel": "The Roman Empire, over time",
+    "off": "Off",
+    "yearBce": "{year} BCE",
+    "yearCe": "{year} CE",
+    "approximate": "Frontiers are approximate, drawn by OpenHistoricalMap contributors."
   },
   "tabulaPeutingeriana": {
     "title": "Tabula Peutingeriana",

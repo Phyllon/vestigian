@@ -138,7 +138,7 @@ export const LIMES_ATTRIBUTION =
  * owed the knowledge that this one came from a volunteer project — so it is
  * credited on the same terms as the sources that do require it.
  */
-const EMPIRE_EXTENT_ATTRIBUTION =
+export const EMPIRE_EXTENT_ATTRIBUTION =
   'Extent over time © <a href="https://www.openhistoricalmap.org" target="_blank" rel="noopener">OpenHistoricalMap</a> contributors (CC0 1.0)'
 
 /**
@@ -251,10 +251,6 @@ interface StyleRequest {
   source: BasemapSource
   /** Only the Barrington sheet reads this; every other view ignores it. */
   isFollowingLimes?: boolean
-  /** The empire's extent at this date is drawn under the sheet's own
-   *  linework. `null`/`undefined` means the scrubber is at its default
-   *  "off" position. Only the Barrington sheet reads this. */
-  periodYear?: number | null
 }
 
 const buildVectorSource = (source: BasemapSource) =>
@@ -453,8 +449,6 @@ interface AtlasColours {
   label: string
   labelHalo: string
   regionLabel: string
-  periodExtent: string
-  periodExtentLine: string
 }
 
 /**
@@ -475,11 +469,64 @@ const ATLAS_COLOURS: AtlasColours = {
   label: '#3d362e',
   labelHalo: '#faf7ef',
   regionLabel: '#6b6154',
-  // A wash distinct from urban's tan and infrastructure's oxide — the period
-  // scrubber's fill has to read as "territory at this date" without being
-  // mistaken for a city or a built structure.
-  periodExtent: '#c99b52',
-  periodExtentLine: '#8a6a2f',
+}
+
+export interface PeriodExtentColours {
+  fill: string
+  line: string
+}
+
+/**
+ * The period scrubber's own palette — a wash distinct from `ATLAS_COLOURS.urban`'s
+ * tan and `.infrastructure`'s oxide, so it reads as "territory at this date"
+ * without being mistaken for a city or a built structure. This is the default,
+ * used on the Barrington sheet and the modern (Vestigian) view; DARE and
+ * satellite get their own palettes below, for the same reason a reference
+ * mark does (see `resolvePeriodExtentColours`).
+ */
+export const PERIOD_EXTENT_COLOURS: PeriodExtentColours = {
+  fill: '#c99b52',
+  line: '#8a6a2f',
+}
+
+/**
+ * DARE's own raster cartography is pale parchment — the default amber wash
+ * reads as barely-there on top of it, the same low-contrast problem
+ * `referenceInk` already documents for point marks over a raster basemap
+ * (`.claude/rules/map-and-tiles.md`, "Reference marks over raster basemaps
+ * get a halo"). A dark, near-black ink reads clearly against DARE's pale
+ * colouring without fighting its own printed linework.
+ */
+const DARE_PERIOD_EXTENT_COLOURS: PeriodExtentColours = {
+  fill: '#241f19',
+  line: '#120f0c',
+}
+
+/**
+ * Satellite imagery carries no single background tone the way DARE or
+ * Barrington's flat fills do, so the amber wash reads poorly against both a
+ * dark forest and pale sand in the same view. Oxide red — this app's one
+ * accent — is spent here for the same reason `SATELLITE_REFERENCE_INK`
+ * fixes a high-visibility yellow for reference marks over the same imagery:
+ * legibility over unpredictable photography, not decoration.
+ */
+const SATELLITE_PERIOD_EXTENT_COLOURS: PeriodExtentColours = {
+  fill: '#9a3b22',
+  line: '#5c2013',
+}
+
+/**
+ * Which wash the extent fill draws in, keyed to the basemap it sits over —
+ * not the reader's theme, the same "follows the sheet" reasoning
+ * `resolveSheetTone` already documents. `usePeriodOverlay` calls this fresh
+ * on every attach, so switching basemaps while the scrubber is on (which
+ * tears down and rebuilds every overlay via `styledata`, same as every
+ * other overlay in this file) picks up the right palette automatically.
+ */
+export const resolvePeriodExtentColours = (view: BasemapView): PeriodExtentColours => {
+  if (view === 'antiquity-dare') return DARE_PERIOD_EXTENT_COLOURS
+  if (view === 'satellite') return SATELLITE_PERIOD_EXTENT_COLOURS
+  return PERIOD_EXTENT_COLOURS
 }
 
 /**
@@ -686,13 +733,17 @@ const LIMES_RECESSION = 0.42
  * source or layers of its own. The layers a reader sees with the switch off
  * must be exactly the layers they saw before it existed — which is a thing a
  * test can assert only while there is one function.
+ *
+ * ## The period scrubber
+ *
+ * Like the frontier, the extent-over-time fill is no longer baked into this
+ * style either — see `buildPeriodExtentLayers` and `usePeriodOverlay`. It
+ * used to be a `null`-gated field on this style's own options, shown only
+ * while the Barrington sheet was the active view; now it draws over any
+ * basemap, the same generalisation the frontier went through first.
  */
 interface AtlasStyleOptions {
   limes: boolean
-  /** `null` is the scrubber's default "off" position — no extent source is
-   *  even added to the style, so a reader who never touches it requests
-   *  nothing from `/api/tiles/antiquity-periods`. */
-  periodYear: number | null
 }
 
 const buildAtlasStyle = (
@@ -709,17 +760,6 @@ const buildAtlasStyle = (
       maxzoom: 12,
       attribution: ATLAS_ATTRIBUTION,
     },
-    ...(options.periodYear === null
-      ? {}
-      : {
-          'atlas-period': {
-            type: 'vector' as const,
-            tiles: [`${source.empireExtentTilesUrl}/${options.periodYear}/{z}/{x}/{y}.mvt`],
-            minzoom: 0,
-            maxzoom: 12,
-            attribution: EMPIRE_EXTENT_ATTRIBUTION,
-          },
-        }),
     /**
      * Relief, from the elevation tiles the terrain view already uses.
      *
@@ -772,33 +812,6 @@ const buildAtlasStyle = (
       filter: ['==', ['get', 'kind'], 'inland'],
       paint: { 'fill-color': ATLAS_COLOURS.inland },
     },
-    /**
-     * The period scrubber's fill — under the urban/road linework so a city
-     * or a route still reads as itself rather than being tinted by the wash
-     * under it, and only added to the style at all when a period is
-     * actually selected (see the conditional `atlas-period` source above).
-     */
-    ...(options.periodYear === null
-      ? []
-      : ([
-          {
-            id: 'atlas-period-extent',
-            type: 'fill',
-            source: 'atlas-period',
-            'source-layer': 'extent',
-            paint: { 'fill-color': ATLAS_COLOURS.periodExtent, 'fill-opacity': 0.22 },
-          },
-          {
-            id: 'atlas-period-extent-outline',
-            type: 'line',
-            source: 'atlas-period',
-            'source-layer': 'extent',
-            paint: {
-              'line-color': ATLAS_COLOURS.periodExtentLine,
-              'line-width': ['interpolate', ['linear'], ['zoom'], 3, 0.5, 10, 1.4],
-            },
-          },
-        ] satisfies LayerSpecification[])),
     {
       id: 'atlas-urban',
       type: 'fill',
@@ -968,13 +981,53 @@ const buildAtlasStyle = (
   ],
 })
 
+/**
+ * The empire's extent at a given date, drawn as an overlay above whichever
+ * basemap is showing — no longer a reading of the Barrington sheet in
+ * particular. It used to live inside `buildAtlasStyle`, gated to
+ * `antiquity-awmc`, on the reasoning that the three dates AWMC once published
+ * were "a property of that sheet's own data". The scrubber's source is now
+ * OpenHistoricalMap's own dated series (`useEmpirePeriods`), which carries its
+ * own coordinates and licence independent of the Barrington import — a fill
+ * that makes just as much sense over DARE, satellite or the modern sheet, the
+ * same generalisation `buildLimesLayers`/`useLimesOverlay` went through first.
+ *
+ * Drawn under the urban/road linework of whichever sheet is showing, same
+ * ordering intent as before: a city or a route should still read as itself
+ * rather than being tinted by the wash under it. `usePeriodOverlay` adds
+ * these two layers on top of the rendered map, after everything the basemap
+ * style itself already drew.
+ *
+ * `colours` defaults to the standard wash; `usePeriodOverlay` resolves it
+ * per basemap via `resolvePeriodExtentColours` before calling this, so DARE
+ * and satellite get their own higher-contrast palette instead.
+ */
+export const buildPeriodExtentLayers = (
+  colours: PeriodExtentColours = PERIOD_EXTENT_COLOURS,
+): LayerSpecification[] => [
+  {
+    id: 'atlas-period-extent',
+    type: 'fill',
+    source: 'atlas-period',
+    'source-layer': 'extent',
+    paint: { 'fill-color': colours.fill, 'fill-opacity': 0.22 },
+  },
+  {
+    id: 'atlas-period-extent-outline',
+    type: 'line',
+    source: 'atlas-period',
+    'source-layer': 'extent',
+    paint: {
+      'line-color': colours.line,
+      'line-width': ['interpolate', ['linear'], ['zoom'], 3, 0.5, 10, 1.4],
+    },
+  },
+]
+
 export const buildBasemapStyle = (request: StyleRequest): StyleSpecification => {
   if (request.view === 'antiquity-dare') return buildDareStyle(request.source)
   if (request.view === 'antiquity-awmc') {
-    return buildAtlasStyle(request.source, {
-      limes: request.isFollowingLimes === true,
-      periodYear: request.periodYear ?? null,
-    })
+    return buildAtlasStyle(request.source, { limes: request.isFollowingLimes === true })
   }
   if (request.view === 'satellite') return buildSatelliteStyle(request.source)
 
@@ -1094,16 +1147,16 @@ export const useBasemapStyle = () => {
   const isFollowingLimes = computed(() => isLimesActive.value)
 
   /**
-   * The period scrubber, unlike the frontier, stays a reading of the
-   * Barrington sheet specifically — the three dates it draws are a property
-   * of *that* sheet's own data, not a line that makes equal sense laid over
-   * a modern basemap. `canShowPeriodExtent` mirrors `canFollowLimes`'s
-   * shape (always true today) so `BasemapSwitcher` doesn't need to know
-   * that reasoning either. Not persisted, same reasoning as `isLimesActive`.
+   * The period scrubber — like the frontier, an overlay drawn on any basemap
+   * now (see `buildPeriodExtentLayers`/`usePeriodOverlay`), not a reading of
+   * the Barrington sheet specifically. Unlike the other overlays here, there
+   * is no `canShow*`/`isShowing*` pair: `PeriodSwitcher` is a slider, not a
+   * toggle gated on a boolean, and nothing constrains it to one basemap any
+   * more for a `canShow*` flag to carry. `null` is the scrubber's default
+   * "off" position — no extent source is added anywhere until a reader
+   * actually moves it. Not persisted, same reasoning as `isLimesActive`.
    */
   const periodYear = useState<number | null>('atlas-period-year', () => null)
-
-  const canShowPeriodExtent = computed(() => view.value === 'antiquity-awmc')
 
   /**
    * The Tabula Peutingeriana network — unlike the limes, an overlay drawn on
@@ -1232,7 +1285,6 @@ export const useBasemapStyle = () => {
       isDark: isDark.value,
       source: source.value,
       isFollowingLimes: isFollowingLimes.value,
-      periodYear: canShowPeriodExtent.value ? periodYear.value : null,
     }),
   )
 
@@ -1259,9 +1311,9 @@ export const useBasemapStyle = () => {
     isFollowingLimes,
     setLimesActive,
     limesTilesUrl: computed(() => source.value.limesTilesUrl),
-    canShowPeriodExtent,
     periodYear,
     setPeriodYear,
+    empireExtentTilesUrl: computed(() => source.value.empireExtentTilesUrl),
     canShowTabulaPeutingerianaOverlay,
     isShowingTabulaPeutingerianaOverlay,
     setTabulaPeutingerianaOverlayActive,

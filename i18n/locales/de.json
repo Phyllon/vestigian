@@ -55,12 +55,7 @@
     "showFeatures": "Kleinere Altertümer anzeigen",
     "showFeaturesHint": "Brücken, Bergwerke, Dämme, Gräberfelder, Kastelle und Grabhügel (AWMC)",
     "showCoinHoards": "Münzhorte anzeigen",
-    "showCoinHoardsHint": "Fundorte republikanischer Münzhorte (CHRR)",
-    "periodScrubber": "Das Imperium, im Laufe der Zeit",
-    "periodOff": "Ausgeschaltet",
-    "periodYearBce": "{year} v. Chr.",
-    "periodYearCe": "{year} n. Chr.",
-    "periodApproximate": "Grenzverläufe sind Näherungswerte, gezeichnet von OpenHistoricalMap-Mitwirkenden."
+    "showCoinHoardsHint": "Fundorte republikanischer Münzhorte (CHRR)"
   },
   "tabulaPeutingeriana": {
     "title": "Tabula Peutingeriana",
@@ -1017,6 +1012,17 @@
     "menuLabel": "Overlays",
     "labelNone": "Overlays: keine aktiv",
     "labelActive": "Overlays: {count} aktiv"
+  },
+  "periodSwitcher": {
+    "label": "Römisches Reich: {state}",
+    "menuLabel": "Das Römische Reich im Laufe der Zeit",
+    "title": "Römisches Reich",
+    "heading": "Ausdehnung im Laufe der Zeit",
+    "scrubberLabel": "Das Römische Reich im Laufe der Zeit",
+    "off": "Ausgeschaltet",
+    "yearBce": "{year} v. Chr.",
+    "yearCe": "{year} n. Chr.",
+    "approximate": "Grenzverläufe sind Näherungswerte, gezeichnet von OpenHistoricalMap-Mitwirkenden."
   },
   "languageNotice": {
     "body": "Diese Seite wird in {language} angezeigt. Englisch ist hier die Sprache, auf die man sich am meisten verlassen kann – andere Sprachen können eine etwas andere Bedeutung haben.",

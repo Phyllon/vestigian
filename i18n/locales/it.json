@@ -55,12 +55,7 @@
     "showFeatures": "Mostra le testimonianze minori",
     "showFeaturesHint": "Ponti, miniere, dighe, necropoli, forti e tumuli (AWMC)",
     "showCoinHoards": "Mostra i ripostigli monetali",
-    "showCoinHoardsHint": "Luoghi di rinvenimento di ripostigli repubblicani (CHRR)",
-    "periodScrubber": "L'impero, nel tempo",
-    "periodOff": "Fuori",
-    "periodYearBce": "{year} a.C.",
-    "periodYearCe": "{year} d.C.",
-    "periodApproximate": "I confini sono approssimativi, tracciati dai contributori di OpenHistoricalMap."
+    "showCoinHoardsHint": "Luoghi di rinvenimento di ripostigli repubblicani (CHRR)"
   },
   "tabulaPeutingeriana": {
     "title": "Tabula Peutingeriana",
@@ -1017,6 +1012,17 @@
     "menuLabel": "Livelli",
     "labelNone": "Livelli: nessuno attivo",
     "labelActive": "Livelli: {count} attivi"
+  },
+  "periodSwitcher": {
+    "label": "Impero romano: {state}",
+    "menuLabel": "L'Impero romano nel tempo",
+    "title": "Impero romano",
+    "heading": "Estensione nel tempo",
+    "scrubberLabel": "L'Impero romano nel tempo",
+    "off": "Fuori",
+    "yearBce": "{year} a.C.",
+    "yearCe": "{year} d.C.",
+    "approximate": "I confini sono approssimativi, tracciati dai contributori di OpenHistoricalMap."
   },
   "languageNotice": {
     "body": "Questa pagina è mostrata in {language}. L'inglese è la lingua più affidabile qui — le altre possono avere un significato leggermente diverso.",

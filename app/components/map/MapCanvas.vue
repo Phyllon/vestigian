@@ -7,7 +7,7 @@
   const map = shallowRef<MapLibreMap | null>(null)
   const isReady = ref(false)
 
-  const { currentStyle, view, isDark } = useBasemapStyle()
+  const { currentStyle, view, isDark, periodYear } = useBasemapStyle()
 
   /**
    * An antiquity sheet is parchment in both themes — filtering the raster would
@@ -31,6 +31,8 @@
     detachLimesOverlay,
     keepLimesOverlayThroughStyleChanges,
   } = useLimesOverlay()
+  const { attachPeriodOverlay, detachPeriodOverlay, keepPeriodOverlayThroughStyleChanges } =
+    usePeriodOverlay()
   const {
     isActive: isShowingBattles,
     attachBattleOverlay,
@@ -181,6 +183,19 @@
     refreshLimesDimming(map.value)
   })
 
+  /**
+   * The period overlay's source URL carries the year itself
+   * (`/api/tiles/antiquity-empire/:year/...`), so a change in `periodYear`
+   * has to rebuild the source and layers even while the overlay stays
+   * switched on — not just when it toggles between "off" and a value, the
+   * shape every other overlay's watcher follows.
+   */
+  watch(periodYear, () => {
+    if (!map.value) return
+    detachPeriodOverlay(map.value)
+    attachPeriodOverlay(map.value)
+  })
+
   watch(isShowingBattles, (isActive) => {
     if (!map.value) return
     if (isActive) {
@@ -253,6 +268,8 @@
       // markers it runs past rather than over them.
       attachLimesOverlay(instance)
       keepLimesOverlayThroughStyleChanges(instance)
+      attachPeriodOverlay(instance)
+      keepPeriodOverlayThroughStyleChanges(instance)
       attachBattleOverlay(instance)
       keepBattleOverlayThroughStyleChanges(instance)
       attachPortOverlay(instance)

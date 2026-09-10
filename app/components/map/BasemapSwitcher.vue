@@ -4,11 +4,11 @@
 
   /**
    * The sheet, and the one control that redraws the sheet itself. Every
-   * overlay switch moved out to `OverlaySwitcher.vue` — see its docstring for
-   * why, and for why the scrubber below did not go with them.
+   * overlay switch moved out to `OverlaySwitcher.vue`, and the period
+   * scrubber moved out to `PeriodSwitcher.vue` for the same reason — see
+   * that component's own docstring for why it no longer has to live here.
    */
-  const { view, setView, availableViews, canShowPeriodExtent, periodYear, setPeriodYear } =
-    useBasemapStyle()
+  const { view, setView, availableViews } = useBasemapStyle()
   const { t } = useI18n()
   const isOpen = ref(false)
   const root = useTemplateRef('root')
@@ -43,90 +43,11 @@
     close()
   }
 
-  const { steps: periodSteps, load: loadPeriodSteps } = useEmpirePeriods()
-
-  /**
-   * An index domain, not the year itself — `USlider` moves its thumb by even
-   * steps, and the gaps in this series run from a single year (116 to 117)
-   * to 171 (509 to 338 BCE). Mapping the thumb to the year would compress
-   * the entire early Republic into a few pixels. Position 0 is the
-   * scrubber's own "off" state, so a fresh visitor sees nothing extra on the
-   * sheet until they actually drag it.
-   */
-  const periodSliderIndex = computed<number>({
-    get: () => {
-      if (periodYear.value === null) return 0
-      const index = periodSteps.value.findIndex((step) => step.year === periodYear.value)
-      return index === -1 ? 0 : index + 1
-    },
-    set: (index) => {
-      setPeriodYear(index <= 0 ? null : (periodSteps.value[index - 1]?.year ?? null))
-    },
-  })
-
-  const currentPeriodStep = computed(() =>
-    periodYear.value === null
-      ? null
-      : (periodSteps.value.find((step) => step.year === periodYear.value) ?? null),
-  )
-
-  const periodSliderLabel = computed<string>(() =>
-    periodYear.value === null
-      ? t('basemapSwitcher.periodOff')
-      : formatPeriodYear(periodYear.value, (key, named) => t(key, named)),
-  )
-
-  /**
-   * Nuxt UI's `<USlider>` forwards `aria-*` attrs only to `SliderRoot` — the
-   * wrapping element — never to `SliderThumb`, which is the actual element
-   * carrying `role="slider"` (confirmed by reading both components' source,
-   * not assumed). A screen reader names a slider from *that* element, so an
-   * `aria-label` passed as a normal prop is silently inert: it lands on a
-   * `<span>` nothing asks for a name. Setting it directly on the thumb once
-   * it exists, and keeping it in sync as the label changes, is the smallest
-   * fix that doesn't mean dropping an established component for a hand-rolled
-   * `<input type="range">` over one missing attribute passthrough.
-   */
-  /**
-   * `useTemplateRef`'s own type only ever models a single instance, but the
-   * `ref` here sits inside the `v-for="group in groups"` block above
-   * (guarded by its own `v-if`, so it renders once) — Vue still collects
-   * refs inside a `v-for` scope into an array at runtime regardless of how
-   * many iterations actually render the element, which the composable's
-   * type signature does not account for. Confirmed by logging the raw
-   * value during development, not assumed from the type alone.
-   */
-  const periodSlider = useTemplateRef<{ $el?: HTMLElement }[]>('periodSlider')
-
-  watchEffect(() => {
-    const root = periodSlider.value?.[0]?.$el
-    const thumb = root?.querySelector?.('[role="slider"]')
-    if (!thumb) return
-    thumb.setAttribute('aria-label', t('basemapSwitcher.periodScrubber'))
-    thumb.setAttribute('aria-valuetext', periodSliderLabel.value)
-  })
-
   const activeLabel = computed(
     () => availableViews.find((option) => option.value === view.value)?.label ?? 'Vestigian',
   )
 
   onClickOutside(root, close)
-
-  /**
-   * The scrubber's stops are fetched, not constant, so they have to arrive
-   * before the slider can be dragged — but only for a reader who actually
-   * opens the switcher on the sheet that has a scrubber. Watching both
-   * conditions rather than loading `onMounted` keeps that request off every
-   * first paint, the same restraint the extent tiles themselves already
-   * follow by staying out of the style until a period is chosen.
-   */
-  watch(
-    () => isOpen.value && canShowPeriodExtent.value,
-    (shouldLoad) => {
-      if (shouldLoad) void loadPeriodSteps()
-    },
-    { immediate: true },
-  )
 </script>
 
 <template>
@@ -168,9 +89,8 @@
     >
       <!--
         Capped against the viewport rather than sized to the content: two
-        groups of sheets plus the period scrubber is taller than a phone in
-        landscape, and a menu that runs off the bottom of the screen has no way
-        back.
+        groups of sheets is taller than a phone in landscape, and a menu that
+        runs off the bottom of the screen has no way back.
       -->
       <div
         v-if="isOpen"
@@ -207,50 +127,6 @@
             </span>
             <span class="text-xs text-ink-500 dark:text-paper-400">{{ option.hint }}</span>
           </button>
-
-          <!--
-            Only while the Barrington sheet is the active view — the three
-            dates it draws are a property of that sheet's own data, not a
-            reading that makes sense laid over DARE or a modern basemap.
-          -->
-          <div
-            v-if="group === 'antiquity' && canShowPeriodExtent"
-            class="border-b border-paper-200 px-4 py-3 dark:border-night-700"
-          >
-            <div class="mb-2 flex items-center justify-between gap-2">
-              <span class="text-sm font-medium text-ink-900 dark:text-paper-100">
-                {{ t('basemapSwitcher.periodScrubber') }}
-              </span>
-              <span class="font-mono text-xs text-ink-500 dark:text-paper-400">
-                {{ periodSliderLabel }}
-              </span>
-            </div>
-            <USlider
-              ref="periodSlider"
-              v-model="periodSliderIndex"
-              :min="0"
-              :max="periodSteps.length"
-              :step="1"
-              size="sm"
-              :disabled="periodSteps.length === 0"
-            />
-            <!--
-              What the source itself says ends this slice ("Trajan conquers
-              Armenia"). English only upstream and deliberately untranslated —
-              see `useEmpirePeriods`. `aria-live` because the text changes
-              under a slider the reader is already operating by keyboard.
-            -->
-            <p
-              v-if="currentPeriodStep?.endEvent"
-              class="mt-2 text-xs leading-snug text-ink-500 dark:text-paper-400"
-              aria-live="polite"
-            >
-              {{ currentPeriodStep.endEvent }}
-            </p>
-            <p class="mt-2 text-xs italic text-ink-400 dark:text-paper-500">
-              {{ t('basemapSwitcher.periodApproximate') }}
-            </p>
-          </div>
         </div>
       </div>
     </Transition>

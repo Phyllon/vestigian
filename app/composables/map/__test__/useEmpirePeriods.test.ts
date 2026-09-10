@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { formatPeriodYear } from '../useEmpirePeriods'
 
 const translate = (key: string, named: Record<string, unknown>): string =>
-  key === 'basemapSwitcher.periodYearBce' ? `${named.year} BCE` : `${named.year} CE`
+  key === 'periodSwitcher.yearBce' ? `${named.year} BCE` : `${named.year} CE`
 
 describe('formatPeriodYear', () => {
   it('renders a negative year as a positive BCE count', () => {
@@ -23,6 +23,6 @@ describe('formatPeriodYear', () => {
       keys.push(key)
       return String(named.year)
     })
-    expect(keys).toEqual(['basemapSwitcher.periodYearBce'])
+    expect(keys).toEqual(['periodSwitcher.yearBce'])
   })
 })
