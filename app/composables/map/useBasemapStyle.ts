@@ -178,6 +178,9 @@ export const MINOR_FEATURE_ATTRIBUTION =
 export const COIN_HOARD_ATTRIBUTION =
   'Coin hoards: <a href="http://numismatics.org/chrr/" target="_blank" rel="noopener">Coin Hoards of the Roman Republic</a>, American Numismatic Society (CC BY-NC-SA 4.0)'
 
+export const INSCRIPTION_ATTRIBUTION =
+  'Inscriptions: <a href="https://edh.ub.uni-heidelberg.de/" target="_blank" rel="noopener">Epigraphic Database Heidelberg</a> (CC BY-SA 4.0)'
+
 export const TABULA_PEUTINGERIANA_ATTRIBUTION =
   'Tabula Peutingeriana network compiled by René Voorburg, <a href="https://omnesviae.org" target="_blank" rel="noopener">omnesviae.org</a>'
 
@@ -1118,6 +1121,7 @@ export const useBasemapStyle = () => {
     routeTilesUrl: absolute(config.public.basemap.routeTilesUrl),
     featureTilesUrl: absolute(config.public.basemap.featureTilesUrl),
     coinHoardTilesUrl: absolute(config.public.basemap.coinHoardTilesUrl),
+    inscriptionTilesUrl: absolute(config.public.basemap.inscriptionTilesUrl),
     glyphsUrl: config.public.basemap.glyphsUrl,
   }))
 
@@ -1279,6 +1283,22 @@ export const useBasemapStyle = () => {
     isCoinHoardsActive.value = next
   }
 
+  /**
+   * Same shape again, for mirrored EDH inscriptions. Off by default like
+   * every reference overlay here — `.claude/rules/epigraphy.md` puts the
+   * geometry-bearing subset at 13,388 rows, the same order of magnitude as
+   * ports (6,007, drawn unclustered), so a plain symbol layer is enough.
+   */
+  const isInscriptionsActive = useState<boolean>('inscriptions-active', () => false)
+
+  const canShowInscriptions = computed(() => true)
+
+  const isShowingInscriptions = computed(() => isInscriptionsActive.value)
+
+  const setInscriptionsActive = (next: boolean): void => {
+    isInscriptionsActive.value = next
+  }
+
   const currentStyle = computed(() =>
     buildBasemapStyle({
       view: view.value,
@@ -1340,5 +1360,9 @@ export const useBasemapStyle = () => {
     isShowingCoinHoards,
     setCoinHoardsActive,
     coinHoardTilesUrl: computed(() => source.value.coinHoardTilesUrl),
+    canShowInscriptions,
+    isShowingInscriptions,
+    setInscriptionsActive,
+    inscriptionTilesUrl: computed(() => source.value.inscriptionTilesUrl),
   }
 }

@@ -64,6 +64,12 @@
     keepCoinHoardOverlayThroughStyleChanges,
   } = useCoinHoardOverlay()
   const {
+    isActive: isShowingInscriptions,
+    attachInscriptionsOverlay,
+    detachInscriptionsOverlay,
+    keepInscriptionsOverlayThroughStyleChanges,
+  } = useInscriptionsOverlay()
+  const {
     load: loadNotebook,
     overlay: notebookOverlay,
     attachNotebookOverlay,
@@ -250,6 +256,15 @@
     }
   })
 
+  watch(isShowingInscriptions, (isActive) => {
+    if (!map.value) return
+    if (isActive) {
+      attachInscriptionsOverlay(map.value)
+    } else {
+      detachInscriptionsOverlay(map.value)
+    }
+  })
+
   onMounted(() => {
     if (!container.value) return
 
@@ -280,6 +295,8 @@
       keepFeatureOverlayThroughStyleChanges(instance)
       attachCoinHoardOverlay(instance)
       keepCoinHoardOverlayThroughStyleChanges(instance)
+      attachInscriptionsOverlay(instance)
+      keepInscriptionsOverlayThroughStyleChanges(instance)
       attachOverlay(instance)
       keepOverlayThroughStyleChanges(instance)
       refreshLimesDimming(instance)

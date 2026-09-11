@@ -1028,5 +1028,63 @@
     "body": "Cette page est affichée dans {language}. L'anglais est la langue la plus fiable ici — les autres peuvent avoir un sens légèrement différent.",
     "switchToEnglish": "Passer à l'anglais",
     "dismiss": "Ignorer cet avis"
+  },
+  "epigraphy": {
+    "menuLabel": "Inscriptions",
+    "title": "Inscriptions",
+    "intro": "Des pierres tombales, des autels, des jalons et d'autres pierres inscrites du monde romain, miroir de la base de données épigraphique Heidelberg — texte sculpté, abréviations élargies, trouver des points recoupés avec les sites et les routes de cet atlas.",
+    "credit": "Texte reproduit de la base de données épigraphique Heidelberg, CC BY-SA 4.0.",
+    "notable": {
+      "title": "Quelques-uns pour commencer"
+    },
+    "browse": {
+      "title": "Parcourir le corpus",
+      "empty": "Aucune inscription ne correspond à ces filtres.",
+      "loadMore": "Charger plus"
+    },
+    "filters": {
+      "type": "Type",
+      "anyType": "Tout type",
+      "language": "Langue",
+      "anyLanguage": "Toute langue",
+      "yearFrom": "À partir de l'année",
+      "yearTo": "Année",
+      "decoratedOnly": "Décoré seulement"
+    },
+    "types": {
+      "funerary": "Funérailles",
+      "votive": "Voix",
+      "honorific": "Honoraires",
+      "building": "Bâtiment",
+      "milestone": "Étape"
+    },
+    "languages": {
+      "la": "Latin",
+      "grc": "Grèce"
+    },
+    "formulary": {
+      "title": "Formule",
+      "intro": "Les abréviations les plus courantes sur chaque inscription miroir, lues à partir de leur propre texte sculpté — et non d'un glossaire distinct.",
+      "count": "le {count} inscriptions"
+    },
+    "detail": {
+      "dated": "Fait",
+      "material": "Matériau",
+      "dimensions": "Dimensions",
+      "letterHeight": "Hauteur de la lettre",
+      "origin": "Origine",
+      "foundAt": "Trouvé à",
+      "text": "Texte",
+      "textHint": "Les abréviations sculptées sont soulignées — planez ou tapez une pour voir son expansion.",
+      "commentary": "Commentaire",
+      "bibliography": "Bibliographie",
+      "viewOnEdh": "Vue sur EDH",
+      "credit": "{licence}, Base de données épigraphiques Heidelberg"
+    },
+    "nearby": {
+      "title": "Inscriptions trouvées à proximité",
+      "titleTracing": "Inscriptions le long de cette route",
+      "distance": "{metres} m loin"
+    }
   }
 }

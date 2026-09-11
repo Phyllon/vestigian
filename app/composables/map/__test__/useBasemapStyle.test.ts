@@ -30,6 +30,7 @@ const source: BasemapSource = {
   routeTilesUrl: 'http://localhost:3000/api/tiles/antiquity-routes',
   featureTilesUrl: 'http://localhost:3000/api/tiles/antiquity-features',
   coinHoardTilesUrl: 'http://localhost:3000/api/tiles/antiquity-coin-hoards',
+  inscriptionTilesUrl: 'http://localhost:3000/api/tiles/inscriptions',
   glyphsUrl: '/fonts/{fontstack}/{range}.pbf',
 }
 

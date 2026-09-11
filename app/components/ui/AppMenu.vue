@@ -23,6 +23,7 @@
         icon: 'i-lucide-map',
         to: '/tabula-peutingeriana',
       },
+      { label: t('epigraphy.menuLabel'), icon: 'i-lucide-landmark', to: '/inscriptions' },
     ],
     [
       { type: 'label' as const, label: t('layout.menuGroupLegal') },

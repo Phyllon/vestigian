@@ -112,6 +112,8 @@
         </p>
       </div>
 
+      <EpigraphyNearbyInscriptions :id="tracing.id" kind="tracing" class="mt-6" />
+
       <footer
         class="mt-10 flex flex-wrap items-center gap-3 border-t border-paper-200 pt-4 dark:border-night-700"
       >

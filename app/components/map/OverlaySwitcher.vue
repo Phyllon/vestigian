@@ -43,6 +43,9 @@
     canShowCoinHoards,
     isShowingCoinHoards,
     setCoinHoardsActive,
+    canShowInscriptions,
+    isShowingInscriptions,
+    setInscriptionsActive,
   } = useBasemapStyle()
   const { t } = useI18n()
 
@@ -143,6 +146,14 @@
       label: t('basemapSwitcher.showCoinHoards'),
       hint: t('basemapSwitcher.showCoinHoardsHint'),
       toggle: () => setCoinHoardsActive(!isShowingCoinHoards.value),
+    },
+    {
+      key: 'inscriptions',
+      canShow: canShowInscriptions.value,
+      isActive: isShowingInscriptions.value,
+      label: t('basemapSwitcher.showInscriptions'),
+      hint: t('basemapSwitcher.showInscriptionsHint'),
+      toggle: () => setInscriptionsActive(!isShowingInscriptions.value),
     },
   ])
 

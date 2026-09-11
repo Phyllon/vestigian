@@ -1028,5 +1028,63 @@
     "body": "Esta página se muestra en {language}. El inglés es el idioma en el que más se puede confiar aquí — otros pueden tener un significado ligeramente distinto.",
     "switchToEnglish": "Cambiar a inglés",
     "dismiss": "Descartar este aviso"
+  },
+  "epigraphy": {
+    "menuLabel": "Inscripciones",
+    "title": "Inscripciones",
+    "intro": "Tombstones, altares, hitos y otras piedras inscritas del mundo romano, reflejadas en la base de datos epigráfica Heidelberg — texto tallado, abreviaturas expandidas, encuentra puntos cruzados contra los propios sitios y caminos de este atlas.",
+    "credit": "Texto reflejado en la base de datos epigráfica Heidelberg, CC BY-SA 4.0.",
+    "notable": {
+      "title": "Algunos para empezar"
+    },
+    "browse": {
+      "title": "Examine el cuerpo",
+      "empty": "No hay inscripciones que coincidan con estos filtros.",
+      "loadMore": "Carga más"
+    },
+    "filters": {
+      "type": "Tipo",
+      "anyType": "Cualquier tipo",
+      "language": "Idioma",
+      "anyLanguage": "Cualquier idioma",
+      "yearFrom": "Del año",
+      "yearTo": "Al año",
+      "decoratedOnly": "Decorado sólo"
+    },
+    "types": {
+      "funerary": "Funerario",
+      "votive": "Votive",
+      "honorific": "Honorífico",
+      "building": "Edificio",
+      "milestone": "Milestone"
+    },
+    "languages": {
+      "la": "Latina",
+      "grc": "Griego"
+    },
+    "formulary": {
+      "title": "Fórmula",
+      "intro": "Las abreviaturas más comunes en cada inscripción reflejada, leídas de su propio texto tallado, no un glosario separado.",
+      "count": "on {count} inscripciones"
+    },
+    "detail": {
+      "dated": "Fecha",
+      "material": "Material",
+      "dimensions": "Dimensiones",
+      "letterHeight": "Altura de la carta",
+      "origin": "Origen",
+      "foundAt": "Encontrado en",
+      "text": "Texto",
+      "textHint": "Las abreviaturas talladas se subrayan — agitar o pulsar uno para ver su expansión.",
+      "commentary": "Comentario",
+      "bibliography": "Bibliografía",
+      "viewOnEdh": "View on EDH",
+      "credit": "{licence}, Base de datos epigráfica Heidelberg"
+    },
+    "nearby": {
+      "title": "Inscripciones encontradas cerca",
+      "titleTracing": "Inscripciones en esta ruta",
+      "distance": "{metres} m away"
+    }
   }
 }

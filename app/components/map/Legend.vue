@@ -17,6 +17,7 @@
     isShowingRoutes,
     isShowingFeatures,
     isShowingCoinHoards,
+    isShowingInscriptions,
   } = useBasemapStyle()
   const { t } = useI18n()
   const isOpen = ref(false)
@@ -358,6 +359,33 @@
               </svg>
               <span class="text-xs text-ink-700 dark:text-paper-200">
                 {{ t('legend.coinHoardMark') }}
+              </span>
+            </li>
+          </ul>
+        </template>
+
+        <!--
+          Inscriptions are an overlay on any basemap, own key entry, same
+          reasoning as battles and coin hoards above.
+        -->
+        <template v-if="isShowingInscriptions">
+          <h2 class="eyebrow mb-2 mt-3 border-t border-paper-300 pt-2.5 dark:border-night-600">
+            {{ t('legend.inscriptionsTitle') }}
+          </h2>
+
+          <ul class="flex flex-col gap-1.5">
+            <li class="flex items-center gap-2">
+              <svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  :d="INSCRIPTION_ICON_PATH"
+                  stroke="currentColor"
+                  stroke-width="1.1"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              <span class="text-xs text-ink-700 dark:text-paper-200">
+                {{ t('legend.inscriptionMark') }}
               </span>
             </li>
           </ul>

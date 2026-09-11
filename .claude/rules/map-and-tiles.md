@@ -649,6 +649,23 @@ registration (`registerSiteIcons`/`registerAtlasIcons`/`registerLimesIcons`/
 marks are drawn from that same registry and both can be switched on while
 "Show sites" itself stays off.
 
+## A nullable numeric property in an MVT tile arrives as `undefined`, not `null`
+
+Found building the inscriptions overlay (`.claude/rules/epigraphy.md`), but
+general to any layer that puts a nullable numeric column into a tile and
+reads it back client-side: MVT has no null type, so `ST_AsMVT` simply omits
+a NULL column from that feature's properties. A real browser decoding the
+tile then sees `undefined` for that property, not `null` — and code written
+against `| null` types (every date/period helper in this codebase, written
+against real Postgres reads elsewhere) can take a wrong branch on
+`undefined === undefined` before its own `=== null` checks ever run. Caught
+live: a fully undated inscription's map popup rendered a bare "AD" instead
+of "Undated", because `formatPeriod`'s exact-year branch matched on both
+fields being `undefined` first. The fix belongs at the tile-properties
+boundary — normalise with `?? null` right after reading `feature.properties`,
+before handing values to anything typed `number | null` — not inside the
+shared formatting helper, which is correct for every other caller.
+
 ## How the map stays fast
 
 1. `GET /api/tiles/{z}/{x}/{y}.mvt` → validate coordinate → check Valkey → `ST_AsMVT` against a GiST index.

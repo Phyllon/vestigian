@@ -78,6 +78,8 @@ pnpm import:limes               # → the frontier, derived from the atlas; ~1 m
 pnpm import:country-boundaries  # → 239 countries, Natural Earth, public domain
 pnpm exec tsx scripts/backfill-country-codes.ts --repair   # needs country-boundaries first
 pnpm import:edh-findspots       # → 29,861 inscription findspots, CC BY-SA 4.0
+pnpm import:edh-inscriptions    # → 79,201 inscriptions (of 79,206), CC BY-SA 4.0, ~2 min
+pnpm import:edh-inscription-images # → 24,779 photo records, metadata only, ~20s (no image bytes — every one is rights-reserved)
 pnpm exec tsx scripts/verify-concordances.ts --repair       # overnight-scale, see its own docstring
 pnpm import:cities              # → 235,666 modern cities and towns, CC BY 4.0
 pnpm import:tabula-peutingeriana # → 2,574 places, 2,397 roads; licence unconfirmed, off by default

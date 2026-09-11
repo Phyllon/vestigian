@@ -1028,5 +1028,63 @@
     "body": "Questa pagina è mostrata in {language}. L'inglese è la lingua più affidabile qui — le altre possono avere un significato leggermente diverso.",
     "switchToEnglish": "Passa all'inglese",
     "dismiss": "Chiudi questo avviso"
+  },
+  "epigraphy": {
+    "menuLabel": "Iscrizioni",
+    "title": "Iscrizioni",
+    "intro": "Pietre, altari, pietre miliari e altre pietre inscritte dal mondo romano, specchiate dal database epigrafico Heidelberg — testo scolpito, abbreviazioni espanse, reperti incrociati contro i propri siti e strade di questo atlante.",
+    "credit": "Testo rispecchiato dal database epigrafico Heidelberg, CC BY-SA 4.0.",
+    "notable": {
+      "title": "Alcuni da cominciare"
+    },
+    "browse": {
+      "title": "Sfoglia il corpus",
+      "empty": "Nessuna iscrizione corrisponde a questi filtri.",
+      "loadMore": "Carica più"
+    },
+    "filters": {
+      "type": "Tipo",
+      "anyType": "Qualsiasi tipo",
+      "language": "Lingua",
+      "anyLanguage": "Qualsiasi lingua",
+      "yearFrom": "Dall'anno",
+      "yearTo": "All'anno",
+      "decoratedOnly": "Decorato solo"
+    },
+    "types": {
+      "funerary": "Funerari",
+      "votive": "Votazioni",
+      "honorific": "Omaggio",
+      "building": "Edilizia",
+      "milestone": "Milestone"
+    },
+    "languages": {
+      "la": "Latino",
+      "grc": "Greco"
+    },
+    "formulary": {
+      "title": "Formulario",
+      "intro": "Le abbreviazioni più comuni in ogni iscrizione a specchio, lette dal loro testo scolpito — non un glossario separato.",
+      "count": "su {count} iscrizioni"
+    },
+    "detail": {
+      "dated": "Data",
+      "material": "Materiale",
+      "dimensions": "Dimensioni",
+      "letterHeight": "Altezza lettera",
+      "origin": "Origine",
+      "foundAt": "Trovato",
+      "text": "Testo",
+      "textHint": "Abbreviazioni asfaltate sono sottolineate — hover o toccare uno per vedere la sua espansione.",
+      "commentary": "Commento",
+      "bibliography": "Bibliografia",
+      "viewOnEdh": "Visualizza su EDH",
+      "credit": "{licence}, Epigraphic Database Heidelberg"
+    },
+    "nearby": {
+      "title": "Iscrizioni trovate nelle vicinanze",
+      "titleTracing": "Iscrizioni lungo questo percorso",
+      "distance": "{metres} m distanza"
+    }
   }
 }

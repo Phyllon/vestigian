@@ -60,7 +60,9 @@
     "showFeatures": "Show minor antiquities",
     "showFeaturesHint": "Bridges, mines, dams, cemeteries, forts and burial mounds (AWMC)",
     "showCoinHoards": "Show coin hoards",
-    "showCoinHoardsHint": "Roman Republic coin-hoard findspots (CHRR)"
+    "showCoinHoardsHint": "Roman Republic coin-hoard findspots (CHRR)",
+    "showInscriptions": "Show inscriptions",
+    "showInscriptionsHint": "Mirrored inscriptions with a resolved findspot (EDH)"
   },
   "overlaySwitcher": {
     "title": "Overlays",
@@ -118,6 +120,70 @@
       "of": "of {total}"
     }
   },
+  "epigraphy": {
+    "menuLabel": "Inscriptions",
+    "title": "Inscriptions",
+    "intro": "Tombstones, altars, milestones and other inscribed stones from the Roman world, mirrored from the Epigraphic Database Heidelberg — carved text, abbreviations expanded, findspots cross-referenced against this atlas's own sites and roads.",
+    "credit": "Text mirrored from the Epigraphic Database Heidelberg, CC BY-SA 4.0.",
+    "notable": {
+      "title": "A few to start with"
+    },
+    "browse": {
+      "title": "Browse the corpus",
+      "empty": "No inscriptions match these filters.",
+      "loadMore": "Load more"
+    },
+    "filters": {
+      "type": "Type",
+      "anyType": "Any type",
+      "language": "Language",
+      "anyLanguage": "Any language",
+      "yearFrom": "From year",
+      "yearTo": "To year",
+      "decoratedOnly": "Decorated only"
+    },
+    "types": {
+      "funerary": "Funerary",
+      "votive": "Votive",
+      "honorific": "Honorific",
+      "building": "Building",
+      "milestone": "Milestone"
+    },
+    "languages": {
+      "la": "Latin",
+      "grc": "Greek"
+    },
+    "formulary": {
+      "title": "Formulary",
+      "intro": "The most common abbreviations across every mirrored inscription, read from their own carved text — not a separate glossary.",
+      "count": "on {count} inscriptions"
+    },
+    "detail": {
+      "dated": "Dated",
+      "material": "Material",
+      "dimensions": "Dimensions",
+      "letterHeight": "Letter height",
+      "origin": "Origin",
+      "foundAt": "Found at",
+      "text": "Text",
+      "textHint": "Carved abbreviations are underlined — hover or tap one to see its expansion.",
+      "photographs": "Photographs",
+      "photographsHint": "{count} on record at EDH — rights reserved, so linked rather than shown here.",
+      "morePhotos": "+{count} more on EDH",
+      "commentary": "Commentary",
+      "bibliography": "Bibliography",
+      "viewOnEdh": "View on EDH",
+      "credit": "{licence}, Epigraphic Database Heidelberg"
+    },
+    "nearby": {
+      "title": "Inscriptions found nearby",
+      "titleTracing": "Inscriptions along this route",
+      "distance": "{metres} m away"
+    },
+    "popup": {
+      "open": "Open inscription"
+    }
+  },
   "legend": {
     "title": "What the marks mean",
     "tapForDetails": "Tap or click a mark on the map to open what is recorded about it.",
@@ -139,6 +205,8 @@
     "featuresTitle": "Minor antiquities",
     "coinHoardsTitle": "Coin hoards",
     "coinHoardMark": "Recorded coin-hoard findspot",
+    "inscriptionsTitle": "Inscriptions",
+    "inscriptionMark": "Mirrored inscription with a resolved findspot",
     "basemapCreditDare": "Antiquity (DARE): © Johan Åhlfeldt, Gothenburg University, CC BY-SA 3.0.",
     "basemapCreditBarrington": "Antiquity (Barrington): roads, coastline and places from the Ancient World Mapping Center (ODbL 1.0) and Pleiades (CC BY 3.0)."
   },

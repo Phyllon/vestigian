@@ -583,6 +583,37 @@ export const registerPortIcon = (map: MapLibreMap, palette: SiteIconPalette): vo
   map.addImage(PORT_ICON_ID, image, { pixelRatio: ICON_PIXEL_RATIO })
 }
 
+export const INSCRIPTION_ICON_ID = 'vestigian-inscription'
+
+/**
+ * Lucide `scroll-text` — two `<path>` elements flattened into one `d`
+ * string, the same technique this file already uses for a `<circle>`.
+ * Deliberately not `landmark` (already the app-menu icon for `/inscriptions`
+ * — a map marker wants a mark distinct from a menu glyph) and not any
+ * cemetery/grave-specific icon, since the corpus is funerary, votive,
+ * honorific and building inscriptions alike, not tombstones exclusively.
+ */
+export const INSCRIPTION_ICON_PATH =
+  'M15 12h-5m5-4h-5m9 9V5a2 2 0 0 0-2-2H4 M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3'
+
+/**
+ * Registered alongside the other reference marks, for the same reason as
+ * `registerPortIcon`: one more canvas, cheaper than a second hook that has
+ * to know whether "Show inscriptions" is on.
+ */
+export const registerInscriptionIcon = (map: MapLibreMap, palette: SiteIconPalette): void => {
+  const image = rasteriseIcon({
+    glyph: outline(INSCRIPTION_ICON_PATH),
+    ink: referenceInk(palette),
+    palette,
+    reference: true,
+  })
+  if (!image) return
+
+  if (map.hasImage(INSCRIPTION_ICON_ID)) map.removeImage(INSCRIPTION_ICON_ID)
+  map.addImage(INSCRIPTION_ICON_ID, image, { pixelRatio: ICON_PIXEL_RATIO })
+}
+
 /**
  * AWMC's minor point features — bridges, mines/quarries, dams, cemeteries
  * and tumuli. `fort` has no glyph of its own here: it reuses

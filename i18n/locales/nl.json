@@ -1028,5 +1028,63 @@
     "body": "Deze pagina wordt weergegeven in {language}. Engels is hier de taal om het meest op te vertrouwen — andere talen kunnen een iets andere betekenis hebben.",
     "switchToEnglish": "Naar Engels wisselen",
     "dismiss": "Melding sluiten"
+  },
+  "epigraphy": {
+    "menuLabel": "Inscripties",
+    "title": "Inscripties",
+    "intro": "Grafstenen, altaren, mijlpalen en andere gegraveerde stenen uit de Romeinse wereld, gespiegeld uit de Epigraphic Database Heidelberg Gekerfde tekst, afkortingen uitgebreid, vindplaatsen kruisverwijzingen met de eigen sites en wegen van deze atlas.",
+    "credit": "Tekst gespiegeld uit de Epigraphic Database Heidelberg, CC BY-SA 4.0.",
+    "notable": {
+      "title": "Een paar om mee te beginnen"
+    },
+    "browse": {
+      "title": "Blader door het corpus",
+      "empty": "Geen inscripties van deze filters.",
+      "loadMore": "Meer laden"
+    },
+    "filters": {
+      "type": "Type",
+      "anyType": "Elk type",
+      "language": "Taal",
+      "anyLanguage": "Elke taal",
+      "yearFrom": "Vanaf jaar",
+      "yearTo": "Naar jaar",
+      "decoratedOnly": "Alleen gedecoreerd"
+    },
+    "types": {
+      "funerary": "Funerair",
+      "votive": "Votief",
+      "honorific": "Eervol",
+      "building": "Gebouw",
+      "milestone": "Mijlpaal"
+    },
+    "languages": {
+      "la": "Latijn",
+      "grc": "Grieks"
+    },
+    "formulary": {
+      "title": "Formulering",
+      "intro": "De meest voorkomende afkortingen over elke gespiegelde inscriptie, gelezen uit hun eigen gekerfde tekst, niet een aparte woordenlijst.",
+      "count": "op {count} inscripties"
+    },
+    "detail": {
+      "dated": "Datum",
+      "material": "Materiaal",
+      "dimensions": "Afmetingen",
+      "letterHeight": "Letterhoogte",
+      "origin": "Oorsprong",
+      "foundAt": "Gevonden op",
+      "text": "Tekst",
+      "textHint": "Gesneden afkortingen worden onderstreept .",
+      "commentary": "Toelichting",
+      "bibliography": "Bibliografie",
+      "viewOnEdh": "Weergave op EDH",
+      "credit": "{licence}, Epigraphic Database Heidelberg"
+    },
+    "nearby": {
+      "title": "Inscripties gevonden in de buurt",
+      "titleTracing": "Inscripties langs deze route",
+      "distance": "{metres} m"
+    }
   }
 }

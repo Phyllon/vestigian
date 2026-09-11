@@ -147,6 +147,8 @@
           class="mt-6"
         />
 
+        <EpigraphyNearbyInscriptions :id="site.id" kind="site" class="mt-6" />
+
         <SiteEndorsementButton v-model="site" class="mt-6" />
 
         <!--

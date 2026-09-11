@@ -1028,5 +1028,63 @@
     "body": "Diese Seite wird in {language} angezeigt. Englisch ist hier die Sprache, auf die man sich am meisten verlassen kann – andere Sprachen können eine etwas andere Bedeutung haben.",
     "switchToEnglish": "Zu Englisch wechseln",
     "dismiss": "Diesen Hinweis schließen"
+  },
+  "epigraphy": {
+    "menuLabel": "Aufschriften",
+    "title": "Aufschriften",
+    "intro": "Grabsteine, Altäre, Meilensteine und andere eingeschriebene Steine aus der römischen Welt, gespiegelt aus der Epigraphischen Datenbank Heidelberg - geschnitzter Text, Abkürzungen erweitert, Fundpunkte, die mit den eigenen Orten und Straßen dieses Atlas verglichen werden.",
+    "credit": "Text gespiegelt aus der Epigraphic Database Heidelberg, CC BY-SA 4.0.",
+    "notable": {
+      "title": "Ein paar, um mit zu beginnen"
+    },
+    "browse": {
+      "title": "Durchsuchen des Corpus",
+      "empty": "Keine Inschriften passen zu diesen Filtern.",
+      "loadMore": "Mehr Ladung"
+    },
+    "filters": {
+      "type": "Typ",
+      "anyType": "Jeder Typ",
+      "language": "Sprache",
+      "anyLanguage": "Jede Sprache",
+      "yearFrom": "Ab Jahr",
+      "yearTo": "Bis zum Jahr",
+      "decoratedOnly": "Nur dekoriert"
+    },
+    "types": {
+      "funerary": "Beerdigung",
+      "votive": "Stimmrecht",
+      "honorific": "Ehrenamtlich",
+      "building": "Gebäude",
+      "milestone": "Meilenstein"
+    },
+    "languages": {
+      "la": "Latein",
+      "grc": "Griechisch"
+    },
+    "formulary": {
+      "title": "Formal",
+      "intro": "Die gebräuchlichsten Abkürzungen über jede gespiegelte Inschrift, gelesen aus ihrem eigenen geschnitzten Text - kein separates Glossar.",
+      "count": "am {count} aufschriften"
+    },
+    "detail": {
+      "dated": "Datum",
+      "material": "Material",
+      "dimensions": "Abmessungen",
+      "letterHeight": "Briefhöhe",
+      "origin": "Ursprung",
+      "foundAt": "Gefunden bei",
+      "text": "Text",
+      "textHint": "Geschnitzte Abkürzungen sind unterstrichen - schweben oder tippen Sie auf eine, um ihre Erweiterung zu sehen.",
+      "commentary": "Kommentar",
+      "bibliography": "Bibliographie",
+      "viewOnEdh": "Ansicht auf EDH",
+      "credit": "{licence}, Epigrafische Datenbank Heidelberg"
+    },
+    "nearby": {
+      "title": "Inschriften in der Nähe gefunden",
+      "titleTracing": "Inschriften entlang dieser Route",
+      "distance": "{metres} m entfernt"
+    }
   }
 }

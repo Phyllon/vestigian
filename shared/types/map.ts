@@ -67,6 +67,8 @@ export interface BasemapSource {
   featureTilesUrl: string
   /** CHRR coin-hoard findspots, added when "Show coin hoards" is on. */
   coinHoardTilesUrl: string
+  /** Mirrored EDH inscriptions with a resolved findspot, added when "Show inscriptions" is on. */
+  inscriptionTilesUrl: string
   glyphsUrl: string
 }
 

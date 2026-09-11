@@ -1,0 +1,2 @@
+CREATE INDEX IF NOT EXISTS "inscription_images_inscription_idx" ON "inscription_images" USING btree ("inscription_id");--> statement-breakpoint
+ALTER TABLE "inscription_images" ADD CONSTRAINT "inscription_images_edh_photo_id_unique" UNIQUE("edh_photo_id");

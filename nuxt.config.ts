@@ -496,6 +496,12 @@ export default defineNuxtConfig({
          */
         coinHoardTilesUrl: '/api/tiles/antiquity-coin-hoards',
         /**
+         * Mirrored EDH inscriptions carrying a resolved findspot — an overlay
+         * on any basemap, like the frontier and battles above. Same PostGIS,
+         * own endpoint, same reasoning; see `.claude/rules/epigraphy.md`.
+         */
+        inscriptionTilesUrl: '/api/tiles/inscriptions',
+        /**
          * Label glyphs ship with the app rather than being fetched from a font
          * server, for the same reason `@fontsource` is used for the interface:
          * reading the map should tell no third party that you did. Same-origin,
