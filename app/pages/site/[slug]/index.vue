@@ -32,6 +32,19 @@
       : '/',
   )
 
+  /**
+   * `@click` + `navigateTo`, not `:to`. A `UButton`/`NuxtLink` whose target
+   * differs from the current route only by its hash (`/#map=...`) falls
+   * through to a plain, router-unintercepted anchor and triggers a full
+   * browser navigation — confirmed live, and the reason every overlay
+   * toggle (`useState`, which lives on the Nuxt app instance and is wiped
+   * by a hard reload) used to reset after following this link.
+   * `navigateTo` goes through Vue Router directly instead.
+   */
+  const goToMap = (): void => {
+    void navigateTo(mapLink.value)
+  }
+
   const base = config.public.siteUrl.replace(/\/$/, '')
 
   const ogImageUrl = computed(() => {
@@ -138,7 +151,7 @@
       <footer
         class="mt-10 flex flex-wrap items-center gap-3 border-t border-paper-200 pt-4 dark:border-night-700"
       >
-        <UButton :to="mapLink" color="primary" icon="i-lucide-map">{{
+        <UButton color="primary" icon="i-lucide-map" @click="goToMap">{{
           t('siteDetailPage.showOnMap')
         }}</UButton>
         <UButton

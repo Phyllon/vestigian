@@ -14,14 +14,22 @@
    */
   const route = useRoute()
   const edhId = route.params.edhId as string
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const config = useRuntimeConfig()
   const base = config.public.siteUrl.replace(/\/$/, '')
 
+  /**
+   * Re-fetches when the reader switches interface language, since the
+   * server does the translating (see `/api/inscriptions/[edhId].get.ts`) and
+   * a locale switch is otherwise invisible to `useAsyncData`'s own cache.
+   */
   const { data: inscription } = await useAsyncData<InscriptionDetail | null>(
     `inscription-${edhId}`,
-    () => $fetch<InscriptionDetail>(`/api/inscriptions/${edhId}`).catch(() => null),
-    { default: () => null },
+    () =>
+      $fetch<InscriptionDetail>(`/api/inscriptions/${edhId}`, {
+        query: { lang: locale.value },
+      }).catch(() => null),
+    { default: () => null, watch: [locale] },
   )
 
   if (!inscription.value) {
@@ -60,14 +68,64 @@
     )
     return parts.length > 0 ? `${parts.join(' × ')} cm` : null
   })
+
+  /** The map hash format (`useMapInstance.ts`'s `useCameraState`), so
+   *  following this lands the map zoomed in on this inscription's own
+   *  findspot — the same convention `site/[slug]`'s own `mapLink` uses. */
+  const mapLink = computed(() =>
+    inscription.value?.position
+      ? `/#map=17.00/${inscription.value.position.lat.toFixed(5)}/${inscription.value.position.lon.toFixed(5)}`
+      : null,
+  )
+
+  /**
+   * `@click` + `navigateTo`, not `:to`. `UButton`'s `to` prop, for a target
+   * like `/#map=...` (a different route than the current one, distinguished
+   * only by its hash), renders a plain link that falls through to a full
+   * browser navigation rather than a router-intercepted one — confirmed
+   * live, and the reason "the overlays are deactivated" after following
+   * this link: a hard navigation discards `useState`, which is where every
+   * overlay toggle lives. `navigateTo` goes through Vue Router directly,
+   * so this is a genuine client-side route change.
+   */
+  const goToMap = (): void => {
+    if (mapLink.value) void navigateTo(mapLink.value)
+  }
+
+  const nameOf = (code: string): string => {
+    const known = t(`enrichment.languages.${code}`)
+    return known === `enrichment.languages.${code}` ? code.toUpperCase() : known
+  }
+
+  /** Same three-case shape `SiteEnrichment.vue`'s `languageNote` already
+   *  uses for borrowed prose — reused as-is, since a machine standing
+   *  between a reader and EDH's own words deserves the same disclosure. */
+  const languageNote = computed(() => {
+    const item = inscription.value
+    if (!item) return null
+
+    if (item.isMachineTranslated) {
+      return t('enrichment.machineTranslatedFrom', { language: nameOf(item.originalLanguage) })
+    }
+
+    return item.language === locale.value
+      ? null
+      : t('enrichment.inLanguage', { language: nameOf(item.language) })
+  })
 </script>
 
 <template>
   <article v-if="inscription">
     <p class="eyebrow">{{ typeLabel ?? inscription.objectType }}</p>
-    <h1 class="mt-1 font-display text-3xl text-ink-900 dark:text-paper-100">
+    <h1
+      :lang="inscription.language"
+      class="mt-1 font-display text-3xl text-ink-900 dark:text-paper-100"
+    >
       {{ inscription.title }}
     </h1>
+    <p v-if="languageNote" class="mt-1 text-xs text-ink-500 dark:text-paper-400">
+      {{ languageNote }}
+    </p>
 
     <dl
       class="mt-5 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 border-y border-paper-200 py-3 dark:border-night-700"
@@ -75,6 +133,10 @@
       <template v-if="period">
         <dt class="eyebrow pt-0.5">{{ t('epigraphy.detail.dated') }}</dt>
         <dd class="datum">{{ period }}</dd>
+      </template>
+      <template v-if="inscription.empireStates.length > 0">
+        <dt class="eyebrow pt-0.5">{{ t('epigraphy.detail.empireState') }}</dt>
+        <dd class="datum">{{ inscription.empireStates.join(' / ') }}</dd>
       </template>
       <template v-if="inscription.material">
         <dt class="eyebrow pt-0.5">{{ t('epigraphy.detail.material') }}</dt>
@@ -157,7 +219,10 @@
 
     <section v-if="inscription.commentary" class="mt-6">
       <h2 class="eyebrow">{{ t('epigraphy.detail.commentary') }}</h2>
-      <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
+      <p
+        :lang="inscription.language"
+        class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200"
+      >
         {{ inscription.commentary }}
       </p>
     </section>
@@ -172,6 +237,9 @@
     <div
       class="mt-8 flex flex-wrap items-center gap-3 border-t border-paper-200 pt-3 dark:border-night-700"
     >
+      <UButton v-if="mapLink" color="primary" icon="i-lucide-map" @click="goToMap">
+        {{ t('epigraphy.detail.showOnMap') }}
+      </UButton>
       <a
         :href="inscription.sourceUrl"
         target="_blank"

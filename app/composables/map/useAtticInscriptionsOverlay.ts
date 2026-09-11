@@ -68,12 +68,24 @@ export const useAtticInscriptionsOverlay = () => {
     const feature = event.features?.[0]
     if (feature?.geometry.type !== 'Point') return
 
-    new Popup({ closeButton: true, maxWidth: '260px' })
+    const properties = feature.properties as AtticInscriptionFeatureProperties
+
+    const popup = new Popup({ closeButton: true, maxWidth: '260px' })
       .setLngLat(feature.geometry.coordinates as [number, number])
-      .setHTML(
-        buildAtticInscriptionPopupHtml(feature.properties as AtticInscriptionFeatureProperties, t),
-      )
+      .setHTML(buildAtticInscriptionPopupHtml(properties, t))
       .addTo(map)
+
+    // Same fix as `useInscriptionsOverlay.ts`'s own popup link, and for the
+    // same reason: raw `Popup.setHTML` markup has no router interception on
+    // its own, so its "Open inscription" link would otherwise hard-navigate
+    // and drop every overlay toggle along with it.
+    popup
+      .getElement()
+      ?.querySelector('a')
+      ?.addEventListener('click', (clickEvent) => {
+        clickEvent.preventDefault()
+        void navigateTo(`/inscriptions/attic/${properties.aio_key}`)
+      })
   }
 
   const attachAtticInscriptionsOverlay = (map: MapLibreMap): void => {

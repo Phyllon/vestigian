@@ -168,6 +168,23 @@ the same convention every other imported-reference layer here follows
 (ports, battles, coin hoards): a moderator's approval bumps `data-version`
 instead, and this table has nothing to do with that clock.
 
+**A fourth cross-reference, added later: "the empire's extent when this was
+carved."** `findEmpireStatesForDating` (`server/utils/atlas.ts`) reads an
+inscription's own `notBefore`/`notAfter` against the same 52
+`antiquity_empire_extents` slices the period scrubber stands on — the same
+half-open-interval convention `buildEmpireExtentTileSql` already uses
+(`start_year <= to AND end_year > from`), not a new time model. A dating
+range spanning a slice boundary can genuinely overlap more than one state
+(shown joined with `/`, the same treatment `/api/atlas/empire-periods`
+already gives the Western/Eastern split after 395). Reuses the existing
+machinery rather than building new time UI, per the plan: no map preview, no
+deep link into the scrubber, just a text row (`epigraphy.detail.empireState`)
+next to "Dated" on `/inscriptions/:edhId` — empty and hidden when the
+dating range is undated or falls outside the scrubber's 509 BCE–476 CE
+coverage. Not applied to Attic Inscriptions Online: AIO's Classical/
+Hellenistic Athenian corpus mostly predates the scrubber's own Republic-era
+slices, and the plan's cross-reference item names only the EDH corpus.
+
 Two more real bugs, found only by actually clicking a marker on a running map:
 
 6. **`USelect`'s "Any type"/"Any language" filter options crashed the whole
@@ -397,3 +414,88 @@ page is cached to `.import/attic-inscriptions/` (resumable, same "scratch,
 read once" shape every other import here uses), so a re-run after a bug fix
 costs no further network traffic at all — every fix above 10–13 was
 verified by re-running against the same cached HTML, not by re-fetching.
+
+## EDH metadata is machine-translated on read; the carved text never is
+
+`title`/`commentary` on `/inscriptions/:edhId` are EDH's own German
+scholarly metadata (verified live, not assumed — every sampled record's
+prose is German; `textLanguage` is a different field entirely, the
+inscription's own carved language). `/api/inscriptions/[edhId].get.ts`
+translates both through the same self-hosted LibreTranslate
+`/api/sites/:id/enrichment` already uses (`translateText`,
+`.claude/rules/enrichment-and-i18n.md`), when `?lang` names one of the six
+interface languages and differs from German. Cached per (inscription,
+language) in Redis at `inscription-translate:v1:{edhId}:{lang}` — a week for
+an answer, a day for "nothing came back", the same lifetimes enrichment
+uses. Fails open, same as enrichment: a timed-out or unreachable
+LibreTranslate leaves the German original in place rather than blocking the
+page. `app/pages/inscriptions/[edhId].vue` re-fetches on locale change
+(`watch: [locale]` on its `useAsyncData`) and shows the same three-case
+disclosure `SiteEnrichment.vue` already established (nothing said when
+already in the interface language, "Machine-translated from German" when a
+machine stepped in, "In German" when left untranslated) — reusing
+`enrichment.machineTranslatedFrom`/`enrichment.inLanguage`/
+`enrichment.languages.*` directly rather than duplicating them under
+`epigraphy.*`.
+
+**The transcription itself (`textEdition`/`textDiplomatic`) is never
+translated, on purpose.** It is Latin or Greek, and the self-hosted
+LibreTranslate instance here has only the app's six modern interface
+languages loaded (`/languages` checked live: `en`, `nl`, `fr`, `de`, `it`,
+`es` — no `la`, no `grc`) — there is no engine to even attempt it with. More
+to the point, this is a primary source, not prose: a fluent-sounding but
+wrong machine rendering of a carved abbreviation would be far worse than no
+translation, the same caution that kept Iconclass tagging and photo-reading
+out of this project's scope elsewhere. A genuine reading translation of the
+Latin/Greek content is a scholarly problem Attic Inscriptions Online already
+solves by hand for its own corpus (`translationEdition`) — not something to
+approximate with a generic translation model.
+
+**Scope is title + commentary only — not `material`, `originPlaceName`,
+`findModernPlace` or `bibliography`.** Place names are proper nouns and
+should never be machine-translated at all; `bibliography` is citation text,
+also never translated. `material` is real German prose ("unbestimmt",
+"Marmor") but stays untouched deliberately: it is a one- or two-word field
+with no sentence context, exactly the shape `enrichment-and-i18n.md`'s own
+audits found LibreTranslate gets wrong most often (`site`→`Website`,
+`limes`→citrus fruit, `Key`→a door key) — a short label is safe to translate
+inside a full sentence and unreliable standing alone. Not attempted here for
+the same reason those audits exist.
+
+**AIO's own `translationEdition` is untouched by any of this** — it is
+already curated human English, a segmented structure (text/place/gloss/note
+spans with embedded Pleiades links and footnote anchors), not a flat string
+`translateText` could take as input without first flattening and then
+reconstructing that structure. Translating it further into the other five
+interface languages is a real, separate feature, not attempted in this pass.
+
+## "Show on map" — both detail pages, the same URL-hash convention as `site/[slug]`
+
+`/inscriptions/:edhId` and `/inscriptions/attic/:aioKey` each carry a
+`mapLink` computed, identical in shape to `site/[slug]/index.vue`'s
+original: `` `/#map=${zoom}/${lat}/${lon}` ``, read on mount by
+`useCameraState`'s `restoreCamera()` (`useMapInstance.ts`) when the map page
+next mounts. Not a live `flyTo` call — the reading layout's detail pages and
+the map page's `default` layout are different page/layout pairs
+(`app.vue`'s `<NuxtLayout><NuxtPage /></NuxtLayout>` swaps both together),
+so following the link is a full navigation and remount of `MapCanvas`, not
+an in-place camera move into an already-running map instance. Zoom **17**,
+one step tighter than the site page's 16 — an inscription is a single
+carved object, not a settlement-scale record, and warrants landing a bit
+closer. Hidden (`v-if="mapLink"`) when the record's own findspot never
+resolved a geometry (83% of the EDH corpus, 22% of AIO's).
+
+## Not built, deliberately: a "read N inscriptions" milestone
+
+The plan's own closing item was a `notebook/MilestoneStamps` entry for
+reading N inscriptions. Not built, and not pending — every existing mark in
+`shared/utils/milestones.ts` is derived from a count the database already
+keeps for another reason (visits, approved contributions, countries), and
+there is no tracking anywhere of which inscriptions a given user has opened:
+inscriptions are pure imported reference data, no `siteId`, no per-user
+row at all. Earning this mark would mean standing up a new table whose only
+purpose is logging inscription views per user — a real per-user
+behavioural log, not a derived count, and out of proportion to one badge.
+Decided against when this came up as the plan's last open item; revisit
+only if a genuine second reason to log per-user inscription reads ever
+appears (a reading-history page, say) and the milestone rides along with it.

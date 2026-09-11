@@ -1042,9 +1042,6 @@
     "title": "Inscripciones",
     "intro": "Tombstones, altares, hitos y otras piedras inscritas del mundo romano, reflejadas en la base de datos epigráfica Heidelberg — texto tallado, abreviaturas expandidas, encuentra puntos cruzados contra los propios sitios y caminos de este atlas.",
     "credit": "Texto reflejado en la base de datos epigráfica Heidelberg, CC BY-SA 4.0.",
-    "notable": {
-      "title": "Algunos para empezar"
-    },
     "browse": {
       "title": "Examine el cuerpo",
       "empty": "No hay inscripciones que coincidan con estos filtros.",
@@ -1077,6 +1074,7 @@
     },
     "detail": {
       "dated": "Fecha",
+      "empireState": "Estado romano en esta época",
       "material": "Material",
       "dimensions": "Dimensiones",
       "letterHeight": "Altura de la carta",
@@ -1090,7 +1088,8 @@
       "credit": "{licence}, Base de datos epigráfica Heidelberg",
       "photographs": "Fotografías",
       "photographsHint": "{count} registradas en el EDH — derechos reservados, por lo que se enlazan en lugar de mostrarse aquí.",
-      "morePhotos": "+{count} más en el EDH"
+      "morePhotos": "+{count} más en el EDH",
+      "showOnMap": "Mostrar en el mapa"
     },
     "nearby": {
       "title": "Inscripciones encontradas cerca",
@@ -1137,7 +1136,8 @@
       "images": "Imágenes",
       "references": "También publicado como",
       "viewOnAio": "Ver en AIO",
-      "credit": "{licence}, Attic Inscriptions Online"
+      "credit": "{licence}, Attic Inscriptions Online",
+      "showOnMap": "Mostrar en el mapa"
     },
     "nearby": {
       "title": "Inscripciones áticas encontradas cerca",

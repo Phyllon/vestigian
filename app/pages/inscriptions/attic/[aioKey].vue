@@ -37,6 +37,20 @@
 
   const pleiadesUrl = (pleiadesId: string | null): string | null =>
     pleiadesId ? `https://pleiades.stoa.org/places/${pleiadesId}` : null
+
+  /** The map hash format, same convention as the EDH detail page's own
+   *  `mapLink` and `site/[slug]`'s original. */
+  const mapLink = computed(() =>
+    inscription.value?.position
+      ? `/#map=17.00/${inscription.value.position.lat.toFixed(5)}/${inscription.value.position.lon.toFixed(5)}`
+      : null,
+  )
+
+  /** `@click` + `navigateTo`, not `:to` — see the EDH detail page's own
+   *  `goToMap` for why `:to` here falls through to a hard navigation. */
+  const goToMap = (): void => {
+    if (mapLink.value) void navigateTo(mapLink.value)
+  }
 </script>
 
 <template>
@@ -192,6 +206,9 @@
     <div
       class="mt-8 flex flex-wrap items-center gap-3 border-t border-paper-200 pt-3 dark:border-night-700"
     >
+      <UButton v-if="mapLink" color="primary" icon="i-lucide-map" @click="goToMap">
+        {{ t('atticInscriptions.detail.showOnMap') }}
+      </UButton>
       <a
         :href="inscription.sourceUrl"
         target="_blank"

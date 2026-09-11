@@ -67,6 +67,19 @@ export interface InscriptionDetail extends InscriptionSummary {
   /** Capped — some inscriptions carry over a hundred photograph records. */
   photos: InscriptionPhoto[]
   photoCount: number
+  /** The Roman state(s) whose mapped extent covers this inscription's own
+   *  dating range (`findEmpireStatesForDating`) — empty when undated or when
+   *  the range falls outside the period scrubber's 509 BCE–476 CE coverage. */
+  empireStates: string[]
+  /**
+   * `title`/`commentary` only — never the carved text itself, which is a
+   * primary source, not prose. `language` is what they're actually in after
+   * translation, if any; equal to `originalLanguage` ('de', EDH's own
+   * scholarly metadata language) when nothing was translated.
+   */
+  language: string
+  originalLanguage: string
+  isMachineTranslated: boolean
 }
 
 /** One row of `GET /api/sites/:id/inscriptions` or `.../tracings/:id/inscriptions`. */

@@ -10,6 +10,58 @@ paths:
   - 'app/pages/offline.vue'
 ---
 
+## "Show on the map" and a popup's own link were both hard-navigating, quietly discarding every overlay toggle
+
+Reported directly: toggling an overlay on, opening an inscription from its
+map marker, then following "Show on the map" back — every overlay had
+switched itself off. Confirmed live with Playwright (a `window` marker set
+right after landing on the detail page, checked for survival after
+following the link back): both links were causing a genuine full browser
+navigation, not a client-side route change, and a hard navigation discards
+`useState('inscriptions-active', …)` and every sibling overlay flag along
+with it — they live on the Nuxt app instance, which the reload replaces
+outright. Nothing in the app was resetting the flags on purpose; the
+`useState` values were never surviving to be reset.
+
+**Two independent culprits, not one.** First: a `UButton`/`NuxtLink` whose
+`to` target is the _same_ app but a _different_ route distinguished only by
+its camera hash (`/#map=17.00/41.5/12.7`, read back by
+`useCameraState`'s `restoreCamera()`) falls through to a plain,
+router-unintercepted anchor rather than a `router.push` — confirmed by
+setting a global marker after page load and checking whether it survived
+the click; it did not, and `window.performance`-style reasoning wasn't
+even needed once the marker itself was gone. `site/[slug]/index.vue`'s own
+`mapLink`/"Show on the map" button (the pattern the inscription detail
+pages' identical buttons were modelled on) carried the exact same latent
+bug — not something the inscriptions feature introduced, only what finally
+surfaced it. Fixed in all three places (`site/[slug]/index.vue`,
+`inscriptions/[edhId].vue`, `inscriptions/attic/[aioKey].vue`) by replacing
+`:to="mapLink"` with a plain `@click` handler calling `navigateTo(mapLink)`
+directly — `navigateTo` goes through Vue Router itself rather than through
+whatever heuristic `UButton`'s `to` prop uses to decide a link is
+"internal", and a Playwright check confirmed a marker set before the click
+now survives it.
+
+Second, and the one a reader actually hits first: `useInscriptionsOverlay.ts`
+and `useAtticInscriptionsOverlay.ts` build their popups with
+`Popup.setHTML(...)` — raw markup, not a Vue template (see "Overlay popups
+are a themed card" below for the same fact biting a different way) — and
+its "Open inscription →" link was a plain `<a href="/inscriptions/...">`
+with nothing to stop the browser handling it natively. `showInscriptionPopup`/
+`showAtticInscriptionPopup` now grab the popup's own DOM element right
+after `addTo(map)` and attach a `click` listener to its one `<a>` that
+calls `event.preventDefault()` and `navigateTo(...)` itself — the same fix
+in spirit as swapping `UButton`'s `to` for a handler above, applied to raw
+HTML instead of a component prop, since there is no Vue-template path
+available to fix here at all.
+
+Verified end to end with Playwright, not just read: toggle "Show
+inscriptions" on, click the marker, click "Open inscription" in its popup,
+click "Show on the map" on the resulting detail page, reopen the overlay
+menu — `aria-checked` on "Show inscriptions" reads `true` and two fresh
+tile requests fire, proving the layer actually redrew rather than merely
+reporting itself on.
+
 ## A theme switch stacked one extra click listener per overlay, forever
 
 Reported directly: after a fresh page load, one click on a popup's "×"

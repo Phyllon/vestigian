@@ -1042,9 +1042,6 @@
     "title": "Aufschriften",
     "intro": "Grabsteine, Altäre, Meilensteine und andere eingeschriebene Steine aus der römischen Welt, gespiegelt aus der Epigraphischen Datenbank Heidelberg - geschnitzter Text, Abkürzungen erweitert, Fundpunkte, die mit den eigenen Orten und Straßen dieses Atlas verglichen werden.",
     "credit": "Text gespiegelt aus der Epigraphic Database Heidelberg, CC BY-SA 4.0.",
-    "notable": {
-      "title": "Ein paar, um mit zu beginnen"
-    },
     "browse": {
       "title": "Durchsuchen des Corpus",
       "empty": "Keine Inschriften passen zu diesen Filtern.",
@@ -1077,6 +1074,7 @@
     },
     "detail": {
       "dated": "Datum",
+      "empireState": "Römischer Staat zu dieser Zeit",
       "material": "Material",
       "dimensions": "Abmessungen",
       "letterHeight": "Briefhöhe",
@@ -1090,7 +1088,8 @@
       "credit": "{licence}, Epigrafische Datenbank Heidelberg",
       "photographs": "Fotografien",
       "photographsHint": "{count} bei der EDH verzeichnet — Rechte vorbehalten, daher nur verlinkt statt hier gezeigt.",
-      "morePhotos": "+{count} weitere bei der EDH"
+      "morePhotos": "+{count} weitere bei der EDH",
+      "showOnMap": "Auf der Karte anzeigen"
     },
     "nearby": {
       "title": "Inschriften in der Nähe gefunden",
@@ -1137,7 +1136,8 @@
       "images": "Bilder",
       "references": "Auch veröffentlicht als",
       "viewOnAio": "Auf AIO ansehen",
-      "credit": "{licence}, Attic Inscriptions Online"
+      "credit": "{licence}, Attic Inscriptions Online",
+      "showOnMap": "Auf der Karte anzeigen"
     },
     "nearby": {
       "title": "Attische Inschriften in der Nähe gefunden",

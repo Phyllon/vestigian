@@ -1042,9 +1042,6 @@
     "title": "Inscripties",
     "intro": "Grafstenen, altaren, mijlpalen en andere gegraveerde stenen uit de Romeinse wereld, gespiegeld uit de Epigraphic Database Heidelberg Gekerfde tekst, afkortingen uitgebreid, vindplaatsen kruisverwijzingen met de eigen sites en wegen van deze atlas.",
     "credit": "Tekst gespiegeld uit de Epigraphic Database Heidelberg, CC BY-SA 4.0.",
-    "notable": {
-      "title": "Een paar om mee te beginnen"
-    },
     "browse": {
       "title": "Blader door het corpus",
       "empty": "Geen inscripties van deze filters.",
@@ -1077,6 +1074,7 @@
     },
     "detail": {
       "dated": "Datum",
+      "empireState": "Romeinse staat in deze tijd",
       "material": "Materiaal",
       "dimensions": "Afmetingen",
       "letterHeight": "Letterhoogte",
@@ -1090,7 +1088,8 @@
       "credit": "{licence}, Epigraphic Database Heidelberg",
       "photographs": "Foto's",
       "photographsHint": "{count} geregistreerd bij de EDH — rechten voorbehouden, daarom gelinkt in plaats van hier getoond.",
-      "morePhotos": "+{count} meer op EDH"
+      "morePhotos": "+{count} meer op EDH",
+      "showOnMap": "Op de kaart tonen"
     },
     "nearby": {
       "title": "Inscripties gevonden in de buurt",
@@ -1137,7 +1136,8 @@
       "images": "Afbeeldingen",
       "references": "Ook gepubliceerd als",
       "viewOnAio": "Bekijk op AIO",
-      "credit": "{licence}, Attic Inscriptions Online"
+      "credit": "{licence}, Attic Inscriptions Online",
+      "showOnMap": "Op de kaart tonen"
     },
     "nearby": {
       "title": "Attische inscripties gevonden in de buurt",

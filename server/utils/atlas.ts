@@ -293,3 +293,36 @@ export const buildEmpireExtentTileSql = (query: EmpireExtentTileQuery): string =
     SELECT (${extentLayer}) AS tile
   `
 }
+
+/**
+ * "The empire's extent when this was carved" — an inscription's own
+ * `notBefore`/`notAfter` dating, read against the same 52 slices the period
+ * scrubber stands on, reusing that machinery instead of building new time UI
+ * (`.claude/plans/breezy-churning-deer.md`'s epigraphy plan, cross-reference
+ * point 3). A dating range can span a slice boundary (e.g. an inscription
+ * dated "1st–2nd century") and genuinely overlap more than one state, the
+ * same reason `/api/atlas/empire-periods` already merges the Western and
+ * Eastern empire after 395 rather than assuming one row.
+ *
+ * Half-open interval, matching `buildEmpireExtentTileSql`'s own
+ * `start_year <= y AND end_year > y`: a slice's `end_year` is the year the
+ * *next* one begins, not a year it still covers.
+ */
+export const findEmpireStatesForDating = async (
+  notBefore: number | null,
+  notAfter: number | null,
+): Promise<string[]> => {
+  const from = notBefore ?? notAfter
+  const to = notAfter ?? notBefore
+  if (from === null || to === null) return []
+
+  const sql = useSql()
+  const rows = await sql<{ stateName: string }[]>`
+    SELECT DISTINCT state_name AS "stateName"
+    FROM antiquity_empire_extents
+    WHERE start_year <= ${to} AND end_year > ${from}
+    ORDER BY "stateName"
+  `
+
+  return rows.map((row) => row.stateName)
+}

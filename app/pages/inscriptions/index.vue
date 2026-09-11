@@ -26,15 +26,6 @@
   const filters = ref(emptyInscriptionBrowseFilters())
   const { items, hasMore, isLoading, load, loadMore } = useInscriptionBrowse(filters)
 
-  const { data: notable } = await useAsyncData<InscriptionSummary[]>(
-    'epigraphy-notable',
-    () =>
-      $fetch<{ items: InscriptionSummary[] }>('/api/inscriptions', {
-        query: { decoratedOnly: true, limit: 6 },
-      }).then((response) => response.items),
-    { default: () => [] },
-  )
-
   const { data: formulary } = await useAsyncData<InscriptionFormulaEntry[]>(
     'epigraphy-formulary',
     () => $fetch<InscriptionFormulaEntry[]>('/api/inscriptions/formulary'),
@@ -91,26 +82,6 @@
     >
       {{ t('epigraphy.seeAlsoAttic') }}
     </NuxtLink>
-
-    <section v-if="notable.length > 0" class="mt-10">
-      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
-        {{ t('epigraphy.notable.title') }}
-      </h2>
-      <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <NuxtLink
-          v-for="item in notable"
-          :key="item.edhId"
-          :to="`/inscriptions/${item.edhId}`"
-          class="leaf block p-4 transition hover:border-oxide-600 dark:hover:border-oxide-300"
-        >
-          <p class="eyebrow">{{ typeLabel(item.inscriptionType) }}</p>
-          <p class="mt-1 truncate text-sm font-medium text-ink-900 dark:text-paper-100">
-            {{ item.title }}
-          </p>
-          <p class="datum mt-1">{{ periodFor(item) }}</p>
-        </NuxtLink>
-      </div>
-    </section>
 
     <section class="mt-10">
       <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">

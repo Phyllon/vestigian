@@ -1042,9 +1042,6 @@
     "title": "Inscriptions",
     "intro": "Des pierres tombales, des autels, des jalons et d'autres pierres inscrites du monde romain, miroir de la base de données épigraphique Heidelberg — texte sculpté, abréviations élargies, trouver des points recoupés avec les sites et les routes de cet atlas.",
     "credit": "Texte reproduit de la base de données épigraphique Heidelberg, CC BY-SA 4.0.",
-    "notable": {
-      "title": "Quelques-uns pour commencer"
-    },
     "browse": {
       "title": "Parcourir le corpus",
       "empty": "Aucune inscription ne correspond à ces filtres.",
@@ -1077,6 +1074,7 @@
     },
     "detail": {
       "dated": "Fait",
+      "empireState": "État romain à cette époque",
       "material": "Matériau",
       "dimensions": "Dimensions",
       "letterHeight": "Hauteur de la lettre",
@@ -1090,7 +1088,8 @@
       "credit": "{licence}, Base de données épigraphiques Heidelberg",
       "photographs": "Photographies",
       "photographsHint": "{count} recensées à l'EDH — droits réservés, donc simplement liées plutôt que montrées ici.",
-      "morePhotos": "+{count} de plus sur l'EDH"
+      "morePhotos": "+{count} de plus sur l'EDH",
+      "showOnMap": "Afficher sur la carte"
     },
     "nearby": {
       "title": "Inscriptions trouvées à proximité",
@@ -1137,7 +1136,8 @@
       "images": "Images",
       "references": "Également publié sous",
       "viewOnAio": "Voir sur AIO",
-      "credit": "{licence}, Attic Inscriptions Online"
+      "credit": "{licence}, Attic Inscriptions Online",
+      "showOnMap": "Afficher sur la carte"
     },
     "nearby": {
       "title": "Inscriptions attiques trouvées à proximité",

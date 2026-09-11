@@ -88,10 +88,28 @@ export const useInscriptionsOverlay = () => {
     const feature = event.features?.[0]
     if (feature?.geometry.type !== 'Point') return
 
-    new Popup({ closeButton: true, maxWidth: '260px' })
+    const properties = feature.properties as InscriptionFeatureProperties
+
+    const popup = new Popup({ closeButton: true, maxWidth: '260px' })
       .setLngLat(feature.geometry.coordinates as [number, number])
-      .setHTML(buildInscriptionPopupHtml(feature.properties as InscriptionFeatureProperties, t))
+      .setHTML(buildInscriptionPopupHtml(properties, t))
       .addTo(map)
+
+    // `Popup.setHTML` is raw markup, not a Vue template — its own "Open
+    // inscription" link is a plain `<a>` with no router interception. Left
+    // alone, following it hard-navigates the whole document, which throws
+    // away every overlay toggle (`useState` lives on the Nuxt app instance,
+    // gone the moment the page reloads) — reported live as "the overlays
+    // are deactivated" after opening an inscription and coming back.
+    // Intercepted the same way a `<NuxtLink>` already handles this, so it's
+    // an ordinary client-side route change instead.
+    popup
+      .getElement()
+      ?.querySelector('a')
+      ?.addEventListener('click', (clickEvent) => {
+        clickEvent.preventDefault()
+        void navigateTo(`/inscriptions/${properties.edh_id}`)
+      })
   }
 
   const attachInscriptionsOverlay = (map: MapLibreMap): void => {

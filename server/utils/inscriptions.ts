@@ -139,6 +139,8 @@ export const loadInscriptionDetail = async (edhId: string): Promise<InscriptionD
     SELECT count(*) FROM inscription_images WHERE inscription_id = ${id}
   `
 
+  const empireStates = await findEmpireStatesForDating(row.notBefore, row.notAfter)
+
   return {
     ...rest,
     heightCm: heightCm !== null ? Number(heightCm) : null,
@@ -147,6 +149,13 @@ export const loadInscriptionDetail = async (edhId: string): Promise<InscriptionD
     position: lon !== null && lat !== null ? { lon, lat } : null,
     photos,
     photoCount: Number(photoCountRow?.count ?? 0),
+    // The caller (`/api/inscriptions/[edhId].get.ts`) overwrites these three
+    // once it knows the reader's target language — this is EDH's own,
+    // as-mirrored German metadata.
+    language: 'de',
+    originalLanguage: 'de',
+    isMachineTranslated: false,
+    empireStates,
   }
 }
 

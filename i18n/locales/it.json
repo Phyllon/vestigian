@@ -1042,9 +1042,6 @@
     "title": "Iscrizioni",
     "intro": "Pietre, altari, pietre miliari e altre pietre inscritte dal mondo romano, specchiate dal database epigrafico Heidelberg — testo scolpito, abbreviazioni espanse, reperti incrociati contro i propri siti e strade di questo atlante.",
     "credit": "Testo rispecchiato dal database epigrafico Heidelberg, CC BY-SA 4.0.",
-    "notable": {
-      "title": "Alcuni da cominciare"
-    },
     "browse": {
       "title": "Sfoglia il corpus",
       "empty": "Nessuna iscrizione corrisponde a questi filtri.",
@@ -1077,6 +1074,7 @@
     },
     "detail": {
       "dated": "Data",
+      "empireState": "Stato romano in questo periodo",
       "material": "Materiale",
       "dimensions": "Dimensioni",
       "letterHeight": "Altezza lettera",
@@ -1090,7 +1088,8 @@
       "credit": "{licence}, Epigraphic Database Heidelberg",
       "photographs": "Fotografie",
       "photographsHint": "{count} registrate presso l'EDH — diritti riservati, quindi collegate anziché mostrate qui.",
-      "morePhotos": "+{count} in più su EDH"
+      "morePhotos": "+{count} in più su EDH",
+      "showOnMap": "Visualizza sulla mappa"
     },
     "nearby": {
       "title": "Iscrizioni trovate nelle vicinanze",
@@ -1137,7 +1136,8 @@
       "images": "Immagini",
       "references": "Pubblicato anche come",
       "viewOnAio": "Visualizza su AIO",
-      "credit": "{licence}, Attic Inscriptions Online"
+      "credit": "{licence}, Attic Inscriptions Online",
+      "showOnMap": "Visualizza sulla mappa"
     },
     "nearby": {
       "title": "Iscrizioni attiche trovate nelle vicinanze",

@@ -128,9 +128,6 @@
     "intro": "Tombstones, altars, milestones and other inscribed stones from the Roman world, mirrored from the Epigraphic Database Heidelberg — carved text, abbreviations expanded, findspots cross-referenced against this atlas's own sites and roads.",
     "credit": "Text mirrored from the Epigraphic Database Heidelberg, CC BY-SA 4.0.",
     "seeAlsoAttic": "Also see Attic Inscriptions Online, a second, smaller mirror →",
-    "notable": {
-      "title": "A few to start with"
-    },
     "browse": {
       "title": "Browse the corpus",
       "empty": "No inscriptions match these filters.",
@@ -163,6 +160,7 @@
     },
     "detail": {
       "dated": "Dated",
+      "empireState": "Roman state at this time",
       "material": "Material",
       "dimensions": "Dimensions",
       "letterHeight": "Letter height",
@@ -176,7 +174,8 @@
       "commentary": "Commentary",
       "bibliography": "Bibliography",
       "viewOnEdh": "View on EDH",
-      "credit": "{licence}, Epigraphic Database Heidelberg"
+      "credit": "{licence}, Epigraphic Database Heidelberg",
+      "showOnMap": "Show on the map"
     },
     "nearby": {
       "title": "Inscriptions found nearby",
@@ -222,7 +221,8 @@
       "images": "Images",
       "references": "Also published as",
       "viewOnAio": "View on AIO",
-      "credit": "{licence}, Attic Inscriptions Online"
+      "credit": "{licence}, Attic Inscriptions Online",
+      "showOnMap": "Show on the map"
     },
     "nearby": {
       "title": "Attic inscriptions found nearby",
