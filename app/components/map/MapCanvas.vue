@@ -70,6 +70,12 @@
     keepInscriptionsOverlayThroughStyleChanges,
   } = useInscriptionsOverlay()
   const {
+    isActive: isShowingAtticInscriptions,
+    attachAtticInscriptionsOverlay,
+    detachAtticInscriptionsOverlay,
+    keepAtticInscriptionsOverlayThroughStyleChanges,
+  } = useAtticInscriptionsOverlay()
+  const {
     load: loadNotebook,
     overlay: notebookOverlay,
     attachNotebookOverlay,
@@ -265,6 +271,15 @@
     }
   })
 
+  watch(isShowingAtticInscriptions, (isActive) => {
+    if (!map.value) return
+    if (isActive) {
+      attachAtticInscriptionsOverlay(map.value)
+    } else {
+      detachAtticInscriptionsOverlay(map.value)
+    }
+  })
+
   onMounted(() => {
     if (!container.value) return
 
@@ -297,6 +312,8 @@
       keepCoinHoardOverlayThroughStyleChanges(instance)
       attachInscriptionsOverlay(instance)
       keepInscriptionsOverlayThroughStyleChanges(instance)
+      attachAtticInscriptionsOverlay(instance)
+      keepAtticInscriptionsOverlayThroughStyleChanges(instance)
       attachOverlay(instance)
       keepOverlayThroughStyleChanges(instance)
       refreshLimesDimming(instance)

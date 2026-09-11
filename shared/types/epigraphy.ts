@@ -85,3 +85,77 @@ export interface InscriptionFormulaEntry {
   count: number
   exampleEdhId: string
 }
+
+/**
+ * Attic Inscriptions Online (`server/database/schema/epigraphy.ts`,
+ * `scripts/import/20-attic-inscriptions.ts`) — a second, smaller corpus,
+ * genuinely separate from the EDH mirror above: Classical/Hellenistic
+ * Athenian decrees, not Roman-imperial epigraphy. `aioKey` ('AIO_5') is the
+ * natural identifier, what `/inscriptions/attic/*` routes on.
+ */
+export interface AtticTranslationSegment {
+  type: 'text' | 'break' | 'lineNumber' | 'place' | 'gloss' | 'note'
+  text?: string
+  pleiadesId?: string
+  number?: number
+}
+
+export interface AtticFootnote {
+  number: number
+  text: string
+}
+
+export interface AtticPlaceRef {
+  text: string
+  pleiadesId: string | null
+}
+
+export interface AtticFindspot extends AtticPlaceRef {
+  label: string | null
+}
+
+export interface AtticImageCredit {
+  collection: string
+  url: string
+}
+
+export interface AtticReference {
+  source: string
+  reference: string
+  externalLinks: string[]
+  isTranslationSource?: boolean
+}
+
+export interface AtticInscriptionSummary {
+  aioKey: string
+  title: string
+  primarySource: string | null
+  dateText: string | null
+  notBefore: number | null
+  notAfter: number | null
+  monumentType: string | null
+  inscriptionType: string | null
+  position: InscriptionPosition | null
+}
+
+export interface AtticInscriptionDetail extends AtticInscriptionSummary {
+  translators: string[] | null
+  translationEdition: AtticTranslationSegment[] | null
+  footnotes: AtticFootnote[] | null
+  originalLocation: AtticPlaceRef | null
+  findspots: AtticFindspot[] | null
+  imageCredits: AtticImageCredit[] | null
+  references: AtticReference[] | null
+  sourceUrl: string
+  licence: string
+}
+
+/** One row of `GET /api/sites/:id/attic-inscriptions` or
+ *  `.../tracings/:id/attic-inscriptions` — the same cross-referencing
+ *  synergy the EDH corpus already gets, reused for the second corpus. */
+export interface NearbyAtticInscription {
+  aioKey: string
+  title: string
+  monumentType: string | null
+  distanceMetres: number
+}

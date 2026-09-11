@@ -57,7 +57,9 @@
     "showCoinHoards": "Muntschatten tonen",
     "showCoinHoardsHint": "Vindplaatsen van republikeinse muntschatten (CHRR)",
     "showInscriptions": "Inscripties tonen",
-    "showInscriptionsHint": "Gespiegelde inscripties met een geïdentificeerde vindplaats (EDH)"
+    "showInscriptionsHint": "Gespiegelde inscripties met een geïdentificeerde vindplaats (EDH)",
+    "showAtticInscriptions": "Attische inscripties tonen",
+    "showAtticInscriptionsHint": "Attic Inscriptions Online met een geïdentificeerde vindplaats (AIO)"
   },
   "tabulaPeutingeriana": {
     "title": "Tabula Peutingeriana",
@@ -122,7 +124,9 @@
     "basemapCreditBarrington": "Oudheid (Barrington): wegen, kustlijn en plaatsen vanaf het Oude Wereldkaartcentrum (ODbL 1.0) en Pleiades (CC BY 3.0).",
     "tapForDetails": "Tik op of klik op een teken op de kaart om te openen wat er over is opgenomen.",
     "inscriptionsTitle": "Inscripties",
-    "inscriptionMark": "Gespiegelde inscriptie met een geïdentificeerde vindplaats"
+    "inscriptionMark": "Gespiegelde inscriptie met een geïdentificeerde vindplaats",
+    "atticInscriptionsTitle": "Attische inscripties",
+    "atticInscriptionMark": "Attische inscriptie met een geïdentificeerde vindplaats"
   },
   "siteDetail": {
     "loading": "Laden",
@@ -1095,6 +1099,50 @@
     },
     "popup": {
       "open": "Inscriptie openen"
+    },
+    "seeAlsoAttic": "Zie ook Attic Inscriptions Online, een tweede, kleinere verzameling →"
+  },
+  "atticInscriptions": {
+    "title": "Attic Inscriptions Online",
+    "intro": "Klassieke en hellenistische Atheense decreten, ere- en votiefinscripties, gespiegeld vanuit Attic Inscriptions Online — Engelse vertalingen met toelichtende noten, vindplaatsen vergeleken met de Pleiades-plaatsen die deze atlas al bevat.",
+    "credit": "Tekst gespiegeld vanuit Attic Inscriptions Online, CC BY-SA 3.0.",
+    "backToEdh": "← Terug naar de EDH-inscripties",
+    "browse": {
+      "title": "Blader door het corpus",
+      "empty": "Geen inscriptie voldoet aan deze filters.",
+      "loadMore": "Meer laden"
+    },
+    "filters": {
+      "monumentType": "Monumenttype",
+      "anyMonumentType": "Alle typen",
+      "yearFrom": "Vanaf jaar",
+      "yearTo": "Tot jaar"
+    },
+    "monumentTypes": {
+      "stele": "Stele",
+      "base": "Voetstuk",
+      "plaque": "Plaat",
+      "altar": "Altaar"
+    },
+    "detail": {
+      "dated": "Datering",
+      "source": "Bron",
+      "inscriptionType": "Type",
+      "originalLocation": "Oorspronkelijke locatie",
+      "findspot": "Vindplaats",
+      "findspots": "Vindplaatsen",
+      "translators": "Vertaling door",
+      "text": "Vertaling",
+      "footnotes": "Voetnoten",
+      "images": "Afbeeldingen",
+      "references": "Ook gepubliceerd als",
+      "viewOnAio": "Bekijk op AIO",
+      "credit": "{licence}, Attic Inscriptions Online"
+    },
+    "nearby": {
+      "title": "Attische inscripties gevonden in de buurt",
+      "titleTracing": "Attische inscripties langs deze route",
+      "distance": "{metres} m verderop"
     }
   }
 }

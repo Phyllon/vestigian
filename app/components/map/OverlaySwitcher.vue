@@ -46,6 +46,9 @@
     canShowInscriptions,
     isShowingInscriptions,
     setInscriptionsActive,
+    canShowAtticInscriptions,
+    isShowingAtticInscriptions,
+    setAtticInscriptionsActive,
   } = useBasemapStyle()
   const { t } = useI18n()
 
@@ -154,6 +157,14 @@
       label: t('basemapSwitcher.showInscriptions'),
       hint: t('basemapSwitcher.showInscriptionsHint'),
       toggle: () => setInscriptionsActive(!isShowingInscriptions.value),
+    },
+    {
+      key: 'attic-inscriptions',
+      canShow: canShowAtticInscriptions.value,
+      isActive: isShowingAtticInscriptions.value,
+      label: t('basemapSwitcher.showAtticInscriptions'),
+      hint: t('basemapSwitcher.showAtticInscriptionsHint'),
+      toggle: () => setAtticInscriptionsActive(!isShowingAtticInscriptions.value),
     },
   ])
 

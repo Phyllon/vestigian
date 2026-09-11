@@ -132,3 +132,114 @@ export const inscriptionImages = pgTable(
   },
   (table) => [index('inscription_images_inscription_idx').on(table.inscriptionId)],
 )
+
+/**
+ * Attic Inscriptions Online (`scripts/import/14-attic-inscriptions.ts`,
+ * Phase 2) — a second, smaller, genuinely separate corpus, not a
+ * duplicate of `inscriptions`. Confirmed live before building: AIO's own
+ * REST API (`atticinscriptions.com/api/`) is real but thin — a paginated
+ * list (3,412 records) and a per-record endpoint carrying only the English
+ * translation (as base64 EpiDoc), a translator credit, cross-references to
+ * other corpora (IG, SEG, PHI, …) and a generic `"IPR": "Creative Commons"`
+ * string. The actually useful structured metadata this table needs —
+ * monument type, inscription type, date, and critically a **Pleiades URI
+ * per findspot** — is rendered only in each inscription's own HTML page,
+ * never exposed by the JSON API at all. `14-attic-inscriptions.ts` fetches
+ * both per record. The generic "Creative Commons" IPR string is not the
+ * real licence: every inscription page carries a `rel="license"` link to
+ * `creativecommons.org/licenses/by-sa/3.0/`, checked against several
+ * records spanning different translators and source volumes, not assumed
+ * from one sample or from the vaguer API field.
+ *
+ * `geom` resolves through the **same** `pleiadesId` extraction
+ * `05-antiquity-atlas.ts` already uses (the last path segment of a
+ * Pleiades URI) joined against `antiquityPlaces.pleiadesId` — confirmed
+ * live that both sample findspot ids from AIO's own pages, including a
+ * newer long-form Pleiades id, already resolve in that table. No new join
+ * key needed; this is the same identifier space the Barrington sheet's own
+ * places already live in, not a second geocoding scheme.
+ *
+ * `translationEdition` is parsed from the **rendered HTML**, not the raw
+ * EpiDoc XML the API returns — AIO's own translation markup
+ * (`.insline`/`.aio_place`/`.translit`/`.inslineno`) is simpler and more
+ * reliable to read than re-deriving the same structure from nested XML,
+ * and it is what "the site itself already renders safely" looks like, the
+ * same "read the real page" call already made for the column-relief plate
+ * numbers and the minor-antiquities AWMC codes. It is never rendered with
+ * `v-html` — every segment is a typed object the Vue template branches on
+ * explicitly, the same discipline `inscriptions.textEdition` already uses
+ * for EDH's abbreviation tokens.
+ */
+export const atticInscriptions = pgTable(
+  'attic_inscriptions',
+  {
+    id: serial('id').primaryKey(),
+    /** e.g. 'AIO_5' — AIO's own stable identifier, and this table's natural key. */
+    aioKey: varchar('aio_key', { length: 16 }).notNull().unique(),
+    title: text('title').notNull(),
+    /** Human-readable citation, e.g. 'IG II³ 1 292' — display only, not a join key. */
+    primarySource: varchar('primary_source', { length: 160 }),
+    /** Raw text, e.g. '352/1 BC' — Athenian archon-year notation, not reliably
+     *  reducible to a single calendar year, so kept verbatim alongside the
+     *  best-effort `notBefore`/`notAfter` parse below. */
+    dateText: varchar('date_text', { length: 120 }),
+    notBefore: integer('not_before'),
+    notAfter: integer('not_after'),
+    monumentType: varchar('monument_type', { length: 80 }),
+    /** A short phrase ('Decree (People?) and Correction'), not a small enum
+     *  like EDH's `inscriptionType` — AIO does not publish a controlled
+     *  vocabulary for this field, so it is stored and shown as-is. */
+    inscriptionType: text('inscription_type'),
+    translators: text('translators').array(),
+    translationEdition: jsonb('translation_edition').$type<AtticTranslationSegment[]>(),
+    footnotes: jsonb('footnotes').$type<AtticFootnote[]>(),
+    originalLocation: jsonb('original_location').$type<AtticPlaceRef | null>(),
+    /** A record can name more than one findspot — a decree cut on two
+     *  stelai, or a text assembled from fragments found in different
+     *  places. `geom` denormalises the first resolvable one for the map;
+     *  the full list is what the detail page actually shows. */
+    findspots: jsonb('findspots').$type<AtticFindspot[]>(),
+    imageCredits: jsonb('image_credits').$type<AtticImageCredit[]>(),
+    references: jsonb('references').$type<AtticReference[]>(),
+    sourceUrl: varchar('source_url', { length: 300 }).notNull(),
+    licence: varchar('licence', { length: 40 }).notNull().default('CC-BY-SA-3.0'),
+    geom: pointGeometry('geom'),
+  },
+  (table) => [
+    index('attic_inscriptions_geom_idx').using('gist', table.geom),
+    index('attic_inscriptions_monument_idx').on(table.monumentType),
+  ],
+)
+
+export interface AtticTranslationSegment {
+  type: 'text' | 'break' | 'lineNumber' | 'place' | 'gloss' | 'note'
+  text?: string
+  pleiadesId?: string
+  number?: number
+}
+
+export interface AtticFootnote {
+  number: number
+  text: string
+}
+
+export interface AtticPlaceRef {
+  text: string
+  pleiadesId: string | null
+}
+
+export interface AtticFindspot extends AtticPlaceRef {
+  label: string | null
+}
+
+export interface AtticImageCredit {
+  collection: string
+  url: string
+}
+
+export interface AtticReference {
+  source: string
+  reference: string
+  externalLinks: string[]
+  isTranslationSource?: boolean
+}

@@ -85,6 +85,7 @@ pnpm import:cities              # → 235,666 modern cities and towns, CC BY 4.0
 pnpm import:tabula-peutingeriana # → 2,574 places, 2,397 roads; licence unconfirmed, off by default
 pnpm import:column-reliefs      # → Trajan's Column plates from Wikimedia Commons, public domain
 pnpm import:empire-extents      # → 52 dated extent slices, OpenHistoricalMap, CC0
+pnpm import:attic-inscriptions  # → 3,412 Attic Inscriptions Online records, CC BY-SA 3.0, ~30-40 min (politely rate-limited)
 pnpm tiles:warm <url>
 ```
 

@@ -181,6 +181,9 @@ export const COIN_HOARD_ATTRIBUTION =
 export const INSCRIPTION_ATTRIBUTION =
   'Inscriptions: <a href="https://edh.ub.uni-heidelberg.de/" target="_blank" rel="noopener">Epigraphic Database Heidelberg</a> (CC BY-SA 4.0)'
 
+export const ATTIC_INSCRIPTION_ATTRIBUTION =
+  'Attic inscriptions: <a href="https://www.atticinscriptions.com/" target="_blank" rel="noopener">Attic Inscriptions Online</a> (CC BY-SA 3.0)'
+
 export const TABULA_PEUTINGERIANA_ATTRIBUTION =
   'Tabula Peutingeriana network compiled by René Voorburg, <a href="https://omnesviae.org" target="_blank" rel="noopener">omnesviae.org</a>'
 
@@ -1122,6 +1125,7 @@ export const useBasemapStyle = () => {
     featureTilesUrl: absolute(config.public.basemap.featureTilesUrl),
     coinHoardTilesUrl: absolute(config.public.basemap.coinHoardTilesUrl),
     inscriptionTilesUrl: absolute(config.public.basemap.inscriptionTilesUrl),
+    atticInscriptionTilesUrl: absolute(config.public.basemap.atticInscriptionTilesUrl),
     glyphsUrl: config.public.basemap.glyphsUrl,
   }))
 
@@ -1299,6 +1303,22 @@ export const useBasemapStyle = () => {
     isInscriptionsActive.value = next
   }
 
+  /**
+   * Same shape again, for Attic Inscriptions Online — a second, smaller
+   * corpus (`.claude/rules/epigraphy.md`), its own toggle rather than
+   * folded into "Show inscriptions" since the two draw from separate
+   * tables with no shared row identity.
+   */
+  const isAtticInscriptionsActive = useState<boolean>('attic-inscriptions-active', () => false)
+
+  const canShowAtticInscriptions = computed(() => true)
+
+  const isShowingAtticInscriptions = computed(() => isAtticInscriptionsActive.value)
+
+  const setAtticInscriptionsActive = (next: boolean): void => {
+    isAtticInscriptionsActive.value = next
+  }
+
   const currentStyle = computed(() =>
     buildBasemapStyle({
       view: view.value,
@@ -1364,5 +1384,9 @@ export const useBasemapStyle = () => {
     isShowingInscriptions,
     setInscriptionsActive,
     inscriptionTilesUrl: computed(() => source.value.inscriptionTilesUrl),
+    canShowAtticInscriptions,
+    isShowingAtticInscriptions,
+    setAtticInscriptionsActive,
+    atticInscriptionTilesUrl: computed(() => source.value.atticInscriptionTilesUrl),
   }
 }

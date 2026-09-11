@@ -57,7 +57,9 @@
     "showCoinHoards": "Mostra i ripostigli monetali",
     "showCoinHoardsHint": "Luoghi di rinvenimento di ripostigli repubblicani (CHRR)",
     "showInscriptions": "Mostra le iscrizioni",
-    "showInscriptionsHint": "Iscrizioni specchiate con un luogo di rinvenimento identificato (EDH)"
+    "showInscriptionsHint": "Iscrizioni specchiate con un luogo di rinvenimento identificato (EDH)",
+    "showAtticInscriptions": "Mostra le iscrizioni attiche",
+    "showAtticInscriptionsHint": "Attic Inscriptions Online con un luogo di rinvenimento identificato (AIO)"
   },
   "tabulaPeutingeriana": {
     "title": "Tabula Peutingeriana",
@@ -122,7 +124,9 @@
     "basemapCreditBarrington": "Antichità (Barrington): strade, coste e luoghi dal centro di mappatura del mondo antico (ODbL 1.0) e Pleiades (CC BY 3.0).",
     "tapForDetails": "Toccare o fare clic su un segno sulla mappa per aprire ciò che è registrato su di esso.",
     "inscriptionsTitle": "Iscrizioni",
-    "inscriptionMark": "Iscrizione specchiata con un luogo di rinvenimento identificato"
+    "inscriptionMark": "Iscrizione specchiata con un luogo di rinvenimento identificato",
+    "atticInscriptionsTitle": "Iscrizioni attiche",
+    "atticInscriptionMark": "Iscrizione attica con un luogo di rinvenimento identificato"
   },
   "siteDetail": {
     "loading": "Caricamento",
@@ -1095,6 +1099,50 @@
     },
     "popup": {
       "open": "Apri l'iscrizione"
+    },
+    "seeAlsoAttic": "Vedi anche Attic Inscriptions Online, un secondo corpus più piccolo →"
+  },
+  "atticInscriptions": {
+    "title": "Attic Inscriptions Online",
+    "intro": "Decreti ateniesi classici ed ellenistici, iscrizioni onorarie e votive, specchiate da Attic Inscriptions Online — traduzioni in inglese con note di commento, luoghi di rinvenimento incrociati con i luoghi Pleiadi già presenti in questo atlante.",
+    "credit": "Testo specchiato da Attic Inscriptions Online, CC BY-SA 3.0.",
+    "backToEdh": "← Torna alle iscrizioni dell’EDH",
+    "browse": {
+      "title": "Sfoglia il corpus",
+      "empty": "Nessuna iscrizione corrisponde a questi filtri.",
+      "loadMore": "Carica altro"
+    },
+    "filters": {
+      "monumentType": "Tipo di monumento",
+      "anyMonumentType": "Qualsiasi tipo",
+      "yearFrom": "Dall’anno",
+      "yearTo": "All’anno"
+    },
+    "monumentTypes": {
+      "stele": "Stele",
+      "base": "Base",
+      "plaque": "Lastra",
+      "altar": "Altare"
+    },
+    "detail": {
+      "dated": "Datazione",
+      "source": "Fonte",
+      "inscriptionType": "Tipo",
+      "originalLocation": "Posizione originale",
+      "findspot": "Luogo di rinvenimento",
+      "findspots": "Luoghi di rinvenimento",
+      "translators": "Traduzione di",
+      "text": "Traduzione",
+      "footnotes": "Note",
+      "images": "Immagini",
+      "references": "Pubblicato anche come",
+      "viewOnAio": "Visualizza su AIO",
+      "credit": "{licence}, Attic Inscriptions Online"
+    },
+    "nearby": {
+      "title": "Iscrizioni attiche trovate nelle vicinanze",
+      "titleTracing": "Iscrizioni attiche lungo questo percorso",
+      "distance": "{metres} m distanza"
     }
   }
 }

@@ -277,7 +277,8 @@ this project.
   desktop second but not neglected. Breakpoints: 375px–<768px phone, <1000px
   tablet, above desktop.
 - **Fast, clean, modern.** Make it quick, keep it readable, use current best
-  practice, lazy-load where it helps.
+  practice.
+- **Lazy-loading** use lazy-loading always where suitable to decrease first loading bytes (composables & components)
 - **Accessibility every time** — ARIA and the rest, improved where possible. Also take keyboard i18n into account.
 - **Semantic HTML** — the most fitting tag, always.
 - **ORM over string queries.**

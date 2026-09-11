@@ -85,6 +85,12 @@
       {{ t('epigraphy.intro') }}
     </p>
     <p class="datum mt-2">{{ t('epigraphy.credit') }}</p>
+    <NuxtLink
+      to="/inscriptions/attic"
+      class="datum mt-1 inline-block underline-offset-2 hover:underline"
+    >
+      {{ t('epigraphy.seeAlsoAttic') }}
+    </NuxtLink>
 
     <section v-if="notable.length > 0" class="mt-10">
       <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">

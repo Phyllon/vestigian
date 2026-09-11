@@ -148,6 +148,7 @@
         />
 
         <EpigraphyNearbyInscriptions :id="site.id" kind="site" class="mt-6" />
+        <EpigraphyNearbyAtticInscriptions :id="site.id" kind="site" class="mt-6" />
 
         <SiteEndorsementButton v-model="site" class="mt-6" />
 

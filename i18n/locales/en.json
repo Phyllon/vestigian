@@ -62,7 +62,9 @@
     "showCoinHoards": "Show coin hoards",
     "showCoinHoardsHint": "Roman Republic coin-hoard findspots (CHRR)",
     "showInscriptions": "Show inscriptions",
-    "showInscriptionsHint": "Mirrored inscriptions with a resolved findspot (EDH)"
+    "showInscriptionsHint": "Mirrored inscriptions with a resolved findspot (EDH)",
+    "showAtticInscriptions": "Show Attic inscriptions",
+    "showAtticInscriptionsHint": "Attic Inscriptions Online with a resolved findspot (AIO)"
   },
   "overlaySwitcher": {
     "title": "Overlays",
@@ -125,6 +127,7 @@
     "title": "Inscriptions",
     "intro": "Tombstones, altars, milestones and other inscribed stones from the Roman world, mirrored from the Epigraphic Database Heidelberg — carved text, abbreviations expanded, findspots cross-referenced against this atlas's own sites and roads.",
     "credit": "Text mirrored from the Epigraphic Database Heidelberg, CC BY-SA 4.0.",
+    "seeAlsoAttic": "Also see Attic Inscriptions Online, a second, smaller mirror →",
     "notable": {
       "title": "A few to start with"
     },
@@ -184,6 +187,49 @@
       "open": "Open inscription"
     }
   },
+  "atticInscriptions": {
+    "title": "Attic Inscriptions Online",
+    "intro": "Classical and Hellenistic Athenian decrees, honorific and dedicatory inscriptions, mirrored from Attic Inscriptions Online — English translations with editorial notes, findspots cross-referenced against this atlas's own Pleiades places.",
+    "credit": "Text mirrored from Attic Inscriptions Online, CC BY-SA 3.0.",
+    "backToEdh": "← Back to the EDH inscriptions",
+    "browse": {
+      "title": "Browse the corpus",
+      "empty": "No inscriptions match these filters.",
+      "loadMore": "Load more"
+    },
+    "filters": {
+      "monumentType": "Monument type",
+      "anyMonumentType": "Any type",
+      "yearFrom": "From year",
+      "yearTo": "To year"
+    },
+    "monumentTypes": {
+      "stele": "Stele",
+      "base": "Base",
+      "plaque": "Plaque",
+      "altar": "Altar"
+    },
+    "detail": {
+      "dated": "Dated",
+      "source": "Source",
+      "inscriptionType": "Type",
+      "originalLocation": "Original location",
+      "findspot": "Findspot",
+      "findspots": "Findspots",
+      "translators": "Translation by",
+      "text": "Translation",
+      "footnotes": "Notes",
+      "images": "Images",
+      "references": "Also published as",
+      "viewOnAio": "View on AIO",
+      "credit": "{licence}, Attic Inscriptions Online"
+    },
+    "nearby": {
+      "title": "Attic inscriptions found nearby",
+      "titleTracing": "Attic inscriptions along this route",
+      "distance": "{metres} m away"
+    }
+  },
   "legend": {
     "title": "What the marks mean",
     "tapForDetails": "Tap or click a mark on the map to open what is recorded about it.",
@@ -207,6 +253,8 @@
     "coinHoardMark": "Recorded coin-hoard findspot",
     "inscriptionsTitle": "Inscriptions",
     "inscriptionMark": "Mirrored inscription with a resolved findspot",
+    "atticInscriptionsTitle": "Attic inscriptions",
+    "atticInscriptionMark": "Attic inscription with a resolved findspot",
     "basemapCreditDare": "Antiquity (DARE): © Johan Åhlfeldt, Gothenburg University, CC BY-SA 3.0.",
     "basemapCreditBarrington": "Antiquity (Barrington): roads, coastline and places from the Ancient World Mapping Center (ODbL 1.0) and Pleiades (CC BY 3.0)."
   },

@@ -4,14 +4,20 @@ paths:
   - 'server/utils/inscriptions.ts'
   - 'scripts/import/12-edh-inscriptions.ts'
   - 'scripts/import/13-edh-inscription-images.ts'
-  - 'scripts/import/14-attic-inscriptions.ts'
+  - 'scripts/import/20-attic-inscriptions.ts'
+  - 'server/utils/attic-inscriptions.ts'
   - 'server/api/inscriptions/**'
+  - 'server/api/attic-inscriptions/**'
   - 'server/api/sites/[id]/inscriptions.get.ts'
+  - 'server/api/sites/[id]/attic-inscriptions.get.ts'
   - 'server/api/tracings/[id]/inscriptions.get.ts'
+  - 'server/api/tracings/[id]/attic-inscriptions.get.ts'
   - 'server/api/tiles/inscriptions/**'
+  - 'server/api/tiles/attic-inscriptions/**'
   - 'app/components/epigraphy/**'
   - 'app/composables/epigraphy/**'
   - 'app/composables/map/useInscriptionsOverlay.ts'
+  - 'app/composables/map/useAtticInscriptionsOverlay.ts'
   - 'app/pages/inscriptions/**'
 ---
 
@@ -253,3 +259,141 @@ error at all** — the kind of failure that looks like success:
    The inscription-link join key (`P128.carries > E34.Inscription >
 P1.is_identified_by > E42.Identifier`, present on 61% of records) was
    also verified this way, not assumed from the RDF's apparent shape.
+
+## Attic Inscriptions Online (Phase 2) — a second, genuinely separate corpus
+
+The plan's own open item was "confirm AIO's bulk-access mechanism before
+committing to mirroring it" — checked live, not assumed, and what turned up
+changed the shape of the import from what the plan sketched.
+
+**AIO has a real REST API, but it is thin.** `atticinscriptions.com/api/` is
+a genuine Swagger UI with its full spec embedded inline in the page
+(`window.drsSpec`) — two endpoints, a paginated list
+(`list_all_inscriptions.{json,xml}`, confirmed **3,412** records across 35
+pages of 100, not the plan's estimated 2,727) and a per-record endpoint. The
+per-record JSON carries exactly seven fields — `url`, `aio_key`,
+`references`, `translation_title`, `translation_epidoc` (the English
+translation as base64 EpiDoc), `translators`, and a generic
+`"IPR": "Creative Commons"` string — checked across a dozen records
+spanning four different translators and source volumes, always this same
+shape, never a Greek edition despite the API description's own "Greek text
+(where present)" claim. **The metadata this table actually needs — monument
+type, inscription type, a real date, and a Pleiades URI per findspot —
+exists only in each inscription's own rendered HTML page, never in the
+API's JSON at all.** `20-attic-inscriptions.ts` fetches only the HTML per
+record (one request, not two — the translation text is fully recoverable
+from the rendered page, so the JSON endpoint is never called at all in the
+final import, cutting the request count in half from an earlier version
+that fetched both).
+
+**Licence, checked properly rather than trusted from the vague `IPR`
+field**: every inscription's HTML page carries a real
+`<a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/…">`
+— CC BY-SA 3.0, confirmed on records from four different translators and
+source volumes (IG II³ 1, IG II², SEG, Raubitschek), not assumed from the
+API's generic "Creative Commons" string, which names no version at all.
+
+**Geometry resolves through the same identifier space the Barrington sheet's
+own places already live in — no new join key.** A findspot is a Pleiades
+URI (`https://pleiades.stoa.org/places/579920`); `pleiadesIdFromUri` is the
+same trailing-numeric-id extraction `05-antiquity-atlas.ts`'s own
+`pleiadesId` helper already applies to AWMC's data. Confirmed live before
+writing the join: both a five-digit sample id and a newer nine-digit one
+(`638356144`, "Acropolis of Athens" — Pleiades mints longer ids for more
+recently added places) already resolve against `antiquityPlaces.pleiadesId`.
+`resolveGeometry` denormalises the _first_ resolvable findspot's coordinate
+into `geom` for the map, the same "resolve once at import, not per read"
+call `12-edh-inscriptions.ts` makes for its own Trismegistos join — the
+full findspot list, fragment labels included, is what the detail page shows.
+
+**The translation body is parsed from the rendered HTML, not the raw EpiDoc
+XML the API returns.** AIO's own markup — `.insline` (one real inscribed
+line per span, occasionally labelled every fifth line by a nested
+`.inslineno`), `.aio_place` (a linked place name carrying its own Pleiades
+href), `.translit` (a transliterated Greek gloss in parens), and a bare
+`<sup><a href="#note-N">` for a footnote reference — is simpler and more
+reliable to read than re-deriving the same structure from nested XML, the
+same "read what the site already renders safely" call already made for the
+column-relief plate numbers and the AWMC minor-feature codes. Parsed into a
+flat, typed segment list (`text | break | lineNumber | place | gloss |
+note`) and rendered with explicit `v-if`/`v-else-if` branches per type on
+the detail page — never `v-html`, the same discipline
+`inscriptions.textEdition`'s abbreviation tokens already follow.
+
+**Measured after the full import actually ran, not estimated beforehand**:
+all 3,412 records imported cleanly, 0 skipped; **2,669 (78%) resolved a
+findspot** via the Pleiades join above, denser than EDH's own 17% precisely
+because AIO's corpus is geographically concentrated in Attica, a region
+Pleiades covers thoroughly, rather than scattered across the whole former
+empire. `attic_inscriptions` is **14 MB total** including its GiST and
+btree indexes — well under the plan's "low tens of MB" estimate. Top
+`monumentType` values across the full corpus: Stele 1,509, Base 769,
+Plaque 203, Altar 163 — checked again after the full run, since an early
+300-record sample had ranked 'Block' (33 records total) ahead of 'Altar'
+(163) in what looked like a representative top four; the browse page's
+facet dropdown was built from that early, wrong ranking and corrected once
+the real distribution was in hand.
+
+**Own table, own toggle, not folded into the EDH inscriptions layer or its
+"Show inscriptions" switch.** `attic_inscriptions` has no foreign key to
+`inscriptions` and no shared row identity — checked before assuming any
+overlap: the sample records are 4th–1st century BC Athenian decrees, well
+before EDH's own Roman-imperial scope even starts, so this is a second,
+genuinely separate corpus rather than a richer translation of rows already
+mirrored. Its own map overlay (`useAtticInscriptionsOverlay.ts`,
+`vestigian-attic-inscriptions` layer, `Show Attic inscriptions` switch,
+Lucide `scroll` glyph — deliberately not the EDH layer's `scroll-text`, so
+the two can be switched on together near Athens without reading as the
+same mark twice), its own browse/detail pages
+(`/inscriptions/attic`, `/inscriptions/attic/:aioKey`, cross-linked from
+`/inscriptions`), and its own nearby-site/tracing cross-reference endpoints
+and panel section, mirroring the EDH corpus's shape throughout rather than
+inventing a different one.
+
+**Four real bugs, all found by running the import against real data, not
+by review:**
+
+10. **`notBefore`/`notAfter` were inverted for every BC record.** AIO's own
+    dating is Athenian archon-year notation ('352/1 BC', a civil year
+    spanning two modern ones); a smaller BC year number is chronologically
+    _later_, and the first version negated the wrong half of the pair,
+    storing `notBefore` as the later year and `notAfter` as the earlier one
+    — backwards for every single BC-dated row, silently, since nothing
+    types or throws on `notBefore > notAfter`. Caught by reading the actual
+    imported values back for a known example (352/1 BC should read
+    `notBefore: -352, notAfter: -351`) rather than trusting the logic by
+    inspection.
+11. **Every multi-fragment findspot read the identical, wrong text.** The
+    findspot block reads "Fragment a - Findspot: Eleusis &lt;a&gt;…&lt;/a&gt;
+    (EM 10052) Fragment b - Findspot: Eleusis &lt;a&gt;…&lt;/a&gt; (EM
+    5136)" as one run of text with the place name a plain text node
+    _before_ its link (the link's own content is only an icon span, never
+    the name). A first version fell back to the link's parent's full text
+    when the link itself had none, which is the _whole block_, not the one
+    fragment's name — every fragment on a multi-findspot record ended up
+    with byte-identical text. Fixed by walking the block's child nodes in
+    document order, tracking the current "Fragment X" label and the pending
+    place name as plain text, and pairing each with the `<a>` that follows
+    it.
+12. **`Findspot:` blocks were matched with `startsWith`, missing every
+    multi-fragment record entirely.** The block's own text reads "Fragment
+    a - Findspot: …", never "Findspot: …" first — `startsWith('Findspot:')`
+    silently returned zero findspots for any record with more than one
+    fragment. Fixed with `includes`.
+13. **93 of a 300-record sample carry a genuinely blank `#ins_title`** — a
+    real gap in AIO's own data (an untitled decree fragment still carrying
+    real translation content and a source citation), not a scraping
+    failure. Storing the empty string would have shipped unusable blank
+    page titles; falls back to the citation, then the AIO key itself.
+    Separately, `monumentType` fragmented into two facet values for the
+    same classification ('Stele' vs. 'Stele?', AIO's own uncertainty
+    marker) — stripped with the same restraint EDH's own
+    `normaliseVocabTerm` already applies to its German vocabulary terms.
+
+**Politeness**: one request every `AIO_REQUEST_DELAY_MS` (default 200ms) —
+`robots.txt` only disallows `_preview/` paths, but ~3,400 requests to a
+small academic site over a tight loop would still be inconsiderate. Each
+page is cached to `.import/attic-inscriptions/` (resumable, same "scratch,
+read once" shape every other import here uses), so a re-run after a bug fix
+costs no further network traffic at all — every fix above 10–13 was
+verified by re-running against the same cached HTML, not by re-fetching.

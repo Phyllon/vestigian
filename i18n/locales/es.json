@@ -57,7 +57,9 @@
     "showCoinHoards": "Mostrar tesoros monetarios",
     "showCoinHoardsHint": "Hallazgos de tesoros monetarios republicanos (CHRR)",
     "showInscriptions": "Mostrar inscripciones",
-    "showInscriptionsHint": "Inscripciones reflejadas con un lugar de hallazgo identificado (EDH)"
+    "showInscriptionsHint": "Inscripciones reflejadas con un lugar de hallazgo identificado (EDH)",
+    "showAtticInscriptions": "Mostrar inscripciones áticas",
+    "showAtticInscriptionsHint": "Attic Inscriptions Online con un lugar de hallazgo identificado (AIO)"
   },
   "tabulaPeutingeriana": {
     "title": "Tabula Peutingeriana",
@@ -122,7 +124,9 @@
     "basemapCreditBarrington": "Antigüedad (Barrington): carreteras, costa y lugares del Centro de Mapping del Mundo Antiguo (ODbL 1.0) y Pléyades (CC BY 3.0).",
     "tapForDetails": "Pulse o haga clic en una marca en el mapa para abrir lo que se registra al respecto.",
     "inscriptionsTitle": "Inscripciones",
-    "inscriptionMark": "Inscripción reflejada con un lugar de hallazgo identificado"
+    "inscriptionMark": "Inscripción reflejada con un lugar de hallazgo identificado",
+    "atticInscriptionsTitle": "Inscripciones áticas",
+    "atticInscriptionMark": "Inscripción ática con un lugar de hallazgo identificado"
   },
   "siteDetail": {
     "loading": "Cargando",
@@ -1095,6 +1099,50 @@
     },
     "popup": {
       "open": "Abrir la inscripción"
+    },
+    "seeAlsoAttic": "Vea también Attic Inscriptions Online, un segundo corpus más pequeño →"
+  },
+  "atticInscriptions": {
+    "title": "Attic Inscriptions Online",
+    "intro": "Decretos atenienses clásicos y helenísticos, inscripciones honoríficas y votivas, reflejadas desde Attic Inscriptions Online — traducciones al inglés con notas de comentario, lugares de hallazgo cruzados con los lugares de Pléyades ya recogidos en este atlas.",
+    "credit": "Texto reflejado desde Attic Inscriptions Online, CC BY-SA 3.0.",
+    "backToEdh": "← Volver a las inscripciones del EDH",
+    "browse": {
+      "title": "Explorar el corpus",
+      "empty": "Ninguna inscripción coincide con estos filtros.",
+      "loadMore": "Cargar más"
+    },
+    "filters": {
+      "monumentType": "Tipo de monumento",
+      "anyMonumentType": "Cualquier tipo",
+      "yearFrom": "Desde el año",
+      "yearTo": "Hasta el año"
+    },
+    "monumentTypes": {
+      "stele": "Estela",
+      "base": "Base",
+      "plaque": "Placa",
+      "altar": "Altar"
+    },
+    "detail": {
+      "dated": "Fecha",
+      "source": "Fuente",
+      "inscriptionType": "Tipo",
+      "originalLocation": "Ubicación original",
+      "findspot": "Lugar de hallazgo",
+      "findspots": "Lugares de hallazgo",
+      "translators": "Traducción de",
+      "text": "Traducción",
+      "footnotes": "Notas",
+      "images": "Imágenes",
+      "references": "También publicado como",
+      "viewOnAio": "Ver en AIO",
+      "credit": "{licence}, Attic Inscriptions Online"
+    },
+    "nearby": {
+      "title": "Inscripciones áticas encontradas cerca",
+      "titleTracing": "Inscripciones áticas en esta ruta",
+      "distance": "{metres} m de distancia"
     }
   }
 }

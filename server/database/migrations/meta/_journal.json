@@ -183,6 +183,13 @@
       "when": 1789119505345,
       "tag": "0025_last_baron_strucker",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1789125638801,
+      "tag": "0026_complete_red_hulk",
+      "breakpoints": true
     }
   ]
 }

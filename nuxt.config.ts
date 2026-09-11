@@ -502,6 +502,12 @@ export default defineNuxtConfig({
          */
         inscriptionTilesUrl: '/api/tiles/inscriptions',
         /**
+         * Attic Inscriptions Online carrying a resolved findspot — a second,
+         * smaller reference overlay alongside the EDH one above, its own
+         * endpoint since the two draw from separate tables.
+         */
+        atticInscriptionTilesUrl: '/api/tiles/attic-inscriptions',
+        /**
          * Label glyphs ship with the app rather than being fetched from a font
          * server, for the same reason `@fontsource` is used for the interface:
          * reading the map should tell no third party that you did. Same-origin,

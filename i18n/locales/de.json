@@ -57,7 +57,9 @@
     "showCoinHoards": "Münzhorte anzeigen",
     "showCoinHoardsHint": "Fundorte republikanischer Münzhorte (CHRR)",
     "showInscriptions": "Inschriften anzeigen",
-    "showInscriptionsHint": "Gespiegelte Inschriften mit einer bekannten Fundstelle (EDH)"
+    "showInscriptionsHint": "Gespiegelte Inschriften mit einer bekannten Fundstelle (EDH)",
+    "showAtticInscriptions": "Attische Inschriften anzeigen",
+    "showAtticInscriptionsHint": "Attic Inscriptions Online mit einer bekannten Fundstelle (AIO)"
   },
   "tabulaPeutingeriana": {
     "title": "Tabula Peutingeriana",
@@ -122,7 +124,9 @@
     "basemapCreditBarrington": "Antike (Barrington): Straßen, Küsten und Orte vom Ancient World Mapping Center (ODbL 1.0) und Plejaden (CC BY 3.0).",
     "tapForDetails": "Tippen oder klicken Sie auf eine Markierung auf der Karte, um zu öffnen, was darüber aufgezeichnet ist.",
     "inscriptionsTitle": "Inschriften",
-    "inscriptionMark": "Gespiegelte Inschrift mit bekannter Fundstelle"
+    "inscriptionMark": "Gespiegelte Inschrift mit bekannter Fundstelle",
+    "atticInscriptionsTitle": "Attische Inschriften",
+    "atticInscriptionMark": "Attische Inschrift mit bekannter Fundstelle"
   },
   "siteDetail": {
     "loading": "Wird geladen…",
@@ -1095,6 +1099,50 @@
     },
     "popup": {
       "open": "Inschrift öffnen"
+    },
+    "seeAlsoAttic": "Siehe auch Attic Inscriptions Online, ein zweiter, kleinerer Bestand →"
+  },
+  "atticInscriptions": {
+    "title": "Attic Inscriptions Online",
+    "intro": "Klassische und hellenistische athenische Dekrete, Ehren- und Weihinschriften, gespiegelt aus Attic Inscriptions Online — englische Übersetzungen mit Anmerkungen, Fundstellen abgeglichen mit den in diesem Atlas bereits erfassten Pleiades-Orten.",
+    "credit": "Text gespiegelt aus Attic Inscriptions Online, CC BY-SA 3.0.",
+    "backToEdh": "← Zurück zu den EDH-Inschriften",
+    "browse": {
+      "title": "Den Bestand durchsuchen",
+      "empty": "Keine Inschrift entspricht diesen Filtern.",
+      "loadMore": "Mehr laden"
+    },
+    "filters": {
+      "monumentType": "Denkmaltyp",
+      "anyMonumentType": "Alle Typen",
+      "yearFrom": "Ab Jahr",
+      "yearTo": "Bis Jahr"
+    },
+    "monumentTypes": {
+      "stele": "Stele",
+      "base": "Basis",
+      "plaque": "Platte",
+      "altar": "Altar"
+    },
+    "detail": {
+      "dated": "Datiert",
+      "source": "Quelle",
+      "inscriptionType": "Art",
+      "originalLocation": "Ursprünglicher Standort",
+      "findspot": "Fundstelle",
+      "findspots": "Fundstellen",
+      "translators": "Übersetzung von",
+      "text": "Übersetzung",
+      "footnotes": "Anmerkungen",
+      "images": "Bilder",
+      "references": "Auch veröffentlicht als",
+      "viewOnAio": "Auf AIO ansehen",
+      "credit": "{licence}, Attic Inscriptions Online"
+    },
+    "nearby": {
+      "title": "Attische Inschriften in der Nähe gefunden",
+      "titleTracing": "Attische Inschriften entlang dieser Route",
+      "distance": "{metres} m entfernt"
     }
   }
 }

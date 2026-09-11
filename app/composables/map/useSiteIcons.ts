@@ -614,6 +614,32 @@ export const registerInscriptionIcon = (map: MapLibreMap, palette: SiteIconPalet
   map.addImage(INSCRIPTION_ICON_ID, image, { pixelRatio: ICON_PIXEL_RATIO })
 }
 
+export const ATTIC_INSCRIPTION_ICON_ID = 'vestigian-attic-inscription'
+
+/**
+ * Lucide `scroll` — an unrolled scroll with no text lines, deliberately
+ * distinct from `INSCRIPTION_ICON_PATH` (`scroll-text`, EDH's mark): the
+ * two overlays can be switched on together and cluster in the same small
+ * area around Athens, so they need marks a reader can actually tell apart
+ * at a glance, not two near-identical scrolls.
+ */
+export const ATTIC_INSCRIPTION_ICON_PATH =
+  'M19 17V5a2 2 0 0 0-2-2H4 M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3'
+
+/** Registered alongside `registerInscriptionIcon`, same reasoning. */
+export const registerAtticInscriptionIcon = (map: MapLibreMap, palette: SiteIconPalette): void => {
+  const image = rasteriseIcon({
+    glyph: outline(ATTIC_INSCRIPTION_ICON_PATH),
+    ink: referenceInk(palette),
+    palette,
+    reference: true,
+  })
+  if (!image) return
+
+  if (map.hasImage(ATTIC_INSCRIPTION_ICON_ID)) map.removeImage(ATTIC_INSCRIPTION_ICON_ID)
+  map.addImage(ATTIC_INSCRIPTION_ICON_ID, image, { pixelRatio: ICON_PIXEL_RATIO })
+}
+
 /**
  * AWMC's minor point features — bridges, mines/quarries, dams, cemeteries
  * and tumuli. `fort` has no glyph of its own here: it reuses

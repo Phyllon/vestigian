@@ -57,7 +57,9 @@
     "showCoinHoards": "Afficher les trésors monétaires",
     "showCoinHoardsHint": "Lieux de découverte de trésors monétaires républicains (CHRR)",
     "showInscriptions": "Afficher les inscriptions",
-    "showInscriptionsHint": "Inscriptions reproduites avec un lieu de découverte identifié (EDH)"
+    "showInscriptionsHint": "Inscriptions reproduites avec un lieu de découverte identifié (EDH)",
+    "showAtticInscriptions": "Afficher les inscriptions attiques",
+    "showAtticInscriptionsHint": "Inscriptions attiques en ligne avec un lieu de découverte identifié (AIO)"
   },
   "tabulaPeutingeriana": {
     "title": "Tabula Peutingeriana",
@@ -122,7 +124,9 @@
     "basemapCreditBarrington": "Antiquité (Barrington) : routes, côtes et lieux du Centre de cartographie du monde antique (ODbL 1.0) et des Pléiades (CC BY 3.0).",
     "tapForDetails": "Appuyez ou cliquez sur une marque sur la carte pour ouvrir ce qui est enregistré à ce sujet.",
     "inscriptionsTitle": "Inscriptions",
-    "inscriptionMark": "Inscription reproduite avec un lieu de découverte identifié"
+    "inscriptionMark": "Inscription reproduite avec un lieu de découverte identifié",
+    "atticInscriptionsTitle": "Inscriptions attiques",
+    "atticInscriptionMark": "Inscription attique avec un lieu de découverte identifié"
   },
   "siteDetail": {
     "loading": "Chargement",
@@ -1095,6 +1099,50 @@
     },
     "popup": {
       "open": "Ouvrir l'inscription"
+    },
+    "seeAlsoAttic": "Voir aussi Attic Inscriptions Online, un second corpus plus restreint →"
+  },
+  "atticInscriptions": {
+    "title": "Attic Inscriptions Online",
+    "intro": "Décrets athéniens classiques et hellénistiques, inscriptions honorifiques et votives, reproduits depuis Attic Inscriptions Online — traductions anglaises avec notes de commentaire, lieux de découverte recoupés avec les lieux Pléiades déjà recensés dans cet atlas.",
+    "credit": "Texte reproduit depuis Attic Inscriptions Online, CC BY-SA 3.0.",
+    "backToEdh": "← Retour aux inscriptions de l’EDH",
+    "browse": {
+      "title": "Parcourir le corpus",
+      "empty": "Aucune inscription ne correspond à ces filtres.",
+      "loadMore": "Charger plus"
+    },
+    "filters": {
+      "monumentType": "Type de monument",
+      "anyMonumentType": "Tous types",
+      "yearFrom": "À partir de l’année",
+      "yearTo": "Jusqu’à l’année"
+    },
+    "monumentTypes": {
+      "stele": "Stèle",
+      "base": "Base",
+      "plaque": "Plaque",
+      "altar": "Autel"
+    },
+    "detail": {
+      "dated": "Daté",
+      "source": "Source",
+      "inscriptionType": "Type",
+      "originalLocation": "Emplacement d’origine",
+      "findspot": "Lieu de découverte",
+      "findspots": "Lieux de découverte",
+      "translators": "Traduction de",
+      "text": "Traduction",
+      "footnotes": "Notes",
+      "images": "Images",
+      "references": "Également publié sous",
+      "viewOnAio": "Voir sur AIO",
+      "credit": "{licence}, Attic Inscriptions Online"
+    },
+    "nearby": {
+      "title": "Inscriptions attiques trouvées à proximité",
+      "titleTracing": "Inscriptions attiques le long de cette route",
+      "distance": "{metres} m loin"
     }
   }
 }

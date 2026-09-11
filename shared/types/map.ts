@@ -69,6 +69,8 @@ export interface BasemapSource {
   coinHoardTilesUrl: string
   /** Mirrored EDH inscriptions with a resolved findspot, added when "Show inscriptions" is on. */
   inscriptionTilesUrl: string
+  /** Attic Inscriptions Online with a resolved findspot, added when "Show Attic inscriptions" is on. */
+  atticInscriptionTilesUrl: string
   glyphsUrl: string
 }
 
