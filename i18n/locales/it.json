@@ -55,7 +55,9 @@
     "showFeatures": "Mostra le testimonianze minori",
     "showFeaturesHint": "Ponti, miniere, dighe, necropoli, forti e tumuli (AWMC)",
     "showCoinHoards": "Mostra i ripostigli monetali",
-    "showCoinHoardsHint": "Luoghi di rinvenimento di ripostigli repubblicani (CHRR)"
+    "showCoinHoardsHint": "Luoghi di rinvenimento di ripostigli repubblicani (CHRR)",
+    "showInscriptions": "Mostra le iscrizioni",
+    "showInscriptionsHint": "Iscrizioni specchiate con un luogo di rinvenimento identificato (EDH)"
   },
   "tabulaPeutingeriana": {
     "title": "Tabula Peutingeriana",
@@ -118,7 +120,9 @@
     "coinHoardMark": "Luogo di rinvenimento registrato",
     "basemapCreditDare": "Antichità (DARE): © Johan Åhlfeldt, Gothenburg University, CC BY-SA 3.0.",
     "basemapCreditBarrington": "Antichità (Barrington): strade, coste e luoghi dal centro di mappatura del mondo antico (ODbL 1.0) e Pleiades (CC BY 3.0).",
-    "tapForDetails": "Toccare o fare clic su un segno sulla mappa per aprire ciò che è registrato su di esso."
+    "tapForDetails": "Toccare o fare clic su un segno sulla mappa per aprire ciò che è registrato su di esso.",
+    "inscriptionsTitle": "Iscrizioni",
+    "inscriptionMark": "Iscrizione specchiata con un luogo di rinvenimento identificato"
   },
   "siteDetail": {
     "loading": "Caricamento",
@@ -1079,12 +1083,18 @@
       "commentary": "Commento",
       "bibliography": "Bibliografia",
       "viewOnEdh": "Visualizza su EDH",
-      "credit": "{licence}, Epigraphic Database Heidelberg"
+      "credit": "{licence}, Epigraphic Database Heidelberg",
+      "photographs": "Fotografie",
+      "photographsHint": "{count} registrate presso l'EDH — diritti riservati, quindi collegate anziché mostrate qui.",
+      "morePhotos": "+{count} in più su EDH"
     },
     "nearby": {
       "title": "Iscrizioni trovate nelle vicinanze",
       "titleTracing": "Iscrizioni lungo questo percorso",
       "distance": "{metres} m distanza"
+    },
+    "popup": {
+      "open": "Apri l'iscrizione"
     }
   }
 }

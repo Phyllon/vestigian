@@ -55,7 +55,9 @@
     "showFeatures": "Kleinere Altertümer anzeigen",
     "showFeaturesHint": "Brücken, Bergwerke, Dämme, Gräberfelder, Kastelle und Grabhügel (AWMC)",
     "showCoinHoards": "Münzhorte anzeigen",
-    "showCoinHoardsHint": "Fundorte republikanischer Münzhorte (CHRR)"
+    "showCoinHoardsHint": "Fundorte republikanischer Münzhorte (CHRR)",
+    "showInscriptions": "Inschriften anzeigen",
+    "showInscriptionsHint": "Gespiegelte Inschriften mit einer bekannten Fundstelle (EDH)"
   },
   "tabulaPeutingeriana": {
     "title": "Tabula Peutingeriana",
@@ -118,7 +120,9 @@
     "coinHoardMark": "Dokumentierter Münzhort-Fundort",
     "basemapCreditDare": "Antike (DARE): © Johan Åhlfeldt, Universität Göteborg, CC BY-SA 3.0.",
     "basemapCreditBarrington": "Antike (Barrington): Straßen, Küsten und Orte vom Ancient World Mapping Center (ODbL 1.0) und Plejaden (CC BY 3.0).",
-    "tapForDetails": "Tippen oder klicken Sie auf eine Markierung auf der Karte, um zu öffnen, was darüber aufgezeichnet ist."
+    "tapForDetails": "Tippen oder klicken Sie auf eine Markierung auf der Karte, um zu öffnen, was darüber aufgezeichnet ist.",
+    "inscriptionsTitle": "Inschriften",
+    "inscriptionMark": "Gespiegelte Inschrift mit bekannter Fundstelle"
   },
   "siteDetail": {
     "loading": "Wird geladen…",
@@ -1079,12 +1083,18 @@
       "commentary": "Kommentar",
       "bibliography": "Bibliographie",
       "viewOnEdh": "Ansicht auf EDH",
-      "credit": "{licence}, Epigrafische Datenbank Heidelberg"
+      "credit": "{licence}, Epigrafische Datenbank Heidelberg",
+      "photographs": "Fotografien",
+      "photographsHint": "{count} bei der EDH verzeichnet — Rechte vorbehalten, daher nur verlinkt statt hier gezeigt.",
+      "morePhotos": "+{count} weitere bei der EDH"
     },
     "nearby": {
       "title": "Inschriften in der Nähe gefunden",
       "titleTracing": "Inschriften entlang dieser Route",
       "distance": "{metres} m entfernt"
+    },
+    "popup": {
+      "open": "Inschrift öffnen"
     }
   }
 }

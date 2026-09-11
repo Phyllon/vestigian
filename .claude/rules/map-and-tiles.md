@@ -10,6 +10,44 @@ paths:
   - 'app/pages/offline.vue'
 ---
 
+## A theme switch stacked one extra click listener per overlay, forever
+
+Reported directly: after a fresh page load, one click on a popup's "×"
+closed it; after switching dark/light mode, the same popup needed two
+clicks; a second switch needed three, and so on, growing without bound.
+
+Root cause confirmed by reading, then reproduced live in a real browser
+before fixing anything (Playwright, clicking a port icon, toggling the
+theme button, clicking the same icon again, counting `.maplibregl-popup`
+DOM nodes): every overlay's `attach*Overlay` (battles, ports, routes, minor
+features, coin hoards, inscriptions) unconditionally calls
+`map.on('click'|'mouseenter'|'mouseleave', LAYER_ID, ...)` on every
+invocation, with no matching `.off()` anywhere in `app/composables/map/`.
+`attach*Overlay` runs once on initial load, but also every time
+`keep*OverlayThroughStyleChanges`'s `styledata` listener finds the source
+missing — and `MapCanvas.vue`'s `watch(currentStyle, …) { map.setStyle(style)
+}` fires on every theme toggle (`currentStyle` is a computed over
+`isDark`). MapLibre's diffed `setStyle` reconciles sources and layers but
+leaves already-bound `map.on(...)` listeners alone (they are runtime API
+state, not part of the style document — the same "images survive `setStyle`"
+fact already documented below under "reference marks over raster basemaps").
+So a style change removes the source/layer, `attach*Overlay` re-adds them
+_and_ a brand-new click handler on top of every one already sitting on the
+map instance; one tap then fires N handlers, opening N stacked, visually
+identical `Popup`s at the same point.
+
+Fixed with `bindOverlayListenersOnce(map, layerId, bind)`
+(`useMapInstance.ts`), a `WeakMap<MapLibreMap, Set<string>>` guarding the
+three listener registrations independently of whether the source/layer
+currently exist — so a `styledata`-triggered reattachment re-adds the source
+and layer (still required) without ever re-adding the listeners, while a
+genuinely new `Map` instance (a remount, not a style swap) still binds its
+own. All six overlays call it. Verified two ways: a unit test
+(`useMapInstance.test.ts`) asserting a bind callback fires once across
+repeated calls for the same map+layer and independently per map instance and
+per layer id; and the live Playwright repro above, re-run after the fix —
+exactly one popup after two theme switches, closed with exactly one click.
+
 ## Overlay popups show everything the database actually has, plus a tap-to-open hint
 
 Investigated on request: whether the battle/port/route/minor-feature/coin-hoard

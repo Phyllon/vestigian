@@ -1,6 +1,7 @@
 import { Popup } from 'maplibre-gl'
 import type { LineLayerSpecification, Map as MapLibreMap, MapLayerMouseEvent } from 'maplibre-gl'
 import { ROUTE_ATTRIBUTION } from './useBasemapStyle'
+import { bindOverlayListenersOnce } from './useMapInstance'
 import { ATLAS_MARK_INK } from './useSiteIcons'
 import { escapeHtmlForPopup } from './useBattleOverlay'
 
@@ -103,12 +104,14 @@ export const useRouteOverlay = () => {
     // See `useLimesOverlay`'s `attachLimesOverlay` for why this call is needed.
     map.triggerRepaint()
 
-    map.on('click', ROUTE_LAYER_ID, (event) => showRoutePopup(map, event))
-    map.on('mouseenter', ROUTE_LAYER_ID, () => {
-      map.getCanvas().style.cursor = 'pointer'
-    })
-    map.on('mouseleave', ROUTE_LAYER_ID, () => {
-      map.getCanvas().style.cursor = ''
+    bindOverlayListenersOnce(map, ROUTE_LAYER_ID, () => {
+      map.on('click', ROUTE_LAYER_ID, (event) => showRoutePopup(map, event))
+      map.on('mouseenter', ROUTE_LAYER_ID, () => {
+        map.getCanvas().style.cursor = 'pointer'
+      })
+      map.on('mouseleave', ROUTE_LAYER_ID, () => {
+        map.getCanvas().style.cursor = ''
+      })
     })
   }
 

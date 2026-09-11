@@ -3,6 +3,7 @@ import type { Map as MapLibreMap, MapLayerMouseEvent, SymbolLayerSpecification }
 import type { FrontierTranslate } from '../limes/useLimes'
 import { formatYear } from '../limes/useLimes'
 import { BATTLE_ATTRIBUTION } from './useBasemapStyle'
+import { bindOverlayListenersOnce } from './useMapInstance'
 import { BATTLE_ICON_ID } from './useSiteIcons'
 
 export const BATTLE_SOURCE_ID = 'battles'
@@ -112,12 +113,14 @@ export const useBattleOverlay = () => {
     // is added while the map is otherwise idle.
     map.triggerRepaint()
 
-    map.on('click', BATTLE_LAYER_ID, (event) => showBattlePopup(map, event))
-    map.on('mouseenter', BATTLE_LAYER_ID, () => {
-      map.getCanvas().style.cursor = 'pointer'
-    })
-    map.on('mouseleave', BATTLE_LAYER_ID, () => {
-      map.getCanvas().style.cursor = ''
+    bindOverlayListenersOnce(map, BATTLE_LAYER_ID, () => {
+      map.on('click', BATTLE_LAYER_ID, (event) => showBattlePopup(map, event))
+      map.on('mouseenter', BATTLE_LAYER_ID, () => {
+        map.getCanvas().style.cursor = 'pointer'
+      })
+      map.on('mouseleave', BATTLE_LAYER_ID, () => {
+        map.getCanvas().style.cursor = ''
+      })
     })
   }
 

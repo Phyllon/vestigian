@@ -55,7 +55,9 @@
     "showFeatures": "Kleine oudheden tonen",
     "showFeaturesHint": "Bruggen, mijnen, dammen, grafvelden, forten en grafheuvels (AWMC)",
     "showCoinHoards": "Muntschatten tonen",
-    "showCoinHoardsHint": "Vindplaatsen van republikeinse muntschatten (CHRR)"
+    "showCoinHoardsHint": "Vindplaatsen van republikeinse muntschatten (CHRR)",
+    "showInscriptions": "Inscripties tonen",
+    "showInscriptionsHint": "Gespiegelde inscripties met een geïdentificeerde vindplaats (EDH)"
   },
   "tabulaPeutingeriana": {
     "title": "Tabula Peutingeriana",
@@ -118,7 +120,9 @@
     "coinHoardMark": "Geregistreerde vindplaats van een muntschat",
     "basemapCreditDare": "Oudheid (DARE): © Johan Åhlfeldt, Universiteit Göteborg, CC BY-SA 3.0.",
     "basemapCreditBarrington": "Oudheid (Barrington): wegen, kustlijn en plaatsen vanaf het Oude Wereldkaartcentrum (ODbL 1.0) en Pleiades (CC BY 3.0).",
-    "tapForDetails": "Tik op of klik op een teken op de kaart om te openen wat er over is opgenomen."
+    "tapForDetails": "Tik op of klik op een teken op de kaart om te openen wat er over is opgenomen.",
+    "inscriptionsTitle": "Inscripties",
+    "inscriptionMark": "Gespiegelde inscriptie met een geïdentificeerde vindplaats"
   },
   "siteDetail": {
     "loading": "Laden",
@@ -1079,12 +1083,18 @@
       "commentary": "Toelichting",
       "bibliography": "Bibliografie",
       "viewOnEdh": "Weergave op EDH",
-      "credit": "{licence}, Epigraphic Database Heidelberg"
+      "credit": "{licence}, Epigraphic Database Heidelberg",
+      "photographs": "Foto's",
+      "photographsHint": "{count} geregistreerd bij de EDH — rechten voorbehouden, daarom gelinkt in plaats van hier getoond.",
+      "morePhotos": "+{count} meer op EDH"
     },
     "nearby": {
       "title": "Inscripties gevonden in de buurt",
       "titleTracing": "Inscripties langs deze route",
       "distance": "{metres} m"
+    },
+    "popup": {
+      "open": "Inscriptie openen"
     }
   }
 }

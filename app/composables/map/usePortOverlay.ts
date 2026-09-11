@@ -2,6 +2,7 @@ import { Popup } from 'maplibre-gl'
 import type { Map as MapLibreMap, MapLayerMouseEvent, SymbolLayerSpecification } from 'maplibre-gl'
 import { escapeHtmlForPopup } from './useBattleOverlay'
 import { PORT_ATTRIBUTION } from './useBasemapStyle'
+import { bindOverlayListenersOnce } from './useMapInstance'
 import { PORT_ICON_ID } from './useSiteIcons'
 
 export const PORT_SOURCE_ID = 'ports'
@@ -98,12 +99,14 @@ export const usePortOverlay = () => {
     // See `useLimesOverlay`'s `attachLimesOverlay` for why this call is needed.
     map.triggerRepaint()
 
-    map.on('click', PORT_LAYER_ID, (event) => showPortPopup(map, event))
-    map.on('mouseenter', PORT_LAYER_ID, () => {
-      map.getCanvas().style.cursor = 'pointer'
-    })
-    map.on('mouseleave', PORT_LAYER_ID, () => {
-      map.getCanvas().style.cursor = ''
+    bindOverlayListenersOnce(map, PORT_LAYER_ID, () => {
+      map.on('click', PORT_LAYER_ID, (event) => showPortPopup(map, event))
+      map.on('mouseenter', PORT_LAYER_ID, () => {
+        map.getCanvas().style.cursor = 'pointer'
+      })
+      map.on('mouseleave', PORT_LAYER_ID, () => {
+        map.getCanvas().style.cursor = ''
+      })
     })
   }
 

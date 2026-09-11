@@ -2,6 +2,7 @@ import { Popup } from 'maplibre-gl'
 import type { Map as MapLibreMap, MapLayerMouseEvent, SymbolLayerSpecification } from 'maplibre-gl'
 import { escapeHtmlForPopup } from './useBattleOverlay'
 import { INSCRIPTION_ATTRIBUTION } from './useBasemapStyle'
+import { bindOverlayListenersOnce } from './useMapInstance'
 import { INSCRIPTION_ICON_ID } from './useSiteIcons'
 import { formatPeriod } from '../data/useSiteQuery'
 
@@ -109,12 +110,14 @@ export const useInscriptionsOverlay = () => {
     // See `useLimesOverlay`'s `attachLimesOverlay` for why this call is needed.
     map.triggerRepaint()
 
-    map.on('click', INSCRIPTION_LAYER_ID, (event) => showInscriptionPopup(map, event))
-    map.on('mouseenter', INSCRIPTION_LAYER_ID, () => {
-      map.getCanvas().style.cursor = 'pointer'
-    })
-    map.on('mouseleave', INSCRIPTION_LAYER_ID, () => {
-      map.getCanvas().style.cursor = ''
+    bindOverlayListenersOnce(map, INSCRIPTION_LAYER_ID, () => {
+      map.on('click', INSCRIPTION_LAYER_ID, (event) => showInscriptionPopup(map, event))
+      map.on('mouseenter', INSCRIPTION_LAYER_ID, () => {
+        map.getCanvas().style.cursor = 'pointer'
+      })
+      map.on('mouseleave', INSCRIPTION_LAYER_ID, () => {
+        map.getCanvas().style.cursor = ''
+      })
     })
   }
 

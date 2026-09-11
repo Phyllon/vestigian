@@ -2,6 +2,7 @@ import { Popup } from 'maplibre-gl'
 import type { Map as MapLibreMap, MapLayerMouseEvent, SymbolLayerSpecification } from 'maplibre-gl'
 import { escapeHtmlForPopup } from './useBattleOverlay'
 import { COIN_HOARD_ATTRIBUTION } from './useBasemapStyle'
+import { bindOverlayListenersOnce } from './useMapInstance'
 import { COIN_HOARD_ICON_ID } from './useSiteIcons'
 
 export const COIN_HOARD_SOURCE_ID = 'coin-hoards'
@@ -88,12 +89,14 @@ export const useCoinHoardOverlay = () => {
     // See `useLimesOverlay`'s `attachLimesOverlay` for why this call is needed.
     map.triggerRepaint()
 
-    map.on('click', COIN_HOARD_LAYER_ID, (event) => showCoinHoardPopup(map, event))
-    map.on('mouseenter', COIN_HOARD_LAYER_ID, () => {
-      map.getCanvas().style.cursor = 'pointer'
-    })
-    map.on('mouseleave', COIN_HOARD_LAYER_ID, () => {
-      map.getCanvas().style.cursor = ''
+    bindOverlayListenersOnce(map, COIN_HOARD_LAYER_ID, () => {
+      map.on('click', COIN_HOARD_LAYER_ID, (event) => showCoinHoardPopup(map, event))
+      map.on('mouseenter', COIN_HOARD_LAYER_ID, () => {
+        map.getCanvas().style.cursor = 'pointer'
+      })
+      map.on('mouseleave', COIN_HOARD_LAYER_ID, () => {
+        map.getCanvas().style.cursor = ''
+      })
     })
   }
 

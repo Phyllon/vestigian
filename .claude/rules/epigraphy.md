@@ -187,6 +187,19 @@ Two more real bugs, found only by actually clicking a marker on a running map:
    an MVT tile and reads it back client-side** — the same gap would recur
    silently, since nothing here throws or types wrong, it just renders a
    plausible-looking wrong string.
+8. **Tapping an abbreviation on a phone did nothing.** The transcription's
+   `<abbr title="...">` reveal is a native browser tooltip, which only ever
+   fires on `:hover` — there is no touch equivalent, so a phone reader had
+   no way to see an expansion at all despite `epigraphy.detail.textHint`
+   already promising "hover or tap". Fixed in
+   `app/pages/inscriptions/[edhId].vue` by wrapping the `<abbr>` in a plain
+   reset `<button>` inside a `UPopover` (`mode="click"`, Nuxt UI's default —
+   fires on tap and click alike, no custom touch handling needed), with the
+   expansion shown in the popover's `#content` slot. The `<abbr title>`
+   itself stays, both for its native accessible fallback and as a free
+   hover affordance on desktop; the popover is what makes tap actually work.
+   Verified live with Playwright under an iPhone 13 viewport (`tap()` on the
+   button opens the popover and renders the expansion), not just typechecked.
 
 ## Photograph metadata (Phase 2) — link-out only, checked exhaustively before writing a line of import code
 

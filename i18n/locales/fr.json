@@ -55,7 +55,9 @@
     "showFeatures": "Afficher les petits vestiges",
     "showFeaturesHint": "Ponts, mines, barrages, nécropoles, forts et tumulus (AWMC)",
     "showCoinHoards": "Afficher les trésors monétaires",
-    "showCoinHoardsHint": "Lieux de découverte de trésors monétaires républicains (CHRR)"
+    "showCoinHoardsHint": "Lieux de découverte de trésors monétaires républicains (CHRR)",
+    "showInscriptions": "Afficher les inscriptions",
+    "showInscriptionsHint": "Inscriptions reproduites avec un lieu de découverte identifié (EDH)"
   },
   "tabulaPeutingeriana": {
     "title": "Tabula Peutingeriana",
@@ -118,7 +120,9 @@
     "coinHoardMark": "Lieu de découverte répertorié",
     "basemapCreditDare": "Antiquité : © Johan Åhlfeldt, Université de Göteborg, CC BY-SA 3.0.",
     "basemapCreditBarrington": "Antiquité (Barrington) : routes, côtes et lieux du Centre de cartographie du monde antique (ODbL 1.0) et des Pléiades (CC BY 3.0).",
-    "tapForDetails": "Appuyez ou cliquez sur une marque sur la carte pour ouvrir ce qui est enregistré à ce sujet."
+    "tapForDetails": "Appuyez ou cliquez sur une marque sur la carte pour ouvrir ce qui est enregistré à ce sujet.",
+    "inscriptionsTitle": "Inscriptions",
+    "inscriptionMark": "Inscription reproduite avec un lieu de découverte identifié"
   },
   "siteDetail": {
     "loading": "Chargement",
@@ -1079,12 +1083,18 @@
       "commentary": "Commentaire",
       "bibliography": "Bibliographie",
       "viewOnEdh": "Vue sur EDH",
-      "credit": "{licence}, Base de données épigraphiques Heidelberg"
+      "credit": "{licence}, Base de données épigraphiques Heidelberg",
+      "photographs": "Photographies",
+      "photographsHint": "{count} recensées à l'EDH — droits réservés, donc simplement liées plutôt que montrées ici.",
+      "morePhotos": "+{count} de plus sur l'EDH"
     },
     "nearby": {
       "title": "Inscriptions trouvées à proximité",
       "titleTracing": "Inscriptions le long de cette route",
       "distance": "{metres} m loin"
+    },
+    "popup": {
+      "open": "Ouvrir l'inscription"
     }
   }
 }

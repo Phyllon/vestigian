@@ -5,9 +5,12 @@
    * One mirrored EDH inscription. The transcription is set in IBM Plex
    * Mono with the source's own line breaks preserved — a field-notebook
    * transcription of an inscription looks like this, not like flowing
-   * prose — and abbreviations render as real `<abbr>` elements: a native,
-   * accessible way to carry "as carved" alongside its expansion, rather
-   * than an invented tooltip widget.
+   * prose. Abbreviations keep the real `<abbr title="...">` element for
+   * its native accessible fallback, but the `title` attribute alone is
+   * hover-only and never fires on a touch device — reported live as "tap
+   * doesn't open the expansion". The disclosure itself is a `UPopover`
+   * (mode="click", the Nuxt UI default), wrapping the `<abbr>` in a plain
+   * reset `<button>` so it is both tappable and keyboard-focusable.
    */
   const route = useRoute()
   const edhId = route.params.edhId as string
@@ -103,11 +106,24 @@
       <p class="datum mt-1">{{ t('epigraphy.detail.textHint') }}</p>
       <pre
         class="prose-notebook mt-3 overflow-x-auto whitespace-pre-wrap rounded-notebook bg-paper-100 p-4 font-mono text-sm leading-relaxed text-ink-900 dark:bg-night-700 dark:text-paper-100"
-      ><code><template v-for="line in inscription.textEdition" :key="line.line">{{ line.line }}  <template v-for="(token, index) in line.tokens" :key="index"><abbr
+      ><code><template v-for="line in inscription.textEdition" :key="line.line">{{ line.line }}  <template v-for="(token, index) in line.tokens" :key="index"><UPopover
               v-if="token.abbr"
-              :title="token.expansion ? `${token.abbr}(${token.expansion})` : token.abbr"
-              class="cursor-help font-semibold text-oxide-600 no-underline decoration-dotted dark:text-oxide-300"
-              >{{ token.abbr }}</abbr
+              mode="click"
+              :content="{ side: 'top' }"
+              ><button
+                type="button"
+                class="cursor-pointer border-0 bg-transparent p-0 align-baseline"
+                ><abbr
+                  :title="token.expansion ? `${token.abbr}(${token.expansion})` : token.abbr"
+                  class="font-semibold text-oxide-600 no-underline decoration-dotted dark:text-oxide-300"
+                  >{{ token.abbr }}</abbr
+                ></button
+              ><template #content
+                ><p class="max-w-xs px-3 py-1.5 text-sm text-ink-900 dark:text-paper-100"
+                  ><span class="font-mono font-semibold">{{ token.abbr }}</span
+                  ><template v-if="token.expansion"> — {{ token.expansion }}</template></p
+                ></template
+              ></UPopover
             ><template v-else>{{ token.text }}</template>{{ ' ' }}</template>
 </template></code></pre>
     </section>

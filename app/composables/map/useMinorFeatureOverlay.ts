@@ -7,6 +7,7 @@ import type {
 } from 'maplibre-gl'
 import { MINOR_FEATURE_ATTRIBUTION } from './useBasemapStyle'
 import { escapeHtmlForPopup } from './useBattleOverlay'
+import { bindOverlayListenersOnce } from './useMapInstance'
 import { type MinorFeatureKind, minorFeatureIconId } from './useSiteIcons'
 
 export const FEATURE_SOURCE_ID = 'features'
@@ -178,12 +179,14 @@ export const useMinorFeatureOverlay = () => {
     // See `useLimesOverlay`'s `attachLimesOverlay` for why this call is needed.
     map.triggerRepaint()
 
-    map.on('click', FEATURE_LAYER_ID, (event) => showFeaturePopup(map, event))
-    map.on('mouseenter', FEATURE_LAYER_ID, () => {
-      map.getCanvas().style.cursor = 'pointer'
-    })
-    map.on('mouseleave', FEATURE_LAYER_ID, () => {
-      map.getCanvas().style.cursor = ''
+    bindOverlayListenersOnce(map, FEATURE_LAYER_ID, () => {
+      map.on('click', FEATURE_LAYER_ID, (event) => showFeaturePopup(map, event))
+      map.on('mouseenter', FEATURE_LAYER_ID, () => {
+        map.getCanvas().style.cursor = 'pointer'
+      })
+      map.on('mouseleave', FEATURE_LAYER_ID, () => {
+        map.getCanvas().style.cursor = ''
+      })
     })
   }
 

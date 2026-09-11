@@ -290,6 +290,31 @@ falls back to English (`@nuxtjs/i18n`'s normal fallback), which is a safe,
 honest default now that English is the stated reference language, not a
 silent gap.
 
+**Found in the wild: the epigraphy feature's `en.json` keys shipped without
+ever being added to the other five locales at all** — not mistranslated,
+genuinely absent (`basemapSwitcher.showInscriptions`/`showInscriptionsHint`,
+`epigraphy.detail.photographs`/`photographsHint`/`morePhotos`,
+`epigraphy.popup.open`, `legend.inscriptionsTitle`/`inscriptionMark`), so
+`@nuxtjs/i18n`'s fallback silently served English in five locales with
+nothing on screen to say a key was missing versus deliberately English. This
+is exactly the gap the pre-commit reminder above exists to catch — the
+reminder is non-blocking, so it is only as good as someone reading and
+acting on it, and here nobody had. Fixed by hand-translating the eight keys
+directly into all five catalogues (not via `pnpm i18n:translate`, per the
+policy above), then confirming zero key-parity drift with a flatten+diff
+across all six locale files. **First attempt at this fix used
+`pnpm i18n:translate` anyway** — the reflex from before this section's
+policy existed — which did fill the eight keys, but also silently
+re-translated ~15–34 unrelated pre-existing keys per locale through the very
+pipeline this policy retired (any key a prior run had left equal to its
+English source is fair game to the script's resumability rule, keys
+unrelated to the task at hand included). Caught by diffing against `git
+diff` before treating the run as done: every one of those collateral
+re-translations happened to produce byte-identical output to what was
+already stored, so nothing was actually lost, but that was luck, not
+verification — the fix was redone by hand-writing all eight values instead
+and confirming the resulting diff touched only those eight keys, per locale.
+
 **`scripts/i18n/translate-locales.ts` and `pnpm i18n:translate` are kept, not
 deleted**, but are no longer part of the standard workflow — historical
 tooling for bootstrapping a brand-new locale from scratch, or a documented,
