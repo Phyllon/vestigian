@@ -5,7 +5,16 @@ import type { SessionUser } from '#shared/types'
 
 export const changeEmailSchema = z.object({
   currentPassword: z.string().min(1).max(200),
-  email: z.string().trim().toLowerCase().email().max(320),
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .email()
+    .max(320)
+    .refine((email) => !isDisposableEmailDomain(email), {
+      message:
+        'Temporary or disposable email addresses cannot be used. Please use a permanent address.',
+    }),
 })
 
 /**
