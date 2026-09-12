@@ -59,6 +59,9 @@ importers:
       cheerio:
         specifier: ^1.2.0
         version: 1.2.0
+      disposable-email-domains:
+        specifier: ^1.0.62
+        version: 1.0.62
       drizzle-orm:
         specifier: ^0.36.4
         version: 0.36.4(@opentelemetry/api@1.9.1)(mysql2@3.23.4(@types/node@22.20.1))(postgres@3.4.9)
@@ -147,6 +150,9 @@ importers:
       '@types/adm-zip':
         specifier: ^0.5.8
         version: 0.5.8
+      '@types/disposable-email-domains':
+        specifier: ^1.0.6
+        version: 1.0.6
       '@types/he':
         specifier: ^1.2.3
         version: 1.2.3
@@ -3496,6 +3502,9 @@ packages:
   '@types/adm-zip@0.5.8':
     resolution: {integrity: sha512-RVVH7QvZYbN+ihqZ4kX/dMiowf6o+Jk1fNwiSdx0NahBJLU787zkULhGhJM8mf/obmLGmgdMM0bXsQTmyfbR7Q==}
 
+  '@types/disposable-email-domains@1.0.6':
+    resolution: {integrity: sha512-+jHw0Q4ERuVYIChlUaoSm/VEuuNFeW7JgUU8Rwa9V1ym6q+gkGmBK5sGTDKqlfmsSdI5bFMHKlEatirPFvd8Xw==}
+
   '@types/esrecurse@4.3.1':
     resolution: {integrity: sha512-xJBAbDifo5hpffDBuHl0Y8ywswbiAp/Wi7Y/GtAgSlZyIABppyurxVueOPE8LUQOxdlgi6Zqce7uoEpqNTeiUw==}
 
@@ -4794,6 +4803,9 @@ packages:
 
   dijkstrajs@1.0.3:
     resolution: {integrity: sha512-qiSlmBq9+BCdCA/L46dw8Uy93mloxsPSbwnm5yrKn2vMPiy8KyAskTF6zuV/j5BMsmOGZDPs7KjU+mjb670kfA==}
+
+  disposable-email-domains@1.0.62:
+    resolution: {integrity: sha512-LBQvhRw7mznQTPoyZbsmYeNOZt1pN5aCsx4BAU/3siVFuiM9f2oyKzUaB8v1jbxFjE3aYqYiMo63kAL4pHgfWQ==}
 
   dom-serializer@2.0.0:
     resolution: {integrity: sha512-wIkAryiqt/nV5EQKqQpo3SToSOV9J0DnbJqwK7Wv/Trc92zIAYZ4FlMu+JPFW1DfGFt81ZTCGgDEabffXeLyJg==}
@@ -12217,6 +12229,8 @@ snapshots:
     dependencies:
       '@types/node': 22.20.1
 
+  '@types/disposable-email-domains@1.0.6': {}
+
   '@types/esrecurse@4.3.1': {}
 
   '@types/estree@1.0.9': {}
@@ -13498,6 +13512,8 @@ snapshots:
   diff@8.0.4: {}
 
   dijkstrajs@1.0.3: {}
+
+  disposable-email-domains@1.0.62: {}
 
   dom-serializer@2.0.0:
     dependencies:

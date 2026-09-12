@@ -3,7 +3,14 @@ import { emailTokens, users } from '~~/server/database/schema'
 import { passwordSchema } from '#shared/utils/password'
 
 export const registrationSchema = z.object({
-  email: z.string().email().max(320),
+  email: z
+    .string()
+    .email()
+    .max(320)
+    .refine((email) => !isDisposableEmailDomain(email), {
+      message:
+        'Temporary or disposable email addresses cannot be used to register. Please use a permanent address.',
+    }),
   displayName: z
     .string()
     .trim()
@@ -27,7 +34,32 @@ defineRouteMeta({
 
 export default defineEventHandler(async (event) => {
   await enforceRateLimit(event, 'register')
-  const body = await readValidatedBody(event, registrationSchema.parse)
+
+  /**
+   * Parsed by hand rather than via `readValidatedBody(event, registrationSchema.parse)`:
+   * h3's default validation handler serializes the whole zod issues array into
+   * `.message` and drops `.data` to `{issues, name}` — no `field` key. That's
+   * invisible for the plain `.email()` format check, since `RegisterForm.vue`
+   * already runs the identical check client-side and never lets a malformed
+   * address reach this handler, but the disposable-domain `.refine()` above
+   * has no client-side twin, so a real user can genuinely hit it. Reshaping
+   * the failure the same way the 409 conflict below already is keeps it
+   * landing under the email field instead of a garbled toast.
+   */
+  const rawBody = await readBody(event)
+  const parsedBody = registrationSchema.safeParse(rawBody)
+
+  if (!parsedBody.success) {
+    const issue = parsedBody.error.issues[0]!
+
+    throw createError({
+      statusCode: 400,
+      message: issue.message,
+      data: { field: String(issue.path[0] ?? '') },
+    })
+  }
+
+  const body = parsedBody.data
 
   if (body.website) {
     // Answer as though it succeeded so the bot learns nothing from the response.
