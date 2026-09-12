@@ -1,6 +1,5 @@
 import { eq } from 'drizzle-orm'
 import { users } from '~~/server/database/schema'
-import type { SessionUser } from '#shared/types'
 
 /**
  * The notebook as a GPX waypoint file — the one thing here that leaves the
@@ -17,8 +16,7 @@ defineRouteMeta({
 })
 
 export default defineEventHandler(async (event) => {
-  const session = await requireUserSession(event)
-  const sessionUser = session.user as SessionUser
+  const sessionUser = await requireActiveUser(event)
   await enforceRateLimit(event, 'record')
 
   const [places, [account]] = await Promise.all([

@@ -45,13 +45,19 @@
         to: '/notebook/contributions',
       },
     ],
+    /**
+     * The only link to `/admin` anywhere in the application, and the reason
+     * the route is reachable without being discoverable. Shown on the session
+     * cookie's role, which is cosmetic by design — the page's own middleware
+     * and every endpoint behind it re-read the role from the database.
+     */
     ...(isAdmin.value
       ? [
           [
             {
-              label: t('account.contributors'),
-              icon: 'i-lucide-users',
-              to: '/moderation/contributors',
+              label: t('account.adminPanel'),
+              icon: 'i-lucide-shield-alert',
+              to: '/admin',
             },
           ],
         ]

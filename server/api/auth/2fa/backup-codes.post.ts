@@ -1,7 +1,6 @@
 import { z } from 'zod'
 import { eq } from 'drizzle-orm'
 import { twoFactorBackupCodes, users } from '~~/server/database/schema'
-import type { SessionUser } from '#shared/types'
 
 export const regenerateBackupCodesSchema = z.object({
   currentPassword: z.string().min(1).max(200),
@@ -25,8 +24,7 @@ defineRouteMeta({
 })
 
 export default defineEventHandler(async (event) => {
-  const session = await requireUserSession(event)
-  const sessionUser = session.user as SessionUser
+  const sessionUser = await requireActiveUser(event)
   await enforceRateLimit(event, 'passwordReset')
 
   const { currentPassword } = await readValidatedBody(event, regenerateBackupCodesSchema.parse)

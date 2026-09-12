@@ -22,8 +22,8 @@
     "notebook": "Mijn notitieboek",
     "visits": "Waar ik ben geweest",
     "contributions": "Mijn bijdragen",
-    "contributors": "Bijdragers",
-    "settings": "Instellingen"
+    "settings": "Instellingen",
+    "adminPanel": "Commandopost"
   },
   "themeToggle": {
     "switchToDay": "Overschakelen naar dag",
@@ -254,40 +254,6 @@
       "batchResultTitle": "{count} {decision}.",
       "batchResultSkipped": "{count} overgeslagen."
     },
-    "contributorTable": {
-      "findPlaceholder": "Zoek een medewerker",
-      "accepted": "{count} aanvaard",
-      "waiting": "{count} wachtend",
-      "restoreTrust": "Vertrouwen herstellen",
-      "restoreTrustAria": "Vertrouwen herstellen voor {name}",
-      "suspendPublishing": "Publicatie onderbreken",
-      "suspendPublishingAria": "Publiceren onderbreken voor {name}",
-      "roleAria": "Rol voor {name}",
-      "suspendPrompt": "Waarom wordt {name} geschorst?",
-      "suspendHint": "Aan hen gemaild, letterlijk",
-      "suspendReasonPlaceholder": "Drie bewerkingen verwijderd brontekst zonder te zeggen waarom.",
-      "cancel": "Annuleren",
-      "untouchedNote": "Hun geaccepteerde bijdragen zijn onaangetast.",
-      "noMatches": "Dat komt niet overeen.",
-      "standing": {
-        "moderator": "Publiceert op basis van rol",
-        "revoked": "Elke bewerking in de wachtrij onderbroken",
-        "earned": "Publiceert onmiddellijk",
-        "probation": "In de wachtrij{remaining}te gaan"
-      },
-      "trustSuspended": "Automatische publicatie opgeschort.",
-      "trustRestored": "Vertrouwen hersteld.",
-      "toldByEmail": "{name} is per e-mail op de hoogte gebracht.",
-      "trustFailedTitle": "Kon vertrouwen niet wijzigen",
-      "tryAgain": "Probeer het nog eens.",
-      "nowRole": "{name} is nu {role}.",
-      "roleFailedTitle": "Kon rol niet veranderen",
-      "roles": {
-        "contributor": "Medewerker",
-        "moderator": "Moderator",
-        "admin": "Beheerder"
-      }
-    },
     "revisionDiff": {
       "fields": {
         "title": "Naam",
@@ -309,13 +275,7 @@
     },
     "queuePage": {
       "title": "Wachtrij bekijken",
-      "intro": "Bijdragen van rekeningen die nog niet automatisch gepubliceerd zijn.",
-      "contributorsLink": "Bijdragers"
-    },
-    "contributorsPage": {
-      "title": "Bijdragers",
-      "backToQueue": "Wachtrij bekijken",
-      "intro": "Het onderbreken van publiceren houdt het record van een bijdrager intact — het herstellen ervan brengt iemand terug naar precies waar ze waren."
+      "intro": "Bijdragen van rekeningen die nog niet automatisch gepubliceerd zijn."
     }
   },
   "licence": {
@@ -1143,6 +1103,272 @@
       "title": "Attische inscripties gevonden in de buurt",
       "titleTracing": "Attische inscripties langs deze route",
       "distance": "{metres} m verderop"
+    }
+  },
+  "admin": {
+    "eyebrow": "Beheer",
+    "title": "Commandopost",
+    "intro": "Elke wijziging aan de atlas op het moment dat die gebeurt, en door wie — ook de bewerkingen die zonder beoordeling zijn gepubliceerd. Accounts, status en sancties staan hier ook.",
+    "loading": "De commandopost wordt geladen…",
+    "sections": {
+      "activity": "Activiteit",
+      "accounts": "Accounts",
+      "images": "Foto's",
+      "audit": "Beslisregister",
+      "system": "Systeem"
+    },
+    "attention": {
+      "unresolvedLicences": "{count} onpubliceerbare licentie",
+      "pendingRevisions": "{count} wachten op beoordeling",
+      "pendingImages": "{count} foto wacht",
+      "blockedAccounts": "{count} geblokkeerd",
+      "revokedTrust": "{count} met opgeschorte publicatie",
+      "unverifiedAccounts": "{count} nooit bevestigd"
+    },
+    "commandBar": {
+      "placeholder": "Een naam, een adres of #412",
+      "searchLabel": "Accounts en herzieningen zoeken",
+      "sectionLabel": "Onderdeel",
+      "jumpTo": "Ga naar",
+      "revision": "Herziening {id}",
+      "openAccountAria": "Dossier van {name} openen",
+      "attentionLabel": "Wacht op aandacht",
+      "status": {
+        "ready": "Alle diensten werken",
+        "degraded": "Een dienst is uitgevallen"
+      }
+    },
+    "activity": {
+      "loading": "Het register wordt gelezen…",
+      "empty": "Geen resultaten.",
+      "loadMore": "Ouder",
+      "untitled": "Zonder titel",
+      "deletedAccount": "Verwijderd account",
+      "changeCount": "{count} gewijzigde velden",
+      "reviewNote": "Opmerking: {note}",
+      "blankingWarning": "Deze bewerking haalt meer weg dan ze toevoegt.",
+      "substantialNote": "Een aanzienlijke herschrijving.",
+      "toggleDiffAria": "Toon wat er veranderde in herziening {id}",
+      "openAuthorAria": "Dossier van {name} openen",
+      "kinds": {
+        "autoPublished": "ongecontroleerd gepubliceerd",
+        "reviewed": "na beoordeling gepubliceerd",
+        "queued": "wacht op beoordeling",
+        "rejected": "afgewezen",
+        "revert": "teruggedraaid",
+        "retraction": "van de atlas gehaald"
+      },
+      "status": {
+        "pending": "Wacht",
+        "approved": "Gepubliceerd",
+        "rejected": "Afgewezen"
+      },
+      "filters": {
+        "search": "Zoeken",
+        "searchPlaceholder": "De titel van een record of een samenvatting",
+        "status": "Status",
+        "anyStatus": "Elke status",
+        "kind": "Soort",
+        "anyKind": "Plaatsen en tracés",
+        "sites": "Plaatsen",
+        "tracings": "Tracés",
+        "autoApprovedOnly": "Alleen bewerkingen die niemand heeft beoordeeld",
+        "blankingOnly": "Alleen bewerkingen die meer weghalen dan toevoegen",
+        "clearAuthor": "Alle auteurs"
+      }
+    },
+    "accounts": {
+      "loading": "De accounts worden gelezen…",
+      "noMatches": "Geen account komt overeen.",
+      "tryAgain": "Probeer het opnieuw.",
+      "cancel": "Annuleren",
+      "blocked": "Geblokkeerd",
+      "unverified": "adres nooit bevestigd",
+      "twoFactor": "tweestapsaanmelding aan",
+      "accepted": "{count} aangenomen",
+      "waiting": "{count} wachtend",
+      "openDossierAria": "Dossier van {name} openen",
+      "roles": {
+        "contributor": "Bijdragen",
+        "moderator": "Moderatie",
+        "admin": "Beheer"
+      },
+      "standing": {
+        "moderator": "Bewerkingen verschijnen meteen, vanwege de rol.",
+        "revoked": "Publicatie opgeschort — elke bewerking wacht op beoordeling.",
+        "earned": "Bewerkingen verschijnen meteen.",
+        "probation": "Nog {remaining} aangenomen bijdragen voordat bewerkingen meteen verschijnen.",
+        "blocked": "Geblokkeerd: kan niet aanmelden en niet bijdragen. Gepubliceerd werk blijft ongemoeid."
+      },
+      "revokeTrust": "Publicatie opschorten",
+      "revokeTrustAria": "Automatische publicatie voor {name} opschorten",
+      "restoreTrust": "Publicatie herstellen",
+      "restoreTrustAria": "Automatische publicatie voor {name} herstellen",
+      "trustFailedTitle": "Publicatie kon niet worden gewijzigd",
+      "roleAria": "Rol van {name}",
+      "roleFailedTitle": "Rol kon niet worden gewijzigd",
+      "nowRole": "{name} is nu {role}.",
+      "revokeSessions": "Overal afmelden",
+      "revokeSessionsAria": "Elke open sessie van {name} beëindigen",
+      "sessionsRevokedToast": "Elke open sessie van {name} is beëindigd.",
+      "sessionsFailedTitle": "Die sessies konden niet worden beëindigd",
+      "block": "Account blokkeren",
+      "blockAria": "Het account van {name} blokkeren",
+      "unblock": "Blokkade opheffen",
+      "unblockAria": "De blokkade van {name} opheffen",
+      "blockPrompt": "Waarom wordt {name} geblokkeerd?",
+      "blockHint": "Wordt meegestuurd, en is het enige deel van een blokkade waarop iemand kan reageren",
+      "blockReasonPlaceholder": "Herhaald verzonnen records, na twee waarschuwingen",
+      "blockReasonShown": "Geblokkeerd: {reason}",
+      "blockedToast": "{name} is geblokkeerd.",
+      "unblockedToast": "De blokkade van {name} is opgeheven.",
+      "toldByEmail": "{name} is per e-mail op de hoogte gebracht.",
+      "blockFailedTitle": "Die blokkade kon niet worden gewijzigd",
+      "workUntouchedNote": "Gepubliceerd werk blijft in de atlas. Dat offline halen is een aparte stap, in het dossier.",
+      "filters": {
+        "search": "Zoeken",
+        "searchPlaceholder": "Een weergavenaam of een e-mailadres",
+        "role": "Rol",
+        "anyRole": "Elke rol",
+        "standing": "Status",
+        "anyStanding": "Elke status",
+        "trusted": "Publicatie toegestaan",
+        "revoked": "Publicatie opgeschort",
+        "banned": "Geblokkeerd",
+        "unverified": "Adres nooit bevestigd",
+        "sort": "Volgorde",
+        "sortAccepted": "Meest aangenomen",
+        "sortNewest": "Nieuwste",
+        "sortLastSeen": "Laatst gezien",
+        "sortPending": "Meest wachtend"
+      }
+    },
+    "dossier": {
+      "loading": "Alles wat deze persoon deed wordt samengebracht…",
+      "backToRoll": "Terug naar de lijst",
+      "tryAgain": "Probeer het opnieuw.",
+      "never": "nooit",
+      "joined": "Aangemeld op {joined}, laatst gezien op {seen}.",
+      "seeEverythingChanged": "Alle wijzigingen van deze persoon bekijken",
+      "recordsCreated": "Records die deze persoon aanlegde",
+      "truncated": "De eerste 200 worden getoond. De totalen hierboven zijn volledig.",
+      "decisionsTaken": "Beslissingen over dit account",
+      "counts": {
+        "sitesCreated": "Aangelegde plaatsen",
+        "tracingsCreated": "Aangelegde tracés",
+        "imagesUploaded": "Foto's",
+        "approved": "Gepubliceerde bewerkingen",
+        "pending": "Wachtend",
+        "rejected": "Afgewezen",
+        "endorsements": "Gegeven aanbevelingen",
+        "visits": "Bezochte plaatsen"
+      },
+      "recordStatus": {
+        "approved": "in de atlas",
+        "pending": "wachtend",
+        "rejected": "offline"
+      },
+      "retractTitle": "Het werk van de atlas halen",
+      "retractExplanation": "Haalt elk aangelegd record terug, draait bewerkingen aan records van anderen terug en trekt foto's uit de galerijen. Niets wordt verwijderd: elke terugname is een gewone herziening die de moderatie kan terugdraaien, en geen enkele afbeeldingsbyte wordt gewist. Wat nog op beoordeling wacht, blijft in de wachtrij en wordt op inhoud beoordeeld.",
+      "retractReasonLabel": "Reden",
+      "retractReasonHint": "Wordt vastgelegd op elke herziening die dit schrijft",
+      "retractReasonPlaceholder": "Verzonnen records, geblokkeerd na onderzoek",
+      "retractPreview": "Tellen wat dit zou doen",
+      "retractPlan": "{records} records zouden offline gaan, {edits} bewerkingen worden teruggedraaid en {photographs} foto's ingetrokken.",
+      "retractUntouched": "{count} bijdragen blijven met opzet ongemoeid.",
+      "retractApply": "Alles offline halen",
+      "retractNothingToDo": "Er is niets gepubliceerd om offline te halen.",
+      "retractReasonRequired": "Geef eerst een reden.",
+      "retractedToast": "{records} records en {photographs} foto's offline gehaald.",
+      "retractedReversible": "Elk ervan kan uit de geschiedenis van het record zelf worden teruggedraaid.",
+      "retractedPartly": "{count} konden niet worden toegepast — zie het logboek.",
+      "retractFailedTitle": "Dat werk kon niet offline worden gehaald"
+    },
+    "images": {
+      "loading": "De galerijen worden gelezen…",
+      "empty": "Niets wachtend, en geen onopgeloste licentie.",
+      "filterLabel": "Toon",
+      "cannotPublish": "Mag niet worden gepubliceerd",
+      "deletedAccount": "Verwijderd account",
+      "openSource": "De bronpagina openen",
+      "manageOnSite": "Beheren op de pagina van de plaats",
+      "openUploaderAria": "Dossier van {name} openen",
+      "filters": {
+        "pending": "Wacht op beoordeling",
+        "unlicensed": "Onopgeloste licentie",
+        "all": "Beide"
+      },
+      "status": {
+        "pending": "Wacht op beoordeling",
+        "approved": "In de galerij",
+        "rejected": "Ingetrokken"
+      }
+    },
+    "audit": {
+      "loading": "Het register wordt gelezen…",
+      "empty": "Nog niets vastgelegd.",
+      "loadMore": "Ouder",
+      "filterLabel": "Handeling",
+      "anyAction": "Alle handelingen",
+      "deletedActor": "Verwijderd account",
+      "account": "account #{id}",
+      "note": "Alleen toevoegend: niets in deze toepassing wijzigt of verwijdert een regel. Er staan geen herkomstadressen en geen inloggegevens in — details per verzoek staan in het verzoeklogboek.",
+      "actions": {
+        "account_banned": "Account geblokkeerd",
+        "account_unbanned": "Blokkade opgeheven",
+        "account_role-changed": "Rol gewijzigd",
+        "account_trust-changed": "Publicatie gewijzigd",
+        "account_sessions-revoked": "Sessies beëindigd",
+        "account_work-retracted": "Werk offline gehaald",
+        "accounts_viewed": "Accountlijst gelezen",
+        "account_inspected": "Dossier geopend",
+        "step-up_granted": "Identiteit bevestigd"
+      }
+    },
+    "stepUp": {
+      "title": "Bevestig dat het u bent",
+      "description": "Deze wijziging vraagt opnieuw om uw wachtwoord.",
+      "explanation": "Een account blokkeren en een rol wijzigen kunnen binnen de atlas niet ongedaan worden gemaakt, dus wordt opnieuw om uw wachtwoord gevraagd, ook al bent u al aangemeld.",
+      "passwordLabel": "Uw wachtwoord",
+      "passwordAria": "Wachtwoord van {name}",
+      "codeLabel": "Code uit de authenticatie-app",
+      "codeHint": "Alleen als uw account tweestapsaanmelding heeft",
+      "codePlaceholder": "123456",
+      "confirm": "Bevestigen",
+      "cancel": "Annuleren"
+    },
+    "system": {
+      "loading": "De diensten worden bevraagd…",
+      "servicesTitle": "Onderliggende diensten",
+      "services": {
+        "database": "Database",
+        "cache": "Cache"
+      },
+      "uptime": "Actief sinds {uptime}",
+      "uptimeDays": "{days} d {hours} u",
+      "uptimeHours": "{hours} u {minutes} min",
+      "uptimeMinutes": "{minutes} min",
+      "dataVersion": "gegevensversie {version}",
+      "atlasTitle": "De atlas in cijfers",
+      "counts": {
+        "publishedSites": "Gepubliceerde plaatsen",
+        "publishedTracings": "Gepubliceerde tracés",
+        "accounts": "Accounts",
+        "accountsLastDay": "Nieuw in 24 uur",
+        "unverifiedAccounts": "Nooit bevestigd",
+        "blockedAccounts": "Geblokkeerd",
+        "revokedTrust": "Publicatie opgeschort",
+        "pendingRevisions": "Wacht op beoordeling"
+      },
+      "signalsNote": "Een golf nieuwe accounts die nooit een adres bevestigen heeft de vorm van een geautomatiseerde aanmeldreeks. Geen van deze cijfers bewijst op zichzelf iets.",
+      "counters": {
+        "mail_deliveries_total": "Afgeleverde e-mail",
+        "auth_events_total": "Aanmelduitkomsten",
+        "rate_limit_decisions_total": "Limietbeslissingen",
+        "moderation_actions_total": "Moderatiehandelingen"
+      },
+      "noSeries": "Nog niets geteld.",
+      "countersNote": "Dit zijn totalen sinds het proces voor het laatst startte, geen frequenties — een laag getal na een uitrol is een herstart, geen goed nieuws."
     }
   }
 }

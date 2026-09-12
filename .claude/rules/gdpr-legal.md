@@ -49,7 +49,28 @@ under "Governance model."
 **Right to access/portability** (`server/api/auth/export.get.ts`) returns the
 caller's own account fields plus every site, tracing, image and revision they
 authored, as JSON. Scoped entirely by the caller's own session id — there is
-no admin variant of this endpoint.
+no admin variant of this endpoint. `/admin`'s dossier
+(`server/api/admin/accounts/[id].get.ts`) is **not** that variant and should not
+become one: it returns contributions, which are public work, and deliberately
+never the password hash, the encrypted TOTP secret, the private visit log, or
+the bookmarks.
+
+**The admin panel reads email addresses, and records that it did.**
+`server/api/admin/accounts.get.ts` returns the address and matches search
+against it — a widening of what `moderation/users.get.ts` deliberately withheld,
+decided on the grounds that an administrator has to act on an abuse report that
+names an address or tie a run of signups to one disposable domain, which a
+moderator judging contributions does not. Every request writes an
+`accounts.viewed` row and every dossier an `account.inspected` row to
+`admin_audit_log`, which is what makes the wider disclosure accountable rather
+than merely convenient; the rows record _that_ the roll was read and how it was
+narrowed, never the addresses returned, since a second copy of them buys nothing.
+
+**`admin_audit_log` holds no IP addresses and no credentials**, by design. The
+request log already retains addresses for 30 days on a documented
+legitimate-interest basis; a second, unbounded store of them inside an
+append-only table nothing prunes would be a new liability rather than a new
+capability. The panel is not a log viewer — that is Loki's job.
 
 **IP addresses are logged and retained 30 days** (Loki, per
 `docker/observability/loki.yml`'s `retention_period`), on the

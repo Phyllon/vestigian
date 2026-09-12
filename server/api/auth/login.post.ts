@@ -120,6 +120,8 @@ export default defineEventHandler(async (event) => {
       trustRevoked: users.trustRevoked,
       emailVerifiedAt: users.emailVerifiedAt,
       totpEnabledAt: users.totpEnabledAt,
+      bannedAt: users.bannedAt,
+      banReason: users.banReason,
     })
     .from(users)
     .where(eq(sql`lower(${users.email})`, credentials.email.toLowerCase()))
@@ -140,6 +142,36 @@ export default defineEventHandler(async (event) => {
     authEventsTotal().inc({ event: 'login', outcome: 'rejected' })
     event.context.log.warn({ audit: 'auth.login' }, 'login rejected')
     throw createError({ statusCode: 401, message: 'That email and password do not match.' })
+  }
+
+  /**
+   * A blocked account is refused here, and **below the credential check** on
+   * purpose — the same placement, and the same reasoning, as the unverified
+   * branch beneath it. Above it, this would answer differently for a blocked
+   * address than for an unknown one before any password had been proved,
+   * turning the login form into a way to ask which addresses are blocked.
+   * Below it there is nothing left to enumerate: the caller has already
+   * demonstrated they hold the password for that account.
+   *
+   * The reason is named rather than withheld. Someone whose correct password
+   * is refused with no explanation reads the site as broken, and a sanction
+   * nobody can identify is a sanction nobody can appeal — the same argument
+   * the trust-suspension mail makes. `readCurrentIdentity` refuses every other
+   * route for the same account, so this is not the only place the block bites,
+   * just the first one the person meets.
+   */
+  if (account.bannedAt) {
+    authEventsTotal().inc({ event: 'login', outcome: 'blocked' })
+    event.context.log.warn(
+      { audit: 'auth.login', userId: account.id },
+      'login refused: account blocked',
+    )
+    throw createError({
+      statusCode: 403,
+      message: account.banReason
+        ? `This account is blocked: ${account.banReason}`
+        : 'This account is blocked. Contact the operators if you believe that is a mistake.',
+    })
   }
 
   if (!account.emailVerifiedAt && !import.meta.dev) {

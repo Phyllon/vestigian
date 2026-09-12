@@ -9,14 +9,17 @@ import {
   tracings,
   users,
 } from '~~/server/database/schema'
-import type { SessionUser } from '#shared/types'
 
 /**
  * GDPR Art. 15/20 — everything this account's row and its own contributions
  * hold, as one JSON document. Read-only, and deliberately scoped to what the
  * requester themselves wrote: this is a self-service export, not an admin
- * tool, and `requireUserSession` is the only authorization it needs because
- * every query below is already filtered to the caller's own id.
+ * tool, and `requireActiveUser` is the only authorization it needs because
+ * every query below is already filtered to the caller's own id. **There is no
+ * admin variant of this endpoint and there should not be** — `/admin`'s
+ * dossier shows an account's contributions, which are public work, and stops
+ * short of handing an administrator the same personal-data dump its owner
+ * gets for their own use.
  */
 defineRouteMeta({
   openAPI: {
@@ -28,8 +31,7 @@ defineRouteMeta({
 })
 
 export default defineEventHandler(async (event) => {
-  const session = await requireUserSession(event)
-  const sessionUser = session.user as SessionUser
+  const sessionUser = await requireActiveUser(event)
   await enforceRateLimit(event, 'record')
 
   const database = useDatabase()

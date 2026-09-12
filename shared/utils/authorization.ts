@@ -161,3 +161,107 @@ export const describeRoleChangeRejection = (reason: RoleChangeRejection): string
   }
   return messages[reason]
 }
+
+export type BanRejection = 'not-admin' | 'self' | 'admin-protected'
+
+export interface BanCheck {
+  allowed: boolean
+  reason: BanRejection | null
+}
+
+export interface BanRequest {
+  actor: SessionUser
+  targetUserId: number
+  targetCurrentRole: UserRole
+}
+
+/**
+ * Who may ban whom.
+ *
+ * Three rules, and the third is the one that matters. Admin only, because a
+ * block on a person is governance rather than the routine housekeeping trust
+ * revocation is. Never yourself, so nobody locks themselves out of the one
+ * account that can undo it. And **never an administrator, unconditionally** —
+ * `checkRoleChange` already refuses to let one admin demote another no matter
+ * how many exist, and leaving ban open against an admin would make it the
+ * exact back door that rule was made unconditional to close: an account that
+ * cannot sign in, cannot write and has every session killed is neutralised as
+ * completely as one whose role was stripped, so allowing the second while
+ * refusing the first would be a distinction without a difference.
+ *
+ * Removing a rogue or compromised co-admin therefore stays the same database
+ * surgery that creates the first one — slower on purpose, and for the same
+ * reason: not a button any admin can press against any other.
+ */
+export const checkBan = (request: BanRequest): BanCheck => {
+  const { actor, targetUserId, targetCurrentRole } = request
+
+  if (!hasAtLeastRole(actor.role, 'admin')) return { allowed: false, reason: 'not-admin' }
+  if (actor.id === targetUserId) return { allowed: false, reason: 'self' }
+  if (targetCurrentRole === 'admin') return { allowed: false, reason: 'admin-protected' }
+
+  return { allowed: true, reason: null }
+}
+
+export const describeBanRejection = (reason: BanRejection): string => {
+  const messages: Record<BanRejection, string> = {
+    'not-admin': 'Only an administrator can block an account.',
+    self: 'You cannot block your own account.',
+    'admin-protected':
+      'An administrator cannot be blocked here — this requires database access, the same as removing the role.',
+  }
+  return messages[reason]
+}
+
+/** Null `bannedAt` means the account is in good standing. */
+export const isAccountActive = (account: { bannedAt: Date | null }): boolean =>
+  account.bannedAt === null
+
+/**
+ * Whether a sealed session cookie is still the account's to use.
+ *
+ * The session is stateless — there is no server-side store to delete from —
+ * so revocation is a comparison rather than a deletion: anything sealed
+ * before `users.sessions_valid_from` is spent. `>=` and not `>`, because the
+ * epoch is bumped by the same clock that stamps `loggedInAt`, and a session
+ * created in the same millisecond as its own epoch is the *new* one, not an
+ * old one to invalidate.
+ */
+export const isSessionCurrent = (input: { loggedInAt: number; sessionsValidFrom: Date }): boolean =>
+  input.loggedInAt >= input.sessionsValidFrom.getTime()
+
+/**
+ * Everything `/admin` writes to `admin_audit_log`, stated once.
+ *
+ * A union rather than free text so the log's vocabulary is closed: a filter
+ * in the panel and the endpoint that writes a row cannot drift into
+ * disagreeing about what an action is called.
+ */
+export const ADMIN_ACTIONS = [
+  'account.banned',
+  'account.unbanned',
+  'account.role-changed',
+  'account.trust-changed',
+  'account.sessions-revoked',
+  'account.work-retracted',
+  'accounts.viewed',
+  'account.inspected',
+  'step-up.granted',
+] as const
+
+export type AdminAction = (typeof ADMIN_ACTIONS)[number]
+
+/**
+ * The i18n message key for one action, in `admin.audit.actions`.
+ *
+ * Not just `` `admin.audit.actions.${action}` `` — vue-i18n splits a message
+ * key on every `.` to walk nested message objects, so `'account.banned'`
+ * would be read as the path `admin → audit → actions → account → banned`
+ * rather than the single flat key the locale files actually define, and
+ * resolve to nothing. Hyphens are not path separators, so
+ * `'account.role-changed'` only needs its one dot replaced.
+ */
+export const adminActionMessageKey = (action: AdminAction): string =>
+  `admin.audit.actions.${action.replaceAll('.', '_')}`
+
+export type AdminSubjectType = 'account' | 'revision' | 'image' | 'system'

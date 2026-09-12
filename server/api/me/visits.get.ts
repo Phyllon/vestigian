@@ -1,6 +1,5 @@
 import { desc, eq, sql } from 'drizzle-orm'
 import { siteVisits, sites } from '~~/server/database/schema'
-import type { SessionUser } from '#shared/types'
 
 /**
  * The visit log, newest first.
@@ -19,8 +18,7 @@ defineRouteMeta({
 })
 
 export default defineEventHandler(async (event) => {
-  const session = await requireUserSession(event)
-  const userId = (session.user as SessionUser).id
+  const userId = (await requireActiveUser(event)).id
   await enforceRateLimit(event, 'record')
 
   // Personal data, and specific to one session's account: a shared cache would

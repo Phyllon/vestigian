@@ -1,7 +1,6 @@
 import { z } from 'zod'
 import { and, eq } from 'drizzle-orm'
 import { siteVisits } from '~~/server/database/schema'
-import type { SessionUser } from '#shared/types'
 
 export const paramsSchema = z.object({ siteId: routeIdentifier })
 
@@ -25,8 +24,7 @@ defineRouteMeta({
 })
 
 export default defineEventHandler(async (event) => {
-  const session = await requireUserSession(event)
-  const userId = (session.user as SessionUser).id
+  const userId = (await requireActiveUser(event)).id
   await enforceRateLimit(event, 'contribute')
 
   const { siteId } = await getValidatedRouterParams(event, paramsSchema.parse)

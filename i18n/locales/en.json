@@ -22,8 +22,8 @@
     "notebook": "My notebook",
     "visits": "Places I have been",
     "contributions": "My contributions",
-    "contributors": "Contributors",
-    "settings": "Settings"
+    "settings": "Settings",
+    "adminPanel": "Command station"
   },
   "themeToggle": {
     "switchToDay": "Switch to day",
@@ -384,40 +384,6 @@
       "batchResultTitle": "{count} {decision}.",
       "batchResultSkipped": "{count} skipped."
     },
-    "contributorTable": {
-      "findPlaceholder": "Find a contributor",
-      "accepted": "{count} accepted",
-      "waiting": "{count} waiting",
-      "restoreTrust": "Restore trust",
-      "restoreTrustAria": "Restore trust for {name}",
-      "suspendPublishing": "Suspend publishing",
-      "suspendPublishingAria": "Suspend publishing for {name}",
-      "roleAria": "Role for {name}",
-      "suspendPrompt": "Why is {name} being suspended?",
-      "suspendHint": "Emailed to them, verbatim",
-      "suspendReasonPlaceholder": "Three edits removed sourced text without saying why.",
-      "cancel": "Cancel",
-      "untouchedNote": "Their accepted contributions are untouched.",
-      "noMatches": "No contributors match that.",
-      "standing": {
-        "moderator": "Publishes by role",
-        "revoked": "Suspended — every edit queued",
-        "earned": "Publishes immediately",
-        "probation": "Queued — {remaining} to go"
-      },
-      "trustSuspended": "Automatic publishing suspended.",
-      "trustRestored": "Trust restored.",
-      "toldByEmail": "{name} has been told by email.",
-      "trustFailedTitle": "Could not change trust",
-      "tryAgain": "Try again.",
-      "nowRole": "{name} is now a {role}.",
-      "roleFailedTitle": "Could not change role",
-      "roles": {
-        "contributor": "Contributor",
-        "moderator": "Moderator",
-        "admin": "Administrator"
-      }
-    },
     "revisionDiff": {
       "fields": {
         "title": "Name",
@@ -439,13 +405,7 @@
     },
     "queuePage": {
       "title": "Review queue",
-      "intro": "Contributions from accounts that have not yet earned automatic publishing.",
-      "contributorsLink": "Contributors"
-    },
-    "contributorsPage": {
-      "title": "Contributors",
-      "backToQueue": "Review queue",
-      "intro": "Suspending publishing keeps a contributor's record intact — restoring it returns them to exactly where they were."
+      "intro": "Contributions from accounts that have not yet earned automatic publishing."
     }
   },
   "licence": {
@@ -1144,5 +1104,271 @@
     "withBasemap": "with background map",
     "remove": "Remove {name}",
     "removeFailed": "Could not remove that area. Try again in a moment."
+  },
+  "admin": {
+    "eyebrow": "Administration",
+    "title": "Command station",
+    "intro": "Every change to the atlas as it happens, whoever made it — including the edits that published without review. Accounts, standing and sanctions are here too.",
+    "loading": "Loading the station…",
+    "sections": {
+      "activity": "Activity",
+      "accounts": "Accounts",
+      "images": "Photographs",
+      "audit": "Audit trail",
+      "system": "System"
+    },
+    "attention": {
+      "unresolvedLicences": "{count} unpublishable licence",
+      "pendingRevisions": "{count} waiting for review",
+      "pendingImages": "{count} photograph waiting",
+      "blockedAccounts": "{count} blocked",
+      "revokedTrust": "{count} with publishing suspended",
+      "unverifiedAccounts": "{count} never confirmed"
+    },
+    "commandBar": {
+      "placeholder": "A name, an address, or #412",
+      "searchLabel": "Search accounts and revisions",
+      "sectionLabel": "Section",
+      "jumpTo": "Jump to",
+      "revision": "Revision {id}",
+      "openAccountAria": "Open the dossier for {name}",
+      "attentionLabel": "Waiting for attention",
+      "status": {
+        "ready": "All services up",
+        "degraded": "A service is down"
+      }
+    },
+    "activity": {
+      "loading": "Reading the record…",
+      "empty": "Nothing matches.",
+      "loadMore": "Older",
+      "untitled": "Untitled",
+      "deletedAccount": "Deleted account",
+      "changeCount": "{count} changed fields",
+      "reviewNote": "Note: {note}",
+      "blankingWarning": "This edit removes more than it adds.",
+      "substantialNote": "A substantial rewrite.",
+      "toggleDiffAria": "Show what changed in revision {id}",
+      "openAuthorAria": "Open the dossier for {name}",
+      "kinds": {
+        "autoPublished": "published unreviewed",
+        "reviewed": "published after review",
+        "queued": "waiting for review",
+        "rejected": "rejected",
+        "revert": "reverted",
+        "retraction": "taken offline"
+      },
+      "status": {
+        "pending": "Waiting",
+        "approved": "Published",
+        "rejected": "Rejected"
+      },
+      "filters": {
+        "search": "Find",
+        "searchPlaceholder": "A record title or an edit summary",
+        "status": "Status",
+        "anyStatus": "Any status",
+        "kind": "Kind",
+        "anyKind": "Sites and tracings",
+        "sites": "Sites",
+        "tracings": "Tracings",
+        "autoApprovedOnly": "Only edits nobody reviewed",
+        "blankingOnly": "Only edits that remove more than they add",
+        "clearAuthor": "All authors"
+      }
+    },
+    "accounts": {
+      "loading": "Reading the roll…",
+      "noMatches": "No account matches.",
+      "tryAgain": "Try again.",
+      "cancel": "Cancel",
+      "blocked": "Blocked",
+      "unverified": "address never confirmed",
+      "twoFactor": "two-factor on",
+      "accepted": "{count} accepted",
+      "waiting": "{count} waiting",
+      "openDossierAria": "Open the dossier for {name}",
+      "roles": {
+        "contributor": "Contributor",
+        "moderator": "Moderator",
+        "admin": "Administrator"
+      },
+      "standing": {
+        "moderator": "Edits publish immediately, by role.",
+        "revoked": "Publishing suspended — every edit waits for review.",
+        "earned": "Edits publish immediately.",
+        "probation": "{remaining} more accepted contributions before edits publish immediately.",
+        "blocked": "Blocked: cannot sign in, cannot contribute. Published work is untouched."
+      },
+      "revokeTrust": "Suspend publishing",
+      "revokeTrustAria": "Suspend automatic publishing for {name}",
+      "restoreTrust": "Restore publishing",
+      "restoreTrustAria": "Restore automatic publishing for {name}",
+      "trustFailedTitle": "Could not change publishing",
+      "roleAria": "Role for {name}",
+      "roleFailedTitle": "Could not change the role",
+      "nowRole": "{name} is now {role}.",
+      "revokeSessions": "Sign out everywhere",
+      "revokeSessionsAria": "End every session {name} has open",
+      "sessionsRevokedToast": "Every session {name} had open has ended.",
+      "sessionsFailedTitle": "Could not end those sessions",
+      "block": "Block account",
+      "blockAria": "Block the account of {name}",
+      "unblock": "Lift the block",
+      "unblockAria": "Lift the block on {name}",
+      "blockPrompt": "Why is {name} being blocked?",
+      "blockHint": "Sent to them, and the only part of a block they can act on",
+      "blockReasonPlaceholder": "Repeated fabricated records, after two warnings",
+      "blockReasonShown": "Blocked: {reason}",
+      "blockedToast": "{name} is blocked.",
+      "unblockedToast": "The block on {name} is lifted.",
+      "toldByEmail": "{name} has been told by email.",
+      "blockFailedTitle": "Could not change that block",
+      "workUntouchedNote": "Their published work stays on the atlas. Taking it offline is a separate step, in their dossier.",
+      "filters": {
+        "search": "Find",
+        "searchPlaceholder": "A display name or an email address",
+        "role": "Role",
+        "anyRole": "Any role",
+        "standing": "Standing",
+        "anyStanding": "Any standing",
+        "trusted": "Publishing allowed",
+        "revoked": "Publishing suspended",
+        "banned": "Blocked",
+        "unverified": "Address never confirmed",
+        "sort": "Order",
+        "sortAccepted": "Most accepted",
+        "sortNewest": "Newest",
+        "sortLastSeen": "Seen most recently",
+        "sortPending": "Most waiting"
+      }
+    },
+    "dossier": {
+      "loading": "Gathering everything they did…",
+      "backToRoll": "Back to the roll",
+      "tryAgain": "Try again.",
+      "never": "never",
+      "joined": "Joined {joined}, last seen {seen}.",
+      "seeEverythingChanged": "See every change they made",
+      "recordsCreated": "Records they created",
+      "truncated": "Showing the first 200. The counts above are complete.",
+      "decisionsTaken": "Decisions taken about this account",
+      "counts": {
+        "sitesCreated": "Sites created",
+        "tracingsCreated": "Tracings created",
+        "imagesUploaded": "Photographs",
+        "approved": "Published edits",
+        "pending": "Waiting",
+        "rejected": "Rejected",
+        "endorsements": "Endorsements given",
+        "visits": "Places visited"
+      },
+      "recordStatus": {
+        "approved": "on the atlas",
+        "pending": "waiting",
+        "rejected": "offline"
+      },
+      "retractTitle": "Take their work offline",
+      "retractExplanation": "Retracts every record they created, rolls back their edits to other people's records, and withdraws their photographs. Nothing is deleted: each retraction is an ordinary revision a moderator can revert, and no image bytes are removed. Work still waiting for review is left in the queue to be judged on merit.",
+      "retractReasonLabel": "Why",
+      "retractReasonHint": "Recorded on every revision this writes",
+      "retractReasonPlaceholder": "Fabricated records, blocked after review",
+      "retractPreview": "Count what this would do",
+      "retractPlan": "{records} records would go offline, {edits} edits would be rolled back, and {photographs} photographs would be withdrawn.",
+      "retractUntouched": "{count} contributions are deliberately left alone.",
+      "retractApply": "Take it all offline",
+      "retractNothingToDo": "There is nothing published to take offline.",
+      "retractReasonRequired": "Give a reason first.",
+      "retractedToast": "{records} records and {photographs} photographs taken offline.",
+      "retractedReversible": "Every one of these can be reverted from the record's own history.",
+      "retractedPartly": "{count} could not be applied — see the log.",
+      "retractFailedTitle": "Could not take that work offline"
+    },
+    "images": {
+      "loading": "Reading the galleries…",
+      "empty": "Nothing waiting, and no unresolved licence.",
+      "filterLabel": "Show",
+      "cannotPublish": "Cannot be published",
+      "deletedAccount": "Deleted account",
+      "openSource": "Open the source page",
+      "manageOnSite": "Manage it on the site page",
+      "openUploaderAria": "Open the dossier for {name}",
+      "filters": {
+        "pending": "Waiting for review",
+        "unlicensed": "Unresolved licence",
+        "all": "Both"
+      },
+      "status": {
+        "pending": "Waiting for review",
+        "approved": "In the gallery",
+        "rejected": "Withdrawn"
+      }
+    },
+    "audit": {
+      "loading": "Reading the trail…",
+      "empty": "Nothing recorded yet.",
+      "loadMore": "Older",
+      "filterLabel": "Action",
+      "anyAction": "Every action",
+      "deletedActor": "Deleted account",
+      "account": "account #{id}",
+      "note": "Append-only: nothing in this application edits or removes an entry. It holds no addresses of origin and no credentials — request-level detail lives in the request log.",
+      "actions": {
+        "account_banned": "Account blocked",
+        "account_unbanned": "Block lifted",
+        "account_role-changed": "Role changed",
+        "account_trust-changed": "Publishing changed",
+        "account_sessions-revoked": "Sessions ended",
+        "account_work-retracted": "Work taken offline",
+        "accounts_viewed": "Account roll read",
+        "account_inspected": "Dossier opened",
+        "step-up_granted": "Identity confirmed"
+      }
+    },
+    "stepUp": {
+      "title": "Confirm it is you",
+      "description": "This change needs your password again.",
+      "explanation": "Blocking an account and changing a role cannot be undone from inside the atlas, so they ask for your password even though you are already signed in.",
+      "passwordLabel": "Your password",
+      "passwordAria": "Password for {name}",
+      "codeLabel": "Authenticator code",
+      "codeHint": "Only if your account has two-factor sign-in",
+      "codePlaceholder": "123456",
+      "confirm": "Confirm",
+      "cancel": "Cancel"
+    },
+    "system": {
+      "loading": "Asking the services…",
+      "servicesTitle": "Backing services",
+      "services": {
+        "database": "Database",
+        "cache": "Cache"
+      },
+      "uptime": "Running for {uptime}",
+      "uptimeDays": "{days}d {hours}h",
+      "uptimeHours": "{hours}h {minutes}m",
+      "uptimeMinutes": "{minutes}m",
+      "dataVersion": "data version {version}",
+      "atlasTitle": "The atlas, counted",
+      "counts": {
+        "publishedSites": "Published sites",
+        "publishedTracings": "Published tracings",
+        "accounts": "Accounts",
+        "accountsLastDay": "New in 24 hours",
+        "unverifiedAccounts": "Never confirmed",
+        "blockedAccounts": "Blocked",
+        "revokedTrust": "Publishing suspended",
+        "pendingRevisions": "Waiting for review"
+      },
+      "signalsNote": "A burst of new accounts that never confirm an address is the shape of an automated signup run. Neither number proves anything on its own.",
+      "counters": {
+        "mail_deliveries_total": "Mail delivered",
+        "auth_events_total": "Sign-in outcomes",
+        "rate_limit_decisions_total": "Rate-limit decisions",
+        "moderation_actions_total": "Moderation actions"
+      },
+      "noSeries": "Nothing counted yet.",
+      "countersNote": "These are totals since the process last started, not rates — a low number after a deploy is a restart, not good news."
+    }
   }
 }

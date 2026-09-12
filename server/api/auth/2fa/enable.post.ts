@@ -1,7 +1,6 @@
 import { z } from 'zod'
 import { eq } from 'drizzle-orm'
 import { twoFactorBackupCodes, users } from '~~/server/database/schema'
-import type { SessionUser } from '#shared/types'
 
 export const enableTwoFactorSchema = z.object({
   code: z.string().min(6).max(6),
@@ -28,8 +27,7 @@ defineRouteMeta({
 })
 
 export default defineEventHandler(async (event) => {
-  const session = await requireUserSession(event)
-  const sessionUser = session.user as SessionUser
+  const sessionUser = await requireActiveUser(event)
   await enforceRateLimit(event, 'twoFactorVerify')
 
   const { code } = await readValidatedBody(event, enableTwoFactorSchema.parse)

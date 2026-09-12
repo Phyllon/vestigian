@@ -1,6 +1,5 @@
 import { desc, eq, sql } from 'drizzle-orm'
 import { siteBookmarks, sites } from '~~/server/database/schema'
-import type { SessionUser } from '#shared/types'
 
 /** The to-visit list, newest first. Feeds the GPX field kit. */
 defineRouteMeta({
@@ -13,8 +12,7 @@ defineRouteMeta({
 })
 
 export default defineEventHandler(async (event) => {
-  const session = await requireUserSession(event)
-  const userId = (session.user as SessionUser).id
+  const userId = (await requireActiveUser(event)).id
   await enforceRateLimit(event, 'record')
 
   setResponseHeader(event, 'cache-control', 'private, no-store')

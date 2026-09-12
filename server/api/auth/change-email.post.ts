@@ -1,7 +1,6 @@
 import { z } from 'zod'
 import { and, eq, isNull, ne } from 'drizzle-orm'
 import { emailTokens, users } from '~~/server/database/schema'
-import type { SessionUser } from '#shared/types'
 
 export const changeEmailSchema = z.object({
   currentPassword: z.string().min(1).max(200),
@@ -43,8 +42,7 @@ defineRouteMeta({
 })
 
 export default defineEventHandler(async (event) => {
-  const session = await requireUserSession(event)
-  const sessionUser = session.user as SessionUser
+  const sessionUser = await requireActiveUser(event)
   await enforceRateLimit(event, 'passwordReset')
 
   const { currentPassword, email } = await readValidatedBody(event, changeEmailSchema.parse)

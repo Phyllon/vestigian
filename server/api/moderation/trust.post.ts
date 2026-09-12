@@ -64,6 +64,23 @@ export default defineEventHandler(async (event) => {
     moderatorName: moderator.displayName,
   })
 
+  /**
+   * Audited even though this is a moderator power rather than an admin one:
+   * the trail in `/admin` is a record of what was done to an account, not of
+   * who was senior enough to do it, and a standing that changed with no
+   * durable record of why is the gap the trail exists to close. No step-up
+   * here — revocation is reversible and restores someone to exactly the
+   * standing they had, which is not the irreversible category role changes
+   * and blocks fall into.
+   */
+  await recordAdminAction({
+    actorId: moderator.id,
+    action: 'account.trust-changed',
+    subjectType: 'account',
+    subjectId: userId,
+    detail: { revoked, reason: reason ?? null },
+  })
+
   moderationActionsTotal().inc({ action: 'trust' })
   event.context.log.info(
     { audit: 'moderation.trust', targetUserId: userId, revoked, moderatorId: moderator.id },

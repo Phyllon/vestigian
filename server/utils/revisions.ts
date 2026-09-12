@@ -1,3 +1,5 @@
+import { and, desc, eq } from 'drizzle-orm'
+import { revisions } from '~~/server/database/schema'
 import { countsTowardsTrust } from '#shared/utils/authorization'
 import type postgres from 'postgres'
 import type { ContributionKind } from '#shared/types'
@@ -12,6 +14,7 @@ interface SitePayload {
   position: { lon: number; lat: number }
   periodFrom: number | null
   periodTo: number | null
+  retracted?: boolean
 }
 
 interface TracingPayload {
@@ -21,6 +24,7 @@ interface TracingPayload {
   category: string
   description?: string
   geometry: { type: string; coordinates: unknown }
+  retracted?: boolean
 }
 
 type RevisionPayload = SitePayload | TracingPayload
@@ -56,6 +60,46 @@ export const applyRevision = async (revisionId: number): Promise<void> => {
   let finalSiteId: number | null = payload.kind === 'site' ? targetId : null
 
   await sql.begin(async (tx) => {
+    /**
+     * A retraction takes a published record off the atlas without editing it.
+     *
+     * This branch exists so that withdrawing a record stays inside the one
+     * function allowed to write a live row. There was no withdrawal path for
+     * a site or tracing at all before `/admin`'s bulk retraction needed one,
+     * and the obvious implementation — an `UPDATE sites SET status` in the
+     * endpoint — would have been the second write path this whole design
+     * exists to prevent.
+     *
+     * `'rejected'` rather than a new status value because it is already what
+     * every tile query excludes (`mvt.ts`), so the record leaves the map, the
+     * sitemap and the GeoJSON feed with nothing else to change. The fields are
+     * left exactly as they are: a retraction is not an edit, and the record
+     * has to come back unchanged when the retraction is reverted — which needs
+     * no new code, because the retraction is itself an ordinary revision and
+     * `moderation/revert.post.ts` restores `previousPayload` like any other.
+     */
+    if (payload.retracted === true && targetId) {
+      // Two statements rather than one with an interpolated table name: the
+      // identifier is not a parameter, and spelling it out is clearer than
+      // composing a fragment to save a line.
+      if (payload.kind === 'site') {
+        await tx`UPDATE sites SET status = 'rejected' WHERE id = ${targetId}`
+      } else {
+        await tx`UPDATE tracings SET status = 'rejected' WHERE id = ${targetId}`
+      }
+
+      useLogger().info(
+        {
+          audit: 'revision.retracted',
+          revisionId,
+          entityType: revision.entity_type,
+          entityId: targetId,
+        },
+        'record retracted',
+      )
+      return
+    }
+
     if (payload.kind === 'site') {
       if (targetId) {
         await updateSite(tx, targetId, payload)
@@ -113,6 +157,169 @@ export const applyRevision = async (revisionId: number): Promise<void> => {
     },
     'revision applied',
   )
+}
+
+export interface RevertRequest {
+  revisionId: number
+  moderatorId: number
+  reason?: string
+}
+
+export interface RevertResult {
+  revisionId: number
+  revertedRevisionId: number
+}
+
+/**
+ * Restores the state a record had before a given revision.
+ *
+ * Lives here rather than in `moderation/revert.post.ts` because it now has two
+ * callers — that endpoint and the bulk retraction sweep — and a revert that
+ * two places implement is a revert two places can get wrong. The endpoint
+ * keeps the HTTP concerns (validation, the 404, the metric, the audit line);
+ * everything that decides *what a revert is* is here.
+ *
+ * A revert is written as a new revision rather than by deleting the offending
+ * one. History stays append-only, so the record of what was reverted and by
+ * whom survives — which is the whole point of keeping revisions at all.
+ *
+ * Throws rather than returning a failure: both callers need to distinguish
+ * "there is nothing to restore" from "this worked", and the sweep catches it
+ * per item so one unrevertable revision cannot abandon the rest.
+ */
+export const revertRevision = async (request: RevertRequest): Promise<RevertResult> => {
+  const { revisionId, moderatorId, reason } = request
+  const database = useDatabase()
+
+  const [target] = await database
+    .select({
+      id: revisions.id,
+      entityType: revisions.entityType,
+      entityId: revisions.entityId,
+      payload: revisions.payload,
+      previousPayload: revisions.previousPayload,
+    })
+    .from(revisions)
+    .where(and(eq(revisions.id, revisionId), eq(revisions.status, 'approved')))
+    .limit(1)
+
+  if (!target) {
+    throw createError({ statusCode: 404, message: 'No published revision with that id.' })
+  }
+
+  if (!target.previousPayload || !target.entityId) {
+    throw createError({
+      statusCode: 400,
+      message: 'That revision created the record, so there is no earlier state to restore.',
+    })
+  }
+
+  const restored = {
+    ...(target.previousPayload as Record<string, unknown>),
+    kind: target.entityType,
+    entityId: target.entityId,
+  }
+
+  /**
+   * `previousPayload` is what this revert replaces — the state the offending
+   * revision put there — so it is that revision's `payload`. It was read above
+   * rather than re-selected in a subquery, which is what the raw version did.
+   */
+  const [revision] = await database
+    .insert(revisions)
+    .values({
+      entityType: target.entityType,
+      entityId: target.entityId,
+      payload: restored,
+      previousPayload: target.payload,
+      editSummary: reason ?? `Reverted revision ${revisionId}`,
+      status: 'approved',
+      authorId: moderatorId,
+      reviewerId: moderatorId,
+      autoApproved: 0,
+      revertsRevisionId: revisionId,
+      reviewedAt: new Date(),
+    })
+    .returning({ id: revisions.id })
+
+  await applyRevision(revision!.id)
+
+  return { revisionId: revision!.id, revertedRevisionId: revisionId }
+}
+
+export interface RetractRequest {
+  entityType: ContributionKind
+  entityId: number
+  moderatorId: number
+  reason: string
+}
+
+/**
+ * Takes one published record off the atlas, as a revision.
+ *
+ * The counterpart to `revertRevision` for a record the person *created* rather
+ * than edited: there is no earlier state to restore, so reverting is
+ * meaningless and what is wanted is for the record to stop being published.
+ *
+ * It writes an ordinary approved revision whose payload is the record's
+ * current state plus `retracted: true`, and lets `applyRevision`'s retraction
+ * branch do the write. Three things fall out of that shape for free: the
+ * retraction appears in the record's own history where a reader expects it,
+ * `revert.post.ts` un-retracts it with no new code, and no second path to a
+ * live row is created.
+ */
+export const retractRecord = async (request: RetractRequest): Promise<{ revisionId: number }> => {
+  const { entityType, entityId, moderatorId, reason } = request
+  const database = useDatabase()
+
+  /**
+   * The record's latest approved payload is the state a revert of this
+   * retraction has to restore, so it is what `previousPayload` must hold.
+   * Read from `revisions` rather than reassembled from the live row: the
+   * live row has no geometry this code can serialise without PostGIS, and the
+   * last approved revision is by definition what produced it.
+   */
+  const [latest] = await database
+    .select({ payload: revisions.payload })
+    .from(revisions)
+    .where(
+      and(
+        eq(revisions.entityType, entityType),
+        eq(revisions.entityId, entityId),
+        eq(revisions.status, 'approved'),
+      ),
+    )
+    .orderBy(desc(revisions.id))
+    .limit(1)
+
+  if (!latest) {
+    throw createError({
+      statusCode: 409,
+      message: 'That record has no approved revision, so there is nothing to retract.',
+    })
+  }
+
+  const current = latest.payload as Record<string, unknown>
+
+  const [revision] = await database
+    .insert(revisions)
+    .values({
+      entityType,
+      entityId,
+      payload: { ...current, kind: entityType, entityId, retracted: true },
+      previousPayload: current,
+      editSummary: reason,
+      status: 'approved',
+      authorId: moderatorId,
+      reviewerId: moderatorId,
+      autoApproved: 0,
+      reviewedAt: new Date(),
+    })
+    .returning({ id: revisions.id })
+
+  await applyRevision(revision!.id)
+
+  return { revisionId: revision!.id }
 }
 
 /**

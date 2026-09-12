@@ -22,8 +22,8 @@
     "notebook": "Mein Notizbuch",
     "visits": "Orte, an denen ich war",
     "contributions": "Meine Beiträge",
-    "contributors": "Mitwirkende",
-    "settings": "Einstellungen"
+    "settings": "Einstellungen",
+    "adminPanel": "Leitstand"
   },
   "themeToggle": {
     "switchToDay": "Wechsel zum Tag",
@@ -254,40 +254,6 @@
       "batchResultTitle": "{count} {decision}.",
       "batchResultSkipped": "{count} übersprungen."
     },
-    "contributorTable": {
-      "findPlaceholder": "Mitwirkende suchen",
-      "accepted": "{count} akzeptiert",
-      "waiting": "{count} wartend",
-      "restoreTrust": "Vertrauen wiederherstellen",
-      "restoreTrustAria": "Vertrauen wiederherstellen für {name}",
-      "suspendPublishing": "Veröffentlichen unterbrechen",
-      "suspendPublishingAria": "Veröffentlichen für {name} unterbrechen",
-      "roleAria": "Rolle für {name}",
-      "suspendPrompt": "Warum wird {name} gesperrt?",
-      "suspendHint": "E-Mail an sie, wortwörtlich",
-      "suspendReasonPlaceholder": "Drei Bearbeitungen entfernten Text, ohne zu sagen, warum.",
-      "cancel": "Abbrechen",
-      "untouchedNote": "Ihre akzeptierten Beiträge bleiben unberührt.",
-      "noMatches": "Kein Mitwirkender passt dazu.",
-      "standing": {
-        "moderator": "Veröffentlicht nach Rolle",
-        "revoked": "Gesperrt — jede Änderung wird geprüft",
-        "earned": "Veröffentlicht sofort",
-        "probation": "In der Warteschlange — noch {remaining}"
-      },
-      "trustSuspended": "Automatisches Publizieren ausgesetzt.",
-      "trustRestored": "Vertrauen wiederhergestellt.",
-      "toldByEmail": "{name} wurde per E-Mail benachrichtigt.",
-      "trustFailedTitle": "Vertrauen konnte nicht geändert werden",
-      "tryAgain": "Versuchen Sie es noch einmal.",
-      "nowRole": "{name} ist jetzt {role}.",
-      "roleFailedTitle": "Kann die Rolle nicht ändern",
-      "roles": {
-        "contributor": "Beitragende",
-        "moderator": "Moderator",
-        "admin": "Administrator"
-      }
-    },
     "revisionDiff": {
       "fields": {
         "title": "Name",
@@ -309,13 +275,7 @@
     },
     "queuePage": {
       "title": "Überprüfungswarteschlange",
-      "intro": "Beiträge von Accounts, die noch keine automatische Veröffentlichung verdient haben.",
-      "contributorsLink": "Beitragende"
-    },
-    "contributorsPage": {
-      "title": "Beitragende",
-      "backToQueue": "Überprüfungswarteschlange",
-      "intro": "Das Aussetzen der Veröffentlichung hält die Aufzeichnungen eines Mitwirkenden intakt – die Wiederherstellung bringt sie genau dorthin zurück, wo sie waren."
+      "intro": "Beiträge von Accounts, die noch keine automatische Veröffentlichung verdient haben."
     }
   },
   "licence": {
@@ -1143,6 +1103,272 @@
       "title": "Attische Inschriften in der Nähe gefunden",
       "titleTracing": "Attische Inschriften entlang dieser Route",
       "distance": "{metres} m entfernt"
+    }
+  },
+  "admin": {
+    "eyebrow": "Verwaltung",
+    "title": "Leitstand",
+    "intro": "Jede Änderung am Atlas, sobald sie geschieht, und von wem — auch die Bearbeitungen, die ohne Prüfung veröffentlicht wurden. Konten, Status und Sanktionen finden sich ebenfalls hier.",
+    "loading": "Der Leitstand wird geladen …",
+    "sections": {
+      "activity": "Aktivität",
+      "accounts": "Konten",
+      "images": "Fotografien",
+      "audit": "Prüfspur",
+      "system": "System"
+    },
+    "attention": {
+      "unresolvedLicences": "{count} nicht veröffentlichbare Lizenz",
+      "pendingRevisions": "{count} warten auf Prüfung",
+      "pendingImages": "{count} Fotografie wartet",
+      "blockedAccounts": "{count} gesperrt",
+      "revokedTrust": "{count} mit ausgesetzter Veröffentlichung",
+      "unverifiedAccounts": "{count} nie bestätigt"
+    },
+    "commandBar": {
+      "placeholder": "Ein Name, eine Adresse oder #412",
+      "searchLabel": "Konten und Bearbeitungen durchsuchen",
+      "sectionLabel": "Bereich",
+      "jumpTo": "Springen zu",
+      "revision": "Bearbeitung {id}",
+      "openAccountAria": "Dossier von {name} öffnen",
+      "attentionLabel": "Wartet auf Aufmerksamkeit",
+      "status": {
+        "ready": "Alle Dienste laufen",
+        "degraded": "Ein Dienst ist ausgefallen"
+      }
+    },
+    "activity": {
+      "loading": "Verzeichnis wird gelesen …",
+      "empty": "Keine Treffer.",
+      "loadMore": "Älter",
+      "untitled": "Ohne Titel",
+      "deletedAccount": "Gelöschtes Konto",
+      "changeCount": "{count} geänderte Felder",
+      "reviewNote": "Anmerkung: {note}",
+      "blankingWarning": "Diese Bearbeitung entfernt mehr, als sie hinzufügt.",
+      "substantialNote": "Eine umfangreiche Neufassung.",
+      "toggleDiffAria": "Änderungen der Bearbeitung {id} anzeigen",
+      "openAuthorAria": "Dossier von {name} öffnen",
+      "kinds": {
+        "autoPublished": "ungeprüft veröffentlicht",
+        "reviewed": "nach Prüfung veröffentlicht",
+        "queued": "wartet auf Prüfung",
+        "rejected": "abgelehnt",
+        "revert": "zurückgenommen",
+        "retraction": "offline genommen"
+      },
+      "status": {
+        "pending": "Wartet",
+        "approved": "Veröffentlicht",
+        "rejected": "Abgelehnt"
+      },
+      "filters": {
+        "search": "Suchen",
+        "searchPlaceholder": "Titel eines Eintrags oder Zusammenfassung",
+        "status": "Status",
+        "anyStatus": "Jeder Status",
+        "kind": "Art",
+        "anyKind": "Orte und Verläufe",
+        "sites": "Orte",
+        "tracings": "Verläufe",
+        "autoApprovedOnly": "Nur ungeprüfte Bearbeitungen",
+        "blankingOnly": "Nur Bearbeitungen, die mehr entfernen als hinzufügen",
+        "clearAuthor": "Alle Verfassenden"
+      }
+    },
+    "accounts": {
+      "loading": "Konten werden gelesen …",
+      "noMatches": "Kein Konto passt.",
+      "tryAgain": "Bitte erneut versuchen.",
+      "cancel": "Abbrechen",
+      "blocked": "Gesperrt",
+      "unverified": "Adresse nie bestätigt",
+      "twoFactor": "Zwei-Faktor aktiv",
+      "accepted": "{count} angenommen",
+      "waiting": "{count} wartend",
+      "openDossierAria": "Dossier von {name} öffnen",
+      "roles": {
+        "contributor": "Beitragende",
+        "moderator": "Moderation",
+        "admin": "Administration"
+      },
+      "standing": {
+        "moderator": "Bearbeitungen erscheinen sofort, aufgrund der Rolle.",
+        "revoked": "Veröffentlichung ausgesetzt — jede Bearbeitung wartet auf Prüfung.",
+        "earned": "Bearbeitungen erscheinen sofort.",
+        "probation": "Noch {remaining} angenommene Beiträge, bis Bearbeitungen sofort erscheinen.",
+        "blocked": "Gesperrt: keine Anmeldung, keine Beiträge. Veröffentlichtes bleibt unberührt."
+      },
+      "revokeTrust": "Veröffentlichung aussetzen",
+      "revokeTrustAria": "Automatische Veröffentlichung für {name} aussetzen",
+      "restoreTrust": "Veröffentlichung wiederherstellen",
+      "restoreTrustAria": "Automatische Veröffentlichung für {name} wiederherstellen",
+      "trustFailedTitle": "Veröffentlichung konnte nicht geändert werden",
+      "roleAria": "Rolle von {name}",
+      "roleFailedTitle": "Rolle konnte nicht geändert werden",
+      "nowRole": "{name} ist jetzt {role}.",
+      "revokeSessions": "Überall abmelden",
+      "revokeSessionsAria": "Alle offenen Sitzungen von {name} beenden",
+      "sessionsRevokedToast": "Alle offenen Sitzungen von {name} sind beendet.",
+      "sessionsFailedTitle": "Sitzungen konnten nicht beendet werden",
+      "block": "Konto sperren",
+      "blockAria": "Konto von {name} sperren",
+      "unblock": "Sperre aufheben",
+      "unblockAria": "Sperre von {name} aufheben",
+      "blockPrompt": "Warum wird {name} gesperrt?",
+      "blockHint": "Wird zugesandt und ist der einzige Teil einer Sperre, auf den reagiert werden kann",
+      "blockReasonPlaceholder": "Wiederholt erfundene Einträge, nach zwei Verwarnungen",
+      "blockReasonShown": "Gesperrt: {reason}",
+      "blockedToast": "{name} ist gesperrt.",
+      "unblockedToast": "Die Sperre von {name} ist aufgehoben.",
+      "toldByEmail": "{name} wurde per E-Mail benachrichtigt.",
+      "blockFailedTitle": "Sperre konnte nicht geändert werden",
+      "workUntouchedNote": "Veröffentlichte Beiträge bleiben im Atlas. Sie offline zu nehmen ist ein eigener Schritt, im Dossier.",
+      "filters": {
+        "search": "Suchen",
+        "searchPlaceholder": "Anzeigename oder E-Mail-Adresse",
+        "role": "Rolle",
+        "anyRole": "Jede Rolle",
+        "standing": "Status",
+        "anyStanding": "Jeder Status",
+        "trusted": "Veröffentlichung erlaubt",
+        "revoked": "Veröffentlichung ausgesetzt",
+        "banned": "Gesperrt",
+        "unverified": "Adresse nie bestätigt",
+        "sort": "Reihenfolge",
+        "sortAccepted": "Meist angenommen",
+        "sortNewest": "Neueste",
+        "sortLastSeen": "Zuletzt gesehen",
+        "sortPending": "Meist wartend"
+      }
+    },
+    "dossier": {
+      "loading": "Alles Getane wird zusammengetragen …",
+      "backToRoll": "Zurück zur Liste",
+      "tryAgain": "Bitte erneut versuchen.",
+      "never": "nie",
+      "joined": "Beigetreten am {joined}, zuletzt gesehen {seen}.",
+      "seeEverythingChanged": "Alle Änderungen dieser Person ansehen",
+      "recordsCreated": "Angelegte Einträge",
+      "truncated": "Die ersten 200 werden gezeigt. Die Zahlen oben sind vollständig.",
+      "decisionsTaken": "Entscheidungen zu diesem Konto",
+      "counts": {
+        "sitesCreated": "Angelegte Orte",
+        "tracingsCreated": "Angelegte Verläufe",
+        "imagesUploaded": "Fotografien",
+        "approved": "Veröffentlichte Bearbeitungen",
+        "pending": "Wartend",
+        "rejected": "Abgelehnt",
+        "endorsements": "Abgegebene Empfehlungen",
+        "visits": "Besuchte Orte"
+      },
+      "recordStatus": {
+        "approved": "im Atlas",
+        "pending": "wartend",
+        "rejected": "offline"
+      },
+      "retractTitle": "Beiträge offline nehmen",
+      "retractExplanation": "Nimmt jeden angelegten Eintrag zurück, setzt Bearbeitungen an Einträgen anderer zurück und zieht Fotografien aus den Galerien. Nichts wird gelöscht: jede Rücknahme ist eine gewöhnliche Bearbeitung, die die Moderation zurücksetzen kann, und keine Bilddaten werden entfernt. Was noch auf Prüfung wartet, bleibt in der Warteschlange und wird inhaltlich beurteilt.",
+      "retractReasonLabel": "Begründung",
+      "retractReasonHint": "Wird auf jeder hierdurch geschriebenen Bearbeitung vermerkt",
+      "retractReasonPlaceholder": "Erfundene Einträge, nach Prüfung gesperrt",
+      "retractPreview": "Zählen, was das bedeuten würde",
+      "retractPlan": "{records} Einträge gingen offline, {edits} Bearbeitungen würden zurückgesetzt und {photographs} Fotografien zurückgezogen.",
+      "retractUntouched": "{count} Beiträge bleiben bewusst unberührt.",
+      "retractApply": "Alles offline nehmen",
+      "retractNothingToDo": "Es ist nichts veröffentlicht, das offline genommen werden könnte.",
+      "retractReasonRequired": "Zuerst eine Begründung angeben.",
+      "retractedToast": "{records} Einträge und {photographs} Fotografien offline genommen.",
+      "retractedReversible": "Jede davon lässt sich aus der Versionsgeschichte des Eintrags zurücksetzen.",
+      "retractedPartly": "{count} konnten nicht angewandt werden — siehe Protokoll.",
+      "retractFailedTitle": "Beiträge konnten nicht offline genommen werden"
+    },
+    "images": {
+      "loading": "Galerien werden gelesen …",
+      "empty": "Nichts wartet, und keine ungeklärte Lizenz.",
+      "filterLabel": "Zeigen",
+      "cannotPublish": "Darf nicht veröffentlicht werden",
+      "deletedAccount": "Gelöschtes Konto",
+      "openSource": "Quellseite öffnen",
+      "manageOnSite": "Auf der Ortsseite verwalten",
+      "openUploaderAria": "Dossier von {name} öffnen",
+      "filters": {
+        "pending": "Wartet auf Prüfung",
+        "unlicensed": "Ungeklärte Lizenz",
+        "all": "Beides"
+      },
+      "status": {
+        "pending": "Wartet auf Prüfung",
+        "approved": "In der Galerie",
+        "rejected": "Zurückgezogen"
+      }
+    },
+    "audit": {
+      "loading": "Prüfspur wird gelesen …",
+      "empty": "Noch nichts vermerkt.",
+      "loadMore": "Älter",
+      "filterLabel": "Handlung",
+      "anyAction": "Alle Handlungen",
+      "deletedActor": "Gelöschtes Konto",
+      "account": "Konto #{id}",
+      "note": "Nur anfügend: nichts in dieser Anwendung ändert oder entfernt einen Eintrag. Sie enthält keine Herkunftsadressen und keine Zugangsdaten — Details je Anfrage stehen im Anfrageprotokoll.",
+      "actions": {
+        "account_banned": "Konto gesperrt",
+        "account_unbanned": "Sperre aufgehoben",
+        "account_role-changed": "Rolle geändert",
+        "account_trust-changed": "Veröffentlichung geändert",
+        "account_sessions-revoked": "Sitzungen beendet",
+        "account_work-retracted": "Beiträge offline genommen",
+        "accounts_viewed": "Kontenliste gelesen",
+        "account_inspected": "Dossier geöffnet",
+        "step-up_granted": "Identität bestätigt"
+      }
+    },
+    "stepUp": {
+      "title": "Bestätigen, dass es Sie sind",
+      "description": "Diese Änderung benötigt Ihr Passwort erneut.",
+      "explanation": "Ein Konto zu sperren und eine Rolle zu ändern lässt sich innerhalb des Atlas nicht rückgängig machen. Deshalb wird das Passwort erneut verlangt, obwohl Sie angemeldet sind.",
+      "passwordLabel": "Ihr Passwort",
+      "passwordAria": "Passwort von {name}",
+      "codeLabel": "Code der Authentifizierungs-App",
+      "codeHint": "Nur bei Konten mit Zwei-Faktor-Anmeldung",
+      "codePlaceholder": "123456",
+      "confirm": "Bestätigen",
+      "cancel": "Abbrechen"
+    },
+    "system": {
+      "loading": "Dienste werden befragt …",
+      "servicesTitle": "Zugrundeliegende Dienste",
+      "services": {
+        "database": "Datenbank",
+        "cache": "Zwischenspeicher"
+      },
+      "uptime": "Läuft seit {uptime}",
+      "uptimeDays": "{days} T {hours} Std",
+      "uptimeHours": "{hours} Std {minutes} Min",
+      "uptimeMinutes": "{minutes} Min",
+      "dataVersion": "Datenstand {version}",
+      "atlasTitle": "Der Atlas in Zahlen",
+      "counts": {
+        "publishedSites": "Veröffentlichte Orte",
+        "publishedTracings": "Veröffentlichte Verläufe",
+        "accounts": "Konten",
+        "accountsLastDay": "Neu in 24 Stunden",
+        "unverifiedAccounts": "Nie bestätigt",
+        "blockedAccounts": "Gesperrt",
+        "revokedTrust": "Veröffentlichung ausgesetzt",
+        "pendingRevisions": "Wartet auf Prüfung"
+      },
+      "signalsNote": "Viele neue Konten, die nie eine Adresse bestätigen, sind die Form einer automatisierten Anmeldewelle. Keine der Zahlen beweist für sich genommen etwas.",
+      "counters": {
+        "mail_deliveries_total": "Zugestellte E-Mails",
+        "auth_events_total": "Anmeldeergebnisse",
+        "rate_limit_decisions_total": "Ratenbegrenzungen",
+        "moderation_actions_total": "Moderationshandlungen"
+      },
+      "noSeries": "Noch nichts gezählt.",
+      "countersNote": "Das sind Gesamtwerte seit dem letzten Start des Prozesses, keine Raten — eine niedrige Zahl nach einer Auslieferung ist ein Neustart, keine gute Nachricht."
     }
   }
 }

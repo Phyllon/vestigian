@@ -59,6 +59,8 @@ export default defineEventHandler(async (event) => {
       approvedContributions: users.approvedContributions,
       trustRevoked: users.trustRevoked,
       totpSecretEncrypted: users.totpSecretEncrypted,
+      bannedAt: users.bannedAt,
+      banReason: users.banReason,
     })
     .from(users)
     .where(eq(users.id, state.userId))
@@ -72,6 +74,27 @@ export default defineEventHandler(async (event) => {
     throw createError({
       statusCode: 401,
       message: 'That sign-in attempt has expired. Sign in again.',
+    })
+  }
+
+  /**
+   * Checked again here, not only in `login.post.ts`: a block landing in the
+   * few minutes between the password step and the code step would otherwise
+   * hand out a session the moment the code arrived. The challenge is burned
+   * first, so a blocked account cannot keep retrying against it.
+   */
+  if (account.bannedAt) {
+    await redis.del(key)
+    authEventsTotal().inc({ event: 'login', outcome: 'blocked' })
+    event.context.log.warn(
+      { audit: 'auth.login', userId: account.id },
+      'second factor refused: account blocked',
+    )
+    throw createError({
+      statusCode: 403,
+      message: account.banReason
+        ? `This account is blocked: ${account.banReason}`
+        : 'This account is blocked. Contact the operators if you believe that is a mistake.',
     })
   }
 

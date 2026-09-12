@@ -65,8 +65,7 @@ defineRouteMeta({
 })
 
 export default defineEventHandler(async (event) => {
-  const session = await requireUserSession(event)
-  const user = session.user as SessionUser
+  const user = await requireActiveUser(event)
   await enforceRateLimit(event, 'contribute')
 
   const draft = await readValidatedBody(event, contributionSchema.parse)

@@ -1,7 +1,9 @@
+import type { AnyPgColumn } from 'drizzle-orm/pg-core'
 import {
   boolean,
   index,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
   serial,
@@ -24,6 +26,39 @@ export const users = pgTable(
     approvedContributions: integer('approved_contributions').notNull().default(0),
     /** Set by a moderator to pin a user at level 0 regardless of their count. */
     trustRevoked: boolean('trust_revoked').notNull().default(false),
+    /**
+     * A block on the person, not on their work. Null means active.
+     *
+     * Deliberately a timestamp rather than a boolean: the audit log records
+     * the decision, but the account row should be able to answer "since when"
+     * on its own, without a join to a table that only exists for review.
+     * Distinct from `trustRevoked` in kind, not just in degree — a revoked
+     * account still works and simply has its edits queued, a banned one
+     * cannot sign in, cannot write, and has every live session killed. What
+     * it does *not* touch is anything they already published; taking that
+     * offline is a separate, deliberate sweep (`server/utils/retraction.ts`).
+     */
+    bannedAt: timestamp('banned_at', { withTimezone: true }),
+    /** Sent to the person. Same length as a trust-revocation reason. */
+    banReason: varchar('ban_reason', { length: 300 }),
+    bannedBy: integer('banned_by').references((): AnyPgColumn => users.id, {
+      onDelete: 'set null',
+    }),
+    /**
+     * The session epoch — **the only session revocation this app has.**
+     *
+     * Sessions are stateless: `auth/login.post.ts` seals `loggedInAt` into an
+     * iron cookie and nothing refreshes or stores it, so there is no session
+     * table to delete a row from. Comparing that sealed `loggedInAt` against
+     * this column (`isSessionCurrent`) makes every cookie issued before the
+     * timestamp dead on its very next request, with no new storage anywhere.
+     * Bumping it is what makes a ban bite immediately rather than whenever
+     * the person next happens to sign out, and it is the whole of
+     * "sign out everywhere".
+     */
+    sessionsValidFrom: timestamp('sessions_valid_from', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
     emailVerifiedAt: timestamp('email_verified_at', { withTimezone: true }),
     lastSeenAt: timestamp('last_seen_at', { withTimezone: true }),
     /** Shown on the opt-in public contributor page and nowhere else. */
@@ -85,5 +120,47 @@ export const emailTokens = pgTable(
   (table) => [
     index('email_tokens_lookup').on(table.tokenHash),
     index('email_tokens_user').on(table.userId),
+  ],
+)
+
+/**
+ * Who did what in `/admin`, append-only.
+ *
+ * Nothing in the app ever updates or deletes a row here — the same discipline
+ * `revisions` keeps, for the same reason. It duplicates the `audit:` lines
+ * that already go to the request log on purpose: those live in Loki on a
+ * 30-day retention and need Grafana open to read, while this is the durable,
+ * in-app record an administrator can actually be held to, and the thing that
+ * makes an admin-visible email address defensible rather than merely
+ * convenient.
+ *
+ * It deliberately holds **no IP addresses and no credentials**. Addresses are
+ * in the request log on a documented retention and a lawful basis of their
+ * own (`.claude/rules/gdpr-legal.md`); this panel is not a log viewer, and a
+ * second, unbounded store of them would be a new liability rather than a new
+ * capability.
+ */
+export const adminAuditLog = pgTable(
+  'admin_audit_log',
+  {
+    id: serial('id').primaryKey(),
+    /**
+     * Set null rather than cascade: an administrator exercising their own
+     * right to erasure must not take the record of their decisions with them.
+     */
+    actorId: integer('actor_id').references((): AnyPgColumn => users.id, { onDelete: 'set null' }),
+    /** One of `AdminAction` (`shared/utils/authorization.ts`). */
+    action: varchar('action', { length: 40 }).notNull(),
+    /** 'account' | 'revision' | 'image' | 'system' — what was acted on. */
+    subjectType: varchar('subject_type', { length: 20 }).notNull(),
+    subjectId: integer('subject_id'),
+    /** What was decided: a reason, a role transition, a retraction count. */
+    detail: jsonb('detail'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('admin_audit_created_idx').on(table.createdAt),
+    index('admin_audit_subject_idx').on(table.subjectType, table.subjectId),
+    index('admin_audit_actor_idx').on(table.actorId),
   ],
 )

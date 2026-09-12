@@ -41,6 +41,14 @@ export default defineEventHandler((event) => {
     'Disallow: /api/tiles/',
     'Disallow: /api/sites/search',
     'Disallow: /moderation',
+    /**
+     * Belt to the `X-Robots-Tag` braces in `nuxt.config.ts`'s `routeRules`.
+     * The header is what actually binds a crawler that ignores this file, and
+     * the `<meta name="robots">` the page itself sets is invisible to anything
+     * that does not execute JavaScript — three measures because the panel must
+     * not appear in an index at all, and only one of them is a request.
+     */
+    'Disallow: /admin',
     'Disallow: /verify',
     'Disallow: /reset-password',
     'Disallow: /login',

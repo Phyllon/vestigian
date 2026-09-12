@@ -39,6 +39,24 @@ but an already-linked disallowed URL can still be indexed sans content —
 `useNoIndex()` (`app/composables/data/useNoIndex.ts`) closes that gap on the
 same pages plus `/moderation`, `/verify`, `/reset-password`.
 
+**`/admin` gets a third measure, and the third is the one that binds.** The
+admin station carries `Disallow: /admin` in `robots.txt` and `useNoIndex()` on
+the page like everything above, _plus_ an `X-Robots-Tag: noindex, nofollow,
+noarchive` response header in `nuxt.config.ts`'s `routeRules` (spelled out for
+both `/admin` and `/admin/**`, since whether the wildcard also matches the bare
+prefix is a radix3 detail not worth resting this on). The header exists because
+a `<meta name="robots">` only exists once a crawler has executed the page, and
+this app is a Nuxt SPA behind a CDN — a fetcher that never runs JavaScript sees
+the tag not at all, and `robots.txt` binds only the crawlers that read it. The
+same `routeRules` entries set `cache-control: no-store` on `/admin/**` and
+`/api/admin/**`: those responses carry registered email addresses and one
+person's complete contribution history, and nothing in this config forbids
+page-level edge caching at Bunny. Every admin fetch is `server: false` for the
+same reason `AuthAccountMenu` is `ClientOnly` — admin-visible data must never be
+baked into server-rendered HTML. `e2e/admin.spec.ts` asserts the header and the
+`robots.txt` line, not the meta tag, because the header is the part a
+non-executing client obeys.
+
 **Canonical URLs never carry a query string.** `useCanonicalUrl()` always
 resolves to the bare `route.path`, never `route.fullPath` — there is no
 filtered or paginated content view in this app today, so a query param

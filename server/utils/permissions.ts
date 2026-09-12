@@ -1,7 +1,7 @@
 import type { H3Event } from 'h3'
 import { eq } from 'drizzle-orm'
 import { users } from '~~/server/database/schema'
-import { hasAtLeastRole } from '#shared/utils/authorization'
+import { hasAtLeastRole, isAccountActive, isSessionCurrent } from '#shared/utils/authorization'
 import type { SessionUser, UserRole } from '#shared/types'
 
 /**
@@ -11,7 +11,8 @@ import type { SessionUser, UserRole } from '#shared/types'
  */
 
 /**
- * The caller's role and trust **as they are now**, not as they were at login.
+ * The caller's role, trust and standing **as they are now**, not as they were
+ * at login.
  *
  * The session is sealed by `auth/login.post.ts` into a stateless cookie that
  * nothing refreshes. (`me/index.patch.ts` re-seals it on a rename, but only to
@@ -23,9 +24,17 @@ import type { SessionUser, UserRole } from '#shared/types'
  * all. Demotion is one of the few levers the governance model has; it has to
  * bite on the next request.
  *
+ * Two more things are now read for the same reason a role is. A **ban** is
+ * worth nothing if it waits for a logout, and the **session epoch**
+ * (`users.sessions_valid_from`) is the only revocation a stateless session
+ * can have: a cookie sealed before it is spent, which is what actually ends
+ * a banned person's live sessions and what "sign out everywhere" does. Both
+ * are checked here rather than at each call site, so every route that already
+ * asks who the caller is gets them for free.
+ *
  * This is the same reasoning `contributions/images.post.ts` already applies to
- * trust, and the same cost: one primary-key lookup, on the handful of routes
- * that gate on a role. Tiles, records and the map never reach it.
+ * trust, and the same cost: one primary-key lookup, on the routes that gate on
+ * an identity. Tiles, records and the map never reach it.
  */
 const readCurrentIdentity = async (event: H3Event): Promise<SessionUser> => {
   const session = await requireUserSession(event)
@@ -36,6 +45,9 @@ const readCurrentIdentity = async (event: H3Event): Promise<SessionUser> => {
       role: users.role,
       trustRevoked: users.trustRevoked,
       approvedContributions: users.approvedContributions,
+      bannedAt: users.bannedAt,
+      banReason: users.banReason,
+      sessionsValidFrom: users.sessionsValidFrom,
     })
     .from(users)
     .where(eq(users.id, sessionUser.id))
@@ -46,8 +58,58 @@ const readCurrentIdentity = async (event: H3Event): Promise<SessionUser> => {
     throw createError({ statusCode: 401, message: 'Sign in again to continue.' })
   }
 
-  return { id: sessionUser.id, displayName: sessionUser.displayName, ...current }
+  /**
+   * 401, deliberately, and the same message the deleted-account branch above
+   * uses: a spent cookie is not a refused request, it is an absent one, and
+   * every client path in the app already treats 401 as "go and sign in".
+   * Answering 403 here would strand someone on a page telling them they are
+   * not allowed to do a thing they are in fact allowed to do.
+   */
+  if (
+    !isSessionCurrent({
+      loggedInAt: Number(session.loggedInAt ?? 0),
+      sessionsValidFrom: current.sessionsValidFrom,
+    })
+  ) {
+    throw createError({ statusCode: 401, message: 'Sign in again to continue.' })
+  }
+
+  if (!isAccountActive(current)) {
+    throw createError({
+      statusCode: 403,
+      message: current.banReason
+        ? `This account is blocked: ${current.banReason}`
+        : 'This account is blocked. Contact the operators if you believe that is a mistake.',
+    })
+  }
+
+  return {
+    id: sessionUser.id,
+    displayName: sessionUser.displayName,
+    role: current.role,
+    trustRevoked: current.trustRevoked,
+    approvedContributions: current.approvedContributions,
+  }
 }
+
+/**
+ * Signed in, not blocked, and holding a session that has not been revoked —
+ * with no role requirement at all.
+ *
+ * This is what every authenticated route should ask for instead of
+ * `requireUserSession`, which only proves a cookie unseals. Without it a ban
+ * would bite on precisely the routes that gate on a role — the moderation and
+ * admin ones a banned contributor could never reach anyway — and on none of
+ * the ones that matter: contributing, uploading, endorsing, editing their own
+ * account.
+ *
+ * A Nitro server middleware was considered for this and rejected twice over:
+ * it would run on tile and record traffic that carries no session to check,
+ * and it would put an authorization decision somewhere other than the guards
+ * file, which is the one arrangement the governance model explicitly protects.
+ */
+export const requireActiveUser = (event: H3Event): Promise<SessionUser> =>
+  readCurrentIdentity(event)
 
 const requireRole = async (event: H3Event, required: UserRole): Promise<SessionUser> => {
   const user = await readCurrentIdentity(event)

@@ -8,6 +8,18 @@ import {
   TILE_PARAMS,
   TILE_RESPONSES,
 } from '~~/server/utils/openapi'
+import { querySchema as adminAccountsQuery } from './admin/accounts.get'
+import {
+  paramsSchema as adminAccountParams,
+  querySchema as adminAccountQuery,
+} from './admin/accounts/[id].get'
+import { querySchema as adminActivityQuery } from './admin/activity.get'
+import { querySchema as adminAuditQuery } from './admin/audit.get'
+import { banSchema } from './admin/ban.post'
+import { querySchema as adminImagesQuery } from './admin/images.get'
+import { retractSchema } from './admin/retract.post'
+import { revokeSessionsSchema } from './admin/sessions.post'
+import { stepUpSchema } from './admin/step-up.post'
 import { bodySchema as forgotPasswordSchema } from './auth/forgot-password.post'
 import { credentialsSchema } from './auth/login.post'
 import { registrationSchema } from './auth/register.post'
@@ -25,7 +37,6 @@ import { batchSchema } from './moderation/review-batch.post'
 import { reviewSchema } from './moderation/review.post'
 import { roleSchema } from './moderation/role.post'
 import { trustSchema } from './moderation/trust.post'
-import { querySchema as moderationUsersQuery } from './moderation/users.get'
 import { bookmarkSchema } from './me/bookmarks.post'
 import { paramsSchema as bookmarkDeleteParams } from './me/bookmarks/[siteId].delete'
 import { querySchema as myContributionsQuery } from './me/contributions.get'
@@ -501,14 +512,133 @@ const OPERATION_OVERRIDES: Record<
       },
     },
   },
-  '/api/moderation/users': {
+  '/api/admin/activity': {
     get: {
       security: SESSION_SECURITY,
-      parameters: paramsFromSchema(moderationUsersQuery, 'query'),
+      parameters: paramsFromSchema(adminActivityQuery, 'query'),
       responses: {
-        200: jsonResponse('{ contributors: [...] }'),
+        200: jsonResponse('{ items: [...], nextCursor: number | null }'),
         401: COMMON_RESPONSES[401],
         403: COMMON_RESPONSES[403],
+        429: COMMON_RESPONSES[429],
+      },
+    },
+  },
+  '/api/admin/accounts': {
+    get: {
+      security: SESSION_SECURITY,
+      parameters: paramsFromSchema(adminAccountsQuery, 'query'),
+      responses: {
+        200: jsonResponse('{ accounts: [...] }'),
+        401: COMMON_RESPONSES[401],
+        403: COMMON_RESPONSES[403],
+        429: COMMON_RESPONSES[429],
+      },
+    },
+  },
+  '/api/admin/accounts/{id}': {
+    get: {
+      security: SESSION_SECURITY,
+      parameters: [
+        ...paramsFromSchema(adminAccountParams, 'path'),
+        ...paramsFromSchema(adminAccountQuery, 'query'),
+      ],
+      responses: {
+        200: jsonResponse('{ account, counts, createdSites, history, auditTrail, ... }'),
+        401: COMMON_RESPONSES[401],
+        403: COMMON_RESPONSES[403],
+        404: errorResponse('No such account.'),
+        429: COMMON_RESPONSES[429],
+      },
+    },
+  },
+  '/api/admin/audit': {
+    get: {
+      security: SESSION_SECURITY,
+      parameters: paramsFromSchema(adminAuditQuery, 'query'),
+      responses: {
+        200: jsonResponse('{ entries: [...], nextCursor: number | null }'),
+        401: COMMON_RESPONSES[401],
+        403: COMMON_RESPONSES[403],
+        429: COMMON_RESPONSES[429],
+      },
+    },
+  },
+  '/api/admin/images': {
+    get: {
+      security: SESSION_SECURITY,
+      parameters: paramsFromSchema(adminImagesQuery, 'query'),
+      responses: {
+        200: jsonResponse('{ images: [...] }'),
+        401: COMMON_RESPONSES[401],
+        403: COMMON_RESPONSES[403],
+        429: COMMON_RESPONSES[429],
+      },
+    },
+  },
+  '/api/admin/system': {
+    get: {
+      security: SESSION_SECURITY,
+      responses: {
+        200: jsonResponse('{ status, checks, dataVersion, attention, counters }'),
+        401: COMMON_RESPONSES[401],
+        403: COMMON_RESPONSES[403],
+        429: COMMON_RESPONSES[429],
+      },
+    },
+  },
+  '/api/admin/step-up': {
+    post: {
+      security: SESSION_SECURITY,
+      requestBody: bodyFromSchema(stepUpSchema),
+      responses: {
+        200: jsonResponse('{ status: "confirmed", expiresInSeconds }'),
+        400: errorResponse('Enter a code from your authenticator app.'),
+        401: COMMON_RESPONSES[401],
+        403: errorResponse('Wrong password, or wrong code.'),
+        429: COMMON_RESPONSES[429],
+      },
+    },
+  },
+  '/api/admin/ban': {
+    post: {
+      security: SESSION_SECURITY,
+      requestBody: bodyFromSchema(banSchema),
+      responses: {
+        200: jsonResponse('{ userId, blocked, bannedAt }'),
+        401: COMMON_RESPONSES[401],
+        403: errorResponse('Refused by checkBan — never against another administrator.'),
+        404: errorResponse('No such account.'),
+        409: errorResponse('That account is already in the requested state.'),
+        428: errorResponse('Confirm your password before making this change.'),
+        429: COMMON_RESPONSES[429],
+        503: errorResponse('Re-authentication could not be checked; the action is refused.'),
+      },
+    },
+  },
+  '/api/admin/retract': {
+    post: {
+      security: SESSION_SECURITY,
+      requestBody: bodyFromSchema(retractSchema),
+      responses: {
+        200: jsonResponse('{ userId, applied, summary, outcomes?, untouched }'),
+        401: COMMON_RESPONSES[401],
+        403: COMMON_RESPONSES[403],
+        404: errorResponse('No such account.'),
+        428: errorResponse('Confirm your password before applying this.'),
+        429: COMMON_RESPONSES[429],
+      },
+    },
+  },
+  '/api/admin/sessions': {
+    post: {
+      security: SESSION_SECURITY,
+      requestBody: bodyFromSchema(revokeSessionsSchema),
+      responses: {
+        200: jsonResponse('{ userId, sessionsValidFrom }'),
+        401: COMMON_RESPONSES[401],
+        403: COMMON_RESPONSES[403],
+        404: errorResponse('No such account.'),
         429: COMMON_RESPONSES[429],
       },
     },

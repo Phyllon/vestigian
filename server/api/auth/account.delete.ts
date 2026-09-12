@@ -1,6 +1,5 @@
 import { eq } from 'drizzle-orm'
 import { siteBookmarks, siteVisits, twoFactorBackupCodes, users } from '~~/server/database/schema'
-import type { SessionUser } from '#shared/types'
 
 /**
  * GDPR Art. 17 erasure, for the account itself.
@@ -40,8 +39,7 @@ defineRouteMeta({
 })
 
 export default defineEventHandler(async (event) => {
-  const session = await requireUserSession(event)
-  const sessionUser = session.user as SessionUser
+  const sessionUser = await requireActiveUser(event)
   await enforceRateLimit(event, 'record')
 
   const database = useDatabase()

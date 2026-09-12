@@ -5,6 +5,11 @@ paths:
   - 'shared/utils/authorization.ts'
   - 'server/api/auth/**'
   - 'server/api/moderation/**'
+  - 'server/api/admin/**'
+  - 'server/utils/step-up.ts'
+  - 'server/utils/retraction.ts'
+  - 'server/utils/admin-audit.ts'
+  - 'app/middleware/admin.ts'
   - 'server/api/contributions/**'
   - 'server/database/schema/users.ts'
   - 'nuxt.config.ts'
@@ -35,6 +40,91 @@ paths:
 - **Role and trust are re-read from the database inside every guard.** The session cookie is sealed at login and nothing refreshes it, so reading a role from it let a demoted moderator keep moderating until they logged out. `requireModerator`/`requireAdmin` cost one primary-key lookup and are the reason a demotion bites on the next request.
 - **Slugs never change on edit.** Inbound links, citations and the sitemap point at them.
 - Suspension leaves `approved_contributions` untouched, so restoring trust returns someone exactly where they were.
+
+## The admin station — `/admin`
+
+Added because the moderator's queue is scoped to `status = 'pending'`, so from
+the moment a contributor crosses `TRUST_THRESHOLD` their edits published and
+appeared on **no screen in this application** — `applyRevision()` logged every
+one of those writes, but that line goes to Loki. `admin/activity.get.ts` is the
+same projection `moderation/queue.get.ts` builds, minus that status filter.
+
+- **A block is a sanction on the person, not on their work.** `users.banned_at`
+  (plus `ban_reason`, `banned_by`) refuses login and every guarded route, and
+  leaves the sites, tracings, photographs and revision history exactly where
+  they are, still credited. Distinct in kind from `trust_revoked`, which only
+  re-queues someone's edits and otherwise leaves the account fully working.
+  Taking the work offline is a separate, counted, reversible sweep
+  (`admin/retract.post.ts`) — never a side effect of the block, because a block
+  that silently unpublished a productive contributor's back catalogue would be
+  a far larger decision than the button implies and a lifted block could not
+  undo it.
+- **`users.sessions_valid_from` is the only session revocation this app has.**
+  The session is a stateless iron cookie with no server-side store to delete a
+  row from, so revocation is a comparison: `isSessionCurrent` checks the
+  `loggedInAt` sealed at login against this column, and anything older is spent.
+  Bumped by a block, by lifting a block (so a cookie that was live at the moment
+  of the block cannot come back), and by `admin/sessions.post.ts`. Without it a
+  block would wait for the person to sign out, which is exactly when they have
+  no reason to.
+- **A ban can never touch an administrator** (`checkBan`), unconditionally, for
+  the same reason `checkRoleChange`'s `admin-protected` branch is unconditional:
+  an account that cannot sign in, cannot write and has every session killed is
+  neutralised as completely as one whose role was stripped, so allowing the
+  second while refusing the first would be a distinction without a difference.
+  Removing a rogue co-admin stays the same database surgery that creates the
+  first one.
+- **`requireActiveUser` is what makes a block bite where it matters.** Extending
+  `readCurrentIdentity` alone would have enforced it on precisely the routes a
+  blocked contributor could never reach anyway. A Nitro middleware was
+  considered and rejected twice over: it would run on tile and record traffic
+  carrying no session, and it would put an authorization decision somewhere
+  other than the guards file.
+- **Step-up re-authentication, and it fails closed.** `requireStepUp`
+  (`server/utils/step-up.ts`) gates `moderation/role.post.ts`,
+  `admin/ban.post.ts` and the retraction sweep — the actions this application
+  cannot undo from inside itself, since a second permanent admin minted from a
+  stolen session can only be removed with direct database access. The Valkey
+  grant is keyed on `{userId}:{loggedInAt}`, so a _different_ live session for
+  the same admin cannot ride a grant the real one minted, and it is **spent by
+  the action it authorises** rather than leaving a fifteen-minute unguarded
+  window. On a Valkey outage it **refuses** — the one deliberate inversion of
+  `enforceRateLimit`'s fail-open, because an outage that waved privileged
+  actions through would turn a service problem into a window for the
+  irreversible ones. `sessions.post.ts` is deliberately _not_ behind it: it
+  takes nothing away that signing in again does not restore, and a password
+  prompt in front of the one fast containment action would mean it is not fast.
+- **Retraction still goes through `applyRevision`.** There was no withdrawal
+  path for a site or tracing at all, and the obvious implementation — an
+  `UPDATE sites SET status` in the endpoint — would have been the second write
+  path the whole governance model exists to prevent. Instead `retractRecord`
+  writes an approved revision carrying `retracted: true`, and `applyRevision`
+  has one new branch that sets `status = 'rejected'` (already what every tile
+  query excludes) without touching the fields. Three things fall out for free:
+  the retraction appears in the record's own history, `revert.post.ts`
+  un-retracts it with no new code, and history stays append-only. Which of an
+  author's contributions get retracted versus reverted versus left alone is
+  `planRetraction` (`server/utils/retraction.ts`), pure and unit-tested —
+  reverting an edit to somebody else's record rolls back a state a third party
+  may have built on, and reverting a _revert_ re-applies what a moderator
+  removed.
+- **`admin_audit_log` is append-only and holds no IPs or credentials.** Nothing
+  in the application updates or deletes a row; `recordAdminAction` only inserts,
+  and it never throws — a failed audit write must not be able to roll back a
+  block that has already taken effect, so it lands in the request log and the
+  action stands. It duplicates the `audit:` log lines on purpose: those live in
+  Loki on a 30-day retention and need Grafana open, while this is the durable
+  in-app record, and the thing that makes an admin-visible email address
+  defensible rather than merely convenient.
+- **`/admin` answers 404 to a signed-in non-administrator**
+  (`app/middleware/admin.ts`), so the route's existence is not confirmed to
+  somebody who cannot use it. That is concealment, worth nothing on its own; the
+  protection is `requireAdmin` on every endpoint, which answers an honest 403
+  because by then the caller is authenticated and a truthful error is worth more
+  than a coy one. The unindexability measures are in `.claude/rules/seo.md`.
+- **There is still no admin variant of `auth/export.get.ts`.** The dossier shows
+  an account's contributions, which are public work; it stops short of handing an
+  administrator the personal-data dump its owner gets under Art. 15.
 
 ## Security invariants — do not weaken these either
 

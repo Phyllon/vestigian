@@ -8,12 +8,21 @@ export const roleSchema = z.object({
   role: z.enum(['contributor', 'moderator', 'admin']),
 })
 
+/**
+ * The one endpoint that can create a second permanent administrator.
+ *
+ * `checkRoleChange` refuses to demote an admin unconditionally, so a grant
+ * made here cannot be taken back from inside the application — which is what
+ * puts it behind `requireStepUp`. A stolen admin session should buy an
+ * attacker the ability to read the panel, not the ability to plant an
+ * administrator that only direct database access can remove.
+ */
 defineRouteMeta({
   openAPI: {
     tags: ['moderation'],
     summary: "Change a user's role",
     description:
-      'Admin only. Nobody can change their own role, and no admin can demote another admin — removing an admin requires direct database access.',
+      'Admin only, and requires re-authentication (428 until a step-up grant is held). Nobody can change their own role, and no admin can demote another admin — removing an admin requires direct database access.',
   },
 })
 
@@ -45,7 +54,21 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  // After the rules, before the write: a refused change should not have cost
+  // the administrator their password.
+  await requireStepUp(event, actor)
+
   await database.update(users).set({ role }).where(eq(users.id, userId))
+
+  await consumeStepUp(event, actor)
+
+  await recordAdminAction({
+    actorId: actor.id,
+    action: 'account.role-changed',
+    subjectType: 'account',
+    subjectId: userId,
+    detail: { previousRole: target.role, nextRole: role },
+  })
 
   moderationActionsTotal().inc({ action: 'role' })
   event.context.log.info(

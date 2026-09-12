@@ -22,8 +22,8 @@
     "notebook": "Mon carnet",
     "visits": "Les lieux où je suis allé",
     "contributions": "Mes contributions",
-    "contributors": "Contributeurs",
-    "settings": "Réglages"
+    "settings": "Réglages",
+    "adminPanel": "Poste de commande"
   },
   "themeToggle": {
     "switchToDay": "Passer à jour",
@@ -254,40 +254,6 @@
       "batchResultTitle": "{count} {decision}.",
       "batchResultSkipped": "{count} ignorée(s)."
     },
-    "contributorTable": {
-      "findPlaceholder": "Trouver un contributeur",
-      "accepted": "{count} accepté",
-      "waiting": "{count} en attente",
-      "restoreTrust": "Rétablir la confiance",
-      "restoreTrustAria": "Rétablir la confiance pour {name}",
-      "suspendPublishing": "Suspendre la publication",
-      "suspendPublishingAria": "Suspendre la publication pour {name}",
-      "roleAria": "Rôle de {name}",
-      "suspendPrompt": "Pourquoi {name} est-il/elle suspendu(e) ?",
-      "suspendHint": "Envoyé par e-mail, mot pour mot",
-      "suspendReasonPlaceholder": "Trois éditions ont supprimé le texte source sans dire pourquoi.",
-      "cancel": "Annuler",
-      "untouchedNote": "Leurs contributions acceptées sont intactes.",
-      "noMatches": "Aucun contributeur ne correspond à ça.",
-      "standing": {
-        "moderator": "Publie par rôle",
-        "revoked": "Suspendu — chaque édition en attente",
-        "earned": "Publie immédiatement",
-        "probation": "En attente — encore {remaining}"
-      },
-      "trustSuspended": "Publication automatique suspendue.",
-      "trustRestored": "La confiance est rétablie.",
-      "toldByEmail": "{name} a été informé(e) par courriel.",
-      "trustFailedTitle": "Impossible de changer de confiance",
-      "tryAgain": "Réessayez.",
-      "nowRole": "{name} est maintenant {role}.",
-      "roleFailedTitle": "Impossible de changer de rôle",
-      "roles": {
-        "contributor": "Contributeur",
-        "moderator": "Modérateur",
-        "admin": "Administrateur"
-      }
-    },
     "revisionDiff": {
       "fields": {
         "title": "Nom",
@@ -309,13 +275,7 @@
     },
     "queuePage": {
       "title": "Revoir la file d'attente",
-      "intro": "Contributions provenant de comptes qui n'ont pas encore fait l'objet d'une publication automatique.",
-      "contributorsLink": "Contributeurs"
-    },
-    "contributorsPage": {
-      "title": "Contributeurs",
-      "backToQueue": "Revoir la file d'attente",
-      "intro": "Suspendre l'édition maintient intact le dossier d'un contributeur — la restaurer les renvoie à exactement où ils étaient."
+      "intro": "Contributions provenant de comptes qui n'ont pas encore fait l'objet d'une publication automatique."
     }
   },
   "licence": {
@@ -1143,6 +1103,272 @@
       "title": "Inscriptions attiques trouvées à proximité",
       "titleTracing": "Inscriptions attiques le long de cette route",
       "distance": "{metres} m loin"
+    }
+  },
+  "admin": {
+    "eyebrow": "Administration",
+    "title": "Poste de commande",
+    "intro": "Chaque modification de l'atlas au moment où elle se produit, et par qui — y compris les modifications publiées sans relecture. Les comptes, leur statut et les sanctions sont ici aussi.",
+    "loading": "Chargement du poste de commande…",
+    "sections": {
+      "activity": "Activité",
+      "accounts": "Comptes",
+      "images": "Photographies",
+      "audit": "Journal des décisions",
+      "system": "Système"
+    },
+    "attention": {
+      "unresolvedLicences": "{count} licence non publiable",
+      "pendingRevisions": "{count} en attente de relecture",
+      "pendingImages": "{count} photographie en attente",
+      "blockedAccounts": "{count} bloqué",
+      "revokedTrust": "{count} avec publication suspendue",
+      "unverifiedAccounts": "{count} jamais confirmé"
+    },
+    "commandBar": {
+      "placeholder": "Un nom, une adresse ou #412",
+      "searchLabel": "Rechercher comptes et révisions",
+      "sectionLabel": "Section",
+      "jumpTo": "Aller à",
+      "revision": "Révision {id}",
+      "openAccountAria": "Ouvrir le dossier de {name}",
+      "attentionLabel": "En attente d'attention",
+      "status": {
+        "ready": "Tous les services fonctionnent",
+        "degraded": "Un service est hors service"
+      }
+    },
+    "activity": {
+      "loading": "Lecture du registre…",
+      "empty": "Aucun résultat.",
+      "loadMore": "Plus anciens",
+      "untitled": "Sans titre",
+      "deletedAccount": "Compte supprimé",
+      "changeCount": "{count} champs modifiés",
+      "reviewNote": "Note : {note}",
+      "blankingWarning": "Cette modification retire plus qu'elle n'ajoute.",
+      "substantialNote": "Une réécriture substantielle.",
+      "toggleDiffAria": "Afficher ce qui a changé dans la révision {id}",
+      "openAuthorAria": "Ouvrir le dossier de {name}",
+      "kinds": {
+        "autoPublished": "publié sans relecture",
+        "reviewed": "publié après relecture",
+        "queued": "en attente de relecture",
+        "rejected": "refusé",
+        "revert": "annulé",
+        "retraction": "retiré de l'atlas"
+      },
+      "status": {
+        "pending": "En attente",
+        "approved": "Publié",
+        "rejected": "Refusé"
+      },
+      "filters": {
+        "search": "Chercher",
+        "searchPlaceholder": "Le titre d'une fiche ou un résumé de modification",
+        "status": "Statut",
+        "anyStatus": "Tous les statuts",
+        "kind": "Type",
+        "anyKind": "Sites et tracés",
+        "sites": "Sites",
+        "tracings": "Tracés",
+        "autoApprovedOnly": "Seulement les modifications non relues",
+        "blankingOnly": "Seulement celles qui retirent plus qu'elles n'ajoutent",
+        "clearAuthor": "Tous les auteurs"
+      }
+    },
+    "accounts": {
+      "loading": "Lecture des comptes…",
+      "noMatches": "Aucun compte ne correspond.",
+      "tryAgain": "Réessayez.",
+      "cancel": "Annuler",
+      "blocked": "Bloqué",
+      "unverified": "adresse jamais confirmée",
+      "twoFactor": "double facteur actif",
+      "accepted": "{count} acceptées",
+      "waiting": "{count} en attente",
+      "openDossierAria": "Ouvrir le dossier de {name}",
+      "roles": {
+        "contributor": "Contributeur",
+        "moderator": "Modération",
+        "admin": "Administration"
+      },
+      "standing": {
+        "moderator": "Les modifications paraissent aussitôt, du fait du rôle.",
+        "revoked": "Publication suspendue — chaque modification attend une relecture.",
+        "earned": "Les modifications paraissent aussitôt.",
+        "probation": "Encore {remaining} contributions acceptées avant que les modifications paraissent aussitôt.",
+        "blocked": "Bloqué : ni connexion ni contribution. Le travail publié reste intact."
+      },
+      "revokeTrust": "Suspendre la publication",
+      "revokeTrustAria": "Suspendre la publication automatique pour {name}",
+      "restoreTrust": "Rétablir la publication",
+      "restoreTrustAria": "Rétablir la publication automatique pour {name}",
+      "trustFailedTitle": "Impossible de changer la publication",
+      "roleAria": "Rôle de {name}",
+      "roleFailedTitle": "Impossible de changer le rôle",
+      "nowRole": "{name} est désormais {role}.",
+      "revokeSessions": "Déconnecter partout",
+      "revokeSessionsAria": "Mettre fin à toutes les sessions ouvertes de {name}",
+      "sessionsRevokedToast": "Toutes les sessions ouvertes de {name} sont terminées.",
+      "sessionsFailedTitle": "Impossible de terminer ces sessions",
+      "block": "Bloquer le compte",
+      "blockAria": "Bloquer le compte de {name}",
+      "unblock": "Lever le blocage",
+      "unblockAria": "Lever le blocage de {name}",
+      "blockPrompt": "Pourquoi {name} est-il bloqué ?",
+      "blockHint": "Lui est transmis, et c'est la seule partie d'un blocage sur laquelle il peut agir",
+      "blockReasonPlaceholder": "Fiches inventées à répétition, après deux avertissements",
+      "blockReasonShown": "Bloqué : {reason}",
+      "blockedToast": "{name} est bloqué.",
+      "unblockedToast": "Le blocage de {name} est levé.",
+      "toldByEmail": "{name} en a été informé par courriel.",
+      "blockFailedTitle": "Impossible de changer ce blocage",
+      "workUntouchedNote": "Son travail publié reste dans l'atlas. Le retirer est une étape distincte, dans son dossier.",
+      "filters": {
+        "search": "Chercher",
+        "searchPlaceholder": "Un nom affiché ou une adresse électronique",
+        "role": "Rôle",
+        "anyRole": "Tous les rôles",
+        "standing": "Statut",
+        "anyStanding": "Tous les statuts",
+        "trusted": "Publication autorisée",
+        "revoked": "Publication suspendue",
+        "banned": "Bloqué",
+        "unverified": "Adresse jamais confirmée",
+        "sort": "Ordre",
+        "sortAccepted": "Plus d'acceptées",
+        "sortNewest": "Plus récents",
+        "sortLastSeen": "Vus le plus récemment",
+        "sortPending": "Plus en attente"
+      }
+    },
+    "dossier": {
+      "loading": "Rassemblement de tout ce qu'il a fait…",
+      "backToRoll": "Retour à la liste",
+      "tryAgain": "Réessayez.",
+      "never": "jamais",
+      "joined": "Inscrit le {joined}, vu pour la dernière fois le {seen}.",
+      "seeEverythingChanged": "Voir toutes ses modifications",
+      "recordsCreated": "Fiches qu'il a créées",
+      "truncated": "Les 200 premières sont affichées. Les totaux ci-dessus sont complets.",
+      "decisionsTaken": "Décisions prises sur ce compte",
+      "counts": {
+        "sitesCreated": "Sites créés",
+        "tracingsCreated": "Tracés créés",
+        "imagesUploaded": "Photographies",
+        "approved": "Modifications publiées",
+        "pending": "En attente",
+        "rejected": "Refusées",
+        "endorsements": "Recommandations données",
+        "visits": "Lieux visités"
+      },
+      "recordStatus": {
+        "approved": "dans l'atlas",
+        "pending": "en attente",
+        "rejected": "retiré"
+      },
+      "retractTitle": "Retirer son travail de l'atlas",
+      "retractExplanation": "Retire chaque fiche qu'il a créée, annule ses modifications sur les fiches d'autrui et retire ses photographies des galeries. Rien n'est supprimé : chaque retrait est une révision ordinaire que la modération peut annuler, et aucun octet d'image n'est effacé. Ce qui attend encore une relecture reste dans la file, pour être jugé sur le fond.",
+      "retractReasonLabel": "Motif",
+      "retractReasonHint": "Consigné sur chaque révision écrite par cette action",
+      "retractReasonPlaceholder": "Fiches inventées, bloqué après examen",
+      "retractPreview": "Compter ce que cela ferait",
+      "retractPlan": "{records} fiches seraient retirées, {edits} modifications annulées et {photographs} photographies retirées.",
+      "retractUntouched": "{count} contributions sont délibérément laissées intactes.",
+      "retractApply": "Tout retirer",
+      "retractNothingToDo": "Il n'y a rien de publié à retirer.",
+      "retractReasonRequired": "Indiquez d'abord un motif.",
+      "retractedToast": "{records} fiches et {photographs} photographies retirées.",
+      "retractedReversible": "Chacune peut être annulée depuis l'historique de la fiche.",
+      "retractedPartly": "{count} n'ont pu être appliquées — voir le journal.",
+      "retractFailedTitle": "Impossible de retirer ce travail"
+    },
+    "images": {
+      "loading": "Lecture des galeries…",
+      "empty": "Rien en attente, et aucune licence non résolue.",
+      "filterLabel": "Afficher",
+      "cannotPublish": "Ne peut pas être publiée",
+      "deletedAccount": "Compte supprimé",
+      "openSource": "Ouvrir la page source",
+      "manageOnSite": "La gérer sur la page du site",
+      "openUploaderAria": "Ouvrir le dossier de {name}",
+      "filters": {
+        "pending": "En attente de relecture",
+        "unlicensed": "Licence non résolue",
+        "all": "Les deux"
+      },
+      "status": {
+        "pending": "En attente de relecture",
+        "approved": "Dans la galerie",
+        "rejected": "Retirée"
+      }
+    },
+    "audit": {
+      "loading": "Lecture du journal…",
+      "empty": "Rien de consigné pour l'instant.",
+      "loadMore": "Plus anciens",
+      "filterLabel": "Action",
+      "anyAction": "Toutes les actions",
+      "deletedActor": "Compte supprimé",
+      "account": "compte n° {id}",
+      "note": "En ajout seul : rien dans cette application ne modifie ni ne retire une entrée. Il ne contient aucune adresse d'origine et aucun identifiant — le détail par requête vit dans le journal des requêtes.",
+      "actions": {
+        "account_banned": "Compte bloqué",
+        "account_unbanned": "Blocage levé",
+        "account_role-changed": "Rôle changé",
+        "account_trust-changed": "Publication changée",
+        "account_sessions-revoked": "Sessions terminées",
+        "account_work-retracted": "Travail retiré",
+        "accounts_viewed": "Liste des comptes consultée",
+        "account_inspected": "Dossier ouvert",
+        "step-up_granted": "Identité confirmée"
+      }
+    },
+    "stepUp": {
+      "title": "Confirmez que c'est bien vous",
+      "description": "Ce changement demande à nouveau votre mot de passe.",
+      "explanation": "Bloquer un compte et changer un rôle ne peuvent pas être annulés depuis l'atlas : c'est pourquoi votre mot de passe est redemandé même si vous êtes déjà connecté.",
+      "passwordLabel": "Votre mot de passe",
+      "passwordAria": "Mot de passe de {name}",
+      "codeLabel": "Code de l'application d'authentification",
+      "codeHint": "Seulement si votre compte utilise la double authentification",
+      "codePlaceholder": "123456",
+      "confirm": "Confirmer",
+      "cancel": "Annuler"
+    },
+    "system": {
+      "loading": "Interrogation des services…",
+      "servicesTitle": "Services sous-jacents",
+      "services": {
+        "database": "Base de données",
+        "cache": "Cache"
+      },
+      "uptime": "En service depuis {uptime}",
+      "uptimeDays": "{days} j {hours} h",
+      "uptimeHours": "{hours} h {minutes} min",
+      "uptimeMinutes": "{minutes} min",
+      "dataVersion": "version des données {version}",
+      "atlasTitle": "L'atlas en chiffres",
+      "counts": {
+        "publishedSites": "Sites publiés",
+        "publishedTracings": "Tracés publiés",
+        "accounts": "Comptes",
+        "accountsLastDay": "Nouveaux en 24 heures",
+        "unverifiedAccounts": "Jamais confirmés",
+        "blockedAccounts": "Bloqués",
+        "revokedTrust": "Publication suspendue",
+        "pendingRevisions": "En attente de relecture"
+      },
+      "signalsNote": "Une vague de nouveaux comptes qui ne confirment jamais d'adresse est la forme d'une inscription automatisée. Aucun de ces chiffres ne prouve quoi que ce soit à lui seul.",
+      "counters": {
+        "mail_deliveries_total": "Courriels remis",
+        "auth_events_total": "Résultats de connexion",
+        "rate_limit_decisions_total": "Décisions de limitation",
+        "moderation_actions_total": "Actions de modération"
+      },
+      "noSeries": "Rien de compté pour l'instant.",
+      "countersNote": "Ce sont des totaux depuis le dernier démarrage du processus, non des taux — un chiffre bas après un déploiement est un redémarrage, pas une bonne nouvelle."
     }
   }
 }

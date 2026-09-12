@@ -1,7 +1,6 @@
 import { and, count, eq } from 'drizzle-orm'
 import { revisions, siteImages, sites, tracings, users } from '~~/server/database/schema'
 import { evaluateTrust } from '#shared/utils/authorization'
-import type { SessionUser } from '#shared/types'
 
 /**
  * The notebook's front page: who you are here, what you have put in, and where
@@ -23,8 +22,7 @@ defineRouteMeta({
 })
 
 export default defineEventHandler(async (event) => {
-  const session = await requireUserSession(event)
-  const userId = (session.user as SessionUser).id
+  const userId = (await requireActiveUser(event)).id
   await enforceRateLimit(event, 'record')
 
   const database = useDatabase()

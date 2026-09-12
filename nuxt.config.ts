@@ -783,6 +783,44 @@ export default defineNuxtConfig({
     '/api/sites/**': {
       headers: { 'cache-control': 'public, max-age=60' },
     },
+
+    /**
+     * The admin station must not be indexed, and must not be cached anywhere.
+     *
+     * `X-Robots-Tag` rather than relying on the page's own
+     * `<meta name="robots">` alone: the meta tag only exists once a crawler has
+     * executed the page, and this app is a Nuxt SPA behind a CDN — a header is
+     * read by everything, including the fetchers that never run JavaScript.
+     * `robots.txt` carries the matching `Disallow` as a third measure; it binds
+     * only the crawlers that read it, which is why it is not the only one.
+     *
+     * `no-store` covers both halves, and the API half matters more than it
+     * looks: these responses carry registered email addresses and one person's
+     * complete contribution history, and the project already runs behind Bunny
+     * with nothing in this config forbidding page-level edge caching. A cached
+     * admin response is a cross-user leak waiting for a misconfiguration.
+     */
+    // `/admin` is spelled out as well as `/admin/**`: whether the wildcard
+    // also matches the bare prefix is a radix3 detail not worth resting the
+    // one measure a non-executing crawler obeys on.
+    '/admin': {
+      headers: {
+        'x-robots-tag': 'noindex, nofollow, noarchive',
+        'cache-control': 'no-store',
+      },
+    },
+    '/admin/**': {
+      headers: {
+        'x-robots-tag': 'noindex, nofollow, noarchive',
+        'cache-control': 'no-store',
+      },
+    },
+    '/api/admin/**': {
+      headers: {
+        'x-robots-tag': 'noindex, nofollow, noarchive',
+        'cache-control': 'no-store',
+      },
+    },
   },
 
   vite: {

@@ -80,6 +80,23 @@ export const RATE_LIMITS = {
    * policy is the IP-wide backstop, not the only guard.
    */
   twoFactorVerify: { limit: 8, windowSeconds: 900 },
+  /**
+   * The admin panel's reads. Wide, because the station is a dashboard that
+   * refreshes several lists from one screen and an administrator working a
+   * spam run legitimately reloads it hard — but not unlimited, because these
+   * are the widest-reading endpoints in the app: `accounts.get.ts` returns
+   * email addresses and `accounts/[id].get.ts` returns one person's complete
+   * body of work, so a compromised admin session should still meet a ceiling
+   * on how fast it can be used to enumerate the user table.
+   */
+  admin: { limit: 240, windowSeconds: 60 },
+  /**
+   * Re-authentication for a sanction. Matches `login`'s brute-force
+   * resistance exactly, because it takes the same password — a step-up
+   * endpoint with a looser cap than the login form would simply be the softer
+   * of two doors onto the same credential.
+   */
+  adminStepUp: { limit: 8, windowSeconds: 900 },
 } as const satisfies Record<string, RateLimitPolicy>
 
 export type RateLimitName = keyof typeof RATE_LIMITS

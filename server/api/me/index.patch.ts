@@ -1,7 +1,6 @@
 import { z } from 'zod'
 import { and, eq, ne } from 'drizzle-orm'
 import { users } from '~~/server/database/schema'
-import type { SessionUser } from '#shared/types'
 
 /**
  * A camera hash — `{zoom}/{lat}/{lon}`, the same string the map already writes
@@ -45,8 +44,13 @@ defineRouteMeta({
 })
 
 export default defineEventHandler(async (event) => {
+  const sessionUser = await requireActiveUser(event)
+  // Read separately from `requireActiveUser`, which returns the identity
+  // rather than the envelope: the re-seal below has to preserve everything
+  // else the cookie carries, `loggedInAt` included — that value is what
+  // `isSessionCurrent` compares against, so dropping it here would revoke the
+  // session of anyone who renamed themselves.
   const session = await requireUserSession(event)
-  const sessionUser = session.user as SessionUser
   await enforceRateLimit(event, 'contribute')
 
   const body = await readValidatedBody(event, profileSchema.parse)

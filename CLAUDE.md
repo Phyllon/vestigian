@@ -94,7 +94,10 @@ checking `.claude/rules/` first, every time, not just this once.
 - **An edit that removes more than it adds is queued regardless of trust** (`isBlankingEdit`) — a wrong auto-approval on a blanking edit costs far more than a moderator glance.
 - **Revert writes a new revision** restoring the prior state. Never delete a revision. History is append-only, and reverts do not increment the moderator's trust counter.
 - **A decision reaches the person it was made about** — review and trust decisions mail the author after the write, never before (reverts excluded: their author is the moderator).
-- **Nobody can change their own role, and no admin can demote another admin** (`checkRoleChange`) — removing an admin requires direct database access, same as creating the first one.
+- **Nobody can change their own role, and no admin can demote another admin** (`checkRoleChange`) — removing an admin requires direct database access, same as creating the first one. **`checkBan` refuses a block against an admin for exactly the same reason**: a locked-out admin is neutralised as completely as a demoted one.
+- **`users.sessions_valid_from` is the only session revocation this app has.** The session is a stateless sealed cookie with nothing to delete, so revocation is `isSessionCurrent` comparing the sealed `loggedInAt` against that column. Blocking an account bumps it, lifting a block bumps it, and `/api/admin/sessions` bumps it alone. Anything that must end a live session bumps it; nothing else can.
+- **A block stops the person, not their work.** Published sites, tracings, photographs and revision history are untouched, and pending revisions stay in the moderator queue. Taking work offline is a separate, counted, reversible sweep — never a side effect of a block.
+- **Retraction goes through `applyRevision()` like everything else.** Taking a record off the atlas is an approved revision carrying `retracted: true`, not an `UPDATE ... SET status` in an endpoint. No second write path was added for it.
 - **Role and trust are re-read from the database inside every guard**, never from the session cookie.
 - **Slugs never change on edit.**
 - Suspension leaves `approved_contributions` untouched, so restoring trust returns someone exactly where they were.
@@ -112,7 +115,9 @@ Full rationale (why Casbin/CASL/Cerbos were rejected, the notification mechanics
 - **Nothing a user typed reaches an inbox as markup** (`renderTokenEmail` escapes).
 - Uploads: format is read from **magic bytes**, every image is **re-encoded through sharp**, storage keys derive from database ids, never the filename.
 - Images with an unresolved licence (`UNKNOWN`) or `ARR` are never published.
-- Signup: self-hosted **ALTCHA** + honeypot + per-IP rate limit + email verification.
+- Signup: self-hosted **ALTCHA** + honeypot + per-IP rate limit + email verification, and a disposable-domain check on the address (`server/utils/disposable-email.ts`).
+- **Every authenticated route asks `requireActiveUser`, not `requireUserSession`.** The latter only proves a cookie unseals; the former is what makes a block and a revoked session bite on contributing, uploading and endorsing rather than only on the moderation routes a blocked contributor could never reach.
+- **Role changes, blocks and bulk retraction demand the password again** (`requireStepUp`), and that check **fails closed** on a cache outage — the one deliberate inversion of `enforceRateLimit`'s fail-open, because those are the actions this app cannot undo from inside itself.
 - **Forwarded headers are believed only behind a trusted proxy** (`NUXT_BEHIND_TRUSTED_PROXY`); `x-forwarded-for` is deliberately never read.
 - **The session cookie expires** (`maxAge` set).
 - **sharp is given an explicit `limitInputPixels`.**
@@ -141,7 +146,9 @@ app/
     tracing/   TracingDetailPanel
     contribute/ ContributionPanel SiteEditorForm TracingEditorForm GeometryDrawTool ImageUploader
     auth/      LoginForm RegisterForm PasswordField PasswordRequirements AccountMenu
-    moderation/ ReviewQueue RevisionDiff ContributorTable
+    moderation/ ReviewQueue RevisionDiff
+    admin/     AdminCommandBar AdminActivityStream AdminAccountTable AdminAccountDossier
+               AdminImageQueue AdminAuditLog AdminSystemPanel AdminStepUpDialog
     limes/     LimesPanel
     notebook/  NotebookControls MilestoneStamps
     columns/   ColumnTrajanGallery ColumnMarcusAureliusViewer
@@ -152,11 +159,12 @@ app/
     data/ useSiteQuery useSiteEnrichment useSiteEndorsement useImageUrl useCanonicalUrl
           useNoIndex useSocialMeta                                                     (+__test__/)
     auth/ useSession
+    admin/ useAdminStepUp
     user/ useNotebook
     limes/ useLimes
     ui/   useColorScheme useUiLocale useBreakpoint                                      (+__test__/)
   layouts/ default.vue (map shell) reading.vue (documents)
-  middleware/ authenticated.ts moderator.ts
+  middleware/ authenticated.ts moderator.ts admin.ts (404s, not 403s)
   router.options.ts          scroll behaviour; the camera hash is not a selector
   pages/ index login register verify forgot-password reset-password
          licence privacy impressum settings offline
@@ -164,7 +172,7 @@ app/
          contributor/[name]
          site/[slug] site/[slug]/edit tracing/[id] tracing/[id]/edit
          limes/index limes/[slug]
-         moderation/index moderation/contributors
+         moderation/index          admin/index (one station, sections in the query string)
          tabula-peutingeriana columns
 server/
   plugins/ observability.ts   the only per-request hook: id, access log, span
@@ -176,12 +184,15 @@ server/
        me/ (index.get/patch contributions visits bookmarks map.geojson field-kit.gpx)
        contributors/[name]
        moderation/  data/  limes/
+       admin/ (activity accounts accounts/[id] images audit system
+               step-up ban retract sessions)
        images/[id]/[preset]  sites/[id]/enrichment  health ready metrics openapi.json
        column-reliefs/ (+ [id]/[preset])  tabula-peutingeriana/network.geojson
   routes/ robots.txt sitemap.xml sitemap-static.xml
           sitemap-sites/[page]  sitemap-tracings/[page]
   database/ schema/ (users sites notebook endorsements geo atlas) migrations/ migrate.ts
   utils/ mvt atlas limes openapi permissions ratelimit images images-order uploads tokens diff
+         step-up retraction admin-audit disposable-email
          notebook gpx basemap-pmtiles endorsements
          site-record validation
          mail mail-template notifications
@@ -295,5 +306,5 @@ this project.
   check its licence tags, hit the real endpoint), not from memory or
   documentation alone. Also you are free to use NC licenses. Cite what was actually checked and
   how.
-- **Maintain documentation** Keep documentation up-to-date (documents/, .claude/rules/)
+- **Maintain documentation** Keep documentation up-to-date (documents/, .claude/rules/) after implementing a new feature
 - **commits** never commit code yourself, always wait for user instruction

@@ -1,6 +1,5 @@
 import { eq } from 'drizzle-orm'
 import { users } from '~~/server/database/schema'
-import type { SessionUser } from '#shared/types'
 
 /**
  * Generates a fresh TOTP secret for the signed-in account, without enabling
@@ -24,8 +23,7 @@ defineRouteMeta({
 })
 
 export default defineEventHandler(async (event) => {
-  const session = await requireUserSession(event)
-  const sessionUser = session.user as SessionUser
+  const sessionUser = await requireActiveUser(event)
   await enforceRateLimit(event, 'passwordReset')
 
   const database = useDatabase()

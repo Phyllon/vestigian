@@ -60,6 +60,8 @@ export type MailKind =
   | 'revision-rejected'
   | 'trust-suspended'
   | 'trust-restored'
+  | 'account-blocked'
+  | 'account-unblocked'
   | 'account-deleted'
   | 'two-factor-enabled'
   | 'two-factor-disabled'
@@ -389,6 +391,60 @@ const buildAccountCopy = (input: AccountEmailInput): EmailCopy => {
         note: input.note,
         reassurance:
           'Everything you contributed in the meantime still counts; nothing had to be recorded twice.',
+        footerReason,
+        showPasteFallback: false,
+      }
+
+    /**
+     * A block is the one sanction the person cannot discover for themselves:
+     * their next sign-in fails, and an account that refuses a correct password
+     * reads as a broken site rather than a decision. So this names the
+     * decision, names the reason if one was given, and says plainly what has
+     * and has not happened to their work — which is the difference between a
+     * sanction someone can appeal and one they can only guess at.
+     *
+     * No action button. There is nothing on the site they can now do, and
+     * offering a link into an account they cannot open would be a taunt.
+     */
+    case 'account-blocked':
+      return {
+        subject: 'Your Vestigian account has been blocked',
+        preheader: `The account registered to ${input.recipient} was blocked on ${when}.`,
+        heading: 'Your account has been blocked',
+        paragraphs: [
+          `An administrator has blocked the Vestigian account registered to ${input.recipient}. You can no longer sign in, and any session you had open has ended.`,
+          'What you contributed is unaffected by this: the sites, tracings and photographs you added are still on the atlas, still credited to you, and your revision history is unchanged. Blocking an account stops a person from making further changes; it is not a deletion of their work.',
+        ],
+        facts: [
+          { label: 'Account', value: input.displayName },
+          { label: 'Blocked', value: when },
+          ...(input.moderatorName ? [{ label: 'By', value: input.moderatorName }] : []),
+        ],
+        note: input.note,
+        reassurance:
+          'If you think this is a mistake, reply to this message — it reaches the people who run the atlas, and a block can be lifted.',
+        footerReason,
+        showPasteFallback: false,
+      }
+
+    case 'account-unblocked':
+      return {
+        subject: 'Your Vestigian account works again',
+        preheader: `The block on ${input.recipient} was lifted on ${when}.`,
+        heading: 'Your account works again',
+        paragraphs: [
+          'An administrator has lifted the block on your Vestigian account. You can sign in again, and contribute as you did before.',
+          'You will have to sign in fresh: the block ended every session that was open, and lifting it does not bring those back.',
+        ],
+        action: { label: 'Sign in', href: `${site}/login` },
+        facts: [
+          { label: 'Account', value: input.displayName },
+          { label: 'Unblocked', value: when },
+          ...(input.moderatorName ? [{ label: 'By', value: input.moderatorName }] : []),
+        ],
+        note: input.note,
+        reassurance:
+          'Your standing is exactly what it was: accepted contributions, trust level and role were never touched by the block.',
         footerReason,
         showPasteFallback: false,
       }

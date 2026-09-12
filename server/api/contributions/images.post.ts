@@ -2,7 +2,6 @@ import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import sharp from 'sharp'
 import { and, eq } from 'drizzle-orm'
 import { siteImages, sites, users } from '~~/server/database/schema'
-import type { SessionUser } from '#shared/types'
 import { evaluateTrust } from '#shared/utils/authorization'
 
 /**
@@ -48,8 +47,7 @@ defineRouteMeta({
 })
 
 export default defineEventHandler(async (event) => {
-  const session = await requireUserSession(event)
-  const user = session.user as SessionUser
+  const user = await requireActiveUser(event)
   await enforceRateLimit(event, 'upload')
 
   /**

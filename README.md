@@ -377,9 +377,20 @@ Tapping a traced route opens its own panel, with the course length computed by P
 
 - **Review queue** with field-level diffs, flagged for substantial rewrites and blanking edits.
 - **Revert** from any site's history.
-- **Contributors** at `/moderation/contributors`: suspend or restore automatic publishing, and — for administrators — change roles.
+  Suspension leaves the accepted-contribution count untouched, so restoring trust returns someone to exactly where they were. Three rules guard role changes: only admins may make them, nobody may change their own, and no admin can demote another admin — removing one requires direct database access, the same as creating the very first one.
 
-Suspension leaves the accepted-contribution count untouched, so restoring trust returns someone to exactly where they were. Three rules guard role changes: only admins may make them, nobody may change their own, and no admin can demote another admin — removing one requires direct database access, the same as creating the very first one.
+## The admin station
+
+`/admin`, administrators only, reached from the account menu and linked from nowhere else. It is disallowed in `robots.txt`, carries an `X-Robots-Tag: noindex` header and `no-store`, and answers 404 rather than 403 to anyone signed in without the role.
+
+- **Activity**: every revision the atlas has, newest first — including the edits a trusted contributor published with nobody reviewing them, which the moderator's queue by definition cannot show. Filter by status, kind, author, date, whether anyone reviewed it, and whether it removes more than it adds; search titles and edit summaries.
+- **Accounts**: the roll with email addresses (audited on every read), role, standing, two-factor and verification state. Suspend or restore automatic publishing, change roles, end every session an account has open, and block or unblock an account.
+- **A dossier per account**: everything one person created, changed, photographed and endorsed, with diffs — and one counted, reversible sweep that takes all of it offline.
+- **Photographs**: the review backlog, plus every image whose licence is `UNKNOWN` or `ARR`. Those can never be published, and no other screen lists them.
+- **Audit trail**: append-only, every admin action with who and when. No addresses of origin, no credentials.
+- **System**: readiness of both database pools and the cache, backlog counts, signup-abuse signals, and the four counters worth a screen — failed mail deliveries first, since mail delivery never throws and a broken provider is otherwise silent.
+
+A **block stops the person, not their work**: login is refused, every live session ends immediately, and their published records stay on the atlas, still credited. Taking that work offline is the separate sweep above. **Changing a role and blocking an account ask for the password again**, because neither can be undone from inside the application — and no administrator can be blocked at all, for the same reason none can be demoted.
 
 ## Photographs
 

@@ -1,5 +1,3 @@
-import type { SessionUser } from '#shared/types'
-
 /**
  * The reader's own traces, as GeoJSON for a client-side map layer.
  *
@@ -25,8 +23,7 @@ defineRouteMeta({
 })
 
 export default defineEventHandler(async (event) => {
-  const session = await requireUserSession(event)
-  const userId = (session.user as SessionUser).id
+  const userId = (await requireActiveUser(event)).id
   await enforceRateLimit(event, 'record')
 
   const places = await readNotebookPlaces(userId)

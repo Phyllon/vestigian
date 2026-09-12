@@ -63,6 +63,29 @@ export const ACCOUNTS = {
     approvedContributions: 0,
   },
   /**
+   * A second administrator, so `admin.spec.ts` can assert that blocking one
+   * administrator from another is refused — the rule `checkBan` exists for, and
+   * one that cannot be tested with a single admin fixture.
+   */
+  secondAdmin: {
+    email: 'second-admin@e2e.local',
+    displayName: 'E2E Second Admin',
+    role: 'admin',
+    approvedContributions: 0,
+  },
+  /**
+   * Exclusively for `admin.spec.ts` to block and unblock. A shared account
+   * would be left unable to sign in for every spec that runs afterwards, and
+   * the failure would surface in whichever file happened to come next rather
+   * than in the one that caused it.
+   */
+  blockSubject: {
+    email: 'block-subject@e2e.local',
+    displayName: 'E2E Block Subject',
+    role: 'contributor',
+    approvedContributions: 5,
+  },
+  /**
    * Exclusively for `two-factor.spec.ts` — enabling and disabling a real
    * TOTP secret on `trusted` or another shared account would leave it
    * mid-enrollment for every other spec file that signs in as that account
@@ -139,6 +162,19 @@ const removeAccounts = async (sql: postgres.Sql): Promise<void> => {
   // live immediately, so they are real rows, not queue entries.
   await sql`DELETE FROM sites WHERE title LIKE 'E2E %'`
   await sql`DELETE FROM email_tokens WHERE user_id IN (SELECT id FROM users WHERE email LIKE '%@e2e.local')`
+  /**
+   * Append-only in the application, deliberately — but a suite that blocks and
+   * unblocks an account writes rows here on every run, and `actor_id` is
+   * `ON DELETE SET NULL`, so leaving them would build an unexplainable trail
+   * attributed to nobody. The no-edit rule is about the running application,
+   * not about a test fixture cleaning up after itself.
+   */
+  await sql`
+    DELETE FROM admin_audit_log
+    WHERE actor_id IN (SELECT id FROM users WHERE email LIKE '%@e2e.local')
+       OR (subject_type = 'account'
+           AND subject_id IN (SELECT id FROM users WHERE email LIKE '%@e2e.local'))
+  `
   await sql`DELETE FROM users WHERE email LIKE '%@e2e.local'`
 }
 
