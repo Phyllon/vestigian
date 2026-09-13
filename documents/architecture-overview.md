@@ -74,12 +74,12 @@ route so a reader who never asks for them pays nothing:
 ## Background work (not request-driven)
 
 - **Import pipeline** (`scripts/import/`): a resumable, numbered pipeline
-  (19 stages and growing) that pulls vici.org's MySQL dump, converts it to
+  (20 stages and growing) that pulls vici.org's MySQL dump, converts it to
   the Postgres schema, mirrors photographs and the DARE raster basemap,
   builds the Barrington/limes vector data, and imports every later overlay
   (battles, ports, routes, minor antiquities, coin hoards, empire extents,
-  Tabula Peutingeriana, column relief plates, modern cities). Run once per
-  environment, not per request.
+  Tabula Peutingeriana, column relief plates, modern cities, two inscription
+  corpora). Run once per environment, not per request.
 - **`pnpm tiles:warm`**: pre-populates the Valkey tile cache after a deploy or
   bulk import so the first visitors don't pay for cold PostGIS renders.
 - **`pnpm db:snapshot`** / **`pnpm images:reconcile`**: nightly-ish maintenance,
@@ -94,6 +94,16 @@ decides whether it publishes immediately or queues for a moderator, and
 reverts write a new revision rather than deleting history. Authorization rules
 live in one file, `shared/utils/authorization.ts`, imported by both the client
 (to hide controls) and the server (to actually enforce).
+
+`/admin` (admin role only, `server/api/admin/**`) sits above this as a
+governance layer, not a second write path: banning an account is a column
+flip plus a `users.sessions_valid_from` bump (the app's only session
+revocation, since sessions are stateless), and its bulk "take this account's
+work offline" sweep still goes through `applyRevision()` — a revision
+carrying `retracted: true` for records the person created, an ordinary
+revert for edits they made to someone else's. Role changes and bans require
+re-entering the password (step-up), which fails closed on a cache outage —
+the one place this app is not fail-open by default.
 
 ## Observability
 
@@ -119,9 +129,11 @@ metrics, 30d logs, 7d traces).
 CrowdSec reads the app's structured logs and writes ban/captcha decisions;
 nothing currently enforces them (no bouncer wired to Traefik yet — see
 `docker/security/README.md`). Application-level defenses that do run today:
-argon2id password hashing, ALTCHA proof-of-work on signup, per-IP rate limits
-enforced through Valkey (fail open, logged), a strict CSP, and a session
-cookie that now actually expires.
+argon2id password hashing, ALTCHA proof-of-work + a disposable-email-domain
+check on signup (also enforced on email change), per-IP rate limits enforced
+through Valkey (fail open, logged), a strict CSP, a session cookie that now
+actually expires, and the `/admin` governance layer above (step-up
+re-authentication, fail-closed, an append-only audit log).
 
 ## Deployment
 
@@ -146,19 +158,21 @@ Kubernetes would be a translation of the same containers, not a rewrite.
 
 ## Directory-to-architecture map
 
-| Layer                                       | Where                                                                                        |
-| ------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| UI / map rendering                          | `app/components/map/` (basemap switcher + separate overlay switcher), `app/composables/map/` |
-| Column relief viewers (OpenSeadragon)       | `app/components/columns/`, `app/composables/columns/`                                        |
-| Record detail, contribution forms           | `app/components/site/`, `contribute/`, `moderation/`                                         |
-| Domain vocabulary shared by client + server | `shared/types/`, `shared/utils/`                                                             |
-| API routes                                  | `server/api/**` (one file per route, Nitro file-based routing)                               |
-| Tile SQL generation                         | `server/utils/mvt.ts`, `atlas.ts`, `limes.ts`                                                |
-| Governance (revisions, trust, permissions)  | `server/utils/revisions.ts`, `permissions.ts`                                                |
-| DB schema (Drizzle)                         | `server/database/schema/`                                                                    |
-| Hand-written SQL migrations                 | `server/database/migrations/`                                                                |
-| One-off data pipelines                      | `scripts/import/`, `scripts/*.ts`                                                            |
-| Container definitions                       | `docker/`                                                                                    |
+| Layer                                       | Where                                                                                                                |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| UI / map rendering                          | `app/components/map/` (basemap switcher + separate overlay switcher), `app/composables/map/`                         |
+| Column relief viewers (OpenSeadragon)       | `app/components/columns/`, `app/composables/columns/`                                                                |
+| Record detail, contribution forms           | `app/components/site/`, `contribute/`, `moderation/`                                                                 |
+| Admin command station                       | `app/pages/admin/`, `app/components/admin/`, `server/api/admin/**`                                                   |
+| Epigraphy (EDH + Attic Inscriptions Online) | `app/pages/inscriptions/`, `app/components/epigraphy/`, `server/utils/inscriptions.ts`, `server/api/inscriptions/**` |
+| Domain vocabulary shared by client + server | `shared/types/`, `shared/utils/`                                                                                     |
+| API routes                                  | `server/api/**` (one file per route, Nitro file-based routing)                                                       |
+| Tile SQL generation                         | `server/utils/mvt.ts`, `atlas.ts`, `limes.ts`                                                                        |
+| Governance (revisions, trust, permissions)  | `server/utils/revisions.ts`, `permissions.ts`                                                                        |
+| DB schema (Drizzle)                         | `server/database/schema/`                                                                                            |
+| Hand-written SQL migrations                 | `server/database/migrations/`                                                                                        |
+| One-off data pipelines                      | `scripts/import/`, `scripts/*.ts`                                                                                    |
+| Container definitions                       | `docker/`                                                                                                            |
 
 ## What this diagram leaves out
 

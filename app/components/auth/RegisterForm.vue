@@ -121,6 +121,7 @@
   <UForm
     v-else
     ref="form"
+    method="post"
     :schema="schema"
     :state="state"
     :validate-on-input-delay="0"

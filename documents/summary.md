@@ -6,7 +6,7 @@ This document is a technical deep-dive for interested, technically literate
 readers. It covers accessibility, security, architecture, the technology
 stack, the request lifecycle, the full feature set, how borrowed data is
 cross-checked and enriched, and the legal/GDPR posture. It reflects the
-codebase and its documented design decisions as of **2026-09-07**.
+codebase and its documented design decisions as of **2026-09-12**.
 
 ---
 
@@ -173,6 +173,23 @@ load-bearing — never to be "quietly" weakened):
   very next request rather than at next login.
 - **Slugs never change on edit** — inbound links, citations, and the sitemap
   all depend on permanence.
+- **`users.sessions_valid_from` is the only session revocation this app
+  has.** Sessions are stateless sealed cookies with nothing server-side to
+  delete, so ending one is a comparison, not a deletion: anything sealed
+  before that column is dead on its next request. Banning an account, lifting
+  a ban, and an admin's "end this session" action are the only three things
+  that bump it.
+- **A ban stops the person, not their work.** Published sites, tracings,
+  photographs and revision history are left untouched; taking a banned
+  account's work off the atlas is a separate, deliberate, reversible sweep,
+  never a side effect of the ban itself — see §5.10.
+- **No admin can ever ban or demote another admin, unconditionally** — not
+  "while more than one exists." Removing a rogue or compromised co-admin
+  requires the same direct database access as creating the first one,
+  deliberately slower than a button any admin could press against any other.
+- **Taking a record off the atlas is still an ordinary revision** — one
+  carrying `retracted: true`, applied through `applyRevision()` like
+  everything else. No second write path was added for it.
 
 ### 2.4 Versioning & releases
 
@@ -241,6 +258,8 @@ mindmap
       EOX Sentinel-2 (CC BY-NC-SA)
       GeoNames cities500 (CC BY)
       EDH findspots (CC BY-SA)
+      EDH inscriptions corpus, EpiDoc TEI (CC BY-SA 4.0)
+      Attic Inscriptions Online (CC BY-SA 3.0)
       Natural Earth country boundaries (public domain)
       OmnesViae / Tabula Peutingeriana (unlicensed, gated)
       Wikidata battles (CC0)
@@ -257,6 +276,7 @@ mindmap
       CrowdSec (detection)
       ALTCHA
       argon2id
+      disposable-email-domains (signup/email-change guard)
     i18n
       "@nuxtjs/i18n (6 locales)"
       LibreTranslate (self-hosted MT)
@@ -431,7 +451,10 @@ sequenceDiagram
 ### 5.4 Accounts & identity
 
 - Registration with **ALTCHA proof-of-work** + honeypot + per-IP rate limit
-  - email verification.
+  - email verification + a **disposable/throwaway-domain check** — a zod
+    `.refine()` against the `disposable-email-domains` package's list, applied
+    identically to registration and to email change, so a burner address is
+    refused before it can ever receive a verification link.
 - **Opt-in TOTP two-factor authentication** — QR enrollment, 10 single-use
   backup codes (shown once, copy-or-download), disable requires _both_
   password and a code.
@@ -484,6 +507,89 @@ source catalogue through a self-hosted LibreTranslate instance.
   drift from what a handler actually enforces. Interactive UI at
   `http://localhost:3000/_scalar` while `pnpm dev` is running; raw document
   at `/api/openapi.json`.
+
+### 5.9 Epigraphy — two mirrored inscription corpora
+
+- **The Epigraphic Database Heidelberg's inscriptions tree**, mirrored
+  file-for-file from its public EpiDoc TEI GitHub repo (CC BY-SA 4.0):
+  **79,206 records**, of which **13,388 (17%)** carry a resolved map
+  position — a Trismegistos place reference joined against the same
+  `edh_findspots` table the site-enrichment concordance check already uses,
+  accepted only where the join resolves to exactly one distinct coordinate
+  rather than guessing among several.
+- **Attic Inscriptions Online**, a second, entirely separate corpus (CC BY-SA
+  3.0): **3,412** Athenian decrees and dedications, 4th–1st century BC,
+  geolocated through Pleiades place URIs — the same identifier space the
+  Barrington sheet's own places already live in — resolving a findspot for
+  **78%** of records, far denser than EDH's 17% because this corpus is
+  concentrated in Attica.
+- **Both are imported reference material, not contributed data** — their own
+  table, no `siteId`, outside the revision/moderation pipeline entirely, the
+  same treatment already given the Barrington sheet and the other overlay
+  datasets in §6.3.
+- Surfaced three ways: a **"nearby inscriptions" cross-reference** on every
+  site and tracing page (`ST_DWithin` against the resolved geometry), a
+  standalone **browse/detail page per corpus** (`/inscriptions`,
+  `/inscriptions/attic`) with facet filters and a "show on map" link, and two
+  independent, off-by-default **map overlay layers** (distinct icons, so both
+  can be switched on together near Athens without reading as one dataset).
+- EDH's German scholarly metadata (title, commentary) is machine-translated
+  on read through the same self-hosted LibreTranslate path enrichment uses;
+  the carved Latin/Greek transcription itself is **never** machine-translated
+  — the interface has no source-language engine for it, and a fluent-sounding
+  wrong rendering of an epigraphic abbreviation would be worse than none.
+- Photograph _metadata_ for the EDH corpus is mirrored for link-out credit
+  (43,199 records checked, not sampled); no image bytes are mirrored, since
+  every one carries a "rights reserved, free access" statement rather than an
+  open licence.
+
+### 5.10 Administration — the command station
+
+- **`/admin`**, admin-role-only, absorbing what used to be a separate
+  `/moderation/contributors` page. One station, sections switched via the
+  query string (`?section=activity|accounts|images|audit|system`) rather than
+  sub-routes, so any view is linkable and survives a reload.
+- **The activity stream is the reason it exists.** Moderation's own review
+  queue only ever showed _pending_ work; the moment a contributor crosses the
+  trust threshold their edits publish immediately and, until this station,
+  never appeared on any screen again. The activity stream lists every
+  revision regardless of status, flags which ones auto-published unreviewed,
+  and reuses the same diff/blanking-edit logic the moderation queue already
+  has.
+- **A ban is a new, harder power than trust revocation.** Trust revocation
+  (existing, moderator-level) only re-queues someone's future edits. A ban
+  (new, admin-only) refuses login, ends every live session immediately via
+  `sessions_valid_from`, and refuses every write — while leaving already-
+  published work untouched (§2.3). **An admin can never be banned or demoted
+  by another admin**, unconditionally, closing the obvious lockout attack.
+- **Taking a banned account's work offline is a separate, counted, reversible
+  sweep** — an explicit dossier action, never automatic on ban — built
+  entirely out of `applyRevision()`: reverting their edits to others' records,
+  retracting records they created (a revision carrying `retracted: true`),
+  and withdrawing their photographs, with per-item outcomes rather than an
+  all-or-nothing transaction.
+- **Role changes and bans demand the password again** (step-up
+  re-authentication, TOTP too if enabled) — a short-lived grant keyed to the
+  specific session, not just the account, so a different stolen session for
+  the same admin can't ride a grant the real admin minted. This check **fails
+  closed** on a cache outage, the one deliberate inversion of this project's
+  usual fail-open rate-limit philosophy, because these actions are the ones
+  the app cannot undo from inside itself.
+- **Every admin action is written to an append-only audit log** — who did
+  what, to whom, when — including every read of the accounts view, since that
+  view surfaces every registered email address. Nothing is ever updated or
+  deleted from it.
+- **Deliberately unfindable**: `X-Robots-Tag: noindex, nofollow, noarchive`
+  and `Cache-Control: no-store` on every `/admin` and `/api/admin` response,
+  `Disallow: /admin` in `robots.txt`, every admin fetch client-side only so
+  nothing privileged is ever baked into cacheable server-rendered HTML, and a
+  non-admin visiting the route gets a **404**, not a 403 — the route's
+  existence is not confirmed to someone who cannot use it (the API endpoints
+  behind it still answer honest 403s, once the caller is already
+  authenticated).
+- Also surfaces what previously existed only in Grafana: images stuck with
+  an unresolved (`UNKNOWN`) or all-rights-reserved licence, and failed mail
+  deliveries — both invisible to anyone without a Loki login until now.
 
 ---
 
@@ -640,10 +746,17 @@ flowchart LR
     A["Registration attempt"] --> B["Self-hosted ALTCHA\nproof-of-work"]
     B --> C["Off-screen honeypot field"]
     C --> D["Per-IP rate limit"]
-    D --> E["Account created at trust 0"]
+    D --> DD["Disposable-domain check\n(zod .refine, same rule\nreused on email change)"]
+    DD --> E["Account created at trust 0"]
     E --> F["Email verification required\nbefore login succeeds"]
     F --> G["Even a bot that clears\nevery gate earns nothing\nbut a queued revision"]
 ```
+
+The disposable-domain check runs entirely against a static npm package's
+domain list (`disposable-email-domains`) — no external lookup, no added
+latency, and no false sense of security against a determined attacker
+registering their own throwaway domain, which is exactly why it sits
+alongside the other gates rather than replacing any of them.
 
 ALTCHA replaced Turnstile specifically to remove the app's last third-party
 runtime dependency — a deliberate trade: it _prices_ automated signup rather
@@ -712,6 +825,22 @@ licence normalization), several readability improvements, and a handful of
 narrowly scoped, documented suppressions for verified false positives —
 never a blanket rule disable.
 
+### 8.7 Administrative governance (`/admin`)
+
+The admin station (§5.10) is the one place in the app where a single role
+can read every registered email address and end another account's access
+entirely, so its security model is layered rather than resting on the role
+check alone:
+
+| Control                        | Detail                                                                                                                                                                                                                                                                             |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Concealment                    | Non-admins get a **404** at `/admin`, not a 403 — existence is not confirmed to someone who cannot use it. `noindex`/`no-store` headers and a `robots.txt` disallow keep it out of crawlers and CDN caches.                                                                        |
+| Step-up re-authentication      | Role changes and bans require the password again (plus TOTP if enabled), minting a 15-minute grant keyed to `{userId}:{loggedInAt}` — the session's own timestamp, not just the account id, so a second stolen session for the same admin cannot spend a grant it never earned.    |
+| Fails closed                   | A Valkey outage refuses a step-up-gated action outright — the one deliberate exception to this project's usual fail-open posture (rate limiting, mail delivery), because a ban or role change is the one class of action the app cannot undo from inside itself if abused.         |
+| Unconditional admin protection | Neither `checkBan` nor `checkRoleChange` can ever be satisfied against a target who is already an admin, full stop — not "while more than one admin exists." Removing a rogue admin requires direct database access, the same deliberately slower path that creates the first one. |
+| Audit trail                    | Every admin write, and every read of the accounts view (it surfaces emails), lands in an append-only `admin_audit_log` row — actor, action, subject, a detail blob, never a password, a TOTP secret, or an IP address.                                                             |
+| Session revocation             | Banning, unbanning, and an explicit "end this session" action are the only three things that bump `users.sessions_valid_from` — the sole session-revocation mechanism this stateless-cookie app has.                                                                               |
+
 ---
 
 ## 9. GDPR & legal
@@ -763,6 +892,12 @@ flowchart TD
   the reset link itself goes to whatever inbox is on file, which may
   already be an attacker's; the follow-up notice is the one point where the
   genuine owner learns something happened at all.
+- **The admin station is the one surface where email addresses are shown and
+  searched by someone other than their owner** — a deliberate, narrowly
+  scoped exception (role: admin only), and every such read is itself written
+  to the audit log in §8.7, so the exception is accountable rather than
+  silent. The admin audit log holds no IP addresses and no credentials, the
+  same restriction already applied to the request log's own retention.
 
 ### 9.2 Cookies — no consent banner, and why
 

@@ -37,7 +37,7 @@
       </p>
     </div>
 
-    <UForm v-else :schema="schema" :state="state" class="space-y-4" @submit="request">
+    <UForm v-else method="post" :schema="schema" :state="state" class="space-y-4" @submit="request">
       <header>
         <h1 class="text-2xl">{{ t('forgotPasswordPage.title') }}</h1>
         <p class="mt-1 text-sm text-ink-500 dark:text-paper-400">

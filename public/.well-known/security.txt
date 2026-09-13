@@ -1,0 +1,22 @@
+# Vestigian — vulnerability disclosure, per RFC 9116.
+#
+# Served straight out of `public/`, so it is reachable at
+# /.well-known/security.txt with no route of its own.
+#
+# EVERY VALUE BELOW IS A PLACEHOLDER and must be replaced before this site is
+# public. `vestigian.example` is the same stand-in host `.env.example` and
+# `nuxt.config.ts` already use; `[CONTACT EMAIL]` is the one
+# `impressum.contactPlaceholder` carries in i18n/locales/en.json — this file
+# and the legal notice are meant to name the same address. A security.txt
+# advertising an address nobody reads is worse than having none, because it
+# stops a finder looking for another way through.
+#
+# Expires is an obligation rather than a formality: RFC 9116 says a consumer
+# should treat an expired file as absent, so this date has to be moved before
+# it passes or the file quietly stops counting. Set roughly a year out.
+
+Contact: mailto:[CONTACT EMAIL]
+Expires: 2027-08-01T00:00:00.000Z
+Preferred-Languages: en, de
+Canonical: https://vestigian.example/.well-known/security.txt
+Policy: https://vestigian.example/impressum

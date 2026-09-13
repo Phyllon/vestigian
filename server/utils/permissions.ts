@@ -10,6 +10,79 @@ import type { SessionUser, UserRole } from '#shared/types'
  * `H3Event` and a database.
  */
 
+/** What the database knows about the caller right now, not at login. */
+export interface CurrentAccount {
+  role: UserRole
+  trustRevoked: boolean
+  approvedContributions: number
+  bannedAt: Date | null
+  banReason: string | null
+  sessionsValidFrom: Date
+}
+
+export interface IdentityDecisionInput {
+  /** The identity sealed into the cookie. Undefined when the account is gone. */
+  sealed: { id: number; displayName: string; loggedInAt: number }
+  current: CurrentAccount | undefined
+}
+
+export type IdentityDecision =
+  { ok: true; user: SessionUser } | { ok: false; status: 401 | 403; message: string }
+
+/**
+ * The order in which a caller's standing is judged, separated from the fetch
+ * that feeds it.
+ *
+ * The order is the rule. A revoked session is checked *before* a ban so that
+ * someone whose block was just lifted — their old cookie spent by the same
+ * bump — is told to sign in again rather than that they are still blocked,
+ * which would be false and unactionable. And the 401/403 split is not
+ * cosmetic: every client path in this app treats 401 as "go and sign in", so
+ * answering 403 to a spent cookie strands someone on a page telling them they
+ * may not do a thing they are in fact allowed to do.
+ *
+ * Pure, so the ordering is asserted in `__test__/permissions.test.ts` rather
+ * than inferred by arranging a real ban against a real session.
+ */
+export const decideIdentity = (input: IdentityDecisionInput): IdentityDecision => {
+  const { sealed, current } = input
+
+  // The account was deleted while the cookie stayed valid.
+  if (!current) {
+    return { ok: false, status: 401, message: 'Sign in again to continue.' }
+  }
+
+  if (
+    !isSessionCurrent({
+      loggedInAt: sealed.loggedInAt,
+      sessionsValidFrom: current.sessionsValidFrom,
+    })
+  ) {
+    return { ok: false, status: 401, message: 'Sign in again to continue.' }
+  }
+
+  if (!isAccountActive(current)) {
+    return {
+      ok: false,
+      status: 403,
+      message: current.banReason
+        ? `This account is blocked: ${current.banReason}`
+        : 'This account is blocked. Contact the operators if you believe that is a mistake.',
+    }
+  }
+
+  return {
+    ok: true,
+    user: {
+      id: sealed.id,
+      displayName: sealed.displayName,
+      role: current.role,
+      trustRevoked: current.trustRevoked,
+      approvedContributions: current.approvedContributions,
+    },
+  }
+}
+
 /**
  * The caller's role, trust and standing **as they are now**, not as they were
  * at login.
@@ -53,43 +126,20 @@ const readCurrentIdentity = async (event: H3Event): Promise<SessionUser> => {
     .where(eq(users.id, sessionUser.id))
     .limit(1)
 
-  // The account was deleted while the cookie stayed valid.
-  if (!current) {
-    throw createError({ statusCode: 401, message: 'Sign in again to continue.' })
-  }
-
-  /**
-   * 401, deliberately, and the same message the deleted-account branch above
-   * uses: a spent cookie is not a refused request, it is an absent one, and
-   * every client path in the app already treats 401 as "go and sign in".
-   * Answering 403 here would strand someone on a page telling them they are
-   * not allowed to do a thing they are in fact allowed to do.
-   */
-  if (
-    !isSessionCurrent({
+  const decision = decideIdentity({
+    sealed: {
+      id: sessionUser.id,
+      displayName: sessionUser.displayName,
       loggedInAt: Number(session.loggedInAt ?? 0),
-      sessionsValidFrom: current.sessionsValidFrom,
-    })
-  ) {
-    throw createError({ statusCode: 401, message: 'Sign in again to continue.' })
+    },
+    current,
+  })
+
+  if (!decision.ok) {
+    throw createError({ statusCode: decision.status, message: decision.message })
   }
 
-  if (!isAccountActive(current)) {
-    throw createError({
-      statusCode: 403,
-      message: current.banReason
-        ? `This account is blocked: ${current.banReason}`
-        : 'This account is blocked. Contact the operators if you believe that is a mistake.',
-    })
-  }
-
-  return {
-    id: sessionUser.id,
-    displayName: sessionUser.displayName,
-    role: current.role,
-    trustRevoked: current.trustRevoked,
-    approvedContributions: current.approvedContributions,
-  }
+  return decision.user
 }
 
 /**

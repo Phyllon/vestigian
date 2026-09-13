@@ -4,7 +4,13 @@
 # Separated from the build so a source-only change does not re-resolve the
 # dependency tree, which is the slowest part of the pipeline.
 FROM node:26-alpine AS deps
-RUN corepack enable
+# Node 26 no longer bundles corepack — it was unbundled after the deprecation in
+# 25, so the plain `corepack enable` this used to run failed with
+# "corepack: not found" and every image build since has died on this line.
+# Installing it from npm restores the shim and keeps `packageManager` in
+# package.json as the single place the pnpm version is written; pinning pnpm
+# here instead would put that version in two files.
+RUN npm i -g corepack@latest && corepack enable
 WORKDIR /app
 COPY package.json pnpm-lock.yaml* ./
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
@@ -12,7 +18,7 @@ RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
 
 # ---- build ------------------------------------------------------------------
 FROM node:26-alpine AS build
-RUN corepack enable
+RUN npm i -g corepack@latest && corepack enable
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .

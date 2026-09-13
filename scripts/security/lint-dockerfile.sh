@@ -6,8 +6,13 @@ cd "$(dirname "${BASH_SOURCE[0]}")/../.."
 
 HADOLINT_IMAGE="hadolint/hadolint:v2.15.1-alpine"
 
+# Enumerated rather than globbed: a Dockerfile that appears in this repo should
+# be added here deliberately, so a new one cannot arrive unlinted and unnoticed.
 status=0
-for dockerfile in docker/Dockerfile docker/security/bunny-bouncer/Dockerfile; do
+for dockerfile in \
+  docker/Dockerfile \
+  docker/backup/Dockerfile \
+  docker/security/bunny-bouncer/Dockerfile; do
   echo "lint-dockerfile: $dockerfile"
   docker run --rm -i \
     -v "$(pwd)/.hadolint.yaml:/.hadolint.yaml:ro" \

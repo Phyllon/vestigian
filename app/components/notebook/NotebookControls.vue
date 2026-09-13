@@ -118,6 +118,7 @@
 
     <form
       v-if="isFormOpen"
+      method="post"
       class="mt-3 space-y-3 rounded-notebook border border-paper-200 p-3 dark:border-night-700"
       @submit.prevent="save"
     >

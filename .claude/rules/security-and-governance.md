@@ -19,6 +19,31 @@ paths:
 
 - Every change to a site or tracing is written to `revisions` **before** any live table is touched.
 - `applyRevision()` in `server/utils/revisions.ts` is the **only** place a live row is written. Automatic approval, moderator approval and revert all go through it. Do not add a second path.
+- **What that file decides is pure and unit-tested; only the writes touch the
+  database.** `planRevisionWrite`, `shouldCountTowardsTrust`, `planRevert`,
+  `buildRetractionPayload` and `geometryKindFor` are exported and asserted in
+  `server/utils/__test__/revisions.test.ts`, following the same split
+  `retraction.ts`/`planRetraction` already used. Before that, every rule in this
+  section was reachable only through a transaction, a live PostGIS geometry and
+  three call sites — which is exactly why the governance core went untested
+  longest despite being the part that matters most. **Extending `applyRevision`
+  means extending the plan function and its test, not adding a branch inside the
+  transaction.**
+  Two holes the extraction closed rather than merely described:
+  a payload carrying `retracted: true` with no resolvable target used to fall
+  _past_ the retraction branch into the insert path — so a retraction that had
+  lost its entity id would have published a brand-new record built from the
+  retraction payload, credited to the moderator who pressed the button; and
+  `revisions.entity_type` is a plain `varchar(20)` with no check constraint, so
+  a value outside the vocabulary produced a payload whose `kind` matched neither
+  branch, making a revert write history, log `revision.applied`, and change
+  nothing. Both are now explicit refusals.
+- **`planRevert` and `buildRetractionPayload` force `kind` and `entityId` from
+  the revision row, after the spread of the stored payload.** That ordering is
+  the property keeping a revert aimed at its own record: `previousPayload` is
+  stored JSON, and one naming a different record would otherwise redirect the
+  write at something no moderator looked at, with `applyRevision` applying it
+  without complaint.
 - **Every authorization rule lives in `shared/utils/authorization.ts`** and nowhere else — both sides import it, and the guards that throw are the only thing left in `server/utils/permissions.ts`. Casbin, CASL and Cerbos were assessed as replacements and rejected: three roles fixed in a `pgEnum` buy nothing from a runtime policy engine, and the rules that actually matter here are not the subject/action/resource shape they model. `users.trust_level` was dropped for the same reason — a derived column written by two hand-transcribed SQL copies of the threshold.
 - **Trust:** new accounts are queued. After **2 accepted contributions** (`evaluateTrust`), edits publish immediately. Moderators can revoke. Images do not count toward trust — uploading two photos is a weaker signal than two records surviving review.
 - **A moderator cannot approve their own contribution** (`canReviewRevision`).
@@ -38,6 +63,17 @@ paths:
   them.
 - **Nobody can change their own role, and no admin can demote another admin, ever** (`checkRoleChange`). This used to allow it once a second admin existed — the `last-admin` branch only blocked demoting the _final_ one, so granting someone admin also handed them the power to strip your own admin role back off, as long as a third account existed to keep the count above one. Reported directly as an unacceptable outcome ("even if I granted some other partner admin rights, this must hold") and closed by making the `admin-protected` branch unconditional: an admin can promote anyone up to admin, but taking admin away from an existing admin is refused regardless of how many others exist. Removing a rogue or compromised co-admin is deliberately left to the same database surgery that creates the first admin — see above — a slower path chosen on purpose over a button any admin could press against any other.
 - **Role and trust are re-read from the database inside every guard.** The session cookie is sealed at login and nothing refreshes it, so reading a role from it let a demoted moderator keep moderating until they logged out. `requireModerator`/`requireAdmin` cost one primary-key lookup and are the reason a demotion bites on the next request.
+- **The order those checks run in is itself a rule, and is tested.**
+  `decideIdentity` (`server/utils/permissions.ts`, pure, asserted in
+  `__test__/permissions.test.ts`) judges deleted-account, then spent session,
+  then ban, then role. Session-before-ban matters because blocking bumps
+  `sessions_valid_from` and **so does lifting the block** — so somebody whose
+  block was just lifted arrives with a spent cookie and a clean record, and must
+  be told to sign in again rather than that they are still blocked, which would
+  be both false and unactionable. The 401/403 split is load-bearing for the same
+  reason: every client path treats 401 as "go and sign in", so answering 403 to a
+  spent cookie strands someone on a page telling them they may not do a thing
+  they are in fact allowed to do.
 - **Slugs never change on edit.** Inbound links, citations and the sitemap point at them.
 - Suspension leaves `approved_contributions` untouched, so restoring trust returns someone exactly where they were.
 

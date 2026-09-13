@@ -50,5 +50,25 @@ compactor:
   # Without this, retention_period above is advisory and nothing ever deletes.
   retention_enabled: true
 
+# The one thing in this deployment that has to be alerted on from a *log* rather
+# than a metric. The backup container has no HTTP endpoint for Prometheus to
+# scrape and no business growing one, but Alloy already ships every container's
+# stdout here — so the ruler evaluates LogQL on the lines backup.sh prints and
+# hands the result to the same Alertmanager the Prometheus rules use.
+#
+# This is what makes "the backups quietly stopped three months ago" a page
+# rather than a discovery. See docker/observability/rules/backup.yml.
+ruler:
+  storage:
+    type: local
+    local:
+      directory: /etc/loki/rules
+  rule_path: /loki/ruler-tmp
+  alertmanager_url: http://alertmanager:9093
+  enable_api: true
+  ring:
+    kvstore:
+      store: inmemory
+
 analytics:
   reporting_enabled: false

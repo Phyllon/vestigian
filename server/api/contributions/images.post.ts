@@ -1,5 +1,9 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
-import sharp from 'sharp'
+// `Metadata` is imported by name rather than reached for as `sharp.Metadata`:
+// 0.35 stopped publishing the types as a namespace alongside the default
+// export, so the old form resolves to a value with no type side and fails as
+// "Cannot find namespace 'sharp'".
+import sharp, { type Metadata } from 'sharp'
 import { and, eq } from 'drizzle-orm'
 import { siteImages, sites, users } from '~~/server/database/schema'
 import { evaluateTrust } from '#shared/utils/authorization'
@@ -133,7 +137,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, message: 'No approved site with that identifier.' })
   }
 
-  let metadata: sharp.Metadata
+  let metadata: Metadata
   let body: Buffer
 
   try {

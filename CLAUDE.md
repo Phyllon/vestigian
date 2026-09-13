@@ -140,7 +140,7 @@ app/
   assets/css/main.css        design tokens (Tailwind v4 @theme)
   components/
     map/       MapCanvas BasemapSwitcher GeolocateButton MapSearchField Legend FeaturePicker
-               OfflineDownloadControl
+               OfflineDownloadControl OverlaySwitcher PeriodSwitcher
     site/      SiteDetailPanel SiteGallery SiteGalleryManager SiteMetaList
                SiteExternalLinks SiteEnrichment SiteEndorsementButton
     tracing/   TracingDetailPanel
@@ -149,20 +149,30 @@ app/
     moderation/ ReviewQueue RevisionDiff
     admin/     AdminCommandBar AdminActivityStream AdminAccountTable AdminAccountDossier
                AdminImageQueue AdminAuditLog AdminSystemPanel AdminStepUpDialog
+    epigraphy/ EpigraphyNearbyInscriptions EpigraphyNearbyAtticInscriptions
     limes/     LimesPanel
     notebook/  NotebookControls MilestoneStamps
-    columns/   ColumnTrajanGallery ColumnMarcusAureliusViewer
-    ui/        ThemeToggle LanguageSwitcher RevisionHistory
+    columns/   ColumnTrajanGallery ColumnTrajanViewer.client
+               ColumnMarcusAureliusViewer.client ColumnPlatePager
+    tabula-peutingeriana/ TabulaPeutingerianaViewer.client
+    ui/        ThemeToggle LanguageSwitcher LanguageNotice RevisionHistory AppMenu
   composables/
     map/  useMapInstance useBasemapStyle useViewportTiles useGeolocation useSiteIcons
-          useNotebookOverlay useOfflineAreas                                           (+__test__/)
+          useNotebookOverlay useOfflineAreas useTabulaPeutingerianaOverlay
+          useAtlasPlaceOverlay useLimesOverlay usePeriodOverlay useEmpirePeriods
+          useBattleOverlay usePortOverlay useRouteOverlay useCoinHoardOverlay
+          useMinorFeatureOverlay useInscriptionsOverlay useAtticInscriptionsOverlay
+                                                                                   (+__test__/)
     data/ useSiteQuery useSiteEnrichment useSiteEndorsement useImageUrl useCanonicalUrl
           useNoIndex useSocialMeta                                                     (+__test__/)
+    epigraphy/ useInscriptionBrowse useNearbyInscriptions
+               useAtticInscriptionBrowse useNearbyAtticInscriptions
+    columns/ useColumnPlatePosition useOpenSeadragonHost                               (+__test__/)
     auth/ useSession
     admin/ useAdminStepUp
     user/ useNotebook
     limes/ useLimes
-    ui/   useColorScheme useUiLocale useBreakpoint                                      (+__test__/)
+    ui/   useColorScheme useUiLocale useBreakpoint useCountryName                      (+__test__/)
   layouts/ default.vue (map shell) reading.vue (documents)
   middleware/ authenticated.ts moderator.ts admin.ts (404s, not 403s)
   router.options.ts          scroll behaviour; the camera hash is not a selector
@@ -172,6 +182,8 @@ app/
          contributor/[name]
          site/[slug] site/[slug]/edit tracing/[id] tracing/[id]/edit
          limes/index limes/[slug]
+         inscriptions/index inscriptions/[edhId]
+         inscriptions/attic/index inscriptions/attic/[aioKey]
          moderation/index          admin/index (one station, sections in the query string)
          tabula-peutingeriana columns
 server/
@@ -194,18 +206,25 @@ server/
   utils/ mvt atlas limes openapi permissions ratelimit images images-order uploads tokens diff
          step-up retraction admin-audit disposable-email
          notebook gpx basemap-pmtiles endorsements
-         site-record validation
+         site-record validation sanitize
          mail mail-template notifications
          revisions slug db cache argon altcha enrichment enrichment-sources concordances
          concordance-sources translate logger metrics tracing sitemap
+         totp two-factor
+         inscriptions attic-inscriptions battles ports orbis-routes
+         coin-hoards minor-features
                                                                             (+__test__/)
 shared/types/  vocabulary shared by both sides
 shared/utils/  password policy, authorization rules, the limes gazetteer, JSON-LD builders,
-               tile enumeration, offline-cache naming, byte formatting            (+__test__/)
+               tile enumeration and limits, offline-cache naming, byte formatting,
+               milestones, Pleiades identifiers                                   (+__test__/)
 scripts/import/  four-stage vici.org import + vici-licences.ts (shared vocabulary)
                  02c-geo-names.ts 04-mirror-basemap-tiles.ts 05-antiquity-atlas.ts
                  06-limes.ts 07-country-boundaries.ts 08-edh-findspots.ts 09-cities.ts
-                 10-tabula-peutingeriana.ts 11-column-reliefs.ts
+                 10-tabula-peutingeriana.ts 11-column-reliefs.ts 12-edh-inscriptions.ts
+                 13-battles.ts 13-edh-inscription-images.ts 14-ancient-ports.ts
+                 15-orbis-routes.ts 16-awmc-minor-features.ts 17-awmc-minor-lines.ts
+                 18-chrr-coin-hoards.ts 19-ohm-empire-extents.ts 20-attic-inscriptions.ts
 scripts/generate-og-placeholders.ts  static per-category Open Graph cards, run by hand
 scripts/warm-tiles.ts snapshot-database.ts reconcile-images.ts build-glyphs.ts
                  strip-description-html.ts backfill-country-codes.ts verify-concordances.ts
@@ -273,7 +292,12 @@ to match the compose defaults.
 - Full-text search across descriptions (titles and summaries only).
 - RDF / Pelagios linked data. The GeoJSON feed at `/api/data/sites.geojson` exists.
 - Full i18n component coverage — see "i18n" above for what is and is not migrated. Note the vici source has `nl`, `de` and `fr` text for thousands of sites — the import takes `en` and discards the rest; none of that is surfaced by the interface language yet, only the borrowed Wikipedia enrichment is.
-- Off-box backups. `docker/backup.sh` writes nightly to a volume on the same VPS, and `pnpm db:snapshot` writes beside the database it copies. Neither survives losing the machine.
+- Purging withdrawn images from object storage stays unbuilt (above), and
+  `pnpm db:snapshot` still writes beside the database it copies — it is a
+  developer convenience, not a backup. The **nightly** backup does now leave the
+  machine: `docker/backup.sh` pushes each dump to a restic repository and
+  `docker/restore-drill.sh` proves one restores. See
+  `.claude/rules/deployment-and-releases.md`.
 
 ## Working style for this project
 

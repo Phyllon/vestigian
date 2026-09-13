@@ -102,7 +102,27 @@
 </script>
 
 <template>
-  <UForm v-if="!challengeId" :schema="schema" :state="state" class="space-y-4" @submit="signIn">
+  <!--
+    `method="post"` is load-bearing, not decoration. UForm renders a bare
+    `<form>` whose only submit handling is `@submit.prevent`, so a submission
+    that happens *before* Vue hydrates — slow mobile network, a blocked bundle,
+    or autofill firing Enter early — falls through to the browser default, which
+    is GET. That serialises every field into the query string: this form's
+    password would land in the address bar, browser history, the Referer header
+    of the next request, and every access log between here and the origin.
+    Posting instead means a pre-hydration submit is at worst a failed request.
+    Fixed upstream in @nuxt/ui 4.8.1 (GHSA-gj2h-2fpw-fhv9); this is that fix
+    applied by hand, because the upgrade is a major version of the whole design
+    system and this one line does not need to wait for it.
+  -->
+  <UForm
+    v-if="!challengeId"
+    :schema="schema"
+    :state="state"
+    method="post"
+    class="space-y-4"
+    @submit="signIn"
+  >
     <header>
       <h1 class="text-2xl">{{ t('auth.login.title') }}</h1>
     </header>
@@ -148,8 +168,13 @@
     The password already checked out — `challengeId` only exists because
     `/api/auth/login` returned it — so this step asks for the second factor
     only, not the whole form again.
+
+    `method="post"` for the same reason as the form above: this one is
+    hand-written rather than a UForm, but it has the identical shape — a bare
+    `<form>` guarded only by `@submit.prevent` — so a pre-hydration submit would
+    put a live TOTP code, or a single-use backup code, into the query string.
   -->
-  <form v-else class="space-y-4" @submit.prevent="verifyCode">
+  <form v-else method="post" class="space-y-4" @submit.prevent="verifyCode">
     <header>
       <h1 class="text-2xl">{{ t('auth.login.twoFactor.title') }}</h1>
       <p class="mt-1 text-sm text-ink-600 dark:text-paper-300">

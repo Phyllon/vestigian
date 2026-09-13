@@ -115,7 +115,7 @@
 </script>
 
 <template>
-  <UForm :schema="schema" :state="state" class="space-y-4" @submit="save">
+  <UForm method="post" :schema="schema" :state="state" class="space-y-4" @submit="save">
     <header class="space-y-1">
       <h2 class="text-xl">
         {{ isEditing ? t('siteEditorForm.editTitle') : t('siteEditorForm.recordTitle') }}

@@ -206,16 +206,52 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
+  # Nightly dump, kept locally and pushed off this machine. The image adds
+  # restic to the stock postgres one — see docker/backup/Dockerfile for why it
+  # is built rather than `apk add`-ed at start.
+  #
+  # ON AN INSTANCE THAT RAN THE OLD ROOT IMAGE, chown the existing volume once
+  # before deploying this, or the first dump fails on a permission error:
+  #
+  #   docker run --rm -v vestigian_backup-data:/b alpine chown -R 70:70 /b
+  #
+  # Docker seeds ownership into a *fresh* named volume from the image and never
+  # revisits it, so a volume created under the previous root-running image stays
+  # root-owned no matter what this image says.
+  #
+  # Everything RESTIC_* is optional: without them the service behaves exactly as
+  # it did before, writing local dumps and saying once per run that no remote is
+  # configured. With them, losing this VPS stops being the same as losing the
+  # atlas. Prove it with docker/restore-drill.sh --offsite, not by reading this.
   backup:
-    image: postgres:17-alpine
+    build: ./backup
     restart: unless-stopped
     logging: *default-logging
     environment:
       PGPASSWORD: ${POSTGRES_PASSWORD}
+      # e.g. sftp:u123456@u123456.your-storagebox.de:/vestigian — a Hetzner
+      # Storage Box, same provider and jurisdiction as the VPS, roughly €3/mo.
+      RESTIC_REPOSITORY: ${RESTIC_REPOSITORY:-}
+      # Losing this loses every off-box snapshot: restic encrypts client-side
+      # and there is no recovery path. Keep it somewhere that is not this box.
+      RESTIC_PASSWORD: ${RESTIC_PASSWORD:-}
     volumes:
       - ./backup.sh:/backup.sh:ro
       - backup-data:/backups
-    entrypoint: ['/bin/sh', '/backup.sh']
+      # Paths under /var/lib/postgresql, not /root: the container runs as the
+      # `postgres` user (see docker/backup/Dockerfile), and ssh reads its key
+      # and known_hosts relative to that user's $HOME.
+      #
+      # Read-only, and the key should be restricted on the remote to this one
+      # repository path — a backup job that can also delete the remote is a
+      # ransomware amplifier rather than a backup. Defaults to /dev/null so the
+      # service still starts on an instance with no off-box target configured.
+      - ${RESTIC_SSH_KEY_PATH:-/dev/null}:/var/lib/postgresql/.ssh/id_ed25519:ro
+      # Pinned host keys, mounted rather than accepted on first use: a backup
+      # that trusts whatever answers on the remote's address can be pointed at
+      # an attacker's server by DNS alone. Generate with
+      # `ssh-keyscan -H <storagebox-host> > docker/restic_known_hosts`.
+      - ${RESTIC_KNOWN_HOSTS_PATH:-/dev/null}:/var/lib/postgresql/.ssh/known_hosts:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -267,6 +303,10 @@ services:
     command: -config.file=/etc/loki/loki.yml
     volumes:
       - ./observability/loki.yml:/etc/loki/loki.yml:ro
+      # Alerting rules evaluated against log lines rather than metrics — the
+      # backup container has no scrape endpoint. The `fake/` level inside is
+      # Loki's own tenant name when auth_enabled is false, not a placeholder.
+      - ./observability/rules:/etc/loki/rules:ro
       - loki-data:/loki
     deploy:
       resources:

@@ -1,0 +1,85 @@
+# Loki alerting rules for the nightly backup.
+#
+# Loki's local ruler storage expects <rules_directory>/<tenant>/<file>.yml, and
+# with `auth_enabled: false` every write lands in the tenant literally named
+# `fake` — Loki's own default, not a placeholder left behind here. Renaming this
+# directory to something tidier stops the rules loading.
+#
+# These alert on log lines rather than metrics because the backup container has
+# no scrape endpoint and no reason to grow one. `backup.sh` prints exactly one
+# `backup.outcome=` line per stage per run; Alloy already ships every
+# container's stdout to Loki, so the lines are there whether or not anyone is
+# watching them. These rules are what makes somebody watch.
+groups:
+  - name: backup
+    # Hourly. A nightly job does not need a tighter evaluation interval, and a
+    # 24-hour lookback re-evaluated every hour means a missed run is caught
+    # within the hour rather than at the next midnight.
+    interval: 1h
+    rules:
+      # The failure this whole off-box push exists to prevent is not a backup
+      # that errors — it is a backup that stopped running and told nobody. An
+      # absence cannot be matched by a log query, so this counts successes and
+      # fires when the count is zero.
+      - alert: BackupNotRunning
+        expr: |
+          sum(count_over_time({service="backup"} |= "backup.outcome=ok stage=dump" [26h])) == 0
+        for: 1h
+        labels:
+          severity: critical
+        annotations:
+          summary: No successful database dump in over a day
+          description: >
+            docker/backup.sh has not logged a successful dump in 26 hours. Either
+            the container is down or pg_dump is failing. Until this is fixed the
+            atlas has no recoverable state newer than the last good snapshot —
+            check `docker compose logs backup`.
+
+      - alert: BackupFailing
+        expr: |
+          sum(count_over_time({service="backup"} |= "backup.outcome=failed" [24h])) > 0
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: The nightly backup reported a failure
+          description: >
+            A stage of docker/backup.sh failed in the last 24 hours. The line
+            names which one — dump, offsite, prune or check. A dump failure means
+            no local copy was kept at all; an offsite failure means the local one
+            exists but did not leave this machine.
+
+      # A local dump that never reaches the remote is the silent half-failure:
+      # everything looks healthy right up until the VPS is the thing that is
+      # lost. Distinct from BackupFailing because it also catches a repository
+      # that was configured once and has since been unset.
+      - alert: BackupNotLeavingTheMachine
+        expr: |
+          sum(count_over_time({service="backup"} |= "backup.outcome=ok stage=offsite" [26h])) == 0
+          and
+          sum(count_over_time({service="backup"} |= "backup.outcome=ok stage=dump" [26h])) > 0
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: Backups are being written but not pushed off this VPS
+          description: >
+            The nightly dump is succeeding locally but no off-box push has
+            succeeded in 26 hours — RESTIC_REPOSITORY/RESTIC_PASSWORD may be
+            unset, or the Storage Box unreachable. One VPS is one failure domain
+            until this clears.
+
+      - alert: BackupRepositoryUnverified
+        expr: |
+          sum(count_over_time({service="backup"} |= "backup.outcome=ok stage=check" [9d])) == 0
+          and
+          sum(count_over_time({service="backup"} |= "backup.outcome=ok stage=offsite" [9d])) > 0
+        for: 6h
+        labels:
+          severity: warning
+        annotations:
+          summary: No successful restic integrity check in over a week
+          description: >
+            backup.sh runs `restic check` every Sunday; none has passed in nine
+            days. Snapshots are still being written, but nothing has confirmed
+            they can be read back. Run docker/restore-drill.sh --offsite.

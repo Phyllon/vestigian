@@ -22,7 +22,83 @@ describing objects that are gone, and the gallery breaks while every query
 reports health. `--repair` returns those rows to `pending`. Orphaned objects are
 reported only — nothing in this project deletes bytes.
 
-Neither snapshot leaves the machine yet — see "Not built".
+`pnpm db:snapshot` still never leaves the machine — it is a developer
+convenience for "undo the last hour", not disaster recovery. The **nightly**
+backup does leave, and that is new.
+
+### The nightly path, end to end
+
+`docker/backup.sh` (in the `backup` service, built from `docker/backup/Dockerfile`
+so restic is present) writes the local dump exactly as before, then pushes it to
+a restic repository — content-addressed, deduplicated, and **encrypted
+client-side**, so the copy on somebody else's disk is not a second place the
+atlas is readable in the clear. `RESTIC_REPOSITORY` points at a Hetzner Storage
+Box over SFTP: same provider and jurisdiction as the VPS, roughly €3/month.
+
+Everything `RESTIC_*` is optional. With nothing configured the service behaves
+exactly as it always did and says so once per run, so an instance that has not
+set this up is not broken, only unprotected — and says which.
+
+Three details that are deliberate rather than incidental:
+
+- **`RESTIC_PASSWORD` _is_ the backup.** restic encrypts client-side and has no
+  recovery path; losing it makes every off-box snapshot permanently unreadable.
+  It belongs somewhere that is neither this VPS nor this repository — the same
+  category of secret as `NUXT_TOTP_ENCRYPTION_KEY`, and the same failure mode.
+- **Host keys are pinned, not accepted on first use.** A backup that trusts
+  whatever answers at the remote's address can be redirected by DNS alone.
+  `ssh-keyscan -H <storagebox-host> > docker/restic_known_hosts`.
+- **The SSH key should be restricted on the remote to the one repository path.**
+  A backup job that can also delete the remote turns one compromised host into
+  the loss of both copies at once.
+
+### Proving it, which is the part that was missing
+
+`docker/restore-drill.sh` restores a real snapshot into a throwaway PostGIS
+container, asserts the tables that cannot be regenerated actually carry rows,
+checks that geometry reads back (`ST_X` on a restored `sites.geom` — a restore
+that lost PostGIS leaves the column present and every value unreadable), and
+throws the container away. `--offsite` pulls from restic instead of a local file,
+which is the version that proves the remote.
+
+Verified once against a real 58 MB dump: 61,273 sites, 11,720 tracings, 39,213
+images, all 61,273 geometries readable.
+
+**One trap, found by running it.** The postgres image's entrypoint starts a
+_temporary_ server during initialisation with `listen_addresses` empty. A plain
+`pg_isready -U vestigian` passes against that one, so a restore begins and then
+initdb shuts the server down underneath it — surfacing as
+`PQputCopyData: server closed the connection unexpectedly` partway through a
+COPY, which reads exactly like a corrupt dump and is not one. The drill probes
+`pg_isready -h 127.0.0.1` instead: the init server is not listening on TCP, so
+waiting on TCP skips it entirely.
+
+### Knowing when it stops
+
+The failure this whole path exists to prevent is not a backup that errors, it is
+one that quietly stopped months ago. `backup.sh` prints one `backup.outcome=`
+line per stage per run, Alloy already ships every container's stdout to Loki, and
+`docker/observability/rules/fake/backup.yml` turns that into four alerts —
+nothing dumped in 26h, any stage failing, dumps succeeding but **not leaving the
+machine**, and no `restic check` passing in nine days.
+
+This needed a Loki **ruler**, which the deployment did not have: `alerts.yml` is
+Prometheus-only (PromQL), and the backup container has no scrape endpoint and no
+reason to grow one. The ruler block in `loki.yml` points at the same Alertmanager
+the Prometheus rules use. The `fake/` directory level inside `rules/` is Loki's
+own tenant name when `auth_enabled: false` — renaming it to something tidier
+stops the rules loading. Verified by booting Loki against the real config and
+reading back all four rules from `/loki/api/v1/rules`.
+
+**Upgrading an instance that ran the old image needs one manual step.** The
+container now runs as `postgres` (uid 70) rather than root. Docker seeds
+ownership into a _fresh_ named volume from the image and never revisits it, so a
+`backup-data` volume created under the previous root-running image stays
+root-owned and the first dump fails on a permission error:
+
+```bash
+docker run --rm -v vestigian_backup-data:/b alpine chown -R 70:70 /b
+```
 
 Data is CC BY-SA (text) / CC0 (metadata); **image licences vary per record**, which is why `licence` and `attribution` are non-null columns and attribution renders under every image rather than hiding behind an interaction.
 
@@ -50,9 +126,33 @@ addresses); **SafeLine** (2 vCPU / 4 GB, and it would replace Traefik);
 
 ## Deployment
 
-`docker/compose.prod.yml` is the deployment unit. GitHub Actions runs tests, builds a multi-stage image to GHCR, calls a Dokploy webhook. Traefik terminates TLS. Nightly `pg_dump` kept 14 days.
+`docker/compose.prod.yml` is the deployment unit. GitHub Actions builds a
+multi-stage image to GHCR and calls a Dokploy webhook. Traefik terminates TLS.
+Nightly `pg_dump` kept 14 days locally, plus restic off-box — see "Backups".
 
-**One VPS is one failure domain.** Test the restore, not just the dump.
+**CI deliberately runs no tests, lint or typecheck.** That is a settled decision,
+not an oversight: `pnpm check` is the pre-push hook, and the hosted minutes go to
+the one thing that cannot be done locally — building and publishing the image.
+`deploy.yml` used to carry a `verify` job whose entire body was
+`pnpm install --frozen-lockfile`, which proved only that the lockfile resolves —
+something the image build re-proves a minute later on its own. It also ran on
+`pull_request`, where `publish` is skipped, so a PR started the workflow to do an
+install and then stop. It was removed rather than filled in.
+`changeset-check.yml` is what actually runs on a pull request.
+
+**`corepack enable` in the Dockerfile was a live outage, not a latent one.**
+Node 26 unbundled corepack (deprecated in 25, gone in 26), so `RUN corepack
+enable` failed with `corepack: not found` and _every_ image build died on line 7
+— meaning no image reached GHCR and the Dokploy webhook never fired, silently,
+for as long as the base image had been on 26. It is now
+`npm i -g corepack@latest && corepack enable`, which restores the shim and keeps
+`packageManager` in `package.json` as the single place the pnpm version lives.
+Worth remembering as a shape: a broken _publish_ step fails loudly in Actions but
+looks like nothing at all from the outside, because the running site keeps
+serving the last image that did build.
+
+**One VPS is one failure domain.** Test the restore, not just the dump —
+`docker/restore-drill.sh` is how, and it is not a drill until somebody runs it.
 
 To move from OpenFreeMap to self-hosted tiles: download a Europe + Mediterranean extract from maps.protomaps.com, upload to R2, set `NUXT_PUBLIC_BASEMAP_PROVIDER=pmtiles` and `NUXT_PUBLIC_BASEMAP_PMTILES_URL`.
 

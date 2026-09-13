@@ -1,27 +1,22 @@
 name: build and deploy
 
+# Push to `main` only. Testing is deliberately not CI's job here — `pnpm check`
+# runs at pre-push, locally, and the hosted minutes are better spent on the one
+# thing that cannot be done locally: building and publishing the image.
+#
+# There used to be a `verify` job in front of this one whose entire body was
+# `pnpm install --frozen-lockfile`. It proved only that the lockfile resolves,
+# which the image build below re-proves on its own a minute later, so it was
+# paying for the same install twice and gating nothing. It ran on
+# `pull_request` too, where `publish` is skipped — so a PR started this workflow
+# to do an install and then stop. `changeset-check.yml` is what actually runs on
+# a pull request.
 on:
   push:
     branches: [main]
-  pull_request:
 
 jobs:
-  verify:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      # No `version` input: pnpm/action-setup@v4 reads it from package.json's
-      # `packageManager` field on its own, and setting both here and there is
-      # what produced "Multiple versions of pnpm specified" — pin the version
-      # in exactly one place.
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 26, cache: pnpm }
-      - run: pnpm install --frozen-lockfile
-
   publish:
-    needs: [verify]
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: read

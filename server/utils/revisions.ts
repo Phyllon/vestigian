@@ -17,13 +17,21 @@ interface SitePayload {
   retracted?: boolean
 }
 
+/**
+ * `LineString | Polygon` and nothing else, because that is what
+ * `server/api/contributions/index.post.ts` accepts. Typed as the union rather
+ * than `string` so `geometryKindFor` below is total: a third geometry type
+ * would be a compile error here instead of silently falling through to `line`.
+ */
+type ContributedGeometryType = 'LineString' | 'Polygon'
+
 interface TracingPayload {
   kind: 'tracing'
   entityId?: number
   title: string
   category: string
   description?: string
-  geometry: { type: string; coordinates: unknown }
+  geometry: { type: ContributedGeometryType; coordinates: unknown }
   retracted?: boolean
 }
 
@@ -37,6 +45,181 @@ interface RevisionRow {
   author_id: number | null
   reverts_revision_id: number | null
 }
+
+/**
+ * The decisions this file makes, separated from the writes that carry them out.
+ *
+ * Everything below is pure and unit-tested in `__test__/revisions.test.ts`.
+ * The pattern is the one `server/utils/retraction.ts` already uses, and for the
+ * same reason: these are the governance rules, and asserting them through the
+ * database would mean asserting them through a transaction, a live PostGIS
+ * geometry and three call sites — which is why they went untested for as long
+ * as they did. `applyRevision` keeps the writes; what *decides* is here.
+ */
+
+export type RevisionRefusal = 'retraction-without-target'
+
+export type RevisionWritePlan =
+  | { action: 'retract'; kind: 'site' | 'tracing'; targetId: number }
+  | { action: 'update'; kind: 'site' | 'tracing'; targetId: number }
+  | { action: 'insert'; kind: 'site' | 'tracing' }
+  | { action: 'refuse'; reason: RevisionRefusal }
+
+export interface RevisionWriteInput {
+  /** `revisions.entity_id`, authoritative when set. */
+  entityId: number | null
+  payload: RevisionPayload
+}
+
+/**
+ * Which of the four things an approved revision does to the live tables.
+ *
+ * `entity_id` on the row outranks `entityId` inside the payload. The column is
+ * written by this file when a create is applied; the payload field is what the
+ * submitting client sent, so where they disagree the column is the one that has
+ * already been reconciled against a real row.
+ *
+ * The `refuse` case is a hole this extraction closed rather than described. A
+ * payload carrying `retracted: true` with no resolvable target used to fall
+ * straight past the retraction branch into the insert path — so a retraction
+ * that had lost its entity id would not fail, it would *publish a brand-new
+ * record* built out of the retraction payload, credited to the moderator who
+ * pressed the button. Nothing in the app is known to produce that shape, which
+ * is exactly why it would have been found late.
+ */
+export const planRevisionWrite = (input: RevisionWriteInput): RevisionWritePlan => {
+  const kind = input.payload.kind
+  const targetId = input.entityId ?? input.payload.entityId ?? null
+
+  if (input.payload.retracted === true) {
+    if (targetId === null) return { action: 'refuse', reason: 'retraction-without-target' }
+    return { action: 'retract', kind, targetId }
+  }
+
+  return targetId === null ? { action: 'insert', kind } : { action: 'update', kind, targetId }
+}
+
+export interface TrustCreditInput {
+  authorId: number | null
+  revertsRevisionId: number | null
+  entityType: ContributionKind
+}
+
+/**
+ * Whether applying this revision moves its author towards automatic publishing.
+ *
+ * Three separate rules meet here, and each one is load-bearing on its own: an
+ * anonymous or deleted author has nobody to credit, a revert is moderator
+ * housekeeping rather than a contribution, and `countsTowardsTrust` excludes
+ * photographs. The threshold itself stays in `shared/utils/authorization.ts` —
+ * this only decides whether the counter moves, never what the count implies.
+ */
+export const shouldCountTowardsTrust = (input: TrustCreditInput): boolean =>
+  input.authorId !== null &&
+  input.revertsRevisionId === null &&
+  countsTowardsTrust(input.entityType)
+
+/** `LineString` becomes a line, `Polygon` an area. The only two that exist. */
+export const geometryKindFor = (geometry: { type: ContributedGeometryType }): 'area' | 'line' =>
+  geometry.type === 'Polygon' ? 'area' : 'line'
+
+export interface RevertTarget {
+  /**
+   * Deliberately `string`, not `ContributionKind`: `revisions.entity_type` is a
+   * plain `varchar(20)` with no check constraint, so the database can hand back
+   * a value outside the union and the compiler would be lying if this said
+   * otherwise. `planRevert` narrows it instead — see the refusal below.
+   */
+  entityType: string
+  entityId: number | null
+  payload: unknown
+  previousPayload: unknown
+}
+
+export type RevertPlan =
+  | {
+      ok: true
+      payload: Record<string, unknown>
+      /** Resolved here so the caller writes the revision without re-narrowing. */
+      entityType: ContributionKind
+      entityId: number
+    }
+  | { ok: false; status: 404 | 400 | 409; message: string }
+
+const isContributionKind = (value: string): value is ContributionKind =>
+  value === 'site' || value === 'tracing' || value === 'image'
+
+/**
+ * The state a revert has to restore, or the reason there isn't one.
+ *
+ * `kind` and `entityId` are written *after* the spread deliberately. They are
+ * not decoration: a `previousPayload` carrying some other record's `entityId` —
+ * corrupt, hand-edited, or written by a bug that no longer exists — would
+ * otherwise aim this revert at a record the moderator never looked at, and
+ * `applyRevision` would apply it without complaint. Forcing both from the
+ * revision row means a revert can only ever touch the record it belongs to.
+ *
+ * The two refusals are different in kind and keep different statuses: 404 is
+ * "no such published revision", 400 is "this revision created the record, so
+ * there is no earlier state" — which is a retraction's job, not a revert's.
+ */
+export const planRevert = (target: RevertTarget | undefined): RevertPlan => {
+  if (!target) {
+    return { ok: false, status: 404, message: 'No published revision with that id.' }
+  }
+
+  if (!target.previousPayload || !target.entityId) {
+    return {
+      ok: false,
+      status: 400,
+      message: 'That revision created the record, so there is no earlier state to restore.',
+    }
+  }
+
+  /**
+   * An entity type outside the vocabulary would produce a payload whose `kind`
+   * matches neither branch in `applyRevision`, so the revert would write a
+   * revision, log "revision applied", and change nothing — a silent no-op
+   * reported as a success. Refusing is the honest answer.
+   */
+  if (!isContributionKind(target.entityType)) {
+    return {
+      ok: false,
+      status: 409,
+      message: 'That revision refers to a kind of record this version cannot restore.',
+    }
+  }
+
+  return {
+    ok: true,
+    entityType: target.entityType,
+    entityId: target.entityId,
+    payload: {
+      ...(target.previousPayload as Record<string, unknown>),
+      kind: target.entityType,
+      entityId: target.entityId,
+    },
+  }
+}
+
+export interface RetractionPayloadInput {
+  /** The record's latest approved payload — what a revert of this must restore. */
+  current: Record<string, unknown>
+  entityType: ContributionKind
+  entityId: number
+}
+
+/**
+ * A retraction is the current state plus a flag, not an edit — the fields are
+ * carried across untouched so that reverting it returns the record exactly as
+ * it was. `entityId` is forced for the same reason it is in `planRevert`.
+ */
+export const buildRetractionPayload = (input: RetractionPayloadInput): Record<string, unknown> => ({
+  ...input.current,
+  kind: input.entityType,
+  entityId: input.entityId,
+  retracted: true,
+})
 
 /**
  * Materialises an approved revision into the live tables.
@@ -56,7 +239,16 @@ export const applyRevision = async (revisionId: number): Promise<void> => {
   if (!revision) throw createError({ statusCode: 404, message: 'Revision not found.' })
 
   const payload = revision.payload
-  const targetId = revision.entity_id ?? payload.entityId ?? null
+  const plan = planRevisionWrite({ entityId: revision.entity_id, payload })
+
+  if (plan.action === 'refuse') {
+    throw createError({
+      statusCode: 409,
+      message: 'That revision retracts a record it does not identify.',
+    })
+  }
+
+  const targetId = plan.action === 'insert' ? null : plan.targetId
   let finalSiteId: number | null = payload.kind === 'site' ? targetId : null
 
   await sql.begin(async (tx) => {
@@ -78,14 +270,14 @@ export const applyRevision = async (revisionId: number): Promise<void> => {
      * no new code, because the retraction is itself an ordinary revision and
      * `moderation/revert.post.ts` restores `previousPayload` like any other.
      */
-    if (payload.retracted === true && targetId) {
+    if (plan.action === 'retract') {
       // Two statements rather than one with an interpolated table name: the
       // identifier is not a parameter, and spelling it out is clearer than
       // composing a fragment to save a line.
-      if (payload.kind === 'site') {
-        await tx`UPDATE sites SET status = 'rejected' WHERE id = ${targetId}`
+      if (plan.kind === 'site') {
+        await tx`UPDATE sites SET status = 'rejected' WHERE id = ${plan.targetId}`
       } else {
-        await tx`UPDATE tracings SET status = 'rejected' WHERE id = ${targetId}`
+        await tx`UPDATE tracings SET status = 'rejected' WHERE id = ${plan.targetId}`
       }
 
       useLogger().info(
@@ -93,7 +285,7 @@ export const applyRevision = async (revisionId: number): Promise<void> => {
           audit: 'revision.retracted',
           revisionId,
           entityType: revision.entity_type,
-          entityId: targetId,
+          entityId: plan.targetId,
         },
         'record retracted',
       )
@@ -101,8 +293,8 @@ export const applyRevision = async (revisionId: number): Promise<void> => {
     }
 
     if (payload.kind === 'site') {
-      if (targetId) {
-        await updateSite(tx, targetId, payload)
+      if (plan.action === 'update') {
+        await updateSite(tx, plan.targetId, payload)
       } else {
         const createdId = await insertSite(tx, payload, revision.author_id)
         finalSiteId = createdId
@@ -111,19 +303,21 @@ export const applyRevision = async (revisionId: number): Promise<void> => {
     }
 
     if (payload.kind === 'tracing') {
-      if (targetId) {
-        await updateTracing(tx, targetId, payload)
+      if (plan.action === 'update') {
+        await updateTracing(tx, plan.targetId, payload)
       } else {
         const createdId = await insertTracing(tx, payload, revision.author_id)
         await tx`UPDATE revisions SET entity_id = ${createdId} WHERE id = ${revisionId}`
       }
     }
 
-    // A revert is moderator housekeeping, not a contribution, so it does not
-    // move anyone towards automatic publishing.
-    const isRevert = revision.reverts_revision_id !== null
-
-    if (revision.author_id && !isRevert && countsTowardsTrust(revision.entity_type)) {
+    if (
+      shouldCountTowardsTrust({
+        authorId: revision.author_id,
+        revertsRevisionId: revision.reverts_revision_id,
+        entityType: revision.entity_type,
+      })
+    ) {
       // Only the count is written. The level it implies is `evaluateTrust`'s
       // to decide, and used to be transcribed into this statement with the
       // threshold inline — a second copy of the governance rule, in SQL, where
@@ -203,22 +397,13 @@ export const revertRevision = async (request: RevertRequest): Promise<RevertResu
     .where(and(eq(revisions.id, revisionId), eq(revisions.status, 'approved')))
     .limit(1)
 
-  if (!target) {
-    throw createError({ statusCode: 404, message: 'No published revision with that id.' })
+  const plan = planRevert(target)
+
+  if (!plan.ok) {
+    throw createError({ statusCode: plan.status, message: plan.message })
   }
 
-  if (!target.previousPayload || !target.entityId) {
-    throw createError({
-      statusCode: 400,
-      message: 'That revision created the record, so there is no earlier state to restore.',
-    })
-  }
-
-  const restored = {
-    ...(target.previousPayload as Record<string, unknown>),
-    kind: target.entityType,
-    entityId: target.entityId,
-  }
+  const restored = plan.payload
 
   /**
    * `previousPayload` is what this revert replaces — the state the offending
@@ -228,10 +413,10 @@ export const revertRevision = async (request: RevertRequest): Promise<RevertResu
   const [revision] = await database
     .insert(revisions)
     .values({
-      entityType: target.entityType,
-      entityId: target.entityId,
+      entityType: plan.entityType,
+      entityId: plan.entityId,
       payload: restored,
-      previousPayload: target.payload,
+      previousPayload: target!.payload,
       editSummary: reason ?? `Reverted revision ${revisionId}`,
       status: 'approved',
       authorId: moderatorId,
@@ -306,7 +491,7 @@ export const retractRecord = async (request: RetractRequest): Promise<{ revision
     .values({
       entityType,
       entityId,
-      payload: { ...current, kind: entityType, entityId, retracted: true },
+      payload: buildRetractionPayload({ current, entityType, entityId }),
       previousPayload: current,
       editSummary: reason,
       status: 'approved',
@@ -466,7 +651,7 @@ const insertTracing = async (
     INSERT INTO tracings (title, kind, category, geom, description, status, created_by)
     VALUES (
       ${payload.title},
-      ${payload.geometry.type === 'Polygon' ? 'area' : 'line'}::geometry_kind,
+      ${geometryKindFor(payload.geometry)}::geometry_kind,
       ${payload.category}::site_category,
       ST_SetSRID(ST_GeomFromGeoJSON(${JSON.stringify(payload.geometry)}), 4326),
       ${payload.description ?? null}, 'approved', ${authorId}
@@ -485,7 +670,7 @@ const updateTracing = async (
   await tx`
     UPDATE tracings SET
       title = ${payload.title},
-      kind = ${payload.geometry.type === 'Polygon' ? 'area' : 'line'}::geometry_kind,
+      kind = ${geometryKindFor(payload.geometry)}::geometry_kind,
       category = ${payload.category}::site_category,
       geom = ST_SetSRID(ST_GeomFromGeoJSON(${JSON.stringify(payload.geometry)}), 4326),
       description = ${payload.description ?? null},

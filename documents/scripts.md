@@ -18,29 +18,36 @@ afterward to refresh just that layer. Full detail, licensing rationale and
 row counts: `.claude/rules/import-pipeline.md` and
 `.claude/rules/antiquity-basemaps.md`.
 
-| #   | Script                       | Run with                           | Source → what it fills                                                                                                                            |
-| --- | ---------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 01  | `01-fetch-dump.ts`           | `pnpm import:fetch`                | vici.org SQL dumps → scratch MariaDB (own machine only, ~3 GB)                                                                                    |
-| 02  | `02-mysql-to-postgres.ts`    | `pnpm import:convert`              | MariaDB → `sites`, `tracings`, `external_ids` (61,272 sites, 11,720 tracings)                                                                     |
-| 02b | `02b-image-records.ts`       | `pnpm import:image-records`        | vici image metadata → `site_images` rows (no bytes yet)                                                                                           |
-| 02c | `02c-geo-names.ts`           | `pnpm import:geo-names`            | vici's `geo.sql.gz` (GeoNames-derived) → `geo_names` (447,053 rows, 5-country coverage)                                                           |
-| 03  | `03-mirror-images.ts`        | `pnpm import:images`               | vici.org originals → object storage, one at a time, ~a day. **Tell René Voorburg before running at scale.**                                       |
-| 04  | `04-mirror-basemap-tiles.ts` | `pnpm import:basemap`              | DARE + EOX Sentinel-2 raster tiles → object storage                                                                                               |
-| 05  | `05-antiquity-atlas.ts`      | `pnpm import:atlas`                | AWMC (ODbL) + Pleiades (CC BY 3.0) → `antiquity_*` reference cartography                                                                          |
-| 06  | `06-limes.ts`                | `pnpm import:limes`                | AWMC empire-extent polygons (ODbL) → the limes frontier line (5,123 km / 11 runs, Europe+Med)                                                     |
-| 07  | `07-country-boundaries.ts`   | `pnpm import:country-boundaries`   | Natural Earth 1:50m admin-0 (public domain) → `country_boundaries`, for reverse-geocoding                                                         |
-| 08  | `08-edh-findspots.ts`        | `pnpm import:edh-findspots`        | Epigraphic Database Heidelberg (CC BY-SA 4.0) → findspots for concordance verification                                                            |
-| 09  | `09-cities.ts`               | `pnpm import:cities`               | GeoNames `cities500` (CC BY 4.0) → `cities`, worldwide, for map search                                                                            |
-| 10  | `10-tabula-peutingeriana.ts` | `pnpm import:tabula-peutingeriana` | OmnesViae (René Voorburg) → Tabula Peutingeriana places and roads                                                                                 |
-| 11  | `11-column-reliefs.ts`       | `pnpm import:column-reliefs`       | Wikimedia Commons (public domain) → Trajan's Column Cichorius plates (138 files)                                                                  |
-| 13  | `13-battles.ts`              | `pnpm import:battles`              | Wikidata SPARQL (CC0) → ancient battle sites, worldwide                                                                                           |
-| 14  | `14-ancient-ports.ts`        | `pnpm import:ports`                | Catalogue of Ancient Ports, de Graauw (CC BY 4.0) → `antiquity_ports` (~5,990 of 6,007 rows have coordinates)                                     |
-| 15  | `15-orbis-routes.ts`         | `pnpm import:orbis-routes`         | ORBIS v2, Stanford (CC BY 3.0) → `antiquity_routes`, 1,215 edges, 6 route kinds                                                                   |
-| 16  | `16-awmc-minor-features.ts`  | `pnpm import:awmc-features`        | AWMC Cultural Shapefiles (ODbL) → bridges, mines/quarries, dams, cemeteries, Barrington forts, tumuli                                             |
-| 17  | `17-awmc-minor-lines.ts`     | `pnpm import:awmc-centuriation`    | Same AWMC release, line/polygon layers → centuriation grids, causeways, dikes (drawn into `antiquity_lines`/`antiquity_areas`, not a new overlay) |
-| 18  | `18-chrr-coin-hoards.ts`     | `pnpm import:chrr-coin-hoards`     | Coin Hoards of the Roman Republic (CC BY-NC 3.0) → 620 findspot locations                                                                         |
-| 19  | `19-ohm-empire-extents.ts`   | `pnpm import:empire-extents`       | OpenHistoricalMap Overpass (CC0) → dated Roman-state extent series, the Barrington period scrubber                                                |
-| —   | `vici-licences.ts`           | not run directly                   | Shared licence-string vocabulary imported by `02-mysql-to-postgres.ts` and `03-mirror-images.ts` — not itself a pipeline stage                    |
+| #   | Script                         | Run with                             | Source → what it fills                                                                                                                            |
+| --- | ------------------------------ | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 01  | `01-fetch-dump.ts`             | `pnpm import:fetch`                  | vici.org SQL dumps → scratch MariaDB (own machine only, ~3 GB)                                                                                    |
+| 02  | `02-mysql-to-postgres.ts`      | `pnpm import:convert`                | MariaDB → `sites`, `tracings`, `external_ids` (61,272 sites, 11,720 tracings)                                                                     |
+| 02b | `02b-image-records.ts`         | `pnpm import:image-records`          | vici image metadata → `site_images` rows (no bytes yet)                                                                                           |
+| 02c | `02c-geo-names.ts`             | `pnpm import:geo-names`              | vici's `geo.sql.gz` (GeoNames-derived) → `geo_names` (447,053 rows, 5-country coverage)                                                           |
+| 03  | `03-mirror-images.ts`          | `pnpm import:images`                 | vici.org originals → object storage, one at a time, ~a day. **Tell René Voorburg before running at scale.**                                       |
+| 04  | `04-mirror-basemap-tiles.ts`   | `pnpm import:basemap`                | DARE + EOX Sentinel-2 raster tiles → object storage                                                                                               |
+| 05  | `05-antiquity-atlas.ts`        | `pnpm import:atlas`                  | AWMC (ODbL) + Pleiades (CC BY 3.0) → `antiquity_*` reference cartography                                                                          |
+| 06  | `06-limes.ts`                  | `pnpm import:limes`                  | AWMC empire-extent polygons (ODbL) → the limes frontier line (5,123 km / 11 runs, Europe+Med)                                                     |
+| 07  | `07-country-boundaries.ts`     | `pnpm import:country-boundaries`     | Natural Earth 1:50m admin-0 (public domain) → `country_boundaries`, for reverse-geocoding                                                         |
+| 08  | `08-edh-findspots.ts`          | `pnpm import:edh-findspots`          | Epigraphic Database Heidelberg (CC BY-SA 4.0) → findspots for concordance verification                                                            |
+| 09  | `09-cities.ts`                 | `pnpm import:cities`                 | GeoNames `cities500` (CC BY 4.0) → `cities`, worldwide, for map search                                                                            |
+| 10  | `10-tabula-peutingeriana.ts`   | `pnpm import:tabula-peutingeriana`   | OmnesViae (René Voorburg) → Tabula Peutingeriana places and roads                                                                                 |
+| 11  | `11-column-reliefs.ts`         | `pnpm import:column-reliefs`         | Wikimedia Commons (public domain) → Trajan's Column Cichorius plates (138 files)                                                                  |
+| 12  | `12-edh-inscriptions.ts`       | `pnpm import:edh-inscriptions`       | Epigraphic Database Heidelberg inscriptions tree, EpiDoc TEI (CC BY-SA 4.0) → `inscriptions` (79,206 rows, 13,388 with a resolved position)       |
+| 13  | `13-battles.ts`                | `pnpm import:battles`                | Wikidata SPARQL (CC0) → ancient battle sites, worldwide                                                                                           |
+| 13  | `13-edh-inscription-images.ts` | `pnpm import:edh-inscription-images` | EDH `image_metadata/` (link-out only, no bytes mirrored) → `inscription_images`, 43,199 rows                                                      |
+| 14  | `14-ancient-ports.ts`          | `pnpm import:ports`                  | Catalogue of Ancient Ports, de Graauw (CC BY 4.0) → `antiquity_ports` (~5,990 of 6,007 rows have coordinates)                                     |
+| 15  | `15-orbis-routes.ts`           | `pnpm import:orbis-routes`           | ORBIS v2, Stanford (CC BY 3.0) → `antiquity_routes`, 1,215 edges, 6 route kinds                                                                   |
+| 16  | `16-awmc-minor-features.ts`    | `pnpm import:awmc-features`          | AWMC Cultural Shapefiles (ODbL) → bridges, mines/quarries, dams, cemeteries, Barrington forts, tumuli                                             |
+| 17  | `17-awmc-minor-lines.ts`       | `pnpm import:awmc-centuriation`      | Same AWMC release, line/polygon layers → centuriation grids, causeways, dikes (drawn into `antiquity_lines`/`antiquity_areas`, not a new overlay) |
+| 18  | `18-chrr-coin-hoards.ts`       | `pnpm import:chrr-coin-hoards`       | Coin Hoards of the Roman Republic (CC BY-NC 3.0) → 620 findspot locations                                                                         |
+| 19  | `19-ohm-empire-extents.ts`     | `pnpm import:empire-extents`         | OpenHistoricalMap Overpass (CC0) → dated Roman-state extent series, the Barrington period scrubber                                                |
+| 20  | `20-attic-inscriptions.ts`     | `pnpm import:attic-inscriptions`     | Attic Inscriptions Online, HTML per record (CC BY-SA 3.0) → `attic_inscriptions`, 3,412 rows, 2,669 with a resolved position                      |
+| —   | `vici-licences.ts`             | not run directly                     | Shared licence-string vocabulary imported by `02-mysql-to-postgres.ts` and `03-mirror-images.ts` — not itself a pipeline stage                    |
+
+Stage **13** is genuinely shared by two scripts (`13-battles.ts` and
+`13-edh-inscription-images.ts`) — a real numbering collision in the repo, not
+a typo here; both run independently and neither depends on the other.
 
 ## i18n (`scripts/i18n/`)
 

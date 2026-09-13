@@ -26,3 +26,8 @@ tsconfig.scripts.tsbuildinfo
 # and the scan-*.sh scripts regenerate all of this on demand.
 .tools/
 .security-reports/
+
+# Local database dumps that docker/restore-drill.sh reads without --offsite,
+# and the pinned host keys the backup service mounts. Both are per-machine.
+docker/backups/
+docker/restic_known_hosts

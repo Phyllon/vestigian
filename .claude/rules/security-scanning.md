@@ -168,37 +168,105 @@ set for the same reason (see above) rather than nagging about the same
 undecided trade-off in two tools. Revisit if/when this project adds a
 dependency-update bot of some kind.
 
-## Real dependency vulnerabilities — surfaced, not yet acted on
+## Dependency vulnerabilities — 41 down to 22
 
-`pnpm scan:deps` (osv-scanner against `pnpm-lock.yaml`) found **41 known
-vulnerabilities across 17 packages** (5 critical, 21 high) as of this setup.
-Worth a maintainer's own triage rather than an automatic bump, since some of
-these are major-version jumps with real breaking-change risk:
+`pnpm scan:deps` (osv-scanner against `pnpm-lock.yaml`) first reported **41
+across 17 packages**. It now reports **22 across 6**, and every one that remains
+is there for a stated reason rather than because nobody looked.
 
-- **`maplibre-gl` 5.24.0 → fix at 6.4.1** (CVSS 10.0) — the actual map
-  rendering library this app is built around (see CLAUDE.md's stack table).
-  A major version bump; check the changelog before touching it.
-- **`sharp` 0.33.5 → fix at 0.35.4** (CVSS 8.9) — the library every
-  uploaded image is re-encoded through, per this project's own security
-  invariants.
-- **`drizzle-orm` 0.36.4 → fix at 0.45.2** (CVSS 7.5) — the project's ORM.
-- **`xmldom` 0.1.31** — a transitive dependency (likely via
-  `shapefile`/`osmtogeojson`/an import script), 20 CVEs, several with no
-  fixed version available for its current major at all.
-- The rest (`vitest`, `vite`, `esbuild`, `happy-dom`, `@vitest/mocker`) are
-  devDependencies — not present in the shipped `.output`, lower real
-  exposure, but still worth a bump when convenient.
+### Fixed
 
-Full table: run `pnpm scan:deps`.
+- **`sharp` 0.33.5 → 0.35.4** (CVSS 8.9). Every uploaded image is re-encoded
+  through it, so this was verified against the real pipeline rather than the
+  unit tests alone: the exact `sharp(…, { failOn: 'error', limitInputPixels })`
+  → `.rotate()` → `.metadata()` → `.resize()` → `.jpeg({ mozjpeg })` sequence
+  from `contributions/images.post.ts`, checked for EXIF actually being stripped,
+  for `limitInputPixels` still **throwing** (the decompression-bomb guard, not a
+  warning), and for a malformed buffer still throwing rather than hanging.
+  One source change was needed: 0.35 stopped publishing its types as a namespace
+  beside the default export, so `sharp.Metadata` became
+  `import { type Metadata }`.
+- **`drizzle-orm` 0.36.4 → 0.45.2** and **`drizzle-kit` 0.28.1 → 0.31.10**
+  (CVSS 7.5). Verified by `pnpm typecheck` clean and `pnpm db:generate`
+  reporting _no schema changes_ — a bumped kit that reads the schema differently
+  would have produced a spurious migration, which is the failure to watch for.
+  Deliberately **not** 1.0, which is still release-candidate.
+- **`vitest` 2.1.9 → 4.x** (CVSS 9.8) plus `@vitest/coverage-v8`. This also
+  cleared `@vitest/mocker`, and the `vite` 5.4.21 / `esbuild` 0.21.5 that were
+  vitest's own bundled internals. All 561 tests pass unchanged.
+- **`happy-dom` removed entirely** (CVSS 9.3 among three). It was declared in
+  `package.json` and imported by nothing — `vitest.config.ts` runs
+  `environment: 'node'`. Deleting an unused dependency beat bumping it.
+- **`js-yaml`, `svgo`, `minimist`** lifted through `pnpm.overrides`, since each
+  sits behind a parent that will not move on its own schedule.
+
+### The `@nuxt/ui` advisory, fixed without the major bump
+
+GHSA-gj2h-2fpw-fhv9 (6.9) is fixed upstream in `@nuxt/ui` **4.8.1** — a major
+version of the entire design system. The vulnerability itself is one attribute:
+`UForm` renders a bare `<form>` whose only submit handling is `@submit.prevent`,
+so a submit that lands **before Vue hydrates** — slow mobile network, a bundle
+blocked by CSP, autofill firing Enter early — falls through to the browser
+default, which is GET. That serialises every field into the query string.
+
+For this app that means a password in the address bar, in browser history, in
+the `Referer` header of the next request, and in every access log between the
+visitor and the origin. Mobile-first plus a strict CSP is exactly the profile
+where pre-hydration submits happen.
+
+The upstream patch is `method="post"`. That was applied by hand to **every**
+form in the app — the four `UForm`s carrying credentials, and the hand-written
+`<form>` elements too, which have the identical shape: the 2FA challenge in
+`LoginForm.vue`, `AdminStepUpDialog.vue` (the password prompt in front of the
+irreversible admin actions), and the password/email-change forms in
+`settings.vue`. Confirmed first that `UForm` sets no `inheritAttrs: false`, so
+the attribute genuinely reaches the rendered `<form>`.
+
+The 4.x upgrade is therefore worth doing on its own merits, not as a security
+fix. **If a new form is added, it needs `method="post"` until then.**
+
+### Still open, and why
+
+- **`maplibre-gl` 5.24.0 → 6.4.1** (CVSS 10.0). Deferred to its own cycle by
+  decision: 26 files import it, it is the library the whole map is built on, and
+  `terra-draw-maplibre-gl-adapter@^1` peers on it. Not a bump to land beside
+  unrelated work.
+- **`xmldom` (14), `xlsx` (2), `adm-zip` (1), `esbuild` 0.18.20 (1)** — all
+  **devDependencies reachable only from import scripts a human runs by hand**,
+  never from the shipped `.output`. `xmldom` comes via `osmtogeojson`
+  (`19-ohm-empire-extents.ts`), `xlsx` via `14-ancient-ports.ts`, `adm-zip` via
+  the cities/AWMC importers, `esbuild` via `drizzle-kit`'s deprecated
+  `@esbuild-kit/esm-loader`. Most have no fixed version at all. The honest
+  mitigation is not a bump that does not exist but knowing what those scripts
+  wrote — which is what the import guards are for.
+
+`pnpm.overrides` lives in `package.json`, which is correct for the pinned
+`packageManager: pnpm@9.12.0` and is recorded in `pnpm-lock.yaml`'s own
+`overrides:` block. A **newer** pnpm on `PATH` warns that it ignores that field
+(pnpm 10 moved settings to `pnpm-workspace.yaml`); if the pinned version is ever
+raised, the overrides have to move with it or they silently stop applying.
+
+Full current table: run `pnpm scan:deps`.
+
+## Vulnerability disclosure
+
+`public/.well-known/security.txt`, RFC 9116, served straight out of `public/`
+with no route of its own. **Every value in it is a placeholder** matching the
+ones `impressum.contactPlaceholder` already carries, and must be filled in
+before the site is public — a security.txt advertising an address nobody reads
+is worse than none, because it stops a finder looking for another way through.
+
+`Expires` is an obligation rather than a formality: RFC 9116 says a consumer
+should treat an expired file as absent, so the date has to be moved before it
+passes or the file quietly stops counting.
 
 ## Not yet validated end to end
 
-- **`scan-image.sh` (Trivy)** — builds `docker/Dockerfile` before scanning
-  it. That build currently fails on its own, unrelated to this setup:
-  `corepack enable` fails with `corepack: not found` on `node:26-alpine`,
-  which apparently no longer bundles corepack. This blocks the image build
-  itself, not the scanning step — worth its own fix before `scan-image.sh`
-  can run for real.
+- **`scan-image.sh` (Trivy)** — was blocked by the image build failing on
+  `corepack enable` (Node 26 unbundled corepack). That is fixed in
+  `docker/Dockerfile` and the image now builds end to end, so this is
+  unblocked; see `.claude/rules/deployment-and-releases.md` for why that
+  failure was invisible from outside.
 - **`scan-dast.sh` (ZAP baseline)** — follows the exact
   `pnpm build && node .output/server/index.mjs` pattern
   `playwright.config.ts`'s `webServer` already uses for e2e (same port

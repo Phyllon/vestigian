@@ -295,7 +295,7 @@
       {{ t('settings.intro') }}
     </p>
 
-    <form class="mt-8 space-y-5" @submit.prevent="saveProfile">
+    <form method="post" class="mt-8 space-y-5" @submit.prevent="saveProfile">
       <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
         {{ t('settings.profileHeading') }}
       </h2>
@@ -347,6 +347,7 @@
     </form>
 
     <form
+      method="post"
       class="mt-10 space-y-5 border-t border-paper-200 pt-6 dark:border-night-700"
       @submit.prevent="changePassword"
     >
@@ -474,7 +475,7 @@
           {{ t('settings.twoFactor.isOn') }}
         </p>
 
-        <form class="space-y-4" @submit.prevent="regenerateBackupCodes">
+        <form method="post" class="space-y-4" @submit.prevent="regenerateBackupCodes">
           <h3 class="font-medium text-ink-900 dark:text-paper-100">
             {{ t('settings.twoFactor.regenerateHeading') }}
           </h3>
@@ -496,7 +497,7 @@
           </UButton>
         </form>
 
-        <form class="space-y-4" @submit.prevent="disableTwoFactor">
+        <form method="post" class="space-y-4" @submit.prevent="disableTwoFactor">
           <h3 class="font-medium text-ink-900 dark:text-paper-100">
             {{ t('settings.twoFactor.disableHeading') }}
           </h3>
@@ -529,6 +530,7 @@
     </section>
 
     <form
+      method="post"
       class="mt-10 space-y-5 border-t border-paper-200 pt-6 dark:border-night-700"
       @submit.prevent="changeEmail"
     >

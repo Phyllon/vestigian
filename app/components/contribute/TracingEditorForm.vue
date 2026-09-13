@@ -105,7 +105,7 @@
       {{ t('tracingEditorForm.pointsCaptured', { count: vertexCount }) }}
     </p>
 
-    <UForm :schema="schema" :state="state" class="space-y-4" @submit="save">
+    <UForm method="post" :schema="schema" :state="state" class="space-y-4" @submit="save">
       <UFormField :label="t('tracingEditorForm.name')" name="title" required>
         <UInput
           v-model="state.title"

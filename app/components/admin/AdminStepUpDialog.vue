@@ -69,7 +69,7 @@
     @update:open="(next: boolean) => !next && cancel()"
   >
     <template #body>
-      <form class="space-y-3" @submit.prevent="submit">
+      <form method="post" class="space-y-3" @submit.prevent="submit">
         <p class="text-sm text-ink-500 dark:text-paper-400">
           {{ t('admin.stepUp.explanation') }}
         </p>
