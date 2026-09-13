@@ -19,3 +19,10 @@ blob-report/
 .playwright/
 
 tsconfig.scripts.tsbuildinfo
+
+# Security tooling (scripts/security/) — downloaded binaries, vendored
+# rulesets and scan output, none of it reproducible from a fresh checkout
+# without network access, so none of it is committed. install-opengrep.sh
+# and the scan-*.sh scripts regenerate all of this on demand.
+.tools/
+.security-reports/

@@ -1,0 +1,21 @@
+rules:
+  - id: use-require-active-user-not-require-user-session
+    languages: [typescript]
+    severity: WARNING
+    message: >
+      requireUserSession() only proves the session cookie unseals — it does
+      not re-check role, trust or ban state, or the session epoch. Use
+      requireActiveUser() from server/utils/permissions.ts on every
+      authenticated route (see CLAUDE.md's security invariants), or this
+      route is reachable by a blocked or revoked-trust account.
+    pattern: requireUserSession($EVENT)
+    paths:
+      include:
+        - server/api
+      exclude:
+        # No session/user exists yet on the pre-authentication flows.
+        - server/api/auth
+        # Documented, deliberate exception: only re-seals displayName, never
+        # reads role/trust/ban state. See server/utils/permissions.ts's
+        # readCurrentIdentity docstring.
+        - server/api/me/index.patch.ts

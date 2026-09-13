@@ -1,0 +1,16 @@
+failure-threshold: warning
+
+ignored:
+  # A named, non-numeric user (adduser/addgroup, both Dockerfiles) is a
+  # deliberate choice, not an oversight — a numeric UID only matters for a
+  # distroless image with no /etc/passwd, which neither of these are.
+  - DL3066
+  # `apk add --no-cache tini vips` is unpinned on purpose, for now: Alpine's
+  # package index keeps only the current build per branch, so pinning an
+  # exact version risks a future build failing outright when that build is
+  # pruned, in exchange for reproducibility this project doesn't yet have
+  # tooling to re-verify (no Renovate/Dependabot — see
+  # .claude/rules/security-scanning.md). Left visible in scan-image.sh's
+  # Trivy output instead, which catches an actually-vulnerable resolved
+  # version rather than an unpinned one in the abstract.
+  - DL3018

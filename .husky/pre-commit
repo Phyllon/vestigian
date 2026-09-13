@@ -1,3 +1,8 @@
+# Staged-only, so it's fast enough for every commit; the full working-tree
+# scan (scan-secrets.sh, also in `pnpm check`) runs at pre-push instead.
+docker run --rm -v "$(pwd):/repo" -w /repo zricethezav/gitleaks:v8.30.1 \
+  protect --source /repo --config /repo/.gitleaks.toml --staged --no-banner --redact
+
 if git diff --cached --name-only | grep -qx "i18n/locales/en.json"; then
   echo "pre-commit: en.json changed. Locales are translated by hand (by Claude), not the LibreTranslate engine — see .claude/rules/enrichment-and-i18n.md's 'Locales are hand-translated now' section." >&2
   for locale in fr es de it nl; do

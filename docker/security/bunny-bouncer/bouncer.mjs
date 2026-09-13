@@ -68,10 +68,16 @@ for (const [name, value] of Object.entries({ BOUNCER_KEY, BUNNY_API_KEY, BUNNY_P
   }
 }
 
+// `message` is already fully interpolated into the template literal — the
+// one argument the rule below worries about substituting a format specifier
+// into — before it ever reaches console.log/warn; `extra` is logged as a
+// second, independent value, never used to fill a placeholder in the first.
 const log = (message, extra = {}) =>
+  // nosemgrep: javascript.lang.security.audit.unsafe-formatstring
   console.log(`[bunny-bouncer] ${message}`, Object.keys(extra).length ? extra : '')
 
 const warn = (message, extra = {}) =>
+  // nosemgrep: javascript.lang.security.audit.unsafe-formatstring
   console.warn(`[bunny-bouncer] ${message}`, Object.keys(extra).length ? extra : '')
 
 /**
@@ -81,6 +87,10 @@ const warn = (message, extra = {}) =>
  * than threaded through the rest of the parse.
  */
 const parseCrowdSecDuration = (raw) => {
+  // Three optional non-capturing groups, each requiring a distinct trailing
+  // literal (h/m/s) with nothing overlapping between them — no ambiguous
+  // backtracking path despite the plugin's star-height heuristic flagging it.
+  // eslint-disable-next-line security/detect-unsafe-regex
   const match = /^-?(?:(\d+)h)?(?:(\d+)m)?(?:([\d.]+)s)?$/.exec(raw ?? '')
   if (!match) return null
 

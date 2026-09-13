@@ -1,0 +1,21 @@
+rules:
+  - id: authorization-must-use-shared-rules
+    languages: [typescript]
+    severity: WARNING
+    message: >
+      Every authorization rule lives in shared/utils/authorization.ts (see
+      CLAUDE.md) — that file exists precisely because "is at least a
+      moderator" once had four spellings. Use hasAtLeastRole() /
+      canReviewContributions() / canReviewRevision() instead of comparing
+      `.role` directly.
+    patterns:
+      - pattern-either:
+          - pattern: $X.role === $Y
+          - pattern: $X.role !== $Y
+    paths:
+      include:
+        - server/api
+        - server/utils/permissions.ts
+        - app/middleware
+      exclude:
+        - shared/utils/authorization.ts

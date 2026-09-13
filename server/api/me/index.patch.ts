@@ -10,7 +10,12 @@ import { users } from '~~/server/database/schema'
  */
 const cameraHash = z
   .string()
+  // Three sibling `(\.\d+)?` groups trip the plugin's star-height heuristic,
+  // but none nest or overlap in what they can consume (each is anchored
+  // between fixed literals), so there is no ambiguous backtracking path —
+  // worst case is linear in input length, and `.max(64)` below bounds that too.
   .regex(
+    // eslint-disable-next-line security/detect-unsafe-regex
     /^\d{1,2}(\.\d+)?\/-?\d{1,2}(\.\d+)?\/-?\d{1,3}(\.\d+)?$/,
     'Expected a map position of the form zoom/latitude/longitude.',
   )

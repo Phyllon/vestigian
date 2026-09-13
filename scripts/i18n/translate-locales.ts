@@ -188,7 +188,15 @@ export const unflatten = (flat: Record<string, string>): Record<string, unknown>
     const segments = path.split('.')
     let cursor = root
     for (const segment of segments.slice(0, -1)) {
+      // A key path comes from this project's own en.json, but walking
+      // attacker-shaped segments this way is the textbook prototype-pollution
+      // pattern, so the unsafe names are refused outright rather than trusted
+      // by provenance alone.
+      if (segment === '__proto__' || segment === 'constructor' || segment === 'prototype') {
+        throw new Error(`Refusing to unflatten unsafe key segment "${segment}" in "${path}"`)
+      }
       if (cursor[segment] === undefined) cursor[segment] = {}
+      // nosemgrep: javascript.lang.security.audit.prototype-pollution.prototype-pollution-loop
       cursor = cursor[segment] as Record<string, unknown>
     }
     cursor[segments.at(-1) as string] = text

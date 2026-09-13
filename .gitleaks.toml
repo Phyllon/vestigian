@@ -1,0 +1,16 @@
+title = "vestigian gitleaks config"
+
+# Layer on top of gitleaks' own default ruleset rather than replacing it —
+# see .claude/rules/security-scanning.md for what was actually run against
+# this repo to arrive at the allowlist below.
+[extend]
+useDefault = true
+
+[allowlist]
+paths = [
+  # .env is gitignored; only this template is committed, and every value in
+  # it is either a placeholder ("replace-me-with-...") or a local-only
+  # default (postgres://vestigian:vestigian@127.0.0.1/...) for the dev
+  # docker-compose stack, never a real credential.
+  '''\.env\.example''',
+]

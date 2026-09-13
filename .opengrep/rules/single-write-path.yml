@@ -1,0 +1,20 @@
+rules:
+  - id: no-second-write-path-to-live-tables
+    languages: [typescript]
+    severity: ERROR
+    message: >
+      Only server/utils/revisions.ts may write to `sites` or `tracings`.
+      Automatic approval, moderator approval and revert all go through
+      applyRevision() — see CLAUDE.md's governance model. If this is a
+      genuinely new kind of write, it belongs inside applyRevision(), not
+      beside it.
+    patterns:
+      - pattern-either:
+          - pattern: $DB.update(sites)
+          - pattern: $DB.update(tracings)
+          - pattern: $DB.insert(sites)
+          - pattern: $DB.insert(tracings)
+    paths:
+      exclude:
+        - server/utils/revisions.ts
+        - server/database/migrations

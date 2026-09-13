@@ -181,6 +181,10 @@ export const useSiteSearch = () => {
       $fetch<AncientPlaceSummary[]>('/api/atlas/places/search', { query: { q: trimmed } }),
     ])
 
+    // A stale-response guard (an in-flight search whose token was superseded
+    // by a newer keystroke), not a secret comparison — the rule's heuristic
+    // flags any `!==` against a variable it can't prove isn't sensitive.
+    // eslint-disable-next-line security/detect-possible-timing-attacks
     if (token !== requestToken) return
 
     results.value = [

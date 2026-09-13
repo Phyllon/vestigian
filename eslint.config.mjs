@@ -3,6 +3,7 @@ import withNuxt from './.nuxt/eslint.config.mjs'
 import prettier from 'eslint-config-prettier'
 import vueA11y from 'eslint-plugin-vuejs-accessibility'
 import sonarjs from 'eslint-plugin-sonarjs'
+import security from 'eslint-plugin-security'
 
 /**
  * ESLint covers correctness and the conventions in CLAUDE.md that a formatter
@@ -16,10 +17,30 @@ import sonarjs from 'eslint-plugin-sonarjs'
  * (cognitive complexity, duplicated logic, dead code) locally — this project
  * has no hosted SonarQube instance to talk to, so this is the offline
  * equivalent rather than a client for one.
+ *
+ * `eslint-plugin-security` is the SAST layer that runs on every commit and
+ * push (see `scripts/security/scan-sast.sh` for the heavier opengrep pass,
+ * which is dataflow-aware and covers what a regex-based ESLint rule cannot).
+ * `detect-object-injection` is off, not `warn`: run once at `recommended` it
+ * produced 162 warnings, including five inside `shared/utils/authorization.ts`
+ * itself — every `ROLE_RANK[role]` lookup by a typed enum key reads as the
+ * same sink as `obj[req.query.key]`, and the rule cannot tell the two apart.
+ * A warning nobody can act on file-by-file is exactly the backlog this
+ * project's tooling is supposed to not have (see CLAUDE.md's "it passes;
+ * treat any output as a regression"). TypeScript's own indexed-access typing
+ * already rejects an unknown key at the call sites that matter here.
  */
 export default withNuxt(
   ...vueA11y.configs['flat/recommended'],
   sonarjs.configs.recommended,
+  security.configs.recommended,
+
+  {
+    name: 'vestigian/security',
+    rules: {
+      'security/detect-object-injection': 'off',
+    },
+  },
 
   {
     name: 'vestigian/conventions',
@@ -101,6 +122,13 @@ export default withNuxt(
     files: ['scripts/**/*.ts', 'server/database/migrate.ts', 'docker/security/bunny-bouncer/*.mjs'],
     rules: {
       'no-console': 'off',
+
+      // Every path here comes from an operator's own CLI argument or a fixed
+      // output directory this repo already controls (`.import/`, snapshot
+      // folders) — one-shot, locally run, never reachable from a request.
+      // The rule earns its keep on `server/**`, where it currently has
+      // nothing to flag; that absence is the point, not a gap to widen here.
+      'security/detect-non-literal-fs-filename': 'off',
     },
   },
 
@@ -110,6 +138,14 @@ export default withNuxt(
     rules: {
       'max-params': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
+
+      // Test fixtures read known files by a relative path built in the test
+      // itself, and `buildMilitaryFeatureTypePattern()`
+      // (shared/utils/limes.test.ts) compiles a fixed gazetteer, never
+      // attacker input — both trip the rule's static-argument heuristic with
+      // nothing for it to actually warn about.
+      'security/detect-non-literal-fs-filename': 'off',
+      'security/detect-non-literal-regexp': 'off',
     },
   },
 
@@ -125,6 +161,11 @@ export default withNuxt(
     rules: {
       'sonarjs/no-hardcoded-passwords': 'off',
       'sonarjs/pseudo-random': 'off',
+
+      // Every dynamic RegExp here is built from a slug the test itself just
+      // fetched from the app's own API moments earlier, never from anything
+      // an attacker could shape.
+      'security/detect-non-literal-regexp': 'off',
     },
   },
 

@@ -24,6 +24,13 @@ const VALIDATION_WINDOW = 1
 
 const ENCRYPTION_ALGORITHM = 'aes-256-gcm'
 const IV_LENGTH = 12
+/**
+ * Node defaults to this already, but pinned explicitly on both sides: without
+ * it, `setAuthTag` accepts any shorter tag an attacker with write access to
+ * the stored ciphertext could supply, which raises the odds of a forged tag
+ * being accepted. Explicit here costs nothing and closes that off outright.
+ */
+const AUTH_TAG_LENGTH = 16
 
 const readEncryptionKey = (): Buffer => {
   const { totpEncryptionKey } = useRuntimeConfig()
@@ -58,7 +65,7 @@ const readEncryptionKey = (): Buffer => {
 export const encryptTotpSecret = (secretBase32: string): string => {
   const key = readEncryptionKey()
   const iv = randomBytes(IV_LENGTH)
-  const cipher = createCipheriv(ENCRYPTION_ALGORITHM, key, iv)
+  const cipher = createCipheriv(ENCRYPTION_ALGORITHM, key, iv, { authTagLength: AUTH_TAG_LENGTH })
   const ciphertext = Buffer.concat([cipher.update(secretBase32, 'utf8'), cipher.final()])
   const authTag = cipher.getAuthTag()
 
@@ -72,7 +79,9 @@ export const decryptTotpSecret = (encrypted: string): string => {
     throw createError({ statusCode: 500, message: 'Stored two-factor secret is malformed.' })
   }
 
-  const decipher = createDecipheriv(ENCRYPTION_ALGORITHM, key, Buffer.from(ivHex, 'hex'))
+  const decipher = createDecipheriv(ENCRYPTION_ALGORITHM, key, Buffer.from(ivHex, 'hex'), {
+    authTagLength: AUTH_TAG_LENGTH,
+  })
   decipher.setAuthTag(Buffer.from(authTagHex, 'hex'))
 
   return Buffer.concat([
