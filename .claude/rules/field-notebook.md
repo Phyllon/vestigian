@@ -170,3 +170,81 @@ query that computes the count. `bool_or` over `user_id = NULL` is `NULL`, not
 over zero rows is also `NULL` — both cases needed the explicit `COALESCE`, and
 both were caught by testing against the running database rather than
 assumed.
+
+## "Nearby, needing work" — the contribution queue
+
+61,273 records were imported and **49,964 of them (82%) have no photograph**.
+Until `/nearby` existed the application offered a map to browse and no way to
+find the records that need somebody standing in front of them — which is the one
+kind of work a visitor can do that nobody at a desk can. That is the cold-start
+problem stated precisely, and it is a product gap rather than a technical one.
+
+Measured against the real catalogue:
+
+| Gap           | Sites lacking it | Share |
+| ------------- | ---------------- | ----- |
+| a photograph  | 49,964           | 82%   |
+| a period      | 29,905           | 49%   |
+| a description | 29,417           | 48%   |
+| a summary     | 5                | ~0%   |
+
+`shared/utils/completeness.ts` holds the rule (pure, tested);
+`server/api/sites/needs-work.get.ts` is the query; `/nearby` is the page, public
+and `noindex`.
+
+### Three decisions worth keeping
+
+**Only gaps the contribution form can accept are counted.** Concordances are
+deliberately excluded: there is no field for them in `SiteEditorForm` and
+`SitePayload` carries none, so listing a site as incomplete for lacking one
+would be asking for something the application cannot receive.
+
+**Ordered by distance, not by how incomplete a record is** — the opposite of
+what it first seems it should do. The binding constraint on a visitor is where
+they are; a very incomplete site forty kilometres away is not more useful than a
+nearly complete one at the end of the road. Completeness decides _which records
+appear at all_ and what each asks for. `?missing=photograph` is the query a
+visitor actually wants.
+
+**A photograph outranks every other gap** in the score (0.4 of 1.0), for two
+reasons at once: it is the scarcest thing in the atlas by a wide margin, and it
+is the only gap that genuinely requires being there. A summary is worth least
+because five records lack one — weighting it heavily would rank on a distinction
+that barely exists.
+
+### The bounding-box pre-filter is not optional
+
+`geom && ST_Expand(...)` before `ST_DWithin` is the same trap
+`limes/sectors/[slug].get.ts` documents: a geography cast cannot use the GiST
+index on `sites.geom`, so without it this is a sequential scan over sixty
+thousand rows per request. `ST_Expand` takes **degrees**, so the radius is
+converted at the query's own latitude — a fixed factor would under-cover the box
+in northern Europe and silently drop sites that are genuinely in range.
+
+Confirmed on the real table: `Index Scan using sites_approved_geom_idx`, 13–17 ms
+warm (the first run's 114 ms was a cold cache).
+
+### Two bugs found by driving it in a browser, not by any test
+
+**The site's `Permissions-Policy` header blocked geolocation — and had been
+breaking the map's own "locate me" button all along.** `nuxt.config.ts` sent
+`geolocation=()`, whose comment claimed "nothing here uses them";
+`useGeolocation` has always been used by `GeolocateButton.vue`. A denied
+permissions policy refuses `navigator.geolocation` _before_ any prompt appears,
+so the composable reports `denied` and the control reads exactly as if the
+visitor had refused — which is why nobody noticed. Now `geolocation: ['self']`.
+
+**`useFetch`'s `immediate: false` and `watch` do not combine the way they read.**
+`watch` only _refreshes_ a request that has already run once, so with nothing to
+refresh no request was ever made and the list stayed empty forever — with no
+error anywhere. A watcher on the position fires the first `execute()`; `watch`
+handles later radius and filter changes.
+
+### Known limitation
+
+The list can be dominated by one repetitive cluster — a search from Xanten
+returns eleven `Übungslager Uedemerbruch I–XIV` practice camps in sixteen
+results. The data and the ordering are both correct; it is simply what nearest
+-first does where the atlas records a numbered series. Worth revisiting with
+per-title-prefix diversity if it proves annoying in use, rather than
+pre-emptively.

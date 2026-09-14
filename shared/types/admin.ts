@@ -45,6 +45,13 @@ export interface AdminRevisionEntry {
   createdAt: string
   reviewedAt?: string | null
   reviewNote?: string | null
+  /**
+   * Drawn for a post-hoc second look by `server/utils/sampling.ts`. Null on
+   * everything not drawn, which is most of it — trust publishes without review,
+   * and this is the sample brought back in front of a moderator.
+   */
+  sampledAt?: string | null
+  sampleReason?: 'newly-trusted' | 'routine-audit' | null
   authorId: number | null
   authorName: string | null
   authorRole?: UserRole | null

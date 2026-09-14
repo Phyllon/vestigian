@@ -187,6 +187,20 @@ load-bearing — never to be "quietly" weakened):
   "while more than one exists." Removing a rogue or compromised co-admin
   requires the same direct database access as creating the first one,
   deliberately slower than a button any admin could press against any other.
+- **Drift sampling is post-hoc and must never become a gate.** Trust was
+  binary and permanent-until-revoked: two accepted contributions and
+  everything afterwards published immediately, with nothing ever looking
+  again. That is blind to the contributor who behaves well enough to earn
+  trust and then degrades records slowly. A fraction of auto-approved work is
+  now drawn back for a second look **after** it publishes
+  (`server/utils/sampling.ts`), at a rate weighted towards newly trusted
+  accounts (50% on the first, decaying) and floored at 5% so no account
+  becomes permanently unwatched. It writes `revisions.sampled_at`, never
+  `status` — holding a contribution back would undo the whole promise of
+  trust. The draw uses `crypto.randomInt`, not `Math.random()`, because the
+  mechanism is adversarial by design: V8's PRNG state is recoverable from a
+  run of outputs, so a patient bad actor observing which of their own edits
+  were drawn could otherwise time the damaging ones into the gaps.
 - **Taking a record off the atlas is still an ordinary revision** — one
   carrying `retracted: true`, applied through `applyRevision()` like
   everything else. No second write path was added for it.
@@ -441,6 +455,38 @@ sequenceDiagram
   shouldn't.
 - **Revision history and diffing** (`RevisionDiff.vue`) visible per record.
 
+#### The "needs work" queue — answering "what can I do near here"
+
+61,273 records were imported and **82% of them have no photograph**. Until
+`/nearby` existed the application offered a map to browse and no way to find
+the records that need somebody to stand in front of them — the one kind of
+work a visitor can do that nobody at a desk can. That is this project's
+cold-start problem stated precisely, and it is a product gap rather than a
+technical one.
+
+`/api/sites/needs-work` returns approved sites within a radius that are still
+missing something, **nearest first** — deliberately not ordered by how
+incomplete a record is. The binding constraint on a visitor is where they are
+standing; a very incomplete site forty kilometres away is not more useful than
+a nearly complete one at the end of the road. Completeness decides _which_
+records appear and what each one asks for.
+
+What counts as a gap is a single tested rule (`shared/utils/completeness.ts`),
+weighted by both scarcity and by who can close it:
+
+| Gap           | Sites lacking it | Weight |
+| ------------- | ---------------- | ------ |
+| a photograph  | 49,964 (82%)     | 0.40   |
+| a description | 29,417 (48%)     | 0.30   |
+| a period      | 29,905 (49%)     | 0.20   |
+| a summary     | 5 (~0%)          | 0.10   |
+
+Concordances are deliberately **not** counted: there is no field for them in
+`SiteEditorForm`, so listing a record as incomplete for lacking one would ask
+for something the application cannot accept. The page is public on purpose —
+it is the best argument this project has for signing up, and putting it behind
+an account would show it only to people already contributing.
+
 ### 5.3 Moderation
 
 - **Review queue** with per-revision notes, batch actions, and a
@@ -501,6 +547,15 @@ source catalogue through a self-hosted LibreTranslate instance.
 - JSON-LD structured data (`schema.org/Place`) for sites and tracings.
 - Open Graph images: real photo when available, one of eleven static
   category cards otherwise.
+- A **Linked Places Format feed** at `/api/data/sites.lp.json`, alongside the
+  existing GeoJSON one. This project consumes vici.org, EDH, AWMC, OHM, CHRR
+  and ORBIS and previously gave back only raw GeoJSON; LPF is what Recogito,
+  Peripleo and the World Historical Gazetteer actually read, so publishing it
+  puts Vestigian _inside_ the gazetteer graph rather than beside it. Built
+  against the real specification (v1.3, fetched rather than recalled — that
+  version made `fclasses` required, which a build from memory of the older
+  shape would have silently omitted), and the `external_ids` table already
+  held exactly the Pleiades/Wikidata identifiers LPF wants as `links`.
 - A public, machine-readable **OpenAPI document** (dev-only — 404s in
   production), built by merging Nitro's auto-generated shape with each
   route's real zod validation schema, so documentation can never silently
@@ -673,6 +728,33 @@ BY-SA third-party content, so persisting a copy would make the app a
 republisher rather than a linker; Valkey caches a hit for 7 days and a miss
 for 1 day instead.
 
+### 6.6 The import pipeline is a supply chain, and is now guarded
+
+Twenty-four scripts fetch someone else's data and write it straight into the
+tables the map reads. None of them compared what arrived against what arrived
+last time, so an upstream that changed shape, lost half its rows, or was
+replaced outright would import silently and look exactly like a successful
+run. The failure is not loud: it is a map that is quietly wrong, discovered
+whenever somebody happens to notice.
+
+`scripts/import/guard.ts` is a tripwire between a source and the atlas. Each
+run records its row count and a checksum of the fetched bytes in an
+append-only `import_runs` table, and refuses an implausible delta against the
+previous run — a sharp shrink (upstream truncated or restructured) or an
+implausible growth. The quiet case it also catches is a **checksum change with
+an unchanged row count**, which is what a silently rewritten upstream looks
+like. A `--dry-run` flag fetches, parses and reports the delta without
+writing.
+
+Wired into the three highest-volume importers first (vici's own conversion,
+`09-cities.ts`, `12-edh-inscriptions.ts`) rather than all twenty-four at once:
+the guard is worth nothing until it has been proven against a real import, and
+retrofitting every script in one pass would be a large mechanical change
+landing on top of unverified behaviour. The decision logic is pure and unit
+tested; only the bookkeeping touches a database.
+
+---
+
 ---
 
 ## 7. Accessibility (a11y)
@@ -824,6 +906,63 @@ initial 40 findings produced one genuine bug fix (dead-branch logic in
 licence normalization), several readability improvements, and a handful of
 narrowly scoped, documented suppressions for verified false positives —
 never a blanket rule disable.
+
+Since then the local-only scanning story has widened considerably, all of it
+offline and none of it spending hosted CI minutes (a deliberate constraint —
+see §2.4):
+
+| Layer              | Tool                         | Blocking?                                             |
+| ------------------ | ---------------------------- | ----------------------------------------------------- |
+| Lint-level SAST    | `eslint-plugin-security`     | yes, in `pnpm lint`                                   |
+| SAST               | **opengrep** (pinned binary) | yes, in `pnpm check`                                  |
+| Secrets            | gitleaks                     | yes — staged at pre-commit, full tree in `pnpm check` |
+| Dockerfile         | hadolint                     | yes, in `pnpm check`                                  |
+| Dependencies (SCA) | osv-scanner                  | no — `pnpm scan:deps`                                 |
+| Container image    | Trivy                        | no — `pnpm scan:image`                                |
+| DAST               | OWASP ZAP baseline           | no — `pnpm scan:dast`                                 |
+
+opengrep rather than Semgrep because it is a full open-source fork made before
+parts of the rule registry moved behind a login. Its vendored ruleset is an
+**allowlist** of the frameworks this stack actually uses, not a denylist: the
+first unfiltered run produced 1,196 findings on real source, almost all of it
+React/Express/jQuery rules matching Vue, Nitro and cheerio by coincidence.
+Allowlisting means a future upstream registry addition cannot silently
+reintroduce that noise. Three custom rules encode this project's own
+governance invariants as an enforced diff check rather than prose — no second
+write path to `sites`/`tracings`, no authorization decision outside
+`shared/utils/authorization.ts`, no `requireUserSession` where
+`requireActiveUser` belongs.
+
+**Dependency posture.** `pnpm scan:deps` first reported 41 known
+vulnerabilities across 17 packages; it now reports 22 across 6, and each
+remaining one is there for a stated reason. `sharp` and `drizzle-orm` were
+bumped and verified against their real behaviour rather than their unit tests
+— the sharp upgrade specifically re-checked that EXIF is still stripped and
+that `limitInputPixels` still _throws_ rather than warning, since that is the
+decompression-bomb guard §8.3 depends on. `happy-dom` was **removed** rather
+than bumped, because nothing imported it. What remains is `maplibre-gl`
+(deferred to its own cycle — 26 files import it) and four devDependencies
+reachable only from import scripts a human runs by hand, most with no fixed
+version in existence.
+
+**A form vulnerability fixed without the major upgrade it shipped in.**
+`@nuxt/ui`'s advisory (GHSA-gj2h-2fpw-fhv9) is fixed in 4.8.1 — a major
+version of the whole design system. The flaw itself is one attribute: `UForm`
+renders a bare `<form>` whose only submit handling is `@submit.prevent`, so a
+submission landing **before Vue hydrates** (slow network, a bundle blocked by
+CSP, autofill firing Enter early) falls through to the browser default, which
+is GET — serialising every field into the query string. For this app that
+means a password in the address bar, in browser history, in the `Referer` of
+the next request, and in every access log in between. The upstream fix is
+`method="post"`, applied by hand to every form in the application, including
+the hand-written ones with the identical shape: the 2FA challenge, the admin
+step-up prompt, and the password/email-change forms in `/settings`.
+
+**Vulnerability disclosure.** `public/.well-known/security.txt` (RFC 9116).
+Its values are placeholders matching the ones the legal notice already
+carries, and must be filled in before the site is public — a security.txt
+advertising an address nobody reads is worse than none, because it stops a
+finder looking for another way through.
 
 ### 8.7 Administrative governance (`/admin`)
 
@@ -993,6 +1132,49 @@ flowchart LR
 - **Grafana itself has no public router** and binds to loopback only —
   reached exclusively via an SSH tunnel, since its own dashboards surface
   visitor IPs and the moderation trail.
+
+### 10.1 Backups, and knowing when they stop
+
+One VPS is one failure domain. The nightly `pg_dump` used to write to a volume
+on the same machine it was backing up, which meant losing the box lost the
+dumps along with the database they were dumps of. Each dump is now also pushed
+to a **restic** repository on separate hardware (a Hetzner Storage Box over
+SFTP — same provider and jurisdiction, roughly €3/month), content-addressed,
+deduplicated, and encrypted client-side so the copy on someone else's disk is
+not a second place the atlas is readable in the clear.
+
+Three details are deliberate rather than incidental: `RESTIC_PASSWORD` **is**
+the backup (restic has no recovery path, so losing it makes every off-box
+snapshot permanently unreadable); host keys are pinned rather than accepted on
+first use, since a backup that trusts whatever answers at the remote's address
+can be redirected by DNS alone; and the SSH key is restricted on the remote to
+the one repository path, because a backup job that can also delete the remote
+turns one compromised host into the loss of both copies at once.
+
+**Testing the restore, not just the dump.** `docker/restore-drill.sh` restores
+a real snapshot into a throwaway PostGIS container, asserts the tables that
+cannot be regenerated actually carry rows, and checks that geometry reads back
+— a restore that lost PostGIS leaves the column present and every value
+unreadable, which a row count alone would not catch. Verified once against a
+real 58 MB dump: 61,273 sites, 11,720 tracings, 39,213 images, all geometries
+readable.
+
+Running it surfaced a trap worth recording. The postgres image's entrypoint
+starts a _temporary_ server during initialisation with `listen_addresses`
+empty, so a plain `pg_isready` passes against that one, the restore begins, and
+initdb then shuts the server down underneath it — surfacing as
+`PQputCopyData: server closed the connection unexpectedly` partway through a
+COPY, which reads exactly like a corrupt dump and is not one. The drill waits
+on TCP instead, which the init server is not listening on.
+
+**The failure this guards against is not a backup that errors — it is one that
+quietly stopped months ago.** `backup.sh` prints one `backup.outcome=` line per
+stage per run, and since Alloy already ships every container's stdout to Loki,
+four alerts sit on those lines: nothing dumped in 26 hours, any stage failing,
+dumps succeeding but **not leaving the machine**, and no integrity check
+passing in nine days. That needed a Loki **ruler**, which this deployment did
+not have — `alerts.yml` is Prometheus-only, and the backup container has no
+scrape endpoint and no reason to grow one.
 
 ---
 

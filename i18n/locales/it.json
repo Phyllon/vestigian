@@ -304,7 +304,11 @@
     "placeNamesHeading": "Nomi locali moderni",
     "placeNamesBody": "I nomi di paesi e città attuali usati nella ricerca di luoghi provengono da GeoNames.org (CC BY 4.0).",
     "satelliteHeading": "Mappa base satellitare",
-    "satelliteBody": "La vista satellitare mostra immagini Sentinel-2 senza nuvole di EOX IT Services (Vienna), costruite a partire dai dati aperti ESA Copernicus Sentinel-2. La versione usata da questa app è CC BY-NC-SA 4.0 — solo uso non commerciale, e ogni riutilizzo deve essere condiviso con la stessa licenza."
+    "satelliteBody": "La vista satellitare mostra immagini Sentinel-2 senza nuvole di EOX IT Services (Vienna), costruite a partire dai dati aperti ESA Copernicus Sentinel-2. La versione usata da questa app è CC BY-NC-SA 4.0 — solo uso non commerciale, e ogni riutilizzo deve essere condiviso con la stessa licenza.",
+    "reuseHeading": "Riutilizzare questi dati",
+    "reuseBody": "Vestigian nasce da fonti con licenza aperta e ripubblica le proprie schede nello stesso spirito. Entrambi i flussi sono in sola lettura, limitati, paginati e aperti alle richieste da altri domini. I testi sono CC BY-SA e i metadati CC0; le licenze delle immagini variano per scheda e non sono incluse.",
+    "reuseGeojson": "GeoJSON semplice, per mappe e analisi",
+    "reuseLinkedPlaces": "Linked Places Format, lo standard di repertorio geografico della rete Pelagios, con collegamenti closeMatch a Pleiades e Wikidata"
   },
   "impressum": {
     "title": "Avviso legale",
@@ -1174,8 +1178,12 @@
         "tracings": "Tracciati",
         "autoApprovedOnly": "Solo le modifiche che nessuno ha riveduto",
         "blankingOnly": "Solo le modifiche che togliono più di quanto aggiungano",
-        "clearAuthor": "Tutti gli autori"
-      }
+        "clearAuthor": "Tutti gli autori",
+        "sampledOnly": "Estratti per revisione"
+      },
+      "sampleTitle": "Pubblicato automaticamente in base alla fiducia e poi estratto a caso per una seconda verifica. Il campionamento non ritarda mai la pubblicazione.",
+      "sampleNewlyTrusted": "fiducia recente",
+      "sampleRoutine": "controllo di routine"
     },
     "accounts": {
       "loading": "Lettura degli account…",
@@ -1369,6 +1377,37 @@
       },
       "noSeries": "Nulla contato per ora.",
       "countersNote": "Sono totali dall'ultimo avvio del processo, non tassi — una cifra bassa dopo un rilascio è un riavvio, non una buona notizia."
+    }
+  },
+  "nearby": {
+    "title": "Nei dintorni, da completare",
+    "menuLabel": "Nei dintorni, da completare",
+    "intro": "La maggior parte delle schede di questo atlante è stata importata, non visitata. Quattro su cinque non hanno alcuna fotografia. Ecco cosa manca vicino a lei — e una fotografia è l'unica cosa che richiede di essere sul posto.",
+    "locationPrompt": "La sua posizione serve a trovare i siti nei dintorni. Viene letta nel browser e inviata solo come coordinata insieme alla ricerca.",
+    "useMyLocation": "Usa la mia posizione",
+    "locationDenied": "Il permesso di posizione è stato negato, quindi qui non può essere mostrato nulla.",
+    "radiusLabel": "Entro",
+    "radius5": "5 km",
+    "radius10": "10 km",
+    "radius25": "25 km",
+    "radius50": "50 km",
+    "onlyPhotographs": "Solo siti senza fotografia",
+    "searching": "Ricerca in corso…",
+    "nothingNearby": "Non manca nulla a questa distanza. Provi un raggio più ampio.",
+    "missingAria": "Manca ancora",
+    "distanceMetres": "{metres} m",
+    "distanceKilometres": "{km} km",
+    "asks": {
+      "photograph": "Richiede una fotografia.",
+      "description": "Richiede una descrizione.",
+      "period": "Richiede una datazione.",
+      "summary": "Richiede una breve sintesi."
+    },
+    "gaps": {
+      "photograph": "fotografia",
+      "description": "descrizione",
+      "period": "datazione",
+      "summary": "sintesi"
     }
   }
 }

@@ -44,6 +44,8 @@ interface RevisionRow {
   payload: RevisionPayload
   author_id: number | null
   reverts_revision_id: number | null
+  /** 1 when trust published this without a moderator. Drives the drift sample below. */
+  auto_approved: number
 }
 
 /**
@@ -232,7 +234,7 @@ export const applyRevision = async (revisionId: number): Promise<void> => {
   const sql = useSql()
 
   const [revision] = await sql<RevisionRow[]>`
-    SELECT id, entity_type, entity_id, payload, author_id, reverts_revision_id
+    SELECT id, entity_type, entity_id, payload, author_id, reverts_revision_id, auto_approved
     FROM revisions WHERE id = ${revisionId} LIMIT 1
   `
 
@@ -335,6 +337,22 @@ export const applyRevision = async (revisionId: number): Promise<void> => {
   // path — a contribution's own approval — should wait on them. See
   // `verifySiteConcordances`'s own docstring for why it is never awaited here.
   if (finalSiteId) void verifySiteConcordances(finalSiteId)
+
+  /**
+   * The drift spot-check, drawn here rather than at the contribution endpoint
+   * for the reason this whole file exists: automatic approval, moderator
+   * approval and revert all arrive at this one function, so a rule applied here
+   * cannot diverge between them.
+   *
+   * Only *automatic* publishing is eligible — `auto_approved` distinguishes it
+   * from the moderator-approved and revert paths, which already had a reviewer.
+   * After the transaction, so the author's count reflects this contribution,
+   * and never awaited: the record is already published and correct, and a
+   * missing spot-check must not be able to fail a contribution.
+   */
+  if (revision.auto_approved === 1 && revision.author_id) {
+    void sampleAutoApprovedRevision({ revisionId, authorId: revision.author_id })
+  }
 
   // The governance audit line. `applyRevision` is the only path by which a live
   // row is ever written — automatic approval, moderator approval and revert all

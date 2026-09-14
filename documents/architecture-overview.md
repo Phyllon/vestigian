@@ -64,12 +64,12 @@ route so a reader who never asks for them pays nothing:
 
 ## Data layer
 
-| Store                         | Holds                                                                                                                                                | Notes                                                                                                                           |
-| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| **PostgreSQL + PostGIS**      | Everything durable: `sites`, `tracings`, `users`, `revisions`, `antiquity_*` (AWMC/Pleiades, read-only reference data), `limes_*` (derived frontier) | One instance, ~190 MB of real data. Drizzle is the default client; raw SQL (`useSql()`) only where PostGIS functions are needed |
-| **Valkey** (Redis-compatible) | Tile cache, sessions, rate-limit counters, enrichment cache                                                                                          | No persistence for tiles — regenerable. `--maxmemory 1gb`, LRU eviction                                                         |
-| **Bunny.net**                 | Original site photographs (one per image)                                                                                                            | imgproxy generates every displayed size on the fly; zero egress from the origin                                                 |
-| **Bunny CDN**                 | Edge cache for imgproxy output and static assets                                                                                                     |                                                                                                                                 |
+| Store                         | Holds                                                                                                                                                                                    | Notes                                                                                                                           |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **PostgreSQL + PostGIS**      | Everything durable: `sites`, `tracings`, `users`, `revisions`, `antiquity_*` (AWMC/Pleiades, read-only reference data), `limes_*` (derived frontier), `import_runs` (import bookkeeping) | One instance, ~190 MB of real data. Drizzle is the default client; raw SQL (`useSql()`) only where PostGIS functions are needed |
+| **Valkey** (Redis-compatible) | Tile cache, sessions, rate-limit counters, enrichment cache                                                                                                                              | No persistence for tiles — regenerable. `--maxmemory 1gb`, LRU eviction                                                         |
+| **Bunny.net**                 | Original site photographs (one per image)                                                                                                                                                | imgproxy generates every displayed size on the fly; zero egress from the origin                                                 |
+| **Bunny CDN**                 | Edge cache for imgproxy output and static assets                                                                                                                                         |                                                                                                                                 |
 
 ## Background work (not request-driven)
 
@@ -82,8 +82,17 @@ route so a reader who never asks for them pays nothing:
   corpora). Run once per environment, not per request.
 - **`pnpm tiles:warm`**: pre-populates the Valkey tile cache after a deploy or
   bulk import so the first visitors don't pay for cold PostGIS renders.
+  Each guarded stage records its row count and a checksum in `import_runs`
+  and refuses an implausible delta (`scripts/import/guard.ts`), so an upstream
+  that silently changed shape stops the import rather than quietly rewriting
+  the map.
 - **`pnpm db:snapshot`** / **`pnpm images:reconcile`**: nightly-ish maintenance,
   not wired to a scheduler beyond `docker/backup.sh` in production.
+- **Nightly backup** (`docker/backup.sh`, production): `pg_dump` kept 14 days
+  locally _and_ pushed off the machine to an encrypted restic repository —
+  one VPS is one failure domain. `docker/restore-drill.sh` is the part that
+  proves a snapshot actually restores; four Loki alerts watch for the backup
+  quietly stopping, which is the real failure mode rather than one that errors.
 
 ## Governance / write path
 
@@ -94,6 +103,13 @@ decides whether it publishes immediately or queues for a moderator, and
 reverts write a new revision rather than deleting history. Authorization rules
 live in one file, `shared/utils/authorization.ts`, imported by both the client
 (to hide controls) and the server (to actually enforce).
+
+Drift sampling sits beside that path without becoming part of it: a fraction
+of auto-approved work is drawn back for a second look **after** it publishes
+(`server/utils/sampling.ts`), weighted towards newly trusted accounts and
+floored so no account becomes permanently unwatched. It writes
+`revisions.sampled_at`, never `status` — making it a gate would undo the whole
+promise of trust.
 
 `/admin` (admin role only, `server/api/admin/**`) sits above this as a
 governance layer, not a second write path: banning an account is a column
@@ -158,21 +174,24 @@ Kubernetes would be a translation of the same containers, not a rewrite.
 
 ## Directory-to-architecture map
 
-| Layer                                       | Where                                                                                                                |
-| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| UI / map rendering                          | `app/components/map/` (basemap switcher + separate overlay switcher), `app/composables/map/`                         |
-| Column relief viewers (OpenSeadragon)       | `app/components/columns/`, `app/composables/columns/`                                                                |
-| Record detail, contribution forms           | `app/components/site/`, `contribute/`, `moderation/`                                                                 |
-| Admin command station                       | `app/pages/admin/`, `app/components/admin/`, `server/api/admin/**`                                                   |
-| Epigraphy (EDH + Attic Inscriptions Online) | `app/pages/inscriptions/`, `app/components/epigraphy/`, `server/utils/inscriptions.ts`, `server/api/inscriptions/**` |
-| Domain vocabulary shared by client + server | `shared/types/`, `shared/utils/`                                                                                     |
-| API routes                                  | `server/api/**` (one file per route, Nitro file-based routing)                                                       |
-| Tile SQL generation                         | `server/utils/mvt.ts`, `atlas.ts`, `limes.ts`                                                                        |
-| Governance (revisions, trust, permissions)  | `server/utils/revisions.ts`, `permissions.ts`                                                                        |
-| DB schema (Drizzle)                         | `server/database/schema/`                                                                                            |
-| Hand-written SQL migrations                 | `server/database/migrations/`                                                                                        |
-| One-off data pipelines                      | `scripts/import/`, `scripts/*.ts`                                                                                    |
-| Container definitions                       | `docker/`                                                                                                            |
+| Layer                                          | Where                                                                                                                |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| UI / map rendering                             | `app/components/map/` (basemap switcher + separate overlay switcher), `app/composables/map/`                         |
+| Column relief viewers (OpenSeadragon)          | `app/components/columns/`, `app/composables/columns/`                                                                |
+| Record detail, contribution forms              | `app/components/site/`, `contribute/`, `moderation/`                                                                 |
+| Admin command station                          | `app/pages/admin/`, `app/components/admin/`, `server/api/admin/**`                                                   |
+| Epigraphy (EDH + Attic Inscriptions Online)    | `app/pages/inscriptions/`, `app/components/epigraphy/`, `server/utils/inscriptions.ts`, `server/api/inscriptions/**` |
+| Domain vocabulary shared by client + server    | `shared/types/`, `shared/utils/`                                                                                     |
+| API routes                                     | `server/api/**` (one file per route, Nitro file-based routing)                                                       |
+| Tile SQL generation                            | `server/utils/mvt.ts`, `atlas.ts`, `limes.ts`                                                                        |
+| Governance (revisions, trust, permissions)     | `server/utils/revisions.ts`, `permissions.ts`, `sampling.ts`                                                         |
+| Open-data feeds out (GeoJSON + Linked Places)  | `server/api/data/**`, `shared/utils/linkedPlaces.ts`                                                                 |
+| Contribution queue ("what needs work near me") | `server/api/sites/needs-work.get.ts`, `shared/utils/completeness.ts`, `app/pages/nearby.vue`                         |
+| Local security scanning                        | `scripts/security/`, `.opengrep/rules/`                                                                              |
+| DB schema (Drizzle)                            | `server/database/schema/`                                                                                            |
+| Hand-written SQL migrations                    | `server/database/migrations/`                                                                                        |
+| One-off data pipelines                         | `scripts/import/`, `scripts/*.ts`                                                                                    |
+| Container definitions                          | `docker/`                                                                                                            |
 
 ## What this diagram leaves out
 

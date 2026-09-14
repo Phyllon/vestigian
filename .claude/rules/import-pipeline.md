@@ -234,3 +234,107 @@ marked approved) with no request and no pause. Without that, every rebuild of
   originals are not upscaled.
 - Therefore **2400px is a permanent ceiling** for imported photographs, and
   "one original stored per image" cannot hold for this content.
+
+## Import guards — a tripwire between an upstream and the atlas
+
+Twenty-four scripts here fetch somebody else's data and write it into tables the
+map reads. None of them used to compare what arrived against what arrived last
+time, so an upstream that changed shape, lost half its rows or was replaced
+outright imported silently and looked exactly like a successful run. That
+failure is never loud: it is a map that is quietly wrong, found whenever
+somebody happens to notice.
+
+`scripts/import/guard.ts` adds a memory. Every guarded run records how many rows
+the upstream served and a SHA-256 of the bytes it served them in
+(`import_runs`, append-only, one row per successful run); the next run refuses
+an implausible delta. The decision is pure and tested in
+`__test__/guard.test.ts` — only `readLastImportRun`/`recordImportRun` touch a
+database.
+
+It is **not** a validator. It says nothing about whether individual records are
+correct, only whether this fetch resembles the last one. That is the class of
+problem nobody can catch by eye across 235,000 rows.
+
+### The four verdicts
+
+| Outcome              | When                               | Effect                     |
+| -------------------- | ---------------------------------- | -------------------------- |
+| `empty-source`       | zero rows parsed                   | **refuses**, exit 1        |
+| `implausible-shrink` | below 90% of the last run          | **refuses**, exit 1        |
+| `implausible-growth` | above 3× the last run              | **refuses**, exit 1        |
+| `content-changed`    | same row count, different checksum | proceeds, flagged with `!` |
+
+`content-changed` is deliberately not a refusal. The same number of rows with
+different bytes is what an ordinary upstream correction looks like — and equally
+what a substituted dataset looks like. Nothing available here can tell them
+apart, so it is surfaced rather than judged.
+
+`empty-source` is checked before any comparison because it is wrong on its own
+terms: no source legitimately publishes nothing, so zero means a fetch that
+failed while returning success. Letting it through would also write a zero
+baseline, against which every later run looks like enormous growth.
+
+### Wiring a new script
+
+```ts
+const raw = /* the bytes the upstream served, before parsing */
+const proceed = await guardImport({
+  sql, source: SOURCE_ID, rowCount: rows.length,
+  checksum: checksumOfSource(raw), dryRun: isDryRun(process.argv),
+})
+if (!proceed) { await sql.end(); return }
+// … write …
+await recordImportRun(sql, { source: SOURCE_ID, rowCount: rows.length, checksum })
+```
+
+Four rules that are easy to get wrong:
+
+- **Record after the write, never before.** A run that dies halfway must not
+  leave a baseline claiming rows it never wrote.
+- **Checksum the raw payload, not the parsed rows.** Hashing after parsing
+  misses a source whose content changed in a way this project's own parser
+  normalises away — precisely the change nobody would otherwise see.
+- **Compare and record the same quantity.** `12-edh-inscriptions.ts` counts
+  files _served_, not inscriptions _parsed_: the malformed count is reported
+  separately, and a run where that number jumps is a parser problem rather than
+  a volume one. Recording `parsed` while comparing `served` judges the next run
+  against a different measurement than it takes.
+- **`SOURCE_ID` names the upstream, not the file.** Scripts get renamed;
+  `geonames:cities500` does not.
+
+### Wired so far
+
+`09-cities.ts` (`geonames:cities500`, 235,666 rows), `12-edh-inscriptions.ts`
+(`edh:inscriptions`, ~79,200) and `02-mysql-to-postgres.ts` (`vici:points` and
+`vici:tracings` — the atlas itself). The remaining twenty follow the pattern
+above; the guard was worth nothing until proven on a real import, so it was
+proven on three before being spread further.
+
+### Two traps found while wiring these
+
+**`IMPORT_LIMIT` must not record a baseline.** `12-edh-inscriptions.ts` accepts
+`IMPORT_LIMIT=200` to truncate a run for testing. A truncated run is not a
+measurement of the upstream, so recording it would make the next ordinary run
+read as a 400-fold growth and be refused. Such runs are left unguarded _and_
+unrecorded rather than recorded with a caveat nothing later reads.
+
+**`02-mysql-to-postgres.ts` needed the counts up front.** It streams points out
+of MySQL in batches and writes as it goes, so by the time a total is known the
+write has already happened. Guarding it meant two `count(*)` queries mirroring
+the predicates in `importPoints` and `importTracings` — cheap against indexed
+columns, and the only way to _refuse_ a bad dump rather than merely notice one
+afterwards. Its checksum is of `vici.sql.gz`, the bytes `01-fetch-dump.ts`
+downloaded, not of anything read back out of MySQL: provenance belongs to the
+dump, and the restored database is already a derivative. When that file is not
+on disk there is no provenance left to check, so the guard stands down and says
+so rather than inventing a checksum that compares equal to nothing.
+
+### Verified
+
+Against the live dev database, not only the unit tests: first run, identical
+re-run, `content-changed`, a refused 88% collapse (exit code 1), and a dry run —
+confirming afterwards that neither a refusal nor a dry run writes an
+`import_runs` row. Then end to end through the real `09-cities.ts`: a `--dry-run`
+against the genuine 235,666-row GeoNames fetch reported the first run and wrote
+nothing, and with a 900,000-row baseline seeded the same real fetch was refused
+with exit 1.

@@ -304,7 +304,11 @@
     "placeNamesHeading": "Nombres de lugar modernos",
     "placeNamesBody": "Los nombres de pueblos y ciudades actuales usados en la búsqueda de lugares proceden de GeoNames.org (CC BY 4.0).",
     "satelliteHeading": "Mapa base de satélite",
-    "satelliteBody": "La vista satélite es imagen Sentinel-2 sin nubes de EOX IT Services (Viena), construida a partir de datos abiertos de ESA Copernicus Sentinel-2. La versión que usa esta aplicación está bajo CC BY-NC-SA 4.0 — solo uso no comercial, y cualquier reutilización debe compartirse bajo la misma licencia."
+    "satelliteBody": "La vista satélite es imagen Sentinel-2 sin nubes de EOX IT Services (Viena), construida a partir de datos abiertos de ESA Copernicus Sentinel-2. La versión que usa esta aplicación está bajo CC BY-NC-SA 4.0 — solo uso no comercial, y cualquier reutilización debe compartirse bajo la misma licencia.",
+    "reuseHeading": "Reutilizar estos datos",
+    "reuseBody": "Vestigian se construye a partir de fuentes con licencia abierta y publica sus propios registros con el mismo espíritu. Ambos canales son de solo lectura, acotados, paginados y abiertos a peticiones de otros dominios. Los textos están bajo CC BY-SA y los metadatos bajo CC0; las licencias de las imágenes varían según el registro y no se incluyen.",
+    "reuseGeojson": "GeoJSON simple, para mapas y análisis",
+    "reuseLinkedPlaces": "Linked Places Format, el estándar de nomenclátor de la red Pelagios, con enlaces closeMatch a Pleiades y Wikidata"
   },
   "impressum": {
     "title": "Aviso legal",
@@ -1174,8 +1178,12 @@
         "tracings": "Trazados",
         "autoApprovedOnly": "Solo ediciones que nadie revisó",
         "blankingOnly": "Solo ediciones que quitan más de lo que añaden",
-        "clearAuthor": "Todas las autorías"
-      }
+        "clearAuthor": "Todas las autorías",
+        "sampledOnly": "Seleccionados para revisión"
+      },
+      "sampleTitle": "Publicado automáticamente por confianza y después seleccionado al azar para una segunda revisión. El muestreo nunca retrasa la publicación.",
+      "sampleNewlyTrusted": "confianza reciente",
+      "sampleRoutine": "control rutinario"
     },
     "accounts": {
       "loading": "Leyendo las cuentas…",
@@ -1369,6 +1377,37 @@
       },
       "noSeries": "Nada contado todavía.",
       "countersNote": "Son totales desde el último arranque del proceso, no tasas — una cifra baja tras un despliegue es un reinicio, no una buena noticia."
+    }
+  },
+  "nearby": {
+    "title": "Cerca, por completar",
+    "menuLabel": "Cerca, por completar",
+    "intro": "La mayoría de los registros de este atlas se importaron, no se visitaron. Cuatro de cada cinco no tienen ninguna fotografía. Esto es lo que falta cerca de usted — y una fotografía es lo único que exige estar allí.",
+    "locationPrompt": "Se usa su ubicación para encontrar yacimientos a su alrededor. Se lee en su navegador y solo se envía como una coordenada con la búsqueda.",
+    "useMyLocation": "Usar mi ubicación",
+    "locationDenied": "Se denegó el permiso de ubicación, así que no puede mostrarse nada aquí.",
+    "radiusLabel": "En un radio de",
+    "radius5": "5 km",
+    "radius10": "10 km",
+    "radius25": "25 km",
+    "radius50": "50 km",
+    "onlyPhotographs": "Solo yacimientos sin fotografía",
+    "searching": "Buscando…",
+    "nothingNearby": "No falta nada a esta distancia. Pruebe un radio mayor.",
+    "missingAria": "Todavía falta",
+    "distanceMetres": "{metres} m",
+    "distanceKilometres": "{km} km",
+    "asks": {
+      "photograph": "Necesita una fotografía.",
+      "description": "Necesita una descripción.",
+      "period": "Necesita una datación.",
+      "summary": "Necesita un breve resumen."
+    },
+    "gaps": {
+      "photograph": "fotografía",
+      "description": "descripción",
+      "period": "datación",
+      "summary": "resumen"
     }
   }
 }

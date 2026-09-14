@@ -27,6 +27,7 @@ import { Readable } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
 import AdmZip from 'adm-zip'
 import postgres from 'postgres'
+import { checksumOfSource, guardImport, isDryRun, recordImportRun } from './guard'
 
 const sql = postgres(
   process.env.NUXT_DATABASE_URL ?? 'postgres://vestigian:vestigian@127.0.0.1:5432/vestigian',
@@ -35,6 +36,8 @@ const sql = postgres(
 
 const CACHE_DIR = join(process.cwd(), '.import')
 const SOURCE_URL = 'https://download.geonames.org/export/dump/cities500.zip'
+/** Names the upstream, not this file — the script may be renamed, the source may not. */
+const SOURCE_ID = 'geonames:cities500'
 const BATCH_SIZE = 1000
 
 const exists = async (path: string): Promise<boolean> =>
@@ -133,14 +136,39 @@ const main = async (): Promise<void> => {
   const entry = zip.getEntry('cities500.txt')
   if (!entry) throw new Error('cities500.txt not found inside cities500.zip')
 
-  const rows = parseCitiesFile(entry.getData().toString('utf8'))
-  console.log(`${rows.length} places parsed.\n`)
+  // Checksummed from the extracted bytes rather than the .zip, so a source
+  // rebuilt with identical content but a different compression timestamp does
+  // not read as a changed dataset.
+  const raw = entry.getData()
+  const rows = parseCitiesFile(raw.toString('utf8'))
+  console.log(`${rows.length} places parsed.`)
+
+  const proceed = await guardImport({
+    sql,
+    source: SOURCE_ID,
+    rowCount: rows.length,
+    checksum: checksumOfSource(raw),
+    dryRun: isDryRun(process.argv),
+  })
+
+  if (!proceed) {
+    await sql.end()
+    return
+  }
 
   for (let offset = 0; offset < rows.length; offset += BATCH_SIZE) {
     const batch = rows.slice(offset, offset + BATCH_SIZE)
     await insertBatch(batch)
     console.log(`· cities ${Math.min(offset + BATCH_SIZE, rows.length)}/${rows.length}`)
   }
+
+  // After the write, never before: a run that dies halfway must not leave a
+  // baseline claiming rows it never actually wrote.
+  await recordImportRun(sql, {
+    source: SOURCE_ID,
+    rowCount: rows.length,
+    checksum: checksumOfSource(raw),
+  })
 
   const [result] = await sql<{ count: string }[]>`SELECT count(*)::text FROM cities`
   console.log(`\n${result?.count ?? 0} rows in cities.`)

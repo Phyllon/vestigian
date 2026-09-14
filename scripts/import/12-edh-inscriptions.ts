@@ -42,6 +42,13 @@ import { DOMParser, type Document, type Element, type Node as XmlNode } from '@x
 import { Redis } from 'ioredis'
 import postgres from 'postgres'
 import * as tar from 'tar'
+import {
+  checksumOfSource,
+  guardImport,
+  isDryRun,
+  recordImportRun,
+  type RecordImportRunInput,
+} from './guard'
 import type { InscriptionEditionLine, InscriptionEditionToken } from '../../server/database/schema'
 
 const sql = postgres(
@@ -53,6 +60,8 @@ const CACHE_DIR = join(process.cwd(), '.import', 'edh-inscriptions')
 const ARCHIVE_PATH = join(CACHE_DIR, 'data.tar.gz')
 const EXTRACT_DIR = join(CACHE_DIR, 'inscriptions')
 const SOURCE_URL = 'https://codeload.github.com/epigraphic-database-heidelberg/data/tar.gz/master'
+/** Names the upstream, not this file — the script may be renamed, the source may not. */
+const SOURCE_ID = 'edh:inscriptions'
 
 const IMPORT_LIMIT = Number(process.env.IMPORT_LIMIT ?? Number.POSITIVE_INFINITY)
 
@@ -581,6 +590,47 @@ const resolveGeometry = async (): Promise<void> => {
   console.log(`${row?.count ?? 0} inscriptions now carry a resolved findspot.`)
 }
 
+interface ArchiveGuardResult {
+  proceed: boolean
+  /** Null when this run must not become a baseline — see `IMPORT_LIMIT` below. */
+  record: RecordImportRunInput | null
+}
+
+/**
+ * Refuses an archive that no longer resembles the last one.
+ *
+ * Counted in files served rather than inscriptions parsed, because that is the
+ * measurement of the *upstream*: the malformed count is reported separately,
+ * and a run where it jumps is a parser or source problem rather than a volume
+ * one. Whatever is compared has to be what gets recorded, or the next run is
+ * judged against a different quantity than it measures.
+ *
+ * `IMPORT_LIMIT` deliberately truncates the run, so a limited import is not a
+ * measurement of anything and must never become the baseline a later full run
+ * is judged against — `IMPORT_LIMIT=200` followed by an ordinary run would read
+ * as a 400-fold growth and be refused. Such a run is left unguarded and
+ * unrecorded rather than recorded with a caveat nothing later reads.
+ */
+const guardArchive = async (fileCount: number): Promise<ArchiveGuardResult> => {
+  const checksum = checksumOfSource(await readFile(ARCHIVE_PATH))
+
+  if (Number.isFinite(IMPORT_LIMIT)) {
+    console.log('· IMPORT_LIMIT is set: skipping the import guard and not recording a baseline.\n')
+    return { proceed: true, record: null }
+  }
+
+  const proceed = await guardImport({
+    sql,
+    source: SOURCE_ID,
+    rowCount: fileCount,
+    checksum,
+    dryRun: isDryRun(process.argv),
+  })
+
+  console.log()
+  return { proceed, record: { source: SOURCE_ID, rowCount: fileCount, checksum } }
+}
+
 const main = async (): Promise<void> => {
   await mkdir(CACHE_DIR, { recursive: true })
   console.log('Importing EDH inscriptions — CC BY-SA 4.0, epigraphic-database-heidelberg/data.\n')
@@ -592,7 +642,13 @@ const main = async (): Promise<void> => {
   const files = (await listXmlFiles(EXTRACT_DIR))
     .sort((a, b) => a.localeCompare(b))
     .slice(0, IMPORT_LIMIT)
-  console.log(`${files.length} inscription files to import.\n`)
+  console.log(`${files.length} inscription files to import.`)
+
+  const guard = await guardArchive(files.length)
+  if (!guard.proceed) {
+    await sql.end()
+    return
+  }
 
   let parsed = 0
   let malformed = 0
@@ -635,6 +691,10 @@ const main = async (): Promise<void> => {
   if (batch.length > 0) await insertBatch(batch)
 
   console.log(`\n${parsed} inscriptions imported, ${malformed} malformed and skipped.`)
+
+  // After the write, never before: a run that dies partway must not leave a
+  // baseline claiming rows it never wrote.
+  if (guard.record) await recordImportRun(sql, guard.record)
 
   await resolveGeometry()
 

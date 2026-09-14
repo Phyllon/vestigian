@@ -49,6 +49,19 @@ Stage **13** is genuinely shared by two scripts (`13-battles.ts` and
 `13-edh-inscription-images.ts`) — a real numbering collision in the repo, not
 a typo here; both run independently and neither depends on the other.
 
+### `guard.ts` — the upstream tripwire
+
+Not a stage; a module the stages call. Each guarded import records its row
+count and a checksum of the fetched bytes in the append-only `import_runs`
+table and refuses an implausible delta against the previous run — a sharp
+shrink, an implausible growth, or the quiet case of a **changed checksum with
+an unchanged row count**, which is what a silently rewritten upstream looks
+like. `--dry-run` fetches, parses and reports the delta without writing.
+
+Wired into the three highest-volume importers first (`02-mysql-to-postgres.ts`,
+`09-cities.ts`, `12-edh-inscriptions.ts`); the pattern is documented for the
+rest in `.claude/rules/import-pipeline.md`.
+
 ## i18n (`scripts/i18n/`)
 
 | Script                 | Run with                                                                                                           | What it does                                                                                                                                                                                                                                                                                                                                                             |
@@ -75,6 +88,31 @@ These fix or verify data after the fact rather than running on a schedule.
 | `flush-rate-limits.ts`  | `pnpm flush-rate-limits`                            | Clears every `rl:*` key in Valkey. Exists for the e2e test-IP pool, which otherwise re-spends the same rate-limit budget across repeated local runs. **Dev/test only** — never point at production. |
 | `create-dev-bundle.ts`  | `pnpm dev:bundle`                                   | Packages the local database (including `antiquity_*`, unlike `db:snapshot`) and every mirrored image into two files, so a new developer skips re-running the whole import pipeline.                 |
 | `restore-dev-bundle.ts` | `pnpm dev:bundle:restore -- <dump> <images.tar.gz>` | Restores a bundle written by `create-dev-bundle.ts` into a clean, already-running stack.                                                                                                            |
+
+## Security scanning (`scripts/security/`)
+
+All local. None of this runs in GitHub Actions — hosted minutes are spent only
+on building and publishing the image, so every scanner here is either part of
+the pre-push gate or invoked by hand. Full rationale, including why opengrep
+rather than Semgrep and why the vendored ruleset is an allowlist, is in
+`.claude/rules/security-scanning.md`.
+
+| Script                | Run with               | What it does                                                                                                                                                                                                                                             |
+| --------------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `install-opengrep.sh` | `pnpm security:setup`  | Downloads the pinned opengrep binary and vendors a pinned, curated subset of the rule registry into `.tools/` (gitignored — regenerated on demand, never committed). Run once.                                                                           |
+| `scan-sast.sh`        | `pnpm scan:sast`       | opengrep against the vendored rules plus this project's three custom governance rules in `.opengrep/rules/`. **Blocking** — part of `pnpm check`.                                                                                                        |
+| `scan-secrets.sh`     | `pnpm scan:secrets`    | gitleaks over the whole working tree. **Blocking.** The pre-commit hook runs the same tool `--staged` instead, which is fast enough for every commit.                                                                                                    |
+| `lint-dockerfile.sh`  | `pnpm lint:dockerfile` | hadolint against all three Dockerfiles. **Blocking.** The list is enumerated rather than globbed, so a new Dockerfile cannot arrive unlinted and unnoticed.                                                                                              |
+| `scan-deps.sh`        | `pnpm scan:deps`       | osv-scanner against `pnpm-lock.yaml`. Not blocking — a new advisory against an unchanged lockfile should not fail a push that had nothing to do with it.                                                                                                 |
+| `scan-image.sh`       | `pnpm scan:image`      | Builds `docker/Dockerfile` and scans the result with Trivy (CRITICAL/HIGH, `--ignore-unfixed`). Not blocking.                                                                                                                                            |
+| `scan-dast.sh`        | `pnpm scan:dast`       | Builds and boots the app, then runs an OWASP ZAP **baseline** scan against it. Passive only — it crawls and inspects headers, never sending the attack payloads a full active scan does, which is what makes it safe against a real build. Not blocking. |
+
+## Backup and recovery (`docker/`)
+
+| Script             | Run with                                         | What it does                                                                                                                                                                               |
+| ------------------ | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `backup.sh`        | the `backup` service (production, on a schedule) | Nightly `pg_dump` kept 14 days locally, then pushed to a restic repository off the machine. Prints one `backup.outcome=` line per stage, which is what the Loki alerts watch.              |
+| `restore-drill.sh` | `docker/restore-drill.sh [--offsite \| <dump>]`  | Restores a real snapshot into a throwaway PostGIS container and asserts the irreplaceable tables carry rows and that geometry reads back. **A drill nobody runs is the same as no drill.** |
 
 ## Asset-generation scripts (`scripts/`)
 
@@ -103,5 +141,7 @@ Run by hand, output committed to the repo — not part of any build step.
 - `documents/architecture-overview.md` — system shape and data flow.
 - `documents/runbook_prod.deployment.md` — production deployment steps.
 - `.claude/rules/import-pipeline.md` — full import-pipeline rationale, schema detail, concordance verification.
+- `.claude/rules/security-scanning.md` — every scanner above, why each rule is on, and each documented false positive.
+- `.claude/rules/deployment-and-releases.md` — the backup path end to end, and the restore-drill trap worth knowing.
 - `.claude/rules/antiquity-basemaps.md` — every borrowed antiquity dataset, its licence verification, and what was deliberately not imported.
 - `.claude/rules/enrichment-and-i18n.md` — the i18n pipeline's frozen-key list and the five-locale translation audit history.

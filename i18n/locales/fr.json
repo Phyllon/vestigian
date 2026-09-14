@@ -304,7 +304,11 @@
     "placeNamesHeading": "Noms de lieux modernes",
     "placeNamesBody": "Les noms de ville et de commune actuels utilisés dans la recherche de lieux proviennent de GeoNames.org (CC BY 4.0).",
     "satelliteHeading": "Fond de carte satellite",
-    "satelliteBody": "La vue satellite est une image Sentinel-2 sans nuages d'EOX IT Services (Vienne), construite à partir de données ouvertes ESA Copernicus Sentinel-2. Le millésime utilisé par cette application est en CC BY-NC-SA 4.0 — usage non commercial uniquement, et toute réutilisation doit être partagée sous la même licence."
+    "satelliteBody": "La vue satellite est une image Sentinel-2 sans nuages d'EOX IT Services (Vienne), construite à partir de données ouvertes ESA Copernicus Sentinel-2. Le millésime utilisé par cette application est en CC BY-NC-SA 4.0 — usage non commercial uniquement, et toute réutilisation doit être partagée sous la même licence.",
+    "reuseHeading": "Réutiliser ces données",
+    "reuseBody": "Vestigian est construit à partir de sources sous licence ouverte et republie ses propres fiches dans le même esprit. Les deux flux sont en lecture seule, bornés, paginés et ouverts aux requêtes multi-origines. Les textes sont sous CC BY-SA et les métadonnées sous CC0 ; les licences des images varient selon la fiche et ne sont pas incluses.",
+    "reuseGeojson": "GeoJSON simple, pour la cartographie et l'analyse",
+    "reuseLinkedPlaces": "Linked Places Format, la norme de répertoire géographique du réseau Pelagios, avec des liens closeMatch vers Pleiades et Wikidata"
   },
   "impressum": {
     "title": "Avis juridique",
@@ -1174,8 +1178,12 @@
         "tracings": "Tracés",
         "autoApprovedOnly": "Seulement les modifications non relues",
         "blankingOnly": "Seulement celles qui retirent plus qu'elles n'ajoutent",
-        "clearAuthor": "Tous les auteurs"
-      }
+        "clearAuthor": "Tous les auteurs",
+        "sampledOnly": "Tirés pour contrôle"
+      },
+      "sampleTitle": "Publié automatiquement sur la base de la confiance, puis tiré au hasard pour un second examen. L'échantillonnage ne retarde jamais la publication.",
+      "sampleNewlyTrusted": "confiance récente",
+      "sampleRoutine": "contrôle de routine"
     },
     "accounts": {
       "loading": "Lecture des comptes…",
@@ -1369,6 +1377,37 @@
       },
       "noSeries": "Rien de compté pour l'instant.",
       "countersNote": "Ce sont des totaux depuis le dernier démarrage du processus, non des taux — un chiffre bas après un déploiement est un redémarrage, pas une bonne nouvelle."
+    }
+  },
+  "nearby": {
+    "title": "À proximité, à compléter",
+    "menuLabel": "À proximité, à compléter",
+    "intro": "La plupart des fiches de cet atlas ont été importées, non visitées. Quatre sur cinq n'ont aucune photographie. Voici ce qui manque près de chez vous — et une photographie est la seule chose qui exige d'être sur place.",
+    "locationPrompt": "Votre position sert à trouver les sites autour de vous. Elle est lue dans votre navigateur et envoyée uniquement sous forme de coordonnée avec la recherche.",
+    "useMyLocation": "Utiliser ma position",
+    "locationDenied": "L'autorisation de localisation a été refusée : rien ne peut être affiché ici.",
+    "radiusLabel": "Dans un rayon de",
+    "radius5": "5 km",
+    "radius10": "10 km",
+    "radius25": "25 km",
+    "radius50": "50 km",
+    "onlyPhotographs": "Seulement les sites sans photographie",
+    "searching": "Recherche…",
+    "nothingNearby": "Rien à compléter dans ce rayon. Essayez un rayon plus large.",
+    "missingAria": "Manque encore",
+    "distanceMetres": "{metres} m",
+    "distanceKilometres": "{km} km",
+    "asks": {
+      "photograph": "Demande une photographie.",
+      "description": "Demande une description.",
+      "period": "Demande une datation.",
+      "summary": "Demande un court résumé."
+    },
+    "gaps": {
+      "photograph": "photographie",
+      "description": "description",
+      "period": "datation",
+      "summary": "résumé"
     }
   }
 }

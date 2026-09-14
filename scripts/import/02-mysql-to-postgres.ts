@@ -24,8 +24,18 @@
  *
  *   pnpm import:convert
  */
+import { existsSync } from 'node:fs'
+import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import mysql from 'mysql2/promise'
 import postgres from 'postgres'
+import {
+  checksumOfSource,
+  guardImport,
+  isDryRun,
+  recordImportRun,
+  type RecordImportRunInput,
+} from './guard'
 import { isPublishableLicence, resolveLicence } from './vici-licences'
 
 const BATCH_SIZE = 500
@@ -580,11 +590,85 @@ const importExternalIdentifiers = async (): Promise<number> => {
   return imported
 }
 
+/**
+ * The atlas's own tripwire, and the one that matters most: everything below
+ * writes `sites` and `tracings`, the two tables the map is.
+ *
+ * Guarded before any write rather than after, which needs the counts up front —
+ * hence the two `count(*)` queries mirroring the predicates in `importPoints`
+ * and `importTracings`. They are cheap against indexed columns and are the only
+ * way to refuse a bad dump instead of merely noticing one.
+ *
+ * The checksum is of `vici.sql.gz` — the bytes `01-fetch-dump.ts` actually
+ * downloaded — not of anything read back out of MySQL. Provenance belongs to
+ * the dump; the restored database is already a derivative. When the dump is not
+ * on disk (a MySQL restored earlier and the file since cleaned up) there is no
+ * provenance left to check, so the guard says so and stands down rather than
+ * inventing a checksum that would compare equal to nothing.
+ */
+const guardViciDump = async (): Promise<{ proceed: boolean; runs: RecordImportRunInput[] }> => {
+  const dumpPath = join(
+    process.env.VICI_DUMP_DIR ?? new URL('../../db_dumb/', import.meta.url).pathname,
+    'vici.sql.gz',
+  )
+
+  if (!existsSync(dumpPath)) {
+    console.log(`· ${dumpPath} is not on disk: skipping the import guard for this run.\n`)
+    return { proceed: true, runs: [] }
+  }
+
+  const checksum = checksumOfSource(await readFile(dumpPath))
+
+  const [[pointCount]] = await source.query<mysql.RowDataPacket[]>(
+    `SELECT count(*) AS total FROM points p
+     WHERE p.pnt_visible = 1 AND p.pnt_hide = 0
+       AND p.pnt_lat IS NOT NULL AND p.pnt_lng IS NOT NULL`,
+  )
+
+  const [[lineCount]] = await source.query<mysql.RowDataPacket[]>(
+    `SELECT count(*) AS total FROM plines l
+     WHERE l.line_hide = 0
+       AND EXISTS (SELECT 1 FROM pline_data d WHERE d.pldata_pline_id = l.line_id)`,
+  )
+
+  const dryRun = isDryRun(process.argv)
+  const runs: RecordImportRunInput[] = [
+    { source: 'vici:points', rowCount: Number(pointCount?.total ?? 0), checksum },
+    { source: 'vici:tracings', rowCount: Number(lineCount?.total ?? 0), checksum },
+  ]
+
+  for (const run of runs) {
+    const proceed = await guardImport({
+      sql: target,
+      source: run.source,
+      rowCount: run.rowCount,
+      checksum: run.checksum,
+      dryRun,
+    })
+    if (!proceed) return { proceed: false, runs }
+  }
+
+  console.log()
+  return { proceed: true, runs }
+}
+
 const main = async (): Promise<void> => {
   console.log('Converting vici.org data into PostGIS…\n')
+
+  const guard = await guardViciDump()
+  if (!guard.proceed) {
+    await source.end()
+    await target.end()
+    return
+  }
+
   const points = await importPoints()
   const tracings = await importTracings()
   const concordances = await importExternalIdentifiers()
+
+  // After the writes, so a run that dies partway leaves no baseline claiming
+  // rows it never wrote.
+  for (const run of guard.runs) await recordImportRun(target, run)
 
   await target`ANALYZE sites`
   await target`ANALYZE tracings`

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { and, desc, eq, gte, lt, lte, or, sql } from 'drizzle-orm'
+import { and, desc, eq, gte, isNotNull, lt, lte, or, sql } from 'drizzle-orm'
 import { revisions, users } from '~~/server/database/schema'
 
 export const querySchema = z.object({
@@ -10,6 +10,12 @@ export const querySchema = z.object({
   autoApprovedOnly: z.coerce.boolean().optional(),
   /** Only edits that remove more than they add (`isBlankingEdit`). */
   blankingOnly: z.coerce.boolean().optional(),
+  /**
+   * Only auto-approved work drawn for a post-hoc second look by
+   * `server/utils/sampling.ts` — the answer to "what should a moderator
+   * actually spot-check today", as opposed to everything that published.
+   */
+  sampledOnly: z.coerce.boolean().optional(),
   since: z.coerce.date().optional(),
   until: z.coerce.date().optional(),
   /** Matches the record's title and the author's own edit summary. */
@@ -65,6 +71,8 @@ export default defineEventHandler(async (event) => {
       createdAt: revisions.createdAt,
       reviewedAt: revisions.reviewedAt,
       reviewNote: revisions.reviewNote,
+      sampledAt: revisions.sampledAt,
+      sampleReason: revisions.sampleReason,
       authorId: revisions.authorId,
       // Left, not inner: a contribution outlives the account that made it.
       authorName: users.displayName,
@@ -79,6 +87,7 @@ export default defineEventHandler(async (event) => {
         query.entityType ? eq(revisions.entityType, query.entityType) : undefined,
         query.authorId ? eq(revisions.authorId, query.authorId) : undefined,
         query.autoApprovedOnly ? eq(revisions.autoApproved, 1) : undefined,
+        query.sampledOnly ? isNotNull(revisions.sampledAt) : undefined,
         query.since ? gte(revisions.createdAt, query.since) : undefined,
         query.until ? lte(revisions.createdAt, query.until) : undefined,
         // The title lives inside the jsonb payload; only that one accessor is
@@ -125,6 +134,13 @@ export default defineEventHandler(async (event) => {
         createdAt: row.createdAt.toISOString(),
         reviewedAt: row.reviewedAt?.toISOString() ?? null,
         reviewNote: row.reviewNote,
+        /**
+         * Drawn for a second look after publishing. Null on everything that was
+         * not drawn, which is most of it — a moderator filters with
+         * `sampledOnly` rather than reading past it.
+         */
+        sampledAt: row.sampledAt?.toISOString() ?? null,
+        sampleReason: row.sampleReason,
         authorId: row.authorId,
         authorName: row.authorName,
         authorRole: row.authorRole,

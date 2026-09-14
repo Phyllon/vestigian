@@ -17,6 +17,9 @@
   const items = computed(() => [
     [
       { type: 'label' as const, label: t('layout.menuGroupReference') },
+      // First in the group on purpose: it is the only entry that asks the
+      // reader to do something rather than to read something.
+      { label: t('nearby.menuLabel'), icon: 'i-lucide-camera', to: '/nearby' },
       { label: t('columns.menuLabel'), icon: 'i-lucide-scroll', to: '/columns' },
       {
         label: t('basemapSwitcher.tabulaPeutingeriana'),

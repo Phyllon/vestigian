@@ -119,5 +119,37 @@
         {{ t('licence.placeNamesBody') }}
       </p>
     </section>
+
+    <!--
+      This atlas takes from the open-data commons; the two feeds below are what
+      it gives back. Listed on the licence page rather than hidden in the API
+      documentation because reuse terms and the means of reuse belong together.
+    -->
+    <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
+      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+        {{ t('licence.reuseHeading') }}
+      </h2>
+      <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
+        {{ t('licence.reuseBody') }}
+      </p>
+      <ul class="mt-3 space-y-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
+        <li>
+          <a
+            href="/api/data/sites.geojson"
+            class="font-mono text-ink-900 underline decoration-paper-400 underline-offset-2 dark:text-paper-100"
+            >/api/data/sites.geojson</a
+          >
+          — {{ t('licence.reuseGeojson') }}
+        </li>
+        <li>
+          <a
+            href="/api/data/sites.lp.json"
+            class="font-mono text-ink-900 underline decoration-paper-400 underline-offset-2 dark:text-paper-100"
+            >/api/data/sites.lp.json</a
+          >
+          — {{ t('licence.reuseLinkedPlaces') }}
+        </li>
+      </ul>
+    </section>
   </article>
 </template>

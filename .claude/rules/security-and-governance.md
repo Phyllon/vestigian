@@ -266,3 +266,89 @@ same projection `moderation/queue.get.ts` builds, minus that status filter.
   hygiene in the same category as `images:reconcile`, not an editorial change
   to what a record says, and revision history is append-only, so a bulk
   backfill has nowhere to go there even if it wanted to.
+
+## Drift sampling — watching trust after it is granted
+
+Trust is binary and permanent until revoked: two accepted contributions and
+everything afterwards publishes immediately, with nothing ever looking again.
+That is correct for the failure it was designed against — somebody obviously bad
+from their first edit — and blind to the one it was not: a contributor who
+behaves well enough to earn trust and then degrades records slowly. The
+append-only revision history makes that detectable; nothing looked.
+
+`server/utils/sampling.ts` draws a fraction of auto-approved work back for a
+second look. `planSample` is pure and tested; `sampleAutoApprovedRevision` is
+the thin database half.
+
+**It is post-hoc, and that is load-bearing rather than incidental.** It flags a
+revision that is _already live_. Nothing in it writes `status`, and the draw
+happens after the transaction commits. Making it hold a contribution back would
+quietly undo the trust model, whose entire promise is that trusted work
+publishes immediately — so a future change that turns this into a gate is a
+change to the governance model, not an improvement to the sampler.
+
+### The curve
+
+`INITIAL / (1 + contributions since the threshold)`, clamped at a floor:
+50% on the first auto-approved contribution, then 25%, 17%, 12.5%, decaying to a
+permanent **5%**.
+
+Weighted towards the beginning because that is where the evidence is thinnest
+and a mistaken grant of trust is cheapest to catch. The floor matters more than
+the curve: a rate reaching zero would leave long-standing accounts permanently
+unwatched, which is exactly the position a patient bad actor wants to reach.
+One in twenty keeps every account occasionally visible without making
+established contributors feel policed.
+
+`newly-trusted` versus `routine-audit` is the reason label, and it is the
+elevated window versus the floor — a moderator triaging the list can tell "this
+account was just trusted" from "this is the routine one-in-twenty".
+
+### Three exclusions, each for its own reason
+
+- **Moderator-approved work** is never sampled: a human already looked, and a
+  second look is not a sample.
+- **Moderators and administrators** are never sampled on their own
+  contributions. They publish immediately because of their _role_ rather than an
+  earned count, they are already accountable through `admin_audit_log`, and
+  sampling them would crowd out the contributors this exists to watch.
+- **Reverts and retractions** never reach the draw, because they are not
+  auto-approved — they arrive at `applyRevision` with `auto_approved = 0`.
+
+### Two implementation details that are not arbitrary
+
+**Drawn in `applyRevision`, not at the contribution endpoint.** Automatic
+approval, moderator approval and revert all arrive at that one function, which
+is the same reason the live-row write lives there: a rule applied at the single
+path cannot diverge between the three callers. It reads `auto_approved` off the
+revision row to tell automatic publishing from the rest, and is called with
+`void` — the record is already published and correct, and a failed spot-check
+must never be able to fail a contribution. Same fail-open reasoning as rate
+limiting, mail delivery and concordance verification.
+
+**`crypto.randomInt`, not `Math.random()`.** This mechanism is adversarial by
+design — it exists to catch somebody degrading records on purpose. V8's
+`Math.random()` is a seeded xorshift whose internal state is recoverable from a
+modest run of outputs, so an attacker able to observe which of their own
+contributions were drawn could in principle predict the sequence and time the
+damaging edits into the gaps. `randomInt` draws from the OS entropy pool, is
+itself rejection-sampled, and leaves no such inference. (ESLint's
+`sonarjs/pseudo-random` flagged the original `Math.random()`; it was right.)
+
+### Surfaced in
+
+`/api/admin/activity?sampledOnly=true` — the answer to "what should a moderator
+actually spot-check today", as opposed to everything that published.
+`AdminActivityStream.vue` marks drawn rows in verdigris, this project's
+confirmed/approved token, because a draw is a request for attention rather than
+a warning; oxide red stays reserved for a blanking edit, which is one.
+
+### Verified
+
+`planSample`'s rule in `__test__/sampling.test.ts` (14 assertions, draw
+injected). Separately, the real `crypto.randomInt` draw path was run 40,000
+times at each of five points on the decay curve and the observed rate matched
+the nominal one within 1.5% throughout. The columns and their partial index were
+exercised against the live database. Note the index is not yet _proven_ under
+load: at 208 revisions Postgres correctly prefers a sequential scan, so the plan
+that matters will only appear once the table is large.

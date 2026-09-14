@@ -434,7 +434,11 @@
     "columnReliefHeading": "Column reliefs",
     "columnReliefBody": "Trajan's Column plates are mirrored from Wikimedia Commons' Cichorius Plates category, marked public domain there. The Column of Marcus Aurelius's plates are served live from Heidelberg University Library's digitisation of Petersen, Domaszewski & Calderini's 1896 study — also public domain; nothing is mirrored into this project's own storage for that column.",
     "placeNamesHeading": "Modern place names",
-    "placeNamesBody": "Present-day town and city names used in place search come from GeoNames.org (CC BY 4.0)."
+    "placeNamesBody": "Present-day town and city names used in place search come from GeoNames.org (CC BY 4.0).",
+    "reuseHeading": "Reusing this data",
+    "reuseBody": "Vestigian is built from openly licensed sources, so it publishes its own records back in the same spirit. Both feeds are read-only, bounded and paged, and open to cross-origin requests. Text is CC BY-SA and metadata CC0; image licences vary per record and are not included.",
+    "reuseGeojson": "plain GeoJSON, for maps and analysis",
+    "reuseLinkedPlaces": "Linked Places Format, the gazetteer standard read by the Pelagios Network, with closeMatch links to Pleiades and Wikidata"
   },
   "impressum": {
     "title": "Legal notice",
@@ -1174,8 +1178,12 @@
         "tracings": "Tracings",
         "autoApprovedOnly": "Only edits nobody reviewed",
         "blankingOnly": "Only edits that remove more than they add",
-        "clearAuthor": "All authors"
-      }
+        "clearAuthor": "All authors",
+        "sampledOnly": "Drawn for review"
+      },
+      "sampleTitle": "Published automatically on trust, then drawn at random for a second look. Sampling never delays publishing.",
+      "sampleNewlyTrusted": "newly trusted",
+      "sampleRoutine": "routine check"
     },
     "accounts": {
       "loading": "Reading the roll…",
@@ -1369,6 +1377,37 @@
       },
       "noSeries": "Nothing counted yet.",
       "countersNote": "These are totals since the process last started, not rates — a low number after a deploy is a restart, not good news."
+    }
+  },
+  "nearby": {
+    "title": "Nearby, needing work",
+    "menuLabel": "Nearby, needing work",
+    "intro": "Most records in this atlas were imported, not visited. Four in five have no photograph at all. This is what is missing near you — and a photograph is the one thing that needs somebody standing there.",
+    "locationPrompt": "This uses your location to find sites around you. It is read in your browser and sent only as a coordinate with the search.",
+    "useMyLocation": "Use my location",
+    "locationDenied": "Location permission was refused, so nothing can be listed here.",
+    "radiusLabel": "Within",
+    "radius5": "5 km",
+    "radius10": "10 km",
+    "radius25": "25 km",
+    "radius50": "50 km",
+    "onlyPhotographs": "Only sites with no photograph",
+    "searching": "Looking…",
+    "nothingNearby": "Nothing within this distance needs work. Try a wider radius.",
+    "missingAria": "Still missing",
+    "distanceMetres": "{metres} m",
+    "distanceKilometres": "{km} km",
+    "asks": {
+      "photograph": "Needs a photograph.",
+      "description": "Needs a description.",
+      "period": "Needs a date range.",
+      "summary": "Needs a short summary."
+    },
+    "gaps": {
+      "photograph": "photograph",
+      "description": "description",
+      "period": "period",
+      "summary": "summary"
     }
   }
 }

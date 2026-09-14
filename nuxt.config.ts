@@ -605,12 +605,27 @@ export default defineNuxtConfig({
        * genuine on-screen flicker rather than a no-op, confirmed by the
        * browser's own console warning, not assumed. `['self']` is the whole
        * fix: fullscreen for this app's own pages, nothing granted to anything
-       * embedded from elsewhere. Camera, microphone, geolocation and
-       * display-capture stay at the module's default `[]` — nothing here uses
-       * them.
+       * embedded from elsewhere.
+       *
+       * **`geolocation` is `['self']` for exactly the same reason, and the note
+       * that used to stand here — "nothing here uses them" — was wrong.**
+       * `app/composables/map/useGeolocation.ts` has always used it, through the
+       * map's own "locate me" control (`GeolocateButton.vue`), and a
+       * `geolocation=()` header denies `navigator.geolocation` even to this
+       * app's own pages. The browser refuses the call with a permissions-policy
+       * violation *before* any permission prompt appears, so the composable's
+       * error path reports it as `denied` and the button reads exactly as if
+       * the visitor had refused — which is why it went unnoticed: the failure
+       * is indistinguishable from the ordinary, expected one. Found by driving
+       * `/nearby` in a real browser against the production build, where the
+       * console names the policy outright.
+       *
+       * Camera, microphone and display-capture stay at the module's default
+       * `[]` — those genuinely are unused.
        */
       permissionsPolicy: {
         fullscreen: ['self'],
+        geolocation: ['self'],
       },
     },
     rateLimiter: false,

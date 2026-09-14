@@ -219,11 +219,27 @@ export const revisions = pgTable(
     revertsRevisionId: integer('reverts_revision_id'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
+    /**
+     * Drawn for a second look *after* publishing — never a gate.
+     *
+     * Trust is binary at two accepted contributions and nothing ever re-checks,
+     * so a contributor who earns it and then degrades records is invisible.
+     * These two columns are how a sample of already-published, auto-approved
+     * work gets back in front of a moderator. Null on everything that was not
+     * drawn, which is most of it. See `server/utils/sampling.ts`.
+     */
+    sampledAt: timestamp('sampled_at', { withTimezone: true }),
+    sampleReason: varchar('sample_reason', { length: 20 }),
   },
   (table) => [
     index('revisions_status_idx').on(table.status, table.createdAt),
     index('revisions_history_idx').on(table.entityType, table.entityId, table.createdAt),
     index('revisions_entity_idx').on(table.entityType, table.entityId),
     index('revisions_author_idx').on(table.authorId),
+    // Partial: the sampled set is a small fraction of a large table, and the
+    // only query against it is "the outstanding ones, newest first".
+    index('revisions_sampled_idx')
+      .on(table.sampledAt)
+      .where(sql`${table.sampledAt} IS NOT NULL`),
   ],
 )

@@ -25,6 +25,7 @@
   const entityType = ref<'any' | 'site' | 'tracing'>('any')
   const autoApprovedOnly = ref(false)
   const blankingOnly = ref(false)
+  const sampledOnly = ref(false)
   const search = ref('')
   const debouncedSearch = ref('')
 
@@ -62,6 +63,7 @@
     authorId: authorId.value,
     autoApprovedOnly: autoApprovedOnly.value || undefined,
     blankingOnly: blankingOnly.value || undefined,
+    sampledOnly: sampledOnly.value || undefined,
     q: debouncedSearch.value || undefined,
     limit: 30,
   }))
@@ -210,6 +212,12 @@
           :label="t('admin.activity.filters.autoApprovedOnly')"
         />
         <UCheckbox v-model="blankingOnly" :label="t('admin.activity.filters.blankingOnly')" />
+        <!--
+          The one filter that answers "what should I actually spot-check today".
+          Trust publishes work without review; this narrows to the sample drawn
+          back for a second look.
+        -->
+        <UCheckbox v-model="sampledOnly" :label="t('admin.activity.filters.sampledOnly')" />
 
         <UButton
           v-if="authorId"
@@ -248,6 +256,23 @@
           </h3>
 
           <span class="eyebrow text-ink-500 dark:text-paper-400">{{ describeKind(entry) }}</span>
+
+          <!--
+            Verdigris, this project's confirmed/approved token, because a drawn
+            revision is a request for attention rather than a warning — the
+            oxide red below is reserved for a blanking edit, which is one.
+          -->
+          <span
+            v-if="entry.sampledAt"
+            class="eyebrow rounded-sm bg-verdigris-100 px-1.5 py-0.5 text-verdigris-800 dark:bg-verdigris-900/40 dark:text-verdigris-200"
+            :title="t('admin.activity.sampleTitle')"
+          >
+            {{
+              entry.sampleReason === 'newly-trusted'
+                ? t('admin.activity.sampleNewlyTrusted')
+                : t('admin.activity.sampleRoutine')
+            }}
+          </span>
 
           <span class="datum ml-auto">
             <time :datetime="entry.createdAt">{{

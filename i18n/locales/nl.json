@@ -304,7 +304,11 @@
     "placeNamesHeading": "Moderne plaatsnamen",
     "placeNamesBody": "Namen van hedendaagse dorpen en steden die worden gebruikt bij het zoeken naar plaatsen komen van GeoNames.org (CC BY 4.0).",
     "satelliteHeading": "Satelliet-basiskaart",
-    "satelliteBody": "De satellietweergave toont wolkenloze Sentinel-2-beelden van EOX IT Services (Wenen), opgebouwd uit open data van ESA Copernicus Sentinel-2. De versie die deze app gebruikt is CC BY-NC-SA 4.0 — alleen niet-commercieel gebruik, en elk hergebruik moet onder dezelfde licentie worden gedeeld."
+    "satelliteBody": "De satellietweergave toont wolkenloze Sentinel-2-beelden van EOX IT Services (Wenen), opgebouwd uit open data van ESA Copernicus Sentinel-2. De versie die deze app gebruikt is CC BY-NC-SA 4.0 — alleen niet-commercieel gebruik, en elk hergebruik moet onder dezelfde licentie worden gedeeld.",
+    "reuseHeading": "Deze gegevens hergebruiken",
+    "reuseBody": "Vestigian is opgebouwd uit open gelicentieerde bronnen en publiceert zijn eigen records in dezelfde geest terug. Beide feeds zijn alleen-lezen, begrensd, gepagineerd en open voor verzoeken vanaf andere domeinen. Teksten vallen onder CC BY-SA en metadata onder CC0; beeldlicenties verschillen per record en zijn niet inbegrepen.",
+    "reuseGeojson": "eenvoudige GeoJSON, voor kaarten en analyse",
+    "reuseLinkedPlaces": "Linked Places Format, de gazetteer-standaard van het Pelagios-netwerk, met closeMatch-verwijzingen naar Pleiades en Wikidata"
   },
   "impressum": {
     "title": "Mededeling",
@@ -1174,8 +1178,12 @@
         "tracings": "Tracés",
         "autoApprovedOnly": "Alleen bewerkingen die niemand heeft beoordeeld",
         "blankingOnly": "Alleen bewerkingen die meer weghalen dan toevoegen",
-        "clearAuthor": "Alle auteurs"
-      }
+        "clearAuthor": "Alle auteurs",
+        "sampledOnly": "Getrokken voor controle"
+      },
+      "sampleTitle": "Automatisch gepubliceerd op basis van vertrouwen en daarna willekeurig getrokken voor een tweede blik. Steekproeven vertragen publicatie nooit.",
+      "sampleNewlyTrusted": "net vertrouwd",
+      "sampleRoutine": "routinecontrole"
     },
     "accounts": {
       "loading": "De accounts worden gelezen…",
@@ -1369,6 +1377,37 @@
       },
       "noSeries": "Nog niets geteld.",
       "countersNote": "Dit zijn totalen sinds het proces voor het laatst startte, geen frequenties — een laag getal na een uitrol is een herstart, geen goed nieuws."
+    }
+  },
+  "nearby": {
+    "title": "In de buurt, onvolledig",
+    "menuLabel": "In de buurt, onvolledig",
+    "intro": "De meeste records in deze atlas zijn geïmporteerd, niet bezocht. Vier op de vijf hebben helemaal geen foto. Dit ontbreekt bij u in de buurt — en een foto is het enige waarvoor iemand er echt moet staan.",
+    "locationPrompt": "Hiervoor wordt uw locatie gebruikt om vindplaatsen in uw buurt te vinden. Die wordt in uw browser uitgelezen en alleen als coördinaat met de zoekopdracht meegestuurd.",
+    "useMyLocation": "Mijn locatie gebruiken",
+    "locationDenied": "Locatietoestemming is geweigerd, dus hier kan niets worden getoond.",
+    "radiusLabel": "Binnen",
+    "radius5": "5 km",
+    "radius10": "10 km",
+    "radius25": "25 km",
+    "radius50": "50 km",
+    "onlyPhotographs": "Alleen vindplaatsen zonder foto",
+    "searching": "Bezig met zoeken…",
+    "nothingNearby": "Binnen deze afstand ontbreekt niets. Probeer een grotere straal.",
+    "missingAria": "Ontbreekt nog",
+    "distanceMetres": "{metres} m",
+    "distanceKilometres": "{km} km",
+    "asks": {
+      "photograph": "Heeft een foto nodig.",
+      "description": "Heeft een beschrijving nodig.",
+      "period": "Heeft een datering nodig.",
+      "summary": "Heeft een korte samenvatting nodig."
+    },
+    "gaps": {
+      "photograph": "foto",
+      "description": "beschrijving",
+      "period": "datering",
+      "summary": "samenvatting"
     }
   }
 }

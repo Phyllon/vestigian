@@ -304,7 +304,11 @@
     "placeNamesHeading": "Moderne Ortsnamen",
     "placeNamesBody": "Heutige Stadt- und Stadtnamen, die in der Ortssuche verwendet werden, stammen von GeoNames.org (CC BY 4.0).",
     "satelliteHeading": "Satelliten-Basiskarte",
-    "satelliteBody": "Die Satellitenansicht zeigt wolkenlose Sentinel-2-Aufnahmen von EOX IT Services (Wien), erstellt aus offenen Daten von ESA Copernicus Sentinel-2. Die hier verwendete Aufnahme ist CC BY-NC-SA 4.0 — nur nicht-kommerzielle Nutzung, und jede Weiterverwendung muss unter derselben Lizenz geteilt werden."
+    "satelliteBody": "Die Satellitenansicht zeigt wolkenlose Sentinel-2-Aufnahmen von EOX IT Services (Wien), erstellt aus offenen Daten von ESA Copernicus Sentinel-2. Die hier verwendete Aufnahme ist CC BY-NC-SA 4.0 — nur nicht-kommerzielle Nutzung, und jede Weiterverwendung muss unter derselben Lizenz geteilt werden.",
+    "reuseHeading": "Diese Daten weiterverwenden",
+    "reuseBody": "Vestigian entsteht aus offen lizenzierten Quellen und veröffentlicht seine eigenen Einträge im selben Geist zurück. Beide Feeds sind schreibgeschützt, begrenzt, seitenweise abrufbar und für Anfragen von anderen Domains geöffnet. Texte stehen unter CC BY-SA, Metadaten unter CC0; Bildlizenzen unterscheiden sich je Eintrag und sind nicht enthalten.",
+    "reuseGeojson": "einfaches GeoJSON, für Karten und Auswertungen",
+    "reuseLinkedPlaces": "Linked Places Format, der Gazetteer-Standard des Pelagios-Netzwerks, mit closeMatch-Verknüpfungen zu Pleiades und Wikidata"
   },
   "impressum": {
     "title": "Rechtliche Hinweise",
@@ -1174,8 +1178,12 @@
         "tracings": "Verläufe",
         "autoApprovedOnly": "Nur ungeprüfte Bearbeitungen",
         "blankingOnly": "Nur Bearbeitungen, die mehr entfernen als hinzufügen",
-        "clearAuthor": "Alle Verfassenden"
-      }
+        "clearAuthor": "Alle Verfassenden",
+        "sampledOnly": "Zur Prüfung gezogen"
+      },
+      "sampleTitle": "Automatisch aufgrund von Vertrauen veröffentlicht und anschließend stichprobenartig zur erneuten Durchsicht gezogen. Die Stichprobe verzögert die Veröffentlichung nie.",
+      "sampleNewlyTrusted": "neu vertraut",
+      "sampleRoutine": "Routineprüfung"
     },
     "accounts": {
       "loading": "Konten werden gelesen …",
@@ -1369,6 +1377,37 @@
       },
       "noSeries": "Noch nichts gezählt.",
       "countersNote": "Das sind Gesamtwerte seit dem letzten Start des Prozesses, keine Raten — eine niedrige Zahl nach einer Auslieferung ist ein Neustart, keine gute Nachricht."
+    }
+  },
+  "nearby": {
+    "title": "In der Nähe, unvollständig",
+    "menuLabel": "In der Nähe, unvollständig",
+    "intro": "Die meisten Einträge dieses Atlas wurden importiert, nicht besucht. Vier von fünf haben überhaupt kein Foto. Das hier fehlt in Ihrer Nähe — und ein Foto ist das Einzige, wofür jemand vor Ort sein muss.",
+    "locationPrompt": "Dafür wird Ihr Standort verwendet, um Fundorte in Ihrer Nähe zu finden. Er wird im Browser ausgelesen und nur als Koordinate mit der Suche gesendet.",
+    "useMyLocation": "Meinen Standort verwenden",
+    "locationDenied": "Die Standortfreigabe wurde abgelehnt, daher kann hier nichts angezeigt werden.",
+    "radiusLabel": "Im Umkreis von",
+    "radius5": "5 km",
+    "radius10": "10 km",
+    "radius25": "25 km",
+    "radius50": "50 km",
+    "onlyPhotographs": "Nur Fundorte ohne Foto",
+    "searching": "Wird gesucht …",
+    "nothingNearby": "In dieser Entfernung fehlt nichts. Versuchen Sie einen größeren Umkreis.",
+    "missingAria": "Fehlt noch",
+    "distanceMetres": "{metres} m",
+    "distanceKilometres": "{km} km",
+    "asks": {
+      "photograph": "Braucht ein Foto.",
+      "description": "Braucht eine Beschreibung.",
+      "period": "Braucht eine Datierung.",
+      "summary": "Braucht eine kurze Zusammenfassung."
+    },
+    "gaps": {
+      "photograph": "Foto",
+      "description": "Beschreibung",
+      "period": "Datierung",
+      "summary": "Zusammenfassung"
     }
   }
 }

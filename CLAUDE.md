@@ -90,6 +90,7 @@ checking `.claude/rules/` first, every time, not just this once.
 - `applyRevision()` (`server/utils/revisions.ts`) is the **only** place a live row is written — automatic approval, moderator approval and revert all go through it. Never add a second path.
 - **Every authorization rule lives in `shared/utils/authorization.ts`** and nowhere else.
 - **Trust:** new accounts are queued. After **2 accepted contributions** (`evaluateTrust`), edits publish immediately. Moderators can revoke. Images do not count toward trust.
+- **Drift sampling is post-hoc and must never become a gate.** A fraction of auto-approved work is drawn back for a second look _after_ it publishes (`server/utils/sampling.ts`), weighted towards newly trusted accounts and never decaying to zero. It writes `revisions.sampled_at`, never `status` — holding a contribution back would undo the whole promise of trust.
 - **A moderator cannot approve their own contribution** (`canReviewRevision`).
 - **An edit that removes more than it adds is queued regardless of trust** (`isBlankingEdit`) — a wrong auto-approval on a blanking edit costs far more than a moderator glance.
 - **Revert writes a new revision** restoring the prior state. Never delete a revision. History is append-only, and reverts do not increment the moderator's trust counter.
@@ -185,13 +186,13 @@ app/
          inscriptions/index inscriptions/[edhId]
          inscriptions/attic/index inscriptions/attic/[aioKey]
          moderation/index          admin/index (one station, sections in the query string)
-         tabula-peutingeriana columns
+         tabula-peutingeriana columns nearby
 server/
   plugins/ observability.ts   the only per-request hook: id, access log, span
   middleware/ content-language.ts   sets Content-Language from the locale cookie
   api/ tiles/[z]/[x]/[y]  tiles/antiquity/[z]/[x]/[y]
        tiles/limes/[z]/[x]/[y]  tiles/basemap/[z]/[x]/[y]
-       sites/ (+ [id]/endorse.post.ts endorse.delete.ts)  tracings/  contributions/  places/
+       sites/ (+ [id]/endorse.post.ts endorse.delete.ts needs-work)  tracings/  contributions/  places/
        auth/ (+ account.delete.ts export.get.ts change-password.post.ts change-email.post.ts)
        me/ (index.get/patch contributions visits bookmarks map.geojson field-kit.gpx)
        contributors/[name]
@@ -202,7 +203,7 @@ server/
        column-reliefs/ (+ [id]/[preset])  tabula-peutingeriana/network.geojson
   routes/ robots.txt sitemap.xml sitemap-static.xml
           sitemap-sites/[page]  sitemap-tracings/[page]
-  database/ schema/ (users sites notebook endorsements geo atlas) migrations/ migrate.ts
+  database/ schema/ (users sites notebook endorsements geo atlas imports) migrations/ migrate.ts
   utils/ mvt atlas limes openapi permissions ratelimit images images-order uploads tokens diff
          step-up retraction admin-audit disposable-email
          notebook gpx basemap-pmtiles endorsements
@@ -210,15 +211,17 @@ server/
          mail mail-template notifications
          revisions slug db cache argon altcha enrichment enrichment-sources concordances
          concordance-sources translate logger metrics tracing sitemap
-         totp two-factor
+         totp two-factor sampling
          inscriptions attic-inscriptions battles ports orbis-routes
          coin-hoards minor-features
                                                                             (+__test__/)
 shared/types/  vocabulary shared by both sides
 shared/utils/  password policy, authorization rules, the limes gazetteer, JSON-LD builders,
                tile enumeration and limits, offline-cache naming, byte formatting,
-               milestones, Pleiades identifiers                                   (+__test__/)
+               milestones, Pleiades identifiers, Linked Places (Pelagios) builders,
+               record completeness                                                (+__test__/)
 scripts/import/  four-stage vici.org import + vici-licences.ts (shared vocabulary)
+                 guard.ts (upstream delta tripwire, +__test__/)
                  02c-geo-names.ts 04-mirror-basemap-tiles.ts 05-antiquity-atlas.ts
                  06-limes.ts 07-country-boundaries.ts 08-edh-findspots.ts 09-cities.ts
                  10-tabula-peutingeriana.ts 11-column-reliefs.ts 12-edh-inscriptions.ts
@@ -290,7 +293,6 @@ to match the compose defaults.
   password changed, address change requested — deliberately ignore that
   preference, for the reason given under "Credentials" above.
 - Full-text search across descriptions (titles and summaries only).
-- RDF / Pelagios linked data. The GeoJSON feed at `/api/data/sites.geojson` exists.
 - Full i18n component coverage — see "i18n" above for what is and is not migrated. Note the vici source has `nl`, `de` and `fr` text for thousands of sites — the import takes `en` and discards the rest; none of that is surfaced by the interface language yet, only the borrowed Wikipedia enrichment is.
 - Purging withdrawn images from object storage stays unbuilt (above), and
   `pnpm db:snapshot` still writes beside the database it copies — it is a
