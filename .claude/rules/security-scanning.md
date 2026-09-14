@@ -6,6 +6,8 @@ paths:
   - '.hadolint.yaml'
   - '.husky/pre-commit'
   - 'eslint.config.mjs'
+  - 'eslint-plugins.d.ts'
+  - 'tsconfig.eslint.json'
 ---
 
 ## SAST/DAST — local only, no GitHub Actions minutes spent
@@ -27,6 +29,26 @@ instruction; dependency scanning instead runs locally via `pnpm scan:deps`
 | Image scan (SCA)      | Trivy (`scan-image.sh`)             | manual (`pnpm scan:image`) | No — builds the image first, minutes not seconds |
 | Dependency scan (SCA) | osv-scanner (`scan-deps.sh`)        | manual (`pnpm scan:deps`)  | No — queries osv.dev over the network            |
 | DAST                  | OWASP ZAP baseline (`scan-dast.sh`) | manual (`pnpm scan:dast`)  | No — full build + boot per run                   |
+
+## `eslint.config.mjs` is type-checked in its own project
+
+The config carries `// @ts-check` but belonged to no tsconfig, so the editor
+checked it in an inferred project. That project resolved `eslint` to an
+automatically acquired `@types/eslint` in `~/.cache/typescript`, not the types
+ESLint 10 bundles, and the two `Linter.Config` shapes are not assignable to
+each other at `withNuxt(...)`. `tsconfig.eslint.json` (referenced from the root
+`tsconfig.json`, so `pnpm typecheck` checks it too) gives it Node ESM
+resolution against the installed packages.
+
+Two plugin imports needed more than that:
+
+- **sonarjs** is imported as the named `configs`, not the default export: the
+  default is typed as the generic `ESLint.Plugin`, whose `configs` is optional
+  and a legacy/flat union.
+- **eslint-plugin-security** ships no types, and `@types/eslint-plugin-security`
+  depends on `@types/eslint` — installing it reintroduces the mismatch. A
+  minimal local declaration, `eslint-plugins.d.ts`, types it against ESLint's
+  own types instead.
 
 ## opengrep, not Semgrep
 

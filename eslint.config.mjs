@@ -2,7 +2,9 @@
 import withNuxt from './.nuxt/eslint.config.mjs'
 import prettier from 'eslint-config-prettier'
 import vueA11y from 'eslint-plugin-vuejs-accessibility'
-import sonarjs from 'eslint-plugin-sonarjs'
+// Named, not default: the default export is typed as the generic `ESLint.Plugin`,
+// whose `configs` is optional and a legacy/flat union `withNuxt` rejects.
+import { configs as sonarjsConfigs } from 'eslint-plugin-sonarjs'
 import security from 'eslint-plugin-security'
 
 /**
@@ -32,7 +34,7 @@ import security from 'eslint-plugin-security'
  */
 export default withNuxt(
   ...vueA11y.configs['flat/recommended'],
-  sonarjs.configs.recommended,
+  sonarjsConfigs.recommended,
   security.configs.recommended,
 
   {
