@@ -140,8 +140,23 @@ test.describe('the basemap switcher', () => {
 
     await openPeriods(page)
     const slider = page.getByRole('slider', { name: 'The Roman Empire, over time' })
-    await slider.focus()
-    await page.keyboard.press('ArrowRight')
+
+    /**
+     * Wait for the stops to arrive before touching the slider.
+     *
+     * The scrubber's steps are fetched when the panel opens, not bundled, so
+     * for a moment the slider is mounted and focusable with `aria-valuemax="0"`
+     * — a range of exactly one value. An arrow key in that window is clamped to
+     * the value it already has, the year never changes, and no empire tile is
+     * ever requested, so the poll below times out. Nothing is wrong with the
+     * application; the test was simply racing its own fetch, and lost
+     * intermittently (on maplibre 5 and 6 alike).
+     *
+     * `press` rather than `focus` + `page.keyboard`, so the key goes to this
+     * element under Playwright's own actionability checks.
+     */
+    await expect(slider).toHaveAttribute('aria-valuemax', /^[1-9]\d*$/)
+    await slider.press('ArrowRight')
     await expect.poll(() => periodTiles.length, { timeout: 15_000 }).toBeGreaterThan(0)
 
     expect(periodTiles.some((status) => status === 200 || status === 204)).toBe(true)

@@ -54,7 +54,7 @@ exercised, including a full opt-in two-factor authentication system.
 ```mermaid
 flowchart TB
     subgraph Client["Browser"]
-        UI["Nuxt 4 SPA/SSR\nMapLibre GL JS v5"]
+        UI["Nuxt 4 SPA/SSR\nMapLibre GL JS v6"]
         SW["Service Worker\n(offline cache)"]
     end
 
@@ -110,7 +110,7 @@ flowchart TB
 
 | Layer                          | Choice                                          | Why (vs. the alternative)                                                                                                                                                                  |
 | ------------------------------ | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Map rendering                  | **MapLibre GL JS v5**                           | Vector + GPU; clusters 20k+ sites and styles 1k+ tracings without DOM thrashing (Leaflet) and with better mobile feel than OpenLayers; no per-load fee (Mapbox GL).                        |
+| Map rendering                  | **MapLibre GL JS v6**                           | Vector + GPU; clusters 20k+ sites and styles 1k+ tracings without DOM thrashing (Leaflet) and with better mobile feel than OpenLayers; no per-load fee (Mapbox GL).                        |
 | Spatial queries                | **PostGIS `ST_AsMVT`**                          | Answers the viewport with _tiles_, not bbox GeoJSON — the single most important architectural decision in the project.                                                                     |
 | Basemap delivery               | **PMTiles** (OpenFreeMap in dev)                | Custom style keeps the app's own character; read directly by the browser over HTTP range requests — **no tile server process**.                                                            |
 | ORM                            | **Drizzle + `postgres.js`**                     | TypeScript-first, compile-time-checked columns; raw SQL kept to exactly the PostGIS operations a query builder cannot express.                                                             |
@@ -245,7 +245,7 @@ mindmap
     Frontend
       Nuxt 4 / Vue 3
       Nuxt UI v3 (Reka UI)
-      MapLibre GL JS v5
+      MapLibre GL JS v6
       terra-draw
       Tailwind v4 (design tokens)
       @vite-pwa/nuxt (Service Worker)
@@ -940,10 +940,12 @@ bumped and verified against their real behaviour rather than their unit tests
 — the sharp upgrade specifically re-checked that EXIF is still stripped and
 that `limitInputPixels` still _throws_ rather than warning, since that is the
 decompression-bomb guard §8.3 depends on. `happy-dom` was **removed** rather
-than bumped, because nothing imported it. What remains is `maplibre-gl`
-(deferred to its own cycle — 26 files import it) and four devDependencies
-reachable only from import scripts a human runs by hand, most with no fixed
-version in existence.
+than bumped, because nothing imported it. `maplibre-gl` has since gone to 6.9.0,
+closing the CVSS 10.0 sanitizer-bypass XSS — see
+`.claude/rules/map-and-tiles.md` for why this application sat at the narrow end
+of it and what the ESM-only migration actually required. What remains is four
+devDependencies reachable only from import scripts a human runs by hand, most
+with no fixed version in existence.
 
 **A form vulnerability fixed without the major upgrade it shipped in.**
 `@nuxt/ui`'s advisory (GHSA-gj2h-2fpw-fhv9) is fixed in 4.8.1 — a major

@@ -55,6 +55,15 @@ Every one of these was a real failure before it was a rule.
   `203.0.113.1` — and Valkey counters outlive the run. Three runs inside fifteen
   minutes used to fail on the fourth, with the failure moving around depending
   on how recently the suite had been run.
+- **Wait for fetched data to arrive before driving the control that needs it.**
+  The period scrubber's stops are fetched when its panel opens, so for a moment
+  the slider is mounted, focusable and enabled with `aria-valuemax="0"` — a
+  range of exactly one value. An arrow key in that window is clamped to the
+  value it already has, so the year never changes and no empire tile is ever
+  requested. `basemap.spec.ts` now waits for `aria-valuemax` to be non-zero
+  first. The tell for this shape of bug is a test that passes whenever you add
+  a `console.log` or an extra `await` before the interaction, because the
+  incidental round-trip is what was letting the fetch land.
 - **The server is warmed before the first test.** The first server-rendered
   request after a build is materially slower, and whichever test ran first
   absorbed that as a timeout unrelated to what it asserted.

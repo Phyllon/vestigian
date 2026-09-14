@@ -1,5 +1,5 @@
 import { Protocol } from 'pmtiles'
-import maplibregl from 'maplibre-gl'
+import { addProtocol } from 'maplibre-gl'
 import type { FilterSpecification, LayerSpecification, StyleSpecification } from 'maplibre-gl'
 // Imported explicitly rather than through Nuxt's auto-imports: this is called
 // while the style is built, so the unit tests — which import this module
@@ -25,7 +25,7 @@ let protocolRegistered = false
 const registerPmtilesProtocol = (): void => {
   if (protocolRegistered) return
   const protocol = new Protocol()
-  maplibregl.addProtocol('pmtiles', protocol.tile)
+  addProtocol('pmtiles', protocol.tile)
   protocolRegistered = true
 }
 

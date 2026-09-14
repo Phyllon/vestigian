@@ -756,6 +756,92 @@ boundary — normalise with `?? null` right after reading `feature.properties`,
 before handing values to anything typed `number | null` — not inside the
 shared formatting helper, which is correct for every other caller.
 
+## The period scrubber's thumb was never named — a template ref typed as an array that was not one
+
+`PeriodSwitcher.vue` sets the slider's accessible name imperatively, because
+Nuxt UI's `<USlider>` forwards `aria-*` only to `SliderRoot` and never to
+`SliderThumb`, which is the element actually carrying `role="slider"`. That part
+of the reasoning was right. The lookup was not:
+
+```ts
+const periodSlider = useTemplateRef<{ $el?: HTMLElement }[]>('periodSlider')
+const sliderRoot = periodSlider.value?.[0]?.$el // always undefined
+```
+
+A template ref resolves to an **array** only when it sits inside a `v-for`.
+There is no `v-for` here, so `periodSlider.value` is a single component
+instance, `[0]` is `undefined`, and the guard below it returned early on every
+run. The thumb was rendered and left permanently unnamed, from the moment the
+code was written — a screen reader announced an unlabelled slider, and
+`getByRole('slider', { name: … })` could not match it either.
+
+Two lessons worth keeping separately:
+
+- **It was found by a test that had never passed, not by review.** The e2e
+  assertion was written against the intent and the implementation never met it;
+  nobody noticed because the failure sat behind a scrubber nothing else touched.
+- **Verify a DOM claim against the DOM.** The original docstring said the
+  behaviour was "confirmed by reading both components' source, not assumed" —
+  and it was, for the part about `SliderRoot`. The wrong bit was a shape
+  assumption about Vue's own ref, which one `page.evaluate` dumping
+  `document.querySelectorAll('[role="slider"]')` settled immediately: the thumb
+  was present, enabled, and its `aria-label` was simply `null`.
+
+The watcher is also now `watch(..., { flush: 'post' })` with the step count as
+an explicit source, rather than `watchEffect` — the effect could otherwise run
+before the DOM was patched and never re-run, since the only reactive value it
+touched afterwards (`periodSliderLabel`) reads "Off" both before and after the
+fetched steps arrive, and an unchanged computed re-triggers nothing.
+
+## MapLibre v6 is ESM-only, and a bundler needs `setWorkerUrl()` or the map silently renders nothing
+
+The bump from 5.24.0 to 6.9.0 closed GHSA-jrc7-96c5-q579 (CVSS 10.0): `DOM.sanitize()`
+iterated `elem.attributes` — a _live_ `NamedNodeMap` — while calling
+`removeAttribute()` in the same loop, so removing one attribute shifted the rest
+down an index and the iterator skipped the neighbour. `<details open onload="1"
+ontoggle="…">` therefore lost the first handler and kept the second, which then
+ran on insertion into the attribution control's `innerHTML`. Zero-click XSS, for
+anyone rendering untrusted attribution.
+
+**This application was at the narrow end of that.** Every `attribution` value in
+the style is a module constant or a string literal — checked, not assumed — and
+the database's own `sites.attribution` is rendered on record pages, never handed
+to MapLibre. The one path that existed was a third-party TileJSON
+(`tiles.openfreemap.org/planet`, Mapterhorn, EOX) serving a hostile attribution
+string, which is a compromised-upstream scenario rather than a visitor-supplied
+one. Real, but narrow.
+
+The upgrade itself is small here because almost every import in this repo was
+already named or type-only. Three files used the default import
+(`import maplibregl from 'maplibre-gl'`), which v6 does not publish; they now
+name what they use (`addProtocol`, `MapMouseEvent`, `GeoJSONSource`).
+
+**The part that is not optional is `app/plugins/maplibre.client.ts`.** v6 is
+ESM-only and resolves its worker from `import.meta.url`, which does not survive a
+bundler's module graph — so under Vite, webpack and the rest every consumer must
+call `setWorkerUrl()` once, or no vector tile ever loads. v5 needed no such call,
+so there is no older equivalent this grew out of.
+
+Two details in that file are load-bearing:
+
+- **`?worker&url`, never plain `?url`.** The dist worker imports its sibling
+  `maplibre-gl-shared.mjs`; `?url` emits the worker file verbatim in a
+  production build _without_ that sibling, so it dies on its first import.
+  Dev mode works either way, which is exactly how this would have shipped
+  broken. Verified against the built output: the emitted chunk is 496 KB and
+  contains zero references to `maplibre-gl-shared`.
+- **A client plugin, not module scope in `useMapInstance`/`useBasemapStyle`.**
+  `?worker&url` is a Vite transform that fails under vitest's plain-node
+  environment, and both of those modules are imported directly by their unit
+  tests.
+
+Nothing else in v6's breaking list touches this repo, each checked rather than
+assumed: no `map.transform`, no `styleimagemissing` listener, no `JSON.parse` of
+GeoJSON feature properties (both call sites read `localStorage`), no use of
+MapLibre's own `Hash` control (`readCameraFromHash` is this project's own
+parser), and `setData` is called with one argument and its return value ignored.
+CSP already allowed `worker-src 'self'`, which is all a self-hosted worker needs.
+
 ## How the map stays fast
 
 1. `GET /api/tiles/{z}/{x}/{y}.mvt` → validate coordinate → check Valkey → `ST_AsMVT` against a GiST index.

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import type maplibregl from 'maplibre-gl'
+  import type { MapMouseEvent } from 'maplibre-gl'
   import type { LonLat } from '#shared/types'
 
   type ContributionMode = 'choose' | 'site' | 'tracing'
@@ -13,7 +13,7 @@
   const draftPosition = ref<LonLat | null>(null)
   const createdSiteId = ref<number | null>(null)
 
-  const handleMapClick = (event: maplibregl.MapMouseEvent): void => {
+  const handleMapClick = (event: MapMouseEvent): void => {
     if (mode.value !== 'site' || draftPosition.value) return
     draftPosition.value = { lon: event.lngLat.lng, lat: event.lngLat.lat }
   }

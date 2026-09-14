@@ -227,10 +227,11 @@ fix. **If a new form is added, it needs `method="post"` until then.**
 
 ### Still open, and why
 
-- **`maplibre-gl` 5.24.0 → 6.4.1** (CVSS 10.0). Deferred to its own cycle by
-  decision: 26 files import it, it is the library the whole map is built on, and
-  `terra-draw-maplibre-gl-adapter@^1` peers on it. Not a bump to land beside
-  unrelated work.
+- ~~`maplibre-gl` 5.24.0 → 6.4.1 (CVSS 10.0)~~ — **done**, at 6.9.0. The
+  adapter turned out not to gate it (`terra-draw-maplibre-gl-adapter` peers on
+  `maplibre-gl: >=4`), and the 26 importing files were almost all named or
+  type-only imports already. See `.claude/rules/map-and-tiles.md` for the
+  advisory's actual reach here and for the one non-optional migration step.
 - **`xmldom` (14), `xlsx` (2), `adm-zip` (1), `esbuild` 0.18.20 (1)** — all
   **devDependencies reachable only from import scripts a human runs by hand**,
   never from the shipped `.output`. `xmldom` comes via `osmtogeojson`

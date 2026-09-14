@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import type maplibregl from 'maplibre-gl'
+  import type { GeoJSONSource } from 'maplibre-gl'
   import { buildAccuracyCircle } from '~/composables/map/useGeolocation'
 
   const { t } = useI18n()
@@ -43,7 +43,7 @@
 
     const source = instance.getSource(POSITION_SOURCE_ID)
     if (source && 'setData' in source) {
-      ;(source as maplibregl.GeoJSONSource).setData(data)
+      ;(source as GeoJSONSource).setData(data)
       return
     }
 

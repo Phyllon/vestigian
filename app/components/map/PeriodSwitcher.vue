@@ -84,15 +84,43 @@
    * fix that doesn't mean dropping an established component for a hand-rolled
    * `<input type="range">` over one missing attribute passthrough.
    */
-  const periodSlider = useTemplateRef<{ $el?: HTMLElement }[]>('periodSlider')
+  const periodSlider = useTemplateRef<{ $el?: HTMLElement }>('periodSlider')
 
-  watchEffect(() => {
-    const sliderRoot = periodSlider.value?.[0]?.$el
-    const thumb = sliderRoot?.querySelector?.('[role="slider"]')
-    if (!thumb) return
-    thumb.setAttribute('aria-label', t('periodSwitcher.scrubberLabel'))
-    thumb.setAttribute('aria-valuetext', periodSliderLabel.value)
-  })
+  /**
+   * `watch(..., { flush: 'post' })` rather than `watchEffect`, and the step
+   * count is listed as a source explicitly. Both details are the bug.
+   *
+   * A `watchEffect` ran *before* the DOM was patched, found no thumb, and
+   * returned — then never ran again, because the only reactive value it
+   * happened to touch afterwards was `periodSliderLabel`, which reads "Off"
+   * both before and after the fetched steps arrive. An unchanged computed does
+   * not re-trigger an effect, so the thumb was rendered and left permanently
+   * unnamed: `getByRole('slider', { name: … })` found nothing, and so would a
+   * screen reader. `flush: 'post'` moves the callback after the patch, and
+   * naming `periodSteps.length` as a source is what actually fires when the
+   * slider stops being `:disabled` and the thumb appears.
+   *
+   * The ref is a single component instance, not an array. It was written as
+   * `periodSlider.value?.[0]?.$el` — array indexing only holds for a ref
+   * inside a `v-for`, and there is none here — so the lookup resolved to
+   * `undefined` on every run and the early return fired every time. The thumb
+   * was therefore never named at all, from the moment this code was written:
+   * `getByRole('slider', { name: … })` could not match it, and neither could a
+   * screen reader. Verified against the rendered DOM in a real browser rather
+   * than reasoned about again — the thumb is present and enabled, and its
+   * `aria-label` was simply `null`.
+   */
+  watch(
+    [periodSlider, () => periodSteps.value.length, periodSliderLabel],
+    () => {
+      const sliderRoot = periodSlider.value?.$el
+      const thumb = sliderRoot?.querySelector?.('[role="slider"]')
+      if (!thumb) return
+      thumb.setAttribute('aria-label', t('periodSwitcher.scrubberLabel'))
+      thumb.setAttribute('aria-valuetext', periodSliderLabel.value)
+    },
+    { flush: 'post', immediate: true },
+  )
 
   onClickOutside(root, close)
 
