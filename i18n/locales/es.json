@@ -533,6 +533,22 @@
       "historic-england": "Historic England"
     }
   },
+  "siteCoinFinds": {
+    "title": "Hallazgos monetarios",
+    "intro": "Los hallazgos monetarios aislados de este país ({country}) están registrados en estas bases de datos — enlazados, no copiados en este atlas.",
+    "opensNewTab": "(se abre en una nueva pestaña)",
+    "searchPrefilled": "Búsqueda rellenada con «{title}» — conviene ampliarla si no aparece nada.",
+    "coverage": {
+      "afe-rgk": "Alemania más allá de la frontera romana, Hesse y Baden-Wurtemberg",
+      "afe-hd": "Renania-Palatinado, Baden-Wurtemberg y proyectos de investigación de Heidelberg",
+      "afe-pl": "Polonia y territorios históricamente vinculados a ella",
+      "afe-hu": "Hungría al este del Danubio",
+      "pas": "Inglaterra y Gales, hallazgos comunicados por particulares",
+      "sicf": "Suiza y Liechtenstein",
+      "pan": "Países Bajos, hallazgos comunicados por particulares",
+      "dime": "Dinamarca, hallazgos con detector de metales"
+    }
+  },
   "siteMetaList": {
     "locationNotResolved": "Ubicación no resuelta",
     "period": "Período",

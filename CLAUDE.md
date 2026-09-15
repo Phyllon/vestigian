@@ -143,7 +143,7 @@ app/
     map/       MapCanvas BasemapSwitcher GeolocateButton MapSearchField Legend FeaturePicker
                OfflineDownloadControl OverlaySwitcher PeriodSwitcher
     site/      SiteDetailPanel SiteGallery SiteGalleryManager SiteMetaList
-               SiteExternalLinks SiteEnrichment SiteEndorsementButton
+               SiteExternalLinks SiteEnrichment SiteEndorsementButton SiteCoinFindDatabases
     tracing/   TracingDetailPanel
     contribute/ ContributionPanel SiteEditorForm TracingEditorForm GeometryDrawTool ImageUploader
     auth/      LoginForm RegisterForm PasswordField PasswordRequirements AccountMenu
@@ -219,7 +219,7 @@ shared/types/  vocabulary shared by both sides
 shared/utils/  password policy, authorization rules, the limes gazetteer, JSON-LD builders,
                tile enumeration and limits, offline-cache naming, byte formatting,
                milestones, Pleiades identifiers, Linked Places (Pelagios) builders,
-               record completeness                                                (+__test__/)
+               record completeness, coin-find databases (linked, not mirrored)    (+__test__/)
 scripts/import/  four-stage vici.org import + vici-licences.ts (shared vocabulary)
                  guard.ts (upstream delta tripwire, +__test__/)
                  02c-geo-names.ts 04-mirror-basemap-tiles.ts 05-antiquity-atlas.ts

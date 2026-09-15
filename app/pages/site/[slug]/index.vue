@@ -143,6 +143,12 @@
         class="mt-8"
       />
 
+      <SiteCoinFindDatabases
+        :country-code="site.countryCode"
+        :site-title="site.title"
+        class="mt-8"
+      />
+
       <EpigraphyNearbyInscriptions :id="site.id" kind="site" class="mt-8" />
       <EpigraphyNearbyAtticInscriptions :id="site.id" kind="site" class="mt-8" />
 

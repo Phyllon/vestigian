@@ -28,6 +28,8 @@ paths:
   - 'scripts/import/18-chrr-coin-hoards.ts'
   - 'server/utils/coin-hoards.ts'
   - 'server/api/tiles/antiquity-coin-hoards/**'
+  - 'shared/utils/coin-find-databases.ts'
+  - 'app/components/site/SiteCoinFindDatabases.vue'
   - 'app/composables/map/useMinorFeatureOverlay.ts'
   - 'app/composables/map/useCoinHoardOverlay.ts'
   - 'app/composables/map/usePortOverlay.ts'
@@ -744,6 +746,47 @@ does its `apis/` documentation page, while the site's home page returns 200.
 Verified live. Scraping individual record pages instead was rejected as
 disproportionate for a layer this size. Worth re-checking if the export ever
 comes back.
+
+## Single coin finds — pointed to, not mirrored
+
+The site panel's "Coin finds" section (`SiteCoinFindDatabases.vue`) links
+out to the national or regional finds database covering the site's
+`country_code` — AFE-RGK and AFE4HD (DE), AFE-PL, AFE-HU, PAS (GB), SICF
+(CH/LI), PAN (NL), DIME (DK). No coin, findspot or coordinate is stored.
+The list, and the per-source reason none of them is mirrorable, lives on
+`COIN_FIND_DATABASES` in `shared/utils/coin-find-databases.ts`; every link
+there was fetched and its page title checked (2026-09-14), except PAS,
+which answers scripts only with a Cloudflare challenge.
+
+Two things that look like openings and are not:
+
+- **SICF's "Coins online" page embeds its map data** — 382 single-find
+  `L.circleMarker`s with coordinates and a popup (canton, municipality,
+  location, address, excavation number) in the HTML. Scraping it would
+  work mechanically. It carries no licence beyond "© Swiss Inventory of
+  Coin Finds", the "Open Data" pages its own navigation links to 404, and
+  the popups carry no period, so the points are not even scoped to
+  antiquity. Its Zenodo community (19 records) is annual reports and one
+  catalogue PDF, all CC BY 4.0, none a dataset.
+- **AFE place pages carry `Breitengrad`/`Längengrad` and a CSV export**, and
+  AFE describes itself as five-star Linked Open Data — but no page states a
+  licence, and the Impressum defaults everything to copyright. The sitemap
+  lists 20 coin, 6 findspot and 3 place pages of 1,000 entries each.
+
+**Asking AFE (afe@dainst.de) and PAS for an explicit licence is deferred
+to go-live** — tracked under "Offen" in `documents/runbook_prod.deployment.md`.
+A licence granted then turns that entry into an import on the CHRR model
+(own table, own tile endpoint, isolated from `sites`), with one constraint
+that is not negotiable: **never show a findspot more precisely than the
+source does publicly** (PAS: parish), and import no finder names.
+
+**Also checked, not used:** Nomisma.org's SPARQL endpoint returned 400
+for `SELECT ?s WHERE { ?s rdf:type ?o } LIMIT 1` in every output format,
+and OCRE/CRRO's `findspots.geojson` an empty FeatureCollection — the
+aggregator route is down, not refused; re-check it first. CoinSampo
+(Finland) is verifiably CC BY 4.0 over SPARQL, but holds 5 Roman-period
+coins in 18,342. MEDEA's `vondsten.be` fails the TLS handshake from here.
+FMRD (300,000 German finds) is print-only.
 
 ## Researched and rejected
 

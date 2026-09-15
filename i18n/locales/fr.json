@@ -533,6 +533,22 @@
       "historic-england": "Historic England"
     }
   },
+  "siteCoinFinds": {
+    "title": "Trouvailles monétaires",
+    "intro": "Les trouvailles monétaires isolées de ce pays ({country}) sont recensées dans ces bases de données — accessibles par lien, sans être reprises dans cet atlas.",
+    "opensNewTab": "(ouvre dans un nouvel onglet)",
+    "searchPrefilled": "Recherche pré-remplie avec « {title} » — à élargir si rien n'apparaît.",
+    "coverage": {
+      "afe-rgk": "Allemagne au-delà de la frontière romaine, Hesse et Bade-Wurtemberg",
+      "afe-hd": "Rhénanie-Palatinat, Bade-Wurtemberg et projets de recherche de Heidelberg",
+      "afe-pl": "Pologne et territoires qui lui sont historiquement liés",
+      "afe-hu": "Hongrie à l'est du Danube",
+      "pas": "Angleterre et pays de Galles, trouvailles déclarées par le public",
+      "sicf": "Suisse et Liechtenstein",
+      "pan": "Pays-Bas, trouvailles déclarées par le public",
+      "dime": "Danemark, trouvailles au détecteur de métaux"
+    }
+  },
   "siteMetaList": {
     "locationNotResolved": "Emplacement non résolu",
     "period": "Période",

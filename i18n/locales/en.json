@@ -663,6 +663,22 @@
       "historic-england": "Historic England"
     }
   },
+  "siteCoinFinds": {
+    "title": "Coin finds",
+    "intro": "Single coin finds from this country ({country}) are recorded in these databases — linked, not copied into this atlas.",
+    "opensNewTab": "(opens in a new tab)",
+    "searchPrefilled": "Search prefilled with \"{title}\" — worth widening if nothing turns up.",
+    "coverage": {
+      "afe-rgk": "Germany beyond the Roman frontier, Hesse and Baden-Württemberg",
+      "afe-hd": "Rhineland-Palatinate, Baden-Württemberg and Heidelberg research projects",
+      "afe-pl": "Poland and territories historically linked to it",
+      "afe-hu": "Hungary east of the Danube",
+      "pas": "England and Wales, finds reported by the public",
+      "sicf": "Switzerland and Liechtenstein",
+      "pan": "The Netherlands, finds reported by the public",
+      "dime": "Denmark, metal-detector finds"
+    }
+  },
   "siteMetaList": {
     "locationNotResolved": "Location not resolved",
     "period": "Period",

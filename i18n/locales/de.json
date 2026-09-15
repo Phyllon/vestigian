@@ -533,6 +533,22 @@
       "historic-england": "Historic England"
     }
   },
+  "siteCoinFinds": {
+    "title": "Fundmünzen",
+    "intro": "Einzelfunde von Münzen aus diesem Land ({country}) sind in diesen Datenbanken erfasst – verlinkt, nicht in diesen Atlas übernommen.",
+    "opensNewTab": "(wird in einem neuen Tab geöffnet)",
+    "searchPrefilled": "Suche vorausgefüllt mit „{title}“ – bei keinem Treffer lohnt sich eine weitere Suche.",
+    "coverage": {
+      "afe-rgk": "Deutschland jenseits der römischen Grenze, Hessen und Baden-Württemberg",
+      "afe-hd": "Rheinland-Pfalz, Baden-Württemberg und Heidelberger Forschungsprojekte",
+      "afe-pl": "Polen und historisch damit verbundene Gebiete",
+      "afe-hu": "Ungarn östlich der Donau",
+      "pas": "England und Wales, von Findern gemeldete Funde",
+      "sicf": "Schweiz und Liechtenstein",
+      "pan": "Niederlande, von Findern gemeldete Funde",
+      "dime": "Dänemark, Metalldetektorfunde"
+    }
+  },
   "siteMetaList": {
     "locationNotResolved": "Standort nicht geklärt",
     "period": "Zeitraum",

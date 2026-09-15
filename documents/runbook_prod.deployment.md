@@ -398,3 +398,10 @@ Mechanismus setzen.
   zum Bouncer, nicht statt dessen: Shield deckt volumetrische L7-Floods breiter
   ab, der Bouncer setzt CrowdSecs eigene, aus den Anwendungslogs abgeleiteten
   Entscheidungen um.
+- **Lizenzanfrage Fundmünzen — zum Go-Live stellen.** AFE (RGK Frankfurt,
+  afe@dainst.de) und das Portable Antiquities Scheme um eine ausdrückliche
+  Lizenz für Einzelfundmünzen bitten. Bis dahin verlinkt die Site-Ansicht
+  nur (`shared/utils/coin-find-databases.ts`). Mit Lizenz wird daraus ein
+  Import nach CHRR-Vorbild — Fundorte nie genauer als die Quelle öffentlich
+  zeigt, keine Findernamen. Stand und Begründung:
+  `.claude/rules/antiquity-basemaps.md`, „Single coin finds".

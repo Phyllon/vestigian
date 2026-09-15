@@ -533,6 +533,22 @@
       "historic-england": "Historic England"
     }
   },
+  "siteCoinFinds": {
+    "title": "Muntvondsten",
+    "intro": "Losse muntvondsten uit dit land ({country}) worden in deze databanken bijgehouden — gelinkt, niet overgenomen in deze atlas.",
+    "opensNewTab": "(opent in een nieuw tabblad)",
+    "searchPrefilled": "Zoekopdracht vooraf ingevuld met '{title}' — de moeite waard om te verruimen als er niets verschijnt.",
+    "coverage": {
+      "afe-rgk": "Duitsland buiten de Romeinse grens, Hessen en Baden-Württemberg",
+      "afe-hd": "Rijnland-Palts, Baden-Württemberg en Heidelbergse onderzoeksprojecten",
+      "afe-pl": "Polen en historisch daarmee verbonden gebieden",
+      "afe-hu": "Hongarije ten oosten van de Donau",
+      "pas": "Engeland en Wales, door het publiek gemelde vondsten",
+      "sicf": "Zwitserland en Liechtenstein",
+      "pan": "Nederland, door het publiek gemelde vondsten",
+      "dime": "Denemarken, metaaldetectorvondsten"
+    }
+  },
   "siteMetaList": {
     "locationNotResolved": "Locatie niet opgelost",
     "period": "Periode",
