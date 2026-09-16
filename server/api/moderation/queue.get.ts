@@ -70,6 +70,6 @@ export default defineEventHandler(async (event) => {
 
   return {
     items,
-    nextCursor: items.length === limit ? items[items.length - 1]!.id : null,
+    nextCursor: items.length === limit ? items.at(-1)!.id : null,
   }
 })

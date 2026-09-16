@@ -18,6 +18,7 @@ import postgres from 'postgres'
 import sharp from 'sharp'
 import { isPublishableLicence } from './vici-licences'
 import { detectImageFormat } from '../../server/utils/uploads'
+import { requireDatabaseUrl } from '../../server/database/database-url'
 
 /** Pause between requests to the source server, in milliseconds. */
 const REQUEST_INTERVAL = 1200
@@ -30,9 +31,7 @@ const MAX_SOURCE_BYTES = 25 * 1024 * 1024
  */
 const MIRROR_LIMIT = Number(process.env.MIRROR_LIMIT ?? Number.POSITIVE_INFINITY)
 
-const sql = postgres(
-  process.env.NUXT_DATABASE_URL ?? 'postgres://vestigian:vestigian@127.0.0.1:5432/vestigian',
-)
+const sql = postgres(requireDatabaseUrl())
 
 /**
  * The fallbacks match docker/compose.dev.yml. Without them an unset environment

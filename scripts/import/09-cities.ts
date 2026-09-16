@@ -28,11 +28,9 @@ import { pipeline } from 'node:stream/promises'
 import AdmZip from 'adm-zip'
 import postgres from 'postgres'
 import { checksumOfSource, guardImport, isDryRun, recordImportRun } from './guard'
+import { requireDatabaseUrl } from '../../server/database/database-url'
 
-const sql = postgres(
-  process.env.NUXT_DATABASE_URL ?? 'postgres://vestigian:vestigian@127.0.0.1:5432/vestigian',
-  { max: 1 },
-)
+const sql = postgres(requireDatabaseUrl(), { max: 1 })
 
 const CACHE_DIR = join(process.cwd(), '.import')
 const SOURCE_URL = 'https://download.geonames.org/export/dump/cities500.zip'

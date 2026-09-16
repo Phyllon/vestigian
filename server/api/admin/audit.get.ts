@@ -70,6 +70,6 @@ export default defineEventHandler(async (event) => {
 
   return {
     entries: rows.map((row) => ({ ...row, createdAt: row.createdAt.toISOString() })),
-    nextCursor: rows.length === query.limit ? rows[rows.length - 1]!.id : null,
+    nextCursor: rows.length === query.limit ? rows.at(-1)!.id : null,
   }
 })

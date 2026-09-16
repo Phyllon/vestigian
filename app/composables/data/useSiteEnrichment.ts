@@ -58,7 +58,7 @@ export const useSiteEnrichment = (source?: MaybeRefOrGetter<number | null | unde
 
   const readRemembered = (siteId: number, lang: string): StoredEntry | null => {
     const entry = remembered.value[storageKey(siteId, lang)]
-    if (!entry || entry.schema !== STORAGE_SCHEMA) return null
+    if (entry?.schema !== STORAGE_SCHEMA) return null
     if (Date.now() - entry.storedAt > STORAGE_TTL_MS) return null
     return entry
   }

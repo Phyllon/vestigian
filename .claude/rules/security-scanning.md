@@ -8,6 +8,7 @@ paths:
   - 'eslint.config.mjs'
   - 'eslint-plugins.d.ts'
   - 'tsconfig.eslint.json'
+  - 'sonar-project.properties'
 ---
 
 ## SAST/DAST — local only, no GitHub Actions minutes spent
@@ -19,16 +20,93 @@ gate `.husky/pre-push` already ran) — nothing was added to
 instruction; dependency scanning instead runs locally via `pnpm scan:deps`
 (osv-scanner), on demand, not as an always-on bot opening PRs.
 
-| Layer                 | Tool                                | Where it runs              | Blocking?                                        |
-| --------------------- | ----------------------------------- | -------------------------- | ------------------------------------------------ |
-| SAST                  | `eslint-plugin-security`            | `pnpm lint` (existing)     | Yes — part of `pnpm check`                       |
-| SAST                  | opengrep (`scan-sast.sh`)           | `pnpm check`, pre-push     | Yes (`--error`)                                  |
-| Secrets               | gitleaks (`scan-secrets.sh`)        | `pnpm check`, pre-push     | Yes                                              |
-| Secrets               | gitleaks `--staged`                 | `.husky/pre-commit`        | Yes, per commit                                  |
-| Dockerfile lint       | hadolint (`lint-dockerfile.sh`)     | `pnpm check`, pre-push     | Yes                                              |
-| Image scan (SCA)      | Trivy (`scan-image.sh`)             | manual (`pnpm scan:image`) | No — builds the image first, minutes not seconds |
-| Dependency scan (SCA) | osv-scanner (`scan-deps.sh`)        | manual (`pnpm scan:deps`)  | No — queries osv.dev over the network            |
-| DAST                  | OWASP ZAP baseline (`scan-dast.sh`) | manual (`pnpm scan:dast`)  | No — full build + boot per run                   |
+| Layer                 | Tool                                  | Where it runs              | Blocking?                                        |
+| --------------------- | ------------------------------------- | -------------------------- | ------------------------------------------------ |
+| SAST                  | `eslint-plugin-security`              | `pnpm lint` (existing)     | Yes — part of `pnpm check`                       |
+| SAST                  | opengrep (`scan-sast.sh`)             | `pnpm check`, pre-push     | Yes (`--error`)                                  |
+| Secrets               | gitleaks (`scan-secrets.sh`)          | `pnpm check`, pre-push     | Yes                                              |
+| Secrets               | gitleaks `--staged`                   | `.husky/pre-commit`        | Yes, per commit                                  |
+| Dockerfile lint       | hadolint (`lint-dockerfile.sh`)       | `pnpm check`, pre-push     | Yes                                              |
+| Image scan (SCA)      | Trivy (`scan-image.sh`)               | manual (`pnpm scan:image`) | No — builds the image first, minutes not seconds |
+| Dependency scan (SCA) | osv-scanner (`scan-deps.sh`)          | manual (`pnpm scan:deps`)  | No — queries osv.dev over the network            |
+| DAST                  | OWASP ZAP baseline (`scan-dast.sh`)   | manual (`pnpm scan:dast`)  | No — full build + boot per run                   |
+| Quality + SAST        | SonarQube Community (`scan-sonar.sh`) | manual (`pnpm scan:sonar`) | No — boots a server, scans in minutes            |
+
+## SonarQube — a local server, because the CLI is only a client
+
+`eslint-plugin-sonarjs` covers SonarJS's rules inside `pnpm lint`, but not
+what only the SonarQube engine does (cross-file taint analysis, CSS/HTML/
+Docker rules, duplication). The **SonarQube CLI** (`sonar`, v1.7.0, LGPL-3.0)
+was checked for running that locally and cannot: every `sonar analyze`
+subcommand is marked as requiring `sonar auth login`, its own `llms.txt` says
+agents cannot authenticate themselves, and code-quality analysis
+(`analyze agentic`) is SonarQube Cloud only. Cloud would mean uploading the
+source to SonarSource, so it was not used.
+
+`scripts/security/scan-sonar.sh` instead runs `sonarqube:community` on
+`127.0.0.1:9110` (9000 is taken by MinIO), scans with
+`sonarsource/sonar-scanner-cli` over a private Docker network — not
+`--network host`, which failed for ZAP (see below) — and reads the result
+back through the CLI with `sonar list issues`. On first run it replaces the
+default `admin/admin` password and generates a user token; both sit in
+`.tools/sonarqube/` (gitignored, mode 600) and only ever reach loopback.
+Telemetry is off on both sides (`SONAR_TELEMETRY_ENABLE=false`,
+`DO_NOT_TRACK=1` plus `sonar config telemetry --disabled`). The CLI is
+installed with `PROFILE=/dev/null` so its installer does not edit the shell
+profile; the script calls it by absolute path. Scope is in
+`sonar-project.properties`.
+
+Two traps met on the first run:
+
+- **The scanner only uploads; the server processes later.** Listing issues
+  straight after `EXECUTION SUCCESS` printed "No issues found"; the same
+  query a minute later returned 99. The script now polls
+  `/api/ce/activity_status` until nothing is pending.
+- **`sonar.working.directory` is ignored** by the scanner image, which forces
+  `/tmp/.scannerwork` inside the container — so no `.scannerwork` lands in
+  the repo either.
+
+### First run — 99 open issues (2026-09-14)
+
+- **29 BLOCKER `secrets:S6698` — fixed.** Every script's
+  `process.env.NUXT_DATABASE_URL ?? 'postgres://vestigian:vestigian@…'`
+  fallback, plus `server/database/migrate.ts` (and, unflagged, the same in
+  `drizzle.config.ts` and `e2e/helpers/accounts.ts`). All now call
+  `requireDatabaseUrl()`, which throws when the variable is missing;
+  `drizzle.config.ts` loads `.env` itself, as `playwright.config.ts` does.
+  Rescan afterwards: 70 open issues, no `S6698` left.
+- **5 CRITICAL** — `S3735` `void` in `useInscriptionsOverlay.ts` and
+  `useAtticInscriptionsOverlay.ts` (the project's own fire-and-forget idiom,
+  e.g. `goToMap`), and `S2871` `.sort()` without a comparator in
+  `bouncer.mjs`, `02-mysql-to-postgres.ts` and `snapshot-database.ts`.
+- **28 MAJOR** — `Web:S6840` autocomplete values (15) and `Web:S6819`
+  ARIA roles where a native element exists (12), both in Vue templates, which
+  `eslint-plugin-sonarjs` does not see; one `S9332`, the `networkidle`
+  wait in `e2e/helpers/hydration.ts`.
+- **37 MINOR** — modernisation hints (`S7781` `replaceAll`, `S6582`
+  optional chaining, …).
+
+### Residual pass — 0 open (2026-09-14)
+
+Every remaining finding was fixed in code, except two rules that are wrong
+about this code. Those carry per-file exceptions in `sonar-project.properties`,
+each with its evidence beside it:
+
+- **`Web:S6819` on `role="status"`** — replacing it with `<output>` made
+  `vuejs-accessibility/form-control-has-label` fail `pnpm check` on all eight
+  (the plugin hard-codes `output` as a form control needing a label). The
+  `role="group"` hits were real and became `<fieldset>`.
+- **`Web:S6840` on `<UInput>`** — a probe project showed the rule flags
+  `<UInput type="text" autocomplete="nickname">` (and `username`,
+  `one-time-code`) while the same attributes on a plain `<input>` pass. The
+  password fields left the list for a better reason: `AuthPasswordField` now
+  takes `purpose` and builds the token itself.
+
+Two fixes changed behaviour and are worth knowing: the import scripts' and
+`diff.ts`'s scalar-to-text helpers now return `null` for objects instead of
+`"[object Object]"`, and `e2e/helpers/hydration.ts` waits for Nuxt's
+`isHydrating` instead of `networkidle` — **not yet run**, since e2e is run by
+hand.
 
 ## `eslint.config.mjs` is type-checked in its own project
 

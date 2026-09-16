@@ -18,12 +18,13 @@ This file covers what a new contributor needs first. Deeper, topic-scoped detail
 
 ### Prerequisites
 
-| Tool                                                       | Version    | Why                                                                      |
-| ---------------------------------------------------------- | ---------- | ------------------------------------------------------------------------ |
-| [Node.js](https://nodejs.org)                              | ≥22        | Runs the app and every `tsx` script                                      |
-| [pnpm](https://pnpm.io/installation)                       | 9.x        | This repo's package manager — `packageManager` in `package.json` pins it |
-| [Docker](https://docs.docker.com/get-docker/) + Compose v2 | any recent | Postgres/PostGIS, Valkey, MinIO, imgproxy, Mailpit — the whole dev stack |
-| `openssl`                                                  | any        | Generates the session and ALTCHA signup secrets                          |
+| Tool                                                       | Version    | Why                                                                                                                            |
+| ---------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| [Volta](https://volta.sh) (recommended)                    | any recent | Switches to the exact Node and pnpm pinned under `volta` in `package.json` — set `VOLTA_FEATURE_PNPM=1` so it manages pnpm too |
+| [Node.js](https://nodejs.org)                              | ≥22        | Runs the app and every `tsx` script — `volta.node` is the version CI uses                                                      |
+| [pnpm](https://pnpm.io/installation)                       | 9.x        | This repo's package manager — `packageManager` in `package.json` pins it                                                       |
+| [Docker](https://docs.docker.com/get-docker/) + Compose v2 | any recent | Postgres/PostGIS, Valkey, MinIO, imgproxy, Mailpit — the whole dev stack                                                       |
+| `openssl`                                                  | any        | Generates the session and ALTCHA signup secrets                                                                                |
 
 No database, cache, or object store to install by hand — the entire dev stack is one `docker compose` file, and `NUXT_PUBLIC_BASEMAP_PROVIDER=openfreemap` (the default) means no map API key either.
 

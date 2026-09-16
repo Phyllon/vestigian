@@ -50,11 +50,9 @@ import {
   type RecordImportRunInput,
 } from './guard'
 import type { InscriptionEditionLine, InscriptionEditionToken } from '../../server/database/schema'
+import { requireDatabaseUrl } from '../../server/database/database-url'
 
-const sql = postgres(
-  process.env.NUXT_DATABASE_URL ?? 'postgres://vestigian:vestigian@127.0.0.1:5432/vestigian',
-  { max: 1 },
-)
+const sql = postgres(requireDatabaseUrl(), { max: 1 })
 
 const CACHE_DIR = join(process.cwd(), '.import', 'edh-inscriptions')
 const ARCHIVE_PATH = join(CACHE_DIR, 'data.tar.gz')
@@ -174,7 +172,7 @@ const listXmlFiles = async (dir: string): Promise<string[]> => {
   const entries = await readdir(dir, { recursive: true, withFileTypes: true })
   return entries
     .filter((entry) => entry.isFile() && entry.name.endsWith('.xml'))
-    .map((entry) => join(entry.parentPath ?? entry.path, entry.name))
+    .map((entry) => join(entry.parentPath, entry.name))
 }
 
 const firstChildByTag = (node: Element | Document, tag: string): Element | null =>

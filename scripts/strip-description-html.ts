@@ -21,12 +21,11 @@
  */
 import postgres from 'postgres'
 import { stripHtml } from '../server/utils/sanitize'
+import { requireDatabaseUrl } from '../server/database/database-url'
 
 const shouldRepair = process.argv.includes('--repair')
 
-const sql = postgres(
-  process.env.NUXT_DATABASE_URL ?? 'postgres://vestigian:vestigian@127.0.0.1:5432/vestigian',
-)
+const sql = postgres(requireDatabaseUrl())
 
 interface TextRow {
   id: number

@@ -10,6 +10,11 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    // Several import-script tests load modules that build their postgres
+    // client at the top level through `requireDatabaseUrl`. postgres.js only
+    // connects on the first query, so this address is never dialled — it
+    // exists so that loading the module does not throw. No password in it.
+    env: { NUXT_DATABASE_URL: 'postgres://vitest@127.0.0.1:1/unused' },
     include: [
       'server/**/__test__/**/*.test.ts',
       'app/composables/**/__test__/**/*.test.ts',

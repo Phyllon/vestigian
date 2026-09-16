@@ -360,16 +360,12 @@
         <AuthPasswordField
           id="settings-password-current"
           v-model="currentPassword"
-          autocomplete="current-password"
+          purpose="current"
         />
       </UFormField>
 
       <UFormField :label="t('settings.newPassword')">
-        <AuthPasswordField
-          id="settings-password-new"
-          v-model="newPassword"
-          autocomplete="new-password"
-        />
+        <AuthPasswordField id="settings-password-new" v-model="newPassword" purpose="new" />
       </UFormField>
 
       <AuthPasswordRequirements v-if="newPassword" :password="newPassword" />
@@ -483,7 +479,7 @@
             <AuthPasswordField
               id="settings-2fa-regenerate-password"
               v-model="regeneratePassword"
-              autocomplete="current-password"
+              purpose="current"
             />
           </UFormField>
           <UButton
@@ -505,7 +501,7 @@
             <AuthPasswordField
               id="settings-2fa-disable-password"
               v-model="disablePassword"
-              autocomplete="current-password"
+              purpose="current"
             />
           </UFormField>
           <UFormField :label="t('settings.twoFactor.confirmCode')">
@@ -553,11 +549,7 @@
       </UFormField>
 
       <UFormField :label="t('settings.currentPassword')">
-        <AuthPasswordField
-          id="settings-email-password"
-          v-model="emailPassword"
-          autocomplete="current-password"
-        />
+        <AuthPasswordField id="settings-email-password" v-model="emailPassword" purpose="current" />
       </UFormField>
 
       <UButton type="submit" :loading="isChangingEmail" :disabled="!newEmail || !emailPassword">

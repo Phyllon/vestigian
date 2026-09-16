@@ -125,7 +125,6 @@
       Same reasoning, smaller prize. All three are instantiated on every load
       but show nothing until a mark is tapped. Order matters: the picker sits
       above the detail panels — see MapFeaturePicker.
-      "Lazy" left the modulepreload graph, so it's off the critical path rather than blocking. But it's still downloaded.
     -->
     <!--
       Only while the frontier is showing. Lazy for the same reason as the
@@ -134,8 +133,8 @@
     -->
     <LazyLimesPanel v-if="isFollowingLimes" />
 
-    <LazyMapFeaturePicker />
-    <LazySiteDetailPanel />
-    <LazyTracingDetailPanel />
+    <MapFeaturePicker />
+    <SiteDetailPanel />
+    <TracingDetailPanel />
   </MapCanvas>
 </template>

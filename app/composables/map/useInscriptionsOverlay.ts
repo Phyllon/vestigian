@@ -108,7 +108,7 @@ export const useInscriptionsOverlay = () => {
       ?.querySelector('a')
       ?.addEventListener('click', (clickEvent) => {
         clickEvent.preventDefault()
-        void navigateTo(`/inscriptions/${properties.edh_id}`)
+        navigateTo(`/inscriptions/${properties.edh_id}`)
       })
   }
 

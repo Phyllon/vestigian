@@ -16,8 +16,14 @@
    * auto-generated id can drift from the `for`/`aria-describedby` values its
    * own `UFormField` renders, and axe catches the result as an unlabelled
    * control. A caller inside such a layout should pass an explicit `id`.
+   *
+   * `purpose` rather than a free `autocomplete` string: a password field only
+   * ever means `new-password` or `current-password`, and a typo in either
+   * silently turns off the password manager. It also keeps the token off the
+   * caller's tag, where SonarQube's HTML rule reads a static `autocomplete` on
+   * an element with no `type` as invalid.
    */
-  defineProps<{ autocomplete?: string; id?: string }>()
+  defineProps<{ purpose: 'new' | 'current'; id?: string }>()
 
   const { t } = useI18n()
 
@@ -35,7 +41,7 @@
     :id="id"
     v-model="model"
     :type="isRevealed ? 'text' : 'password'"
-    :autocomplete="autocomplete"
+    :autocomplete="`${purpose}-password`"
     class="w-full"
   >
     <template #trailing>

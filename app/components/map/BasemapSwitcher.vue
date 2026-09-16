@@ -99,7 +99,12 @@
         :aria-label="t('basemapSwitcher.menuLabel')"
         class="leaf absolute right-0 top-full z-20 mt-2 max-h-[70vh] w-64 overflow-y-auto shadow-lifted"
       >
-        <div v-for="group in groups" :key="group" role="group" :aria-label="groupLabels[group]">
+        <fieldset
+          v-for="group in groups"
+          :key="group"
+          class="min-w-0"
+          :aria-label="groupLabels[group]"
+        >
           <p
             class="eyebrow border-b border-paper-200 px-4 pb-1 pt-3 text-ink-500 dark:border-night-700 dark:text-paper-400"
           >
@@ -127,7 +132,7 @@
             </span>
             <span class="text-xs text-ink-500 dark:text-paper-400">{{ option.hint }}</span>
           </button>
-        </div>
+        </fieldset>
       </div>
     </Transition>
   </div>

@@ -20,6 +20,7 @@
  */
 import mysql from 'mysql2/promise'
 import postgres from 'postgres'
+import { requireDatabaseUrl } from '../../server/database/database-url'
 
 const BATCH_SIZE = 1000
 
@@ -27,9 +28,7 @@ const source = await mysql.createConnection(
   process.env.MYSQL_GEO_URL ?? 'mysql://root:root@127.0.0.1:3307/geo',
 )
 
-const target = postgres(
-  process.env.NUXT_DATABASE_URL ?? 'postgres://vestigian:vestigian@127.0.0.1:5432/vestigian',
-)
+const target = postgres(requireDatabaseUrl())
 
 interface GeoRow {
   id: number

@@ -911,15 +911,16 @@ Since then the local-only scanning story has widened considerably, all of it
 offline and none of it spending hosted CI minutes (a deliberate constraint —
 see §2.4):
 
-| Layer              | Tool                         | Blocking?                                             |
-| ------------------ | ---------------------------- | ----------------------------------------------------- |
-| Lint-level SAST    | `eslint-plugin-security`     | yes, in `pnpm lint`                                   |
-| SAST               | **opengrep** (pinned binary) | yes, in `pnpm check`                                  |
-| Secrets            | gitleaks                     | yes — staged at pre-commit, full tree in `pnpm check` |
-| Dockerfile         | hadolint                     | yes, in `pnpm check`                                  |
-| Dependencies (SCA) | osv-scanner                  | no — `pnpm scan:deps`                                 |
-| Container image    | Trivy                        | no — `pnpm scan:image`                                |
-| DAST               | OWASP ZAP baseline           | no — `pnpm scan:dast`                                 |
+| Layer              | Tool                                    | Blocking?                                             |
+| ------------------ | --------------------------------------- | ----------------------------------------------------- |
+| Lint-level SAST    | `eslint-plugin-security`                | yes, in `pnpm lint`                                   |
+| SAST               | **opengrep** (pinned binary)            | yes, in `pnpm check`                                  |
+| Secrets            | gitleaks                                | yes — staged at pre-commit, full tree in `pnpm check` |
+| Dockerfile         | hadolint                                | yes, in `pnpm check`                                  |
+| Dependencies (SCA) | osv-scanner                             | no — `pnpm scan:deps`                                 |
+| Container image    | Trivy                                   | no — `pnpm scan:image`                                |
+| DAST               | OWASP ZAP baseline                      | no — `pnpm scan:dast`                                 |
+| Quality + SAST     | SonarQube Community, local server + CLI | no — `pnpm scan:sonar`                                |
 
 opengrep rather than Semgrep because it is a full open-source fork made before
 parts of the rule registry moved behind a login. Its vendored ruleset is an

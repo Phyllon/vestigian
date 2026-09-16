@@ -46,9 +46,7 @@ export const buildRouteLayer = (): LineLayerSpecification => ({
   },
 })
 
-export interface RoutePopupTranslate {
-  (key: `routePopup.${RouteType}`): string
-}
+export type RoutePopupTranslate = (key: `routePopup.${RouteType}`) => string
 
 export const buildRoutePopupHtml = (
   properties: RouteFeatureProperties,

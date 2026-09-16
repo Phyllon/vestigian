@@ -151,6 +151,19 @@ Worth remembering as a shape: a broken _publish_ step fails loudly in Actions bu
 looks like nothing at all from the outside, because the running site keeps
 serving the last image that did build.
 
+**Toolchain pinning — Volta for people, `package.json` for CI.** `volta.node`
+and `volta.pnpm` in `package.json` pin the exact versions a developer's shell
+switches to on `cd`. Both workflows read the same field through
+`actions/setup-node`'s `node-version-file: package.json`, which looks for
+`volta.node` before `engines.node` (checked against setup-node's
+`docs/advanced-usage.md`), so a bump is one edit, not three. `volta.pnpm` must
+stay equal to `packageManager`: corepack in the image and `pnpm/action-setup`
+in CI read the latter, Volta reads the former, and they disagreeing is two
+lockfile writers. Volta manages pnpm only with `VOLTA_FEATURE_PNPM=1`; without
+it the shell falls through to whatever global pnpm exists. **The Dockerfile is
+not covered** — `node:26-alpine` floats within the major; pinning the tag too
+would make every Node patch a Dockerfile edit, which was not taken on here.
+
 **One VPS is one failure domain.** Test the restore, not just the dump —
 `docker/restore-drill.sh` is how, and it is not a drill until somebody runs it.
 

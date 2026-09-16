@@ -207,7 +207,7 @@
 
 <template>
   <div>
-    <div class="flex flex-wrap gap-2" role="group" :aria-label="t('columns.marcusAurelius.volume')">
+    <fieldset class="flex min-w-0 flex-wrap gap-2" :aria-label="t('columns.marcusAurelius.volume')">
       <button
         v-for="volume in VOLUMES"
         :key="volume"
@@ -223,7 +223,7 @@
       >
         {{ t(`columns.marcusAurelius.${volume}`) }}
       </button>
-    </div>
+    </fieldset>
 
     <p v-if="isLoading" class="datum mt-4">{{ t('columns.marcusAurelius.loading') }}</p>
     <p v-else-if="loadFailed" class="datum mt-4 text-oxide-600 dark:text-oxide-300">

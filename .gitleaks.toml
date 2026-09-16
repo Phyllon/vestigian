@@ -13,4 +13,15 @@ paths = [
   # default (postgres://vestigian:vestigian@127.0.0.1/...) for the dev
   # docker-compose stack, never a real credential.
   '''\.env\.example''',
+  # Two default-rule `curl-auth-user` hits, neither a real credential:
+  # `-u admin:admin` is SonarQube Community Edition's own well-known,
+  # publicly-documented bootstrap password, used exactly once to authenticate
+  # the request that immediately rotates it away to a freshly generated one
+  # (`openssl rand -base64 24`, written to `.tools/sonarqube/`, gitignored,
+  # mode 600 — never to this file). `-u "${TOKEN}:"` a few lines later is a
+  # shell variable expansion, not a literal — the rule can't tell "the value
+  # after -u is a runtime variable" from "the value after -u is a secret",
+  # which is the same class of limitation `.env.example` above is allowlisted
+  # for.
+  '''scripts/security/scan-sonar\.sh''',
 ]

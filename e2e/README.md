@@ -100,10 +100,11 @@ Every one of these was a real failure before it was a rule.
   gated on `:disabled="!isComplete"` never becomes enabled and the click that
   follows can only time out. This made two different `auth.spec.ts` tests fail
   intermittently, moving between runs depending on which test happened to hit
-  a slow hydration. `e2e/helpers/hydration.ts`'s `gotoAndHydrate` waits for
-  `networkidle` instead of `load` — a real signal here, not a guessed
-  duration, since neither `/login` nor `/register` opens a persistent
-  connection (no websocket, no polling, no `EventSource`).
+  a slow hydration. `e2e/helpers/hydration.ts`'s `gotoAndHydrate` waits until
+  Nuxt itself reports hydration finished (`nuxtApp.isHydrating === false`).
+  It used to wait for `networkidle`, which held only because neither `/login`
+  nor `/register` opens a persistent connection, and would time out the day
+  one of them did.
 
 ## Accessibility
 

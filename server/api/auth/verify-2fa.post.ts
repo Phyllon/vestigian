@@ -69,7 +69,7 @@ export default defineEventHandler(async (event) => {
   // Reachable if 2FA was turned off in the few minutes since this challenge
   // was issued — treat it the same as an expired challenge rather than a
   // crash, since the reader still needs to just sign in again.
-  if (!account || !account.totpSecretEncrypted) {
+  if (!account?.totpSecretEncrypted) {
     await redis.del(key)
     throw createError({
       statusCode: 401,

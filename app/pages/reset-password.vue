@@ -67,12 +67,12 @@
       </header>
 
       <UFormField :label="t('resetPasswordPage.newPassword')" name="password" required>
-        <AuthPasswordField v-model="state.password" autocomplete="new-password" />
+        <AuthPasswordField v-model="state.password" purpose="new" />
         <AuthPasswordRequirements :password="state.password ?? ''" />
       </UFormField>
 
       <UFormField :label="t('resetPasswordPage.repeatIt')" name="passwordConfirmation" required>
-        <AuthPasswordField v-model="state.passwordConfirmation" autocomplete="new-password" />
+        <AuthPasswordField v-model="state.passwordConfirmation" purpose="new" />
       </UFormField>
 
       <UButton type="submit" :loading="isSubmitting" :disabled="!isComplete" color="primary" block>

@@ -11,12 +11,12 @@ import { revisions, siteImages, sites, tracings, users } from '~~/server/databas
  * verification mail is currently silent unless somebody has Grafana open. An
  * atlas whose signups quietly stop working is exactly the failure this is for.
  */
-const SURFACED_METRICS = [
+const SURFACED_METRICS = new Set([
   'mail_deliveries_total',
   'auth_events_total',
   'rate_limit_decisions_total',
   'moderation_actions_total',
-]
+])
 
 /**
  * What is wrong right now, in one response.
@@ -110,7 +110,7 @@ export default defineEventHandler(async (event) => {
   const metrics = await useMetrics().getMetricsAsJSON()
 
   const counters = metrics
-    .filter((metric) => SURFACED_METRICS.includes(metric.name))
+    .filter((metric) => SURFACED_METRICS.has(metric.name))
     .map((metric) => ({
       name: metric.name,
       help: metric.help,

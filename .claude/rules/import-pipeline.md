@@ -76,11 +76,11 @@ pnpm import:basemap satellite   # → Sentinel-2 cloudless; ~1.9M tiles, ~19 GB,
 pnpm import:atlas               # → the Barrington sheet: AWMC + Pleiades into PostGIS
 pnpm import:limes               # → the frontier, derived from the atlas; ~1 minute
 pnpm import:country-boundaries  # → 239 countries, Natural Earth, public domain
-pnpm exec tsx scripts/backfill-country-codes.ts --repair   # needs country-boundaries first
+pnpm exec tsx --env-file-if-exists=.env scripts/backfill-country-codes.ts --repair   # needs country-boundaries first
 pnpm import:edh-findspots       # → 29,861 inscription findspots, CC BY-SA 4.0
 pnpm import:edh-inscriptions    # → 79,201 inscriptions (of 79,206), CC BY-SA 4.0, ~2 min
 pnpm import:edh-inscription-images # → 24,779 photo records, metadata only, ~20s (no image bytes — every one is rights-reserved)
-pnpm exec tsx scripts/verify-concordances.ts --repair       # overnight-scale, see its own docstring
+pnpm exec tsx --env-file-if-exists=.env scripts/verify-concordances.ts --repair       # overnight-scale, see its own docstring
 pnpm import:cities              # → 235,666 modern cities and towns, CC BY 4.0
 pnpm import:tabula-peutingeriana # → 2,574 places, 2,397 roads; licence unconfirmed, off by default
 pnpm import:column-reliefs      # → Trajan's Column plates from Wikimedia Commons, public domain

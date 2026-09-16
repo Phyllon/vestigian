@@ -15,6 +15,7 @@ import { createReadStream } from 'node:fs'
 import { mkdir, readFile, readdir, rm, stat } from 'node:fs/promises'
 import { extname, join, relative } from 'node:path'
 import { promisify } from 'node:util'
+import { requireDatabaseUrl } from '../server/database/database-url'
 
 const run = promisify(execFile)
 
@@ -22,8 +23,7 @@ const BUNDLE_DIR = new URL('../.import/bundle/', import.meta.url).pathname
 const RESTORE_STAGING_DIR = `${BUNDLE_DIR}restore/`
 const COMPOSE_FILE = new URL('../docker/compose.dev.yml', import.meta.url).pathname
 
-const DATABASE_URL =
-  process.env.NUXT_DATABASE_URL ?? 'postgres://vestigian:vestigian@127.0.0.1:5432/vestigian'
+const DATABASE_URL = requireDatabaseUrl()
 
 const storage = new S3Client({
   region: process.env.NUXT_STORAGE_REGION ?? 'us-east-1',

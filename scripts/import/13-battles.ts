@@ -62,11 +62,9 @@ import { Readable } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
 import { Redis } from 'ioredis'
 import postgres from 'postgres'
+import { requireDatabaseUrl } from '../../server/database/database-url'
 
-const sql = postgres(
-  process.env.NUXT_DATABASE_URL ?? 'postgres://vestigian:vestigian@127.0.0.1:5432/vestigian',
-  { max: 1 },
-)
+const sql = postgres(requireDatabaseUrl(), { max: 1 })
 
 const CACHE_DIR = join(process.cwd(), '.import', 'battles')
 const SPARQL_ENDPOINT = 'https://query.wikidata.org/sparql'

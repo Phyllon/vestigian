@@ -1,5 +1,6 @@
 import { hash } from '@node-rs/argon2'
 import postgres from 'postgres'
+import { requireDatabaseUrl } from '../../server/database/database-url'
 
 /**
  * The accounts every e2e test signs in as.
@@ -102,11 +103,7 @@ export const ACCOUNTS = {
 
 export type AccountName = keyof typeof ACCOUNTS
 
-const connect = () =>
-  postgres(
-    process.env.NUXT_DATABASE_URL ?? 'postgres://vestigian:vestigian@127.0.0.1:5432/vestigian',
-    { max: 1 },
-  )
+const connect = () => postgres(requireDatabaseUrl(), { max: 1 })
 
 /**
  * Idempotent: deletes any leftovers first, so a suite interrupted halfway

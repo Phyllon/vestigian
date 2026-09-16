@@ -29,7 +29,7 @@ import type { NotebookPlace } from './notebook'
  * sequence is invalid, and it costs nothing.
  */
 const escapeXml = (value: string): string =>
-  value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
 
 /** Coordinates at six decimals — about 11 cm, well past what a handheld resolves. */
 const formatCoordinate = (value: number): string => value.toFixed(6)

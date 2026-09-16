@@ -280,7 +280,7 @@ export default defineEventHandler(async (event) => {
         createdAt: row.createdAt.toISOString(),
       }
     }),
-    historyCursor: history.length === limit ? history[history.length - 1]!.id : null,
+    historyCursor: history.length === limit ? history.at(-1)!.id : null,
     auditTrail: auditTrail.map((row) => ({
       ...row,
       createdAt: row.createdAt.toISOString(),

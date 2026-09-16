@@ -29,7 +29,7 @@ export const useMetrics = (): Registry => {
 const define = <T>(build: (registers: Registry[]) => T): (() => T) => {
   let metric: T | undefined
   return () => {
-    if (!metric) metric = build([useMetrics()])
+    metric ??= build([useMetrics()])
     return metric
   }
 }

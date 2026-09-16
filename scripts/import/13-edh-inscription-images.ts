@@ -40,11 +40,9 @@ import { DOMParser, type Document, type Element } from '@xmldom/xmldom'
 import { Redis } from 'ioredis'
 import postgres from 'postgres'
 import * as tar from 'tar'
+import { requireDatabaseUrl } from '../../server/database/database-url'
 
-const sql = postgres(
-  process.env.NUXT_DATABASE_URL ?? 'postgres://vestigian:vestigian@127.0.0.1:5432/vestigian',
-  { max: 1 },
-)
+const sql = postgres(requireDatabaseUrl(), { max: 1 })
 
 /** Shared with `12-edh-inscriptions.ts` — same tarball, no reason to fetch it twice. */
 const CACHE_DIR = join(process.cwd(), '.import', 'edh-inscriptions')
@@ -110,7 +108,7 @@ const listXmlFiles = async (dir: string): Promise<string[]> => {
   const entries = await readdir(dir, { recursive: true, withFileTypes: true })
   return entries
     .filter((entry) => entry.isFile() && entry.name.endsWith('.xml'))
-    .map((entry) => join(entry.parentPath ?? entry.path, entry.name))
+    .map((entry) => join(entry.parentPath, entry.name))
 }
 
 const firstChildByTag = (node: Element | Document, tag: string): Element | null =>

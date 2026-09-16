@@ -30,9 +30,9 @@ export const buildPortLayer = (): SymbolLayerSpecification => ({
   },
 })
 
-export interface PortPopupTranslate {
-  (key: 'portPopup.viewOnPleiades' | 'portPopup.viewOnWikipedia'): string
-}
+export type PortPopupTranslate = (
+  key: 'portPopup.viewOnPleiades' | 'portPopup.viewOnWikipedia',
+) => string
 
 export const buildPortPopupHtml = (
   properties: PortFeatureProperties,

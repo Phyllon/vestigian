@@ -36,11 +36,9 @@ import { parse } from 'csv-parse'
 import { isLocatedPrecisely, resolvePlaceCategory } from '../../shared/utils/pleiades'
 import { Redis } from 'ioredis'
 import postgres from 'postgres'
+import { requireDatabaseUrl } from '../../server/database/database-url'
 
-const sql = postgres(
-  process.env.NUXT_DATABASE_URL ?? 'postgres://vestigian:vestigian@127.0.0.1:5432/vestigian',
-  { max: 1 },
-)
+const sql = postgres(requireDatabaseUrl(), { max: 1 })
 
 const CACHE_DIR = join(process.cwd(), '.import', 'atlas')
 const AWMC_RAW = 'https://raw.githubusercontent.com/AWMC/geodata/master'
@@ -123,8 +121,11 @@ const readFeatures = async (path: string): Promise<GeoJsonFeature[]> => {
   return (parsed.features ?? []).filter((feature) => feature.geometry !== null)
 }
 
+/** A scalar as text. Anything structured is not a value this import can use. */
 const text = (value: unknown): string | null => {
-  if (value === null || value === undefined) return null
+  if (typeof value !== 'string' && typeof value !== 'number' && typeof value !== 'boolean') {
+    return null
+  }
   const trimmed = String(value).trim()
   return trimmed.length === 0 || trimmed === 'null' ? null : trimmed
 }
@@ -141,7 +142,7 @@ const year = (value: unknown): number | null => {
 const pleiadesId = (value: unknown): string | null => {
   const raw = text(value)
   if (!raw) return null
-  const id = raw.split('/').filter(Boolean).pop()
+  const id = raw.split('/').findLast(Boolean)
   return id && /^\d+$/.test(id) ? id : null
 }
 

@@ -174,12 +174,11 @@
       enter-from-class="opacity-0 translate-y-1"
       leave-to-class="opacity-0 translate-y-1"
     >
-      <div
+      <fieldset
         v-if="isOpen"
         id="period-switcher-panel"
-        role="group"
         :aria-label="t('periodSwitcher.menuLabel')"
-        class="leaf absolute right-0 top-full z-20 mt-2 w-72 p-4 shadow-lifted"
+        class="leaf absolute right-0 top-full z-20 mt-2 w-72 min-w-0 p-4 shadow-lifted"
       >
         <div class="mb-2 flex items-center justify-between gap-2">
           <span class="text-sm font-medium text-ink-900 dark:text-paper-100">
@@ -214,7 +213,7 @@
         <p class="mt-2 text-xs italic text-ink-400 dark:text-paper-500">
           {{ t('periodSwitcher.approximate') }}
         </p>
-      </div>
+      </fieldset>
     </Transition>
   </div>
 </template>

@@ -21,12 +21,11 @@
  */
 import { ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3'
 import postgres from 'postgres'
+import { requireDatabaseUrl } from '../server/database/database-url'
 
 const shouldRepair = process.argv.includes('--repair')
 
-const sql = postgres(
-  process.env.NUXT_DATABASE_URL ?? 'postgres://vestigian:vestigian@127.0.0.1:5432/vestigian',
-)
+const sql = postgres(requireDatabaseUrl())
 
 const storage = new S3Client({
   region: process.env.NUXT_STORAGE_REGION ?? 'us-east-1',

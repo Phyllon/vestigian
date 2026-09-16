@@ -37,14 +37,7 @@
 
       <NuxtLink to="/" class="flex items-baseline gap-2">
         <!-- The wordmark is the only place Fraunces runs at full optical size. -->
-        <span
-          class="font-display text-xl leading-none text-ink-900 dark:text-paper-100"
-          style="
-            font-variation-settings:
-              'opsz' 144,
-              'WONK' 1;
-          "
-        >
+        <span class="font-display text-xl leading-none text-ink-900 dark:text-paper-100">
           Vestigian
         </span>
         <span class="eyebrow hidden sm:inline">{{ t('layout.tagline') }}</span>

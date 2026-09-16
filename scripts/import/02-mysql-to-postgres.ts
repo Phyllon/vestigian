@@ -37,6 +37,7 @@ import {
   type RecordImportRunInput,
 } from './guard'
 import { isPublishableLicence, resolveLicence } from './vici-licences'
+import { requireDatabaseUrl } from '../../server/database/database-url'
 
 const BATCH_SIZE = 500
 
@@ -44,9 +45,7 @@ const source = await mysql.createConnection(
   process.env.MYSQL_URL ?? 'mysql://root:root@127.0.0.1:3307/vici',
 )
 
-const target = postgres(
-  process.env.NUXT_DATABASE_URL ?? 'postgres://vestigian:vestigian@127.0.0.1:5432/vestigian',
-)
+const target = postgres(requireDatabaseUrl())
 
 interface ViciPoint {
   pointId: number
@@ -678,7 +677,9 @@ const main = async (): Promise<void> => {
   )
 
   if (unmatchedKinds.size > 0) {
-    console.warn(`· kinds imported as 'other': ${[...unmatchedKinds].sort().join(', ')}`)
+    console.warn(
+      `· kinds imported as 'other': ${[...unmatchedKinds].sort((a, b) => a.localeCompare(b)).join(', ')}`,
+    )
   }
 
   // Visible rather than silent: a host appearing here in quantity is a

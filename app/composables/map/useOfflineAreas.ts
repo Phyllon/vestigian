@@ -1,9 +1,4 @@
-import {
-  MAX_ENUMERATED_TILES,
-  TileCountExceededError,
-  enumerateTiles,
-  sampleTiles,
-} from '#shared/utils/tiles'
+import { enumerateTiles, sampleTiles } from '#shared/utils/tiles'
 import { cacheNameForArea } from '#shared/utils/offline-cache'
 import type { BoundingBox, TileCoordinate } from '#shared/types'
 
@@ -269,5 +264,3 @@ export const useOfflineAreas = () => {
     remove,
   }
 }
-
-export { MAX_ENUMERATED_TILES, TileCountExceededError }

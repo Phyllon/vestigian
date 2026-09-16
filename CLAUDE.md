@@ -281,7 +281,9 @@ knowing because both failed _invisibly_:
 Scripts do not read `.env` on their own — every `tsx` entry in `package.json`
 now passes `--env-file-if-exists=.env`. Before that, `NUXT_DATABASE_URL` was
 `undefined` in all of them and they worked only because their fallbacks happened
-to match the compose defaults.
+to match the compose defaults. Those fallbacks are gone: a missing URL now
+stops the script (`requireDatabaseUrl`, `server/database/database-url.ts`), so
+a script run by hand needs `tsx --env-file-if-exists=.env` too.
 
 ## Not built
 
@@ -323,7 +325,7 @@ this project.
 - **Open source** look for established open source projects to solve some problem first instead of
   writing the logic yourself directly. Then ask for decision
 - **EU/GDPR compliance** all packages or code dealing with user data or which are user-related must be GDPR compliant
-- **e2e-tests** add e2e-tests when new critical features were added. do not run them on your own for checks.
+- **e2e-tests** add e2e-tests when new features were added. do not run them on your own for checks.
 - **i18n** always use i18n for defined languages (de, en, fr, es, it, nl)
 - **Deep nesting** never use nested terneries
 - **Verify third-party sources before integrating them** — before mirroring or

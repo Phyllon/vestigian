@@ -52,9 +52,7 @@ export interface FeatureProperties {
   periods: string | null
 }
 
-export interface FeaturePopupTranslate {
-  (key: `minorFeaturePopup.kind.${MinorFeatureKind}`): string
-}
+export type FeaturePopupTranslate = (key: `minorFeaturePopup.kind.${MinorFeatureKind}`) => string
 
 /**
  * AWMC's `mines_quarries` layer records commodity/material as chemical or

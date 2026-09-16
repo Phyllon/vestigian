@@ -45,8 +45,8 @@ export const useAdminStepUp = () => {
   const runPrivileged = async <T>(action: () => Promise<T>): Promise<T | undefined> => {
     try {
       return await action()
-    } catch (caught) {
-      if (!isStepUpRequired(caught)) throw caught
+    } catch (error_) {
+      if (!isStepUpRequired(error_)) throw error_
 
       pending.value = action as () => Promise<unknown>
       error.value = null
@@ -66,9 +66,9 @@ export const useAdminStepUp = () => {
 
     try {
       await $fetch('/api/admin/step-up', { method: 'POST', body: credentials })
-    } catch (caught) {
+    } catch (error_) {
       error.value =
-        (caught as { data?: { message?: string } }).data?.message ?? 'That did not work.'
+        (error_ as { data?: { message?: string } }).data?.message ?? 'That did not work.'
       return false
     } finally {
       isConfirming.value = false

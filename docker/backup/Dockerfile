@@ -12,9 +12,7 @@ FROM postgres:17-alpine
 
 # openssh-client: restic's sftp backend shells out to `ssh` — without it the
 # repository opens locally and fails only when it tries to reach the host.
-# hadolint ignore=DL3018
-RUN apk add --no-cache restic openssh-client
-
+#
 # Runs as `postgres` (already present in the base image), not root. Nothing here
 # needs root: pg_dump connects over the network, restic reads the dump and
 # writes to a remote, and neither touches a privileged path.
@@ -23,7 +21,9 @@ RUN apk add --no-cache restic openssh-client
 # because Docker seeds a fresh named volume from the image's own directory —
 # ownership included. Without this, /backups would arrive root-owned and the
 # first dump would fail on a permission error that looks like a broken script.
-RUN mkdir -p /backups /var/lib/postgresql/.ssh \
+# hadolint ignore=DL3018
+RUN apk add --no-cache restic openssh-client \
+    && mkdir -p /backups /var/lib/postgresql/.ssh \
     && chown -R postgres:postgres /backups /var/lib/postgresql/.ssh \
     && chmod 700 /var/lib/postgresql/.ssh
 

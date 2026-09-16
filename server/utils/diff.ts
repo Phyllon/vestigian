@@ -14,7 +14,11 @@ const IGNORED_FIELDS = new Set(['kind', 'entityId'])
 const asDisplayValue = (value: unknown): string | null => {
   if (value === null || value === undefined || value === '') return null
   if (typeof value === 'object') return JSON.stringify(value)
-  return String(value)
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return String(value)
+  }
+  // A jsonb payload cannot hold a function, symbol or bigint; nothing to show.
+  return null
 }
 
 const changeKind = (previous: string | null, next: string | null): ChangeKind => {

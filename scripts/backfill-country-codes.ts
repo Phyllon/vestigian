@@ -37,16 +37,15 @@
  * says, the same category as `strip-description-html.ts` and
  * `reconcile-images.ts`.
  *
- *   pnpm exec tsx scripts/backfill-country-codes.ts           report only
- *   pnpm exec tsx scripts/backfill-country-codes.ts --repair  also write it
+ *   pnpm exec tsx --env-file-if-exists=.env scripts/backfill-country-codes.ts           report only
+ *   pnpm exec tsx --env-file-if-exists=.env scripts/backfill-country-codes.ts --repair  also write it
  */
 import postgres from 'postgres'
+import { requireDatabaseUrl } from '../server/database/database-url'
 
 const shouldRepair = process.argv.includes('--repair')
 
-const sql = postgres(
-  process.env.NUXT_DATABASE_URL ?? 'postgres://vestigian:vestigian@127.0.0.1:5432/vestigian',
-)
+const sql = postgres(requireDatabaseUrl())
 
 interface CandidateRow {
   id: number

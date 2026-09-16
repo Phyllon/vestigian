@@ -69,11 +69,9 @@ import type {
   AtticReference,
   AtticTranslationSegment,
 } from '../../server/database/schema'
+import { requireDatabaseUrl } from '../../server/database/database-url'
 
-const sql = postgres(
-  process.env.NUXT_DATABASE_URL ?? 'postgres://vestigian:vestigian@127.0.0.1:5432/vestigian',
-  { max: 1 },
-)
+const sql = postgres(requireDatabaseUrl(), { max: 1 })
 
 const CACHE_DIR = join(process.cwd(), '.import', 'attic-inscriptions')
 const SITE_ORIGIN = 'https://www.atticinscriptions.com'
@@ -146,7 +144,7 @@ const fetchAllInscriptionRefs = async (): Promise<InscriptionRef[]> => {
  *  same way. */
 export const pleiadesIdFromUri = (uri: string | null | undefined): string | null => {
   if (!uri) return null
-  const id = uri.split('/').filter(Boolean).pop()
+  const id = uri.split('/').findLast(Boolean)
   return id && /^\d+$/.test(id) ? id : null
 }
 
@@ -453,7 +451,7 @@ export const parseAtticHtml = (
 const parseAtticInscription = async (
   ref: InscriptionRef,
 ): Promise<ParsedAtticInscription | null> => {
-  const safeName = ref.path.replace(/\//g, '_')
+  const safeName = ref.path.replaceAll('/', '_')
   const htmlPath = join(CACHE_DIR, `${safeName}.html`)
   const html = await fetchCached(htmlPath, `${SITE_ORIGIN}/inscription/${ref.path}`)
   const $ = cheerio.load(html)

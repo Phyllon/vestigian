@@ -19,11 +19,7 @@
       <div class="mx-auto flex max-w-3xl items-center gap-3 px-5 py-3">
         <UiAppMenu />
 
-        <NuxtLink
-          to="/"
-          class="font-display text-lg text-ink-900 dark:text-paper-100"
-          style="font-variation-settings: 'opsz' 96"
-        >
+        <NuxtLink to="/" class="font-display text-lg text-ink-900 dark:text-paper-100">
           Vestigian
         </NuxtLink>
         <nav class="ml-auto flex items-center gap-1" aria-label="Main">

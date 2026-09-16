@@ -38,9 +38,9 @@
  * Resumable: a site already carrying a verification row for a given source
  * is skipped, so an interrupted run costs nothing to restart.
  *
- *   pnpm exec tsx scripts/verify-concordances.ts                  report only
- *   pnpm exec tsx scripts/verify-concordances.ts --repair          also write
- *   LIMIT=200 pnpm exec tsx scripts/verify-concordances.ts --repair   a slice
+ *   pnpm exec tsx --env-file-if-exists=.env scripts/verify-concordances.ts                  report only
+ *   pnpm exec tsx --env-file-if-exists=.env scripts/verify-concordances.ts --repair          also write
+ *   LIMIT=200 pnpm exec tsx --env-file-if-exists=.env scripts/verify-concordances.ts --repair   a slice
  */
 import postgres from 'postgres'
 import type { LonLat, SiteCategory } from '../shared/types'
@@ -49,6 +49,7 @@ import {
   searchGazetteerByName,
   searchHistoricEnglandNearby,
 } from '../server/utils/concordance-sources'
+import { requireDatabaseUrl } from '../server/database/database-url'
 
 const shouldRepair = process.argv.includes('--repair')
 const LIMIT = process.env.LIMIT ? Number(process.env.LIMIT) : undefined
@@ -56,9 +57,7 @@ const REQUEST_DELAY_MS = 400
 /** Generous — the point is finding a candidate to hand to the real distance/category gate, not pre-filtering. */
 const HISTORIC_ENGLAND_SEARCH_RADIUS_METRES = 500
 
-const sql = postgres(
-  process.env.NUXT_DATABASE_URL ?? 'postgres://vestigian:vestigian@127.0.0.1:5432/vestigian',
-)
+const sql = postgres(requireDatabaseUrl())
 
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms))
 

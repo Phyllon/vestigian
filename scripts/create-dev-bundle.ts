@@ -37,6 +37,7 @@ import { mkdir, rm, stat } from 'node:fs/promises'
 import { dirname } from 'node:path'
 import { pipeline } from 'node:stream/promises'
 import { promisify } from 'node:util'
+import { requireDatabaseUrl } from '../server/database/database-url'
 
 const run = promisify(execFile)
 
@@ -44,8 +45,7 @@ const BUNDLE_DIR = new URL('../.import/bundle/', import.meta.url).pathname
 const IMAGES_STAGING_DIR = `${BUNDLE_DIR}images/`
 const COMPOSE_FILE = new URL('../docker/compose.dev.yml', import.meta.url).pathname
 
-const DATABASE_URL =
-  process.env.NUXT_DATABASE_URL ?? 'postgres://vestigian:vestigian@127.0.0.1:5432/vestigian'
+const DATABASE_URL = requireDatabaseUrl()
 
 const storage = new S3Client({
   region: process.env.NUXT_STORAGE_REGION ?? 'us-east-1',

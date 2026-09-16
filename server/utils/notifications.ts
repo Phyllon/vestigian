@@ -80,9 +80,10 @@ export const notifyReviewDecision = async (notification: ReviewNotification): Pr
       .where(eq(revisions.id, notification.revisionId))
       .limit(1)
 
+    if (!revision) return
     // A revert carries the moderator as its author, not the contributor, and
     // telling someone their own housekeeping was approved is noise.
-    if (!revision || revision.authorId === null || revision.revertsRevisionId !== null) return
+    if (revision.authorId === null || revision.revertsRevisionId !== null) return
 
     const [author] = await database
       .select({
@@ -94,7 +95,7 @@ export const notifyReviewDecision = async (notification: ReviewNotification): Pr
       .where(eq(users.id, revision.authorId))
       .limit(1)
 
-    if (!author || !author.notifyByEmail) return
+    if (!author?.notifyByEmail) return
 
     const payload = revision.payload as { title?: string; kind?: string }
 
@@ -147,7 +148,7 @@ export const notifyTrustChange = async (notification: TrustNotification): Promis
       .where(eq(users.id, notification.userId))
       .limit(1)
 
-    if (!account || !account.notifyByEmail) return
+    if (!account?.notifyByEmail) return
 
     await sendAccountMail(notification.revoked ? 'trust-suspended' : 'trust-restored', {
       to: account.email,

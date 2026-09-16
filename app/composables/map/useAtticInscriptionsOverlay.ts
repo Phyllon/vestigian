@@ -84,7 +84,7 @@ export const useAtticInscriptionsOverlay = () => {
       ?.querySelector('a')
       ?.addEventListener('click', (clickEvent) => {
         clickEvent.preventDefault()
-        void navigateTo(`/inscriptions/attic/${properties.aio_key}`)
+        navigateTo(`/inscriptions/attic/${properties.aio_key}`)
       })
   }
 

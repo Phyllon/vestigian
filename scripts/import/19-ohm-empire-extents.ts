@@ -49,11 +49,9 @@ import { join } from 'node:path'
 import osmtogeojson from 'osmtogeojson'
 import postgres from 'postgres'
 import Redis from 'ioredis'
+import { requireDatabaseUrl } from '../../server/database/database-url'
 
-const sql = postgres(
-  process.env.NUXT_DATABASE_URL ?? 'postgres://vestigian:vestigian@127.0.0.1:5432/vestigian',
-  { max: 1 },
-)
+const sql = postgres(requireDatabaseUrl(), { max: 1 })
 
 const CACHE_DIR = join(process.cwd(), '.import', 'ohm')
 const OVERPASS_URL = 'https://overpass-api.openhistoricalmap.org/api/interpreter'

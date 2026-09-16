@@ -7,6 +7,10 @@
   "engines": {
     "node": ">=22"
   },
+  "volta": {
+    "node": "26.8.2",
+    "pnpm": "9.12.0"
+  },
   "scripts": {
     "setup": "sh scripts/setup.sh",
     "dev": "nuxt dev --host",
@@ -24,6 +28,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:e2e:failed": "playwright test --last-failed",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:report": "playwright show-report",
     "db:generate": "drizzle-kit generate",
@@ -74,6 +79,7 @@
     "scan:image": "bash scripts/security/scan-image.sh",
     "scan:deps": "bash scripts/security/scan-deps.sh",
     "scan:dast": "bash scripts/security/scan-dast.sh",
+    "scan:sonar": "bash scripts/security/scan-sonar.sh",
     "changeset": "changeset",
     "changeset:status": "changeset status --since=origin/main",
     "changeset:version": "changeset version",

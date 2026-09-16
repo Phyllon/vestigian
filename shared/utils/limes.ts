@@ -77,7 +77,7 @@ export const LIMES_PLEIADES_TYPES = new Set([
  * optional trailing group rather than by stripping, because this runs in SQL.
  */
 export const buildMilitaryFeatureTypePattern = (): string =>
-  `(^|,)\\s*(${[...LIMES_PLEIADES_TYPES].join('|')})(-[0-9]+)?\\s*(,|$)`
+  String.raw`(^|,)\s*(${[...LIMES_PLEIADES_TYPES].join('|')})(-[0-9]+)?\s*(,|$)`
 
 /**
  * The marks, in the order a frontier is read down: smallest post to largest.
@@ -135,7 +135,10 @@ const stripOrdinal = (term: string): string => term.replace(/-\d+$/, '')
  */
 export const buildPleiadesMarkSql = (column: string): string => {
   const branches = Object.entries(PLEIADES_MARKS)
-    .map(([term, mark]) => `WHEN ${column} ~ '(^|,)\\s*${term}(-[0-9]+)?\\s*(,|$)' THEN '${mark}'`)
+    .map(
+      ([term, mark]) =>
+        String.raw`WHEN ${column} ~ '(^|,)\s*${term}(-[0-9]+)?\s*(,|$)' THEN '${mark}'`,
+    )
     .join(' ')
   return `CASE ${branches} ELSE NULL END`
 }

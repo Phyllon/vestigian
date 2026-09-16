@@ -244,7 +244,7 @@ const main = async () => {
       applyDecisions(added, { removing: false })
       pruneExpired(Date.now())
 
-      const ips = [...bannedUntil.keys()].sort()
+      const ips = [...bannedUntil.keys()].sort((a, b) => a.localeCompare(b))
       const key = ips.join(',')
 
       if (key !== lastPushedKey) {

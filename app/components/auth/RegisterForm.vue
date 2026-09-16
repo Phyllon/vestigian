@@ -144,7 +144,7 @@
     </UFormField>
 
     <UFormField :label="t('auth.register.password')" name="password" required>
-      <AuthPasswordField v-model="state.password" autocomplete="new-password" />
+      <AuthPasswordField v-model="state.password" purpose="new" />
       <AuthPasswordRequirements :password="state.password ?? ''" />
     </UFormField>
 
@@ -153,7 +153,7 @@
       name="passwordConfirmation"
       required
     >
-      <AuthPasswordField v-model="state.passwordConfirmation" autocomplete="new-password" />
+      <AuthPasswordField v-model="state.passwordConfirmation" purpose="new" />
     </UFormField>
 
     <!-- Kept out of the accessibility tree and off screen rather than display:none,

@@ -20,13 +20,24 @@ import type { Page } from '@playwright/test'
  * submit button gated on `:disabled="!isComplete"` never becomes enabled and
  * the click that follows can only time out.
  *
- * `networkidle` is the fix precisely because it is a real, observable signal
- * rather than a guessed duration: the login and register pages open no
- * persistent connection (no websocket, no polling, no `EventSource`; the map
- * is the only part of this app that keeps traffic flowing, and it is not on
- * either page), so "no network activity for 500ms" reliably means the locale
- * fetch — and anything else hydration was waiting on — has resolved.
+ * The wait is on Nuxt's own signal rather than a proxy for it:
+ * `nuxtApp.isHydrating` turns `false` when the last deferred hydration resolves
+ * (`deferHydration`, `nuxt/dist/app/nuxt.js`), which is after every plugin —
+ * the locale fetch included — has run. The app is reached through the element
+ * Vue marks `data-v-app` on mount, whose `__vue_app__.$nuxt` Nuxt defines
+ * unconditionally; both were checked in the installed production builds (Vue
+ * 3.5, Nuxt 4.5), not only in development.
+ *
+ * This replaced `waitUntil: 'networkidle'`, which was right only because
+ * neither auth page opens a persistent connection. The day one did — a
+ * websocket, polling, an `EventSource` — that wait would time out, and it
+ * never said which request it was waiting on.
  */
 export const gotoAndHydrate = async (page: Page, path: string): Promise<void> => {
-  await page.goto(path, { waitUntil: 'networkidle' })
+  await page.goto(path)
+  await page.waitForFunction(() => {
+    const container = document.querySelector('[data-v-app]') as
+      (Element & { __vue_app__?: { $nuxt?: { isHydrating?: boolean } } }) | null
+    return container?.__vue_app__?.$nuxt?.isHydrating === false
+  })
 }

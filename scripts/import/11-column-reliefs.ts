@@ -51,6 +51,7 @@ import postgres from 'postgres'
 import sharp from 'sharp'
 import { stripHtml } from '../../server/utils/sanitize'
 import { detectImageFormat, type AcceptedImageFormat } from '../../server/utils/uploads'
+import { requireDatabaseUrl } from '../../server/database/database-url'
 
 /**
  * `server/utils/images.ts`'s `normaliseLicence`/`LICENCE_ALIASES` are not
@@ -94,10 +95,7 @@ const CONTENT_TYPE_FOR_FORMAT: Record<AcceptedImageFormat, string> = {
   webp: 'image/webp',
 }
 
-const sql = postgres(
-  process.env.NUXT_DATABASE_URL ?? 'postgres://vestigian:vestigian@127.0.0.1:5432/vestigian',
-  { max: 1 },
-)
+const sql = postgres(requireDatabaseUrl(), { max: 1 })
 
 const storage = new S3Client({
   region: process.env.NUXT_STORAGE_REGION ?? 'us-east-1',

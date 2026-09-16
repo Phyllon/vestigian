@@ -14,6 +14,7 @@ import { execFile, spawn } from 'node:child_process'
 import { createWriteStream } from 'node:fs'
 import { mkdir, readdir, rm, stat } from 'node:fs/promises'
 import { promisify } from 'node:util'
+import { requireDatabaseUrl } from '../server/database/database-url'
 
 const run = promisify(execFile)
 
@@ -21,8 +22,7 @@ const SNAPSHOT_DIR = new URL('../.import/snapshots/', import.meta.url).pathname
 const COMPOSE_FILE = new URL('../docker/compose.dev.yml', import.meta.url).pathname
 const KEEP_SNAPSHOTS = Number(process.env.KEEP_SNAPSHOTS ?? 14)
 
-const DATABASE_URL =
-  process.env.NUXT_DATABASE_URL ?? 'postgres://vestigian:vestigian@127.0.0.1:5432/vestigian'
+const DATABASE_URL = requireDatabaseUrl()
 
 interface DatabaseTarget {
   user: string
@@ -110,8 +110,8 @@ const writeSnapshot = async (destination: string): Promise<void> => {
 const pruneOldSnapshots = async (): Promise<number> => {
   const entries = (await readdir(SNAPSHOT_DIR))
     .filter((name) => name.endsWith('.dump'))
-    .sort()
-    .reverse()
+    // Newest first: every name carries the same ISO timestamp shape.
+    .sort((a, b) => b.localeCompare(a))
 
   const stale = entries.slice(KEEP_SNAPSHOTS)
   for (const name of stale) await rm(`${SNAPSHOT_DIR}${name}`, { force: true })
