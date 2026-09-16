@@ -5,9 +5,13 @@ import { ADMIN_ACTIONS } from '#shared/utils/authorization'
 
 export const querySchema = z.object({
   action: z.enum(ADMIN_ACTIONS).optional(),
-  actorId: databaseIdentifier.optional(),
+  // Query parameters always arrive as strings — see the same fix in
+  // `admin/activity.get.ts`'s `authorId`, found by the same failing e2e test
+  // exercising `activity.get.ts`; `databaseIdentifier` has no coercion and
+  // would 400 on every real request here too.
+  actorId: routeIdentifier.optional(),
   subjectType: z.enum(['account', 'revision', 'image', 'system']).optional(),
-  subjectId: databaseIdentifier.optional(),
+  subjectId: routeIdentifier.optional(),
   limit: z.coerce.number().int().min(1).max(100).default(50),
   cursor: routeIdentifier.optional(),
 })

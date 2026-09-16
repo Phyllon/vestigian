@@ -127,17 +127,22 @@ test.describe('route guards', () => {
     const admin = await openSessionAs(browser, 'admin', `${clientAddress}0`)
 
     try {
-      const listing = await fetchAsBrowser<{ contributors: { id: number; displayName: string }[] }>(
+      // `moderation/users.get.ts` was replaced by `admin/accounts.get.ts` —
+      // see that route's own docstring — so this looks the moderator up the
+      // same way `admin.spec.ts`'s `accountIdFor` does.
+      const listing = await fetchAsBrowser<{ accounts: { id: number; email: string }[] }>(
         admin.page,
-        '/api/moderation/users',
+        `/api/admin/accounts?search=${encodeURIComponent(ACCOUNTS.moderator.email)}`,
       )
       expect(listing.status).toBe(200)
 
-      const moderator = listing.body.contributors.find(
-        (row) => row.displayName === ACCOUNTS.moderator.displayName,
-      )
-      expect(moderator, 'the moderator was not in the contributor listing').toBeDefined()
+      const moderator = listing.body.accounts.find((row) => row.email === ACCOUNTS.moderator.email)
+      expect(moderator, 'the moderator was not in the account roll').toBeDefined()
 
+      await fetchAsBrowser(admin.page, '/api/admin/step-up', {
+        method: 'POST',
+        body: { currentPassword: E2E_PASSWORD },
+      })
       const demotion = await fetchAsBrowser(admin.page, '/api/moderation/role', {
         method: 'POST',
         body: { userId: moderator!.id, role: 'contributor' },
@@ -150,7 +155,12 @@ test.describe('route guards', () => {
       // next sign-in.
       expect((await fetchAsBrowser(page, '/api/moderation/queue')).status).toBe(403)
 
-      // Restore, so the order tests run in cannot matter.
+      // Restore, so the order tests run in cannot matter. A fresh step-up:
+      // the grant is spent by the demotion it already authorised above.
+      await fetchAsBrowser(admin.page, '/api/admin/step-up', {
+        method: 'POST',
+        body: { currentPassword: E2E_PASSWORD },
+      })
       await fetchAsBrowser(admin.page, '/api/moderation/role', {
         method: 'POST',
         body: { userId: moderator!.id, role: 'moderator' },

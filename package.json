@@ -175,13 +175,5 @@
     "workbox-core": "^7.4.1",
     "workbox-precaching": "^7.4.1",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
-  },
-  "pnpm": {
-    "overrides": {
-      "js-yaml@<4.3.2": "^4.3.2",
-      "svgo@<4.1.0": "^4.1.0",
-      "happy-dom@<20.8.9": "^20.8.9",
-      "minimist@<0.2.4": "^1.2.8"
-    }
   }
 }

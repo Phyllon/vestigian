@@ -398,6 +398,19 @@ Mechanismus setzen.
   zum Bouncer, nicht statt dessen: Shield deckt volumetrische L7-Floods breiter
   ab, der Bouncer setzt CrowdSecs eigene, aus den Anwendungslogs abgeleiteten
   Entscheidungen um.
+- **Bunny-Pull-Zone vor `SITE_HOST`: "Override Cache Control" muss aus
+  bleiben.** Die App sendet inzwischen für jede Route einen bewussten
+  `cache-control` (Standard `private, no-store`, mit begründeten Ausnahmen für
+  Kacheln, öffentliche Feeds usw. — `server/middleware/security-defaults.ts`,
+  `nuxt.config.ts`s `routeRules`). Ist die Override-Option in der Pull Zone
+  aktiviert, ignoriert Bunny das komplett und cached nach eigener TTL
+  unabhängig vom Origin-Header — das würde `/api/me`, die Moderationsqueue
+  oder einen DSGVO-Export (`auth/export.get.ts`) am Edge cachen und dem
+  nächsten Besucher derselben URL ausliefern. Ungetestet aus dieser Umgebung,
+  aus demselben Grund wie die Bunny-Enum-Werte oben — kein Bunny-Account
+  erreichbar. Die Bild-Pull-Zone ist davon ausdrücklich ausgenommen: die ist
+  über die imgproxy-URL, nicht über eine Session, adressiert und soll hart
+  gecacht werden.
 - **Lizenzanfrage Fundmünzen — zum Go-Live stellen.** AFE (RGK Frankfurt,
   afe@dainst.de) und das Portable Antiquities Scheme um eine ausdrückliche
   Lizenz für Einzelfundmünzen bitten. Bis dahin verlinkt die Site-Ansicht

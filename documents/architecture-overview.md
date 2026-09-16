@@ -149,7 +149,14 @@ argon2id password hashing, ALTCHA proof-of-work + a disposable-email-domain
 check on signup (also enforced on email change), per-IP rate limits enforced
 through Valkey (fail open, logged), a strict CSP, a session cookie that now
 actually expires, and the `/admin` governance layer above (step-up
-re-authentication, fail-closed, an append-only audit log).
+re-authentication, fail-closed, an append-only audit log). Every response now
+also carries a verified `Strict-Transport-Security` and
+`Cross-Origin-Resource-Policy` (`nuxt-security`'s own delivery of both was
+confirmed broken outside HTML responses) and defaults to
+`cache-control: private, no-store` unless a route has explicitly opted into
+public caching (`server/middleware/security-defaults.ts`) — none of which
+protects anything if Bunny's pull zone is configured to override cache
+control, which is a dashboard setting outside this repo's control.
 
 ## Deployment
 

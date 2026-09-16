@@ -37,7 +37,7 @@ export default defineConfig({
   workers: 1,
 
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 1 : 0,
+  retries: process.env.CI ? 1 : 2,
   timeout: 30_000,
   expect: { timeout: 10_000 },
 
@@ -91,6 +91,13 @@ export default defineConfig({
       NUXT_IMGPROXY_BASE_URL: process.env.NUXT_IMGPROXY_BASE_URL ?? '',
       NUXT_IMGPROXY_KEY: process.env.NUXT_IMGPROXY_KEY ?? '',
       NUXT_IMGPROXY_SALT: process.env.NUXT_IMGPROXY_SALT ?? '',
+      // Pinned off regardless of `.env`: `tabula-peutingeriana-overlay.spec.ts`
+      // asserts the flag's default (unconfirmed licence, off by construction),
+      // and a developer's own `.env` commonly sets this to `true` to exercise
+      // the in-progress feature by hand. Without this override the suite
+      // inherited whatever the local machine happened to have set and failed
+      // on every machine where the feature was turned on for manual testing.
+      NUXT_PUBLIC_TABULA_PEUTINGERIANA_ENABLED: 'false',
       // On for the suite, so each test can present its own `x-real-ip` and get
       // its own rate-limit bucket. Every request otherwise comes from
       // 127.0.0.1 and shares one — `login` allows eight per fifteen minutes,

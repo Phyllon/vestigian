@@ -178,9 +178,13 @@ test.describe('moderation', () => {
     await signIn(page, 'trusted')
     await page.goto('/')
 
-    for (const path of ['/api/moderation/queue', '/api/moderation/users']) {
-      expect((await fetchAsBrowser(page, path)).status, `${path} was not refused`).toBe(403)
-    }
+    // `moderation/users.get.ts` was replaced by `admin/accounts.get.ts`
+    // (admin-only, out of scope here) — see that route's own docstring.
+    // `queue.get.ts` is the only remaining GET under `/api/moderation/`.
+    expect(
+      (await fetchAsBrowser(page, '/api/moderation/queue')).status,
+      '/api/moderation/queue was not refused',
+    ).toBe(403)
 
     for (const path of [
       '/api/moderation/review',

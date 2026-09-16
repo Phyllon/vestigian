@@ -589,8 +589,47 @@ export default defineNuxtConfig({
          */
         'upgrade-insecure-requests': isProduction,
       },
+      /**
+       * `nuxt-security`'s own non-strict default is `credentialless` in
+       * production. Left at `unsafe-none` here because every map tile origin
+       * in `mapAssetOrigins` and the IIIF host above answers with no
+       * `Cross-Origin-Resource-Policy` header (checked with a real request to
+       * each — `tiles.openfreemap.org`, `tiles.mapterhorn.com`,
+       * `tiles.maps.eox.at` send only `Access-Control-Allow-Origin: *`, and
+       * `dh.gu.se` sends neither). A `fetch()`-mode vector or raster tile load
+       * would still clear `require-corp`/`credentialless` on the strength of
+       * that CORS header alone, but the Tabula Peutingeriana and column-relief
+       * viewers (`OpenSeadragon`) draw IIIF tiles through plain `<img>`
+       * elements with no `crossorigin` attribute, which fetch cross-origin
+       * images in `no-cors` mode — an opaque response that neither
+       * `require-corp` nor `credentialless` will admit without a `Cross-
+       * Origin-Resource-Policy` header the source doesn't send. `unsafe-none`
+       * is the whole reason none of that has needed a `crossorigin` attribute
+       * or a mirror of every IIIF asset to stay working.
+       */
       crossOriginEmbedderPolicy: 'unsafe-none',
-      strictTransportSecurity: isProduction ? { maxAge: 31536000, includeSubdomains: true } : false,
+      /**
+       * Set to `false` here deliberately, not left at the module's own
+       * default — this key **never reaches a real response** in this stack,
+       * confirmed by curling a running production build directly (no Traefik
+       * in front): every other header in `headers.applicableToAllResources`
+       * (`X-Frame-Options`, `Referrer-Policy`, `X-Content-Type-Options`, …)
+       * comes through correctly on every route, HTML or API, but
+       * `Strict-Transport-Security` is silently absent everywhere the *only*
+       * matching Nitro route rule is `nuxt-security`'s own injected `/**` —
+       * which is every route in this app, since nothing here declares a
+       * competing `/**` rule of its own. It reappears the moment a route also
+       * matches a second, more specific `routeRules` entry, which points at a
+       * merge-order defect in how `nuxt-security` (2.6.0) composes a
+       * wildcard-only match rather than anything specific to HSTS's value or
+       * this app's config. The actual header is now sent explicitly from
+       * `routeRules['/**']` below, using the exact mechanism (`headers` as a
+       * plain routeRule) that already reliably delivers `cache-control` and
+       * `x-robots-tag` everywhere else in this file — kept here as `false`
+       * so a future reader isn't told this config is doing something it
+       * measurably is not.
+       */
+      strictTransportSecurity: false,
       /**
        * `nuxt-security`'s own default is `fullscreen: []` — `fullscreen=()`,
        * disallowed even for this app's own origin — which broke the Tabula
@@ -710,7 +749,13 @@ export default defineNuxtConfig({
       // worker's own fetch handler, not precached — there is no fixed set of
       // tiles to list ahead of time, and precaching would download nothing
       // useful while inflating the app-shell manifest.
-      globPatterns: ['**/*.{js,css,html}', 'fonts/**/*.woff2'],
+      //
+      // The self-hosted @fontsource woff2 files are Vite-bundled assets, so
+      // they land hashed under `_nuxt/`, not under a `fonts/` directory —
+      // that only holds the MapLibre glyph SDF `.pbf` tiles. `fonts/**/*.woff2`
+      // matched nothing there and Workbox warned on every build; `**/*.woff2`
+      // reaches them wherever the build places them.
+      globPatterns: ['**/*.{js,css,html,woff2}'],
       globIgnores: ['**/node_modules/**/*'],
     },
     registerType: 'autoUpdate',
@@ -782,6 +827,24 @@ export default defineNuxtConfig({
 
   routeRules: {
     /**
+     * The one header that survives being placed on nuxt-security's own
+     * injected `/**` rule rather than being dropped by its rewrite of that
+     * key — see `strictTransportSecurity: false` above and
+     * `server/middleware/security-defaults.ts` for the two that don't and
+     * live there instead (`cache-control`'s new default floor,
+     * `cross-origin-resource-policy`). All three were verified against the
+     * same running production build.
+     */
+    '/**': {
+      headers: isProduction
+        ? { 'strict-transport-security': 'max-age=31536000; includeSubDomains' }
+        : {},
+    },
+    /**
+     * Every route below that overrides the middleware's `private, no-store`
+     * default (`server/middleware/security-defaults.ts`) to `public` has been
+     * read and confirmed not to touch a session or a cookie-derived value.
+     *
      * Headers only, deliberately no `cache`. Nitro's route cache serialises the
      * response body, so a binary tile comes back out of it as
      * `{"type":"Buffer","data":[...]}` — eight times the size, under a
@@ -795,8 +858,38 @@ export default defineNuxtConfig({
     '/api/tiles/**': {
       headers: { 'cache-control': 'public, max-age=3600, stale-while-revalidate=86400' },
     },
+    /**
+     * `[id].get.ts` and `slug/[slug].get.ts` read the viewer's session to fill
+     * in `endorsedByMe`, so a shared cache (Bunny sits in front of this app)
+     * must never store one reader's response and serve it to the next — that
+     * would leak both the endorsement state and, worse, whatever `nuxt-session`
+     * cookie rode along with the response that got cached. `private` restricts
+     * caching to the requester's own browser — a deliberate step up from the
+     * `/**` floor's `no-store` above, since this family is read often enough
+     * (map panning re-requests the same site) that a browser-only 60s cache is
+     * worth the trade. The two literal routes below are genuinely anonymous —
+     * neither reads a session — so they keep the public, CDN-cacheable header
+     * the wildcard used to give every route here.
+     */
     '/api/sites/**': {
+      headers: { 'cache-control': 'private, max-age=60' },
+    },
+    '/api/sites/search': {
       headers: { 'cache-control': 'public, max-age=60' },
+    },
+    '/api/sites/needs-work': {
+      headers: { 'cache-control': 'public, max-age=60' },
+    },
+    // `tracings/[id].get.ts` and its nested routes (`revisions`, `inscriptions`,
+    // `attic-inscriptions`) don't currently read the viewer's session — checked
+    // directly, none of them call `getUserSession` — so nothing here is as
+    // urgent as the sites family above. `private` rather than `public` is
+    // still the deliberate choice: it is one step up from the `/**` floor's
+    // `no-store` rather than a return to the old "no rule at all" default,
+    // and it costs nothing today while staying correct the day any of these
+    // routes gains a viewer-specific field the way `sites/[id].get.ts` did.
+    '/api/tracings/**': {
+      headers: { 'cache-control': 'private, max-age=60' },
     },
 
     /**

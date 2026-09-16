@@ -103,7 +103,14 @@ export default defineEventHandler(async (event) => {
       expiresAt: issued.expiresAt,
     })
   } catch (error) {
-    const violation = error as { code?: string; constraint_name?: string }
+    // drizzle-orm wraps every driver error in `DrizzleQueryError`, whose own
+    // `code`/`constraint_name` are `undefined` — the real ones the `postgres`
+    // driver set are on `.cause`. Checking the wrapper directly meant this
+    // branch never matched, so every duplicate email or display name surfaced
+    // as an unhandled 500 instead of the 409 below — confirmed live by
+    // `auth.spec.ts`'s "refuses a display name that is already taken".
+    const cause = (error as { cause?: unknown }).cause ?? error
+    const violation = cause as { code?: string; constraint_name?: string }
     if (violation.code !== '23505') throw error
 
     /**

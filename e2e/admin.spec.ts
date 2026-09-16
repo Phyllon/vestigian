@@ -40,7 +40,9 @@ test.describe('only an administrator reaches the panel', () => {
     await gotoAndHydrate(page, '/admin')
 
     // Concealment, not protection — the endpoints below are the protection.
-    await expect(page.getByText(/not found/i).first()).toBeVisible()
+    // `app/error.vue`'s own 404 copy ("Nothing recorded here"), not the
+    // generic phrase this used to check for.
+    await expect(page.getByText(/nothing recorded here/i).first()).toBeVisible()
   })
 
   test('refuses every admin endpoint to a moderator', async ({ page }) => {
@@ -327,14 +329,27 @@ test.describe('the panel is not discoverable', () => {
   test('is disallowed in robots.txt and marked noindex in the response header', async ({
     page,
   }) => {
+    // `fetchAsBrowser` runs `fetch()` inside the page, so a relative URL needs
+    // a document to resolve against — a `page` that has never navigated is
+    // still on `about:blank`, where `fetch('/robots.txt')` throws rather than
+    // resolving against the app origin.
+    await page.goto('/')
     const robots = await fetchAsBrowser<string>(page, '/robots.txt')
     expect(String(robots.body)).toContain('Disallow: /admin')
 
     /**
      * The header, not the meta tag: the tag only exists once a crawler has
      * executed the page, and this app is a Nuxt SPA behind a CDN.
+     *
+     * `maxRedirects: 0`, because this request is signed out — `admin.ts`'s
+     * middleware sends an anonymous visitor to `/login?next=/admin` first,
+     * and Playwright's request API follows redirects by default. Following it
+     * meant asserting on `/login`'s headers instead of `/admin`'s, which carry
+     * no such route rule and read as `undefined` — passing for the wrong
+     * route rather than failing for a missing header, the more dangerous kind
+     * of green test. The route rule fires on the 302 itself, confirmed live.
      */
-    const response = await page.request.get('/admin')
+    const response = await page.request.get('/admin', { maxRedirects: 0 })
     expect(response.headers()['x-robots-tag']).toContain('noindex')
     expect(response.headers()['cache-control']).toContain('no-store')
   })

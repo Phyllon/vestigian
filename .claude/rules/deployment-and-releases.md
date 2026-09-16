@@ -102,6 +102,37 @@ docker run --rm -v vestigian_backup-data:/b alpine chown -R 70:70 /b
 
 Data is CC BY-SA (text) / CC0 (metadata); **image licences vary per record**, which is why `licence` and `attribution` are non-null columns and attribution renders under every image rather than hiding behind an interaction.
 
+## Response headers, and the Bunny setting no repo file controls
+
+Every response now carries a verified, complete security-header set —
+`Strict-Transport-Security`, `X-Frame-Options`, `X-Content-Type-Options`,
+`Referrer-Policy`, `Cross-Origin-Resource-Policy` on every route, plus CSP,
+`Permissions-Policy`, COOP and COEP on rendered HTML — and a `cache-control`
+that defaults to `private, no-store` everywhere and is opted out of per route
+only where the response has been read and confirmed not to depend on a
+session or a cookie. See `nuxt.config.ts`'s `routeRules` and
+`server/middleware/security-defaults.ts` for what sends which header and why
+two mechanisms exist (`nuxt-security`'s own delivery of a handful of these —
+`strictTransportSecurity` specifically — silently fails outside HTML
+responses; both the failure and the workaround were verified against a
+running production build, not inferred from its docs).
+
+**None of that protects anything if the Bunny pull zone in front of this app
+is configured to ignore it.** Bunny pull zones have an "Override Cache
+Control" / "Query String Sorting" style setting that, if enabled, caches every
+200 response for the zone's own configured TTL regardless of what the origin
+sends — which would cache `private, no-store` responses (a moderator's queue,
+`/api/me`, a GDPR export) at the edge and serve them to the next visitor who
+hits the same URL, the exact cross-user leak `/api/sites/**`'s `private`
+cache-control was already written to prevent. This setting lives in the
+Bunny dashboard, not in this repository, so it cannot be checked here —
+confirm it is **off** for the zone in front of `SITE_HOST` (the images zone is
+a separate concern: those responses are keyed by imgproxy URL, not session,
+and are meant to be cached hard) before trusting any of the reasoning above in
+production. The same check belongs on `docker/traefik/dynamic.yml`'s
+`security-headers` middleware, whose own values now overlap and in two cases
+disagree with the app's — see the comment there.
+
 ## Security layer — detection, and where it is enforced
 
 CrowdSec reads the app's own structured logs (route pattern plus an `audit`

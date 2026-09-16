@@ -5,7 +5,10 @@ import { revisions, users } from '~~/server/database/schema'
 export const querySchema = z.object({
   status: z.enum(['pending', 'approved', 'rejected']).optional(),
   entityType: z.enum(['site', 'tracing']).optional(),
-  authorId: databaseIdentifier.optional(),
+  // Query parameters always arrive as strings, unlike a JSON body's `userId` —
+  // `databaseIdentifier` has no coercion and rejected every real request with
+  // a 400, confirmed live by `admin.spec.ts`'s "ends a live session" test.
+  authorId: routeIdentifier.optional(),
   /** Only edits that published without a moderator ever seeing them. */
   autoApprovedOnly: z.coerce.boolean().optional(),
   /** Only edits that remove more than they add (`isBlankingEdit`). */

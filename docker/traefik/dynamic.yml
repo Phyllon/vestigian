@@ -1,5 +1,29 @@
 http:
   middlewares:
+    # Carries the same "whether Dokploy's Traefik reads this file at all is
+    # unconfirmed" caveat as `deny-external` below — nothing in
+    # compose.prod.yml mounts this directory. That used to make this the only
+    # candidate source for `Strict-Transport-Security`; it no longer is. The
+    # app itself (`nuxt.config.ts`'s `routeRules['/**']`, plus
+    # `server/middleware/security-defaults.ts`) now sends
+    # `Strict-Transport-Security`, `X-Frame-Options`, `X-Content-Type-Options`
+    # and `Referrer-Policy` on every response, verified against a running
+    # production build — see the comments there for why that needed a
+    # workaround at all (`nuxt-security`'s own delivery of these silently
+    # fails for `strictTransportSecurity` specifically). If this middleware
+    # *is* live, it is redundant with the app's own headers for everything
+    # above, and disagrees with it outright on two: `frameDeny` sends `DENY`
+    # where the app sends `SAMEORIGIN` (a difference that matters for
+    # nothing this app currently embeds, but multiple `X-Frame-Options`
+    # values across a proxy hop are undefined behaviour, not merely
+    # belt-and-suspenders), and this `permissionsPolicy` omits `fullscreen`
+    # entirely — `fullscreen=()` here would deny it even though the app's own
+    # policy grants `fullscreen=(self)` for the Tabula Peutingeriana viewer's
+    # full-page toggle (see the long comment on `permissionsPolicy` in
+    # `nuxt.config.ts` for the exact bug that was). Confirm whether Dokploy
+    # actually applies this file before trusting either header set; until
+    # then, treat the app's own headers as the ones actually reaching a
+    # browser.
     security-headers:
       headers:
         frameDeny: true

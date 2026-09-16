@@ -23,10 +23,21 @@ import type { Page } from '@playwright/test'
  * The wait is on Nuxt's own signal rather than a proxy for it:
  * `nuxtApp.isHydrating` turns `false` when the last deferred hydration resolves
  * (`deferHydration`, `nuxt/dist/app/nuxt.js`), which is after every plugin —
- * the locale fetch included — has run. The app is reached through the element
- * Vue marks `data-v-app` on mount, whose `__vue_app__.$nuxt` Nuxt defines
- * unconditionally; both were checked in the installed production builds (Vue
- * 3.5, Nuxt 4.5), not only in development.
+ * the locale fetch included — has run. The app is reached through `#__nuxt`
+ * (Nuxt's default `app.rootId`, not overridden here — see `nuxt.config.ts`),
+ * whose `__vue_app__.$nuxt` Nuxt defines unconditionally.
+ *
+ * This used to select `[data-v-app]`, on the assumption that Vue always
+ * stamps that attribute on the mounted root. Confirmed false in the built
+ * output: Vue's `data-v-app`/`v-cloak` handling lives only in `createApp`'s
+ * wrapped `mount`, and Nuxt hydrates through `createSSRApp`'s own wrapped
+ * `mount`, which calls straight into the core mount and skips that attribute
+ * entirely — checked by grepping the built client chunk for `data-v-app` and
+ * finding it inside exactly one wrapper, not the one Nuxt calls. Every test
+ * using the old selector timed out the full 10s on every run, silently, since
+ * `waitForFunction`'s callback returning `undefined` forever looks identical
+ * to one that is still waiting. `#__nuxt` is server-rendered and present
+ * before any client JS runs, so it needs no such wrapper.
  *
  * This replaced `waitUntil: 'networkidle'`, which was right only because
  * neither auth page opens a persistent connection. The day one did — a
@@ -36,7 +47,7 @@ import type { Page } from '@playwright/test'
 export const gotoAndHydrate = async (page: Page, path: string): Promise<void> => {
   await page.goto(path)
   await page.waitForFunction(() => {
-    const container = document.querySelector('[data-v-app]') as
+    const container = document.getElementById('__nuxt') as
       (Element & { __vue_app__?: { $nuxt?: { isHydrating?: boolean } } }) | null
     return container?.__vue_app__?.$nuxt?.isHydrating === false
   })

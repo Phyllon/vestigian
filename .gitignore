@@ -19,6 +19,7 @@ blob-report/
 .playwright/
 
 tsconfig.scripts.tsbuildinfo
+tsconfig.e2e.tsbuildinfo
 
 # Security tooling (scripts/security/) — downloaded binaries, vendored
 # rulesets and scan output, none of it reproducible from a fresh checkout

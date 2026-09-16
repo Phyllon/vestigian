@@ -66,6 +66,19 @@ Two traps met on the first run:
   `/tmp/.scannerwork` inside the container — so no `.scannerwork` lands in
   the repo either.
 
+### `scan-sonar.sh` itself trips gitleaks' `curl-auth-user` rule twice
+
+Both false positives, allowlisted by path in `.gitleaks.toml`: `-u
+admin:admin` (SonarQube Community's own well-known bootstrap credential,
+used once to authenticate the very request that rotates it away to a fresh
+`openssl rand`-generated password) and `-u "${TOKEN}:"` (a shell variable
+expansion, not a literal — gitleaks' rule matches on shape, so it can't tell
+"the value after `-u` is a runtime variable" from "the value after `-u` is a
+secret"). Same class of limitation the `.env.example` entry above it is
+allowlisted for. Verified via `docker run … gitleaks protect --staged -v`
+before and after: 2 leaks, then 0, with the finding fingerprints matching
+these two lines exactly rather than being suppressed by accident.
+
 ### First run — 99 open issues (2026-09-14)
 
 - **29 BLOCKER `secrets:S6698` — fixed.** Every script's

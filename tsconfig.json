@@ -16,6 +16,7 @@
     { "path": "./.nuxt/tsconfig.node.json" },
     { "path": "./tsconfig.scripts.json" },
     { "path": "./tsconfig.service-worker.json" },
-    { "path": "./tsconfig.eslint.json" }
+    { "path": "./tsconfig.eslint.json" },
+    { "path": "./tsconfig.e2e.json" }
   ]
 }

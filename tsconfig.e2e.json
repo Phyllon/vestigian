@@ -1,0 +1,36 @@
+{
+  // Playwright loads these as plain Node ESM through its own runner, not
+  // through Nuxt — same reasoning as `tsconfig.scripts.json`, which this
+  // mirrors. Without a project of its own, `playwright.config.ts` sits
+  // outside every `include` in `tsconfig.json`'s solution, so an editor
+  // cannot place it in any referenced project and falls back to treating it
+  // as an orphan file rather than a normal standalone inferred one —
+  // `process` (and anything else from `@types/node`) reads as unresolved
+  // even though the package is installed. `pnpm typecheck` has the same
+  // blind spot: `tsc -b` only walks `tsconfig.json`'s `references`, so this
+  // file and everything under `e2e/**` were never type-checked by
+  // `pnpm check` either.
+  //
+  // `DOM`/`DOM.Iterable` are needed alongside `node` specifically for the
+  // callbacks passed to `page.evaluate`/`page.waitForFunction` — those run in
+  // the browser, not in the Playwright process, and reference `window`,
+  // `document`, `navigator` and `caches` (see `offline.spec.ts`,
+  // `map.spec.ts`, `helpers/hydration.ts`). `@playwright/test`'s own types
+  // cover `Page`/`Locator`/etc. and need no separate `types` entry.
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "types": ["node"],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "verbatimModuleSyntax": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "noEmit": true
+  },
+  "include": ["playwright.config.ts", "e2e/**/*.ts"]
+}

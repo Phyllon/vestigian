@@ -4,12 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-overrides:
-  js-yaml@<4.3.2: ^4.3.2
-  svgo@<4.1.0: ^4.1.0
-  happy-dom@<20.8.9: ^20.8.9
-  minimist@<0.2.4: ^1.2.8
-
 importers:
 
   .:
@@ -2206,7 +2200,7 @@ packages:
       '@testing-library/vue': ^7.0.0 || ^8.0.1
       '@vitest/ui': '*'
       '@vue/test-utils': ^2.4.2
-      happy-dom: ^20.8.9
+      happy-dom: '*'
       jsdom: '*'
       playwright-core: ^1.43.1
       vitest: ^3.2.0
@@ -6228,6 +6222,9 @@ packages:
     resolution: {integrity: sha512-OBwBN9AL4dqmETlpS2zasx+vTeWclWzkblfZk7KTA5j3jeOONz/tRCnZomUyvNg83wL5Zv9Ss6HMJXAgL8R2Yg==}
     engines: {node: '>=16 || 14 >=14.17'}
 
+  minimist@0.0.5:
+    resolution: {integrity: sha512-rSJ0cdmCj3qmKdObcnMcWgPVOyaOWlazLhZAJW0s6G6lx1ZEuFkraWmEH5LTvX90btkfHPclQBjvjU7A/kYRFg==}
+
   minimist@1.2.8:
     resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
 
@@ -8123,7 +8120,7 @@ packages:
       '@vitest/coverage-istanbul': 4.1.11
       '@vitest/coverage-v8': 4.1.11
       '@vitest/ui': 4.1.11
-      happy-dom: ^20.8.9
+      happy-dom: '*'
       jsdom: '*'
       vite: ^6.0.0 || ^7.0.0 || ^8.0.0
     peerDependenciesMeta:
@@ -14023,7 +14020,7 @@ snapshots:
     dependencies:
       concat-stream: 1.2.1
       geojson-area: 0.1.0
-      minimist: 1.2.8
+      minimist: 0.0.5
 
   get-caller-file@2.0.5: {}
 
@@ -14892,6 +14889,8 @@ snapshots:
   minimatch@9.0.9:
     dependencies:
       brace-expansion: 2.1.4
+
+  minimist@0.0.5: {}
 
   minimist@1.2.8: {}
 
