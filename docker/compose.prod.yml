@@ -75,6 +75,15 @@ services:
       traefik.http.routers.vestigian-metrics.service: vestigian
       traefik.http.services.vestigian.loadbalancer.server.port: '3000'
       traefik.http.services.vestigian.loadbalancer.healthcheck.path: /api/ready
+    # Dokploy's Traefik runs on its own separate network (`dokploy-network`) from
+    # this compose project's implicit default one. Without joining it too,
+    # Traefik discovers this service's labels fine (that's a Docker API read,
+    # not a network path) but has no way to actually reach the container for
+    # its health check or real traffic — surfaces as a healthy container behind
+    # a Traefik router permanently returning 503 "no available server".
+    networks:
+      - default
+      - dokploy-network
     healthcheck:
       test:
         [
@@ -151,6 +160,9 @@ services:
       traefik.http.routers.images.entrypoints: websecure
       traefik.http.routers.images.tls.certresolver: letsencrypt
       traefik.http.services.images.loadbalancer.server.port: '8080'
+    networks:
+      - default
+      - dokploy-network
 
   # Deliberately has no Traefik labels: this is reachable only from inside the
   # compose network, by the app. Nothing about a site's text should leave the
@@ -487,3 +499,26 @@ volumes:
   alloy-data:
   crowdsec-config:
   crowdsec-data:
+
+networks:
+  # Pinned explicitly, external, rather than left for Compose to derive.
+  # Leaving this unnamed was tried first and broke: something about how
+  # Dokploy invokes `docker compose` here made the implicit default network
+  # resolve to this file's own top-level `name: vestigian` (line 1) instead of
+  # Dokploy's actual project-scoped name — not the normal
+  # `${COMPOSE_PROJECT_NAME}_default` behavior, and not worth chasing further.
+  # `docker network ls` on the VPS confirmed the network the already-running
+  # services (postgres, valkey, etc.) actually sit on is this exact name.
+  #
+  # Fragility this trades in: that name embeds Dokploy's own app-instance id
+  # (the `-4vgm6i` suffix), so a fresh deploy into a *new* Dokploy application
+  # would need this updated to match — check `docker network ls` on the VPS
+  # for the real name if this ever needs to move.
+  default:
+    name: vestigian-4vgm6i_default
+    external: true
+  # Pre-existing network Dokploy's own Traefik instance runs on. External
+  # because this compose project doesn't own it — only `app` and `imgproxy`
+  # join it, since those are the only two services Traefik actually routes to.
+  dokploy-network:
+    external: true

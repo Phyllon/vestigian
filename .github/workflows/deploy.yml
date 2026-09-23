@@ -1,4 +1,4 @@
-name: build and deploy
+name: build and publish
 
 # Push to `main` only. Testing is deliberately not CI's job here — `pnpm check`
 # runs at pre-push, locally, and the hosted minutes are better spent on the one
@@ -11,6 +11,19 @@ name: build and deploy
 # `pull_request` too, where `publish` is skipped — so a PR started this workflow
 # to do an install and then stop. `changeset-check.yml` is what actually runs on
 # a pull request.
+#
+# Deploying is a separate, manual step, not the last step of this workflow.
+# Dokploy's dashboard is deliberately kept off the public internet (reachable
+# only via SSH tunnel), so its redeploy webhook can't be hit by a GitHub-hosted
+# runner — there is no reachable URL to give it. A `curl` to
+# `secrets.DOKPLOY_WEBHOOK_URL` used to sit at the end of this workflow and
+# failed on exactly that (the URL Dokploy hands out defaults to
+# `localhost:3000`, meaningful only inside the tunnel session that generated
+# it). Clicking Deploy in Dokploy after a publish lands here is also the
+# existing pattern for releases in this repo — `release.yml` requires a
+# manual `workflow_dispatch` rather than auto-releasing on every push, for the
+# same reason: no ambient action should be able to trigger production on its
+# own.
 on:
   push:
     branches: [main]
@@ -49,8 +62,3 @@ jobs:
             ghcr.io/${{ steps.repo.outputs.name }}:v${{ steps.package.outputs.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      # Dokploy pulls the new image and restarts the service. Migrations run
-      # inside that hook, before the new container accepts traffic.
-      - name: trigger deployment
-        run: curl -fsS -X POST "${{ secrets.DOKPLOY_WEBHOOK_URL }}"
