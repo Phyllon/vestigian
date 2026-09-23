@@ -514,6 +514,7 @@ networks:
   # (the `-4vgm6i` suffix), so a fresh deploy into a *new* Dokploy application
   # would need this updated to match — check `docker network ls` on the VPS
   # for the real name if this ever needs to move.
+  #test
   default:
     name: vestigian-4vgm6i_default
     external: true
