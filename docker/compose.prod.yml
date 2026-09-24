@@ -19,10 +19,13 @@ services:
       # Traefik terminates TLS in front of this container and Bunny sets
       # x-real-ip in front of that, so the header can be believed here.
       #
-      # This is only true while the Hetzner firewall refuses everything that is
-      # not a Bunny edge address. Without that rule anything reaching Traefik
-      # directly can forge x-real-ip per request and every limit in
-      # RATE_LIMITS becomes decorative — see server/utils/ratelimit.ts.
+      # This is only true while nothing but Bunny can reach the app. Here that
+      # is enforced by the router rules below, which only match requests carrying
+      # the secret `X-Origin-Key` header that a Bunny Edge Rule adds to every
+      # request it forwards (no allowlist of Bunny's addresses to keep current).
+      # Anything reaching Traefik directly has no such header, matches no router
+      # and gets a 404, so it cannot forge x-real-ip against the app — see
+      # server/utils/ratelimit.ts for why that matters.
       NUXT_BEHIND_TRUSTED_PROXY: 'true'
       NUXT_ALTCHA_SECRET: ${ALTCHA_SECRET}
       # Traces go to Alloy, which batches and forwards to Tempo. An empty value
@@ -60,14 +63,21 @@ services:
       # deploy behind an optional nicety would be the wrong trade.
     labels:
       traefik.enable: 'true'
-      traefik.http.routers.vestigian.rule: Host(`${SITE_HOST}`)
+      # `Header(...)` is the origin lock: only requests Bunny forwarded carry the
+      # secret. `:?` makes Compose refuse to start if ORIGIN_KEY is missing —
+      # an empty value would make the rule invalid and silently drop the router.
+      traefik.http.routers.vestigian.rule: Host(`${SITE_HOST}`) && Header(`X-Origin-Key`, `${ORIGIN_KEY:?set ORIGIN_KEY in the environment}`)
+      # Explicit, because Traefik defaults a router's priority to the length of
+      # its rule, and the header clause makes this rule longer than the metrics
+      # router's fixed 100 below — which would silently make this one win.
+      traefik.http.routers.vestigian.priority: '10'
       traefik.http.routers.vestigian.entrypoints: websecure
       traefik.http.routers.vestigian.tls.certresolver: letsencrypt
       traefik.http.routers.vestigian.middlewares: app-rate-limit@file
       # A second, more specific router so the metrics endpoint can carry its own
       # middleware — Traefik attaches middleware per router, not per path. The
       # higher priority is what makes it win over the catch-all above.
-      traefik.http.routers.vestigian-metrics.rule: Host(`${SITE_HOST}`) && Path(`/api/metrics`)
+      traefik.http.routers.vestigian-metrics.rule: Host(`${SITE_HOST}`) && Path(`/api/metrics`) && Header(`X-Origin-Key`, `${ORIGIN_KEY:?set ORIGIN_KEY in the environment}`)
       traefik.http.routers.vestigian-metrics.priority: '100'
       traefik.http.routers.vestigian-metrics.entrypoints: websecure
       traefik.http.routers.vestigian-metrics.tls.certresolver: letsencrypt
