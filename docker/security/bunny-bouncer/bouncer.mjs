@@ -178,7 +178,14 @@ const pushBannedIpsToBunny = async (ips) => {
   const guid = await findManagedRuleGuid()
 
   const body = {
-    Guid: guid,
+    // Omitted, not sent as `null`, when no managed rule exists yet. Verified
+    // against the real API (2026-09-28): a literal `"Guid": null` makes Bunny
+    // reject the whole request with "Maximum 5 triggers are allowed per
+    // condition" — a misleading error for what is actually an invalid Guid,
+    // not a real trigger-count limit. Omitting the field on first creation and
+    // only including it on the update path once a real Guid exists (a run
+    // after the first successful push) is what a create endpoint expects.
+    ...(guid ? { Guid: guid } : {}),
     ActionType: BUNNY_ACTION_BLOCK_REQUEST,
     Triggers: [
       {
