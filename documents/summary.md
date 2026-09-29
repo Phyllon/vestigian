@@ -84,7 +84,7 @@ flowchart TB
         DARE["DARE tiles (Gothenburg)"]
         EOX["EOX Sentinel-2 (Vienna)"]
         Voorburg["OmnesViae IIIF (Voorburg)"]
-        Lettermint["Lettermint (EU mail)"]
+        Lettermint["Brevo (EU mail)"]
         ImgProxy["imgproxy + Bunny storage"]
     end
 
@@ -116,7 +116,7 @@ flowchart TB
 | ORM                            | **Drizzle + `postgres.js`**                     | TypeScript-first, compile-time-checked columns; raw SQL kept to exactly the PostGIS operations a query builder cannot express.                                                             |
 | Cache/session/rate-limit store | **Valkey**                                      | Redis-compatible, no licensing ambiguity.                                                                                                                                                  |
 | Media                          | **Bunny.net + imgproxy**                        | One stored original per image; derivatives generated on the fly; zero egress cost.                                                                                                         |
-| Mail                           | **Lettermint** (EU)                             | Transactional mail entirely inside the EU — replaced a US-hosted provider once the rest of the stack (CDN, object store) had already moved.                                                |
+| Mail                           | **Brevo** (EU)                                  | Transactional mail entirely inside the EU — operator's choice, replacing Lettermint (itself a replacement for a US-hosted provider).                                                       |
 | Drawing tool                   | **terra-draw**                                  | Framework-agnostic vector drawing that plugs directly into MapLibre.                                                                                                                       |
 | Telemetry                      | **Grafana + Loki + Tempo + Prometheus + Alloy** | One agent (Alloy) carries logs, traces _and_ metrics — Vector carries no traces, and Alloy's built-in exporters replace four separate exporter containers. Everything lands on local disk. |
 | Deployment                     | **Dokploy on one Hetzner VPS**                  | ~€27/month all-in vs ~€60–90 for managed Kubernetes; Dokploy _is_ Compose, so dev and prod share one artifact.                                                                             |
@@ -1078,7 +1078,7 @@ banner.
 | **CrowdSec central blocklist**                               | IP addresses already flagged as abusive, shared with the community blocklist (`DISABLE_ONLINE_API: false`)                                                                                             | Legitimate interest (abuse prevention); documented in the privacy policy's recipients section.                       |
 | **Mapterhorn basemap tiles**                                 | Visitor IP, fetched **directly by the browser**, the same as any embedded map tile host                                                                                                                | Hosting jurisdiction **not yet confirmed** — flagged as needing verification before the privacy policy is finalized. |
 | **DARE (Gothenburg), EOX (Vienna), OmnesViae (Netherlands)** | Visitor IP, for basemap/manuscript tile requests, until a self-hosted mirror is built and pointed at                                                                                                   | Courtesy-contact relationships established with each maintainer before any at-scale traffic; EU-hosted throughout.   |
-| **Lettermint**                                               | Recipient email + display name, for transactional mail only                                                                                                                                            | EU-hosted, replaced a US provider specifically to keep this data inside the EU.                                      |
+| **Brevo**                                                    | Recipient email + display name, for transactional mail only                                                                                                                                            | EU-hosted (Paris), operator's choice, replacing Lettermint — same EU-hosting rationale.                              |
 
 ### 9.4 Licensing discipline as a legal control, not just an attribution nicety
 

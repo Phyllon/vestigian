@@ -12,6 +12,18 @@ x-logging: &default-logging
 services:
   app:
     image: ghcr.io/${GITHUB_REPOSITORY:-vestigian/vestigian}:${IMAGE_TAG:-latest}
+    # Dokploy's own deploy command is `up -d --build --remove-orphans` — no
+    # `--pull` flag, and `--build` only rebuilds services with a `build:`
+    # directive (bunny-bouncer, backup below), never causing this image-only
+    # service to re-check the registry. Since the tag is the mutable `latest`,
+    # once it was pulled once it stayed cached forever: every deploy recreated
+    # this container from that same frozen image regardless of new pushes,
+    # invisibly, until a change to the app's own code (not just this compose
+    # file, which Dokploy does re-clone fresh from git every time) needed a
+    # fresh image to take effect and didn't get one. `pull_policy: always`
+    # makes Compose re-check the registry on every `up`, with or without a
+    # `--pull` flag on the command Dokploy actually runs.
+    pull_policy: always
     restart: unless-stopped
     environment:
       NUXT_DATABASE_URL: postgres://vestigian:${POSTGRES_PASSWORD}@postgres:5432/vestigian
@@ -51,7 +63,7 @@ services:
       NUXT_STORAGE_SECRET_ACCESS_KEY: ${BUNNY_SECRET_ACCESS_KEY}
       NUXT_MAIL_API_KEY: ${MAIL_API_KEY}
       # The envelope sender has to be an address on a domain verified with
-      # Lettermint, or every message is refused at the API rather than bounced.
+      # Brevo, or every message is refused at the API rather than bounced.
       NUXT_MAIL_FROM: ${MAIL_FROM}
     depends_on:
       postgres:
@@ -369,12 +381,14 @@ services:
   alertmanager:
     image: prom/alertmanager:v0.28.1
     restart: unless-stopped
-    environment:
-      ALERT_FROM: ${ALERT_FROM}
-      ALERT_TO: ${ALERT_TO}
-      # Lettermint over SMTP, reusing the key the app already holds rather than
-      # standing up a second mail path.
-      MAIL_API_KEY: ${MAIL_API_KEY}
+    # No `environment:` block: Alertmanager's config parser does not read
+    # process environment variables at all (see the long comment at the top of
+    # alertmanager.yml), so nothing set here would ever have reached the
+    # config anyway — the only value that actually needs to cross from this
+    # deploy's secrets into that container is the Discord webhook URL, which
+    # arrives as a file instead, below.
+    secrets:
+      - discord_webhook_url
     command:
       - --config.file=/etc/alertmanager/alertmanager.yml
       - --storage.path=/alertmanager
@@ -495,6 +509,14 @@ services:
         limits:
           memory: 64m
     logging: *default-logging
+
+# Compose-only (not supported under `docker stack deploy`, which this project
+# does not use): mounts the environment variable's value as a file at
+# /run/secrets/<name>, rather than writing the secret into alertmanager.yml or
+# a process environment Alertmanager never reads anyway.
+secrets:
+  discord_webhook_url:
+    environment: DISCORD_WEBHOOK_URL
 
 volumes:
   postgres-data:

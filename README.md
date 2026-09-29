@@ -216,7 +216,7 @@ Site text and descriptions: CC BY-SA. Metadata: CC0. Images carry their own lice
 
 ## Accounts and email
 
-Registration issues a hashed, single-use token and emails a confirmation link. Mail goes through **Lettermint**, hosted in the EU — the same reasoning that moved the CDN and the object store there. `NUXT_MAIL_API_KEY` is a Lettermint project token.
+Registration issues a hashed, single-use token and emails a confirmation link. Mail goes through **Brevo**, hosted in the EU — the same reasoning that moved the CDN and the object store there. `NUXT_MAIL_API_KEY` is a Brevo API key.
 
 Both messages — confirmation and password reset — are rendered as a sheet from the notebook: the wordmark, one oxide button, and the facts that matter set in the mono face (which account, when it was requested, when the link expires, that it works once). Every message carries a plain-text half saying the same things.
 

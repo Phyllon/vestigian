@@ -388,10 +388,10 @@ export default defineNuxtConfig({
       salt: '',
     },
     /**
-     * Lettermint (Amsterdam), not Resend: the addresses and display names in
+     * Brevo (Paris), not Resend: the addresses and display names in
      * transactional mail are the last personal data that was still leaving the
-     * EU after the CDN and object store moved. `apiKey` is a Lettermint
-     * project token.
+     * EU after the CDN and object store moved. `apiKey` is a Brevo API key
+     * (Brevo's HTTP API, not the separate SMTP key Alertmanager uses).
      *
      * `devInboxUrl` is Mailpit's HTTP API, which the dev stack already runs.
      * It is read only when no API key is set and only in development — see

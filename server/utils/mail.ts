@@ -9,11 +9,11 @@ interface OutgoingMail {
   html: string
 }
 
-type MailTransport = 'lettermint' | 'dev-inbox' | 'log'
+type MailTransport = 'brevo' | 'dev-inbox' | 'log'
 
 /**
- * Splits `Vestigian <no-reply@vestigian.org>` into its parts. Lettermint takes
- * the header form as one string; Mailpit's API wants the two separately.
+ * Splits `Vestigian <no-reply@vestigian.org>` into its parts — both Brevo and
+ * Mailpit's API want a sender as `{ name, email }`, not one header string.
  */
 const parseAddress = (address: string): { name: string; email: string } => {
   // The address comes from `NUXT_MAIL_FROM`, a deploy-time config value, never
@@ -25,24 +25,27 @@ const parseAddress = (address: string): { name: string; email: string } => {
 }
 
 /**
- * Lettermint, in Amsterdam. It replaced Resend for one reason: transactional
- * mail carries an address, a display name and the fact that a person has an
- * account here, and there is no reason for that to cross the Atlantic when the
- * CDN, the object store and the database have all been moved into the EU.
+ * Brevo, in Paris — the operator's own choice, replacing Lettermint. Same
+ * reasoning either way: transactional mail carries an address, a display name
+ * and the fact that a person has an account here, and there is no reason for
+ * that to cross the Atlantic when the CDN, the object store and the database
+ * have all been moved into the EU.
  *
- * `to` is an array — the one shape difference from the Resend call this
- * replaces, and the kind of thing that would fail quietly at 422.
+ * Sender is `{ email, name }`, not a single header string, so `from` is split
+ * with the same `parseAddress` the dev-inbox transport already needed.
  */
-const sendThroughLettermint = async (message: OutgoingMail, apiKey: string, from: string) => {
-  await $fetch('https://api.lettermint.co/v1/send', {
+const sendThroughBrevo = async (message: OutgoingMail, apiKey: string, from: string) => {
+  const sender = parseAddress(from)
+
+  await $fetch('https://api.brevo.com/v3/smtp/email', {
     method: 'POST',
-    headers: { 'x-lettermint-token': apiKey },
+    headers: { 'api-key': apiKey },
     body: {
-      from,
-      to: [message.to],
+      sender: { email: sender.email, name: sender.name },
+      to: [{ email: message.to }],
       subject: message.subject,
-      html: message.html,
-      text: message.text,
+      htmlContent: message.html,
+      textContent: message.text,
     },
   })
 }
@@ -79,7 +82,7 @@ const sendToDevInbox = async (message: OutgoingMail, inboxUrl: string, from: str
  * the error log are what make the failure visible to the operator instead.
  */
 const resolveMailTransport = (apiKey: string, devInboxUrl: string): MailTransport => {
-  if (apiKey) return 'lettermint'
+  if (apiKey) return 'brevo'
   if (import.meta.dev && devInboxUrl) return 'dev-inbox'
   return 'log'
 }
@@ -91,8 +94,8 @@ const deliver = async (purpose: MailKind, message: OutgoingMail): Promise<void> 
   const transport: MailTransport = resolveMailTransport(mail.apiKey, mail.devInboxUrl)
 
   try {
-    if (transport === 'lettermint') {
-      await sendThroughLettermint(message, mail.apiKey, mail.from)
+    if (transport === 'brevo') {
+      await sendThroughBrevo(message, mail.apiKey, mail.from)
     } else if (transport === 'dev-inbox') {
       await sendToDevInbox(message, mail.devInboxUrl, mail.from)
       logger.info({ recipient: message.to, subject: message.subject }, 'mail sent to dev inbox')

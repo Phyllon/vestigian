@@ -1,21 +1,35 @@
-# Lettermint over SMTP, reusing the credential the app already holds rather than
-# introducing a second mail path. The username is the literal string
-# `lettermint`; the password is the project token, the same one the app sends as
-# `x-lettermint-token`. Port 587 is STARTTLS. ALERT_* come from the environment.
+# Discord, not email or Telegram — deliberately, so this file (in a repo meant
+# to go public) never has to carry a personal address. Native support since
+# Alertmanager v0.25.0 (we run v0.28.1), no relay/bridge container needed.
+# Telegram's own bot setup (native since v0.24) was tried first and dropped —
+# not a config problem here, the operator hit trouble with Telegram's own
+# verification step. Discord's webhook is simpler either way: no bot account,
+# no phone-number verification, and the URL itself is the only credential —
+# no separate chat-id lookup step. `webhook_url_file` is the one real secret,
+# so it alone is file-backed via Docker Compose's `secrets:` block in
+# compose.prod.yml, the same mechanism used for the SMTP password this file
+# used to carry, before Brevo (or any mail provider) was dropped from this
+# path entirely.
+#
+# This file cannot read the deploy environment: Alertmanager's own config
+# parser does not expand environment variables — upstream considered and
+# rejected adding it (prometheus/alertmanager#2818) — so a bare ${VAR}-style
+# placeholder here is read as that literal string, not substituted. Nothing
+# validates it at parse time, so a wrong value fails silently rather than
+# refusing to start: this is exactly how the previous SMTP setup sat broken —
+# discovered 2026-09-29 by reading this file against that fact, not by an
+# alert actually failing to send.
 global:
   resolve_timeout: 5m
-  smtp_from: '${ALERT_FROM}'
-  smtp_smarthost: 'smtp.lettermint.co:587'
-  smtp_auth_username: 'lettermint'
-  smtp_auth_password: '${MAIL_API_KEY}'
 
 route:
   receiver: operator
   group_by: [alertname]
   group_wait: 30s
   group_interval: 5m
-  # Twelve hours, because this reaches one person's inbox. An alert that repeats
-  # hourly is one that gets filtered, and a filtered alert is worse than none.
+  # Twelve hours, because this reaches one person's phone. An alert that
+  # repeats hourly is one that gets filtered, and a filtered alert is worse
+  # than none.
   repeat_interval: 12h
   routes:
     - matchers: [severity = "critical"]
@@ -24,8 +38,8 @@ route:
 
 receivers:
   - name: operator
-    email_configs:
-      - to: '${ALERT_TO}'
+    discord_configs:
+      - webhook_url_file: '/run/secrets/discord_webhook_url'
         send_resolved: true
 
 inhibit_rules:

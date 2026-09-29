@@ -77,7 +77,7 @@ services:
       - minio
 
   # The development inbox. `server/utils/mail.ts` posts to its HTTP API on 8025
-  # whenever no Lettermint key is set, so the verification and reset mails can
+  # whenever no Brevo key is set, so the verification and reset mails can
   # be read as they will actually arrive — a log line cannot show whether the
   # sheet renders. Web interface: http://localhost:8025. Nothing speaks SMTP
   # here; 1025 is published only so an external client can be pointed at it.
