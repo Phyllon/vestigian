@@ -237,12 +237,22 @@ process.on('SIGTERM', () => {
   running = false
 })
 
+// Caps exponential backoff after repeated failures. Long enough to give a
+// transient Bunny-side issue (rate limiting was observed in practice on
+// 2026-09-29 — every isolated manual retry of the exact same call succeeded,
+// but the poller hammering the same endpoint every POLL_INTERVAL_SECONDS with
+// no backoff kept failing, which is consistent with a frequency-based limit
+// the misleading "Maximum 5 triggers" error gave no direct sign of) room to
+// clear, short enough that a real recovery is still noticed the same day.
+const MAX_BACKOFF_SECONDS = 300
+
 const main = async () => {
   log('starting', { LAPI_URL, BUNNY_PULL_ZONE_ID, POLL_INTERVAL_SECONDS })
   await waitUntilReachable()
   log('LAPI and Bunny both reachable')
 
   let lastPushedKey = null
+  let consecutiveFailures = 0
 
   while (running) {
     try {
@@ -259,15 +269,21 @@ const main = async () => {
         log('pushed updated ban list to Bunny', { count: ips.length })
         lastPushedKey = key
       }
+      consecutiveFailures = 0
     } catch (error) {
       // Fails open, the same way server/utils/ratelimit.ts does on a Valkey
       // outage: a broken bouncer must degrade to "not blocking", never to
       // "the site is down", since CrowdSec is defence-in-depth on top of the
       // rate limits that already run inside the app.
-      warn('cycle failed, will retry next interval', { message: error.message })
+      consecutiveFailures += 1
+      warn('cycle failed, backing off', { message: error.message, consecutiveFailures })
     }
 
-    await wait(POLL_INTERVAL_SECONDS * 1000)
+    const backoffSeconds =
+      consecutiveFailures > 0
+        ? Math.min(POLL_INTERVAL_SECONDS * 2 ** consecutiveFailures, MAX_BACKOFF_SECONDS)
+        : POLL_INTERVAL_SECONDS
+    await wait(backoffSeconds * 1000)
   }
 }
 
