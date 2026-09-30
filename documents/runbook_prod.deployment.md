@@ -1,420 +1,580 @@
-# Erstdeployment-Runbook (korrigiert: es gibt keine Cloud-Migration)
+# Production Deployment Runbook — Vestigian on Netcup
 
-**Status (2026-09-07): noch nicht ausgeführt.** Dies ist ein Plan, kein
-Protokoll — keiner der Schritte 0–6 ist bisher gelaufen, es existiert weder
-ein Bunny-Storage-Objekt noch ein deployter Server. Die Zahlen unter
-„Kontext" (28.630 Objekte, 7.527 pending etc.) sind der zuletzt geprüfte
-lokale Stand, nicht das Ergebnis eines Laufs dieses Runbooks — vor der
-tatsächlichen Ausführung mit `pnpm images:reconcile` erneut prüfen, falls
-seither Zeit vergangen ist.
+**Status (2026-09-30): executed.** This replaces the earlier Hetzner-era plan
+(a migration that never ran) with what actually happened: VPS hardening,
+Dokploy, Bunny, mail and the first admin account are live on a Netcup RS 4000
+G12. Follow this in order to reproduce the setup on a fresh instance, or as a
+reference for what's actually running. **Still open:** off-box backups
+(`RESTIC_*`), the Bunny CrowdSec bouncer (a real Bunny-API bug, unresolved —
+see §17), and a CORS wildcard on the API (see §18).
 
-## Kontext — was ich falsch angenommen hatte
+Placeholders to replace throughout: `<vps-ip>` / `<vps-ipv6>`, `<domain>`
+(e.g. `vestigian.org`), `<github-user>/<repo>`, `<dokploy-app-id>` (Dokploy
+appends a random suffix to your project name, e.g. `vestigian-4vgm6i` —
+`docker compose ls` on the VPS shows the real one).
 
-Das vorherige Runbook beschrieb eine Migration R2 → Bunny. **Die ist hinfällig:
-es liegt nichts in der Cloud.** Alles ist lokal. Es gibt kein R2-Bucket, keinen
-Server, keine Produktion.
+**2026-09-30 update:** the CORS-wildcard item below was root-caused and fixed.
+`nuxt.config.ts`'s `security.corsHandler.origin` read
+`process.env.NUXT_PUBLIC_SITE_URL` directly, which only resolves at `pnpm
+build` time — the Dockerfile takes no such build arg, so it always baked in
+as the `http://localhost:3000` fallback regardless of production's real env.
+Fix: `docker/compose.prod.yml`'s `app` service now also sets
+`NUXT_SECURITY_CORS_HANDLER_ORIGIN: ${SITE_URL}` — nuxt-security's own
+`corsHandler` options live in `runtimeConfig.security`, which nitro
+env-overrides at **container start** by its usual `NUXT_<PATH>` convention
+(the same mechanism that already makes `NUXT_PUBLIC_SITE_URL` work). No
+rebuild needed; takes effect on the next `docker compose up` / Dokploy
+redeploy. Verify after deploying:
 
-Was stattdessen vorliegt, geprüft:
-
-|                                        |                                                     |
-| -------------------------------------- | --------------------------------------------------- |
-| Objekte in lokalem MinIO               | **28.630, 15 GiB**                                  |
-| `storage_key` in der DB                | 36.216 distinct                                     |
-| davon `approved` (= gespiegelt)        | 28.629                                              |
-| davon `pending` (= noch nicht geladen) | **7.527**                                           |
-| PMTiles-Basemap                        | **existiert nicht**, `BASEMAP_PROVIDER=openfreemap` |
-
-Daraus folgen zwei Befunde, die beide gewichtiger sind als die gestrichene
-Migration.
-
-**Der Bildspiegel ist zu ~79 % fertig.** 7.527 Bilder fehlen noch.
-`import:images` ist resumierbar; bei 1,2 s Abstand sind das ~2,5 Stunden.
-
-**Die 15 GiB liegen auf genau einer Maschine, ohne Backup.** CLAUDE.md sagt
-selbst, dass die Fotos nicht reproduzierbar sind — ein erneuter Spiegel kostet
-René Voorburgs Bandbreite ein zweites Mal. Ein Plattenschaden auf diesem Laptop
-kostet heute 36.000 fremde Requests. Das ist das dringendste offene Risiko im
-ganzen Projekt und war in keinem bisherigen Plan enthalten.
-
-Aus „Migration" wird also **Erstbefüllung**, und sie bekommt einen Schritt davor.
+```bash
+curl -sI -H "Origin: https://<domain>" "https://<domain>/api/health" | grep -i access-control-allow-origin
+# expect: access-control-allow-origin: https://<domain>  (not *)
+```
 
 ---
 
-## 0. Spiegel fertigstellen (lokal, vor allem anderen)
+## 1. VPS baseline
 
-Solange nur lokal gearbeitet wird, ist das billig und ohne Risiko.
+Ubuntu 24.04 minimal cloud image, root, SSH keys already installed.
 
 ```bash
-pnpm import:images          # nimmt die 7.527 pending auf, resumierbar
-pnpm images:reconcile       # muss danach missing: 0 melden
+apt update && apt full-upgrade -y
+apt install -y curl wget gnupg2 ca-certificates ufw unattended-upgrades needrestart
+timedatectl set-timezone UTC          # correlates cleanly with Loki/Tempo/Prometheus later
+hostnamectl set-hostname <domain>-prod
+dpkg-reconfigure --priority=low unattended-upgrades
 ```
 
-`reconcile` wird ein **orphan** melden — ein Objekt aus meinem Upload-Test,
-dessen DB-Zeile ich gelöscht habe. Unkritisch, nichts löscht Bytes.
+In `/etc/apt/apt.conf.d/50unattended-upgrades`, set:
 
-**Erst wenn `import:images` durch ist, lohnt der Upload nach Bunny** — sonst
-überträgt man zweimal.
-
----
-
-## 1. Bilder lokal → Bunny (Erstbefüllung, keine Migration)
-
-Bunnys S3-API ist seit Juli 2026 **Public Preview**, nicht stabil. Deshalb:
-
-| Komponente                            | Weg                                                                                                                                 |
-| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Upload aus der App (`images.post.ts`) | S3-Preview über den vorhandenen `@aws-sdk/client-s3` — schreibt selten, Fehler sind sichtbar und wiederholbar                       |
-| **imgproxy**                          | **nicht** S3, sondern die Pull-Zone per HTTPS. `IMGPROXY_USE_S3` aus. Umgeht die Preview-API im Lesepfad — und das ist der Hot Path |
-| `reconcile-images.ts`                 | S3-Preview, liest nur Objektlisten                                                                                                  |
-
-```bash
-# Storage Zone in Bunny anlegen (Falkenstein), Pull Zone davor.
-# rclone-Remotes: minio (lokal) und bunny (S3-Preview-Endpoint)
-
-rclone sync minio:vestigian bunny:vestigian --progress --transfers 16 --checksum
-rclone size minio:vestigian && rclone size bunny:vestigian   # müssen übereinstimmen
+```
+Unattended-Upgrade::Automatic-Reboot "true";
+Unattended-Upgrade::Automatic-Reboot-Time "04:00";
 ```
 
-Freigabekriterium, gegen das neue Ziel, ohne Produktionsconfig anzufassen:
+**This reboot is why §13's auto-heal script exists** — it restarts Docker,
+which recreates Traefik with a new internal IP, silently breaking the
+firewall rule that lets external traffic reach it.
+
+## 2. Non-root user
 
 ```bash
-NUXT_STORAGE_ENDPOINT=<bunny-s3-endpoint> \
-NUXT_STORAGE_BUCKET=vestigian \
-NUXT_STORAGE_ACCESS_KEY_ID=<key> \
-NUXT_STORAGE_SECRET_ACCESS_KEY=<secret> \
-pnpm images:reconcile          # missing muss 0 sein
+adduser deploy
+usermod -aG sudo deploy
+mkdir -p /home/deploy/.ssh
+cp /root/.ssh/authorized_keys /home/deploy/.ssh/authorized_keys
+chown -R deploy:deploy /home/deploy/.ssh
+chmod 700 /home/deploy/.ssh && chmod 600 /home/deploy/.ssh/authorized_keys
 ```
 
-**Das lokale MinIO bleibt danach stehen.** Es ist die einzige zweite Kopie, bis
-es eine echte Backup-Strategie gibt.
+**Verify `ssh deploy@<vps-ip>` and `sudo whoami` in a second terminal before
+closing the root session** — this is the one step that locks you out
+permanently if skipped.
 
----
+Then `/etc/ssh/sshd_config.d/99-hardening.conf`:
 
-## 2. Datenbank: lokal → Produktion
-
-**Die konkrete Frage war: Zip-Datei bauen, auf den VPS schieben, dort ein
-Skript entpacken und in die Produktions-DB laden lassen?** Antwort: nein,
-und zwar aus einem einfachen Grund — `pg_dump` im Custom-Format (`-Fc`)
-komprimiert bereits selbst (zlib, vergleichbar mit gzip). Eine zweite
-Kompressionsstufe (Zip) auf eine bereits komprimierte Datei bringt kaum
-etwas, dafür aber zwei zusätzliche, fehleranfällige Schritte (packen,
-entpacken) und ein selbstgeschriebenes Lade-Skript, wo Postgres bereits ein
-fertiges, genau dafür gebautes Werkzeugpaar mitbringt: `pg_dump` /
-`pg_restore`. Kein Skript nötig, das jemand pflegen müsste.
-
-**Größenordnung, gemessen statt geschätzt:** die lokale DB liegt laut
-`documents/summary.md` bei ~190 MB gesamt, davon ~75 MB allein
-`antiquity_*` (siehe unten). Für eine Datenmenge dieser Größe ist der
-einfachste Weg auch der richtige — es gibt hier kein Performance-Problem zu
-lösen, nur ein Korrektheits- und Sequenzproblem.
-
-**Eine echte Entscheidung, nicht nur Mechanik: `pnpm db:snapshot`
-NICHT verwenden.** Dieses Skript existiert für die _nächtlichen_ Backups
-und schließt `antiquity_*`-Zeilen absichtlich aus (Schema bleibt, Tabellen
-kommen leer wieder hoch) — richtig für ein Backup, das jede Nacht läuft und
-notfalls durch `pnpm import:atlas` & Co. wieder gefüllt wird, aber falsch
-für eine **einmalige** Erstbefüllung: das hieße, nach dem Restore auf dem
-VPS ein gutes Dutzend Import-Skripte nachzuziehen
-(`import:atlas`, `import:limes`, `import:tabula-peutingeriana`,
-`import:battles`, `import:ports`, `import:orbis-routes`,
-`import:awmc-features`, `import:awmc-lines`, `import:chrr-coin-hoards`,
-`import:ohm-empire-extents`, `import:column-reliefs`, `import:cities`,
-`import:edh-findspots`, `import:country-boundaries`), von denen jedes noch
-einmal eine andere dritte Quelle anfragt — bei 75 MB Ersparnis, gemessen an
-den ~190 MB Gesamtgröße, ist das ein schlechter Tausch für ein
-Ereignis, das genau einmal passiert. Stattdessen ein vollständiger Dump,
-ohne Ausschluss:
+```
+PermitRootLogin no
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+AllowUsers deploy
+MaxAuthTries 3
+LoginGraceTime 20
+ClientAliveInterval 300
+ClientAliveCountMax 2
+```
 
 ```bash
-# Lokal: vollständiger Dump, nichts ausgeschlossen — anders als db:snapshot
+sshd -t && systemctl reload ssh
+```
+
+Verify root login is refused and `deploy` still works, **in a new terminal**,
+before closing the original session.
+
+## 3. Kernel hardening
+
+`/etc/sysctl.d/99-hardening.conf`:
+
+```
+net.ipv4.conf.all.rp_filter = 1
+net.ipv4.conf.default.rp_filter = 1
+net.ipv4.conf.all.accept_source_route = 0
+net.ipv4.conf.all.accept_redirects = 0
+net.ipv4.conf.all.send_redirects = 0
+net.ipv4.icmp_echo_ignore_broadcasts = 1
+net.ipv4.tcp_syncookies = 1
+net.ipv6.conf.all.accept_redirects = 0
+net.ipv6.conf.all.accept_source_route = 0
+kernel.randomize_va_space = 2
+fs.protected_hardlinks = 1
+fs.protected_symlinks = 1
+```
+
+```bash
+sysctl --system
+```
+
+Don't touch `net.ipv4.ip_forward` — Docker needs it and sets it itself.
+
+## 4. Firewall — ufw, and the Docker gotcha
+
+```bash
+ufw default deny incoming
+ufw default allow outgoing
+ufw allow OpenSSH
+ufw allow 80/tcp
+ufw allow 443/tcp
+ufw enable
+```
+
+**Docker bypasses ufw by default** — published container ports go through
+Docker's own iptables chain, ahead of ufw's rules. Fix with `ufw-docker`
+(review the script before running, same as any curl-to-root install):
+
+```bash
+curl -fsSL https://github.com/chaifeng/ufw-docker/raw/master/ufw-docker -o /tmp/ufw-docker
+less /tmp/ufw-docker
+install -m 755 /tmp/ufw-docker /usr/local/sbin/ufw-docker
+ufw-docker install
+systemctl restart ufw
+```
+
+This alone is **not enough** — see §13, which is the actual, tested fix for
+Traefik specifically (Dokploy's own container, not something this repo's
+compose file manages).
+
+## 5. Docker Engine
+
+```bash
+install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+chmod a+r /etc/apt/keyrings/docker.asc
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) stable" \
+  | tee /etc/apt/sources.list.d/docker.list
+apt update
+apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+usermod -aG docker deploy
+```
+
+`/etc/docker/daemon.json` — the default `json-file` log driver has no cap:
+
+```json
+{ "log-driver": "json-file", "log-opts": { "max-size": "10m", "max-file": "3" } }
+```
+
+```bash
+systemctl restart docker
+```
+
+## 6. CrowdSec (SSH protection)
+
+```bash
+curl -s https://install.crowdsec.net | less   # review first
+curl -s https://install.crowdsec.net | sudo sh
+apt install -y crowdsec crowdsec-firewall-bouncer-iptables
+```
+
+**The install script only adds the APT repo — it does not install the
+`crowdsec` package itself.** `apt install -y crowdsec` is a separate,
+required step, or `cscli` won't exist.
+
+```bash
+cscli collections install crowdsecurity/sshd
+cscli collections install crowdsecurity/linux
+systemctl enable --now crowdsec crowdsec-firewall-bouncer
+```
+
+## 7. Dokploy
+
+```bash
+curl -sSL https://dokploy.com/install.sh | less   # review first
+curl -sSL https://dokploy.com/install.sh | sh
+```
+
+Dashboard on port 3000, **deliberately not opened in ufw** — reach it via
+tunnel:
+
+```bash
+ssh -N -L 3000:localhost:3000 -L 3001:localhost:3001 deploy@<vps-ip>
+```
+
+## 8. DNS (Hostinger)
+
+hPanel → Domains → **DNS** (not "DNS Zone Editor" — Hostinger renamed it) →
+your domain → **DNS records**.
+
+| Type           | Name            | Value              | Purpose                          |
+| -------------- | --------------- | ------------------ | -------------------------------- |
+| A              | `origin`        | `<vps-ip>`         | Bunny's origin for the main site |
+| AAAA           | `origin`        | `<vps-ipv6>`       | same, IPv6                       |
+| A              | `images-origin` | `<vps-ip>`         | Bunny's origin for imgproxy      |
+| AAAA           | `images-origin` | `<vps-ipv6>`       | same, IPv6                       |
+| CNAME or ALIAS | `@` (apex)      | `<zone>.b-cdn.net` | public hostname, via Bunny       |
+
+**Apex can't take a plain CNAME** (RFC restriction) — Hostinger's fix is
+picking **CNAME** as the type with `@` as the name; it auto-classifies as an
+ALIAS. **If Hostinger has an existing A record at `@`** (default parking
+page), delete it first — ALIAS and A can't coexist on the same name.
+
+## 9. Bunny — site pull zone
+
+1. **CDN → Add Pull Zone**. Origin Type: **Origin URL** = `https://origin.<domain>`
+2. **Forward Host Header: ON** — this is what lets the app see the real
+   public hostname (for `SITE_HOST`, CSP, cookies) even though Bunny connects
+   to `origin.<domain>`, not the public name.
+3. **Hostnames tab** → add `<domain>` → once the apex ALIAS resolves, click
+   **Verify & Activate SSL** → toggle **Force SSL**.
+4. **Caching tab → "Strip response cookies" → OFF.** Default-on on some
+   zones; if left on, Bunny silently strips every `Set-Cookie` header from
+   origin responses — login works server-side (200, correct session cookie
+   in the origin's own response) but nothing ever reaches the browser. This
+   cost an entire evening to find; check this **first** if login "does
+   nothing."
+5. **Origin lock — a secret header, not an IP allowlist.** Bunny's edge IP
+   list changes over time and would need re-syncing monthly; a shared secret
+   avoids that entirely. **Edge Rules → Add Edge Rule**:
+   - Action: Set Request Header, Name `X-Origin-Key`, Value: `openssl rand -hex 32`
+   - Condition: Request URL, Match Any, `*`
+
+   In `docker/compose.prod.yml`, both app routers require this header
+   (`Header('X-Origin-Key', '${ORIGIN_KEY:?...}')`) — anything reaching
+   Traefik without it gets a 404, so `x-real-ip` trust
+   (`NUXT_BEHIND_TRUSTED_PROXY=true`) can't be spoofed by connecting to the
+   origin directly. Set `ORIGIN_KEY` in Dokploy's env to the same value.
+
+## 10. Bunny — image storage
+
+1. **Storage → Add Storage Zone.** Region: closest to the VPS (Frankfurt for
+   a Nuremberg-area VPS) — Falkenstein is a CDN PoP name, not an actual
+   storage region, despite older docs suggesting it.
+2. **Enable S3 compatibility at creation** — cannot be added to an existing
+   zone.
+3. **Access tab**: `BUNNY_S3_ENDPOINT` = the API endpoint shown;
+   `BUNNY_ACCESS_KEY_ID` = the storage zone's **name**; `BUNNY_SECRET_ACCESS_KEY`
+   = the storage zone's **Password**. These aren't a separate generated pair —
+   Bunny's S3 layer reuses the native storage credentials directly.
+4. **CDN → Add Pull Zone** for images. Origin Type: **Origin URL** =
+   `https://images-origin.<domain>` (not the storage zone directly — see
+   below). **Forward Host Header: OFF** this time (opposite of §9) — imgproxy
+   doesn't care what public hostname a visitor used.
+5. **Why not "Bunny Storage Zone" as the origin type:** the app never serves
+   raw stored files. `server/api/images/[id]/[preset].get.ts` redirects to a
+   **signed imgproxy URL**, built from `IMAGE_BASE_URL` in
+   `server/utils/images.ts`. That URL only resolves correctly if the pull
+   zone's origin is imgproxy itself (doing the signing/resizing), not the raw
+   storage bucket. `IMAGE_HOST=images-origin.<domain>` is what Traefik's
+   `images` router matches on.
+6. Migrating existing local images: Bunny's S3 API is public preview and not
+   trusted for bulk transfer — use `rclone` instead, on the VPS (datacenter
+   speed both ways):
+   ```bash
+   rclone config create bunny s3 provider=Other \
+     access_key_id=<storage-zone-name> secret_access_key=<storage-zone-password> \
+     endpoint=<BUNNY_S3_ENDPOINT>
+   rclone sync minio:vestigian bunny:<storage-zone-name> --progress --transfers 16 --checksum
+   rclone size minio:vestigian && rclone size bunny:<storage-zone-name>   # must match
+   ```
+   `pnpm images:reconcile` only checks `site_images`, not
+   `column_relief_plates` — every `column-reliefs/*` object will show as a
+   false-positive "orphan." Expected, not a bug.
+
+## 11. GHCR — case and visibility
+
+`.github/workflows/deploy.yml` tags the image as `ghcr.io/${{ github.repository }}`.
+**GitHub preserves registration case, but OCI image references must be
+lowercase** — this fails the whole build before anything publishes. Fix
+(already applied in this repo): a `lowercase repository name` step using
+`${GITHUB_REPOSITORY,,}`, referenced in every tag instead of the raw
+`github.repository`.
+
+Make the GHCR package **public** (Package settings → Danger Zone → Change
+visibility) rather than storing a registry credential in Dokploy — simpler,
+and no `write:packages`-scoped token sitting on the VPS.
+
+## 12. Deploying via Dokploy
+
+**Use the plain "Git" provider, not "GitHub App."** The GitHub App flow needs
+a publicly reachable webhook callback, which conflicts with keeping Dokploy's
+dashboard off the public internet — it fails with "Hook url is not supported
+because it isn't reachable." Git provider needs only an HTTPS clone URL, no
+callback.
+
+Dokploy → Project → add Compose service:
+
+- Provider: **Git**, HTTPS URL: `https://github.com/<github-user>/<repo>.git`, branch `main`
+- Compose Path: `docker/compose.prod.yml`
+- **Environment tab**: paste every `KEY=value` the compose file references
+  (grep it: `grep -oE '\$\{[A-Z_]+' docker/compose.prod.yml | sort -u`) —
+  Dokploy writes these to a `.env` file next to the compose file; Compose
+  picks it up automatically, this isn't Dokploy-specific magic.
+
+**`pull_policy: always` is set on the `app` service specifically** — Dokploy's
+real deploy command is `up -d --build --remove-orphans`; `--build` only
+rebuilds services with a `build:` directive (`bunny-bouncer`, `backup`), never
+re-checking the registry for an `image:`-only service. Without this, every
+deploy silently reused whatever `ghcr.io/.../vestigian:latest` was first
+pulled, regardless of new pushes — a real bug that stayed invisible for hours
+because every earlier fix that night only touched the compose file itself
+(which Dokploy does correctly re-clone from git every time), never the app's
+actual code. **Don't add `pull_policy: always` to other services** —
+`postgres`/`valkey` use pinned version tags where it's a no-op, and forcing a
+pull on every deploy for a stateful service risks an unplanned image upgrade
+as a side effect of pushing unrelated code.
+
+**Webhook auto-deploy doesn't work here, by design.** Dokploy's webhook URL
+defaults to `localhost:3000`, meaningful only inside the SSH tunnel that
+generated it — a GitHub-hosted runner can't reach it, and opening it up would
+undo keeping the dashboard off the public internet. `deploy.yml` only builds
+and publishes; deploy is a manual click in Dokploy after each push, which
+also matches this repo's existing philosophy of `release.yml` requiring
+`workflow_dispatch` rather than auto-releasing.
+
+**The app and imgproxy services must join Dokploy's own network explicitly:**
+
+```yaml
+networks:
+  app:
+    networks: [default, dokploy-network]
+  imgproxy:
+    networks: [default, dokploy-network]
+networks:
+  default:
+    name: <dokploy-app-id>_default # get the real name: docker network ls
+    external: true
+  dokploy-network:
+    external: true
+```
+
+Without this, Traefik discovers the service's labels fine (a Docker API
+read) but has no network path to actually reach the container — surfaces as
+a permanently healthy container behind a router returning 503 "no available
+server." **Don't set a custom `name:` on the default network** — Compose's
+own project-scoped name (from the `-p` flag Dokploy passes) is what
+already-running containers expect; forcing a name broke every one of them at
+once.
+
+## 13. Traefik firewall — the recurring one
+
+Traefik is Dokploy's own container, outside this repo's compose file, so
+`ufw-docker` (§4) never covers it. Its internal IP changes on every restart
+(the 04:00 reboot from §1, a manual restart, a Dokploy platform update), and
+the firewall rule pointing at the _old_ IP silently stops matching — this
+was the single largest time sink of this whole deployment.
+
+One-time immediate fix, get the current IP first:
+
+```bash
+sudo iptables -t nat -L DOCKER -n | grep -E "dpt:80 |dpt:443 "   # shows the real current target IP
+ufw route allow proto tcp from any to <that-ip> port 80
+ufw route allow proto tcp from any to <that-ip> port 443
+```
+
+**Permanent fix — self-healing, runs daily after the scheduled reboot:**
+
+```bash
+tee /usr/local/sbin/sync-traefik-firewall.sh > /dev/null <<'SCRIPT'
+#!/bin/bash
+set -euo pipefail
+CURRENT_IP=$(iptables -t nat -L DOCKER -n | awk '/tcp dpt:443 to:/ {n=split($NF,a,":"); print a[2]; exit}')
+[ -z "$CURRENT_IP" ] && exit 0
+ufw route allow proto tcp from any to "$CURRENT_IP" port 80 || true
+ufw route allow proto tcp from any to "$CURRENT_IP" port 443 || true
+while read -r rule; do
+  ip=$(echo "$rule" | grep -oP '(?<=-d )[0-9.]+(?=/32)')
+  [ -n "$ip" ] && [ "$ip" != "$CURRENT_IP" ] && iptables ${rule/-A/-D}
+done < <(iptables -S ufw-user-forward | grep -E -- '--dport (80|443) -j ACCEPT')
+SCRIPT
+chmod +x /usr/local/sbin/sync-traefik-firewall.sh
+```
+
+The stale-rule cleanup (the `while read` loop) matters: Docker reuses freed
+IP addresses, and a leftover allow-rule for an old Traefik IP could
+eventually authorize public access to some unrelated future container that
+happens to get reassigned that same address.
+
+```bash
+tee /etc/systemd/system/sync-traefik-firewall.service > /dev/null <<'EOF'
+[Unit]
+Description=Keep the firewall pointed at Traefik's current internal IP
+After=docker.service
+Requires=docker.service
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/sync-traefik-firewall.sh
+EOF
+tee /etc/systemd/system/sync-traefik-firewall.timer > /dev/null <<'EOF'
+[Unit]
+Description=Run sync-traefik-firewall daily after the scheduled reboot
+[Timer]
+OnCalendar=*-*-* 04:15:00
+Persistent=true
+[Install]
+WantedBy=timers.target
+EOF
+systemctl daemon-reload
+systemctl enable --now sync-traefik-firewall.timer
+```
+
+Once daily (15 min after the reboot) is deliberate, not a compromise: the
+only expected trigger is that reboot. A manual restart or platform update is
+rare enough to fix by hand the same way, and running this only once a day
+avoids the risk of a buggy unattended deletion routine causing a _new_,
+harder-to-diagnose outage.
+
+## 14. Database migration
+
+```bash
+# local: full dump, not pnpm db:snapshot (which excludes antiquity_* —
+# correct for nightly backups, wrong for a one-time initial load)
 pg_dump "$NUXT_DATABASE_URL" -Fc --no-owner --no-acl -f vestigian-full.dump
+pg_restore --list vestigian-full.dump | wc -l   # plausibility check
 
-# Vor dem Versand: die Dump-Datei selbst prüfen, nicht erst nach dem Restore
-pg_restore --list vestigian-full.dump | wc -l   # grobe Plausibilität: Tabellenzahl
+rsync -avP vestigian-full.dump deploy@<vps-ip>:/tmp/   # apt install rsync first if missing
 
-# Übertragung — rsync statt scp, wegen --partial (fortsetzbar, falls die
-# Verbindung während der Übertragung abbricht; bei ~190 MB unwahrscheinlich,
-# aber ohne Zusatzkosten)
-rsync -avP vestigian-full.dump <vps>:/tmp/
-
-# Auf dem VPS: Postgres-Container muss stehen und initdb bereits gelaufen
-# sein (postgis/pg_trgm/unaccent-Extensions kommen aus
-# docker/initdb/01-extensions.sql beim allerersten Start des leeren Volumes),
-# aber NICHT `pnpm db:migrate` — der Dump bringt das komplette Schema schon
-# mit, ein vorheriges migrate würde auf bereits existierende Relationen
-# treffen.
-docker compose -f docker/compose.prod.yml up -d postgres
-docker exec -i vestigian-postgres-1 pg_restore \
+# on the VPS, restore into the already-running container — --clean --if-exists
+# makes this safe against the schema the app's own startup migration already created
+docker exec -i <postgres-container> pg_restore \
   --no-owner --no-acl --clean --if-exists \
   -U vestigian -d vestigian < /tmp/vestigian-full.dump
+docker compose -f <compose-path> restart app   # reconnect cleanly, not against dropped/recreated objects
 ```
 
-`--clean --if-exists` macht den Restore wiederholbar, falls beim ersten
-Versuch etwas schiefgeht — ohne diese beiden Flags bricht ein zweiter
-Versuch an "relation already exists" ab. `--no-owner --no-acl`, weil der
-Dump-Rollenname (`vestigian`, lokal) und der Ziel-Rollenname zwar hier
-übereinstimmen, aber nichts garantiert, dass das immer so bleibt — billige
-Absicherung gegen einen Owner-Mismatch-Fehler, der den ganzen Restore
-abbrechen würde.
+## 15. Basemap (PMTiles)
 
-**Bilder-Metadaten und Bild-Bytes laufen getrennt, müssen aber beide vor
-dem Go-Live fertig sein.** `site_images.storage_key` kommt mit diesem Dump
-mit; die eigentlichen Objekte wandern über den `rclone sync` aus Schritt 1.
-Storage-Keys leiten sich aus Datenbank-IDs ab, nie aus Dateinamen (siehe
-CLAUDE.md, "Security invariants") — solange beide Schritte irgendwann vor
-dem ersten echten Seitenaufruf abgeschlossen sind, spielt die Reihenfolge
-zwischen ihnen keine Rolle. Die Cichorius-Platten der Trajanssäule
-(`column_relief_plates`) hängen genauso von beidem ab und laufen über
-denselben `rclone sync`, nicht separat.
-
-**Kein Zwischenschritt für Valkey nötig.** Sitzungen, Rate-Limits und der
-Tile-Cache sind laut Design regenerierbar (siehe CLAUDE.md, "Valkey") — ein
-leerer Valkey auf dem VPS ist der korrekte Startzustand, kein
-Migrationsschritt.
-
----
-
-## 3. Basemap beschaffen
-
-Existiert noch gar nicht. Produktion setzt `BASEMAP_PROVIDER=pmtiles` voraus.
+Production hard-codes `NUXT_PUBLIC_BASEMAP_PROVIDER: pmtiles` — the map is
+blank without this.
 
 ```bash
-# Europa+Mittelmeer-Extrakt von maps.protomaps.com holen (~15–25 GB),
-# nach Bunny hochladen, dann:
-#   NUXT_PUBLIC_BASEMAP_PROVIDER=pmtiles
-#   NUXT_PUBLIC_BASEMAP_PMTILES_URL=https://<pull-zone>.b-cdn.net/basemap.pmtiles
+# on the VPS, inside tmux (long-running, survives a dropped SSH session)
+tmux new -s basemap
+curl -L -o go-pmtiles.tar.gz https://github.com/protomaps/go-pmtiles/releases/download/v1.31.2/go-pmtiles_1.31.2_Linux_x86_64.tar.gz
+tar -xzf go-pmtiles.tar.gz
+./pmtiles extract https://build.protomaps.com/<YYYYMMDD>.pmtiles basemap.pmtiles --bbox=-12,22,48,60
+rclone copyto basemap.pmtiles bunny:<images-storage-zone>/basemap.pmtiles --progress
+rm basemap.pmtiles   # ~40GB extract, free the disk
 ```
 
-Reproduzierbar, also risikolos — jederzeit neu beziehbar.
+Set `PMTILES_URL=https://<images-zone>.b-cdn.net/basemap.pmtiles` in Dokploy,
+Deploy. **Env var changes need a redeploy** — Dokploy writes to `.env`, the
+running container's environment is fixed at creation.
 
----
+## 16. Mail — Brevo
 
-## 4. Erstes Deployment
+Replaces Lettermint (operator's own choice). `server/utils/mail.ts`'s
+`sendThroughBrevo` posts to `https://api.brevo.com/v3/smtp/email` with
+`api-key` header — a different call shape than Lettermint's, already applied.
 
-### 4.0. Wie die Werte sicher auf den Server kommen
+1. Brevo → **Settings → SMTP & API → API Keys** → generate → `MAIL_API_KEY`
+2. Brevo → **Senders, Domains & Dedicated IPs → Domains** → add `<domain>` →
+   note the DKIM and DMARC values shown (account-specific, copy exactly)
+3. Hostinger DNS, in addition to §8's records:
 
-**Geprüft, nicht angenommen** (`docs.dokploy.com/docs/core/variables` und
-`.../docker-compose`, live abgerufen): Variablen, die man in Dokploys eigener
-UI unter "Environment" einträgt, landen laut Dokploys eigener Dokumentation
-selbst **in einer `.env`-Datei im Deployment-Verzeichnis** — sie werden
-"nicht automatisch in Container injiziert", sondern müssen im Compose-File
-über `env_file` oder `${VAR}` referenziert werden, genau wie eine von Hand
-angelegte `.env` neben dem Compose-File auch. Ob diese Datei serverseitig
-zusätzlich verschlüsselt abgelegt wird, sagt Dokploys öffentliche
-Dokumentation nicht — **nicht verifizierbar, also nicht als Tatsache
-behandeln.** Praktisch heißt das: Dokploys UI bietet keinen nachweisbaren
-Sicherheitsgewinn gegenüber einer selbst verwalteten `.env`-Datei, nur eine
-andere Eingabemaske für dieselbe Ablageform.
+   | Type  | Name               | Value                                              |
+   | ----- | ------------------ | -------------------------------------------------- |
+   | CNAME | `mail._domainkey`  | `b1.<domain-with-dashes>.dkim.brevo.com`           |
+   | CNAME | `mail2._domainkey` | `b2.<domain-with-dashes>.dkim.brevo.com`           |
+   | TXT   | `_dmarc`           | `v=DMARC1; p=none; rua=mailto:rua@dmarc.brevo.com` |
 
-**Deshalb: Dokploys Variablen-UI für die echten Secrets gar nicht benutzen.**
-Stattdessen:
+   **Delete any existing `_dmarc` TXT record first** — only one is allowed
+   per domain. Without DKIM/DMARC passing, Brevo won't deliver to
+   Google/Yahoo/Microsoft at all (their 2024+ bulk-sender requirements).
 
-1. `.env` lokal pflegen (liegt bereits in `.gitignore`, verlässt die eigene
-   Maschine nie unverschlüsselt außer per SSH).
-2. Einmalig auf den VPS kopieren — SSH ist ohnehin verschlüsselter Transport,
-   kein zusätzliches Werkzeug nötig:
-   ```bash
-   rsync -avP --chmod=600 .env <vps>:/pfad/zum/deployment-verzeichnis/.env
+4. Back in Brevo, click **Verify**/**Authenticate** on the domain.
+5. `MAIL_FROM=<Name> <no-reply@<domain>>`, matching the verified sender exactly.
+
+## 17. Alerting — Discord, not email or Telegram
+
+Deliberately not email: this file is in a public repo, so a personal address
+can't live in it. Telegram (also natively supported since Alertmanager v0.24)
+was tried first and dropped only because of trouble with Telegram's own
+account verification — not a config problem.
+
+**Alertmanager's config parser does not expand `${VAR}` placeholders at
+all** (upstream rejected adding it) — a bare `${ALERT_FROM}`-style value in
+`alertmanager.yml` is read as that literal string, silently, with no startup
+error. This is why the original email-based alerting never actually worked.
+Fix: everything that isn't a live secret is a literal value in the file;
+the one real secret (`webhook_url`) is file-backed via Compose's
+environment-sourced secrets, native, no relay container:
+
+```yaml
+# compose.prod.yml
+secrets:
+  discord_webhook_url:
+    environment: DISCORD_WEBHOOK_URL
+services:
+  alertmanager:
+    secrets: [discord_webhook_url]
+```
+
+```yaml
+# alertmanager.yml
+receivers:
+  - name: operator
+    discord_configs:
+      - webhook_url_file: '/run/secrets/discord_webhook_url'
+        send_resolved: true
+```
+
+Discord → channel → Edit Channel → **Integrations → Webhooks → New Webhook**
+→ copy URL → `DISCORD_WEBHOOK_URL` in Dokploy. No bot, no phone
+verification, unlike Telegram.
+
+Test:
+
+```bash
+docker exec <alertmanager-container> wget -qO- \
+  --post-data='[{"labels":{"alertname":"test","severity":"warning"}}]' \
+  --header='Content-Type: application/json' http://localhost:9093/api/v2/alerts
+```
+
+(image is minimal — no `curl` inside it, use `wget`. Port 9093 also isn't
+published to the host, so this must run via `docker exec`, not directly.)
+
+## 18. First admin account
+
+**No in-app bootstrap path, by design** — an unauthenticated
+role-escalation endpoint would be worse than one manual SQL statement.
+
+1. Register normally, confirm the email.
+2. ```bash
+   docker exec -it <postgres-container> psql -U vestigian -d vestigian \
+     -c "UPDATE users SET role = 'admin' WHERE email = '<your-email>';"
    ```
-3. Auf dem VPS: `chmod 600 .env`, Eigentümer der Deploy-User, sonst niemand.
-   Docker Compose lädt diese Datei automatisch, ganz ohne Dokploy-Konfiguration
-   — genau der zweite, von Dokploys eigener Doku bestätigte Weg.
-4. Rotation eines Secrets bedeutet: lokal neu generieren, Datei erneut
-   `rsync`en, redeploy. Kein Live-Edit über die UI, wenn deren Weg ohnehin
-   umgangen wird.
+3. Reload the site — role is re-read from the DB on every request, no
+   re-login needed.
 
-**Eine echte Verschlüsselung-bei-Ruhe, verifiziert:** Dokploy unterstützt
-sechs externe Secret-Provider (HashiCorp Vault/OpenBao, Infisical, AWS
-Secrets Manager, Doppler, Azure Key Vault, Scaleway Secret Manager) über die
-Syntax `${{vault.<provider>.<pfad>:<feld>}}` — laut eigener Doku werden
-diese Werte **"nie in der Dokploy-Datenbank gespeichert"**, sondern beim
-Deploy vom Provider abgerufen und direkt injiziert. Für dieses Projekt
-(ein VPS, eine handvoll Secrets, €27/Monat-Budget) ist ein zusätzlicher
-Vault-Dienst voraussichtlich unverhältnismäßig — dieselbe Abwägung, die
-CrowdSec-Alternativen wie Wazuh oder SafeLine schon aus Ressourcengründen
-ausschließt (siehe `.claude/rules/security-and-governance.md`). Falls doch
-gewünscht: **OpenBao** (Open-Source-Fork von Vault, keine Lizenzfrage —
-dieselbe Überlegung wie Valkey statt Redis) oder **Infisical** (ebenfalls
-quelloffen, selbst hostbar) passen besser zu diesem Projekt als eine
-US-SaaS wie Doppler, aus denselben EU/Open-Source-Gründen wie der Rest des
-Stacks.
-
-**Nie:** Secrets ins Dockerfile backen, per `docker run -e SECRET=...` auf
-einer geteilten Shell übergeben (landet in `docker inspect`/Shell-History),
-oder in einen Chat/E-Mail/Ticket einfügen, um sie "kurz rüberzuschicken" —
-die `.env`-Datei per `rsync` über SSH ist genauso schnell und verlässt nie
-einen unverschlüsselten Kanal.
+**If login appears to do nothing (no session, `/admin` redirects to login):**
+first suspect is §9's "Strip response cookies" setting on Bunny, not the app.
+Confirmed with:
 
 ```bash
-# Dokploy-Env
-BUNNY_S3_ENDPOINT / BUNNY_BUCKET / BUNNY_ACCESS_KEY_ID / BUNNY_SECRET_ACCESS_KEY
-IMAGE_BASE_URL=https://<pull-zone>.b-cdn.net
-PMTILES_URL=https://<pull-zone>.b-cdn.net/basemap.pmtiles
-NUXT_BEHIND_TRUSTED_PROXY=false        # bis Schritt 5 steht!
+docker exec <app-container> node -e '
+fetch("http://127.0.0.1:3000/api/auth/login", {
+  method: "POST", headers: { "content-type": "application/json" },
+  body: JSON.stringify({ email: "...", password: "..." }),
+}).then((r) => console.log(r.status, r.headers.get("set-cookie")))'
 ```
 
-Redeploy ist zwingend, nicht nur ein Env-Wechsel: `mapAssetOrigins` und
-`imageOrigin` in `nuxt.config.ts` werden **zur Buildzeit** aufgelöst, die CSP
-nennt sonst den alten Host.
+If this (bypassing Traefik/Bunny entirely, straight to the app's own port)
+shows a correct `Set-Cookie`, but the same request through
+`https://<domain>` doesn't, the app is innocent — it's Bunny stripping it.
 
-Prüfen: Karte laden, Konsole auf CSP-Verstöße ansehen, ein Site-Panel mit Foto
-öffnen, `curl -I https://<image-host>/r/card/<key>` → 200, `image/webp`.
+## 19. Still open
 
----
-
-## 5. Origin-Firewall — erst danach `BEHIND_TRUSTED_PROXY=true`
-
-`true` ohne diese Regel ist **schlechter als `false`**: die App glaubt dann einen
-Header, den jeder setzen kann, der die Hetzner-IP findet — und bekommt pro
-Request einen frischen Rate-Limit-Bucket.
-
-Hetzner Cloud Console → Firewall, eingehend: 80/443 nur aus Bunnys Edge-Ranges
-(`https://api.bunny.net/system/edgeserverlist/plain`), 22 nur von der eigenen
-Adresse, sonst nichts. Liste ändert sich gelegentlich → monatlich nachziehen.
-
-```bash
-curl -m 5 https://<origin-ip>/api/health    # muss timeouten
-curl -m 5 https://<site-host>/api/health    # muss 200 liefern
-```
-
-Beides muss stimmen, dann `NUXT_BEHIND_TRUSTED_PROXY=true`.
-
----
-
-## 6. CrowdSec-Bouncer
-
-**Geändert seit der ersten Fassung dieses Runbooks: statt des
-Traefik-Plugin-Bouncers unten gibt es jetzt `docker/security/bunny-bouncer/`,
-als eigener Service in `docker/compose.prod.yml` bereits verdrahtet.** Grund
-für den Wechsel: der Traefik-Bouncer blockt erst nach dem TLS-Handshake, also
-auf dieser Maschine; der Bunny-Bouncer blockt an Bunnys Edge, bevor die
-Anfrage die Box überhaupt erreicht — genau der Unterschied, den der
-„Offen"-Abschnitt unten schon als Lücke benannt hatte. Die
-Traefik-Plugin-Route bleibt unten dokumentiert (Alternative, keine Ergänzung —
-nicht beide gleichzeitig betreiben), falls der Bunny-Weg aus irgendeinem Grund
-verworfen wird.
-
-CrowdSec ist zweigeteilt: die Engine _erkennt_ und schreibt eine Entscheidung,
-ein _Bouncer_ liest sie und blockiert. Aktuell läuft nur die erste Hälfte —
-`cscli decisions list` zeigt Bans, der Client wird weiter bedient.
-
-### 6a. Was der Bunny-Bouncer tatsächlich braucht
-
-Was er tut und warum, steht ausführlich im Kopfkommentar von
-`docker/security/bunny-bouncer/bouncer.mjs` — hier nur der Deploy-Teil.
-
-**Wichtig, weil oft missverstanden: der Bunny-Bouncer ersetzt weder Schritt 5
-(Origin-Firewall) noch braucht er das Traefik-Plugin aus 6b.** Er ist
-zusätzlich zu Schritt 5, nicht statt dessen — ohne die Hetzner-Firewall kann
-ein Angreifer Bunny komplett umgehen und die Hetzner-IP direkt ansprechen,
-womit jede Sperre, die der Bouncer bei Bunny setzt, wirkungslos wird. Das
-Traefik-Plugin aus 6b wird durch den Bunny-Bouncer dagegen tatsächlich
-überflüssig — beides zu betreiben blockt doppelt und verwaltet zwei
-Entscheidungsquellen für dieselbe Sperre.
-
-Neue Env-Variablen (zusätzlich zu denen aus Schritt 4):
-
-```bash
-CROWDSEC_BUNNY_BOUNCER_KEY=<eigener Key, unabhängig vom Traefik-Key>
-BUNNY_API_KEY=<Bunny-Account-API-Key>
-BUNNY_SITE_PULL_ZONE_ID=<Pull-Zone-ID vor SITE_HOST, NICHT die Bilder-Zone>
-```
-
-`CROWDSEC_BUNNY_BOUNCER_KEY` wird über `BOUNCER_KEY_bunny` auf dem
-`crowdsec`-Service automatisch registriert — kein manuelles `cscli bouncers add`
-nötig, anders als beim Traefik-Weg unten.
-
-**Verifikation, bevor produktivem Traffic vertraut wird** — die Bunny-Enum-Werte
-im Bouncer (`ActionType`, Trigger-`Type`, `PatternMatchingType`) stammen aus
-Bunnys API-Referenz, nicht aus einem Test gegen einen echten Account:
-
-```bash
-docker exec vestigian-crowdsec-1 cscli decisions add --ip <test-ip> -d 2m
-# 30–60s warten (POLL_INTERVAL_SECONDS), dann von <test-ip> aus, oder via Proxy:
-curl -I https://<site-host>/                     # muss 403 liefern
-docker exec vestigian-crowdsec-1 cscli decisions delete --all
-# Bunny-Dashboard → Pull Zone → Edge Rules: die Regel "crowdsec-bouncer-managed"
-# muss danach wieder leer/deaktiviert sein.
-```
-
-Schlägt der 403 fehl, im Bunny-Dashboard nachsehen, was die Regel tatsächlich
-enthält, und `PatternMatchingType`/`Type` im Bouncer-Code danach korrigieren —
-nicht raten, sondern gegen das beobachtete Verhalten anpassen.
-
-### 6b. Traefik-Plugin-Bouncer (Alternative, aktuell nicht der gewählte Weg)
-
-```bash
-docker exec vestigian-crowdsec-1 cscli bouncers add traefik-bouncer
-```
-
-Dokploy UI → Traefik → **statische** Config: Plugin `crowdsec-bouncer-traefik-plugin`
-registrieren. Dann dynamische Config: Middleware mit `crowdsecLapiHost: crowdsec:8080`
-und dem Key. Zuletzt am App-Router anhängen:
-`app-rate-limit@file,crowdsec@file`.
-
-```bash
-docker exec vestigian-crowdsec-1 cscli decisions add --ip <test-ip> -d 2m
-curl -I https://<site-host>/                     # 403
-docker exec vestigian-crowdsec-1 cscli decisions delete --all
-```
-
-**Vorher klären:** `docker/traefik/` ist an keinen Container gemountet. Dokploy
-hält die echte Config in `/etc/dokploy/traefik/`. Die drei bestehenden
-`@file`-Middlewares haben womöglich nie aufgelöst:
-
-```bash
-ls /etc/dokploy/traefik/dynamic/
-docker logs <traefik-container> 2>&1 | grep -i "middleware.*not found"
-```
-
-Entweder die Repo-Dateien dorthin kopieren und das Repo als Quelle behandeln,
-oder `docker/traefik/` löschen. Keine vierte Middleware auf einen ungeprüften
-Mechanismus setzen.
-
----
-
-## Reihenfolge und Rollback
-
-0 → 1 → 2 → 3 → 4 → 5 → 6, einzeln deployen.
-
-| Schritt      | Rollback                                                                                                                                                                                                                           |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1 Upload     | nichts zu tun, MinIO bleibt unangetastet                                                                                                                                                                                           |
-| 2 Datenbank  | leeres `postgres-data`-Volume löschen und neu starten (nichts Produktives hat je darauf gelesen) — `docker compose down -v postgres && docker compose up -d postgres`, dann Restore erneut versuchen                               |
-| 4 Deployment | Env zurück, redeploy                                                                                                                                                                                                               |
-| 5 Firewall   | Regel löschen, `BEHIND_TRUSTED_PROXY=false`                                                                                                                                                                                        |
-| 6 Bouncer    | `bunny-bouncer`-Service stoppen (`docker compose stop bunny-bouncer`); die Edge Rule bleibt liegen, aber deaktiviert sich selbst beim nächsten Zyklus nicht mehr — im Bunny-Dashboard manuell deaktivieren. Erkennung läuft weiter |
-
-## Offen
-
-- **Off-box-Backup der 15 GiB.** Bis Schritt 1 läuft, existieren sie einmal.
-  Danach zweimal (lokal + Bunny), aber Bunny ist kein Backup, sondern
-  Auslieferung. Das dringendste ungelöste Risiko.
-- ~~Edge-Bouncer statt Traefik-Bouncer~~ — **erledigt**, siehe 6a. Offen bleibt
-  nur die Verifikation der Bunny-Enum-Werte gegen den echten Account (Schritt
-  6a, letzter Absatz) — ungetestet, weil aus dieser Umgebung kein Bunny-Account
-  erreichbar ist.
-- Bunny Shield im Dashboard aktivieren (Free-Tier: WAF + L7-DDoS) — zusätzlich
-  zum Bouncer, nicht statt dessen: Shield deckt volumetrische L7-Floods breiter
-  ab, der Bouncer setzt CrowdSecs eigene, aus den Anwendungslogs abgeleiteten
-  Entscheidungen um.
-- **Bunny-Pull-Zone vor `SITE_HOST`: "Override Cache Control" muss aus
-  bleiben.** Die App sendet inzwischen für jede Route einen bewussten
-  `cache-control` (Standard `private, no-store`, mit begründeten Ausnahmen für
-  Kacheln, öffentliche Feeds usw. — `server/middleware/security-defaults.ts`,
-  `nuxt.config.ts`s `routeRules`). Ist die Override-Option in der Pull Zone
-  aktiviert, ignoriert Bunny das komplett und cached nach eigener TTL
-  unabhängig vom Origin-Header — das würde `/api/me`, die Moderationsqueue
-  oder einen DSGVO-Export (`auth/export.get.ts`) am Edge cachen und dem
-  nächsten Besucher derselben URL ausliefern. Ungetestet aus dieser Umgebung,
-  aus demselben Grund wie die Bunny-Enum-Werte oben — kein Bunny-Account
-  erreichbar. Die Bild-Pull-Zone ist davon ausdrücklich ausgenommen: die ist
-  über die imgproxy-URL, nicht über eine Session, adressiert und soll hart
-  gecacht werden.
-- **Lizenzanfrage Fundmünzen — zum Go-Live stellen.** AFE (RGK Frankfurt,
-  afe@dainst.de) und das Portable Antiquities Scheme um eine ausdrückliche
-  Lizenz für Einzelfundmünzen bitten. Bis dahin verlinkt die Site-Ansicht
-  nur (`shared/utils/coin-find-databases.ts`). Mit Lizenz wird daraus ein
-  Import nach CHRR-Vorbild — Fundorte nie genauer als die Quelle öffentlich
-  zeigt, keine Findernamen. Stand und Begründung:
-  `.claude/rules/antiquity-basemaps.md`, „Single coin finds".
+- **`RESTIC_*` backups.** Nightly dump still never leaves the box. Needs an
+  off-site target (Hetzner Storage Box works cross-provider, or check
+  Netcup's own storage product) — see `.claude/rules/deployment-and-releases.md`.
+- **Bunny CrowdSec bouncer** (`docker/security/bunny-bouncer/`). Every manual,
+  isolated API call to Bunny's `edgerules/addOrUpdate` succeeds — identical
+  payload, identical credentials — but the automated poller consistently
+  fails with a misleading `"Maximum 5 triggers are allowed per condition"`
+  error, even from a cold container start with zero pre-existing state.
+  Exponential backoff was added (`bouncer.mjs`) since the original code
+  retried a failing call every 15s forever with no backoff, which is a real
+  fix regardless of the root cause, but the underlying Bunny-side behavior is
+  unresolved. Currently **stopped**
+  (`docker stop <bouncer-container>`). Origin is still protected by §9's
+  secret header regardless — this bouncer would only add automatic banning
+  at Bunny's edge on top of that.
+- ~~CORS wildcard~~ — fixed 2026-09-30, see §12's `NUXT_SECURITY_CORS_HANDLER_ORIGIN` note.

@@ -709,8 +709,32 @@ export default defineNuxtConfig({
      * (summaries, notes, bios, edit summaries) actually working.
      */
     xssValidator: false,
+    /**
+     * `origin` used to read `process.env.NUXT_PUBLIC_SITE_URL` directly, which
+     * only resolves at `pnpm build` time — the Dockerfile never receives that
+     * var as a build arg (by design; the image is built once and deployed
+     * anywhere), so it always baked in as the `http://localhost:3000` fallback
+     * and shipped that way regardless of what production's real env set. At
+     * that point `origin` is a **non-empty string that never matches the
+     * visitor's actual Origin header**, which sounds merely wrong rather than
+     * dangerous — but h3's `handleCors` treats a *falsy* origin option as "no
+     * restriction" and answers `*`. That path wasn't actually reachable here
+     * (the fallback is non-empty), but it made the value do nothing while
+     * looking configured, which is its own kind of dangerous: nobody double-checks
+     * a setting that appears to be set. `nuxt.config.ts` is evaluated once at
+     * build time and has no access to the env a container actually starts
+     * with, same as `imageOrigin` above — so unlike that one (which only feeds
+     * a static CSP header string), this value gets a real runtime fix rather
+     * than a documented limitation: this default is a dev convenience only.
+     * Production overrides it at container start, not rebuild, via
+     * `NUXT_SECURITY_CORS_HANDLER_ORIGIN` in `docker/compose.prod.yml` — every
+     * key `security` merges into `runtimeConfig` is env-overridable by nitro's
+     * usual `NUXT_<PATH>` convention, exactly like `runtimeConfig.public.siteUrl`
+     * below is overridden by `NUXT_PUBLIC_SITE_URL` already. Verified by reading
+     * nuxt-security's own `corsHandler.js` middleware and h3's `createOriginHeaders`.
+     */
     corsHandler: {
-      origin: process.env.NUXT_PUBLIC_SITE_URL ?? 'http://localhost:3000',
+      origin: 'http://localhost:3000',
       methods: ['GET', 'POST', 'PATCH', 'DELETE'],
     },
   },

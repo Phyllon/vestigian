@@ -51,6 +51,13 @@ services:
       NUXT_TRANSLATE_TARGET: en
       NUXT_SESSION_PASSWORD: ${SESSION_PASSWORD}
       NUXT_PUBLIC_SITE_URL: ${SITE_URL}
+      # nuxt.config.ts's `security.corsHandler.origin` can only default to
+      # 'http://localhost:3000' at build time (the image is built once, with
+      # no per-deployment build args) — this is what actually sets the allowed
+      # CORS origin in production, applied at container start. See the comment
+      # on corsHandler in nuxt.config.ts for why the build-time value was
+      # silently never taking effect here.
+      NUXT_SECURITY_CORS_HANDLER_ORIGIN: ${SITE_URL}
       NUXT_PUBLIC_IMAGE_BASE_URL: ${IMAGE_BASE_URL}
       NUXT_PUBLIC_BASEMAP_PROVIDER: pmtiles
       NUXT_PUBLIC_BASEMAP_PMTILES_URL: ${PMTILES_URL}
