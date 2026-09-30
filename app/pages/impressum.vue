@@ -1,8 +1,11 @@
 <script setup lang="ts">
   /**
-   * Required under the German DDG (formerly TMG) §5 independent of GDPR —
-   * every one of the placeholder blocks below needs the operator's real
-   * identity before this goes live. See CLAUDE.md's "GDPR / legal" section.
+   * Required under the German DDG (formerly TMG) §5 independent of GDPR.
+   * Operator identity, contact and supervisory-authority content is real
+   * (via an Online-Impressum c/o address), not a placeholder — see
+   * `.claude/rules/gdpr-legal.md`. `privacy.vue`'s own supervisory-authority
+   * block is a *different* thing (the GDPR data-protection authority, not
+   * this page's DDG/MStV media-oversight one) and is still unfilled.
    */
   const { t } = useI18n()
   const config = useRuntimeConfig()
@@ -46,6 +49,25 @@
       </h2>
       <p class="mt-2 whitespace-pre-line text-sm leading-relaxed text-ink-700 dark:text-paper-200">
         {{ t('impressum.contactPlaceholder') }}
+      </p>
+      <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
+        <a
+          href="https://mein.online-impressum.de/vestigian/#zweiterkontaktweg"
+          target="_blank"
+          rel="noopener"
+          class="underline underline-offset-2"
+        >
+          {{ t('impressum.secondContactLabel') }}
+        </a>
+      </p>
+    </section>
+
+    <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
+      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+        {{ t('impressum.authorityHeading') }}
+      </h2>
+      <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
+        {{ t('impressum.authorityBody') }}
       </p>
     </section>
 

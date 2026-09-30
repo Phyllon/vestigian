@@ -8,11 +8,35 @@ paths:
 
 ## GDPR / legal
 
-Not legal advice — the operator's real identity still has to go into
-`app/pages/impressum.vue` and the controller/supervisory-authority blocks of
-`app/pages/privacy.vue` before either goes live, and a lawyer should read both
-before real users see them. What follows is the technical side, verified
-against the actual code rather than assumed.
+Not legal advice — a lawyer should read both `app/pages/impressum.vue` and
+`app/pages/privacy.vue` before real users see them. What follows is the
+technical side, verified against the actual code rather than assumed.
+
+**`impressum.vue`'s identity, contact and supervisory-authority blocks are
+filled in (2026-09-30), not placeholders** — operator "Vestigian — Alex
+Lernbecher & René Voorburg", a c/o address via an Online-Impressum service
+(`mein.online-impressum.de/vestigian`), and the DDG/MStV media-oversight
+authority (Bayerische Landeszentrale für neue Medien). All three real,
+provided by the operator directly, hand-translated into all six locales per
+`.claude/rules/enrichment-and-i18n.md`'s "hand-translate every new key"
+policy — not run through `pnpm i18n:translate`. The operator's real name,
+address and the authority's proper name are kept **identical across every
+locale** (postal addresses and institution names aren't translated); only
+the surrounding labels are.
+
+**`privacy.vue`'s `supervisoryPlaceholder` is still a placeholder, and
+deliberately was not filled from the Impressum content above.** The two
+"supervisory authority" fields are legally distinct, easy to conflate because
+they use the same heading pattern: `impressum.vue`'s is the DDG/
+Medienstaatsvertrag media-oversight body (who to complain to about the
+service's telemedia/editorial compliance); `privacy.vue`'s is the GDPR data
+protection authority (who to complain to about how personal data is
+processed) — normally the DPA for wherever the controller is established,
+which for a Bavarian c/o address would be the Bayerisches Landesamt für
+Datenschutzaufsicht (BayLDA), not the Bayerische Landeszentrale für neue
+Medien (BLM) named in the Impressum. Needs the operator to confirm which DPA
+actually has jurisdiction before this placeholder is filled — not assumed
+here.
 
 **No cookie-consent banner exists, and none should be added.** The app sets
 exactly three cookies — `nuxt-session` (7 days, `nuxt.config.ts`'s

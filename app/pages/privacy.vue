@@ -2,8 +2,10 @@
   /**
    * Content matches what the code actually does — see CLAUDE.md's "GDPR /
    * legal" section for the research this page and the account actions below
-   * are built from. The controller/supervisory-authority blocks are
-   * placeholders: only the operator can fill those in.
+   * are built from. The supervisory-authority block is real (BayLDA, the
+   * Bavarian data protection authority) — see `.claude/rules/gdpr-legal.md`
+   * for why it differs from `impressum.vue`'s own supervisory-authority
+   * section, which names a different body entirely.
    */
   const { t } = useI18n()
   const { loggedIn } = useSession()
@@ -136,6 +138,7 @@
         <li>{{ t('privacy.recipientColumnReliefs') }}</li>
         <li>{{ t('privacy.recipientBasemap') }}</li>
         <li>{{ t('privacy.recipientSecurity') }}</li>
+        <li>{{ t('privacy.recipientBackup') }}</li>
       </ul>
     </section>
 
