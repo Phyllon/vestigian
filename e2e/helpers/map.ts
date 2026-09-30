@@ -70,7 +70,7 @@ export const openMap = async (page: Page): Promise<void> => {
  * first — see `isShowingSites` in `useBasemapStyle`.
  */
 export const showSites = async (page: Page): Promise<void> => {
-  await toggleOverlay(page, 'Show sites')
+  await toggleOverlay(page, 'Sites')
 }
 
 /**

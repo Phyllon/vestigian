@@ -189,7 +189,7 @@ test.describe('the basemap switcher', () => {
     )
 
     await openOverlays(page)
-    await page.getByRole('menuitemcheckbox', { name: 'Show battles' }).click()
+    await page.getByRole('menuitemcheckbox', { name: 'Battles' }).click()
     await expect.poll(() => battleTiles.length, { timeout: 15_000 }).toBeGreaterThan(0)
 
     expect(battleTiles.some((status) => status === 200 || status === 204)).toBe(true)
@@ -210,7 +210,7 @@ test.describe('the basemap switcher', () => {
     expect(portTiles.length, 'a reader who never touches the switch should request nothing').toBe(0)
 
     await openOverlays(page)
-    await page.getByRole('menuitemcheckbox', { name: 'Show ports' }).click()
+    await page.getByRole('menuitemcheckbox', { name: 'Ports' }).click()
     await expect.poll(() => portTiles.length, { timeout: 15_000 }).toBeGreaterThan(0)
 
     expect(portTiles.some((status) => status === 200 || status === 204)).toBe(true)
@@ -237,7 +237,7 @@ test.describe('the basemap switcher', () => {
     )
 
     await openOverlays(page)
-    await page.getByRole('menuitemcheckbox', { name: 'Show ancient routes' }).click()
+    await page.getByRole('menuitemcheckbox', { name: 'Ancient routes' }).click()
     await expect.poll(() => routeTiles.length, { timeout: 15_000 }).toBeGreaterThan(0)
 
     expect(routeTiles.some((status) => status === 200 || status === 204)).toBe(true)
@@ -265,7 +265,7 @@ test.describe('the basemap switcher', () => {
     ).toBe(0)
 
     await openOverlays(page)
-    await page.getByRole('menuitemcheckbox', { name: 'Show minor antiquities' }).click()
+    await page.getByRole('menuitemcheckbox', { name: 'Minor antiquities' }).click()
     await expect.poll(() => featureTiles.length, { timeout: 15_000 }).toBeGreaterThan(0)
 
     expect(featureTiles.some((status) => status === 200 || status === 204)).toBe(true)
@@ -293,7 +293,7 @@ test.describe('the basemap switcher', () => {
     ).toBe(0)
 
     await openOverlays(page)
-    await page.getByRole('menuitemcheckbox', { name: 'Show coin hoards' }).click()
+    await page.getByRole('menuitemcheckbox', { name: 'Coin hoards' }).click()
     await expect.poll(() => coinHoardTiles.length, { timeout: 15_000 }).toBeGreaterThan(0)
 
     expect(coinHoardTiles.some((status) => status === 200 || status === 204)).toBe(true)
@@ -364,13 +364,13 @@ test.describe('the basemap switcher', () => {
     await expect(attribution).toContainText('OpenStreetMap')
     await expect(attribution).not.toContainText('de Graauw')
 
-    await toggleOverlay(page, 'Show ports')
+    await toggleOverlay(page, 'Ports')
     await expect(attribution).toContainText('de Graauw')
     await expect(attribution).toContainText('CC BY 4.0')
 
     // And leaves with it: a credit for a layer nobody is looking at would be
     // as wrong as a missing one.
-    await toggleOverlay(page, 'Show ports')
+    await toggleOverlay(page, 'Ports')
     await expect(attribution).not.toContainText('de Graauw')
   })
 })
