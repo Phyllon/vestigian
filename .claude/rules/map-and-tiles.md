@@ -943,3 +943,62 @@ typechecking or reading the code:
 question — same CC BY-SA / CC0 as everything else at `/api/data/sites.geojson`.
 A basemap slice is OpenStreetMap data via the operator's own PMTiles archive,
 attributed the same way the live map already attributes it.
+
+## `useBasemapStyle.ts` was written against one vector tile schema; production serves another
+
+Reported directly: city names missing from both the `vestigian` and `satellite`
+views. For `vestigian` this was a real regression with a precise cause; for
+`satellite` the layer had never existed at all — two different things arriving
+as one report, the same shape as the `atlas-places` click-handling report
+above.
+
+**The regression.** `buildBasemapLayers`'s `place-labels`/`buildings`/
+`roads-minor`/`roads-major`/`boundaries` layers hardcode OpenMapTiles/Tilezen
+`source-layer` names (`place`, `building`, `transportation`, `boundary`) and a
+`class`-based road filter — correct for `tiles.openfreemap.org/planet`, the
+`openfreemap` provider dev always uses. Production's `pmtiles` provider reads
+a Protomaps `build.protomaps.com` extract instead (see "Antiquity basemaps" /
+the deployment runbook's PMTiles section), whose own "basemaps" schema
+(confirmed against docs.protomaps.com/basemaps/layers, v4 — this is stated
+there explicitly as Tilezen-_derived_, not OpenMapTiles-compatible) names the
+same five things differently: `places`, `buildings`, `roads`, `boundaries`
+(plural throughout, versus OpenMapTiles' singular), a two-tier `kind`/
+`kind_detail` road classification instead of one `class` string, and a
+`kind: 'country'` boundary tag instead of a numeric `admin_level`. A
+`source-layer` or filter that matches nothing is not an error in MapLibre —
+the layer is simply empty, silently — so every one of those five layers went
+blank in production the moment `NUXT_PUBLIC_BASEMAP_PROVIDER=pmtiles` was set,
+and nothing short of comparing dev against production by eye would show it.
+Labels were the one the report named because they're what a reader actually
+reads; roads, buildings and boundaries were equally gone underneath.
+
+Fixed with `ModernSchema` — the layer-name and filter differences pulled into
+one small table per provider (`OPENMAPTILES_SCHEMA`/`PROTOMAPS_SCHEMA`),
+selected by `source.provider` via `resolveModernSchema()` and threaded through
+`buildBasemapLayers`'s new third parameter. `landuse` and `water` were left
+alone — both schemas happen to agree on those two names, confirmed against
+the same reference page rather than assumed from the other three agreeing by
+coincidence.
+
+**The non-regression.** `satellite` never had a `place-labels` layer at any
+point in this file's history (`git log -p`, back to the commit that added the
+view) — it draws raster imagery and nothing else, so there was nothing to
+regress. What the report actually wanted, and what "slightly transparent
+modern city names" in the same report describes exactly, is the same layer
+`vestigian` already draws at its quiet `0.7` opacity, added to `satellite`
+too. Pulled the layer definition into its own `buildPlaceLabelsLayer()` so
+both views share one source of truth rather than the satellite copy drifting
+from the vestigian original the next time either changes; `buildSatelliteStyle`
+gains a second source (`basemap`, the same `buildVectorSource()` every other
+view uses) purely to feed it, and now also calls `registerPmtilesProtocol()`
+for the `pmtiles` provider — previously only the vestigian branch of
+`buildBasemapStyle` did, because it was the only view that needed a
+`pmtiles://` URL at all.
+
+Verified with `useBasemapStyle.test.ts`: one assertion per schema confirming
+`vestigian` reads `place`/`building`/`transportation`/`boundary` under
+`openfreemap` and `places`/`buildings`/`roads`/`boundaries` (plus the
+`kind_detail`/`kind` filters) under `pmtiles`, and two more confirming
+`satellite` now carries a `place-labels` layer reading the correct
+`source-layer` name for whichever provider is active. 31 tests pass, `tsc`
+and `eslint` both clean.

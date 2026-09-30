@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type {
+  FillLayerSpecification,
   LineLayerSpecification,
   RasterDEMSourceSpecification,
   SymbolLayerSpecification,
@@ -142,6 +143,56 @@ describe('buildBasemapStyle, vector views', () => {
     const style = buildBasemapStyle({ view: 'vestigian', isDark: false, source })
     expect(style.glyphs).not.toMatch(/^https?:/)
   })
+
+  // Production's `pmtiles` provider reads a Protomaps `build.protomaps.com`
+  // extract, whose own vector schema names every one of these layers
+  // differently from the OpenMapTiles/Tilezen schema OpenFreeMap serves in
+  // dev (confirmed against https://docs.protomaps.com/basemaps/layers, v4).
+  // `source-layer`/filter mismatches fail silently in MapLibre — no error,
+  // just an empty layer — which is how city names, roads, buildings and
+  // boundaries all went missing in production with nothing to catch it here
+  // until now.
+  it('reads the OpenMapTiles/Tilezen layer names dev’s OpenFreeMap source actually serves', () => {
+    const style = buildBasemapStyle({
+      view: 'vestigian',
+      isDark: false,
+      source: { ...source, provider: 'openfreemap' },
+    })
+    const byId = (id: string) => style.layers.find((layer) => layer.id === id)
+    expect((byId('place-labels') as SymbolLayerSpecification)['source-layer']).toBe('place')
+    expect((byId('buildings') as FillLayerSpecification)['source-layer']).toBe('building')
+    expect((byId('roads-major') as LineLayerSpecification)['source-layer']).toBe('transportation')
+    expect((byId('boundaries') as LineLayerSpecification)['source-layer']).toBe('boundary')
+  })
+
+  it('reads the Protomaps basemaps layer names production’s pmtiles source actually serves', () => {
+    const style = buildBasemapStyle({
+      view: 'vestigian',
+      isDark: false,
+      source: { ...source, provider: 'pmtiles', pmtilesUrl: 'https://cdn.example/basemap.pmtiles' },
+    })
+    const byId = (id: string) => style.layers.find((layer) => layer.id === id)
+    expect((byId('place-labels') as SymbolLayerSpecification)['source-layer']).toBe('places')
+    expect((byId('buildings') as FillLayerSpecification)['source-layer']).toBe('buildings')
+    expect((byId('roads-major') as LineLayerSpecification)['source-layer']).toBe('roads')
+    expect((byId('roads-major') as LineLayerSpecification).filter).toEqual([
+      'in',
+      'kind_detail',
+      'motorway',
+      'trunk',
+      'primary',
+    ])
+    expect((byId('boundaries') as LineLayerSpecification)['source-layer']).toBe('boundaries')
+    expect((byId('boundaries') as LineLayerSpecification).filter).toEqual(['==', 'kind', 'country'])
+  })
+
+  it('draws city names a shade under full strength, never fully opaque or invisible', () => {
+    const style = buildBasemapStyle({ view: 'vestigian', isDark: false, source })
+    const labels = style.layers.find(
+      (layer) => layer.id === 'place-labels',
+    ) as SymbolLayerSpecification
+    expect(labels.paint?.['text-opacity']).toBeCloseTo(0.7)
+  })
 })
 
 describe('buildBasemapStyle, satellite view', () => {
@@ -175,6 +226,29 @@ describe('buildBasemapStyle, satellite view', () => {
     expect(attribution).toContain('<a href=')
     expect(attribution).toContain('EOX')
     expect(attribution).toContain('CC BY-NC-SA')
+  })
+
+  it('draws modern city names, slightly transparent, over the photograph', () => {
+    const style = buildBasemapStyle({ view: 'satellite', isDark: false, source })
+    const labels = style.layers.find((layer) => layer.id === 'place-labels') as
+      SymbolLayerSpecification | undefined
+    expect(labels?.['source-layer']).toBe('place')
+    expect(labels?.paint?.['text-opacity']).toBeCloseTo(0.7)
+    // Photography has no dark mode of its own — the sheet is light-toned in
+    // both themes, and so is this label's ink, same reasoning as the
+    // background colour just above.
+    expect(labels?.paint?.['text-color']).toBe('#3d362e')
+  })
+
+  it('reads the Protomaps places layer for city names when production’s pmtiles source is active', () => {
+    const style = buildBasemapStyle({
+      view: 'satellite',
+      isDark: false,
+      source: { ...source, provider: 'pmtiles', pmtilesUrl: 'https://cdn.example/basemap.pmtiles' },
+    })
+    const labels = style.layers.find((layer) => layer.id === 'place-labels') as
+      SymbolLayerSpecification | undefined
+    expect(labels?.['source-layer']).toBe('places')
   })
 })
 

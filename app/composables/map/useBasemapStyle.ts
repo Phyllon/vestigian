@@ -231,8 +231,8 @@ const LIGHT_COLOURS: StyleColours = {
   road: '#dcd3bf',
   roadMajor: '#cfc3a8',
   building: '#e2d9c6',
-  label: '#3d362e',
-  labelHalo: '#faf7ef',
+  label: '#000000',
+  labelHalo: '#fefefe',
   boundary: '#b9ab8d',
 }
 
@@ -272,7 +272,95 @@ const buildVectorSource = (source: BasemapSource) =>
         attribution: '© OpenStreetMap contributors',
       }
 
-const buildBasemapLayers = (colours: StyleColours, roadOpacity: number): LayerSpecification[] => [
+interface ModernSchema {
+  building: string
+  transportation: string
+  boundary: string
+  place: string
+  majorRoadFilter: FilterSpecification
+  minorRoadFilter: FilterSpecification
+  boundaryFilter: FilterSpecification
+}
+
+/**
+ * Two vector tile schemas answer to `basemap`/`source-layer`, not one, and
+ * they name layers differently. `landuse` and `water` happen to agree; the
+ * rest don't, which is why city names, roads, buildings and boundaries all
+ * went quietly empty in production while dev (`openfreemap`, OpenMapTiles/
+ * Tilezen-derived) kept looking correct — this file was written against dev's
+ * schema only and never revisited once `NUXT_PUBLIC_BASEMAP_PROVIDER=pmtiles`
+ * pointed production at a Protomaps `build.protomaps.com` extract instead,
+ * whose own "basemaps" schema (confirmed against
+ * https://docs.protomaps.com/basemaps/layers, v4) uses different layer names
+ * and tag shapes: `places`/`roads`/`buildings`/`boundaries` (plural) rather
+ * than OpenMapTiles' `place`/`transportation`/`building`/`boundary`
+ * (singular), a two-tier `kind`/`kind_detail` road classification rather than
+ * a single `class` string, and a `kind: 'country'` boundary tag rather than a
+ * numeric `admin_level`. MapLibre drops a symbol/line/fill layer's features
+ * silently when its `source-layer` or filter matches nothing — no error, no
+ * warning — so this broke with no signal anywhere except a map that looked
+ * thinner than it should.
+ */
+const OPENMAPTILES_SCHEMA: ModernSchema = {
+  building: 'building',
+  transportation: 'transportation',
+  boundary: 'boundary',
+  place: 'place',
+  majorRoadFilter: ['in', 'class', 'motorway', 'trunk', 'primary'],
+  minorRoadFilter: ['!in', 'class', 'motorway', 'trunk', 'primary'],
+  boundaryFilter: ['<=', 'admin_level', 2],
+}
+
+const PROTOMAPS_SCHEMA: ModernSchema = {
+  building: 'buildings',
+  transportation: 'roads',
+  boundary: 'boundaries',
+  place: 'places',
+  majorRoadFilter: ['in', 'kind_detail', 'motorway', 'trunk', 'primary'],
+  minorRoadFilter: ['!in', 'kind_detail', 'motorway', 'trunk', 'primary'],
+  boundaryFilter: ['==', 'kind', 'country'],
+}
+
+const resolveModernSchema = (source: BasemapSource): ModernSchema =>
+  source.provider === 'pmtiles' ? PROTOMAPS_SCHEMA : OPENMAPTILES_SCHEMA
+
+/**
+ * The one symbol layer both the `vestigian` and `satellite` views draw —
+ * pulled out so satellite (photography with nothing of its own to name a
+ * place) can put it straight over the imagery instead of duplicating it.
+ * `opacity` is the "slightly transparent" reported missing: full strength
+ * would compete with whatever the sheet underneath is doing, so both callers
+ * pass the same quiet 0.7 a busy sheet already used before this was a
+ * function of its own.
+ */
+const buildPlaceLabelsLayer = (
+  colours: Pick<StyleColours, 'label' | 'labelHalo'>,
+  schema: ModernSchema,
+  opacity: number,
+): LayerSpecification => ({
+  id: 'place-labels',
+  type: 'symbol',
+  source: 'basemap',
+  'source-layer': schema.place,
+  layout: {
+    'text-field': ['get', 'name'],
+    'text-font': [MAP_LABEL_FONT],
+    'text-size': ['interpolate', ['linear'], ['zoom'], 4, 10, 14, 15],
+    'text-max-width': 8,
+  },
+  paint: {
+    'text-color': colours.label,
+    'text-halo-color': colours.labelHalo,
+    'text-halo-width': 1.2,
+    'text-opacity': opacity,
+  },
+})
+
+const buildBasemapLayers = (
+  colours: StyleColours,
+  roadOpacity: number,
+  schema: ModernSchema,
+): LayerSpecification[] => [
   {
     id: 'background',
     type: 'background',
@@ -296,7 +384,7 @@ const buildBasemapLayers = (colours: StyleColours, roadOpacity: number): LayerSp
     id: 'buildings',
     type: 'fill',
     source: 'basemap',
-    'source-layer': 'building',
+    'source-layer': schema.building,
     minzoom: 14,
     paint: { 'fill-color': colours.building, 'fill-opacity': roadOpacity * 0.8 },
   },
@@ -304,8 +392,8 @@ const buildBasemapLayers = (colours: StyleColours, roadOpacity: number): LayerSp
     id: 'roads-minor',
     type: 'line',
     source: 'basemap',
-    'source-layer': 'transportation',
-    filter: ['!in', 'class', 'motorway', 'trunk', 'primary'],
+    'source-layer': schema.transportation,
+    filter: schema.minorRoadFilter,
     minzoom: 11,
     paint: {
       'line-color': colours.road,
@@ -317,8 +405,8 @@ const buildBasemapLayers = (colours: StyleColours, roadOpacity: number): LayerSp
     id: 'roads-major',
     type: 'line',
     source: 'basemap',
-    'source-layer': 'transportation',
-    filter: ['in', 'class', 'motorway', 'trunk', 'primary'],
+    'source-layer': schema.transportation,
+    filter: schema.majorRoadFilter,
     paint: {
       'line-color': colours.roadMajor,
       'line-opacity': roadOpacity,
@@ -329,8 +417,8 @@ const buildBasemapLayers = (colours: StyleColours, roadOpacity: number): LayerSp
     id: 'boundaries',
     type: 'line',
     source: 'basemap',
-    'source-layer': 'boundary',
-    filter: ['<=', 'admin_level', 2],
+    'source-layer': schema.boundary,
+    filter: schema.boundaryFilter,
     paint: {
       'line-color': colours.boundary,
       'line-dasharray': [3, 2],
@@ -338,24 +426,7 @@ const buildBasemapLayers = (colours: StyleColours, roadOpacity: number): LayerSp
       'line-opacity': 0.6,
     },
   },
-  {
-    id: 'place-labels',
-    type: 'symbol',
-    source: 'basemap',
-    'source-layer': 'place',
-    layout: {
-      'text-field': ['get', 'name'],
-      'text-font': [MAP_LABEL_FONT],
-      'text-size': ['interpolate', ['linear'], ['zoom'], 4, 10, 14, 15],
-      'text-max-width': 8,
-    },
-    paint: {
-      'text-color': colours.label,
-      'text-halo-color': colours.labelHalo,
-      'text-halo-width': 1.2,
-      'text-opacity': roadOpacity < 1 ? 0.7 : 1,
-    },
-  },
+  buildPlaceLabelsLayer(colours, schema, roadOpacity < 1 ? 0.7 : 1),
 ]
 
 /**
@@ -424,24 +495,35 @@ const buildDareStyle = (source: BasemapSource): StyleSpecification => ({
  * uncovered edges show the background through, so a night backdrop would read
  * as a hole rather than as the dark it is elsewhere.
  */
-const buildSatelliteStyle = (source: BasemapSource): StyleSpecification => ({
-  version: 8,
-  glyphs: source.glyphsUrl,
-  sources: {
-    satellite: {
-      type: 'raster',
-      tiles: [resolveSatelliteUrl(source)],
-      tileSize: 256,
-      minzoom: 0,
-      maxzoom: SATELLITE_MAX_ZOOM,
-      attribution: SATELLITE_ATTRIBUTION,
+const buildSatelliteStyle = (source: BasemapSource): StyleSpecification => {
+  if (source.provider === 'pmtiles') registerPmtilesProtocol()
+
+  return {
+    version: 8,
+    glyphs: source.glyphsUrl,
+    sources: {
+      satellite: {
+        type: 'raster',
+        tiles: [resolveSatelliteUrl(source)],
+        tileSize: 256,
+        minzoom: 0,
+        maxzoom: SATELLITE_MAX_ZOOM,
+        attribution: SATELLITE_ATTRIBUTION,
+      },
+      basemap: buildVectorSource(source),
     },
-  },
-  layers: [
-    { id: 'background', type: 'background', paint: { 'background-color': LIGHT_COLOURS.land } },
-    { id: 'satellite', type: 'raster', source: 'satellite' },
-  ],
-})
+    layers: [
+      { id: 'background', type: 'background', paint: { 'background-color': LIGHT_COLOURS.land } },
+      { id: 'satellite', type: 'raster', source: 'satellite' },
+      // City names only — the imagery already shows roads and buildings.
+      // Same quiet 0.7 opacity the vestigian view uses, which is what was
+      // reported missing here; satellite never drew this layer at all
+      // before (see BasemapView history), so this is new rather than a
+      // regression fix for this one view specifically.
+      buildPlaceLabelsLayer(LIGHT_COLOURS, resolveModernSchema(source), 1),
+    ],
+  }
+}
 
 interface AtlasColours {
   land: string
@@ -1045,7 +1127,7 @@ export const buildBasemapStyle = (request: StyleRequest): StyleSpecification => 
     version: 8,
     glyphs: request.source.glyphsUrl,
     sources: { basemap: buildVectorSource(request.source) },
-    layers: buildBasemapLayers(colours, QUIET_ROAD_OPACITY),
+    layers: buildBasemapLayers(colours, QUIET_ROAD_OPACITY, resolveModernSchema(request.source)),
   }
 }
 
