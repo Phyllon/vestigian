@@ -578,3 +578,10 @@ shows a correct `Set-Cookie`, but the same request through
   secret header regardless — this bouncer would only add automatic banning
   at Bunny's edge on top of that.
 - ~~CORS wildcard~~ — fixed 2026-09-30, see §12's `NUXT_SECURITY_CORS_HANDLER_ORIGIN` note.
+- **Ask AFE (afe@dainst.de) and PAS for an explicit licence to mirror their
+  single coin-find data.** Neither states one today — see
+  `.claude/rules/antiquity-basemaps.md`'s coin-finds section for the full
+  per-source research (2026-09-14). The site panel that used to link out to
+  these databases was removed 2026-09-30 for adding no reader benefit, but
+  the underlying question — whether this data could ever be imported outright,
+  on the CHRR model — is independent of that panel and still open.

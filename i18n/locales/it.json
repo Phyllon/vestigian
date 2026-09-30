@@ -540,22 +540,6 @@
       "historic-england": "Historic England"
     }
   },
-  "siteCoinFinds": {
-    "title": "Rinvenimenti monetali",
-    "intro": "I rinvenimenti monetali sporadici di questo paese ({country}) sono registrati in queste banche dati — collegate, non copiate in questo atlante.",
-    "opensNewTab": "(apre in una nuova scheda)",
-    "searchPrefilled": "Ricerca precompilata con «{title}» — vale la pena ampliarla se non emerge nulla.",
-    "coverage": {
-      "afe-rgk": "Germania oltre il confine romano, Assia e Baden-Württemberg",
-      "afe-hd": "Renania-Palatinato, Baden-Württemberg e progetti di ricerca di Heidelberg",
-      "afe-pl": "Polonia e territori storicamente legati a essa",
-      "afe-hu": "Ungheria a est del Danubio",
-      "pas": "Inghilterra e Galles, rinvenimenti segnalati dal pubblico",
-      "sicf": "Svizzera e Liechtenstein",
-      "pan": "Paesi Bassi, rinvenimenti segnalati dal pubblico",
-      "dime": "Danimarca, rinvenimenti con metal detector"
-    }
-  },
   "siteMetaList": {
     "locationNotResolved": "Posizione non risolta",
     "period": "Periodo",

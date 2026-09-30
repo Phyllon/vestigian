@@ -28,8 +28,6 @@ paths:
   - 'scripts/import/18-chrr-coin-hoards.ts'
   - 'server/utils/coin-hoards.ts'
   - 'server/api/tiles/antiquity-coin-hoards/**'
-  - 'shared/utils/coin-find-databases.ts'
-  - 'app/components/site/SiteCoinFindDatabases.vue'
   - 'app/composables/map/useMinorFeatureOverlay.ts'
   - 'app/composables/map/useCoinHoardOverlay.ts'
   - 'app/composables/map/usePortOverlay.ts'
@@ -785,18 +783,27 @@ Verified live. Scraping individual record pages instead was rejected as
 disproportionate for a layer this size. Worth re-checking if the export ever
 comes back.
 
-## Single coin finds — pointed to, not mirrored
+## Single coin finds — the link-out panel was removed; the licensing research stays
 
-The site panel's "Coin finds" section (`SiteCoinFindDatabases.vue`) links
-out to the national or regional finds database covering the site's
+The site panel used to carry a "Coin finds" section (`SiteCoinFindDatabases.vue`,
+backed by `COIN_FIND_DATABASES` in `shared/utils/coin-find-databases.ts`)
+linking out to the national or regional finds database covering the site's
 `country_code` — AFE-RGK and AFE4HD (DE), AFE-PL, AFE-HU, PAS (GB), SICF
-(CH/LI), PAN (NL), DIME (DK). No coin, findspot or coordinate is stored.
-The list, and the per-source reason none of them is mirrorable, lives on
-`COIN_FIND_DATABASES` in `shared/utils/coin-find-databases.ts`; every link
-there was fetched and its page title checked (2026-09-14), except PAS,
-which answers scripts only with a Cloudflare challenge.
+(CH/LI), PAN (NL), DIME (DK). No coin, findspot or coordinate was ever
+stored; it was outbound links only. **Removed entirely (2026-09-30, on
+request)** — a row of external links to databases covering a site's country
+rather than the site itself added no real benefit, since none of them are
+scoped tighter than "somewhere in this country" for a reader already looking
+at one exact site. `SiteCoinFindDatabases.vue` and
+`shared/utils/coin-find-databases.ts` are both deleted, along with the
+`siteCoinFinds.*` i18n keys in all six locales.
 
-Two things that look like openings and are not:
+**The per-source licence research done for that panel is kept here, not
+deleted with it — it's the answer to "can any of this ever be mirrored", a
+question separate from whether the link-out panel was worth keeping.** Every
+link was fetched and its page title checked (2026-09-14), except PAS, which
+answers scripts only with a Cloudflare challenge. None of the eight passed a
+mirrorable-licence check at the time:
 
 - **SICF's "Coins online" page embeds its map data** — 382 single-find
   `L.circleMarker`s with coordinates and a popup (canton, municipality,
@@ -810,21 +817,23 @@ Two things that look like openings and are not:
   AFE describes itself as five-star Linked Open Data — but no page states a
   licence, and the Impressum defaults everything to copyright. The sitemap
   lists 20 coin, 6 findspot and 3 place pages of 1,000 entries each.
+- **Also checked, not used:** Nomisma.org's SPARQL endpoint returned 400 for
+  `SELECT ?s WHERE { ?s rdf:type ?o } LIMIT 1` in every output format, and
+  OCRE/CRRO's `findspots.geojson` an empty FeatureCollection — the aggregator
+  route is down, not refused; re-check it first. CoinSampo (Finland) is
+  verifiably CC BY 4.0 over SPARQL, but holds 5 Roman-period coins in 18,342.
+  MEDEA's `vondsten.be` fails the TLS handshake from here. FMRD (300,000
+  German finds) is print-only.
 
-**Asking AFE (afe@dainst.de) and PAS for an explicit licence is deferred
-to go-live** — tracked under "Offen" in `documents/runbook_prod.deployment.md`.
-A licence granted then turns that entry into an import on the CHRR model
-(own table, own tile endpoint, isolated from `sites`), with one constraint
-that is not negotiable: **never show a findspot more precisely than the
-source does publicly** (PAS: parish), and import no finder names.
-
-**Also checked, not used:** Nomisma.org's SPARQL endpoint returned 400
-for `SELECT ?s WHERE { ?s rdf:type ?o } LIMIT 1` in every output format,
-and OCRE/CRRO's `findspots.geojson` an empty FeatureCollection — the
-aggregator route is down, not refused; re-check it first. CoinSampo
-(Finland) is verifiably CC BY 4.0 over SPARQL, but holds 5 Roman-period
-coins in 18,342. MEDEA's `vondsten.be` fails the TLS handshake from here.
-FMRD (300,000 German finds) is print-only.
+**Asking AFE (afe@dainst.de) and PAS for an explicit licence to mirror their
+data is still worth doing at some point, independent of the link-out panel
+being gone** — tracked under "Still open" in
+`documents/runbook_prod.deployment.md` rather than left only in this file, so
+it surfaces outside a session that happens to be touching antiquity basemaps.
+If either source ever grants one, that becomes a real import on the CHRR
+model (own table, own tile endpoint, isolated from `sites`), with one
+constraint that is not negotiable: **never show a findspot more precisely
+than the source does publicly** (PAS: parish), and import no finder names.
 
 ## Researched and rejected
 
