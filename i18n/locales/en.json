@@ -600,7 +600,8 @@
     "placeholder": "Search sites, roads, places",
     "resultsLabel": "Search results",
     "modernPlace": "Modern place · {country}",
-    "ancientPlace": "Ancient name"
+    "ancientPlace": "Ancient name",
+    "clear": "Clear search"
   },
   "mapCanvas": {
     "ariaLabel": "Map of archaeological sites",

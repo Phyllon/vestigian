@@ -470,7 +470,8 @@
     "placeholder": "Rechercher des sites, routes, lieux",
     "resultsLabel": "Résultats de la recherche",
     "modernPlace": "Lieu moderne · {country}",
-    "ancientPlace": "Nom ancien"
+    "ancientPlace": "Nom ancien",
+    "clear": "Effacer la recherche"
   },
   "mapCanvas": {
     "ariaLabel": "Carte des sites archéologiques",

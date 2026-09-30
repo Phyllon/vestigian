@@ -470,7 +470,8 @@
     "placeholder": "Zoek plaatsen, wegen, plaatsen",
     "resultsLabel": "Zoekresultaten",
     "modernPlace": "Moderne plaats · {country}",
-    "ancientPlace": "Oude naam"
+    "ancientPlace": "Oude naam",
+    "clear": "Zoekopdracht wissen"
   },
   "mapCanvas": {
     "ariaLabel": "Kaart van archeologische sites",

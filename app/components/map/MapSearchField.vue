@@ -52,6 +52,13 @@
     if (result.kind === 'site') selectSite(result.id)
     term.value = ''
   }
+
+  const searchInput = useTemplateRef('searchInput')
+
+  const clearTerm = (): void => {
+    term.value = ''
+    searchInput.value?.focus()
+  }
 </script>
 
 <template>
@@ -68,6 +75,7 @@
       <label for="map-search" class="sr-only">{{ t('mapSearch.label') }}</label>
       <input
         id="map-search"
+        ref="searchInput"
         v-model="term"
         type="search"
         :placeholder="t('mapSearch.placeholder')"
@@ -79,9 +87,18 @@
       <UIcon
         v-if="isSearching"
         name="i-lucide-loader-circle"
-        class="size-4 animate-spin text-ink-300"
+        class="size-4 shrink-0 animate-spin text-ink-300"
         aria-hidden="true"
       />
+      <button
+        v-if="term.length > 0"
+        type="button"
+        class="grid size-6 shrink-0 place-items-center rounded-full text-ink-400 transition hover:bg-paper-200 hover:text-ink-700 dark:text-paper-500 dark:hover:bg-night-700 dark:hover:text-paper-100"
+        :aria-label="t('mapSearch.clear')"
+        @click="clearTerm"
+      >
+        <UIcon name="i-lucide-x" class="size-4" aria-hidden="true" />
+      </button>
     </div>
 
     <p class="sr-only" role="status">{{ searchStatus }}</p>

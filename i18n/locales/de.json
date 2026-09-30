@@ -470,7 +470,8 @@
     "placeholder": "Fundorte, Straßen, Orte durchsuchen",
     "resultsLabel": "Suchergebnisse",
     "modernPlace": "Moderner Ort · {country}",
-    "ancientPlace": "Alte Bezeichnung"
+    "ancientPlace": "Alte Bezeichnung",
+    "clear": "Suche leeren"
   },
   "mapCanvas": {
     "ariaLabel": "Karte der archäologischen Stätten",
