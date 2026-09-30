@@ -170,6 +170,44 @@ Four things about these views that are not obvious:
    unset key as 1 — so the first `INCR` by hand is a no-op. The import clears
    the key and the stale tiles itself; do not do it manually.
 
+## Modern place names — a reading aid over DARE and Barrington
+
+Requested directly: an easy-to-reach switch, over both antiquity views, for
+today's city and town names — neither sheet has any of its own. DARE is raster
+photography of Åhlfeldt's own cartography, nothing more; Barrington's own place
+labels (`atlas-places`) are Pleiades' _ancient_ names, which is the opposite of
+what a reader gets no bearings from at all otherwise.
+
+**`canShowModernLabels` is the one `canShow*` flag in `useBasemapStyle.ts` that
+is not a constant `true`** — the direct precedent is the period scrubber above:
+these names are a fact about _today's_ ground, which only makes sense as a
+reading aid over a historical sheet, not over `vestigian` (which already draws
+them) or `satellite` (photography that already shows modern infrastructure
+directly). `OverlaySwitcher.vue`'s `canShow`-gated skip-rather-than-disable convention
+does the rest: the toggle simply is not in the list outside DARE/Barrington,
+the same as the Tabula Peutingeriana entry disappearing when the server-side
+flag is off.
+
+**Drawn as its own overlay, not baked into `buildDareStyle`/`buildAtlasStyle`.**
+`useModernLabelsOverlay.ts` adds the exact vector source and symbol layer
+`vestigian`/`satellite` already draw (`buildVectorSource`/`buildPlaceLabelsLayer`,
+both exported from `useBasemapStyle.ts` for this), the same "overlay on top of
+whichever basemap is showing" shape `useBattleOverlay` etc. already use — **but
+under its own id** (`modern-labels-overlay`, both source and layer), not
+`vestigian`/`satellite`'s own `basemap`/`place-labels`. Reusing their ids would
+have raced this overlay's own `attach`/`detach` — driven by a plain `watch()`,
+outside the `currentStyle` → `setStyle` pipeline — against MapLibre's diffed
+`setStyle` itself the instant a reader switches from DARE straight to
+`vestigian` with the toggle still on: the diff wants to _keep_ that id
+(`vestigian` defines the same one, just at a different opacity) at the exact
+moment `detachModernLabelsOverlay` is trying to remove it. Distinct ids mean
+the two mechanisms can never contend for the same MapLibre object.
+
+**Full opacity, not the quiet 0.7 `vestigian`'s own always-on labels use** — a
+reader who explicitly switches this on wants to read it, matching the choice
+already made for `satellite`'s labels (see `.claude/rules/map-and-tiles.md`'s
+city-names section) rather than inventing a third opacity value.
+
 ## The limes — a switch on the Barrington sheet
 
 Not a fifth view. **Follow the limes** is a switch inside the antiquity group of

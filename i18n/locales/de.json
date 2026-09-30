@@ -44,6 +44,8 @@
     "groupOverlays": "Overlays",
     "tabulaPeutingerianaOverlay": "Netz Tabula Peutingeriana",
     "tabulaPeutingerianaOverlayHint": "Orte und Straßen aus dem Manuskript, an ihren wirklichen Koordinaten",
+    "showModernLabels": "Moderne Ortsnamen anzeigen",
+    "showModernLabelsHint": "Heutige Städte und Orte, zur Orientierung auf DARE und Barrington",
     "showSites": "Fundstellen anzeigen",
     "showSitesHint": "Beigetragene Fundstellen und Trassierungen – beim ersten Laden aus Geschwindigkeitsgründen ausgeschaltet",
     "showBattles": "Schaugefechte",

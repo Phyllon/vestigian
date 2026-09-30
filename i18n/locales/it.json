@@ -44,6 +44,8 @@
     "groupOverlays": "Livelli",
     "tabulaPeutingerianaOverlay": "Rete Tabula Peutingeriana",
     "tabulaPeutingerianaOverlayHint": "Luoghi e strade dal manoscritto, alle loro vere coordinate",
+    "showModernLabels": "Mostra nomi di luoghi moderni",
+    "showModernLabelsHint": "Città e paesi odierni, per orientarsi su DARE e Barrington",
     "showSites": "Mostra siti",
     "showSitesHint": "Siti e tracciati contribuiti dalla comunità — disattivati al primo caricamento per velocità",
     "showBattles": "Mostra battaglie",

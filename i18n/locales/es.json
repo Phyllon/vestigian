@@ -44,6 +44,8 @@
     "groupOverlays": "Capas",
     "tabulaPeutingerianaOverlay": "Tabula Peutingeriana red",
     "tabulaPeutingerianaOverlayHint": "Lugares y caminos del manuscrito, en sus coordenadas reales",
+    "showModernLabels": "Mostrar nombres de lugares modernos",
+    "showModernLabelsHint": "Ciudades y localidades actuales, para orientarse sobre DARE y Barrington",
     "showSites": "Mostrar sitios",
     "showSitesHint": "Sitios y trazados aportados por la comunidad — desactivados en la primera carga por velocidad",
     "showBattles": "Mostrar batallas",

@@ -49,6 +49,8 @@
     "groupOverlays": "Overlays",
     "tabulaPeutingerianaOverlay": "Tabula Peutingeriana network",
     "tabulaPeutingerianaOverlayHint": "Places and roads from the manuscript, at their real coordinates",
+    "showModernLabels": "Show modern place names",
+    "showModernLabelsHint": "Today's cities and towns, for orientation on DARE and Barrington",
     "showSites": "Show sites",
     "showSitesHint": "Contributed sites and tracings — off at first load for speed",
     "showBattles": "Show battles",

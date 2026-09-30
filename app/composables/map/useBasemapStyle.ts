@@ -21,8 +21,12 @@ let protocolRegistered = false
  * PMTiles is read straight from object storage over HTTP range requests, so no
  * tile server process exists to run, scale or pay for. The protocol handler has
  * to be registered on MapLibre once per page, before any style referencing it.
+ *
+ * Exported so `useModernLabelsOverlay.ts` can register it too — that overlay
+ * adds a `pmtiles://` vector source of its own, imperatively, outside
+ * `buildBasemapStyle`.
  */
-const registerPmtilesProtocol = (): void => {
+export const registerPmtilesProtocol = (): void => {
   if (protocolRegistered) return
   const protocol = new Protocol()
   addProtocol('pmtiles', protocol.tile)
@@ -223,8 +227,12 @@ interface StyleColours {
  * The notebook palette translated into map terms. Land is paper, water is a
  * wash of dilute ink, and modern roads are drawn as faint pencil so the
  * archaeological overlay is always the darkest thing on the map.
+ *
+ * Exported so `useModernLabelsOverlay.ts` can draw its labels in the same
+ * ink — DARE and Barrington are both forced to the light tone by
+ * `resolveSheetTone`, same reasoning as satellite below.
  */
-const LIGHT_COLOURS: StyleColours = {
+export const LIGHT_COLOURS: StyleColours = {
   land: '#f2ede1',
   water: '#cfd7d3',
   landuse: '#e7dfcd',
@@ -259,7 +267,8 @@ interface StyleRequest {
   isFollowingLimes?: boolean
 }
 
-const buildVectorSource = (source: BasemapSource) =>
+/** Exported so `useModernLabelsOverlay.ts` can add the same source imperatively. */
+export const buildVectorSource = (source: BasemapSource) =>
   source.provider === 'pmtiles'
     ? {
         type: 'vector' as const,
@@ -272,7 +281,7 @@ const buildVectorSource = (source: BasemapSource) =>
         attribution: '© OpenStreetMap contributors',
       }
 
-interface ModernSchema {
+export interface ModernSchema {
   building: string
   transportation: string
   boundary: string
@@ -321,26 +330,30 @@ const PROTOMAPS_SCHEMA: ModernSchema = {
   boundaryFilter: ['==', 'kind', 'country'],
 }
 
-const resolveModernSchema = (source: BasemapSource): ModernSchema =>
+/** Exported so `useModernLabelsOverlay.ts` can pick the right schema for its own `addSource` call. */
+export const resolveModernSchema = (source: BasemapSource): ModernSchema =>
   source.provider === 'pmtiles' ? PROTOMAPS_SCHEMA : OPENMAPTILES_SCHEMA
 
 /**
- * The one symbol layer both the `vestigian` and `satellite` views draw —
- * pulled out so satellite (photography with nothing of its own to name a
- * place) can put it straight over the imagery instead of duplicating it.
- * `opacity` is the "slightly transparent" reported missing: full strength
- * would compete with whatever the sheet underneath is doing, so both callers
- * pass the same quiet 0.7 a busy sheet already used before this was a
- * function of its own.
+ * `vestigian`, `satellite` and (behind a toggle, `useModernLabelsOverlay.ts`)
+ * the antiquity views all draw this same symbol layer — pulled out so each
+ * caller supplies only what actually differs between them: `vestigian` keeps
+ * it quiet (0.7) since the antiquity data is that view's own foreground;
+ * satellite draws it at full strength, since a photograph has nothing of its
+ * own competing with a name; the antiquity overlay matches satellite's
+ * choice — a reader who explicitly switches it on wants to read it, not
+ * squint at it.
  */
-const buildPlaceLabelsLayer = (
+export const MODERN_LABELS_SOURCE_ID = 'basemap'
+
+export const buildPlaceLabelsLayer = (
   colours: Pick<StyleColours, 'label' | 'labelHalo'>,
   schema: ModernSchema,
   opacity: number,
 ): LayerSpecification => ({
   id: 'place-labels',
   type: 'symbol',
-  source: 'basemap',
+  source: MODERN_LABELS_SOURCE_ID,
   'source-layer': schema.place,
   layout: {
     'text-field': ['get', 'name'],
@@ -1249,6 +1262,37 @@ export const useBasemapStyle = () => {
   const periodYear = useState<number | null>('atlas-period-year', () => null)
 
   /**
+   * Modern city names, over a historical sheet — DARE's raster tiles carry
+   * none of their own, and Barrington's own place labels are ancient names
+   * from Pleiades, not a reader's present-day bearings; turning this on
+   * draws `vestigian`/`satellite`'s own modern-places layer
+   * (`useModernLabelsOverlay`) over whichever of the two is showing, purely
+   * as an orientation aid.
+   *
+   * `canShowModernLabels` is the one `canShow*` flag in this file that is
+   * not a constant `true` — these names are a fact about *today's* ground,
+   * which only makes sense to offer as a reading aid over a historical
+   * sheet. The period scrubber just above is the direct precedent for a
+   * basemap-scoped control staying scoped rather than generalising to every
+   * view the way the frontier and the reference overlays below did — see
+   * `.claude/rules/antiquity-basemaps.md`. Not persisted, same reasoning as
+   * `isLimesActive`.
+   */
+  const isModernLabelsActive = useState<boolean>('modern-labels-active', () => false)
+
+  const canShowModernLabels = computed(
+    () => view.value === 'antiquity-dare' || view.value === 'antiquity-awmc',
+  )
+
+  const isShowingModernLabels = computed(
+    () => canShowModernLabels.value && isModernLabelsActive.value,
+  )
+
+  const setModernLabelsActive = (next: boolean): void => {
+    isModernLabelsActive.value = next
+  }
+
+  /**
    * The Tabula Peutingeriana network — unlike the limes, an overlay drawn on
    * top of *any* basemap rather than baked into one vector style, since it is
    * a plain `geojson` source layered above whatever sheet is showing (see
@@ -1429,12 +1473,23 @@ export const useBasemapStyle = () => {
     isDark,
     sheetTone,
     availableViews: BASEMAP_VIEWS,
+    /**
+     * The full resolved source config, not just one tile URL — every other
+     * overlay here only ever needed its own single endpoint, but
+     * `useModernLabelsOverlay` builds the same vector source `vestigian`
+     * and `satellite` draw, which needs `provider`/`pmtilesUrl` together,
+     * not a single derived string.
+     */
+    source,
     canFollowLimes,
     isFollowingLimes,
     setLimesActive,
     limesTilesUrl: computed(() => source.value.limesTilesUrl),
     periodYear,
     setPeriodYear,
+    canShowModernLabels,
+    isShowingModernLabels,
+    setModernLabelsActive,
     empireExtentTilesUrl: computed(() => source.value.empireExtentTilesUrl),
     canShowTabulaPeutingerianaOverlay,
     isShowingTabulaPeutingerianaOverlay,

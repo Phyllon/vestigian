@@ -49,6 +49,9 @@
     canShowAtticInscriptions,
     isShowingAtticInscriptions,
     setAtticInscriptionsActive,
+    canShowModernLabels,
+    isShowingModernLabels,
+    setModernLabelsActive,
   } = useBasemapStyle()
   const { t } = useI18n()
 
@@ -109,6 +112,14 @@
       label: t('basemapSwitcher.tabulaPeutingerianaOverlay'),
       hint: t('basemapSwitcher.tabulaPeutingerianaOverlayHint'),
       toggle: () => setTabulaPeutingerianaOverlayActive(!isShowingTabulaPeutingerianaOverlay.value),
+    },
+    {
+      key: 'modern-labels',
+      canShow: canShowModernLabels.value,
+      isActive: isShowingModernLabels.value,
+      label: t('basemapSwitcher.showModernLabels'),
+      hint: t('basemapSwitcher.showModernLabelsHint'),
+      toggle: () => setModernLabelsActive(!isShowingModernLabels.value),
     },
     {
       key: 'battles',

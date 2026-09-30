@@ -228,16 +228,16 @@ describe('buildBasemapStyle, satellite view', () => {
     expect(attribution).toContain('CC BY-NC-SA')
   })
 
-  it('draws modern city names, slightly transparent, over the photograph', () => {
+  it('draws modern city names over the photograph, full strength', () => {
     const style = buildBasemapStyle({ view: 'satellite', isDark: false, source })
     const labels = style.layers.find((layer) => layer.id === 'place-labels') as
       SymbolLayerSpecification | undefined
     expect(labels?.['source-layer']).toBe('place')
-    expect(labels?.paint?.['text-opacity']).toBeCloseTo(0.7)
+    expect(labels?.paint?.['text-opacity']).toBeCloseTo(1)
     // Photography has no dark mode of its own — the sheet is light-toned in
     // both themes, and so is this label's ink, same reasoning as the
     // background colour just above.
-    expect(labels?.paint?.['text-color']).toBe('#3d362e')
+    expect(labels?.paint?.['text-color']).toBe('#000000')
   })
 
   it('reads the Protomaps places layer for city names when production’s pmtiles source is active', () => {

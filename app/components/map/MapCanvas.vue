@@ -76,6 +76,12 @@
     keepAtticInscriptionsOverlayThroughStyleChanges,
   } = useAtticInscriptionsOverlay()
   const {
+    isActive: isShowingModernLabels,
+    attachModernLabelsOverlay,
+    detachModernLabelsOverlay,
+    keepModernLabelsOverlayThroughStyleChanges,
+  } = useModernLabelsOverlay()
+  const {
     load: loadNotebook,
     overlay: notebookOverlay,
     attachNotebookOverlay,
@@ -280,6 +286,15 @@
     }
   })
 
+  watch(isShowingModernLabels, (isActive) => {
+    if (!map.value) return
+    if (isActive) {
+      attachModernLabelsOverlay(map.value)
+    } else {
+      detachModernLabelsOverlay(map.value)
+    }
+  })
+
   onMounted(() => {
     if (!container.value) return
 
@@ -314,6 +329,8 @@
       keepInscriptionsOverlayThroughStyleChanges(instance)
       attachAtticInscriptionsOverlay(instance)
       keepAtticInscriptionsOverlayThroughStyleChanges(instance)
+      attachModernLabelsOverlay(instance)
+      keepModernLabelsOverlayThroughStyleChanges(instance)
       attachOverlay(instance)
       keepOverlayThroughStyleChanges(instance)
       refreshLimesDimming(instance)

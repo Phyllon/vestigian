@@ -44,6 +44,8 @@
     "groupOverlays": "Calques",
     "tabulaPeutingerianaOverlay": "Réseau Tabula Peutingeriana",
     "tabulaPeutingerianaOverlayHint": "Lieux et routes du manuscrit, à leurs coordonnées réelles",
+    "showModernLabels": "Afficher les noms de lieux modernes",
+    "showModernLabelsHint": "Villes et communes actuelles, pour l'orientation sur DARE et Barrington",
     "showSites": "Afficher les sites",
     "showSitesHint": "Sites et tracés contribués par la communauté — désactivés au premier chargement pour la vitesse",
     "showBattles": "Afficher les batailles",
