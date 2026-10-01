@@ -515,18 +515,6 @@ export default defineNuxtConfig({
          */
         glyphsUrl: '/fonts/{fontstack}/{range}.pbf',
       },
-      /**
-       * Off by default, deliberately — not a "no setup yet" default like the
-       * URLs above. `pnpm import:tabula-peutingeriana` populates
-       * `tabula_peutingeriana_places`/`_roads` regardless (the import itself
-       * touches nothing a visitor sees), but the source data
-       * (`omnesviae.org/data/omnesviae.json`) states no licence anywhere, so
-       * `server/api/tabula-peutingeriana/network.geojson.get.ts` 404s and the
-       * basemap switcher's toggle is hidden until an operator sets this to
-       * `true` — after confirming reuse is fine with René Voorburg, the same
-       * courtesy this project already extends to Åhlfeldt (DARE) and EOX. See
-       * CLAUDE.md's "The Tabula Peutingeriana network" section.
-       */
       tabulaPeutingerianaEnabled: false,
     },
   },

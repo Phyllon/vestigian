@@ -61,6 +61,13 @@ services:
       NUXT_PUBLIC_IMAGE_BASE_URL: ${IMAGE_BASE_URL}
       NUXT_PUBLIC_BASEMAP_PROVIDER: pmtiles
       NUXT_PUBLIC_BASEMAP_PMTILES_URL: ${PMTILES_URL}
+      # Off until an operator confirms reuse with the data source — see the
+      # licence note on tabulaPeutingerianaEnabled in nuxt.config.ts. Dokploy's
+      # "Environment" tab only fills `${...}` substitutions actually referenced
+      # in this file; it does not inject arbitrary vars into the container, so
+      # this line has to exist before TABULA_PEUTINGERIANA_ENABLED=true set there
+      # does anything.
+      NUXT_PUBLIC_TABULA_PEUTINGERIANA_ENABLED: ${TABULA_PEUTINGERIANA_ENABLED:-false}
       NUXT_IMGPROXY_BASE_URL: ${IMAGE_BASE_URL}
       NUXT_IMGPROXY_KEY: ${IMGPROXY_KEY}
       NUXT_IMGPROXY_SALT: ${IMGPROXY_SALT}

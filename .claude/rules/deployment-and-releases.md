@@ -200,6 +200,16 @@ would make every Node patch a Dockerfile edit, which was not taken on here.
 
 To move from OpenFreeMap to self-hosted tiles: download a Europe + Mediterranean extract from maps.protomaps.com, upload to R2, set `NUXT_PUBLIC_BASEMAP_PROVIDER=pmtiles` and `NUXT_PUBLIC_BASEMAP_PMTILES_URL`.
 
+**`compose.prod.yml`'s `environment:` block is an allowlist, not a passthrough.**
+Dokploy's "Environment" tab only fills `${VAR}` substitutions that this file
+actually references; it does not inject arbitrary operator-set vars into the
+container. Setting `NUXT_PUBLIC_SOMETHING=true` in Dokploy does nothing unless
+a line like `NUXT_PUBLIC_SOMETHING: ${SOMETHING}` already exists here — this is
+why `NUXT_PUBLIC_TABULA_PEUTINGERIANA_ENABLED` (the licence gate documented
+beside `tabulaPeutingerianaEnabled` in `nuxt.config.ts`) had to be added to this
+file before the flag could be turned on in production at all; the key existing
+in `.env.example` only covers `pnpm dev`, which reads `.env` directly.
+
 ## Versioning & releases
 
 Semantic versioning, via [Changesets](https://github.com/changesets/changesets)
