@@ -8,6 +8,7 @@
     "signOut": "Cerrar sesión",
     "footerLicence": "Licencias de datos",
     "menu": "Menú",
+    "menuGroupAbout": "Acerca de",
     "menuGroupReference": "Referencia",
     "menuGroupLegal": "Datos jurídicos",
     "menuGroupOffline": "Mapas sin conexión",
@@ -279,6 +280,17 @@
       "title": "Cola de revisión",
       "intro": "Contribuciones de cuentas que aún no han obtenido publicación automática."
     }
+  },
+  "about": {
+    "title": "Acerca de Vestigian",
+    "menuLabel": "Acerca de Vestigian",
+    "intro": "Vestigian —«rastros»— es un atlas del mundo antiguo: asentamientos, caminos, fortificaciones, lugares de hallazgo y otros rastros de la Antigüedad, situados en un mapa y registrados por quienes los visitan. Puede pensarse como un cuaderno de campo del mundo romano, mantenido con honestidad por quien lo continúe.",
+    "whatHeading": "Qué es esto",
+    "whatBody": "Un mapa interactivo del mundo antiguo que recoge lugares y elementos de la Europa romana y más allá — desde ciudades conocidas hasta fuertes olvidados, caminos abandonados e inscripciones discretas. Las rutas entre lugares y las antiguas líneas fronterizas se trazan junto a los propios sitios, de modo que el mapa se lee como una red de movimiento y asentamiento, no como una simple dispersión de puntos.",
+    "whoHeading": "A quién va dirigido",
+    "whoBody": "A cualquiera con curiosidad por el mundo antiguo: viajeros que planean adónde ir, investigadores que buscan un lugar de hallazgo, o personas que simplemente quieren ver qué hubo en algún sitio hace dos mil años. Explorar, buscar y leer es libre para todos — no hace falta ninguna cuenta.",
+    "contributeHeading": "Registrar lo que encuentres",
+    "contributeBody": "Los visitantes registrados pueden añadir un sitio, corregir un registro existente, trazar un camino o añadir una fotografía tomada en el terreno. Cada contribución se revisa antes de llegar al mapa público, y el historial completo de un registro — qué cambió, cuándo y quién lo hizo — permanece visible para todos."
   },
   "licence": {
     "title": "Licencias de datos",

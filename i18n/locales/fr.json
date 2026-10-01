@@ -8,6 +8,7 @@
     "signOut": "Déconnexion",
     "footerLicence": "Données et licences",
     "menu": "Menu",
+    "menuGroupAbout": "À propos",
     "menuGroupReference": "Référence",
     "menuGroupLegal": "Données juridiques",
     "menuGroupOffline": "Cartes hors ligne",
@@ -279,6 +280,17 @@
       "title": "Revoir la file d'attente",
       "intro": "Contributions provenant de comptes qui n'ont pas encore fait l'objet d'une publication automatique."
     }
+  },
+  "about": {
+    "title": "À propos de Vestigian",
+    "menuLabel": "À propos de Vestigian",
+    "intro": "Vestigian — « traces » — est un atlas du monde antique : habitats, routes, fortifications, lieux de découverte et autres traces de l'Antiquité, placés sur une carte et enregistrés par les personnes qui les visitent. On peut le voir comme un carnet de terrain du monde romain, tenu honnêtement par quiconque le poursuit.",
+    "whatHeading": "Ce que c'est",
+    "whatBody": "Une carte interactive du monde antique, couvrant des lieux et éléments de l'Europe romaine et au-delà — des villes célèbres aux forts oubliés, en passant par des routes abandonnées et des inscriptions discrètes. Les itinéraires entre les lieux et les anciennes lignes de frontière sont tracés aux côtés des sites eux-mêmes, de sorte que la carte se lit comme un réseau de déplacements et d'implantations plutôt que comme un semis de points.",
+    "whoHeading": "À qui il s'adresse",
+    "whoBody": "À toute personne curieuse du monde antique : voyageurs planifiant leur prochaine étape, chercheurs en quête d'un lieu de découverte, ou simplement celles et ceux qui veulent voir ce qui se dressait quelque part il y a deux mille ans. Parcourir, rechercher et lire sont libres d'accès pour tous — aucun compte n'est nécessaire.",
+    "contributeHeading": "Consigner ce que vous trouvez",
+    "contributeBody": "Les visiteurs inscrits peuvent ajouter un site, corriger un enregistrement existant, tracer une route ou ajouter une photographie prise sur le terrain. Chaque contribution est vérifiée avant d'apparaître sur la carte publique, et l'historique complet d'un enregistrement — ce qui a changé, quand, et par qui — reste visible par tous."
   },
   "licence": {
     "title": "Données et licences",

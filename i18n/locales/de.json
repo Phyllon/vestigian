@@ -8,6 +8,7 @@
     "signOut": "Abmelden",
     "footerLicence": "Daten und Lizenzen",
     "menu": "Menü",
+    "menuGroupAbout": "Über",
     "menuGroupReference": "Referenz",
     "menuGroupLegal": "Recht & Daten",
     "menuGroupOffline": "Offline-Karten",
@@ -279,6 +280,17 @@
       "title": "Überprüfungswarteschlange",
       "intro": "Beiträge von Accounts, die noch keine automatische Veröffentlichung verdient haben."
     }
+  },
+  "about": {
+    "title": "Über Vestigian",
+    "menuLabel": "Über Vestigian",
+    "intro": "Vestigian – „Spuren“ – ist ein Atlas der antiken Welt: Siedlungen, Straßen, Befestigungen, Fundstellen und andere Spuren der Antike, auf einer Karte festgehalten von den Menschen, die sie besuchen. Man kann es sich als Feldnotizbuch der römischen Welt vorstellen, gehalten ehrlich von allen, die es weiterführen.",
+    "whatHeading": "Was das hier ist",
+    "whatBody": "Eine interaktive Karte der antiken Welt mit Orten und Merkmalen aus dem römischen Europa und darüber hinaus – von bekannten Städten bis zu vergessenen Kastellen, verlassenen Straßen und stillen Inschriften. Routen zwischen Orten und alte Grenzlinien sind neben den Orten selbst eingezeichnet, sodass die Karte eher ein Netzwerk aus Bewegung und Besiedlung zeigt als eine Ansammlung einzelner Punkte.",
+    "whoHeading": "Für wen es gedacht ist",
+    "whoBody": "Für alle, die die antike Welt interessiert: Reisende, die ihr Ziel planen, Forschende auf der Suche nach einer Fundstelle, oder Menschen, die einfach sehen möchten, was vor zweitausend Jahren irgendwo gestanden hat. Durchstöbern, Suchen und Lesen sind für alle kostenlos – ganz ohne Konto.",
+    "contributeHeading": "Was Sie finden, festhalten",
+    "contributeBody": "Registrierte Besucher können einen Ort hinzufügen, eine bestehende Aufzeichnung korrigieren, eine Straße nachzeichnen oder ein Foto von vor Ort hochladen. Jeder Beitrag wird geprüft, bevor er auf der öffentlichen Karte erscheint, und die vollständige Geschichte einer Aufzeichnung – was sich geändert hat, wann und von wem – bleibt für alle sichtbar."
   },
   "licence": {
     "title": "Daten und Lizenzen",

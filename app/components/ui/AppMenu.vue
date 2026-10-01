@@ -9,12 +9,16 @@
   const { t } = useI18n()
   const config = useRuntimeConfig()
 
-  // Three named groups, each its own array (which also draws the separator
-  // between them) with a non-interactive `type: 'label'` header — a plain
-  // flat list read fine with one item per row, but stopped being obvious
-  // once a second and third destination arrived with nothing to say which
-  // parts of the app they belonged to.
+  // Several named groups, each its own array (which also draws the
+  // separator between them) with a non-interactive `type: 'label'` header —
+  // a plain flat list read fine with one item per row, but stopped being
+  // obvious once a second and third destination arrived with nothing to say
+  // which parts of the app they belonged to.
   const items = computed(() => [
+    [
+      { type: 'label' as const, label: t('layout.menuGroupAbout') },
+      { label: t('about.menuLabel'), icon: 'i-lucide-info', to: '/about' },
+    ],
     [
       { type: 'label' as const, label: t('layout.menuGroupReference') },
       // First in the group on purpose: it is the only entry that asks the

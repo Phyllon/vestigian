@@ -8,6 +8,7 @@
     "signOut": "Afmelden",
     "footerLicence": "Gegevens & licenties",
     "menu": "Menu",
+    "menuGroupAbout": "Over",
     "menuGroupReference": "Referentie",
     "menuGroupLegal": "Juridische gegevens",
     "menuGroupOffline": "Offline kaarten",
@@ -279,6 +280,17 @@
       "title": "Wachtrij bekijken",
       "intro": "Bijdragen van rekeningen die nog niet automatisch gepubliceerd zijn."
     }
+  },
+  "about": {
+    "title": "Over Vestigian",
+    "menuLabel": "Over Vestigian",
+    "intro": "Vestigian — 'sporen' — is een atlas van de oude wereld: nederzettingen, wegen, versterkingen, vindplaatsen en andere sporen van de oudheid, op een kaart gezet en vastgelegd door de mensen die ze bezoeken. Zie het als een veldnotitieboek van de Romeinse wereld, eerlijk gehouden door wie het ook maar verder draagt.",
+    "whatHeading": "Wat dit is",
+    "whatBody": "Een interactieve kaart van de oude wereld, met plaatsen en kenmerken uit Europa ten tijde van Rome en daarbuiten — van bekende steden tot vergeten forten, verlaten wegen en stille inscripties. Routes tussen plaatsen en oude grenslijnen zijn naast de locaties zelf ingetekend, zodat de kaart eerder een netwerk van beweging en bewoning toont dan een verzameling losse punten.",
+    "whoHeading": "Voor wie dit is",
+    "whoBody": "Voor iedereen die nieuwsgierig is naar de oude wereld: reizigers die hun route plannen, onderzoekers die een vindplaats opsporen, of mensen die gewoon willen zien wat ergens tweeduizend jaar geleden stond. Bladeren, zoeken en lezen is voor iedereen gratis — geen account nodig.",
+    "contributeHeading": "Vastleggen wat je vindt",
+    "contributeBody": "Geregistreerde bezoekers kunnen een locatie toevoegen, een bestaande registratie corrigeren, een weg intekenen of een foto vanaf het veld toevoegen. Elke bijdrage wordt gecontroleerd voordat die op de openbare kaart verschijnt, en de volledige geschiedenis van een registratie — wat er veranderde, wanneer en door wie — blijft voor iedereen zichtbaar."
   },
   "licence": {
     "title": "Gegevens & licenties",

@@ -8,6 +8,7 @@
     "signOut": "Sign out",
     "footerLicence": "Data & licences",
     "menu": "Menu",
+    "menuGroupAbout": "About",
     "menuGroupReference": "Reference",
     "menuGroupLegal": "Legal & data",
     "menuGroupOffline": "Offline maps",
@@ -409,6 +410,17 @@
       "title": "Review queue",
       "intro": "Contributions from accounts that have not yet earned automatic publishing."
     }
+  },
+  "about": {
+    "title": "About Vestigian",
+    "menuLabel": "About Vestigian",
+    "intro": "Vestigian — \"traces\" — is an atlas of the ancient world: settlements, roads, fortifications, findspots and other traces of antiquity, placed on a map and recorded by the people who visit them. Think of it as a field notebook for the Roman world, kept honest by whoever carries it next.",
+    "whatHeading": "What this is",
+    "whatBody": "An interactive map of the ancient world, covering sites and features from Roman-era Europe and beyond — from well-known cities to forgotten forts, abandoned roads and quiet inscriptions. Routes between places and old frontier lines are drawn alongside the sites themselves, so the map reads as a network of movement and settlement rather than a scatter of pins.",
+    "whoHeading": "Who it's for",
+    "whoBody": "Anyone curious about the ancient world: travellers planning where to go, researchers tracking down a findspot, or people who simply want to see what stood somewhere two thousand years ago. Browsing, searching and reading are free for everyone — no account needed.",
+    "contributeHeading": "Recording what you find",
+    "contributeBody": "Registered visitors can add a site, correct an existing record, trace a road, or add a photograph from the field. Every contribution is checked before it reaches the public map, and a record's full history — what changed, when, and by whom — stays visible to everyone."
   },
   "licence": {
     "title": "Data & licences",

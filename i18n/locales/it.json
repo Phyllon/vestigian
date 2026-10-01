@@ -8,6 +8,7 @@
     "signOut": "Esci",
     "footerLicence": "Dati e licenze",
     "menu": "Menu",
+    "menuGroupAbout": "Informazioni",
     "menuGroupReference": "Riferimento",
     "menuGroupLegal": "Legali e dati",
     "menuGroupOffline": "Mappa offline",
@@ -279,6 +280,17 @@
       "title": "Visualizza la coda",
       "intro": "Contributi da conti che non hanno ancora guadagnato la pubblicazione automatica."
     }
+  },
+  "about": {
+    "title": "Informazioni su Vestigian",
+    "menuLabel": "Informazioni su Vestigian",
+    "intro": "Vestigian — «tracce» — è un atlante del mondo antico: insediamenti, strade, fortificazioni, luoghi di rinvenimento e altre tracce dell'antichità, collocati su una mappa e registrati dalle persone che li visitano. Si può pensare a un taccuino da campo del mondo romano, tenuto onesto da chiunque lo porti avanti.",
+    "whatHeading": "Di cosa si tratta",
+    "whatBody": "Una mappa interattiva del mondo antico, che copre luoghi ed elementi dell'Europa di epoca romana e oltre — da città ben note a forti dimenticati, strade abbandonate e iscrizioni silenziose. Gli itinerari tra i luoghi e le antiche linee di confine sono tracciati accanto ai siti stessi, così che la mappa si legga come una rete di movimento e insediamento, non come una semplice dispersione di punti.",
+    "whoHeading": "A chi si rivolge",
+    "whoBody": "A chiunque sia curioso del mondo antico: viaggiatori che pianificano dove andare, ricercatori alla ricerca di un luogo di rinvenimento, o persone che vogliono semplicemente vedere cosa sorgeva da qualche parte duemila anni fa. Esplorare, cercare e leggere è gratuito per tutti — nessun account richiesto.",
+    "contributeHeading": "Registrare ciò che trovi",
+    "contributeBody": "I visitatori registrati possono aggiungere un sito, correggere una registrazione esistente, tracciare una strada o aggiungere una fotografia scattata sul campo. Ogni contributo viene verificato prima di raggiungere la mappa pubblica, e la cronologia completa di una registrazione — cosa è cambiato, quando e da chi — resta visibile a tutti."
   },
   "licence": {
     "title": "Dati e licenze",
