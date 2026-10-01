@@ -1002,3 +1002,246 @@ Verified with `useBasemapStyle.test.ts`: one assertion per schema confirming
 `satellite` now carries a `place-labels` layer reading the correct
 `source-layer` name for whichever provider is active. 31 tests pass, `tsc`
 and `eslint` both clean.
+
+## A fifth basemap view: the familiar OSM look — two passes, the second one reading the actual source
+
+Asked directly: find an OpenStreetMap-style basemap — mirrorable, open
+source, EU-based, linked otherwise — that makes the map "look like vici.org
+does", and add it as another view if one exists.
+
+**Provider research (stayed correct across both passes).** Checked rather
+than assumed, same standard this file already holds third-party sources to
+elsewhere:
+
+- **What vici.org's own map actually is.** Fetched `vici.org` directly
+  first (`curl`, not memory): its `ViciWidget` config sets `defaultMap:
+"OSM"` with no matching `extraMaps` entry, which read as OpenLayers' own
+  built-in `ol.source.OSM` — the standard `tile.openstreetmap.org` raster
+  layer, hotlinked directly. **That reading was incomplete.** Asked a
+  second time against a specific `vici.org` URL, watching the real tile
+  requests a loaded page actually makes (Playwright, not the HTML source)
+  showed the true answer: `tiles.vici.org/osm/{z}/{x}/{y}.png` — `vici.org`
+  mirrors the classic OSM-Carto raster render **itself**, rather than
+  hotlinking `tile.openstreetmap.org`. The HTML alone understated what the
+  page does; a page actually has to be run to know.
+- **OpenFreeMap — already this project's own dev provider.** MIT licensed,
+  self-hostable, public instance on two Hetzner machines (Germany) —
+  "EU-based" and "mirrorable" together, and for data this project already
+  mirrors: no new provider, no new licence question, no new hosting
+  dependency for either dev (`openfreemap`) or production (the self-hosted
+  Protomaps PMTiles extract already described above).
+- **The literal route — running `gravitystorm/openstreetmap-carto`
+  itself** (the actual CartoCSS stylesheet behind `tile.openstreetmap.org`
+  and what `vici.org` mirrors) **— was not taken.** It is a Mapnik/CartoCSS
+  _raster_ stylesheet: its own `osm2pgsql` import into PostGIS plus a
+  `renderd`/`mod_tile` process actually rendering tiles, i.e. exactly the
+  tile-server process this project's PMTiles architecture exists not to
+  need (see the stack table in `CLAUDE.md`). What's built instead reads the
+  same already-mirrored vector source every other view draws and recolours
+  it with that stylesheet's own published colour values — mirrorable in
+  the sense that matters here (no new provider, no new hosting
+  commitment), open source (CC0), EU-based (OpenFreeMap's own instance).
+
+**First pass used invented, memory-approximated colours and was reported as
+not matching.** `OSM_STANDARD_COLOURS` originally held a muted palette
+loosely "modelled on `maputnik/osm-liberty`" from a web search summary, not
+the real file — and the summary itself was wrong in places (it returned
+icon colours when asked about the fill palette). Reusing the shared
+`buildBasemapLayers`/`StyleColours` plumbing meant exactly one landuse wash
+and one two-tier road split, with no forest/grass layer at all. Against the
+actual report — a `vici.org` URL, screenshotted and compared directly —
+the gap was obvious and specific: the reference is dominated by a
+saturated green forest/grass fill this build had no layer for whatsoever,
+and a four-colour cased road hierarchy (red motorway, orange primary, pale
+yellow secondary, white local) where this build drew one flat beige line.
+
+**Second pass reads real values out of the actual stylesheet, not another
+approximation.** Fetched `gravitystorm/openstreetmap-carto` directly —
+`style/style.mss` (land `#f2efe9`, water `#aad3df`), `style/landcover.mss`
+(forest `#add19e`, grass `#cdebb0`), `style/road-colors-generated.mss`
+(motorway fill `#e892a2`/casing `#dc2a67`, primary `#fcd6a4`/`#a06b00`,
+secondary `#f7fabf`/`#707d05`, local `#ffffff`/`#8f8f8f`), `style/
+buildings.mss` (`#d9d0c9`), `style/admin.mss` (`#8d618b`) — every value in
+`OSM_STANDARD_COLOURS` and `buildOsmStandardStyle`'s road tiers is one of
+theirs now, not a guess at one.
+
+**This needed its own layer builder, not the shared `buildBasemapLayers`.**
+That function draws one undifferentiated `landuse` wash and a two-tier
+road split — right for `vestigian`'s deliberately quiet sheet, but the
+actual shape of the first attempt's gap: OSM-Carto's look depends on a
+forest/grass fill and a four-tier coloured-and-cased road hierarchy
+neither of which fits that function's shape. `buildOsmStandardStyle` now
+draws its own layer list — `landuse` (generic wash) → `vegetation` →
+`forest` → `water` → `waterway` (river/stream lines — a real second gap
+found only by comparing the render against the reference a second time,
+see below) → `buildings` → four road tiers, each a casing line under a
+fill line via `buildRoadTierLayers` → `boundaries` → labels — reusing only
+`buildVectorSource`/`resolveModernSchema`/`buildPlaceLabelsLayer`, the
+parts that are genuinely shared facts about the source rather than
+opinions about how to draw it. `ModernSchema` grew the fields this view
+needs (`landcover`/`forestFilter`/`vegetationFilter`, four road-tier
+filters, `waterwayLayer`/`waterwayFilter`) rather than a second interface,
+since they are exactly the same kind of per-provider fact the existing
+fields already record — `vestigian`/`satellite` are unaffected, they just
+don't read the new fields.
+
+**Three provider-schema asymmetries, each found by actually comparing a
+render against the reference rather than trusting the plan:**
+
+- **Forest/grass live in a different _layer_, not just a differently-named
+  one.** OpenMapTiles carries a dedicated `landcover` layer at every zoom.
+  Protomaps' own `landcover` layer only goes to z7 (continental scale, its
+  own docs say so) — at the zooms this atlas is actually read, forest/grass
+  has to come from Protomaps' `landuse` layer's `kind` field instead, the
+  same source-layer the generic wash already reads.
+- **Rivers live in a different layer too.** OpenMapTiles keeps them in
+  their own `waterway` layer. Protomaps' own docs state its `water` layer
+  carries "polygons, lines and point labels" together — so the line
+  geometry is read from the _same_ layer as the lake/sea fill, filtered to
+  the linear `kind_detail` values. Found by comparing a rendered screenshot
+  against the `vici.org` reference a second time after the colour fix
+  landed: the reference's Aniene valley shows a clear blue river thread
+  this build had no layer drawing at all, since nothing reads `waterway`
+  anywhere else in this file.
+- **A real, shipped bug, caught by the render, not the type checker:**
+  `buildRoadTierLayers`'s `source-layer` was hardcoded to `'transportation'`
+  — correct for OpenMapTiles, silently wrong for Protomaps (`'roads'`).
+  `tsc` and `eslint` were both clean; the existing per-provider schema test
+  (now asserting `roads-motorway-fill` rather than the old single
+  `roads-major`) caught it the moment it was updated to the new layer ids.
+  Fixed by threading `schema.transportation` into the builder instead of a
+  literal.
+
+**One MapLibre validation trap, caught live in a browser, not by any static
+check:** `waterwayFilter` is `undefined` for OpenMapTiles (the whole
+`waterway` layer is already nothing but river lines, nothing to filter
+out), and writing `filter: schema.waterwayFilter` straight into the layer
+object set that key to a literal `undefined` — which MapLibre's style
+validator rejects outright (`"layers[5].filter: array expected, undefined
+found"`), silently breaking every view the instant `setStyle` ran, caught
+only by loading the page and reading the console, not by `tsc` (`filter?:
+FilterSpecification` happily accepts `undefined` as a value, which is not
+the same thing MapLibre's own runtime validator accepts). Fixed by
+spreading the key in conditionally (`...(schema.waterwayFilter ? {filter:
+...} : {})`) so the property is _absent_ for OpenMapTiles rather than
+present-and-undefined.
+
+Fixed to a light sheet regardless of theme (`resolveSheetTone`), the same
+treatment DARE/Barrington/satellite already get: there is no authoritative
+"OSM dark mode" to defer to. Reference-mark contrast needed no new
+per-view case in `useViewportTiles.ts`'s `palette` — measured, not assumed:
+`base.ink` (`#2b2621`) against `OSM_STANDARD_COLOURS`'s main fills comes
+out at 9.3–13:1, comfortably past the 3:1 floor `haloOnRaster`/
+`referenceInk` exist to guarantee for satellite/DARE's actual photography —
+this view's fills are flat and known, like Barrington's, not per-pixel-
+unpredictable like a raster, so the existing default already covers it.
+
+No template change was needed in `BasemapSwitcher.vue` — it already
+iterates `availableViews` generically by group, so a fifth `BasemapOption`
+with `group: 'today'` appears automatically. Its `label`/`hint` stayed
+plain English strings, matching the other four entries in `BASEMAP_VIEWS`:
+that whole array has never been run through `t()` (confirmed by grepping
+for a matching `basemapSwitcher.view*` key — none exists), a pre-existing
+i18n gap this change did not introduce and did not fix, to avoid a
+one-entry inconsistency or an unrelated refactor neither was asked for.
+
+Verified end to end: `useBasemapStyle.test.ts` carries 11 cases for this
+view (own colour table, OSM-Carto's real road colours by hex value, the
+forest/vegetation fill, the cased-pair road construction, the waterway
+schema asymmetry, both providers' source-layer names, fixed sheet tone,
+the group assignment), 650 tests pass, `tsc`/`eslint`/`prettier` clean, and
+a real dev-server render at the exact coordinates the `vici.org` reference
+used (Subiaco, Lazio) plus a Munich city-scale render confirm the result —
+dominant green forest, a visible river thread, a red/orange/yellow/white
+cased road hierarchy — against both the reference screenshot and a second,
+independent smoke test switching through all five views with the browser
+console watched for errors.
+
+## Named-feature labels on `osm-standard` — investigated before building, one category dropped by design
+
+Asked next: mountain names and their height, caves, river names, road
+names, "and so on, like existing on OSM" — and explicitly told to
+investigate and report back before writing any code. Checked both
+providers' real schemas rather than their docs' summaries:
+
+- **Peaks carry elevation in OpenMapTiles, not in Protomaps at all.**
+  OpenFreeMap's real TileJSON (`https://tiles.openfreemap.org/planet`) has
+  a dedicated `mountain_peak` layer: `name`, `ele` (metres), `ele_ft`,
+  `class` (peak/volcano/saddle/ridge/cliff/arete), `rank`. Protomaps' own
+  docs (docs.protomaps.com/basemaps/layers) have no `ele`/elevation field
+  anywhere on the page — a peak there is only a `pois` point with
+  `kind: 'peak'` and a name. **Decision, on request: name only, in both
+  providers, so dev and production never visibly disagree about this
+  feature** — not a limitation forcing the choice, a deliberate levelling
+  once the limitation was found.
+- **Caves are absent from both schemas entirely — a data gap, not a
+  styling one.** Checked OpenMapTiles' actual `layers/poi/poi.yaml` source
+  (not its rendered docs page): the POI layer's `subclass` passthrough only
+  forwards `amenity`/`barrier`/`historic`/`information`/`landuse`/
+  `leisure`/`railway`/`shop`/`sport`/`station`/`religion`/`tourism`/
+  `aerialway`/`building`/`highway`/`office`/`waterway`/`zoo` tags —
+  `natural` (what `natural=cave_entrance` is tagged under) is not one of
+  them, so cave entrances are dropped before the tiles are even built.
+  Protomaps' docs don't mention caves anywhere either. **Decision, on
+  request: dropped entirely, not tracked as a follow-up** — surfacing
+  caves would mean a new OSM import with its own table and tile endpoint
+  (the same shape as the AWMC minor-features import), a materially bigger
+  task than a label, and out of scope here.
+- **Rivers and roads both need a _name_ field the already-drawn geometry
+  layer doesn't carry, in OpenMapTiles specifically.** Confirmed directly
+  against the real TileJSON: `transportation` (the line geometry
+  `roads-*-fill`/`-casing` already read) has no `name` field at all — road
+  names live in a separate `transportation_name` layer. `waterway` (the
+  river lines already drawn) does carry `name` directly, so no second
+  layer was needed there. Protomaps keeps `name` on `roads` directly via
+  its common-tag schema (no separate names layer exists for it at all —
+  confirmed against the full id-anchor list of every section on
+  docs.protomaps.com/basemaps/layers: boundaries, buildings, earth,
+  landcover, landuse, places, pois, roads, transit, water — nothing
+  resembling a `roads_name`). Lake/sea names are the same shape as roads:
+  a separate `water_name` layer in OpenMapTiles, but Protomaps' own docs
+  state its `water` layer already carries "polygons, lines _and point
+  labels_" together — the labels are read from the exact source-layer the
+  fill and the river lines already use.
+
+`ModernSchema` grew `peakLayer`/`peakFilter`, `roadNameLayer`, and
+`waterNameLayer` to carry these per-provider facts, the same shape its
+existing `landcover`/`waterway` fields already used — not a second
+interface, since this is exactly the kind of fact the first one already
+exists to record.
+
+**`buildNamedFeatureFilter(extra?)` exists because of a bug this exact
+file already shipped once.** Writing `filter: schema.someOptionalFilter`
+straight into a layer literal is what broke `waterway` earlier in this
+same build (see above) — when the optional filter is `undefined` for one
+provider, MapLibre's validator rejects the literal `undefined` value
+outright rather than treating it as an absent key, and `tsc` cannot catch
+it because `filter?: FilterSpecification` happily accepts `undefined` as a
+value. Centralised into one helper that always returns a real array (`['has',
+'name']` alone, or `['all', extra, ['has', 'name']]`) so every one of the
+four new label layers goes through the same safe merge rather than
+repeating the mistake once per layer.
+
+**Added after `place-labels` in the layers array, not before.** MapLibre
+places symbols in layer order, and with the default
+`text-allow-overlap: false` a label from an earlier layer claims its space
+first and a later, colliding one is hidden — so town names, added first,
+stay the highest-priority label on this view the way they are on any
+reference map, and a crowded peak, river or road name yields to them
+rather than the reverse. No equivalent ordering question existed for any
+earlier layer in this file, since `waterway`'s line layer (added for the
+river-thread fix above) doesn't participate in symbol collision at all.
+
+Verified with six new test cases (name-only peak text with no `ele`
+reference, the per-provider peak schema including the filter-shape
+regression check, line-placement for both river and road labels, both
+providers' `transportation_name`/`water_name` source-layers, and the
+layer-order assertion), 656 tests pass, `tsc`/`eslint`/`prettier` clean.
+Confirmed live across three real renders: the Alps near Innsbruck (dense
+peak labelling — `▲ Patscherkofel`, `▲ Schneiderspitze`, and dozens more,
+with no visual collision against town names), central Munich at street
+zoom (road names following their own streets, "Isar" labelled along the
+river's curve), and the Ligurian coast at regional zoom ("Mar Ligure / Mer
+Ligure" in the water-text blue, `#4d80b3` — `style/water.mss`'s own
+`@water-text`, the same real-stylesheet standard the rest of this view's
+colours already follow).

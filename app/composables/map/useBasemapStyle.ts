@@ -207,7 +207,7 @@ export const isAntiquityView = (view: BasemapView): view is AntiquityView =>
  * `isDark`. Everything drawing over the basemap reads this, not `isDark`.
  */
 export const resolveSheetTone = (view: BasemapView, isDark: boolean): BasemapSheetTone => {
-  if (isAntiquityView(view) || view === 'satellite') return 'light'
+  if (isAntiquityView(view) || view === 'satellite' || view === 'osm-standard') return 'light'
   return isDark ? 'dark' : 'light'
 }
 
@@ -289,6 +289,76 @@ export interface ModernSchema {
   majorRoadFilter: FilterSpecification
   minorRoadFilter: FilterSpecification
   boundaryFilter: FilterSpecification
+  /**
+   * Vegetation fields, read by `buildOsmStandardStyle` only — `vestigian`/
+   * `satellite` have no use for a forest/grass distinction and keep reading
+   * the single generic `landuse` wash. `landcover` is a *different source-
+   * layer per provider*, not just a differently-named one: OpenMapTiles
+   * carries a dedicated `landcover` layer at every zoom, but Protomaps'
+   * own `landcover` layer only goes to z7 (continental scale, per
+   * docs.protomaps.com/basemaps/layers) — its `landuse` layer is what
+   * actually carries `kind: 'forest'`/`'wood'`/`'grass'`/etc. at the zooms
+   * this atlas is read at, so Protomaps reads vegetation from `landuse`
+   * instead, same source-layer the generic wash already reads.
+   */
+  landcover: string
+  forestFilter: FilterSpecification
+  vegetationFilter: FilterSpecification
+  motorwayFilter: FilterSpecification
+  primaryFilter: FilterSpecification
+  secondaryFilter: FilterSpecification
+  localRoadFilter: FilterSpecification
+  /**
+   * Rivers and streams narrow enough that OSM carries them as a line, not a
+   * polygon — without this a river reads as a visible gap in `osm-standard`
+   * exactly where the real OSM-Carto render (what `vici.org` itself mirrors)
+   * draws its most recognisable blue thread. **A different source-layer per
+   * provider, not a filter difference**: OpenMapTiles keeps these in their
+   * own `waterway` layer, nothing to filter out. Protomaps' own docs
+   * (docs.protomaps.com/basemaps/layers) say its `water` layer carries
+   * "polygons, lines and point labels" together in one layer — so reading it
+   * as a `line`-type MapLibre layer already renders only the LineString
+   * features; `waterwayFilter` narrows it to the genuinely linear `kind_detail`
+   * values so a lake polygon's own outline isn't drawn a second time.
+   */
+  waterwayLayer: string
+  waterwayFilter?: FilterSpecification
+  /**
+   * Named-feature labels, read by `buildOsmStandardStyle`'s label layers
+   * only. Checked against each provider's real schema before relying on it
+   * (`openmaptiles/openmaptiles`'s own `layers/*.yaml`,
+   * docs.protomaps.com/basemaps/layers) rather than assumed from the layers
+   * already drawn:
+   *
+   * - **Peaks carry no elevation in Protomaps at all** — its `pois` layer
+   *   has a `kind: 'peak'` and a name, nothing else; OpenMapTiles'
+   *   `mountain_peak` layer does carry `ele`/`ele_ft`. On request, this
+   *   view shows a name only, in both providers, specifically so the two
+   *   don't visibly disagree — not a schema limitation forcing the choice,
+   *   a deliberate one once the limitation was found.
+   * - **`transportation`/`roads` (the line geometry layers already drawn)
+   *   carry no `name` field in OpenMapTiles** — confirmed directly against
+   *   the real OpenFreeMap TileJSON, not assumed from Protomaps agreeing —
+   *   road names live in OpenMapTiles' separate `transportation_name`
+   *   layer. Protomaps has no equivalent second layer; `name` sits
+   *   directly on `roads` via its common-tag schema, so `roadNameLayer` is
+   *   the same source-layer `transportation`/`roads` already reads for
+   *   geometry, not a second one.
+   * - **Lake/sea names are a separate `water_name` layer in OpenMapTiles**,
+   *   but Protomaps' own docs state its `water` layer already carries
+   *   "polygons, lines and point labels" together — the same layer the
+   *   fill and the river lines already read.
+   *
+   * Caves were investigated and left out entirely: neither schema's POI
+   * layer carries a `natural=cave_entrance` equivalent at all (confirmed
+   * against OpenMapTiles' actual `poi.yaml` source, not just its docs) —
+   * getting them onto the map would mean a new OSM import, not a style
+   * change, and was explicitly descoped on request.
+   */
+  peakLayer: string
+  peakFilter?: FilterSpecification
+  roadNameLayer: string
+  waterNameLayer: string
 }
 
 /**
@@ -318,6 +388,20 @@ const OPENMAPTILES_SCHEMA: ModernSchema = {
   majorRoadFilter: ['in', 'class', 'motorway', 'trunk', 'primary'],
   minorRoadFilter: ['!in', 'class', 'motorway', 'trunk', 'primary'],
   boundaryFilter: ['<=', 'admin_level', 2],
+  // OpenMapTiles' `landcover` class enum is only wood/grass/farmland/rock/
+  // ice/wetland/sand (confirmed against openmaptiles.org/docs/schema) — no
+  // separate scrub/park/meadow values to fold in, unlike Protomaps below.
+  landcover: 'landcover',
+  forestFilter: ['in', 'class', 'wood'],
+  vegetationFilter: ['in', 'class', 'grass'],
+  motorwayFilter: ['in', 'class', 'motorway', 'trunk'],
+  primaryFilter: ['==', 'class', 'primary'],
+  secondaryFilter: ['==', 'class', 'secondary'],
+  localRoadFilter: ['!in', 'class', 'motorway', 'trunk', 'primary', 'secondary'],
+  waterwayLayer: 'waterway',
+  peakLayer: 'mountain_peak',
+  roadNameLayer: 'transportation_name',
+  waterNameLayer: 'water_name',
 }
 
 const PROTOMAPS_SCHEMA: ModernSchema = {
@@ -328,6 +412,34 @@ const PROTOMAPS_SCHEMA: ModernSchema = {
   majorRoadFilter: ['in', 'kind_detail', 'motorway', 'trunk', 'primary'],
   minorRoadFilter: ['!in', 'kind_detail', 'motorway', 'trunk', 'primary'],
   boundaryFilter: ['==', 'kind', 'country'],
+  // `landuse`, not `landcover` — see the field's own docstring for why.
+  // `kind` values confirmed against docs.protomaps.com/basemaps/layers'
+  // `landuse` enum.
+  landcover: 'landuse',
+  forestFilter: ['in', 'kind', 'forest', 'wood'],
+  vegetationFilter: [
+    'in',
+    'kind',
+    'grass',
+    'meadow',
+    'scrub',
+    'park',
+    'garden',
+    'nature_reserve',
+    'national_park',
+    'golf_course',
+    'orchard',
+  ],
+  motorwayFilter: ['in', 'kind_detail', 'motorway', 'trunk'],
+  primaryFilter: ['==', 'kind_detail', 'primary'],
+  secondaryFilter: ['==', 'kind_detail', 'secondary'],
+  localRoadFilter: ['!in', 'kind_detail', 'motorway', 'trunk', 'primary', 'secondary'],
+  waterwayLayer: 'water',
+  waterwayFilter: ['in', 'kind_detail', 'river', 'canal', 'stream', 'ditch', 'drain'],
+  peakLayer: 'pois',
+  peakFilter: ['==', 'kind', 'peak'],
+  roadNameLayer: 'roads',
+  waterNameLayer: 'water',
 }
 
 /** Exported so `useModernLabelsOverlay.ts` can pick the right schema for its own `addSource` call. */
@@ -534,6 +646,372 @@ const buildSatelliteStyle = (source: BasemapSource): StyleSpecification => {
       // before (see BasemapView history), so this is new rather than a
       // regression fix for this one view specifically.
       buildPlaceLabelsLayer(LIGHT_COLOURS, resolveModernSchema(source), 1),
+    ],
+  }
+}
+
+interface OsmStandardColours {
+  land: string
+  water: string
+  forest: string
+  vegetation: string
+  landuse: string
+  building: string
+  motorwayFill: string
+  motorwayCasing: string
+  primaryFill: string
+  primaryCasing: string
+  secondaryFill: string
+  secondaryCasing: string
+  localFill: string
+  localCasing: string
+  boundary: string
+  label: string
+  labelHalo: string
+  waterLabel: string
+}
+
+/**
+ * Not "inspired by" OSM-Carto from memory — read directly out of the actual
+ * stylesheet (`gravitystorm/openstreetmap-carto`, CC0, the CartoCSS project
+ * that renders the tiles at `tile.openstreetmap.org` and the ones `vici.org`
+ * itself mirrors at `tiles.vici.org/osm`) after a first attempt at this view
+ * used a muted, invented approximation and was reported as not matching:
+ * `style/style.mss` for land/water, `style/landcover.mss` for forest/grass,
+ * `style/road-colors-generated.mss` for the road hierarchy, `style/
+ * buildings.mss` for the building fill, `style/admin.mss` for the boundary
+ * line. Every value below is one of theirs, not a guess at one.
+ */
+const OSM_STANDARD_COLOURS: OsmStandardColours = {
+  land: '#f2efe9',
+  water: '#aad3df',
+  forest: '#add19e',
+  vegetation: '#cdebb0',
+  landuse: '#e0dfdf',
+  building: '#d9d0c9',
+  motorwayFill: '#e892a2',
+  motorwayCasing: '#dc2a67',
+  primaryFill: '#fcd6a4',
+  primaryCasing: '#a06b00',
+  secondaryFill: '#f7fabf',
+  secondaryCasing: '#707d05',
+  localFill: '#ffffff',
+  localCasing: '#8f8f8f',
+  boundary: '#8d618b',
+  label: '#000000',
+  labelHalo: '#ffffff',
+  // style/water.mss's own `@water-text` — a river or lake name reads as
+  // water, the same distinction OSM-Carto's own render makes.
+  waterLabel: '#4d80b3',
+}
+
+/**
+ * A road drawn as two stacked line layers — a wider "casing" under a
+ * narrower "fill" — which is the one technique that actually makes the
+ * classic OSM look recognisable: a flat single-colour line (this view's
+ * first attempt) reads as a generic vector map regardless of which colours
+ * it uses, where the casing is what gives a motorway its edge against a
+ * residential street's thin white thread. One call builds both layers for
+ * one road tier, in CSS-background-and-foreground order (push the casing
+ * first, the fill second, and both sit above whatever this tier's own
+ * z-order position needs).
+ */
+/** Zoom-interpolated width, the same shape `buildBasemapLayers`'s own road layers already use. */
+type LineWidth = NonNullable<LineLayerSpecification['paint']>['line-width']
+
+interface RoadTierSpecification {
+  idPrefix: string
+  filter: FilterSpecification
+  fillColour: string
+  casingColour: string
+  fillWidth: LineWidth
+  casingWidth: LineWidth
+  minzoom?: number
+}
+
+const buildRoadTierLayers = (
+  tier: RoadTierSpecification,
+  transportationLayer: string,
+): LayerSpecification[] => [
+  {
+    id: `${tier.idPrefix}-casing`,
+    type: 'line',
+    source: 'basemap',
+    'source-layer': transportationLayer,
+    filter: tier.filter,
+    minzoom: tier.minzoom,
+    layout: { 'line-cap': 'round', 'line-join': 'round' },
+    paint: { 'line-color': tier.casingColour, 'line-width': tier.casingWidth },
+  },
+  {
+    id: `${tier.idPrefix}-fill`,
+    type: 'line',
+    source: 'basemap',
+    'source-layer': transportationLayer,
+    filter: tier.filter,
+    minzoom: tier.minzoom,
+    layout: { 'line-cap': 'round', 'line-join': 'round' },
+    paint: { 'line-color': tier.fillColour, 'line-width': tier.fillWidth },
+  },
+]
+
+/**
+ * Merges an optional per-provider filter with a `['has', 'name']` guard,
+ * always returning a real array — never the bare optional filter itself.
+ * Writing `filter: schema.someFilter` straight into a layer literal is
+ * exactly the bug `buildOsmStandardStyle`'s `waterway` layer shipped with
+ * once already: when the optional filter is `undefined` for one provider,
+ * the key ends up present-and-`undefined` on the layer object, which
+ * MapLibre's style validator rejects outright rather than treating as
+ * absent (`"filter: array expected, undefined found"`) — a `tsc`-invisible
+ * runtime failure that broke the whole view. Centralised here once so every
+ * named-feature label layer below goes through the same safe merge.
+ */
+const buildNamedFeatureFilter = (extra?: FilterSpecification): FilterSpecification =>
+  extra ? ['all', extra, ['has', 'name']] : ['has', 'name']
+
+/**
+ * The same vector source `vestigian` already mirrors (OpenFreeMap in dev, a
+ * self-hosted Protomaps PMTiles extract in production — see
+ * `.claude/rules/map-and-tiles.md`), styled to look like the ordinary
+ * reference map underneath it rather than recoloured into this atlas's own
+ * ink. Requested as "an OSM-style map, mirrorable, open source, EU-based",
+ * then requested again, more specifically, against a `vici.org` URL — which
+ * turned out to be real evidence for the question asked, not just a
+ * preference: `vici.org`'s own "OSM" layer is `tiles.vici.org/osm/{z}/{x}/
+ * {y}.png`, a *self-hosted mirror* of the classic OSM-Carto raster render
+ * (confirmed by watching the actual tile requests a real page load makes),
+ * not a hotlink to `tile.openstreetmap.org` — so a mirrorable, open-source
+ * OSM-Carto-alike was never in question, only which route to it to take.
+ *
+ * The literal route — running `gravitystorm/openstreetmap-carto` itself —
+ * was not taken: it is a Mapnik/CartoCSS *raster* stylesheet, which means
+ * its own `osm2pgsql` import into PostGIS plus a `renderd`/`mod_tile`
+ * process actually rendering tiles, i.e. exactly the tile-server process
+ * this project's PMTiles architecture exists to not need (see the stack
+ * table in `CLAUDE.md`). What's built here instead reads the same
+ * already-mirrored vector source every other view draws and recolours it
+ * with OSM-Carto's own published colour values (see `OSM_STANDARD_COLOURS`)
+ * — mirrorable in the sense that matters for this app (no new provider, no
+ * new hosting commitment), open source (the colours are read from a CC0
+ * stylesheet), EU-based (OpenFreeMap's own instance runs on two Hetzner
+ * machines).
+ *
+ * Why this needed its own layer builder rather than reusing
+ * `buildBasemapLayers` the way the first attempt did: that function draws
+ * one undifferentiated `landuse` wash and one two-tier road split, which is
+ * right for `vestigian`'s quiet, deliberately low-detail sheet but was the
+ * actual gap in the first attempt at this view — OSM-Carto's own look is
+ * dominated by a forest/grass fill `buildBasemapLayers` has no layer for at
+ * all, and a four-tier coloured-and-cased road hierarchy a single flat line
+ * per tier cannot approximate. Rather than bend the shared function to a
+ * second, incompatible shape, this view draws its own layer list, reusing
+ * only `buildVectorSource`/`resolveModernSchema`/`buildPlaceLabelsLayer` —
+ * the parts that really are shared facts about the source, not opinions
+ * about how to draw it.
+ */
+const buildOsmStandardStyle = (source: BasemapSource): StyleSpecification => {
+  if (source.provider === 'pmtiles') registerPmtilesProtocol()
+
+  const schema = resolveModernSchema(source)
+  const colours = OSM_STANDARD_COLOURS
+
+  const roadTiers: RoadTierSpecification[] = [
+    {
+      idPrefix: 'roads-local',
+      filter: schema.localRoadFilter,
+      fillColour: colours.localFill,
+      casingColour: colours.localCasing,
+      minzoom: 11,
+      fillWidth: ['interpolate', ['linear'], ['zoom'], 11, 0.4, 18, 3],
+      casingWidth: ['interpolate', ['linear'], ['zoom'], 11, 0.7, 18, 4.6],
+    },
+    {
+      idPrefix: 'roads-secondary',
+      filter: schema.secondaryFilter,
+      fillColour: colours.secondaryFill,
+      casingColour: colours.secondaryCasing,
+      minzoom: 8,
+      fillWidth: ['interpolate', ['linear'], ['zoom'], 8, 0.5, 18, 4],
+      casingWidth: ['interpolate', ['linear'], ['zoom'], 8, 0.9, 18, 6],
+    },
+    {
+      idPrefix: 'roads-primary',
+      filter: schema.primaryFilter,
+      fillColour: colours.primaryFill,
+      casingColour: colours.primaryCasing,
+      fillWidth: ['interpolate', ['linear'], ['zoom'], 6, 0.5, 18, 5],
+      casingWidth: ['interpolate', ['linear'], ['zoom'], 6, 0.9, 18, 7.5],
+    },
+    {
+      idPrefix: 'roads-motorway',
+      filter: schema.motorwayFilter,
+      fillColour: colours.motorwayFill,
+      casingColour: colours.motorwayCasing,
+      fillWidth: ['interpolate', ['linear'], ['zoom'], 4, 0.5, 18, 6],
+      casingWidth: ['interpolate', ['linear'], ['zoom'], 4, 0.9, 18, 9],
+    },
+  ]
+
+  return {
+    version: 8,
+    glyphs: source.glyphsUrl,
+    sources: { basemap: buildVectorSource(source) },
+    layers: [
+      { id: 'background', type: 'background', paint: { 'background-color': colours.land } },
+      {
+        id: 'landuse',
+        type: 'fill',
+        source: 'basemap',
+        'source-layer': 'landuse',
+        paint: { 'fill-color': colours.landuse, 'fill-opacity': 0.6 },
+      },
+      {
+        id: 'vegetation',
+        type: 'fill',
+        source: 'basemap',
+        'source-layer': schema.landcover,
+        filter: schema.vegetationFilter,
+        paint: { 'fill-color': colours.vegetation },
+      },
+      {
+        id: 'forest',
+        type: 'fill',
+        source: 'basemap',
+        'source-layer': schema.landcover,
+        filter: schema.forestFilter,
+        paint: { 'fill-color': colours.forest },
+      },
+      {
+        id: 'water',
+        type: 'fill',
+        source: 'basemap',
+        'source-layer': 'water',
+        paint: { 'fill-color': colours.water },
+      },
+      {
+        id: 'waterway',
+        type: 'line',
+        source: 'basemap',
+        'source-layer': schema.waterwayLayer,
+        // MapLibre's style validator rejects an explicit `filter: undefined`
+        // outright ("array expected, undefined found") — it is not treated
+        // as equivalent to the key being absent, so the key has to not
+        // exist at all for OpenMapTiles, where the whole `waterway` layer is
+        // already nothing but river/stream lines.
+        ...(schema.waterwayFilter ? { filter: schema.waterwayFilter } : {}),
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: {
+          'line-color': colours.water,
+          'line-width': ['interpolate', ['linear'], ['zoom'], 9, 0.5, 18, 4],
+        },
+      },
+      {
+        id: 'buildings',
+        type: 'fill',
+        source: 'basemap',
+        'source-layer': schema.building,
+        minzoom: 14,
+        paint: { 'fill-color': colours.building },
+      },
+      ...roadTiers.flatMap((tier) => buildRoadTierLayers(tier, schema.transportation)),
+      {
+        id: 'boundaries',
+        type: 'line',
+        source: 'basemap',
+        'source-layer': schema.boundary,
+        filter: schema.boundaryFilter,
+        paint: {
+          'line-color': colours.boundary,
+          'line-dasharray': [3, 2],
+          'line-width': 1,
+          'line-opacity': 0.7,
+        },
+      },
+      buildPlaceLabelsLayer({ label: colours.label, labelHalo: colours.labelHalo }, schema, 1),
+      // Added after `place-labels`, not before: MapLibre places symbols in
+      // layer order and, with the default `text-allow-overlap: false`,
+      // whichever claims a spot first wins a collision — so town names stay
+      // the highest-priority label on this view, the way they are on any
+      // reference map, and a crowded peak/river/road name yields to them
+      // rather than the other way round.
+      {
+        id: 'peak-labels',
+        type: 'symbol',
+        source: 'basemap',
+        'source-layer': schema.peakLayer,
+        filter: buildNamedFeatureFilter(schema.peakFilter),
+        minzoom: 8,
+        layout: {
+          'text-field': ['concat', '▲ ', ['get', 'name']],
+          'text-font': [MAP_LABEL_FONT],
+          'text-size': 11,
+          'text-max-width': 8,
+        },
+        paint: {
+          'text-color': colours.label,
+          'text-halo-color': colours.labelHalo,
+          'text-halo-width': 1.2,
+        },
+      },
+      {
+        id: 'water-name-labels',
+        type: 'symbol',
+        source: 'basemap',
+        'source-layer': schema.waterNameLayer,
+        filter: buildNamedFeatureFilter(),
+        minzoom: 4,
+        layout: {
+          'text-field': ['get', 'name'],
+          'text-font': [MAP_LABEL_FONT],
+          'text-size': ['interpolate', ['linear'], ['zoom'], 4, 10, 10, 13],
+          'text-max-width': 8,
+        },
+        paint: {
+          'text-color': colours.waterLabel,
+          'text-halo-color': colours.labelHalo,
+          'text-halo-width': 1,
+        },
+      },
+      {
+        id: 'waterway-name-labels',
+        type: 'symbol',
+        source: 'basemap',
+        'source-layer': schema.waterwayLayer,
+        filter: buildNamedFeatureFilter(schema.waterwayFilter),
+        minzoom: 10,
+        layout: {
+          'symbol-placement': 'line',
+          'text-field': ['get', 'name'],
+          'text-font': [MAP_LABEL_FONT],
+          'text-size': 11,
+          'text-letter-spacing': 0.05,
+        },
+        paint: {
+          'text-color': colours.waterLabel,
+          'text-halo-color': colours.labelHalo,
+          'text-halo-width': 1,
+        },
+      },
+      {
+        id: 'road-name-labels',
+        type: 'symbol',
+        source: 'basemap',
+        'source-layer': schema.roadNameLayer,
+        filter: buildNamedFeatureFilter(),
+        minzoom: 13,
+        layout: {
+          'symbol-placement': 'line',
+          'text-field': ['get', 'name'],
+          'text-font': [MAP_LABEL_FONT],
+          'text-size': 10,
+        },
+        paint: {
+          'text-color': colours.label,
+          'text-halo-color': colours.labelHalo,
+          'text-halo-width': 1,
+        },
+      },
     ],
   }
 }
@@ -1131,6 +1609,7 @@ export const buildBasemapStyle = (request: StyleRequest): StyleSpecification => 
     return buildAtlasStyle(request.source, { limes: request.isFollowingLimes === true })
   }
   if (request.view === 'satellite') return buildSatelliteStyle(request.source)
+  if (request.view === 'osm-standard') return buildOsmStandardStyle(request.source)
 
   const colours = request.isDark ? DARK_COLOURS : LIGHT_COLOURS
 
@@ -1147,6 +1626,12 @@ export const buildBasemapStyle = (request: StyleRequest): StyleSpecification => 
 export const BASEMAP_VIEWS: BasemapOption[] = [
   { value: 'vestigian', group: 'today', label: 'Vestigian', hint: 'Antiquity foregrounded' },
   { value: 'satellite', group: 'today', label: 'Satellite', hint: 'Sentinel-2 imagery' },
+  {
+    value: 'osm-standard',
+    group: 'today',
+    label: 'Standard',
+    hint: 'The familiar OpenStreetMap look, unmodified',
+  },
   {
     value: 'antiquity-dare',
     group: 'antiquity',

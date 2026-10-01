@@ -470,6 +470,7 @@
     "matches": "{count} Treffer",
     "label": "Fundorte, Straßen und Orte durchsuchen",
     "placeholder": "Fundorte, Straßen, Orte durchsuchen",
+    "placeholderShort": "Suchen",
     "resultsLabel": "Suchergebnisse",
     "modernPlace": "Moderner Ort · {country}",
     "ancientPlace": "Alte Bezeichnung",
@@ -996,7 +997,7 @@
     "label": "Römisches Reich: {state}",
     "menuLabel": "Das Römische Reich im Laufe der Zeit",
     "title": "Römisches Reich",
-    "heading": "Ausdehnung im Laufe der Zeit",
+    "heading": "Römisches Reich: Ausdehnung im Laufe der Zeit",
     "scrubberLabel": "Das Römische Reich im Laufe der Zeit",
     "off": "Ausgeschaltet",
     "yearBce": "{year} v. Chr.",
@@ -1009,8 +1010,8 @@
     "dismiss": "Diesen Hinweis schließen"
   },
   "epigraphy": {
-    "menuLabel": "Aufschriften",
-    "title": "Aufschriften",
+    "menuLabel": "Inschriften",
+    "title": "Inschriften",
     "intro": "Grabsteine, Altäre, Meilensteine und andere eingeschriebene Steine aus der römischen Welt, gespiegelt aus der Epigraphischen Datenbank Heidelberg - geschnitzter Text, Abkürzungen erweitert, Fundpunkte, die mit den eigenen Orten und Straßen dieses Atlas verglichen werden.",
     "credit": "Text gespiegelt aus der Epigraphic Database Heidelberg, CC BY-SA 4.0.",
     "browse": {

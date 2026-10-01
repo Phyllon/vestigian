@@ -1,4 +1,5 @@
 <script setup lang="ts">
+  import { useMediaQuery } from '@vueuse/core'
   import type { MapSearchResult } from '#shared/types'
 
   const { t } = useI18n()
@@ -6,6 +7,22 @@
   const { term, results, isSearching } = useSiteSearch()
   const { selectSite } = useSiteQuery()
   const { countryName } = useCountryName()
+
+  /**
+   * Below `sm` this field shares its row with three icon-only controls (see
+   * `OverlaySwitcher.vue`/`PeriodSwitcher.vue`/`BasemapSwitcher.vue`, which
+   * hide their own text at the same breakpoint for the same reason), leaving
+   * too little width for the full placeholder — measured directly, not
+   * assumed: German's "Fundorte, Straßen, Orte durchsuchen" was still wider
+   * than the field at 375px and 390px. The full wording carries no meaning a
+   * short word doesn't already give a sighted reader once they've tapped in —
+   * `mapSearch.label` keeps the complete description for a screen reader
+   * regardless of which placeholder is showing.
+   */
+  const isWide = useMediaQuery('(min-width: 640px)')
+  const placeholder = computed(() =>
+    isWide.value ? t('mapSearch.placeholder') : t('mapSearch.placeholderShort'),
+  )
 
   /**
    * Spoken, not drawn. The list appearing under the field is the whole feedback
@@ -78,7 +95,7 @@
         ref="searchInput"
         v-model="term"
         type="search"
-        :placeholder="t('mapSearch.placeholder')"
+        :placeholder="placeholder"
         class="w-full bg-transparent py-2.5 text-sm text-ink-900 outline-none placeholder:text-ink-300 dark:text-paper-100"
         autocomplete="off"
         spellcheck="false"

@@ -19,8 +19,22 @@ import type { AncientPlaceSummary, LonLat, PlaceSummary, SiteSummary } from './s
  * still on the map and the option was only a fourth way to look at the same
  * roads. `BasemapSource.terrainUrl` stays for that reason — the tiles are
  * still fetched, just not by a view.
+ *
+ * 'osm-standard' (added later, on request) looks like it repeats that same
+ * mistake and deliberately does not: it draws the same already-mirrored
+ * vector source through its own colour table
+ * (`useBasemapStyle.ts`'s `OSM_STANDARD_COLOURS`), modelled on the actual
+ * OSM-Carto/osm-liberty palette — cream land, blue water, orange arterial
+ * roads — rather than `LIGHT_COLOURS` at a different opacity, which is what
+ * made the old 'modern' view indistinguishable from 'vestigian' at a glance.
+ * Requested specifically as a familiar, unstyled reference map (the look
+ * `vici.org`'s own default "OSM" layer has); built on this project's own
+ * already-mirrored data rather than hotlinking `tile.openstreetmap.org`
+ * directly, which OSM's tile usage policy does not permit for an app
+ * expecting real traffic.
  */
-export type BasemapView = 'vestigian' | 'satellite' | 'antiquity-dare' | 'antiquity-awmc'
+export type BasemapView =
+  'vestigian' | 'satellite' | 'osm-standard' | 'antiquity-dare' | 'antiquity-awmc'
 
 export type BasemapProvider = 'openfreemap' | 'pmtiles'
 

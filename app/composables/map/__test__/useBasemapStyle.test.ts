@@ -252,6 +252,230 @@ describe('buildBasemapStyle, satellite view', () => {
   })
 })
 
+describe('buildBasemapStyle, osm-standard view', () => {
+  it('draws a colour table of its own, not vestigian’s palette at a different opacity', () => {
+    // The whole point of this view is to look like the recognisable
+    // OpenStreetMap map, not like vestigian turned up — see the docstring on
+    // `OSM_STANDARD_COLOURS` for the 'modern' view this already went wrong
+    // once with.
+    const vestigianStyle = buildBasemapStyle({ view: 'vestigian', isDark: false, source })
+    const osmStyle = buildBasemapStyle({ view: 'osm-standard', isDark: false, source })
+    const background = (style: typeof vestigianStyle) =>
+      (style.layers.find((layer) => layer.id === 'background') as FillLayerSpecification).paint?.[
+        'background-color'
+      ]
+    const water = (style: typeof vestigianStyle) =>
+      (style.layers.find((layer) => layer.id === 'water') as FillLayerSpecification).paint?.[
+        'fill-color'
+      ]
+    expect(background(osmStyle)).not.toBe(background(vestigianStyle))
+    expect(water(osmStyle)).not.toBe(water(vestigianStyle))
+  })
+
+  it('draws every road tier as a cased pair, the classic OSM look a single flat line cannot give', () => {
+    const style = buildBasemapStyle({ view: 'osm-standard', isDark: false, source })
+    const byId = (id: string) =>
+      style.layers.find((layer) => layer.id === id) as LineLayerSpecification | undefined
+    for (const tier of ['roads-local', 'roads-secondary', 'roads-primary', 'roads-motorway']) {
+      const casing = byId(`${tier}-casing`)
+      const fill = byId(`${tier}-fill`)
+      expect(casing?.paint?.['line-color']).toBeDefined()
+      expect(fill?.paint?.['line-color']).toBeDefined()
+      expect(casing?.paint?.['line-color']).not.toBe(fill?.paint?.['line-color'])
+      // The casing is what actually reads as an "edge" — a casing no wider
+      // than its own fill is pointless, see `buildRoadTierLayers`'s docstring.
+      expect(JSON.stringify(casing?.paint?.['line-width'])).not.toBe(
+        JSON.stringify(fill?.paint?.['line-width']),
+      )
+    }
+  })
+
+  it('draws motorways in red over primary in orange over secondary in pale yellow — OSM-Carto’s own road colours, not an invented palette', () => {
+    // Read straight from gravitystorm/openstreetmap-carto's own
+    // style/road-colors-generated.mss, not approximated — see
+    // `OSM_STANDARD_COLOURS`'s docstring for exactly which files.
+    const style = buildBasemapStyle({ view: 'osm-standard', isDark: false, source })
+    const byId = (id: string) =>
+      style.layers.find((layer) => layer.id === id) as LineLayerSpecification | undefined
+    expect(byId('roads-motorway-fill')?.paint?.['line-color']).toBe('#e892a2')
+    expect(byId('roads-primary-fill')?.paint?.['line-color']).toBe('#fcd6a4')
+    expect(byId('roads-secondary-fill')?.paint?.['line-color']).toBe('#f7fabf')
+    expect(byId('roads-local-fill')?.paint?.['line-color']).toBe('#ffffff')
+  })
+
+  it('draws a forest/grass fill vestigian has no equivalent layer for at all', () => {
+    const style = buildBasemapStyle({ view: 'osm-standard', isDark: false, source })
+    const forest = style.layers.find((layer) => layer.id === 'forest') as
+      FillLayerSpecification | undefined
+    const vegetation = style.layers.find((layer) => layer.id === 'vegetation') as
+      FillLayerSpecification | undefined
+    expect(forest?.paint?.['fill-color']).toBe('#add19e')
+    expect(vegetation?.paint?.['fill-color']).toBe('#cdebb0')
+    const vestigianStyle = buildBasemapStyle({ view: 'vestigian', isDark: false, source })
+    expect(vestigianStyle.layers.find((layer) => layer.id === 'forest')).toBeUndefined()
+  })
+
+  it('draws city names at full strength, matching the other full-detail views', () => {
+    const style = buildBasemapStyle({ view: 'osm-standard', isDark: false, source })
+    const labels = style.layers.find((layer) => layer.id === 'place-labels') as
+      SymbolLayerSpecification | undefined
+    expect(labels?.paint?.['text-opacity']).toBeCloseTo(1)
+  })
+
+  it('reads the OpenMapTiles/Tilezen layer names dev’s OpenFreeMap source serves', () => {
+    const style = buildBasemapStyle({
+      view: 'osm-standard',
+      isDark: false,
+      source: { ...source, provider: 'openfreemap' },
+    })
+    const byId = (id: string) => style.layers.find((layer) => layer.id === id)
+    expect((byId('place-labels') as SymbolLayerSpecification)['source-layer']).toBe('place')
+    expect((byId('roads-motorway-fill') as LineLayerSpecification)['source-layer']).toBe(
+      'transportation',
+    )
+    expect((byId('forest') as FillLayerSpecification)['source-layer']).toBe('landcover')
+  })
+
+  it('reads the Protomaps basemaps layer names production’s pmtiles source serves', () => {
+    const style = buildBasemapStyle({
+      view: 'osm-standard',
+      isDark: false,
+      source: { ...source, provider: 'pmtiles', pmtilesUrl: 'https://cdn.example/basemap.pmtiles' },
+    })
+    const byId = (id: string) => style.layers.find((layer) => layer.id === id)
+    expect((byId('place-labels') as SymbolLayerSpecification)['source-layer']).toBe('places')
+    expect((byId('roads-motorway-fill') as LineLayerSpecification)['source-layer']).toBe('roads')
+    // Protomaps' own `landcover` layer only goes to z7 — forest/grass here
+    // has to read `landuse`'s own `kind` instead, a different source-layer
+    // entirely, not just a different name for the same one.
+    expect((byId('forest') as FillLayerSpecification)['source-layer']).toBe('landuse')
+  })
+
+  it('draws rivers and streams, not just lakes — a river narrow enough to be a line, not a polygon, still has to show', () => {
+    const openfreemap = buildBasemapStyle({
+      view: 'osm-standard',
+      isDark: false,
+      source: { ...source, provider: 'openfreemap' },
+    })
+    const pmtiles = buildBasemapStyle({
+      view: 'osm-standard',
+      isDark: false,
+      source: { ...source, provider: 'pmtiles', pmtilesUrl: 'https://cdn.example/basemap.pmtiles' },
+    })
+    const waterway = (style: typeof openfreemap) =>
+      style.layers.find((layer) => layer.id === 'waterway') as LineLayerSpecification | undefined
+    // OpenMapTiles keeps rivers in their own `waterway` layer; Protomaps'
+    // own docs state its `water` layer carries "polygons, lines and point
+    // labels" together, so the line geometry is read from the same layer
+    // the lake/sea fill already uses, filtered to the linear `kind_detail`
+    // values so a lake's own polygon outline isn't drawn a second time.
+    expect(waterway(openfreemap)?.['source-layer']).toBe('waterway')
+    expect(waterway(openfreemap)?.filter).toBeUndefined()
+    expect(waterway(pmtiles)?.['source-layer']).toBe('water')
+    expect(JSON.stringify(waterway(pmtiles)?.filter)).toContain('river')
+  })
+
+  it('labels mountain peaks by name only — elevation is asymmetric between providers and was dropped from both on request', () => {
+    const style = buildBasemapStyle({ view: 'osm-standard', isDark: false, source })
+    const peaks = style.layers.find((layer) => layer.id === 'peak-labels') as
+      SymbolLayerSpecification | undefined
+    expect(peaks?.layout?.['text-field']).toEqual(['concat', '▲ ', ['get', 'name']])
+    expect(JSON.stringify(peaks?.layout?.['text-field'])).not.toContain('ele')
+  })
+
+  it('reads peaks from each provider’s real schema — a dedicated layer in OpenMapTiles, a filtered POI kind in Protomaps', () => {
+    const openfreemap = buildBasemapStyle({
+      view: 'osm-standard',
+      isDark: false,
+      source: { ...source, provider: 'openfreemap' },
+    })
+    const pmtiles = buildBasemapStyle({
+      view: 'osm-standard',
+      isDark: false,
+      source: { ...source, provider: 'pmtiles', pmtilesUrl: 'https://cdn.example/basemap.pmtiles' },
+    })
+    const peaks = (style: typeof openfreemap) =>
+      style.layers.find((layer) => layer.id === 'peak-labels') as
+        SymbolLayerSpecification | undefined
+    expect(peaks(openfreemap)?.['source-layer']).toBe('mountain_peak')
+    // No per-provider filter for OpenMapTiles — the whole layer is peaks —
+    // so the merged filter must still be a real array, not `undefined`:
+    // the exact shape that broke `waterway` once already (see
+    // `buildNamedFeatureFilter`'s docstring).
+    expect(Array.isArray(peaks(openfreemap)?.filter)).toBe(true)
+    expect(peaks(pmtiles)?.['source-layer']).toBe('pois')
+    expect(JSON.stringify(peaks(pmtiles)?.filter)).toContain('peak')
+  })
+
+  it('labels rivers and roads along their own line, not as a floating point', () => {
+    const style = buildBasemapStyle({ view: 'osm-standard', isDark: false, source })
+    const byId = (id: string) =>
+      style.layers.find((layer) => layer.id === id) as SymbolLayerSpecification | undefined
+    expect(byId('waterway-name-labels')?.layout?.['symbol-placement']).toBe('line')
+    expect(byId('road-name-labels')?.layout?.['symbol-placement']).toBe('line')
+  })
+
+  it('reads road names from OpenMapTiles’ separate transportation_name layer, since the line geometry layer itself carries no name field', () => {
+    // Confirmed against the real OpenFreeMap TileJSON before writing this:
+    // `transportation`'s own field list has no `name` at all.
+    const openfreemap = buildBasemapStyle({
+      view: 'osm-standard',
+      isDark: false,
+      source: { ...source, provider: 'openfreemap' },
+    })
+    const pmtiles = buildBasemapStyle({
+      view: 'osm-standard',
+      isDark: false,
+      source: { ...source, provider: 'pmtiles', pmtilesUrl: 'https://cdn.example/basemap.pmtiles' },
+    })
+    const roadNames = (style: typeof openfreemap) =>
+      style.layers.find((layer) => layer.id === 'road-name-labels') as
+        SymbolLayerSpecification | undefined
+    expect(roadNames(openfreemap)?.['source-layer']).toBe('transportation_name')
+    expect(roadNames(pmtiles)?.['source-layer']).toBe('roads')
+  })
+
+  it('reads lake/sea names from OpenMapTiles’ separate water_name layer, and from the same water layer already drawn in Protomaps', () => {
+    const openfreemap = buildBasemapStyle({
+      view: 'osm-standard',
+      isDark: false,
+      source: { ...source, provider: 'openfreemap' },
+    })
+    const pmtiles = buildBasemapStyle({
+      view: 'osm-standard',
+      isDark: false,
+      source: { ...source, provider: 'pmtiles', pmtilesUrl: 'https://cdn.example/basemap.pmtiles' },
+    })
+    const waterNames = (style: typeof openfreemap) =>
+      style.layers.find((layer) => layer.id === 'water-name-labels') as
+        SymbolLayerSpecification | undefined
+    expect(waterNames(openfreemap)?.['source-layer']).toBe('water_name')
+    expect(waterNames(pmtiles)?.['source-layer']).toBe('water')
+  })
+
+  it('draws every named-feature label after place-labels, so town names keep collision priority', () => {
+    const style = buildBasemapStyle({ view: 'osm-standard', isDark: false, source })
+    const order = style.layers.map((layer) => layer.id)
+    const placeIndex = order.indexOf('place-labels')
+    for (const id of [
+      'peak-labels',
+      'water-name-labels',
+      'waterway-name-labels',
+      'road-name-labels',
+    ]) {
+      expect(order.indexOf(id)).toBeGreaterThan(placeIndex)
+    }
+  })
+
+  it('stays the same sheet regardless of the reader’s theme', () => {
+    // Unlike vestigian, this view is meant to read as the one familiar OSM
+    // look — there is no authoritative "OSM dark mode" to switch to.
+    const light = buildBasemapStyle({ view: 'osm-standard', isDark: false, source })
+    const dark = buildBasemapStyle({ view: 'osm-standard', isDark: true, source })
+    expect(dark).toEqual(light)
+  })
+})
+
 describe('isAntiquityView', () => {
   it('is true for exactly the raster sheets', () => {
     const antiquity = BASEMAP_VIEWS.filter((option) => option.group === 'antiquity')
@@ -277,6 +501,13 @@ describe('resolveSheetTone', () => {
     // as the antiquity rasters from the other direction.
     expect(resolveSheetTone('satellite', true)).toBe('light')
     expect(resolveSheetTone('satellite', false)).toBe('light')
+  })
+
+  it('keeps the sheet light over the OSM-standard view even at night', () => {
+    // This view is meant to look like the one familiar OSM reference map,
+    // which has no dark variant of its own to defer to.
+    expect(resolveSheetTone('osm-standard', true)).toBe('light')
+    expect(resolveSheetTone('osm-standard', false)).toBe('light')
   })
 
   it('follows the theme everywhere else', () => {
@@ -384,7 +615,12 @@ describe('the views on offer', () => {
      * only a fourth way to look at the same roads.
      */
     expect(BASEMAP_VIEWS.map((option) => option.value)).not.toContain('terrain')
-    expect(BASEMAP_VIEWS).toHaveLength(4)
+    expect(BASEMAP_VIEWS).toHaveLength(5)
+  })
+
+  it('offers the OSM-standard view alongside vestigian and satellite, not among the antiquity sheets', () => {
+    const option = BASEMAP_VIEWS.find((entry) => entry.value === 'osm-standard')
+    expect(option?.group).toBe('today')
   })
 
   it('still keeps the elevation source, which the atlas sheet needs', () => {
