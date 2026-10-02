@@ -33,9 +33,11 @@ export default defineEventHandler(async (event): Promise<SiteSummary[]> => {
       category: SiteSummary['category']
       lon: number
       lat: number
+      relevance: number
     }[]
   >`
-    SELECT s.id, s.slug, s.title, s.category, ST_X(s.geom) AS lon, ST_Y(s.geom) AS lat
+    SELECT s.id, s.slug, s.title, s.category, ST_X(s.geom) AS lon, ST_Y(s.geom) AS lat,
+      ${buildRelevance({ sql, column: 's.title', term: q })} AS relevance
     FROM sites s
     WHERE s.status = 'approved'
       AND (
@@ -43,7 +45,7 @@ export default defineEventHandler(async (event): Promise<SiteSummary[]> => {
           @@ plainto_tsquery('simple', ${q})
         OR s.title % ${q}
       )
-    ORDER BY similarity(s.title, ${q}) DESC
+    ORDER BY relevance DESC, similarity(s.title, ${q}) DESC
     LIMIT ${limit}
   `
 
@@ -53,5 +55,6 @@ export default defineEventHandler(async (event): Promise<SiteSummary[]> => {
     title: row.title,
     category: row.category,
     position: { lon: row.lon, lat: row.lat },
+    relevance: row.relevance,
   }))
 })

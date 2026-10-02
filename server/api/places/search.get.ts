@@ -17,6 +17,10 @@ export const querySchema = z.object({
  * "Londa"/"Londe" ahead of London for the query "Lond" — trigram similarity
  * rewards a short candidate matching a short query, which has nothing to do
  * with which "Lond…" a reader is actually looking for.
+ *
+ * Ordering is `relevance` first (`server/utils/search-relevance.ts`), so the
+ * prefix band still sorts by population — every prefix match scores exactly
+ * 1 — and only a fuzzy-only result is ordered by how close it is.
  */
 defineRouteMeta({
   openAPI: {
@@ -39,12 +43,14 @@ export default defineEventHandler(async (event): Promise<PlaceSummary[]> => {
       countryCode: string
       lon: number
       lat: number
+      relevance: number
     }[]
   >`
-    SELECT c.id, c.name, c.country_code AS "countryCode", c.lon, c.lat
+    SELECT c.id, c.name, c.country_code AS "countryCode", c.lon, c.lat,
+      ${buildRelevance({ sql, column: 'c.name', term: q })} AS relevance
     FROM cities c
     WHERE c.name % ${q} OR c.name ILIKE ${q + '%'}
-    ORDER BY (c.name ILIKE ${q + '%'}) DESC, c.population DESC
+    ORDER BY relevance DESC, c.population DESC
     LIMIT ${limit}
   `
 
@@ -53,5 +59,6 @@ export default defineEventHandler(async (event): Promise<PlaceSummary[]> => {
     name: row.name,
     countryCode: row.countryCode,
     position: { lon: row.lon, lat: row.lat },
+    relevance: row.relevance,
   }))
 })

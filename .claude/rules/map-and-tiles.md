@@ -1423,3 +1423,16 @@ standing in for large fitted paving slabs, the feature actually associated
 with an ancient paved road. Verified rendered at both preview scale and the
 real 46px marker size before committing to it, the same technique used for
 the earlier milestone/villa redraws in the section above.
+
+## Map search ranking
+
+`/api/sites/search`, `/api/places/search` and `/api/atlas/places/search` each
+return a `relevance` on one shared scale (`server/utils/search-relevance.ts`):
+1 = name starts with the term, 0.9 = a later word does, ≤0.8 = trigram
+similarity. `useSiteSearch` merges the three lists through `rankSearchResults`
+(`shared/utils/search-ranking.ts`): stable sort on `relevance`, and trigram-only
+results are dropped once any name match exists. Before this the client
+concatenated the lists, so "vitud" showed the modern town Vite above the ancient
+Vitudurum, followed by unrelated near-misses. Modern places still sort by
+population within the prefix band (every prefix match scores exactly 1), which
+is what keeps London ahead of Londa.

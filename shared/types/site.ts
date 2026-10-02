@@ -44,6 +44,8 @@ export interface SiteSummary {
   title: string
   category: SiteCategory
   position: LonLat
+  /** Set by the search endpoints only; see `server/utils/search-relevance.ts`. */
+  relevance?: number
 }
 
 /**
@@ -57,6 +59,8 @@ export interface PlaceSummary {
   name: string
   countryCode: string
   position: LonLat
+  /** Set by the search endpoints only; see `server/utils/search-relevance.ts`. */
+  relevance?: number
 }
 
 /**
@@ -74,6 +78,8 @@ export interface AncientPlaceSummary {
   title: string
   category: SiteCategory | null
   position: LonLat
+  /** Set by the search endpoints only; see `server/utils/search-relevance.ts`. */
+  relevance?: number
 }
 
 export interface SiteImage {

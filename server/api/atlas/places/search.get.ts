@@ -36,12 +36,14 @@ export default defineEventHandler(async (event): Promise<AncientPlaceSummary[]> 
       category: AncientPlaceSummary['category']
       lon: number
       lat: number
+      relevance: number
     }[]
   >`
-    SELECT p.id, p.title, p.category, ST_X(p.geom) AS lon, ST_Y(p.geom) AS lat
+    SELECT p.id, p.title, p.category, ST_X(p.geom) AS lon, ST_Y(p.geom) AS lat,
+      ${buildRelevance({ sql, column: 'p.title', term: q })} AS relevance
     FROM antiquity_places p
     WHERE p.title % ${q} OR p.title ILIKE ${q + '%'}
-    ORDER BY (p.title ILIKE ${q + '%'}) DESC, similarity(p.title, ${q}) DESC
+    ORDER BY relevance DESC, similarity(p.title, ${q}) DESC
     LIMIT ${limit}
   `
 
@@ -50,5 +52,6 @@ export default defineEventHandler(async (event): Promise<AncientPlaceSummary[]> 
     title: row.title,
     category: row.category,
     position: { lon: row.lon, lat: row.lat },
+    relevance: row.relevance,
   }))
 })

@@ -189,7 +189,7 @@ export const useSiteSearch = () => {
     // eslint-disable-next-line security/detect-possible-timing-attacks
     if (token !== requestToken) return
 
-    results.value = [
+    results.value = rankSearchResults([
       ...(sites.status === 'fulfilled'
         ? sites.value.map((site) => ({ kind: 'site' as const, ...site }))
         : []),
@@ -199,7 +199,7 @@ export const useSiteSearch = () => {
       ...(ancientPlaces.status === 'fulfilled'
         ? ancientPlaces.value.map((place) => ({ kind: 'ancient-place' as const, ...place }))
         : []),
-    ]
+    ])
     isSearching.value = false
   }
 
