@@ -55,6 +55,7 @@
       }
 
       await refresh()
+      toast.add({ title: t('auth.login.successTitle'), color: 'success' })
       await navigateTo((route.query.next as string) || '/')
     } catch (error) {
       toast.add({
@@ -78,6 +79,7 @@
         body: { challengeId: challengeId.value, code: code.value.trim() },
       })
       await refresh()
+      toast.add({ title: t('auth.login.successTitle'), color: 'success' })
       await navigateTo((route.query.next as string) || '/')
     } catch (error) {
       toast.add({
@@ -132,12 +134,7 @@
     </UFormField>
 
     <UFormField :label="t('auth.login.password')" name="password" required>
-      <UInput
-        v-model="state.password"
-        type="password"
-        autocomplete="current-password"
-        class="w-full"
-      />
+      <AuthPasswordField v-model="state.password" purpose="current" />
     </UFormField>
 
     <p class="-mt-2 text-right">

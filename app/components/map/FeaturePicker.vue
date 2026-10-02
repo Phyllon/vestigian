@@ -20,8 +20,18 @@
   const { overlappingFeatures, isPickerOpen, chooseCandidate, clearSelection } = useSiteQuery()
   const { isCompact } = useBreakpoint()
 
-  const iconGlyphFor = (category: string): IconGlyph =>
-    SITE_ICON_GLYPHS[category as SiteCategory] ?? SITE_ICON_GLYPHS.other
+  /**
+   * The same subcategory-first lookup `buildSiteIconExpression` draws on the
+   * map itself — without it, a milestone or a museum tapped out of a pile
+   * showed the generic infrastructure/other glyph here while the map right
+   * behind it already drew the specific mark, the one place a reader could
+   * compare the two side by side.
+   */
+  const iconGlyphFor = (candidate: MapFeatureCandidate): IconGlyph => {
+    const mark = resolveSiteMark(candidate.subcategory)
+    if (mark) return SITE_MARK_ICON_GLYPHS[mark]
+    return SITE_ICON_GLYPHS[candidate.category as SiteCategory] ?? SITE_ICON_GLYPHS.other
+  }
 
   const labelFor = (category: string): string =>
     te(`categories.${category}`) ? t(`categories.${category}`) : t('categories.other')
@@ -104,19 +114,21 @@
                 stroke-width="1"
               />
               <path
-                v-if="iconGlyphFor(candidate.category).filled"
-                :d="iconGlyphFor(candidate.category).path"
+                v-if="iconGlyphFor(candidate).filled"
+                :d="iconGlyphFor(candidate).path"
                 :transform="`translate(${GAME_ICON_OFFSET} ${GAME_ICON_OFFSET}) scale(${GAME_ICON_SCALE})`"
-                class="fill-ink-800 dark:fill-paper-200"
+                class="fill-bronze-600 dark:fill-bronze-300"
               />
               <path
                 v-else
-                :d="iconGlyphFor(candidate.category).path"
-                :class="
-                  candidate.kind === 'tracing' || candidate.category === 'infrastructure'
-                    ? 'stroke-bronze-600 dark:stroke-bronze-300'
-                    : 'stroke-ink-800 dark:stroke-paper-200'
+                :d="iconGlyphFor(candidate).path"
+                :transform="
+                  iconGlyphFor(candidate).inset
+                    ? `translate(${OUTLINE_INSET_OFFSET} ${OUTLINE_INSET_OFFSET}) scale(${OUTLINE_INSET_SCALE})`
+                    : undefined
                 "
+                vector-effect="non-scaling-stroke"
+                class="stroke-bronze-600 dark:stroke-bronze-300"
               />
             </svg>
 

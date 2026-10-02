@@ -64,10 +64,18 @@ services:
     image: darthsim/imgproxy:v3
     environment:
       IMGPROXY_USE_S3: 'true'
-      IMGPROXY_S3_ENDPOINT: http://minio:9000
+      # Defaults to the MinIO container above, reachable from inside this
+      # compose network at its service name — not the same address
+      # `NUXT_STORAGE_ENDPOINT` uses, which is read by the app on the host and
+      # needs `127.0.0.1`. Override `IMGPROXY_STORAGE_ENDPOINT` in `.env` when
+      # `NUXT_STORAGE_*` has been pointed at a real bucket (Bunny, R2) instead
+      # — imgproxy then needs to resolve the same endpoint `s3://` source URLs
+      # already reference. Credentials are shared with the app unconditionally:
+      # those identify the same bucket either way, only reachability differs.
+      IMGPROXY_S3_ENDPOINT: ${IMGPROXY_STORAGE_ENDPOINT:-http://minio:9000}
       IMGPROXY_S3_REGION: us-east-1
-      AWS_ACCESS_KEY_ID: vestigian
-      AWS_SECRET_ACCESS_KEY: vestigian-dev-secret
+      AWS_ACCESS_KEY_ID: ${NUXT_STORAGE_ACCESS_KEY_ID:-vestigian}
+      AWS_SECRET_ACCESS_KEY: ${NUXT_STORAGE_SECRET_ACCESS_KEY:-vestigian-dev-secret}
       IMGPROXY_MAX_SRC_RESOLUTION: '80'
       IMGPROXY_ENFORCE_WEBP: 'true'
       IMGPROXY_TTL: '2592000'

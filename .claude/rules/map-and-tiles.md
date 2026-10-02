@@ -1245,3 +1245,180 @@ river's curve), and the Ligurian coast at regional zoom ("Mar Ligure / Mer
 Ligure" in the water-text blue, `#4d80b3` — `style/water.mss`'s own
 `@water-text`, the same real-stylesheet standard the rest of this view's
 colours already follow).
+
+## The SiteMark split (above) missed `FeaturePicker.vue` and left two glyphs overflowing their own disc
+
+A batch of six follow-up reports, all against the seven-mark system described
+above, fixed together since several turned out to share one root cause.
+
+**`FeaturePicker.vue` never learned about marks at all.** Reported as "the
+info panel for the records still holds the old icons" — the pile picker shown
+when a tap lands on more than one feature (`describeFeatures`,
+`useViewportTiles.ts`) looked up a glyph by `candidate.category` only, the
+same lookup `buildSiteIconExpression` used before the mark split. A milestone
+or museum pulled out of a pile showed the generic infrastructure cog or
+`other` menhir while the map right behind the picker already drew the
+specific mark — the one place a reader could compare the two side by side.
+`MapFeatureCandidate` (`useSiteQuery.ts`) gained a `subcategory` field,
+`describeFeatures` now reads `feature.properties?.subcategory` the same way
+it already reads `category`, and `FeaturePicker.vue`'s `iconGlyphFor` tries
+`resolveSiteMark` first, falling back to the category lookup exactly as
+`buildSiteIconExpression` does on the map. Verified live: a pile containing a
+museum record now shows the museum glyph in the picker list, not the menhir.
+
+**`villa` and `museum` overflowed the 10.4-radius disc they're drawn on.**
+Reported as "no rounded background" — confirmed by rendering the raw glyph
+paths against the disc in isolation (a standalone Playwright+SVG render, not
+a guess): Lucide draws `house` and `university` to fill their 24-unit box
+edge to edge, and both glyphs' roofline corners poked a visible notch past
+the circle, breaking its silhouette. `villa` was redrawn by hand (see next
+paragraph) to fit by construction. `museum` kept its Lucide path but gained
+`IconGlyph.inset` — the same shrink-and-centre idea `filled`'s `GAME_ICON_*`
+constants already apply for a 512-unit silhouette overflowing a 24-unit box,
+parameterised instead for a 24-unit outline overflowing its own
+(`OUTLINE_INSET_TARGET_SIZE = 20`, `OUTLINE_INSET_OFFSET`/`_SCALE` derived
+from it). Canvas (`rasteriseIcon`) divides stroke width by the inset scale to
+compensate, the identical compounding `REFERENCE_HALO_WIDTH`'s own docstring
+already explains for the filled family; the two SVG consumers
+(`Legend.vue`, `FeaturePicker.vue`) use `vector-effect="non-scaling-stroke"`
+instead, which keeps a path's stroke at its specified width regardless of
+any transform applied to it — no manual division needed there, since the
+canvas has no equivalent primitive.
+
+**`villa` and `MILESTONE_ICON_PATH` were hand-redrawn, not re-sourced** —
+reported directly that both read as the wrong thing. `house` (Lucide) is a
+plain modern dwelling, not a landhouse; `milestone` (Lucide, the glyph this
+mark was literally named after) draws a pointed roadside placard — the
+_English_ sense the word has drifted to, not a Roman milliarium. Neither
+Lucide nor game-icons.net carries a villa-rustica porticus or a cippus
+specifically (checked, not assumed, the same verification this file already
+holds every borrowed glyph to), so both are now bespoke paths: `villa` draws
+a gabled roof over two columns flanking a doorway (a porticus, the
+recognisable feature of a villa rustica, against `sanctuary`'s own
+temple-front columns with no roof at all); the milestone mark draws a
+capsule — straight-sided, semicircular-topped stone pillar — on a plinth
+wider than the shaft, with two short strokes for the carved distance
+inscription. Both were iterated against the same isolated-render technique
+used to catch the overflow bug above before landing on a design that reads
+clearly at the actual 46px marker size, not just at preview scale — a first
+villa draft (three roof peaks sharing one wall silhouette, meant to read as
+a winged villa with corner towers) rendered as an unreadable "crown" of
+spikes once the roof triangles weren't visually distinct from the wall
+verticals beneath them, caught by rendering it before committing to it
+rather than after.
+
+**Road, milestone, mansio and the generic infrastructure cog read as a
+brownish smear in dark mode, next to every other mark's plain ink.**
+`registerSiteIcons`/`registerSiteMarkIcons` drew every infrastructure-category
+glyph and mark in `palette.linear` (`#bfae7e` in dark mode — a warm tan,
+intentionally tying a bridge or milestone to the bronze tracings per this
+mark system's own original design note) while every non-infrastructure glyph
+drew in `palette.ink` (`#e7dfcd` — pale, near-white). Reported directly as
+inconsistent and asked to match "the others". Fixed, but not by dropping the
+bronze tie everywhere: `SITE_MARK_IS_LINEAR` now names only `bridge` and
+`aqueduct` — both filled game-icons silhouettes, where a saturated colour
+reads as the material of a solid shape rather than as a stray tint. Every
+stroked outline mark (`road`, `milestone`, `mansio`) and the generic
+`infrastructure` cog switched to plain `palette.ink`, matching their stroked
+siblings. `SITE_MARK_CATEGORY` (infrastructure vs. other) no longer decides
+ink colour at all — kept only as the descriptive parent-category fact it
+always also was.
+
+**Asked directly: is the generic `infrastructure` cog still reachable after
+the mark split?** Queried the dev database directly rather than reasoning
+about it: every one of the 7,008 `category = 'infrastructure'` rows carries
+one of the five marked subcategories (road/bridge/milestone/aquaduct/mansio)
+— none falls through to the cog today. Left wired as
+`buildSiteIconExpression`'s fallback regardless: `other`'s menhir already
+covers real, non-hypothetical fallback traffic from subcategories with no
+mark of their own (rural/building/baths/theater/memorial), and removing the
+one glyph that currently has zero traffic would just mean a future unmarked
+infrastructure row drawing nothing.
+
+**The control row at the top of the map "jumped" when a marker was tapped —
+reported, measured, and found to not actually move at all.** `Overlays`/
+`Roman Empire`/`Maps`, the offline-download and geolocate buttons are all
+inside one `absolute inset-0` wrapper on `app/pages/index.vue`, a pure
+overlay with no layout participation — opening `SiteDetailPanel`,
+`TracingDetailPanel` or `FeaturePicker` (each its own `absolute` aside,
+`z-30`, up to `md:w-[26rem]` wide on desktop) never resizes that wrapper.
+Confirmed with real `boundingBox()` reads before and after a click: every
+control's position was pixel-identical — they were never moving, only fully
+hidden under the panel's higher stacking context for as long as it stayed
+open, on both the right-anchored control row and the lower-right download/
+geolocate column. Fixed the same way `isFollowingLimes`'s `md:pl-[23rem]`
+already clears space for the frontier panel on the left: a new
+`isRecordPanelOpen` computed (any of `isPanelOpen`/`isTracingPanelOpen`/
+`isPickerOpen` from `useSiteQuery`) conditionally adds `md:pr-[27rem]` to the
+same wrapper, one rem past the panels' own width.
+
+## `.leaf`'s own `position: relative` was fighting `.absolute` on the same element — the real cause of the three top buttons "jumping"
+
+Reported again after the fix above: opening any of `OverlaySwitcher.vue`,
+`PeriodSwitcher.vue` or `BasemapSwitcher.vue`'s flyout menus made the buttons
+visibly jump sideways — a different bug from the panel-covering one just
+above, which really had been fixed; this one was never about a record panel
+at all. All three flyouts share the exact same markup, `class="leaf absolute
+right-0 top-full z-20 …"` on the panel itself — `.leaf` _and_ `.absolute` on
+one element.
+
+`.leaf` lives in `@layer utilities` (moved there earlier for the
+background-colour-vs-Preflight fight documented above) and itself declares
+`position: relative` — leftover from the long-removed `.leaf-margin`
+companion class, positioning a ruled annotation column against it. Nothing
+left in the app needs `.leaf` to be a positioning context on its own account
+(checked: no element has a child absolutely positioned against a `.leaf`
+ancestor), but `.absolute` is _also_ a `@layer utilities` class, so the two
+rules setting the same `position` property inside the same layer resolve by
+source order, not by which one "sounds" more specific — and confirmed live
+with `getComputedStyle`, `.leaf` was winning: the open panel computed to
+`position: relative`, not `absolute`.
+
+A `position: relative` flyout is back in normal flow as block content inside
+its own `relative ml-auto` trigger wrapper (the wrapper gets `ml-auto` from
+`app/pages/index.vue`, merged onto the component's own root `class="relative"`
+via Vue's attribute fallthrough) — so the wrapper's flex-item size grows to
+fit the entire open panel (measured 256×600px, not the trigger's own
+40×32px), and the flex row reflows everything after it: `MapSearchField`,
+sized from the leftover space, gets squeezed down to a sliver, and
+`PeriodSwitcher`/`BasemapSwitcher` get shoved sideways by however much
+`OverlaySwitcher` just grew. All three trigger buttons use the identical
+panel markup, so every one of them reproduces the same jump when opened.
+
+Fixed by deleting `position: relative` from `.leaf` outright, not by
+reaching for a scoping or specificity trick on the three panels — it was
+dead weight (nothing used it) actively causing harm (everything that is both
+`.leaf` and `.absolute`, `.sticky` or `.fixed` at once was at the mercy of
+this exact same source-order coin flip). Verified with a live
+`getBoundingClientRect` dump of the row and its children before and after
+opening the menu: the button positions are now bit-for-bit identical
+open vs. closed, at both desktop and mobile widths (this was most dramatic at
+390px, where the search field collapsed to 48px and the trigger itself
+jumped 174px before the fix).
+
+## Site icons draw uniformly in bronze now, map and picker alike — reversing an earlier per-category split
+
+Requested directly: "make the filling of all site icons look like bronze, so
+they look all the same," extended explicitly to the picker list
+(`FeaturePicker.vue`) as well as the map. This is a deliberate, direct
+reversal of the earlier fix two sections up ("road, milestone, mansio and the
+generic infrastructure cog read as a brownish smear in dark mode") — that
+fix split ink colour by category/mark; this request asks for exactly the
+opposite, uniform bronze everywhere, and is recorded as the current, correct
+behaviour rather than something to reconcile with the older comment.
+`registerSiteIcons` and `registerSiteMarkIcons` both now pass `palette.linear`
+unconditionally, `SITE_MARK_IS_LINEAR` (the per-mark split) was deleted
+outright rather than left unused, and `Legend.vue`/`FeaturePicker.vue` both
+hardcode the bronze Tailwind classes for every category and mark glyph,
+filled and outline alike, instead of branching per entry.
+
+## The road mark was redrawn — "a modern highway with lane markings is not a Roman road"
+
+`ROAD_ICON_PATH` (`SiteMarkKind` 'road') was Lucide's own `road` icon: a
+receding trapezoid with a dashed centre line — a 20th-century traffic
+marking no Roman road ever had. Replaced with a hand-drawn glyph: the same
+receding-trapezoid perspective, but with regularly spaced transverse joints
+standing in for large fitted paving slabs, the feature actually associated
+with an ancient paved road. Verified rendered at both preview scale and the
+real 46px marker size before committing to it, the same technique used for
+the earlier milestone/villa redraws in the section above.

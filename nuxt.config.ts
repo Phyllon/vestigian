@@ -100,17 +100,29 @@ export default defineNuxtConfig({
    * will only ever index whichever locale resolves for an anonymous crawl
    * (the default, `en`, absent a cookie).
    *
-   * `detectBrowserLanguage` is deliberately absent (not merely defaulted):
-   * every non-English catalogue here is a machine translation
-   * (`translate-locales.ts`, bootstrapped via LibreTranslate) that gets a
-   * manual audit pass only occasionally, not on every change — see
-   * `.claude/rules/enrichment-and-i18n.md`'s translation-bug history.
-   * Silently switching a first-time visitor to their browser's language
-   * hands them the least-checked text on the site as their *only* view,
-   * with no signal that a more reliable one exists. Every visitor now
-   * starts on `en` regardless of browser locale; switching is still one
-   * click away in `LanguageSwitcher.vue`, and the choice is still
-   * remembered in the same `vestigian-locale` cookie once made.
+   * `detectBrowserLanguage` used to be left entirely absent here, on the
+   * theory that omitting it disables it. **That was wrong** — `@nuxtjs/i18n`
+   * does not treat an absent key as "off"; it falls back to its own
+   * `DEFAULT_OPTIONS.detectBrowserLanguage`
+   * (`node_modules/@nuxtjs/i18n/dist/module.mjs`), which has `useCookie:
+   * true` and auto-redirect on. So browser-language detection had been live
+   * the whole time, under the module's own default cookie name,
+   * `i18n_redirected` — not `vestigian-locale`, which every comment in this
+   * codebase (this one included, until now) claimed. Caught by a live
+   * cookie check while verifying an unrelated i18n fix: setting a
+   * `vestigian-locale` cookie by hand did nothing, setting `i18n_redirected`
+   * worked. `server/middleware/content-language.ts`'s `getCookie(event,
+   * 'vestigian-locale')` had therefore never read a cookie anything
+   * actually wrote, and silently fell back to `en` on every request.
+   *
+   * Decided on finding this: keep auto-detection (a first-time visitor
+   * getting their browser's language, machine-translated and only
+   * occasionally audited per `.claude/rules/enrichment-and-i18n.md`, is the
+   * standing trade-off now, not an oversight) and make the cookie name
+   * match what the rest of the codebase already assumed, rather than
+   * matching the comments to the cookie. `redirectOn: 'root'` plus
+   * `alwaysRedirect: false` are the module's own defaults, spelled out
+   * rather than left implicit now that this key is no longer absent.
    */
   i18n: {
     strategy: 'no_prefix',
@@ -124,6 +136,12 @@ export default defineNuxtConfig({
       { code: 'it', name: 'Italiano', file: 'it.json' },
       { code: 'nl', name: 'Nederlands', file: 'nl.json' },
     ],
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: 'vestigian-locale',
+      redirectOn: 'root',
+      alwaysRedirect: false,
+    },
   },
 
   /**

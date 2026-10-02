@@ -107,24 +107,48 @@ looks identical to a dead service) with its own 5s timeout before starting.
 Without it a dead arbiter (below) hangs the whole run instead of failing fast
 with a message that says what to do.
 
-**No browser-language auto-detection — every visitor starts on English,
-on request.** `nuxt.config.ts`'s `i18n` block used to carry a
-`detectBrowserLanguage` option that switched a first-time visitor straight to
-their browser's `navigator.language`, before they had ever opened the
-language switcher. Since every non-English catalogue here is a machine
-translation that gets a manual audit only occasionally (see the translation-bug
-history below), that handed a first-time visitor the least-checked text on the
-site as their only view, with nothing telling them a more reliable one exists.
-Removed outright, not reconfigured — `defaultLocale: 'en'` alone now decides
-every fresh visit, and switching is still one click away in
-`LanguageSwitcher.vue`, still remembered in the same `vestigian-locale`
-cookie once chosen. **A running dev server does not pick this up on its
+**Browser-language auto-detection is on, under the project's own cookie
+name — a decision that was attempted once, reversed, then re-confirmed
+after a real gap between the two was found.** `detectBrowserLanguage`
+switches a first-time visitor straight to their browser's
+`navigator.language` before they ever open the language switcher. Since
+every non-English catalogue here is a machine translation that gets a
+manual audit only occasionally (see the translation-bug history below),
+that was judged to hand a first-time visitor the least-checked text on the
+site as their only view, with nothing telling them a more reliable one
+exists — so `detectBrowserLanguage` was left out of `nuxt.config.ts`'s
+`i18n` block entirely, on the assumption that omitting it disables it.
+
+**That assumption was wrong, caught only by a live cookie check during an
+unrelated fix.** `@nuxtjs/i18n` does not treat an absent key as off — it
+falls back to its own `DEFAULT_OPTIONS.detectBrowserLanguage`, which has
+`useCookie: true` and redirect-on-root enabled by default. So detection had
+been live the entire time the comment here said otherwise, under the
+module's own default cookie name, `i18n_redirected` — not
+`vestigian-locale`, which this file, `nuxt.config.ts` and
+`server/middleware/content-language.ts` all claimed, so the latter's
+`getCookie(event, 'vestigian-locale')` had never actually read a cookie
+anything wrote and silently served `en` as the `Content-Language` header
+regardless of the visitor's real locale.
+
+**Decided on finding this: keep detection on, fix the cookie name to match
+what the rest of the codebase already assumed, rather than fix the
+assumption.** `nuxt.config.ts`'s `i18n.detectBrowserLanguage` now spells out
+`useCookie: true`, `cookieKey: 'vestigian-locale'`, `redirectOn: 'root'`,
+`alwaysRedirect: false` explicitly — the first three are the module's own
+defaults, kept; only the cookie name changed. `defaultLocale: 'en'` still
+governs when no browser language matches one of the six catalogues.
+Switching is still one click away in `LanguageSwitcher.vue`, and
+`LanguageNotice.vue` below remains the actual mitigation for a
+machine-translated first view, exactly as intended when detection was
+(incorrectly) believed to be off.
+
+**A running dev server does not pick up an `i18n` block change on its
 own** — `@nuxtjs/i18n`'s config is read at Nuxt's build/init step, and unlike
 a plain `.vue` file edit (which HMRs immediately) a change to the `i18n` block
 in `nuxt.config.ts` needs the dev server actually restarted before a fresh
-visitor stops seeing the old `i18n_redirected` cookie and browser-language
-redirect; confirmed live — a long-running dev server kept issuing the old
-cookie after this edit until restarted.
+visitor stops seeing the old cookie and old behaviour; confirmed live twice
+now, for the original (attempted) removal and again for the cookie rename.
 
 `LanguageNotice.vue` (`app/components/ui/`, mounted from both `default.vue`
 and `reading.vue`, just after the skip link) is the other half of the same

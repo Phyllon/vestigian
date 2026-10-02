@@ -11,7 +11,7 @@
   const { enrichment, isLoadingEnrichment } = useSiteEnrichment()
   const { loggedIn } = useSession()
   const { isCompact } = useBreakpoint()
-  const { t, locale } = useI18n()
+  const { t, te, locale } = useI18n()
 
   const period = computed(() =>
     site.value ? formatPeriod(site.value.periodFrom, site.value.periodTo, t) : '',
@@ -22,6 +22,12 @@
       ? `${site.value.position.lat.toFixed(5)}, ${site.value.position.lon.toFixed(5)}`
       : '',
   )
+
+  const categoryLabel = computed(() => {
+    const category = site.value?.category
+    if (!category) return t('siteDetail.loading')
+    return te(`categories.${category}`) ? t(`categories.${category}`) : t('categories.other')
+  })
 
   const close = (): void => selectSite(null)
 
@@ -62,7 +68,7 @@
     <aside
       v-if="isPanelOpen"
       class="pointer-events-auto absolute inset-x-0 bottom-0 z-30 max-h-[78vh] overflow-y-auto rounded-t-lg bg-paper-50 shadow-lifted md:inset-y-0 md:left-auto md:right-0 md:max-h-none md:w-[26rem] md:rounded-none md:border-l md:border-paper-200 dark:bg-night-800 dark:md:border-night-700"
-      aria-label="Site details"
+      :aria-label="t('siteDetail.panelLabel')"
     >
       <!-- The grab handle only exists on the sheet; on desktop it would be a lie. -->
       <div class="sticky top-0 z-10 bg-paper-50 pt-2 dark:bg-night-800 md:pt-0">
@@ -70,7 +76,7 @@
         <div
           class="flex items-start gap-3 border-b border-paper-200 px-5 py-3 dark:border-night-700"
         >
-          <p class="eyebrow pt-1">{{ site?.category ?? t('siteDetail.loading') }}</p>
+          <p class="eyebrow pt-1">{{ categoryLabel }}</p>
 
           <div class="ml-auto flex items-center gap-1">
             <!--

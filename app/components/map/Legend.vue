@@ -107,21 +107,70 @@
                 v-if="SITE_ICON_GLYPHS[category].filled"
                 :d="SITE_ICON_GLYPHS[category].path"
                 :transform="`translate(${GAME_ICON_OFFSET} ${GAME_ICON_OFFSET}) scale(${GAME_ICON_SCALE})`"
-                class="fill-ink-800 dark:fill-paper-200"
+                class="fill-bronze-600 dark:fill-bronze-300"
               />
               <path
                 v-else
                 :d="SITE_ICON_GLYPHS[category].path"
-                :class="
-                  category === 'infrastructure'
-                    ? 'stroke-bronze-600 dark:stroke-bronze-300'
-                    : 'stroke-ink-800 dark:stroke-paper-200'
-                "
+                class="stroke-bronze-600 dark:stroke-bronze-300"
               />
             </svg>
 
             <span class="text-xs text-ink-700 dark:text-paper-200">
               {{ t(`categories.${category}`) }}
+            </span>
+          </li>
+        </ul>
+
+        <!--
+          Always shown, not gated behind a toggle: these are vici's own
+          `subcategory` on the always-on site layer above, not an optional
+          overlay — a reader who sees a milestone glyph on the map needs this
+          section whether or not they ever open "Show battles" or similar.
+        -->
+        <h2 class="eyebrow mb-1 mt-3 border-t border-paper-300 pt-2.5 dark:border-night-600">
+          {{ t('legend.siteMarksTitle') }}
+        </h2>
+
+        <ul class="grid grid-cols-2 gap-x-4 gap-y-1.5">
+          <li v-for="mark in SITE_MARK_KINDS" :key="mark" class="flex items-center gap-2">
+            <svg
+              viewBox="0 0 24 24"
+              class="h-5 w-5 shrink-0"
+              aria-hidden="true"
+              fill="none"
+              stroke-width="1.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10.4"
+                class="fill-paper-50 stroke-paper-500 dark:fill-night-800 dark:stroke-paper-800"
+                stroke-width="1"
+              />
+              <path
+                v-if="SITE_MARK_ICON_GLYPHS[mark].filled"
+                :d="SITE_MARK_ICON_GLYPHS[mark].path"
+                :transform="`translate(${GAME_ICON_OFFSET} ${GAME_ICON_OFFSET}) scale(${GAME_ICON_SCALE})`"
+                class="fill-bronze-600 dark:fill-bronze-300"
+              />
+              <path
+                v-else
+                :d="SITE_MARK_ICON_GLYPHS[mark].path"
+                :transform="
+                  SITE_MARK_ICON_GLYPHS[mark].inset
+                    ? `translate(${OUTLINE_INSET_OFFSET} ${OUTLINE_INSET_OFFSET}) scale(${OUTLINE_INSET_SCALE})`
+                    : undefined
+                "
+                vector-effect="non-scaling-stroke"
+                class="stroke-bronze-600 dark:stroke-bronze-300"
+              />
+            </svg>
+
+            <span class="text-xs text-ink-700 dark:text-paper-200">
+              {{ t(`siteMarks.${mark}`) }}
             </span>
           </li>
         </ul>

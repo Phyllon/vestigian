@@ -37,6 +37,29 @@
   "basemapSwitcher": {
     "label": "Mappa di base: {label}",
     "menuLabel": "Mappa di base",
+    "triggerLabel": "Mappe",
+    "views": {
+      "vestigian": {
+        "label": "Vestigian",
+        "hint": "L'antichità in primo piano"
+      },
+      "satellite": {
+        "label": "Satellite",
+        "hint": "Immagini Sentinel-2"
+      },
+      "osmStandard": {
+        "label": "Standard",
+        "hint": "Il consueto aspetto di OpenStreetMap, invariato"
+      },
+      "antiquityDare": {
+        "label": "Antichità (DARE)",
+        "hint": "Atlante digitale dell'Impero Romano"
+      },
+      "antiquityAwmc": {
+        "label": "Antichità (Barrington)",
+        "hint": "Strade, popoli e luoghi, disegnati qui"
+      }
+    },
     "groupToday": "Oggi",
     "groupAntiquity": "Antichità",
     "followLimes": "Seguire il limes",
@@ -108,6 +131,7 @@
     "hideKey": "Nascondi la legenda",
     "showKey": "Legenda",
     "referencedNote": "Gli stessi segni tratti da sottili contorni, senza disco, sono posti di riferimento dall'Atlante di Barrington e Pleiadi — non hanno contribuito qui i record.",
+    "siteMarksTitle": "Segni più specifici",
     "frontierTitle": "La frontiera",
     "frontierMarksBarringtonOnly": "Questi simboli di fortificazione provengono dalla mappa di Barrington e compaiono solo quando questa è la mappa di base attiva. La linea di frontiera stessa è mostrata su ogni mappa di base.",
     "battlesTitle": "Battaglie",
@@ -134,6 +158,7 @@
   "siteDetail": {
     "loading": "Caricamento",
     "recordsHere": "{count} record qui",
+    "panelLabel": "Dettagli del sito",
     "close": "Chiudi dettagli del sito",
     "openFullEntry": "Aprire l'ingresso completo",
     "edit": "Modifica",
@@ -169,8 +194,9 @@
       "password": "Password",
       "forgotPassword": "Hai dimenticato la password?",
       "submit": "Accedi",
-      "noAccount": "Ancora nessun conto?",
+      "noAccount": "Ancora nessun account?",
       "createOne": "Crea uno",
+      "successTitle": "Accesso effettuato.",
       "errorEmail": "Questo non sembra un indirizzo email.",
       "errorPassword": "Inserisci la password.",
       "failedTitle": "Impossibile accedere",
@@ -191,13 +217,13 @@
     },
     "register": {
       "title": "Unisciti a Vestigian",
-      "intro": "I primi due contributi sono controllati da un moderatore. Dopo di che pubblicano come li scrivi.",
+      "intro": "I tuoi primi due contributi sono controllati da un moderatore. Dopo di che vengono pubblicati così come li scrivi.",
       "displayName": "Nome visualizzato",
       "email": "Email",
       "password": "Password",
       "passwordConfirmation": "Ripeti la password",
       "submit": "Crea account",
-      "privacyNotice": "La creazione di un account memorizza il tuo indirizzo e-mail e il nome visualizzato — vedi {link} per cosa significa e per quanto tempo.",
+      "privacyNotice": "La creazione di un account memorizza il tuo indirizzo e-mail e il nome visualizzato — vedi {link} per maggiori informazioni.",
       "doneTitle": "Controlla la casella",
       "doneDescription": "Conferma il tuo indirizzo per completare l'impostazione dell'account. Il link è buono per un giorno.",
       "errorDisplayName": "Almeno tre caratteri.",
@@ -415,6 +441,15 @@
     "production": "Produzione",
     "findspot": "Luogo di rinvenimento",
     "other": "Altro"
+  },
+  "siteMarks": {
+    "road": "Strada",
+    "bridge": "Ponte",
+    "milestone": "Miliario",
+    "aqueduct": "Acquedotto",
+    "mansio": "Stazione di sosta",
+    "museum": "Museo",
+    "event": "Evento storico"
   },
   "limesMarks": {
     "watchtower": "Torre di guardia",

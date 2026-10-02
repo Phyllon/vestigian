@@ -170,6 +170,7 @@ export const useViewportTiles = () => {
     try {
       lastRegisteredPalette = signature
       registerSiteIcons(map, colours)
+      registerSiteMarkIcons(map, colours)
       registerAtlasIcons(map, colours)
       registerLimesIcons(map, colours)
       registerBattleIcon(map, colours)
@@ -275,7 +276,10 @@ export const useViewportTiles = () => {
       source: OVERLAY_SOURCE_ID,
       'source-layer': 'sites',
       paint: {
-        'circle-radius': ['interpolate', ['linear'], ['zoom'], 9, 11, 17, 17],
+        // Doubled alongside `ICON_DISPLAY_PIXELS` in `useSiteIcons.ts` — left
+        // at the old radius once already, the ring sat inside the now-larger
+        // marker instead of around it.
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 9, 22, 17, 34],
         'circle-color': colours.selection,
         'circle-opacity': ['case', ['boolean', ['feature-state', 'selected'], false], 0.16, 0],
         'circle-stroke-color': colours.selection,
@@ -529,6 +533,10 @@ export const describeFeatures = (request: FeatureDescriptionRequest): MapFeature
         id: feature.id as number,
         title: String(feature.properties?.title ?? 'Untitled'),
         category: String(feature.properties?.category ?? 'other'),
+        subcategory:
+          typeof feature.properties?.subcategory === 'string'
+            ? feature.properties.subcategory
+            : null,
         distanceMetres: isPoint ? origin.distanceTo(new LngLat(lon!, lat!)) : null,
       }
     })

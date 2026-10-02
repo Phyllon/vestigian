@@ -118,6 +118,8 @@ export interface MapFeatureCandidate {
   id: number
   title: string
   category: string
+  /** vici's raw subcategory word, when it resolves to one of `SITE_MARK_KINDS`. */
+  subcategory: string | null
   /** Null for tracings: the nearest point of a road to a tap means nothing. */
   distanceMetres: number | null
 }

@@ -22,14 +22,22 @@ import { LIMES_MARKS, VICI_MARKS } from '#shared/utils/limes'
  * The paths are also the legend: `MapLegend` renders these same strings as
  * inline SVG, so the key on screen cannot drift from the marks on the map.
  *
- * Two families deliberately were not moved to Lucide: `LIMES_ICON_PATHS`
- * below (fort plans drawn in *plan* view, not elevation — nothing in a
- * general-purpose icon set represents "playing-card rectangle with two
- * gates seen from above") and the AWMC minor-feature/coin-hoard glyphs
- * further down this file (`DAM_ICON_PATH`, `TUMULUS_ICON_PATH`,
- * `COIN_HOARD_ICON_PATH` — no Lucide icon covers a dam, a burial mound in
- * elevation, or a stack of coins drawn side-on). Forcing a weak match there
- * would have been worse than the specific-purpose glyph already in place.
+ * Three families deliberately were not moved to Lucide, or were moved back
+ * off it: `LIMES_ICON_PATHS` below (fort plans drawn in *plan* view, not
+ * elevation — nothing in a general-purpose icon set represents "playing-card
+ * rectangle with two gates seen from above"), the AWMC minor-feature/
+ * coin-hoard glyphs further down this file (`DAM_ICON_PATH`,
+ * `TUMULUS_ICON_PATH`, `COIN_HOARD_ICON_PATH` — no Lucide icon covers a dam,
+ * a burial mound in elevation, or a stack of coins drawn side-on), and
+ * `villa`/`MILESTONE_ICON_PATH` (the latter a `SiteMarkKind`, further down
+ * again): both were Lucide once (`house`, `milestone`) and both were
+ * reported directly as the wrong thing — `house` as a plain modern dwelling
+ * rather than a landhouse, and `milestone` (the glyph this mark is named
+ * after) as the English road-sign sense of the word rather than a Roman
+ * milliarium. Hand-drawn replacements, not a different borrowed set, since
+ * neither Lucide nor game-icons.net carries a villa-rustica porticus or a
+ * cippus specifically. Forcing a weak match in any of these would have been
+ * worse than the specific-purpose glyph actually in place.
  *
  * **Settlement, production, other, cemetery and bridge are a second
  * borrowed family — filled game-icons.net silhouettes, not stroked Lucide
@@ -62,10 +70,15 @@ export interface IconGlyph {
   viewBox: number
   /** A filled game-icons.net silhouette rather than a stroked Lucide outline. */
   filled?: boolean
+  /** An outline glyph drawn to the edge of its own 24-unit box — see `OUTLINE_INSET_TARGET_SIZE`'s docstring. */
+  inset?: boolean
 }
 
 /** A Lucide outline glyph — the common case, spelled out once rather than at every call site. */
 const outline = (path: string): IconGlyph => ({ path, viewBox: 24 })
+
+/** An outline glyph that needs shrinking to stay inside the disc — see `OUTLINE_INSET_TARGET_SIZE`'s docstring. */
+const insetOutline = (path: string): IconGlyph => ({ path, viewBox: 24, inset: true })
 
 /**
  * A filled game-icons.net glyph. `GAME_ICON_VIEWBOX` is the artist's own
@@ -141,10 +154,16 @@ export const SITE_ICON_GLYPHS: Record<SiteCategory, IconGlyph> = {
   /** Lucide `cog` — see `COG_ICON_PATH`'s docstring. */
   infrastructure: outline(COG_ICON_PATH),
 
-  /** Lucide `house` — one dwelling, against `settlement`'s several roofs. */
-  villa: outline(
-    'M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8 M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',
-  ),
+  /**
+   * Hand-drawn, not Lucide — reported directly: `house` read as a plain
+   * modern dwelling, not a landhouse. This draws a gabled roof over a
+   * colonnaded porch (two columns flanking a doorway), the recognisable
+   * feature of a villa rustica's porticus, against `settlement`'s huddle of
+   * several roofs and `sanctuary`'s own temple-front columns (`landmark`,
+   * no roof at all — a sanctuary is read by its colonnade alone, a villa by
+   * a colonnade under a domestic roof).
+   */
+  villa: outline('M4.5 10L12 4L19.5 10 M4.5 10v8h15v-8 M7 10v8M17 10v8 M10.5 18v-5h3v5'),
 
   /** delapouite's `anvil` (game-icons.net, credited to Lorc) — a smith's tool for kilns, forges and workshops alike, against `factory`'s modern chimneys. */
   production: filled(ANVIL_ICON_PATH),
@@ -173,9 +192,36 @@ export const atlasIconId = (category: SiteCategory): string => `${ATLAS_ICON_PRE
  * soft, which is the difference between a drawing and a smudge.
  */
 const ICON_VIEWBOX = 24
-const ICON_DISPLAY_PIXELS = 23
+/**
+ * Doubled from the original 23 on request ("increase their size") — every
+ * consumer of this registry (the general site marks, the limes fort plans,
+ * battles, ports, inscriptions, coin hoards, minor features) scales
+ * uniformly, since they all multiply their own `icon-size` zoom expression
+ * against this one shared base rather than carrying their own.
+ */
+const ICON_DISPLAY_PIXELS = 46
 const ICON_PIXEL_RATIO = 2
 const ICON_RASTER_PIXELS = ICON_DISPLAY_PIXELS * ICON_PIXEL_RATIO
+
+/**
+ * `museum`'s roofline reaches the very edge of its 24-unit box — Lucide
+ * draws `university` to fill the space the way a game-icons silhouette
+ * fills its own 512-unit one, which most of this file's outlines don't
+ * actually do, but a wide pediment does. Reported as "no rounded
+ * background": the glyph's two roof corners poked past the 10.4-radius
+ * disc, breaking its circular silhouette — confirmed by rendering the raw
+ * path against the disc and comparing it pixel-for-pixel against a glyph
+ * that stays inside it. `IconGlyph.inset` reuses the same shrink-and-centre
+ * idea `filled`'s `GAME_ICON_*` constants already apply for a different
+ * reason (a 512-unit silhouette overflowing a 24-unit box, not a 24-unit
+ * outline overflowing its own) — `rasteriseIcon` divides the stroke width
+ * back up for an inset glyph so its line doesn't read thinner than its
+ * siblings', the same compensation `REFERENCE_HALO_WIDTH`'s own docstring
+ * below already explains for the filled family.
+ */
+const OUTLINE_INSET_TARGET_SIZE = 20
+export const OUTLINE_INSET_OFFSET = (ICON_VIEWBOX - OUTLINE_INSET_TARGET_SIZE) / 2
+export const OUTLINE_INSET_SCALE = OUTLINE_INSET_TARGET_SIZE / ICON_VIEWBOX
 
 /** Width for the halo drawn behind a reference mark, in 24-unit space. Colour comes from the palette. */
 const REFERENCE_HALO_WIDTH = 3.2
@@ -310,15 +356,27 @@ const rasteriseIcon = (request: IconRasterRequest): ImageData | null => {
     return context.getImageData(0, 0, ICON_RASTER_PIXELS, ICON_RASTER_PIXELS)
   }
 
+  if (request.glyph.inset) {
+    context.save()
+    context.translate(OUTLINE_INSET_OFFSET, OUTLINE_INSET_OFFSET)
+    context.scale(OUTLINE_INSET_SCALE, OUTLINE_INSET_SCALE)
+  }
+  // Compensates the inset scale above, the same reason the filled branch
+  // divides by `GAME_ICON_SCALE` — `context.lineWidth` is read in the
+  // transformed space `stroke()` actually runs in.
+  const strokeWidthScale = request.glyph.inset ? OUTLINE_INSET_SCALE : 1
+
   if (request.reference && request.palette.haloOnRaster) {
     context.strokeStyle = request.palette.haloColour ?? REFERENCE_HALO_COLOUR
-    context.lineWidth = REFERENCE_HALO_WIDTH
+    context.lineWidth = REFERENCE_HALO_WIDTH / strokeWidthScale
     context.stroke(path)
   }
 
   context.strokeStyle = request.ink
-  context.lineWidth = request.reference ? 1.1 : 1.6
+  context.lineWidth = (request.reference ? 1.1 : 1.6) / strokeWidthScale
   context.stroke(path)
+
+  if (request.glyph.inset) context.restore()
 
   return context.getImageData(0, 0, ICON_RASTER_PIXELS, ICON_RASTER_PIXELS)
 }
@@ -336,7 +394,11 @@ export const registerSiteIcons = (map: MapLibreMap, palette: SiteIconPalette): v
   for (const category of SITE_CATEGORIES) {
     const image = rasteriseIcon({
       glyph: SITE_ICON_GLYPHS[category],
-      ink: category === 'infrastructure' ? palette.linear : palette.ink,
+      // Every category draws in `palette.linear` (bronze), requested directly
+      // so the nine marks "look all the same" rather than some in ink and
+      // some in bronze — see `SiteMark`s' own identical change below, and
+      // `FeaturePicker.vue`/`Legend.vue` for the matching picker/key colours.
+      ink: palette.linear,
       palette,
     })
     if (!image) continue
@@ -392,16 +454,28 @@ export const registerAtlasIcons = (map: MapLibreMap, palette: SiteIconPalette): 
 }
 
 /**
- * `match` on the category, falling back to the 'other' mark. Built from the
- * path record so a new category cannot be added without also getting a marker,
- * and an unrecognised one still draws something rather than nothing.
+ * `match` on `subcategory` first, for the seven marked kinds
+ * (`SITE_MARK_BY_SUBCATEGORY`); its fallback is the previous expression in
+ * full — `match` on `category`, falling back to the 'other' mark — so
+ * everything that isn't one of the seven behaves exactly as before. Built
+ * from the path records so a new category or mark cannot be added without
+ * also getting a marker, and an unrecognised value still draws something
+ * rather than nothing.
  */
 export const buildSiteIconExpression = (): ExpressionSpecification =>
   [
     'match',
-    ['get', 'category'],
-    ...SITE_CATEGORIES.flatMap((category) => [category, siteIconId(category)]),
-    siteIconId('other'),
+    ['get', 'subcategory'],
+    ...Object.entries(SITE_MARK_BY_SUBCATEGORY).flatMap(([subcategory, mark]) => [
+      subcategory,
+      siteMarkIconId(mark),
+    ]),
+    [
+      'match',
+      ['get', 'category'],
+      ...SITE_CATEGORIES.flatMap((category) => [category, siteIconId(category)]),
+      siteIconId('other'),
+    ],
     // A spread cannot satisfy the tuple shape `match` is typed with, though the
     // value it produces is exactly that shape.
   ] as unknown as ExpressionSpecification
@@ -552,6 +626,183 @@ export const registerBattleIcon = (map: MapLibreMap, palette: SiteIconPalette): 
 
   if (map.hasImage(BATTLE_ICON_ID)) map.removeImage(BATTLE_ICON_ID)
   map.addImage(BATTLE_ICON_ID, image, { pixelRatio: ICON_PIXEL_RATIO })
+}
+
+/**
+ * vici's own `sites.subcategory`, recovered for seven kinds across two
+ * categories, each earning its own mark instead of sharing the parent
+ * category's generic glyph — `infrastructure`'s five (road, bridge,
+ * milestone, aqueduct, mansio) and two of `other`'s (museum, and vici's own
+ * "site of a historic event", which is what a contributed battle or siege
+ * record is filed under there — a different population from the Wikidata
+ * battles `BATTLE_ICON_PATH` already draws, see `.claude/rules/
+ * antiquity-basemaps.md`'s battles section).
+ *
+ * Requested directly, after `infrastructure`'s cog and `other`'s menhir had
+ * already absorbed these once on purpose (see those two glyphs' own
+ * docstrings above) — the difference this time is scale: 1,003 milestones,
+ * 2,442 roads, 2,439 bridges, 815 aqueducts, 309 mansios, 1,418 museums and
+ * 212 historic-event sites, counted directly against the dev database, none
+ * of it new data. `sites.subcategory` already carries every one of these
+ * words verbatim — the same column `VICI_MARKS`/`resolveLimesMark` already
+ * read for the frontier's watchtower/fort/camp split — and
+ * `server/utils/mvt.ts`'s tile SQL already selects it for every site
+ * regardless of category. No migration, backfill or production data change:
+ * this is a client-side rendering change over data already in production.
+ *
+ * Asked directly whether `SITE_ICON_GLYPHS.infrastructure` (the cog) is
+ * still reachable after this split: queried directly against the dev
+ * database (`select category, subcategory, count(*) from sites where
+ * category = 'infrastructure' group by 1, 2`) — every one of the 7,008
+ * infrastructure rows carries one of the five marked subcategories above,
+ * none falls through to the generic glyph. It stays wired as
+ * `buildSiteIconExpression`'s category-level fallback regardless — vici's
+ * own data has shown a blank or unrecognised `subcategory` for other
+ * categories before (`other`'s menhir covers "rural"/"building"/"baths"/
+ * "theater"/"memorial" today, real fallback traffic, not a hypothetical),
+ * and removing the one glyph that currently has none would just mean a
+ * future unmarked infrastructure row drawing nothing at all.
+ */
+export type SiteMarkKind =
+  'road' | 'bridge' | 'milestone' | 'aqueduct' | 'mansio' | 'museum' | 'event'
+
+/**
+ * vici's raw word, lower-cased as stored, mapped to the mark it earns.
+ * `aquaduct` is vici's own spelling (see `CATEGORY_BY_KIND` in
+ * `scripts/import/02-mysql-to-postgres.ts`) — kept verbatim as the lookup
+ * key rather than "corrected", since it is what `sites.subcategory` actually
+ * contains.
+ */
+const SITE_MARK_BY_SUBCATEGORY: Record<string, SiteMarkKind> = {
+  road: 'road',
+  bridge: 'bridge',
+  milestone: 'milestone',
+  aquaduct: 'aqueduct',
+  mansio: 'mansio',
+  museum: 'museum',
+  event: 'event',
+}
+
+/**
+ * Which parent category a mark belongs to — purely descriptive; it has no
+ * bearing on ink colour, which `registerSiteMarkIcons` draws uniformly in
+ * `palette.linear` for every mark — see that function's own docstring.
+ */
+export const SITE_MARK_CATEGORY: Record<SiteMarkKind, SiteCategory> = {
+  road: 'infrastructure',
+  bridge: 'infrastructure',
+  milestone: 'infrastructure',
+  aqueduct: 'infrastructure',
+  mansio: 'infrastructure',
+  museum: 'other',
+  event: 'other',
+}
+
+/**
+ * Hand-drawn, not Lucide — reported directly: `road` reads as a modern
+ * highway, its centre line a painted lane marking no Roman road ever had.
+ * This draws a paved road receding into the distance with the regular
+ * transverse joints of large stone paving slabs instead — the feature
+ * actually associated with an ancient road (a Roman street's large, fitted
+ * paving stones), rather than a 20th-century traffic marking.
+ */
+const ROAD_ICON_PATH = 'M9 4L6 20M15 4L18 20 M8.4 7h7.2M7.9 10h8.2M7.3 13h9.4M6.8 16h10.5'
+
+/**
+ * Hand-drawn, not Lucide — reported directly: `milestone`, the glyph this
+ * mark was named after, draws a road sign (a pointed roadside placard),
+ * which is what the English word has come to mean but not what a Roman
+ * milliarium actually was. This draws the real object instead: a round
+ * stone pillar (a capsule — straight sides, semicircular top) on a plinth
+ * wider than the shaft, with two short strokes for the carved distance
+ * inscription.
+ */
+const MILESTONE_ICON_PATH = 'M8 20V9a4 4 0 0 1 8 0v11 M6 20h12 M10 12h4 M10 15h4'
+
+/**
+ * Delapouite's `aqueduct` (game-icons.net, CC BY 3.0) — "Roman bridge
+ * transporting water across long distances to fill reservoirs", the site's
+ * own description. Fetched directly from
+ * `game-icons.net/1x1/delapouite/aqueduct.html` and its linked `.svg`, the
+ * same verification this file's other borrowed glyphs already document;
+ * there is no `lorc/aqueduct` variant, only this one.
+ */
+const AQUEDUCT_ICON_PATH =
+  'M17.537 117.564 17.497 135h476.944v-17.436H17.538zM17.46 153l-.106 47H24a32 32 0 0 1 32-32 32 32 0 0 1 32 32h16.033a32 32 0 0 1-.033-.676 32 32 0 0 1 32-32 32 32 0 0 1 32 32 32 32 0 0 1-.023.676h15.783a32 32 0 0 1 32-32 32 32 0 0 1 32 32h16.033a32 32 0 0 1-.033-.676 32 32 0 0 1 32-32 32 32 0 0 1 32 32 32 32 0 0 1-.024.676h16.33a32 32 0 0 1-.066-1.324 32 32 0 0 1 32-32 32 32 0 0 1 32 32 32 32 0 0 1-.047 1.324H424.1a32 32 0 0 1-.1-2 32 32 0 0 1 32-32 32 32 0 0 1 32 32 32 32 0 0 1-.07 2h6.51v-47H17.46zm-2.136 63 .2 96h8.67A32 80 0 0 1 56 240a32 80 0 0 1 31.84 72h16.353A32 80 0 0 1 136 240a32 80 0 0 1 31.84 72h16.353A32 80 0 0 1 216 240a32 80 0 0 1 31.84 72h16.353A32 80 0 0 1 296 240a32 80 0 0 1 31.84 72h16.353A32 80 0 0 1 376 240a32 80 0 0 1 31.84 72h16.353A32 80 0 0 1 456 240a32 80 0 0 1 31.84 72h7.924l.398-96H15.324zm-.726 112 .677 160H41.05A62.988 144 0 0 1 104 346.537 62.988 144 0 0 1 166.934 488h26.203A62.988 144 0 0 1 256 352a62.988 144 0 0 1 62.813 136h26.324A62.988 144 0 0 1 408 352a62.988 144 0 0 1 62.813 136h24.705l1.353-160H14.6z'
+
+/**
+ * Lucide `bed` — a mansio was a roadside inn and relay station, a place to
+ * rest. No Roman-era inn/tavern building icon exists on game-icons.net,
+ * checked directly rather than assumed: the one name match, `tavern-sign`,
+ * draws a hanging sign on two posts, not a building, and the only
+ * building-shaped drinking establishment in the library, `saloon`, is Wild
+ * West-themed. A plain bed reads as "somewhere to stop for the night"
+ * without claiming an architecture this map has no source for.
+ */
+const MANSIO_ICON_PATH = 'M2 4v16M2 8h18a2 2 0 0 1 2 2v10M2 17h20M6 8v9'
+
+/**
+ * Lucide `university` — three source elements (two `<path>`s and a
+ * `cx="12" cy="10" r="2"` circle) concatenated into one path, the same
+ * technique `COG_ICON_PATH`'s own circle uses (see this file's header).
+ * Chosen over `landmark` — already `sanctuary`'s glyph — for a second
+ * classical-building mark that still has to read as distinct from a temple
+ * front at a glance.
+ */
+const MUSEUM_ICON_PATH =
+  'M14 21v-3a2 2 0 0 0-4 0v3m8-9h.01M18 16h.01 M22 7a1 1 0 0 0-1-1h-2a2 2 0 0 1-1.143-.359L13.143 2.36a2 2 0 0 0-2.286-.001L6.143 5.64A2 2 0 0 1 5 6H3a1 1 0 0 0-1 1v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2zM6 12h.01M6 16h.01 M10 10A2 2 0 1 0 14 10A2 2 0 1 0 10 10'
+
+export const SITE_MARK_ICON_GLYPHS: Record<SiteMarkKind, IconGlyph> = {
+  road: outline(ROAD_ICON_PATH),
+  /** delapouite's `stone-bridge` (game-icons.net) — the same glyph `MINOR_FEATURE_ICON_GLYPHS.bridge` draws for a borrowed AWMC bridge, reused rather than duplicated. */
+  bridge: filled(STONE_BRIDGE_ICON_PATH),
+  milestone: outline(MILESTONE_ICON_PATH),
+  aqueduct: filled(AQUEDUCT_ICON_PATH),
+  mansio: outline(MANSIO_ICON_PATH),
+  /** `inset` — see `OUTLINE_INSET_TARGET_SIZE`'s docstring; `university`'s pediment otherwise pokes past the disc. */
+  museum: insetOutline(MUSEUM_ICON_PATH),
+  /** Lucide `swords` — the same glyph `BATTLE_ICON_PATH` draws for a Wikidata battle, reused rather than duplicated: both mean "a historic event, not a place", the same reasoning `minorFeatureIconId('fort')` already gives for reusing a glyph across two sources. */
+  event: outline(BATTLE_ICON_PATH),
+}
+
+const SITE_MARK_ICON_PREFIX = 'vestigian-mark-'
+
+export const siteMarkIconId = (mark: SiteMarkKind): string => `${SITE_MARK_ICON_PREFIX}${mark}`
+
+export const SITE_MARK_KINDS = Object.keys(SITE_MARK_ICON_GLYPHS) as SiteMarkKind[]
+
+/**
+ * vici's raw, lower-cased `subcategory` → the mark it earns, or `null` for
+ * everything else — including a blank or unrecognised word, which keeps its
+ * parent category's generic glyph rather than drawing nothing.
+ */
+export const resolveSiteMark = (subcategory?: string | null): SiteMarkKind | null =>
+  (subcategory && SITE_MARK_BY_SUBCATEGORY[subcategory.trim().toLowerCase()]) || null
+
+/**
+ * One image per mark, registered alongside `registerSiteIcons` — same
+ * call site, same `styledata` lifecycle, see that function's own docstring.
+ *
+ * Every mark draws in `palette.linear` (bronze), requested directly so the
+ * marks "look all the same" rather than mixing bronze and plain ink — a
+ * direct reversal of the earlier fix that split them apart over a dark-mode
+ * contrast complaint (see this file's git history / `.claude/rules/
+ * map-and-tiles.md`); recorded here rather than re-litigated, since it is now
+ * what was actually asked for.
+ */
+export const registerSiteMarkIcons = (map: MapLibreMap, palette: SiteIconPalette): void => {
+  for (const mark of SITE_MARK_KINDS) {
+    const image = rasteriseIcon({
+      glyph: SITE_MARK_ICON_GLYPHS[mark],
+      ink: palette.linear,
+      palette,
+    })
+    if (!image) continue
+
+    const id = siteMarkIconId(mark)
+    if (map.hasImage(id)) map.removeImage(id)
+    map.addImage(id, image, { pixelRatio: ICON_PIXEL_RATIO })
+  }
 }
 
 export const PORT_ICON_ID = 'vestigian-port'

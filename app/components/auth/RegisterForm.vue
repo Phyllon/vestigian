@@ -177,12 +177,14 @@
       payload: the submit button stays disabled and **nobody can sign up**.
       A 200 everywhere, nothing in the logs. Found by `e2e/auth.spec.ts`.
     -->
-    <altcha-widget
-      ref="altchaWidget"
-      challenge="/api/auth/challenge"
-      hidefooter
-      @statechange="rememberSolution"
-    />
+    <div class="flex justify-center pb-2">
+      <altcha-widget
+        ref="altchaWidget"
+        challenge="/api/auth/challenge"
+        hidefooter
+        @statechange="rememberSolution"
+      />
+    </div>
 
     <UButton type="submit" :loading="isSubmitting" :disabled="!isComplete" color="primary" block>
       {{ t('auth.register.submit') }}

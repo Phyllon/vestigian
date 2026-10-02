@@ -183,24 +183,69 @@
   }
 }
 
-@layer components {
-  /**
-   * A sheet of the notebook: raised ground, soft corners, a shallow shadow.
-   *
-   * This used to carry a companion `.leaf-margin` that indented the content and
-   * drew a ruled line down the left, the way a surveyor's notebook reserves a
-   * column for annotations. It was removed: nothing was ever placed in the
-   * column, so on every screen it read as a stray vertical line beside an
-   * oddly indented block rather than as a margin. If annotations in the margin
-   * come back, they come back with content in them.
-   */
+/**
+ * A sheet of the notebook: raised ground, soft corners, a shallow shadow.
+ *
+ * In `@layer utilities`, not `@layer components` where every other shared
+ * class here lives — reported as poor text contrast on every `<button
+ * class="leaf …">` over the satellite view and any other map background
+ * that isn't close to paper-coloured (it read fine on the default
+ * `vestigian` sheet purely because that basemap's own land colour,
+ * `#f2ede1`, happens to be a near-match for `--surface-raised`). The real
+ * cause: Tailwind's own Preflight resets `background-color` to transparent
+ * on the bare `button`/`input`/`select`/… element list inside `@layer
+ * base`, and in this project's build `base` outranks the `components`
+ * layer `.leaf` used to live in — confirmed directly by walking
+ * `document.styleSheets` in a live page rather than guessed from reading the
+ * cascade rules, since `components` winning is what the Tailwide v4 default
+ * layer order (`theme, base, components, utilities`) would predict and
+ * empirically was not what happened (`theme, base, components, utilities` is
+ * Tailwind v4's documented default order, with `components` meant to win).
+ * `hover:bg-paper-200` already proved the `utilities` layer reliably wins
+ * over that same Preflight reset (its background visibly applies on hover
+ * today), so `.leaf` moved there too rather than reaching for `!important`
+ * — which would have worked for the rest state but then also beaten every
+ * `hover:`/`disabled:` variant already layered on top of `.leaf` elsewhere,
+ * since `!important` ignores layers and specificity alike. Inside the same
+ * `utilities` layer, a `hover:bg-paper-200:hover` compiled selector still
+ * carries higher specificity than plain `.leaf`, so those hover states are
+ * unaffected.
+ *
+ * This used to carry a companion `.leaf-margin` that indented the content and
+ * drew a ruled line down the left, the way a surveyor's notebook reserves a
+ * column for annotations. It was removed: nothing was ever placed in the
+ * column, so on every screen it read as a stray vertical line beside an
+ * oddly indented block rather than as a margin. If annotations in the margin
+ * come back, they come back with content in them.
+ *
+ * `position: relative` was dropped for the same reason this class moved
+ * layers in the first place: it is the one declaration left over from the
+ * removed `.leaf-margin` (positioning that ruled column against it), and
+ * nothing left in the app needs `.leaf` itself to be a positioning context —
+ * checked directly, no element relies on a child absolutely positioned
+ * against a `.leaf` ancestor. Left in, it actively fought every element that
+ * is *both* `.leaf` and `.absolute` at once, which `OverlaySwitcher.vue`,
+ * `PeriodSwitcher.vue` and `BasemapSwitcher.vue`'s flyout panels all are
+ * (`class="leaf absolute right-0 top-full …"`). Same `@layer utilities`, same
+ * property, so it comes down to source order rather than anything about
+ * `position`'s own specificity — confirmed live (`getComputedStyle` on the
+ * open panel reported `position: relative`, not `absolute`) after a report
+ * that opening any of the three buttons made it "jump horizontally": a
+ * `position: relative` flyout is back in normal flow as block content inside
+ * its `relative ml-auto` trigger wrapper, so the wrapper's own flex-item size
+ * grows to fit the open panel (256×600px, not 40×32px), which then squeezes
+ * `MapSearchField` down to a sliver and shoves every button after it
+ * sideways — not a one-button bug, all three panels share the exact markup.
+ */
+@layer utilities {
   .leaf {
     background-color: var(--surface-raised);
     border-radius: var(--radius-notebook);
     box-shadow: var(--shadow-leaf);
-    position: relative;
   }
+}
 
+@layer components {
   .eyebrow {
     font-family: var(--font-mono);
     font-size: var(--text-eyebrow);

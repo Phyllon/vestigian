@@ -15,7 +15,7 @@ import { z } from 'zod'
  * somewhere it cannot be seen.
  */
 export const PASSWORD_MINIMUM_LENGTH = 12
-export const PASSWORD_MAXIMUM_LENGTH = 30
+export const PASSWORD_MAXIMUM_LENGTH = 100
 
 /** Anything that is neither a letter nor a digit in any script. */
 const SPECIAL_CHARACTER = /[^\p{L}\p{N}]/u

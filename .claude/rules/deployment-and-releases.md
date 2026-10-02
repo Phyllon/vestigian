@@ -261,3 +261,47 @@ commit SHA** — `ghcr.io/.../vestigian:v0.2.0` alongside the two it already
 carried, read from `package.json` at build time via `jq`, so a specific
 released version can be pulled or rolled back to by tag rather than only by
 remembering a SHA.
+
+## `compose.dev.yml`'s imgproxy was hardcoded to MinIO, with no way to point it anywhere else
+
+Reported as "opening sites gives a 404 on pictures" in a dev environment whose
+`.env` had `NUXT_STORAGE_ENDPOINT`/`BUCKET`/credentials overridden to point at
+a real Bunny bucket instead of the local MinIO container (`.env.example`'s own
+documented default) — presumably done deliberately, to see real mirrored
+photographs while testing rather than empty galleries. Verified the object
+genuinely existed and the credentials genuinely worked first, with a standalone
+`@aws-sdk/client-s3` `HeadObjectCommand` against the real endpoint (679 KB,
+`image/jpeg`) — confirming the gap was in this compose file, not the data or
+the credentials.
+
+`imgproxy`'s own `IMGPROXY_S3_ENDPOINT`/`AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY`
+were hardcoded to the MinIO container's own service name and dev credentials,
+with no override path at all — so changing `NUXT_STORAGE_*` for the app (which
+reads it fine, since Nitro reads `.env` directly) did nothing for imgproxy,
+which never saw the new endpoint. Every `s3://vestigian-images/...` source URL
+`buildImageUrl` built kept resolving against an empty local bucket.
+
+Fixed with one new override var, `IMGPROXY_STORAGE_ENDPOINT` (defaults to
+`http://minio:9000`, i.e. unchanged for the common case), and by pointing
+`AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` at the app's own
+`NUXT_STORAGE_ACCESS_KEY_ID`/`SECRET_ACCESS_KEY` instead of duplicating them —
+those identify the same bucket either way, only the endpoint's reachability
+differs between imgproxy (inside the compose network, needs `minio:9000`) and
+the app (on the host via `pnpm dev`, needs `127.0.0.1:9000` or a real public
+host like Bunny's). Documented in `.env.example` next to `NUXT_STORAGE_*`.
+
+**The substitution needed a second fix to actually take effect.** `${VAR}`
+compose-file substitution reads a `.env` file relative to Compose's _project
+directory_, which with `-f docker/compose.dev.yml` and no `--project-directory`
+defaults to `docker/` — not the repository root, where the real `.env` lives
+(confirmed with `docker compose ... config`, which kept printing the hardcoded
+fallback defaults even after the var was set in the root `.env`). None of this
+compose file's other values ever used `${...}` before, which is exactly why
+this had never surfaced: every `stack:*` script in `package.json` now passes
+`--env-file .env` explicitly so substitution reads the root file regardless of
+where the compose YAML itself lives.
+
+Applying a changed env var to a running container needs `--force-recreate`
+(or `down`/`up`) — a bare `up -d` reports the container as already `Running`
+and leaves its old environment in place, confirmed by `printenv` inside the
+container before and after.

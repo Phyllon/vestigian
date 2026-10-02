@@ -1623,26 +1623,44 @@ export const buildBasemapStyle = (request: StyleRequest): StyleSpecification => 
   }
 }
 
+/**
+ * `label`/`hint` hold i18n key paths, not display text — this array is a
+ * plain module-scope constant, outside any component's `t()` context, so it
+ * cannot translate itself. `BasemapSwitcher.vue` is what calls `t()` on
+ * these. Left as literal English for a while after the view itself shipped
+ * (see `.claude/rules/map-and-tiles.md`) — a real, if narrow, i18n gap: the
+ * description under each sheet's name read in English regardless of locale.
+ */
 export const BASEMAP_VIEWS: BasemapOption[] = [
-  { value: 'vestigian', group: 'today', label: 'Vestigian', hint: 'Antiquity foregrounded' },
-  { value: 'satellite', group: 'today', label: 'Satellite', hint: 'Sentinel-2 imagery' },
+  {
+    value: 'vestigian',
+    group: 'today',
+    label: 'basemapSwitcher.views.vestigian.label',
+    hint: 'basemapSwitcher.views.vestigian.hint',
+  },
+  {
+    value: 'satellite',
+    group: 'today',
+    label: 'basemapSwitcher.views.satellite.label',
+    hint: 'basemapSwitcher.views.satellite.hint',
+  },
   {
     value: 'osm-standard',
     group: 'today',
-    label: 'Standard',
-    hint: 'The familiar OpenStreetMap look, unmodified',
+    label: 'basemapSwitcher.views.osmStandard.label',
+    hint: 'basemapSwitcher.views.osmStandard.hint',
   },
   {
     value: 'antiquity-dare',
     group: 'antiquity',
-    label: 'Antiquity (DARE)',
-    hint: 'Digital Atlas of the Roman Empire',
+    label: 'basemapSwitcher.views.antiquityDare.label',
+    hint: 'basemapSwitcher.views.antiquityDare.hint',
   },
   {
     value: 'antiquity-awmc',
     group: 'antiquity',
-    label: 'Antiquity (Barrington)',
-    hint: 'Roads, peoples and places, drawn here',
+    label: 'basemapSwitcher.views.antiquityAwmc.label',
+    hint: 'basemapSwitcher.views.antiquityAwmc.hint',
   },
 ]
 

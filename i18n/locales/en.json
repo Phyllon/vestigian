@@ -42,8 +42,25 @@
   "basemapSwitcher": {
     "label": "Basemap: {label}",
     "menuLabel": "Basemap",
+    "triggerLabel": "Maps",
     "groupToday": "Today",
     "groupAntiquity": "Antiquity",
+    "views": {
+      "vestigian": { "label": "Vestigian", "hint": "Antiquity foregrounded" },
+      "satellite": { "label": "Satellite", "hint": "Sentinel-2 imagery" },
+      "osmStandard": {
+        "label": "Standard",
+        "hint": "The familiar OpenStreetMap look, unmodified"
+      },
+      "antiquityDare": {
+        "label": "Antiquity (DARE)",
+        "hint": "Digital Atlas of the Roman Empire"
+      },
+      "antiquityAwmc": {
+        "label": "Antiquity (Barrington)",
+        "hint": "Roads, peoples and places, drawn here"
+      }
+    },
     "followLimes": "Follow the limes",
     "followLimesHint": "The frontier, its walls and its forts",
     "tabulaPeutingeriana": "Tabula Peutingeriana",
@@ -239,6 +256,7 @@
     "hideKey": "Hide key",
     "showKey": "Key",
     "referencedNote": "The same marks drawn as thin outlines, without a disc, are places referenced from the Barrington Atlas and Pleiades — not records contributed here.",
+    "siteMarksTitle": "Specific marks",
     "frontierTitle": "The frontier",
     "frontierMarksBarringtonOnly": "These fortification marks are drawn from the Barrington Atlas sheet and only appear while it is the active basemap. The frontier line itself is shown on every basemap.",
     "battlesTitle": "Battles",
@@ -264,6 +282,7 @@
   "siteDetail": {
     "loading": "Loading",
     "recordsHere": "{count} records here",
+    "panelLabel": "Site details",
     "close": "Close site details",
     "openFullEntry": "Open the full entry",
     "edit": "Edit",
@@ -301,6 +320,7 @@
       "submit": "Sign in",
       "noAccount": "No account yet?",
       "createOne": "Create one",
+      "successTitle": "Signed in.",
       "errorEmail": "That does not look like an email address.",
       "errorPassword": "Enter your password.",
       "failedTitle": "Could not sign in",
@@ -545,6 +565,15 @@
     "production": "Production",
     "findspot": "Findspot",
     "other": "Other"
+  },
+  "siteMarks": {
+    "road": "Road",
+    "bridge": "Bridge",
+    "milestone": "Milestone",
+    "aqueduct": "Aqueduct",
+    "mansio": "Wayside inn",
+    "museum": "Museum",
+    "event": "Historic event"
   },
   "limesMarks": {
     "watchtower": "Watchtower",

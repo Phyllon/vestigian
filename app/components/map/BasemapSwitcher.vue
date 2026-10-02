@@ -43,9 +43,10 @@
     close()
   }
 
-  const activeLabel = computed(
-    () => availableViews.find((option) => option.value === view.value)?.label ?? 'Vestigian',
-  )
+  const activeLabel = computed(() => {
+    const option = availableViews.find((entry) => entry.value === view.value)
+    return option ? t(option.label) : 'Vestigian'
+  })
 
   onClickOutside(root, close)
 </script>
@@ -78,7 +79,7 @@
         class="size-4 text-oxide-600 dark:text-oxide-300"
         aria-hidden="true"
       />
-      <span class="hidden sm:inline">{{ activeLabel }}</span>
+      <span class="hidden sm:inline">{{ t('basemapSwitcher.triggerLabel') }}</span>
     </button>
 
     <Transition
@@ -122,7 +123,9 @@
             @click="choose(option.value)"
           >
             <span class="flex w-full items-center justify-between gap-2">
-              <span class="font-medium text-ink-900 dark:text-paper-100">{{ option.label }}</span>
+              <span class="font-medium text-ink-900 dark:text-paper-100">{{
+                t(option.label)
+              }}</span>
               <UIcon
                 v-if="option.value === view"
                 name="i-lucide-check"
@@ -130,7 +133,7 @@
                 aria-hidden="true"
               />
             </span>
-            <span class="text-xs text-ink-500 dark:text-paper-400">{{ option.hint }}</span>
+            <span class="text-xs text-ink-500 dark:text-paper-400">{{ t(option.hint) }}</span>
           </button>
         </fieldset>
       </div>

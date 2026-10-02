@@ -4,7 +4,22 @@
   const { t } = useI18n()
   const { loggedIn } = useSession()
   const { isFollowingLimes } = useBasemapStyle()
-  const { selectSite } = useSiteQuery()
+  const { selectSite, isPanelOpen, isTracingPanelOpen, isPickerOpen } = useSiteQuery()
+
+  /**
+   * `SiteDetailPanel`/`TracingDetailPanel`/`FeaturePicker` are `absolute`
+   * overlays, not layout participants — opening one never resizes this
+   * wrapper, so without this the whole right-hand control column (overlays,
+   * period, basemap, offline download, geolocate) stayed exactly where it
+   * was and simply vanished under the panel's `z-30`, the moment a reader
+   * tapped a marker. Reported as the controls "jumping"; nothing actually
+   * moved, they were fully hidden the entire time a panel stayed open.
+   * Mirrors `isFollowingLimes`'s `md:pl-[23rem]` clearance for the frontier
+   * panel on the left, one rem past the panel's own `md:w-[26rem]`.
+   */
+  const isRecordPanelOpen = computed(
+    () => isPanelOpen.value || isTracingPanelOpen.value || isPickerOpen.value,
+  )
   const config = useRuntimeConfig()
 
   const isContributing = ref(false)
@@ -57,7 +72,7 @@
     -->
     <div
       class="pointer-events-none absolute inset-0 p-3 transition-[padding] md:p-4"
-      :class="isFollowingLimes ? 'md:pl-[23rem]' : ''"
+      :class="[isFollowingLimes ? 'md:pl-[23rem]' : '', isRecordPanelOpen ? 'md:pr-[27rem]' : '']"
     >
       <div class="pointer-events-auto flex items-start gap-2">
         <div class="w-full max-w-sm">
