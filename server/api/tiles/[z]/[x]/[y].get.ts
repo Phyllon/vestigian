@@ -13,7 +13,7 @@ defineRouteMeta({
     tags: ['tiles'],
     summary: 'Contributed sites and tracings as a vector tile',
     description:
-      'The hot path of the application. Counted clusters below zoom 9, individual sites at 9+, tracings from zoom 7. Tiles carry id, slug, title and category only.',
+      'The hot path of the application. Counted clusters below zoom 9, individual sites at 9+, tracings from zoom 7. Tiles carry id, slug, title and category only. `sites=all` draws individual sites at every zoom instead of clusters.',
   },
 })
 
@@ -32,7 +32,10 @@ export default defineEventHandler(async (event) => {
   }
 
   const dataVersion = await getDataVersion()
-  const cacheKey = buildTileCacheKey(tile, dataVersion)
+  // `?sites=all` is the reader's "show every marker" switch; anything else is
+  // the default clustered view, so a stray value cannot mint new cache keys.
+  const renderOptions = { showEverySite: getQuery(event).sites === 'all' }
+  const cacheKey = buildTileCacheKey(tile, dataVersion, renderOptions)
   const redis = useRedis()
 
   setResponseHeaders(event, {
@@ -41,7 +44,7 @@ export default defineEventHandler(async (event) => {
     'x-data-version': String(dataVersion),
   })
 
-  const plan = planTileRender(tile.z)
+  const plan = planTileRender(tile.z, renderOptions)
 
   try {
     const cached = await redis.getBuffer(cacheKey)
@@ -70,6 +73,7 @@ export default defineEventHandler(async (event) => {
           tile,
           simplifyTolerance: plan.simplifyTolerance,
           includeTracings: plan.includeTracings,
+          compactSiteProperties: plan.compactSiteProperties,
         })
 
   const renderStartedAt = performance.now()

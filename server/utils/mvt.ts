@@ -36,20 +36,40 @@ export const getSimplifyTolerance = (zoom: number): number => {
 /** Cluster cell size in metres — about 48 screen pixels, tuned for touch. */
 export const getClusterGridSize = (zoom: number): number => (40075016.686 / (256 * 2 ** zoom)) * 48
 
-export const planTileRender = (zoom: number): TileRenderPlan => ({
-  strategy: zoom < CLUSTER_ZOOM_CEILING ? 'cluster' : 'feature',
-  simplifyTolerance: getSimplifyTolerance(zoom),
-  clusterGridSize: getClusterGridSize(zoom),
-  includeTracings: zoom >= TRACING_ZOOM_FLOOR,
-})
+/**
+ * `showEverySite` is the reader's "individual markers" switch: the tile then
+ * carries sites at every zoom instead of counted clusters below the ceiling.
+ * Clusters stay the default because at zoom 4 this is tens of thousands of
+ * points per view — the switch trades payload and legibility for completeness.
+ */
+export interface TileRenderOptions {
+  showEverySite?: boolean
+}
+
+export const planTileRender = (zoom: number, options: TileRenderOptions = {}): TileRenderPlan => {
+  const isBelowCeiling = zoom < CLUSTER_ZOOM_CEILING
+  const showEverySite = options.showEverySite === true
+
+  return {
+    strategy: isBelowCeiling && !showEverySite ? 'cluster' : 'feature',
+    simplifyTolerance: getSimplifyTolerance(zoom),
+    clusterGridSize: getClusterGridSize(zoom),
+    includeTracings: zoom >= TRACING_ZOOM_FLOOR,
+    compactSiteProperties: isBelowCeiling && showEverySite,
+  }
+}
 
 /**
  * Cache key for a rendered tile. The data version prefix lets an approved edit
  * invalidate every cached tile at once by bumping a single counter, which is
  * far cheaper than tracking which tiles a given geometry touches.
  */
-export const buildTileCacheKey = (tile: TileCoordinate, dataVersion: number): string =>
-  `tile:v${dataVersion}:${tile.z}:${tile.x}:${tile.y}`
+export const buildTileCacheKey = (
+  tile: TileCoordinate,
+  dataVersion: number,
+  options: TileRenderOptions = {},
+): string =>
+  `tile:v${dataVersion}:${tile.z}:${tile.x}:${tile.y}${options.showEverySite ? ':every' : ''}`
 
 interface ClusterTileQuery {
   tile: TileCoordinate
@@ -116,6 +136,7 @@ interface FeatureTileQuery {
   tile: TileCoordinate
   simplifyTolerance: number
   includeTracings: boolean
+  compactSiteProperties: boolean
 }
 
 /**
@@ -134,22 +155,21 @@ interface FeatureTileQuery {
  * layer's string table — so this is not a trade.
  */
 export const buildFeatureTileSql = (query: FeatureTileQuery): string => {
-  const { tile, simplifyTolerance, includeTracings } = query
+  const { tile, simplifyTolerance, includeTracings, compactSiteProperties } = query
 
   const siteLayer = `
     SELECT ST_AsMVT(s, 'sites', ${TILE_EXTENT}, 'geom', 'id') AS tile
     FROM (
       SELECT
         sites.id,
-        sites.slug,
+        ${compactSiteProperties ? '' : 'sites.slug,'}
         sites.title,
         sites.category::text AS category,
         -- vici's own kind, where the record came with one. Small and highly
         -- repetitive, so it costs almost nothing in a tile that already carries
         -- a title, and it is what lets the frontier draw a turret as a turret.
         sites.subcategory,
-        sites.period_from,
-        sites.period_to,
+        ${compactSiteProperties ? '' : 'sites.period_from, sites.period_to,'}
         ST_AsMVTGeom(
           ST_Transform(sites.geom, 3857), b.env, ${TILE_EXTENT}, ${TILE_BUFFER}, true
         ) AS geom

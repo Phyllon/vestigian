@@ -42,6 +42,25 @@ describe('planTileRender', () => {
     expect(planTileRender(CLUSTER_ZOOM_CEILING).strategy).toBe('feature')
   })
 
+  it('serves individual sites below the ceiling when every site is asked for', () => {
+    const plan = planTileRender(CLUSTER_ZOOM_CEILING - 1, { showEverySite: true })
+    expect(plan.strategy).toBe('feature')
+    expect(plan.compactSiteProperties).toBe(true)
+  })
+
+  it('keeps full site properties once the tile is at or past the ceiling', () => {
+    expect(
+      planTileRender(CLUSTER_ZOOM_CEILING, { showEverySite: true }).compactSiteProperties,
+    ).toBe(false)
+    expect(planTileRender(3).compactSiteProperties).toBe(false)
+  })
+
+  it('keys the every-site variant apart from the clustered tile', () => {
+    const tile = { z: 4, x: 8, y: 5 }
+    expect(buildTileCacheKey(tile, 3)).toBe('tile:v3:4:8:5')
+    expect(buildTileCacheKey(tile, 3, { showEverySite: true })).not.toBe(buildTileCacheKey(tile, 3))
+  })
+
   it('withholds tracings until they are legible', () => {
     expect(planTileRender(TRACING_ZOOM_FLOOR - 1).includeTracings).toBe(false)
     expect(planTileRender(TRACING_ZOOM_FLOOR).includeTracings).toBe(true)

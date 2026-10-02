@@ -7,7 +7,7 @@
   const map = shallowRef<MapLibreMap | null>(null)
   const isReady = ref(false)
 
-  const { currentStyle, view, isDark, periodYear } = useBasemapStyle()
+  const { currentStyle, view, isDark, periodYear, isClusteringSites } = useBasemapStyle()
 
   /**
    * An antiquity sheet is parchment in both themes — filtering the raster would
@@ -23,6 +23,7 @@
     attachOverlayIcons,
     keepOverlayThroughStyleChanges,
     refreshLimesDimming,
+    refreshSiteClustering,
     findFeaturesAtPoint,
   } = useViewportTiles()
   const {
@@ -230,6 +231,14 @@
     } else {
       detachOverlay(map.value)
     }
+  })
+
+  // Changes the tile URL, not the style, so no `styledata` follows to carry it. The
+  // rebuilt source has no feature state, so the open record's ring is put back.
+  watch(isClusteringSites, () => {
+    if (!map.value) return
+    refreshSiteClustering(map.value)
+    highlightSelection(map.value, selectedSiteId.value)
   })
 
   watch(isShowingPorts, (isActive) => {

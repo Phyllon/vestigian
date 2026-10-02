@@ -1034,6 +1034,10 @@
     "remove": "{name} verwijderen",
     "removeFailed": "Dat gebied kon niet worden verwijderd. Probeer het zo nog eens."
   },
+  "siteDensity": {
+    "showEverySite": "Elke site als eigen markering tonen",
+    "showClusters": "Nabije sites groeperen in genummerde clusters"
+  },
   "overlaySwitcher": {
     "title": "Overlays",
     "menuLabel": "Overlays",

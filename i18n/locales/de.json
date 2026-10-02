@@ -1034,6 +1034,10 @@
     "remove": "{name} entfernen",
     "removeFailed": "Dieser Bereich ließ sich nicht entfernen. Versuche es gleich noch einmal."
   },
+  "siteDensity": {
+    "showEverySite": "Jeden Standort als eigene Markierung zeigen",
+    "showClusters": "Nahe Standorte zu Clustern mit Anzahl zusammenfassen"
+  },
   "overlaySwitcher": {
     "title": "Overlays",
     "menuLabel": "Overlays",

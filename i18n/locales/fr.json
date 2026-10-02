@@ -1034,6 +1034,10 @@
     "remove": "Retirer {name}",
     "removeFailed": "Cette zone n'a pas pu être retirée. Réessayez dans un instant."
   },
+  "siteDensity": {
+    "showEverySite": "Afficher chaque site comme un repère distinct",
+    "showClusters": "Regrouper les sites proches en amas numérotés"
+  },
   "overlaySwitcher": {
     "title": "Calques",
     "menuLabel": "Calques",

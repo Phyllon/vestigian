@@ -1861,6 +1861,17 @@ export const useBasemapStyle = () => {
   }
 
   /**
+   * Counted clusters below zoom 9 (the default) or every site as its own
+   * marker at every zoom. Only meaningful while `isShowingSites`. Not
+   * persisted, for the same reason as the switches around it.
+   */
+  const isClusteringSites = useState<boolean>('sites-clustered', () => true)
+
+  const setSitesClustered = (next: boolean): void => {
+    isClusteringSites.value = next
+  }
+
+  /**
    * An overlay on any basemap, like the frontier and battles above — a
    * port's location is a fact about the world, not a reading of one
    * particular sheet. `canShowPorts` mirrors `canShowBattles`'s shape
@@ -2004,6 +2015,8 @@ export const useBasemapStyle = () => {
     canShowSites,
     isShowingSites,
     setSitesActive,
+    isClusteringSites,
+    setSitesClustered,
     canShowPorts,
     isShowingPorts,
     setPortsActive,

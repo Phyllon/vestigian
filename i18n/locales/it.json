@@ -1034,6 +1034,10 @@
     "remove": "Rimuovi {name}",
     "removeFailed": "Non è stato possibile rimuovere quell'area. Riprova tra poco."
   },
+  "siteDensity": {
+    "showEverySite": "Mostra ogni sito come segnaposto singolo",
+    "showClusters": "Raggruppa i siti vicini in gruppi numerati"
+  },
   "overlaySwitcher": {
     "title": "Livelli",
     "menuLabel": "Livelli",

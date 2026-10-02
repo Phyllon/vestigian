@@ -86,6 +86,10 @@
     "showAtticInscriptions": "Attic inscriptions",
     "showAtticInscriptionsHint": "Attic Inscriptions Online with a resolved findspot (AIO)"
   },
+  "siteDensity": {
+    "showEverySite": "Show every site as its own marker",
+    "showClusters": "Group nearby sites into counted clusters"
+  },
   "overlaySwitcher": {
     "title": "Overlays",
     "menuLabel": "Overlays",

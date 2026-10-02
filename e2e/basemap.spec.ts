@@ -323,6 +323,38 @@ test.describe('the basemap switcher', () => {
     expect(problems.pageErrors).toEqual([])
   })
 
+  test('the site density switch appears with the sites and requests individual markers', async ({
+    page,
+  }) => {
+    const problems = watchForProblems(page)
+    const everySiteTiles: string[] = []
+
+    page.on('request', (request) => {
+      if (/\/api\/tiles\/\d+\/\d+\/\d+\.mvt\?sites=all/.test(request.url())) {
+        everySiteTiles.push(request.url())
+      }
+    })
+
+    await openMap(page)
+    await expect(
+      page.getByRole('button', { name: 'Show every site as its own marker' }),
+    ).toBeHidden()
+
+    await showSites(page)
+    const toggle = page.getByRole('button', { name: 'Show every site as its own marker' })
+    await expect(toggle).toHaveAttribute('aria-pressed', 'false')
+    expect(everySiteTiles.length, 'clusters are the default').toBe(0)
+
+    await toggle.click()
+    await expect.poll(() => everySiteTiles.length, { timeout: 15_000 }).toBeGreaterThan(0)
+
+    const back = page.getByRole('button', { name: 'Group nearby sites into counted clusters' })
+    await expect(back).toHaveAttribute('aria-pressed', 'true')
+
+    expect(problems.cspViolations).toEqual([])
+    expect(problems.pageErrors).toEqual([])
+  })
+
   test('keeps the site overlay across a style swap', async ({ page }) => {
     const tileRequests: string[] = []
     page.on('request', (request) => {

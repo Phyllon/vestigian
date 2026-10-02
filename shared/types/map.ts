@@ -113,6 +113,12 @@ export interface TileRenderPlan {
   simplifyTolerance: number
   clusterGridSize: number
   includeTracings: boolean
+  /**
+   * Below the cluster ceiling in the every-site mode, a tile carries a whole
+   * continent's worth of points, so each one sheds the properties nothing reads
+   * at that zoom (slug, period).
+   */
+  compactSiteProperties: boolean
 }
 
 /**

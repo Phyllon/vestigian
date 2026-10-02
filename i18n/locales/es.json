@@ -1034,6 +1034,10 @@
     "remove": "Quitar {name}",
     "removeFailed": "No se pudo quitar esa zona. Inténtalo de nuevo en un momento."
   },
+  "siteDensity": {
+    "showEverySite": "Mostrar cada sitio como marcador propio",
+    "showClusters": "Agrupar sitios cercanos en conjuntos numerados"
+  },
   "overlaySwitcher": {
     "title": "Capas",
     "menuLabel": "Capas",

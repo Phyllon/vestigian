@@ -57,7 +57,7 @@ const DARK_OVERLAY: OverlayPalette = {
  * on screen. This is what makes the viewport feel instant at continental zoom.
  */
 export const useViewportTiles = () => {
-  const { sheetTone, isFollowingLimes, isShowingSites, view } = useBasemapStyle()
+  const { sheetTone, isFollowingLimes, isShowingSites, isClusteringSites, view } = useBasemapStyle()
 
   /**
    * Keyed on the sheet, not the theme. Over an antiquity raster the ground is
@@ -185,6 +185,14 @@ export const useViewportTiles = () => {
   }
 
   /**
+   * The same endpoint either way; `?sites=all` is what makes the server send
+   * individual sites below zoom 9 instead of counted clusters. A distinct URL
+   * also means the two modes never share a cached tile.
+   */
+  const buildSiteTilesUrl = (): string =>
+    `${window.location.origin}/api/tiles/{z}/{x}/{y}.mvt${isClusteringSites.value ? '' : '?sites=all'}`
+
+  /**
    * Off by default (`isShowingSites`, `useBasemapStyle`) — this is the one
    * overlay that used to request tiles on every first visit no matter what
    * the reader actually wanted to look at.
@@ -196,7 +204,7 @@ export const useViewportTiles = () => {
 
     map.addSource(OVERLAY_SOURCE_ID, {
       type: 'vector',
-      tiles: [`${window.location.origin}/api/tiles/{z}/{x}/{y}.mvt`],
+      tiles: [buildSiteTilesUrl()],
       minzoom: 0,
       maxzoom: 14,
       attribution:
@@ -224,6 +232,7 @@ export const useViewportTiles = () => {
       type: 'circle',
       source: OVERLAY_SOURCE_ID,
       'source-layer': 'clusters',
+      layout: { visibility: isClusteringSites.value ? 'visible' : 'none' },
       paint: {
         'circle-color': colours.cluster,
         // Counted clusters are the loudest thing on the sheet below zoom 9, and
@@ -258,6 +267,7 @@ export const useViewportTiles = () => {
         'text-font': [MAP_LABEL_FONT],
         'text-size': 12,
         'text-allow-overlap': true,
+        visibility: isClusteringSites.value ? 'visible' : 'none',
       },
       paint: {
         'text-color': colours.clusterText,
@@ -304,7 +314,23 @@ export const useViewportTiles = () => {
         'icon-image': buildSiteIconExpression(),
         // Full size only once the drawing is worth reading; smaller at the zoom
         // where the map is about density rather than about individual records.
-        'icon-size': ['interpolate', ['linear'], ['zoom'], 9, 0.62, 13, 0.85, 17, 1],
+        // The 4 and 6 stops only matter in the every-site mode, where markers
+        // exist below zoom 9 and full size would be a solid smear.
+        'icon-size': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          4,
+          0.3,
+          6,
+          0.42,
+          9,
+          0.62,
+          13,
+          0.85,
+          17,
+          1,
+        ],
         /**
          * Never let collision hide a marker. A dropped site is a record the
          * reader has no way of knowing exists, and it cannot be tapped either
@@ -439,6 +465,23 @@ export const useViewportTiles = () => {
   }
 
   /**
+   * Swaps between clusters and individual markers by rebuilding the overlay.
+   *
+   * `VectorTileSource.setTiles` was tried first and is the wrong tool: it
+   * keeps the source and re-requests its tiles, but after the swap the tiles
+   * at the camera's current zoom were observed not to draw until the reader
+   * changed zoom level — a headless run sat at zoom 7 for 45 s with the new
+   * tiles delivered and nothing rendered, while jumping to another zoom drew
+   * at once. Dropping the source and building it again starts from empty tile
+   * state, the same path a basemap swap already takes.
+   */
+  const refreshSiteClustering = (map: MapLibreMap): void => {
+    if (!map.getSource(OVERLAY_SOURCE_ID)) return
+    detachOverlay(map)
+    attachOverlay(map)
+  }
+
+  /**
    * Everything under the tap, not just the topmost thing.
    *
    * `queryRenderedFeatures` returns hits in render order, so taking the first
@@ -495,6 +538,7 @@ export const useViewportTiles = () => {
     attachOverlayIcons,
     keepOverlayThroughStyleChanges,
     refreshLimesDimming,
+    refreshSiteClustering,
     findFeaturesAtPoint,
     palette,
   }
