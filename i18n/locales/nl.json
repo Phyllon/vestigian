@@ -1034,6 +1034,17 @@
     "remove": "{name} verwijderen",
     "removeFailed": "Dat gebied kon niet worden verwijderd. Probeer het zo nog eens."
   },
+  "featuredSites": {
+    "show": "Uitgelichte sites in de buurt tonen",
+    "hide": "Uitgelichte sites in de buurt verbergen",
+    "title": "Uitgelicht in de buurt",
+    "close": "Uitgelichte sites sluiten",
+    "loading": "Uitgelichte sites zoeken…",
+    "empty": "Geen uitgelichte sites in beeld. Zoom uit of verschuif de kaart.",
+    "count": "Geen uitgelichte sites | Eén uitgelichte site | {n} uitgelichte sites",
+    "metres": "{metres} m",
+    "kilometres": "{kilometres} km"
+  },
   "siteDensity": {
     "showEverySite": "Elke site als eigen markering tonen",
     "showClusters": "Nabije sites groeperen in genummerde clusters"

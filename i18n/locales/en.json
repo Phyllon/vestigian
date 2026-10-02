@@ -86,6 +86,17 @@
     "showAtticInscriptions": "Attic inscriptions",
     "showAtticInscriptionsHint": "Attic Inscriptions Online with a resolved findspot (AIO)"
   },
+  "featuredSites": {
+    "show": "Show featured sites nearby",
+    "hide": "Hide featured sites nearby",
+    "title": "Featured nearby",
+    "close": "Close featured sites",
+    "loading": "Looking for featured sites…",
+    "empty": "No featured sites in view. Zoom out or move the map.",
+    "count": "No featured sites | One featured site | {n} featured sites",
+    "metres": "{metres} m",
+    "kilometres": "{kilometres} km"
+  },
   "siteDensity": {
     "showEverySite": "Show every site as its own marker",
     "showClusters": "Group nearby sites into counted clusters"

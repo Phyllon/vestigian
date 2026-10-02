@@ -228,6 +228,9 @@
     if (!map.value) return
     if (isActive) {
       attachOverlay(map.value)
+      // A record opened while the layer was off (the featured list does this)
+      // had no source to ring when its selection was set.
+      highlightSelection(map.value, selectedSiteId.value)
     } else {
       detachOverlay(map.value)
     }

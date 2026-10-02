@@ -1034,6 +1034,17 @@
     "remove": "{name} entfernen",
     "removeFailed": "Dieser Bereich ließ sich nicht entfernen. Versuche es gleich noch einmal."
   },
+  "featuredSites": {
+    "show": "Ausgewählte Fundorte in der Nähe zeigen",
+    "hide": "Ausgewählte Fundorte in der Nähe ausblenden",
+    "title": "Ausgewählt in der Nähe",
+    "close": "Ausgewählte Fundorte schließen",
+    "loading": "Ausgewählte Fundorte werden gesucht …",
+    "empty": "Keine ausgewählten Fundorte im Bild. Zoome heraus oder verschiebe die Karte.",
+    "count": "Keine ausgewählten Fundorte | Ein ausgewählter Fundort | {n} ausgewählte Fundorte",
+    "metres": "{metres} m",
+    "kilometres": "{kilometres} km"
+  },
   "siteDensity": {
     "showEverySite": "Jeden Standort als eigene Markierung zeigen",
     "showClusters": "Nahe Standorte zu Clustern mit Anzahl zusammenfassen"

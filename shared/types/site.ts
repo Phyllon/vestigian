@@ -49,6 +49,22 @@ export interface SiteSummary {
 }
 
 /**
+ * A site picked out for the "featured nearby" list — derived, not flagged; see
+ * `shared/utils/featured.ts`. `thumbnailImageId` is always present because a
+ * record without a published photograph is never featured.
+ */
+export interface FeaturedSiteSummary {
+  id: number
+  slug: string
+  title: string
+  category: SiteCategory
+  countryCode: string | null
+  position: LonLat
+  distanceMetres: number
+  thumbnailImageId: number
+}
+
+/**
  * A modern city or town — GeoNames.org's `cities500` extract
  * (`scripts/import/09-cities.ts`), not a Vestigian record. Exists only to
  * let the map search bar navigate to a place this atlas holds no opinion

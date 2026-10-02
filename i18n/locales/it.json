@@ -1034,6 +1034,17 @@
     "remove": "Rimuovi {name}",
     "removeFailed": "Non è stato possibile rimuovere quell'area. Riprova tra poco."
   },
+  "featuredSites": {
+    "show": "Mostra i siti in evidenza vicini",
+    "hide": "Nascondi i siti in evidenza vicini",
+    "title": "In evidenza nelle vicinanze",
+    "close": "Chiudi i siti in evidenza",
+    "loading": "Ricerca dei siti in evidenza…",
+    "empty": "Nessun sito in evidenza nella vista. Riduci lo zoom o sposta la mappa.",
+    "count": "Nessun sito in evidenza | Un sito in evidenza | {n} siti in evidenza",
+    "metres": "{metres} m",
+    "kilometres": "{kilometres} km"
+  },
   "siteDensity": {
     "showEverySite": "Mostra ogni sito come segnaposto singolo",
     "showClusters": "Raggruppa i siti vicini in gruppi numerati"

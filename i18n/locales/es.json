@@ -1034,6 +1034,17 @@
     "remove": "Quitar {name}",
     "removeFailed": "No se pudo quitar esa zona. Inténtalo de nuevo en un momento."
   },
+  "featuredSites": {
+    "show": "Mostrar sitios destacados cercanos",
+    "hide": "Ocultar sitios destacados cercanos",
+    "title": "Destacados cerca",
+    "close": "Cerrar sitios destacados",
+    "loading": "Buscando sitios destacados…",
+    "empty": "No hay sitios destacados a la vista. Aleja el zoom o mueve el mapa.",
+    "count": "Ningún sitio destacado | Un sitio destacado | {n} sitios destacados",
+    "metres": "{metres} m",
+    "kilometres": "{kilometres} km"
+  },
   "siteDensity": {
     "showEverySite": "Mostrar cada sitio como marcador propio",
     "showClusters": "Agrupar sitios cercanos en conjuntos numerados"

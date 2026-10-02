@@ -1034,6 +1034,17 @@
     "remove": "Retirer {name}",
     "removeFailed": "Cette zone n'a pas pu être retirée. Réessayez dans un instant."
   },
+  "featuredSites": {
+    "show": "Afficher les sites à la une à proximité",
+    "hide": "Masquer les sites à la une à proximité",
+    "title": "À la une, à proximité",
+    "close": "Fermer les sites à la une",
+    "loading": "Recherche des sites à la une…",
+    "empty": "Aucun site à la une dans la vue. Dézoomez ou déplacez la carte.",
+    "count": "Aucun site à la une | Un site à la une | {n} sites à la une",
+    "metres": "{metres} m",
+    "kilometres": "{kilometres} km"
+  },
   "siteDensity": {
     "showEverySite": "Afficher chaque site comme un repère distinct",
     "showClusters": "Regrouper les sites proches en amas numérotés"

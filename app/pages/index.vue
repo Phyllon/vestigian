@@ -107,6 +107,7 @@
       <div
         class="pointer-events-auto absolute bottom-12 right-3 flex flex-col items-end gap-2 md:right-4"
       >
+        <MapFeaturedSitesButton />
         <MapSiteDensityToggle />
         <MapOfflineDownloadControl />
         <MapGeolocateButton />
@@ -121,6 +122,8 @@
           {{ t('indexPage.addToAtlas') }}
         </UButton>
       </div>
+
+      <MapFeaturedSitesPanel />
 
       <!--
         `Lazy`, and it is worth more than it looks. `v-if` decides what renders,

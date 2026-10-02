@@ -1436,3 +1436,23 @@ concatenated the lists, so "vitud" showed the modern town Vite above the ancient
 Vitudurum, followed by unrelated near-misses. Modern places still sort by
 population within the prefix band (every prefix match scores exactly 1), which
 is what keeps London ahead of Londa.
+
+## Featured sites nearby
+
+`MapFeaturedSitesButton` (sparkles, top of the bottom-right control stack) toggles
+`MapFeaturedSitesPanel`: a bottom sheet on phones (`max-h-[45dvh]`, rows scroll
+inside it, `bottom-10` to clear the attribution control), a 20rem card left of the
+control column from `md` (shifted to `md:right-[28rem]` while a record panel is
+open). It loads `GET /api/sites/featured` for the camera centre and a radius of
+half the visible diagonal (1–300 km), refreshing on `moveend` — **only while open**.
+
+"Featured" is **derived, not flagged**: the vici import carries no editorial
+marker. A site must have a published photograph (licence not `UNKNOWN`/`ARR`)
+and a description; the 80 nearest such sites are ranked by
+`scoreFeaturedSite` (`shared/utils/featured.ts`: completeness + capped photo and
+endorsement bonuses), distance excluded from the score. Picking a row switches
+the sites layer on, flies to `max(current zoom, 14)`, selects the site (the
+selection ring is `MapCanvas`'s `selectedSiteId` watcher, which is now also
+re-run when the layer turns on) and, on compact screens, closes the list.
+**Known limit:** on a phone the detail sheet (78vh) covers the map, so the
+marker is hidden behind it exactly as for a tap or a search result.
