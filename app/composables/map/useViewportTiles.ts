@@ -185,12 +185,13 @@ export const useViewportTiles = () => {
   }
 
   /**
-   * The same endpoint either way; `?sites=all` is what makes the server send
-   * individual sites below zoom 9 instead of counted clusters. A distinct URL
-   * also means the two modes never share a cached tile.
+   * The mode is in the path, not a query string: the pull zone in front of the
+   * app ignores query strings in its cache key, so `?sites=all` was answered
+   * with whichever mode's tile it had cached first, and switching back to
+   * clusters left every-site markers drawn among them.
    */
   const buildSiteTilesUrl = (): string =>
-    `${window.location.origin}/api/tiles/{z}/{x}/{y}.mvt${isClusteringSites.value ? '' : '?sites=all'}`
+    `${window.location.origin}/api/tiles${isClusteringSites.value ? '' : '/every'}/{z}/{x}/{y}.mvt`
 
   /**
    * Off by default (`isShowingSites`, `useBasemapStyle`) — this is the one

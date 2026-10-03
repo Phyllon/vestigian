@@ -73,7 +73,7 @@ export const tileRequestsTotal = define(
       name: 'tile_requests_total',
       help: 'Tile requests by render strategy, cache result, zoom and site-density mode.',
       // `zoom` is a bounded integer (0–18) and `mode` is `clustered` or `every`
-      // (`?sites=all`), so this is a few hundred series at most — never a
+      // (`/api/tiles/every`), so this is a few hundred series at most — never a
       // coordinate.
       labelNames: ['strategy', 'cache', 'zoom', 'mode'] as const,
       registers,

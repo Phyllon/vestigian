@@ -330,7 +330,7 @@ test.describe('the basemap switcher', () => {
     const everySiteTiles: string[] = []
 
     page.on('request', (request) => {
-      if (/\/api\/tiles\/\d+\/\d+\/\d+\.mvt\?sites=all/.test(request.url())) {
+      if (/\/api\/tiles\/every\/\d+\/\d+\/\d+\.mvt/.test(request.url())) {
         everySiteTiles.push(request.url())
       }
     })
