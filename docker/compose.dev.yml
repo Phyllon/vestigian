@@ -233,6 +233,7 @@ services:
     volumes:
       - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./observability/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - ./observability/slo-rules.yml:/etc/prometheus/slo-rules.yml:ro
       - prometheus-data:/prometheus
 
   alertmanager:
@@ -259,6 +260,10 @@ services:
       - run
       - --server.http.listen-addr=0.0.0.0:12345
       - --storage.path=/var/lib/alloy/data
+      # Alloy reports which components are enabled to Grafana Labs (US) unless told
+      # not to. Nothing about a visitor is in it, but "nothing leaves the EU" is a
+      # claim the About page makes, so it is off rather than argued about.
+      - --disable-reporting
       - /etc/alloy/config.alloy
     environment:
       POSTGRES_DSN: postgresql://vestigian:vestigian@postgres:5432/vestigian?sslmode=disable

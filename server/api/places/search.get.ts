@@ -54,6 +54,8 @@ export default defineEventHandler(async (event): Promise<PlaceSummary[]> => {
     LIMIT ${limit}
   `
 
+  searchRequestsTotal().inc({ source: 'place', outcome: rows.length > 0 ? 'results' : 'empty' })
+
   return rows.map((row) => ({
     id: row.id,
     name: row.name,

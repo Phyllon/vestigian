@@ -119,3 +119,28 @@ directly by the browser** (`mapAssetOrigins` in `nuxt.config.ts`), so a
 visitor's IP does reach that host the way it would for any embedded map — its
 hosting location is not confirmed in this repository and should be verified
 before the privacy policy's recipients section is treated as final.
+
+## Anonymous performance measurement
+
+`POST /api/vitals` (see `.claude/rules/observability.md`) keeps only histogram
+buckets. Enforced in code, not by promise:
+
+- **No address or user agent in our logs** for this route — `server/utils/anonymous-routes.ts`
+  (`describeRequester` never even calls the resolver); metrics still count the request.
+- **Rate limit keyed on a one-way pseudonym**, not the address (`anonymise: true`,
+  `pseudonymiseIdentifier`: HMAC-SHA256 under a per-process random secret, 16 hex
+  chars, Valkey TTL = the 60 s window, different after every restart). Verified live:
+  the key is `rl:vitals:<16 hex>:<window>`.
+- **Nothing on the device.** The plugin and `web-vitals` (grepped: no cookie,
+  `localStorage`, `sessionStorage` or IndexedDB) store nothing; `e2e/vitals.spec.ts`
+  asserts the beacon holds exactly `name`, `value`, `device` and that a first visit sets
+  only the language cookie.
+- **Same origin, nothing to third parties**; skipped under DNT / GPC.
+- **Not controllable from this repo:** the CDN (Bunny) and proxy still see the connection
+  like any request — check Bunny's log anonymisation setting in the dashboard.
+
+Legal basis stated on the privacy page: legitimate interest (Art. 6(1)(f)). With the
+above, the TDDDG §25 question (does reading the Performance API count as terminal
+access?) is **narrowed, not settled** — nothing is stored or read back from the device
+and no identifier leaves it, which is the strongest position available, but the
+conclusion is a lawyer's, not this file's.

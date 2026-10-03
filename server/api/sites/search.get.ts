@@ -49,6 +49,8 @@ export default defineEventHandler(async (event): Promise<SiteSummary[]> => {
     LIMIT ${limit}
   `
 
+  searchRequestsTotal().inc({ source: 'site', outcome: rows.length > 0 ? 'results' : 'empty' })
+
   return rows.map((row) => ({
     id: row.id,
     slug: row.slug,

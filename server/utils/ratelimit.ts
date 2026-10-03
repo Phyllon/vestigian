@@ -1,3 +1,4 @@
+import { createHmac, randomBytes } from 'node:crypto'
 import type { H3Event } from 'h3'
 
 export interface RateLimitPolicy {
@@ -5,6 +6,11 @@ export interface RateLimitPolicy {
   limit: number
   /** Window length in seconds. */
   windowSeconds: number
+  /**
+   * Count against a one-way pseudonym of the address instead of the address,
+   * so the cache never holds an IP for this policy. See `pseudonymiseIdentifier`.
+   */
+  anonymise?: boolean
 }
 
 export interface RateLimitDecision {
@@ -23,6 +29,11 @@ export const RATE_LIMITS = {
   contribute: { limit: 30, windowSeconds: 3600 },
   upload: { limit: 20, windowSeconds: 3600 },
   search: { limit: 120, windowSeconds: 60 },
+  /**
+   * Browser timing beacons: a page load sends one batch, so this is generous for
+   * a real visitor and cheap to refuse for anything stuffing the histograms.
+   */
+  vitals: { limit: 30, windowSeconds: 60, anonymise: true },
   tiles: { limit: 1200, windowSeconds: 60 },
   /**
    * Generous, because a cache hit costs nothing and most requests are hits.
@@ -189,12 +200,31 @@ export const resolveClientIdentifier = (event: H3Event): string =>
     behindTrustedProxy: useRuntimeConfig().behindTrustedProxy === true,
   })
 
+/**
+ * A keyed one-way stand-in for an address: HMAC-SHA256 under a secret that
+ * exists only in this process's memory, cut to 16 hex characters.
+ *
+ * It is stable inside one process lifetime, which is all a rate limit needs,
+ * and cannot be turned back into an address from what Valkey holds — the key
+ * is not stored anywhere and is gone on restart, and without it the 2^32
+ * IPv4 space cannot be enumerated against the hash. It is **not** a
+ * long-lived identifier: it changes at every deploy, so it cannot be used to
+ * follow a visitor over time even by whoever could read the cache.
+ */
+const PROCESS_SECRET = randomBytes(32)
+
+export const pseudonymiseIdentifier = (
+  identifier: string,
+  secret: Buffer = PROCESS_SECRET,
+): string => createHmac('sha256', secret).update(identifier).digest('hex').slice(0, 16)
+
 export const enforceRateLimit = async (event: H3Event, name: RateLimitName): Promise<void> => {
-  const policy = RATE_LIMITS[name]
+  const policy: RateLimitPolicy = RATE_LIMITS[name]
   const now = Date.now()
+  const address = resolveClientIdentifier(event)
   const key = buildRateLimitKey({
     name,
-    identifier: resolveClientIdentifier(event),
+    identifier: policy.anonymise ? pseudonymiseIdentifier(address) : address,
     windowSeconds: policy.windowSeconds,
     now,
   })

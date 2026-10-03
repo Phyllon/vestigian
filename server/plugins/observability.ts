@@ -127,9 +127,13 @@ export default defineNitroPlugin((nitro) => {
         // whom, which makes a decision impossible.
         //
         // It is personal data. `REDACTED_FIELDS` in `logger.ts` and Loki's
-        // retention are the whole of the position on that.
-        ip: resolveClientIdentifier(event),
-        userAgent: getRequestHeader(event, 'user-agent'),
+        // retention are the whole of the position on that — and for the
+        // anonymous routes (`server/utils/anonymous-routes.ts`) none of it is
+        // written.
+        ...describeRequester(route, () => ({
+          ip: resolveClientIdentifier(event),
+          userAgent: getRequestHeader(event, 'user-agent'),
+        })),
         // Bytes matter here specifically: a tile is binary and its size is the
         // difference between an empty ocean tile and a dense one.
         bytes: body instanceof Buffer || body instanceof Uint8Array ? body.byteLength : undefined,

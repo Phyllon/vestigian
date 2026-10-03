@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   buildRateLimitKey,
   evaluateRateLimit,
+  pseudonymiseIdentifier,
   RATE_LIMITS,
   resolveForwardedIdentifier,
 } from '../ratelimit'
@@ -120,5 +121,34 @@ describe('resolveForwardedIdentifier', () => {
         behindTrustedProxy: true,
       }),
     ).toBe('198.51.100.7')
+  })
+})
+
+describe('pseudonymiseIdentifier', () => {
+  const secret = Buffer.from('a'.repeat(32))
+
+  it('never contains the address it stands for', () => {
+    const pseudonym = pseudonymiseIdentifier('203.0.113.9', secret)
+    expect(pseudonym).not.toContain('203')
+    expect(pseudonym).toMatch(/^[0-9a-f]{16}$/)
+  })
+
+  it('is stable for one secret and different for different addresses', () => {
+    expect(pseudonymiseIdentifier('203.0.113.9', secret)).toBe(
+      pseudonymiseIdentifier('203.0.113.9', secret),
+    )
+    expect(pseudonymiseIdentifier('203.0.113.9', secret)).not.toBe(
+      pseudonymiseIdentifier('203.0.113.10', secret),
+    )
+  })
+
+  it('changes with the secret, so a restart breaks any linkage', () => {
+    expect(pseudonymiseIdentifier('203.0.113.9', secret)).not.toBe(
+      pseudonymiseIdentifier('203.0.113.9', Buffer.from('b'.repeat(32))),
+    )
+  })
+
+  it('is what the anonymous measurement policy asks for', () => {
+    expect(RATE_LIMITS.vitals.anonymise).toBe(true)
   })
 })

@@ -45,12 +45,20 @@ export default defineEventHandler(async (event) => {
   })
 
   const plan = planTileRender(tile.z, renderOptions)
+  const metricLabels = {
+    zoom: String(tile.z),
+    mode: renderOptions.showEverySite ? 'every' : 'clustered',
+  }
 
   try {
     const cached = await redis.getBuffer(cacheKey)
     if (cached) {
       setResponseHeader(event, 'x-tile-cache', 'hit')
-      tileRequestsTotal().inc({ strategy: plan.strategy, cache: 'hit' })
+      tileRequestsTotal().inc({ strategy: plan.strategy, cache: 'hit', ...metricLabels })
+      tileResponseBytes().observe(
+        { strategy: plan.strategy, zoom: metricLabels.zoom },
+        cached.length,
+      )
       return cached
     }
   } catch (error) {
@@ -105,7 +113,8 @@ export default defineEventHandler(async (event) => {
   }
 
   setResponseHeader(event, 'x-tile-cache', 'miss')
-  tileRequestsTotal().inc({ strategy: plan.strategy, cache: 'miss' })
+  tileRequestsTotal().inc({ strategy: plan.strategy, cache: 'miss', ...metricLabels })
+  tileResponseBytes().observe({ strategy: plan.strategy, zoom: metricLabels.zoom }, body.length)
 
   if (body.length === 0) {
     setResponseStatus(event, 204)

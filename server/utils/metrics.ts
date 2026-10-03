@@ -71,8 +71,11 @@ export const tileRequestsTotal = define(
   (registers) =>
     new Counter({
       name: 'tile_requests_total',
-      help: 'Tile requests by render strategy and cache result.',
-      labelNames: ['strategy', 'cache'] as const,
+      help: 'Tile requests by render strategy, cache result, zoom and site-density mode.',
+      // `zoom` is a bounded integer (0–18) and `mode` is `clustered` or `every`
+      // (`?sites=all`), so this is a few hundred series at most — never a
+      // coordinate.
+      labelNames: ['strategy', 'cache', 'zoom', 'mode'] as const,
       registers,
     }),
 )
@@ -170,6 +173,96 @@ export const authEventsTotal = define(
       name: 'auth_events_total',
       help: 'Authentication outcomes.',
       labelNames: ['event', 'outcome'] as const,
+      registers,
+    }),
+)
+
+export const tileResponseBytes = define(
+  (registers) =>
+    new Histogram({
+      name: 'tile_response_bytes',
+      help: 'Size of a tile response body, by render strategy and zoom.',
+      labelNames: ['strategy', 'zoom'] as const,
+      buckets: [200, 1_000, 5_000, 25_000, 100_000, 500_000, 2_500_000],
+      registers,
+    }),
+)
+
+export const searchRequestsTotal = define(
+  (registers) =>
+    new Counter({
+      name: 'search_requests_total',
+      help: 'Map search lookups by source and whether anything matched. The query text is never a label.',
+      labelNames: ['source', 'outcome'] as const,
+      registers,
+    }),
+)
+
+export const featuredRequestsTotal = define(
+  (registers) =>
+    new Counter({
+      name: 'featured_requests_total',
+      help: 'Featured-nearby lookups by whether any site qualified.',
+      labelNames: ['outcome'] as const,
+      registers,
+    }),
+)
+
+export const imageRequestsTotal = define(
+  (registers) =>
+    new Counter({
+      name: 'image_requests_total',
+      help: 'Photograph rendition requests by preset and outcome.',
+      labelNames: ['preset', 'outcome'] as const,
+      registers,
+    }),
+)
+
+export const uploadEventsTotal = define(
+  (registers) =>
+    new Counter({
+      name: 'upload_events_total',
+      help: 'Photograph uploads by outcome: published, queued, or the reason one was refused.',
+      labelNames: ['outcome'] as const,
+      registers,
+    }),
+)
+
+/**
+ * Real-user timings reported by the browser (`POST /api/vitals`).
+ *
+ * Anonymous by construction: the only labels are the metric's own name, a
+ * two-value device class and a rating, none of which identifies a visitor, and
+ * nothing about the request (IP, user agent, route, cookie) is stored.
+ */
+export const webVitalDuration = define(
+  (registers) =>
+    new Histogram({
+      name: 'web_vital_duration_seconds',
+      help: 'Browser-measured timings (LCP, FCP, TTFB, INP, map load/idle), in seconds.',
+      labelNames: ['name', 'device'] as const,
+      buckets: [0.1, 0.25, 0.5, 1, 1.8, 2.5, 4, 6, 10, 20],
+      registers,
+    }),
+)
+
+export const webVitalLayoutShift = define(
+  (registers) =>
+    new Histogram({
+      name: 'web_vital_layout_shift',
+      help: 'Cumulative Layout Shift, a unitless score.',
+      labelNames: ['device'] as const,
+      buckets: [0.01, 0.05, 0.1, 0.15, 0.25, 0.5, 1],
+      registers,
+    }),
+)
+
+export const webVitalRatingsTotal = define(
+  (registers) =>
+    new Counter({
+      name: 'web_vital_ratings_total',
+      help: 'Web Vitals by the standard good / needs-improvement / poor rating.',
+      labelNames: ['name', 'rating'] as const,
       registers,
     }),
 )

@@ -91,3 +91,79 @@ is itself the broken thing.
   `/api/metrics` as reachable; it leaks route names and volumes, not data.
 - Request logs contain IP addresses. 30 days on an EU box is the position, and
   `REDACTED_FIELDS` in `server/utils/logger.ts` is the rest of it.
+
+### Dashboards
+
+Eight, in one Grafana folder, linked from each other by a shared `vestigian` tag
+(dropdown top-left). **Seven are generated** by `pnpm dashboards:build` from
+`scripts/observability/dashboards/*.ts`; they are provisioned read-only, so edit
+the generator and commit both. `overview.json` predates it and stays hand-written.
+The build formats its output with the repo's Prettier config so a rebuild is
+never a formatting diff.
+
+| Dashboard              | uid                        | Answers                                                                                                                                               |
+| ---------------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| overview               | `vestigian-overview`       | Is the app alive: rate, latency, 5xx, rate-limit decisions.                                                                                           |
+| infrastructure         | `vestigian-infrastructure` | Host, per container, Postgres, Valkey, Node process — all already scraped by Alloy, previously shown nowhere.                                         |
+| map & tiles            | `vestigian-map`            | Tile cache/render/size **by zoom**, clustered vs every-site mode, search, featured, photographs, and browser-reported timings.                        |
+| community & moderation | `vestigian-community`      | Backlog and its age, contribution flow, trust funnel, accounts, uploads, licences, mail.                                                              |
+| security & abuse       | `vestigian-security`       | Fail-open first, sign-in outcomes, rate limits, refused requests, step-up, bans, audit and CrowdSec logs.                                             |
+| logs & traces          | `vestigian-logs`           | Loki (levels, errors, slow requests) and Tempo (slowest, failed, `postgis.render_tile`). Fields like `route`/`status` are JSON, so queries `\| json`. |
+| SLOs                   | `vestigian-slo`            | Availability, tile latency, API latency; budget remaining and burn rate over **14 d** (Prometheus keeps 15).                                          |
+| data & import health   | `vestigian-data`           | Catalogue size and completeness, import freshness (`import_runs`), enrichment/translation upstreams.                                                  |
+
+**Verification and its limit.** All 235 PromQL expressions parse
+(`@prometheus-io/lezer-promql`) and every app-side metric name was checked
+against a live `/api/metrics`. Exporter metric names (node, cAdvisor, postgres,
+redis) are from the exporters' documented names, **not** from a running
+Prometheus: Docker was not available when this was written, so no panel has
+been seen drawing. LogQL and TraceQL were reviewed by hand only. First thing to
+do with `pnpm stack:observability` is open each dashboard and look for "No data"
+panels — most likely suspects are the cAdvisor `name` label and Alloy's postgres
+collectors (`pg_stat_user_tables_*`).
+
+### New metrics
+
+Event counters/histograms (`server/utils/metrics.ts`): `tile_requests_total` now
+carries `zoom` and `mode` (`clustered`/`every`); `tile_response_bytes`,
+`search_requests_total{source,outcome}`, `featured_requests_total`,
+`image_requests_total{preset,outcome}`, `upload_events_total{outcome}`, plus
+`auth_events_total` events `step-up`, `password-reset-request`, `password-reset`,
+`email-verify`, `email-change`. Cardinality is bounded (zoom 0–18, fixed
+vocabularies); no query text, id or coordinate is ever a label.
+
+**Catalogue gauges** (`server/utils/catalogue-metrics.ts`, `atlas_*`): computed
+on scrape from one cached snapshot (30 s), **counts and ages only** — sites by
+status/category/missing gap, tracings, photographs by status/licence, accounts by
+state/role (incl. two-factor and 1/7/30-day active), revisions and the age of the
+oldest pending one, endorsements, last import run per source. Written with Drizzle;
+note that `${table.column}` renders **unqualified** in a single-table select, so
+a correlated subquery must spell its qualifiers out (this once made every site
+look unphotographed — 61,273 instead of 49,964).
+
+### Real-user timings and why they are the one piece of client telemetry
+
+`app/plugins/web-vitals.client.ts` (production only) loads `web-vitals`
+(Apache-2.0, Google Chrome team — licence read from the installed package) when
+idle and reports LCP, FCP, TTFB, INP, CLS plus the app's own `map-load` /
+`map-idle` (`MapCanvas`) to `POST /api/vitals` by `sendBeacon`. Skipped under
+**Do Not Track and Global Privacy Control**. The server validates against
+`shared/utils/web-vitals.ts`, **rates the value itself** (never trusts a
+client-sent rating), folds it into histograms labelled only by name, device
+class and rating, and stores nothing else — `204` always. For this route the access log carries **no
+IP address or user agent** and the rate limit counts a one-way pseudonym, not the
+address (details and tests: `.claude/rules/gdpr-legal.md`). Disclosed on the privacy page
+(`privacy.performanceHeading`). **Open legal question:** whether reading the
+Performance API counts as accessing the terminal under §25 TDDDG is contested;
+this assumes no, and relies on the aggregate-only design and the DNT/GPC opt-out.
+Have it checked before relying on it. Abuse: a flood from many addresses can
+skew the histograms (per-IP limit only); the numbers are advisory, not security.
+
+### SLOs and alerts
+
+`docker/observability/slo-rules.yml` (mounted in both compose files, listed in
+`prometheus.yml`): recording rules for error and slow ratios at 5 m / 30 m / 1 h /
+6 h and four multi-window burn-rate alerts (availability 99.5%, tile latency 95%
+within 250 ms), plus `ModerationBacklogStale` (a revision older than 3 days).
+Objectives live in that file **and** `scripts/observability/dashboards/slo.ts` —
+change both.

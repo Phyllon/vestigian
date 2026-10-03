@@ -1,0 +1,121 @@
+# Service-level objectives, as recording rules plus multi-window burn-rate
+# alerts (the Google SRE workbook shape: a long window says the burn is real, a
+# short one says it is still happening, and both must agree before anything
+# pages).
+#
+# Objectives — the dashboard `vestigian-slo` states the same numbers; change them
+# in both (`scripts/observability/dashboards/slo.ts`):
+#   availability   99.5% of requests are not 5xx            budget 0.005
+#   tile latency   95%   of tile responses within 250 ms     budget 0.05
+#
+# The dashboard's window is 14 days because Prometheus keeps 15 (see
+# `.claude/rules/observability.md`). The alerts here use short windows only, so
+# they are unaffected by retention.
+#
+# `or vector(0)` on every numerator is load-bearing, for the same reason as in
+# alerts.yml: with no errors at all the inner sum is an empty vector, the
+# division yields nothing, and an alert built on it could never fire.
+groups:
+  - name: vestigian-slo-recording
+    interval: 1m
+    rules:
+      - record: slo:availability_error_ratio:rate5m
+        expr: |
+          (sum(rate(http_requests_total{status=~"5.."}[5m])) or vector(0))
+            / clamp_min(sum(rate(http_requests_total[5m])), 0.001)
+      - record: slo:availability_error_ratio:rate30m
+        expr: |
+          (sum(rate(http_requests_total{status=~"5.."}[30m])) or vector(0))
+            / clamp_min(sum(rate(http_requests_total[30m])), 0.001)
+      - record: slo:availability_error_ratio:rate1h
+        expr: |
+          (sum(rate(http_requests_total{status=~"5.."}[1h])) or vector(0))
+            / clamp_min(sum(rate(http_requests_total[1h])), 0.001)
+      - record: slo:availability_error_ratio:rate6h
+        expr: |
+          (sum(rate(http_requests_total{status=~"5.."}[6h])) or vector(0))
+            / clamp_min(sum(rate(http_requests_total[6h])), 0.001)
+
+      # Share of tile responses SLOWER than 250 ms (1 - the SLI).
+      - record: slo:tile_slow_ratio:rate5m
+        expr: |
+          1 - (
+            sum(rate(http_request_duration_seconds_bucket{route="/api/tiles/:z/:x/:y",le="0.25"}[5m]))
+              / clamp_min(sum(rate(http_request_duration_seconds_count{route="/api/tiles/:z/:x/:y"}[5m])), 0.001)
+          )
+      - record: slo:tile_slow_ratio:rate30m
+        expr: |
+          1 - (
+            sum(rate(http_request_duration_seconds_bucket{route="/api/tiles/:z/:x/:y",le="0.25"}[30m]))
+              / clamp_min(sum(rate(http_request_duration_seconds_count{route="/api/tiles/:z/:x/:y"}[30m])), 0.001)
+          )
+      - record: slo:tile_slow_ratio:rate1h
+        expr: |
+          1 - (
+            sum(rate(http_request_duration_seconds_bucket{route="/api/tiles/:z/:x/:y",le="0.25"}[1h]))
+              / clamp_min(sum(rate(http_request_duration_seconds_count{route="/api/tiles/:z/:x/:y"}[1h])), 0.001)
+          )
+      - record: slo:tile_slow_ratio:rate6h
+        expr: |
+          1 - (
+            sum(rate(http_request_duration_seconds_bucket{route="/api/tiles/:z/:x/:y",le="0.25"}[6h]))
+              / clamp_min(sum(rate(http_request_duration_seconds_count{route="/api/tiles/:z/:x/:y"}[6h])), 0.001)
+          )
+
+  - name: vestigian-slo-alerts
+    rules:
+      # 14.4x burn for an hour spends 2% of a 14-day budget — the standard
+      # "wake someone" threshold. The 5m term stops it firing for an hour after
+      # the problem is already fixed.
+      - alert: AvailabilityBudgetFastBurn
+        expr: |
+          slo:availability_error_ratio:rate1h > (14.4 * 0.005)
+            and slo:availability_error_ratio:rate5m > (14.4 * 0.005)
+            and sum(rate(http_requests_total[1h])) > 0.02
+        for: 2m
+        labels: { severity: critical }
+        annotations:
+          summary: 'Spending the availability error budget 14x too fast'
+          description: 'Over 7% of requests have failed for the last hour. At this rate the 14-day budget is gone in under a day.'
+
+      - alert: AvailabilityBudgetSlowBurn
+        expr: |
+          slo:availability_error_ratio:rate6h > (6 * 0.005)
+            and slo:availability_error_ratio:rate30m > (6 * 0.005)
+            and sum(rate(http_requests_total[6h])) > 0.02
+        for: 15m
+        labels: { severity: warning }
+        annotations:
+          summary: 'Spending the availability error budget 6x too fast'
+          description: 'A steady 3% error rate that is too low to trip HighServerErrorRate but will exhaust the budget within days.'
+
+      - alert: TileLatencyBudgetFastBurn
+        expr: |
+          slo:tile_slow_ratio:rate1h > (6 * 0.05)
+            and slo:tile_slow_ratio:rate5m > (6 * 0.05)
+            and sum(rate(http_requests_total{route="/api/tiles/:z/:x/:y"}[1h])) > 0.02
+        for: 5m
+        labels: { severity: warning }
+        annotations:
+          summary: 'Over 30% of tiles are slower than 250 ms'
+          description: 'Usually a collapsed cache hit rate (see TileCacheHitRateLow) or a PostGIS regression. The Map & tiles dashboard splits it by zoom.'
+
+      - alert: TileLatencyBudgetSlowBurn
+        expr: |
+          slo:tile_slow_ratio:rate6h > (2 * 0.05)
+            and slo:tile_slow_ratio:rate30m > (2 * 0.05)
+            and sum(rate(http_requests_total{route="/api/tiles/:z/:x/:y"}[6h])) > 0.02
+        for: 30m
+        labels: { severity: warning }
+        annotations:
+          summary: 'Tile latency is eating its error budget'
+
+      # A contributor is waiting on a person. The queue length alone does not say
+      # that; the age of its oldest item does.
+      - alert: ModerationBacklogStale
+        expr: atlas_revisions_oldest_pending_seconds > 3 * 86400
+        for: 1h
+        labels: { severity: warning }
+        annotations:
+          summary: 'A contribution has waited over three days for review'
+          description: 'See the Community & moderation dashboard.'

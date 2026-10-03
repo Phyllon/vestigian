@@ -59,6 +59,7 @@ export default defineEventHandler(async (event) => {
       { audit: 'admin.step-up-refused', userId: admin.id, reason: 'password' },
       'wrong password confirming admin action',
     )
+    authEventsTotal().inc({ event: 'step-up', outcome: 'rejected' })
     throw createError({ statusCode: 403, message: 'That is not your current password.' })
   }
 
@@ -82,11 +83,13 @@ export default defineEventHandler(async (event) => {
         { audit: 'admin.step-up-refused', userId: admin.id, reason: 'code' },
         'wrong code confirming admin action',
       )
+      authEventsTotal().inc({ event: 'step-up', outcome: 'rejected' })
       throw createError({ statusCode: 403, message: 'That code is not right.' })
     }
   }
 
   const expiresInSeconds = await grantStepUp(event, admin)
+  authEventsTotal().inc({ event: 'step-up', outcome: 'accepted' })
 
   await recordAdminAction({
     actorId: admin.id,

@@ -47,6 +47,11 @@ export default defineEventHandler(async (event): Promise<AncientPlaceSummary[]> 
     LIMIT ${limit}
   `
 
+  searchRequestsTotal().inc({
+    source: 'ancient-place',
+    outcome: rows.length > 0 ? 'results' : 'empty',
+  })
+
   return rows.map((row) => ({
     id: row.id,
     title: row.title,

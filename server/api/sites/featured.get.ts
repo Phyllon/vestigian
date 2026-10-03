@@ -99,7 +99,7 @@ export default defineEventHandler(async (event): Promise<FeaturedSiteSummary[]> 
     LIMIT ${CANDIDATE_POOL}
   `
 
-  return rows
+  const featured = rows
     .map((row) => ({
       row,
       candidate: {
@@ -124,4 +124,7 @@ export default defineEventHandler(async (event): Promise<FeaturedSiteSummary[]> 
       distanceMetres: Math.round(row.distance_metres),
       thumbnailImageId: row.thumbnail_image_id as number,
     }))
+
+  featuredRequestsTotal().inc({ outcome: featured.length > 0 ? 'results' : 'empty' })
+  return featured
 })

@@ -41,10 +41,12 @@ export default defineEventHandler(async (event) => {
     .limit(1)
 
   if (!image || !isPublishableLicence(image.licence)) {
+    imageRequestsTotal().inc({ preset, outcome: 'not_found' })
     throw createError({ statusCode: 404, message: 'No published image with that identifier.' })
   }
 
   const size = IMAGE_PRESETS[preset]
+  imageRequestsTotal().inc({ preset, outcome: 'redirected' })
 
   /**
    * A day, not a year. The redirect target is stable, but withdrawal has to be

@@ -97,6 +97,7 @@ export default defineEventHandler(async (event) => {
 
   const normalisedLicence = normaliseLicence(licence)
   if (!isPublishableLicence(normalisedLicence)) {
+    uploadEventsTotal().inc({ outcome: 'licence-refused' })
     throw createError({
       statusCode: 400,
       message: 'Pick a licence that allows the photograph to be shown here.',
@@ -110,6 +111,7 @@ export default defineEventHandler(async (event) => {
   })
 
   if (!verdict.accepted) {
+    uploadEventsTotal().inc({ outcome: verdict.reason! })
     throw createError({ statusCode: 400, message: describeRejection(verdict.reason!) })
   }
 
@@ -159,6 +161,7 @@ export default defineEventHandler(async (event) => {
       { siteId, bytes: file.data.length, err: { message: (error as Error).message } },
       'upload rejected by the image pipeline',
     )
+    uploadEventsTotal().inc({ outcome: 'pipeline-failed' })
     throw createError({
       statusCode: 400,
       message: 'That image could not be processed. It may be corrupt or far too large.',
@@ -216,6 +219,7 @@ export default defineEventHandler(async (event) => {
   )
 
   await database.update(siteImages).set({ storageKey }).where(eq(siteImages.id, image!.id))
+  uploadEventsTotal().inc({ outcome: status === 'approved' ? 'published' : 'queued' })
 
   return {
     imageId: image!.id,

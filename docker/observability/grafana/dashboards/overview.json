@@ -1,6 +1,6 @@
 {
   "uid": "vestigian-overview",
-  "title": "Vestigian \u2014 overview",
+  "title": "Vestigian — overview",
   "tags": ["vestigian"],
   "timezone": "browser",
   "schemaVersion": 39,
@@ -204,7 +204,7 @@
       }
     },
     {
-      "title": "FAILED OPEN \u2014 limits not applied",
+      "title": "FAILED OPEN — limits not applied",
       "id": 7,
       "type": "stat",
       "gridPos": {
@@ -507,5 +507,17 @@
         "overrides": []
       }
     }
-  ]
+  ],
+  "links": [
+    {
+      "type": "dashboards",
+      "title": "Vestigian",
+      "tags": ["vestigian"],
+      "asDropdown": true,
+      "includeVars": false,
+      "keepTime": true,
+      "icon": "external link"
+    }
+  ],
+  "graphTooltip": 1
 }

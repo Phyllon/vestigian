@@ -86,6 +86,8 @@ export default defineEventHandler(async (event) => {
     siteUrl: useRuntimeConfig().public.siteUrl,
   })
 
+  authEventsTotal().inc({ event: 'password-reset', outcome: 'accepted' })
+
   // The session is not created here on purpose: resetting a password should end
   // with a deliberate sign-in, not with an automatic one from an emailed link.
   return { status: 'reset' }

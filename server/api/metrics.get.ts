@@ -20,6 +20,7 @@ export default defineEventHandler(async (event) => {
   await enforceRateLimit(event, 'expensive')
 
   const registry = useMetrics()
+  registerCatalogueMetrics()
   setResponseHeader(event, 'content-type', registry.contentType)
   setResponseHeader(event, 'cache-control', 'no-store')
 

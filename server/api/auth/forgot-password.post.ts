@@ -49,5 +49,8 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  // Counted whether or not the address exists, so the metric cannot be used to
+  // tell the two apart any more than the response can.
+  authEventsTotal().inc({ event: 'password-reset-request', outcome: 'accepted' })
   return { status: 'sent' }
 })

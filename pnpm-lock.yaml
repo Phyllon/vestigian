@@ -119,6 +119,9 @@ importers:
       vue-router:
         specifier: ^4.5.0
         version: 4.6.4(vue@3.5.41(typescript@5.9.3))
+      web-vitals:
+        specifier: ^6.2.2
+        version: 6.2.2
       zod:
         specifier: ^3.23.8
         version: 3.25.76
@@ -8218,6 +8221,9 @@ packages:
     peerDependenciesMeta:
       typescript:
         optional: true
+
+  web-vitals@6.2.2:
+    resolution: {integrity: sha512-oto5x6dLEgrRqfcWed+pZEUb2q6ikbFmqF54CRDhI/QGbn+qxC49b4C4OkbH+kb9C3a8shpFD3SgR9kRcs80ZQ==}
 
   web-worker@1.5.0:
     resolution: {integrity: sha512-RiMReJrTAiA+mBjGONMnjVDP2u3p9R1vkcGz6gDIrOMT3oGuYwX2WRMYI9ipkphSuE5XKEhydbhNEJh4NY9mlw==}
@@ -17283,6 +17289,8 @@ snapshots:
       '@vue/shared': 3.5.41
     optionalDependencies:
       typescript: 5.9.3
+
+  web-vitals@6.2.2: {}
 
   web-worker@1.5.0: {}
 

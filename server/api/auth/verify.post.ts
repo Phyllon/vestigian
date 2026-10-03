@@ -107,5 +107,10 @@ export default defineEventHandler(async (event) => {
     isAddressChange ? 'address change confirmed' : 'address verified',
   )
 
+  authEventsTotal().inc({
+    event: isAddressChange ? 'email-change' : 'email-verify',
+    outcome: 'accepted',
+  })
+
   return { status: isAddressChange ? ('address-changed' as const) : ('verified' as const) }
 })

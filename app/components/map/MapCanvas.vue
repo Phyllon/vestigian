@@ -316,6 +316,12 @@
       camera: restoreCamera(),
     })
 
+    // Browser-side timings for the dashboards (`useWebVitals`): a usable canvas,
+    // then the first moment every visible tile is drawn. `performance.now()` is
+    // measured from navigation start, which is what a visitor waited.
+    instance.once('load', () => queueVital('map-load', performance.now()))
+    instance.once('idle', () => queueVital('map-idle', performance.now()))
+
     instance.on('load', () => {
       // Before every overlay: the frontier and battle marks are drawn from
       // this same icon registry, and both can be switched on while "Show
