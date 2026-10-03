@@ -15,10 +15,6 @@ const mapAssetOrigins = [
   // law rather than the CLOUD Act is the whole point of the move.
   'https://*.b-cdn.net',
   'https://storage.bunnycdn.com',
-  // Mapterhorn: hillshade under the Barrington sheet. Terrarium-encoded,
-  // Copernicus GLO-30 based — replaced Mapzen's tiles on AWS Open Data, which
-  // is why an unset-env fresh clone still falls back to a real host here too.
-  'https://tiles.mapterhorn.com',
   // DARE's tile server, needed only until the mirror is populated and
   // NUXT_PUBLIC_BASEMAP_ANTIQUITY_DARE_URL points at the pull zone. It stays in
   // the list because the unset-env fallback is what makes a fresh clone work.
@@ -29,6 +25,20 @@ const mapAssetOrigins = [
   // mirror — same "unset-env fallback" reasoning as dh.gu.se above.
   'https://tiles.maps.eox.at',
 ]
+
+/**
+ * Origins allowed in development only.
+ *
+ * Mapterhorn serves the hillshade under the Barrington sheet, and
+ * `tiles.mapterhorn.com` is fronted by Cloudflare (a real request returns
+ * `server: cloudflare` and a `cf-ray`), so a production build must never reach
+ * it: `buildAtlasStyle` draws no relief there unless
+ * `NUXT_PUBLIC_BASEMAP_TERRAIN_URL` names a mirror on our own CDN
+ * (`scripts/ops/mirror-terrain.sh`, runbook §15a). Leaving the host out of the
+ * production CSP makes that a browser-enforced rule rather than a convention —
+ * a future change that reintroduced the fallback would be refused, not leak.
+ */
+const developmentOnlyOrigins = isProduction ? [] : ['https://tiles.mapterhorn.com']
 
 /**
  * The Tabula Peutingeriana viewer's one origin. Kept separate from
@@ -547,6 +557,7 @@ export default defineNuxtConfig({
           'blob:',
           imageOrigin,
           ...mapAssetOrigins,
+          ...developmentOnlyOrigins,
           ...iiifAssetOrigins,
         ],
         'worker-src': ["'self'", 'blob:'],
@@ -554,6 +565,7 @@ export default defineNuxtConfig({
         'connect-src': [
           "'self'",
           ...mapAssetOrigins,
+          ...developmentOnlyOrigins,
           ...iiifAssetOrigins,
           ...(isProduction ? [] : ['https://cdn.jsdelivr.net']),
         ],

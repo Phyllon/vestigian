@@ -61,6 +61,10 @@ services:
       NUXT_PUBLIC_IMAGE_BASE_URL: ${IMAGE_BASE_URL}
       NUXT_PUBLIC_BASEMAP_PROVIDER: pmtiles
       NUXT_PUBLIC_BASEMAP_PMTILES_URL: ${PMTILES_URL}
+      # Hillshade under the Barrington sheet: the URL of the Mapterhorn mirror on our
+      # own CDN (runbook §15a). Empty means no relief is drawn — deliberately: the
+      # public fallback host is Cloudflare, which a production build must not reach.
+      NUXT_PUBLIC_BASEMAP_TERRAIN_URL: ${TERRAIN_URL:-}
       # Off until an operator confirms reuse with the data source — see the
       # licence note on tabulaPeutingerianaEnabled in nuxt.config.ts. Dokploy's
       # "Environment" tab only fills `${...}` substitutions actually referenced
@@ -277,8 +281,9 @@ services:
     logging: *default-logging
     environment:
       PGPASSWORD: ${POSTGRES_PASSWORD}
-      # e.g. sftp:u123456@u123456.your-storagebox.de:/vestigian — a Hetzner
-      # Storage Box, same provider and jurisdiction as the VPS, roughly €3/mo.
+      # `/offsite/restic` — a directory on netcup Storage Space, mounted over NFS on
+      # the host and bind-mounted below. The repository is encrypted client-side,
+      # so the storage never holds a readable copy.
       RESTIC_REPOSITORY: ${RESTIC_REPOSITORY:-}
       # Losing this loses every off-box snapshot: restic encrypts client-side
       # and there is no recovery path. Keep it somewhere that is not this box.
@@ -286,20 +291,12 @@ services:
     volumes:
       - ./backup.sh:/backup.sh:ro
       - backup-data:/backups
-      # Paths under /var/lib/postgresql, not /root: the container runs as the
-      # `postgres` user (see docker/backup/Dockerfile), and ssh reads its key
-      # and known_hosts relative to that user's $HOME.
-      #
-      # Read-only, and the key should be restricted on the remote to this one
-      # repository path — a backup job that can also delete the remote is a
-      # ransomware amplifier rather than a backup. Defaults to /dev/null so the
-      # service still starts on an instance with no off-box target configured.
-      - ${RESTIC_SSH_KEY_PATH:-/dev/null}:/var/lib/postgresql/.ssh/id_ed25519:ro
-      # Pinned host keys, mounted rather than accepted on first use: a backup
-      # that trusts whatever answers on the remote's address can be pointed at
-      # an attacker's server by DNS alone. Generate with
-      # `ssh-keyscan -H <storagebox-host> > docker/restic_known_hosts`.
-      - ${RESTIC_KNOWN_HOSTS_PATH:-/dev/null}:/var/lib/postgresql/.ssh/known_hosts:ro
+      # The host directory where netcup Storage Space is mounted (runbook §20),
+      # e.g. /mnt/netcup-backup. Unset, it falls back to an empty directory next to
+      # this file, which the marker-file check in backup.sh then refuses to treat
+      # as an off-box target — so a missing mount reads as a failure, never as a
+      # backup written to this disk.
+      - ${RESTIC_OFFSITE_DIR:-./offsite-unconfigured}:/offsite
     depends_on:
       postgres:
         condition: service_healthy
@@ -382,10 +379,10 @@ services:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.retention.time=15d
       - --web.enable-remote-write-receiver
-      - ./observability/slo-rules.yml:/etc/prometheus/slo-rules.yml:ro
     volumes:
       - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./observability/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - ./observability/slo-rules.yml:/etc/prometheus/slo-rules.yml:ro
       - prometheus-data:/prometheus
     deploy:
       resources:
@@ -420,13 +417,13 @@ services:
     image: grafana/alloy:v1.7.5
     restart: unless-stopped
     command:
+      - run
+      - --server.http.listen-addr=0.0.0.0:12345
+      - --storage.path=/var/lib/alloy/data
       # Alloy reports which components are enabled to Grafana Labs (US) unless told
       # not to. Nothing about a visitor is in it, but "nothing leaves the EU" is a
       # claim the About page makes, so it is off rather than argued about.
       - --disable-reporting
-      - run
-      - --server.http.listen-addr=0.0.0.0:12345
-      - --storage.path=/var/lib/alloy/data
       - /etc/alloy/config.alloy
     environment:
       POSTGRES_DSN: postgresql://vestigian:${POSTGRES_PASSWORD}@postgres:5432/vestigian?sslmode=disable

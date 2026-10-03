@@ -115,6 +115,14 @@ rather than Semgrep and why the vendored ruleset is an allowlist, is in
 | `backup.sh`        | the `backup` service (production, on a schedule) | Nightly `pg_dump` kept 14 days locally, then pushed to a restic repository off the machine. Prints one `backup.outcome=` line per stage, which is what the Loki alerts watch.              |
 | `restore-drill.sh` | `docker/restore-drill.sh [--offsite \| <dump>]`  | Restores a real snapshot into a throwaway PostGIS container and asserts the irreplaceable tables carry rows and that geometry reads back. **A drill nobody runs is the same as no drill.** |
 
+## Operations scripts (`scripts/ops/`)
+
+Run on the production VPS, not part of the import pipeline.
+
+| Script              | Run with                                                                     | What it does                                                                                                                                                                                                                   |
+| ------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `mirror-terrain.sh` | `BUNNY_ZONE=<zone> scripts/ops/mirror-terrain.sh [--dry-run \| --no-upload]` | Cuts a Europe extract of Mapterhorn's elevation tiles into one PMTiles archive (`MAXZOOM` 10 ≈ 1.9 GB by default), verifies it and uploads it to the CDN, so the hillshade never asks a Cloudflare-fronted host. Runbook §15a. |
+
 ## Asset-generation scripts (`scripts/`)
 
 Run by hand, output committed to the repo — not part of any build step.

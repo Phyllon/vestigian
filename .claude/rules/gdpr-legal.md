@@ -144,3 +144,49 @@ above, the TDDDG §25 question (does reading the Performance API count as termin
 access?) is **narrowed, not settled** — nothing is stored or read back from the device
 and no identifier leaves it, which is the strongest position available, but the
 conclusion is a lawyer's, not this file's.
+
+## The About page's "Operated in the EU" claim — what was checked
+
+`about.vue` makes a public claim, so every sentence was checked against the code. It is
+worded **"built to follow"**, never as a guarantee: a legal-compliance claim is not
+something a code audit can certify. Keep text and code in step; if one of these facts
+changes, change the page.
+
+| Claim on the page                                                               | Evidence                                                                                                                                                                                                                                                               |
+| ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Own EU server runs app, DB, cache, imgproxy, LibreTranslate, ALTCHA, monitoring | `docker/compose.prod.yml` (all self-hosted containers)                                                                                                                                                                                                                 |
+| Bunny.net (Slovenia) CDN/map storage                                            | CSP origins, `PMTILES_URL`/`IMAGE_BASE_URL` in compose                                                                                                                                                                                                                 |
+| Brevo (France) for account mail                                                 | `server/utils/mail.ts`                                                                                                                                                                                                                                                 |
+| No analytics, ads, social widgets, third-party scripts or fonts                 | production CSP: `script-src`/`font-src` are `'self'` (+ nonce); jsdelivr is dev-only; fonts via `@fontsource`                                                                                                                                                          |
+| Only functional storage; no cookie banner                                       | real browser session: cookie `vestigian-locale` (+ session cookie after sign-in); localStorage `vestigian-color-mode`, `vestigian-enrichment`, `vestigian-language-notice-dismissed`, column position, `vestigian-offline-areas`; Cache Storage only for offline areas |
+| Photos stripped of EXIF/GPS                                                     | sharp re-encode in `contributions/images.post.ts`                                                                                                                                                                                                                      |
+| Export/delete from privacy page                                                 | `auth/export.get.ts`, `auth/account.delete.ts`                                                                                                                                                                                                                         |
+| Vendors not told about us                                                       | `GF_ANALYTICS_REPORTING_ENABLED=false`, Loki `analytics.reporting_enabled: false`, Tempo `usage_report`, Alloy `--disable-reporting` (added)                                                                                                                           |
+| Stated exceptions                                                               | `DISABLE_ONLINE_API: 'false'` (CrowdSec); DARE/satellite default hosts `dh.gu.se`, `tiles.maps.eox.at`                                                                                                                                                                 |
+
+**Found while checking, and what was done:**
+
+- **Hillshade fell back to `tiles.mapterhorn.com`, which is Cloudflare** (real request:
+  `server: cloudflare`, `cf-ray`; Mapterhorn's own policy stores IP and user agent for 30
+  days). A production build now draws no relief unless `NUXT_PUBLIC_BASEMAP_TERRAIN_URL`
+  names a PMTiles mirror on our CDN (`buildAtlasStyle`), and the **production CSP no longer
+  allows the host at all** (`developmentOnlyOrigins` in `nuxt.config.ts`). The mirror is
+  `scripts/ops/mirror-terrain.sh`, steps in runbook §15a. `tiles.openfreemap.org` is
+  Cloudflare too but is development-only (production sets `provider: pmtiles`).
+- **Alloy reported usage to Grafana Labs** by default — now disabled.
+- **The privacy page said the theme preference was a cookie and never mentioned
+  localStorage.** Both corrected (it is `localStorage`; the list above is now disclosed).
+- **Open, not decided here:**
+  - **Brevo's HTTP API is behind Cloudflare** (`api.brevo.com` and `api.sendinblue.com` both
+    resolve to AS13335; there is no other Brevo API host). The call is server-to-server, so
+    **no visitor IP is in it** — the payload is sender, recipient address, subject and the
+    message body (display name, the verification/reset link with its token, moderation
+    notes), and the source address is our VPS. But TLS ends at Cloudflare, so that content
+    is decrypted on a US company's edge. Options and evidence in the answer log of
+    2026-10-02: Brevo's own SMTP relay (`smtp-relay.brevo.com`, AS200484, France, no
+    Cloudflare) was rejected as a transport; Scaleway Transactional Email
+    (`api.scaleway.com`, AS12876, "Scaleway API Gateway fr-par") and Sweego (OVH, France) were
+    checked and are not behind a US CDN; Mailjet and Mailgun EU run on Google Cloud;
+    MailerSend is Cloudflare; SMTP2GO is Akamai.
+  - `api.crowdsec.net` is on AWS (Ireland) — see runbook §19.
+  - Bunny's edge network is global.

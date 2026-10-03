@@ -10,7 +10,7 @@ A Nuxt 4 app (Vue frontend + Nitro server, one process) renders a MapLibre map
 of ancient-world sites from PostGIS vector tiles, backed by Valkey for caching
 and rate limiting, Bunny.net + imgproxy for photographs, and a six-container
 Grafana stack for observability — all deployed as one Docker Compose unit via
-Dokploy on a single Hetzner VPS.
+Dokploy on a single Netcup VPS.
 
 ## Request flow
 
@@ -170,7 +170,7 @@ git push → GitHub Actions (test, build multi-stage image) → GHCR
                                               docker/compose.prod.yml
                                     (app + postgres + valkey + imgproxy +
                                      libretranslate + backup + 6 observability
-                                     containers + crowdsec, one Hetzner VPS)
+                                     containers + crowdsec, one Netcup VPS)
 ```
 
 Dokploy _is_ Docker Compose with a UI and a webhook — dev and prod run the same

@@ -1,6 +1,13 @@
 import { Protocol } from 'pmtiles'
 import { addProtocol } from 'maplibre-gl'
-import type { FilterSpecification, LayerSpecification, StyleSpecification } from 'maplibre-gl'
+import type {
+  FilterSpecification,
+  LayerSpecification,
+  LineLayerSpecification,
+  RasterDEMSourceSpecification,
+  StyleSpecification,
+  SymbolLayerSpecification,
+} from 'maplibre-gl'
 // Imported explicitly rather than through Nuxt's auto-imports: this is called
 // while the style is built, so the unit tests — which import this module
 // directly — would otherwise fail on an undefined reference that the running
@@ -462,7 +469,7 @@ export const buildPlaceLabelsLayer = (
   colours: Pick<StyleColours, 'label' | 'labelHalo'>,
   schema: ModernSchema,
   opacity: number,
-): LayerSpecification => ({
+): SymbolLayerSpecification => ({
   id: 'place-labels',
   type: 'symbol',
   source: MODERN_LABELS_SOURCE_ID,
@@ -579,6 +586,51 @@ const TERRAIN_TILES = 'https://tiles.mapterhorn.com/{z}/{x}/{y}.webp'
 
 const resolveTerrainUrl = (source: BasemapSource): string =>
   source.terrainUrl.length > 0 ? source.terrainUrl : TERRAIN_TILES
+
+/**
+ * A single PMTiles archive (the mirror `scripts/ops/mirror-terrain.sh` makes on
+ * the CDN) rather than a `{z}/{x}/{y}` template. Either `pmtiles://https://…`
+ * or the bare `https://….pmtiles` URL is accepted, because the second is what
+ * a person copies out of the Bunny dashboard.
+ */
+const isPmtilesTerrainUrl = (url: string): boolean =>
+  url.startsWith('pmtiles://') || /\.pmtiles(?:\?|$)/.test(url)
+
+const ELEVATION_ATTRIBUTION =
+  'Elevation: <a href="https://mapterhorn.com/attribution" target="_blank" rel="noopener">Mapterhorn</a> and the open elevation sources it lists'
+
+/**
+ * The elevation source. A PMTiles archive is addressed by `url` (the protocol
+ * reads its header for zoom range and tile type, so no `maxzoom` is stated here
+ * — the mirror's own cut-off is the truth); a template is addressed by `tiles`
+ * with the upstream's zoom limit.
+ */
+const buildTerrainSource = (source: BasemapSource): RasterDEMSourceSpecification => {
+  const terrainUrl = resolveTerrainUrl(source)
+
+  if (isPmtilesTerrainUrl(terrainUrl)) {
+    registerPmtilesProtocol()
+    return {
+      type: 'raster-dem',
+      url: terrainUrl.startsWith('pmtiles://') ? terrainUrl : `pmtiles://${terrainUrl}`,
+      encoding: 'terrarium',
+      tileSize: 512,
+      attribution: ELEVATION_ATTRIBUTION,
+    }
+  }
+
+  return {
+    type: 'raster-dem',
+    tiles: [terrainUrl],
+    encoding: 'terrarium',
+    // Mapterhorn's tiles are 512px, not the 256px the AWS mirror served.
+    // Wrong here and the hillshade decodes at half resolution silently —
+    // MapLibre does not error on a size mismatch, it just samples wrong.
+    tileSize: 512,
+    maxzoom: 13,
+    attribution: ELEVATION_ATTRIBUTION,
+  }
+}
 
 const resolveDareUrl = (source: BasemapSource): string =>
   source.antiquityDareUrl.length > 0 ? source.antiquityDareUrl : DARE_TILES
@@ -768,7 +820,7 @@ const buildRoadTierLayers = (
  * named-feature label layer below goes through the same safe merge.
  */
 const buildNamedFeatureFilter = (extra?: FilterSpecification): FilterSpecification =>
-  extra ? ['all', extra, ['has', 'name']] : ['has', 'name']
+  extra ? (['all', extra, ['has', 'name']] as FilterSpecification) : ['has', 'name']
 
 /**
  * The same vector source `vestigian` already mirrors (OpenFreeMap in dev, a
@@ -1325,7 +1377,7 @@ interface AtlasStyleOptions {
   limes: boolean
 }
 
-const buildAtlasStyle = (
+const buildAtlasStyleWithRelief = (
   source: BasemapSource,
   options: AtlasStyleOptions,
 ): StyleSpecification => ({
@@ -1349,17 +1401,7 @@ const buildAtlasStyle = (
      * not moved, and where the ground has changed — a silted harbour, a shifted
      * delta — it is the coastline that records it, and that comes from AWMC.
      */
-    terrain: {
-      type: 'raster-dem',
-      tiles: [resolveTerrainUrl(source)],
-      encoding: 'terrarium',
-      // Mapterhorn's tiles are 512px, not the 256px the AWS mirror served.
-      // Wrong here and the hillshade decodes at half resolution silently —
-      // MapLibre does not error on a size mismatch, it just samples wrong.
-      tileSize: 512,
-      maxzoom: 13,
-      attribution: 'Elevation: Mapterhorn (Copernicus GLO-30)',
-    },
+    terrain: buildTerrainSource(source),
   },
   layers: [
     { id: 'background', type: 'background', paint: { 'background-color': ATLAS_COLOURS.land } },
@@ -1559,6 +1601,29 @@ const buildAtlasStyle = (
     },
   ],
 })
+
+/**
+ * In a production build the hillshade is drawn only from an elevation source
+ * the deployment configured (`NUXT_PUBLIC_BASEMAP_TERRAIN_URL`), never from the
+ * public fallback above.
+ *
+ * `tiles.mapterhorn.com` is fronted by Cloudflare (checked with a real request:
+ * `server: cloudflare`, a `cf-ray` header), so falling back to it sends every
+ * visitor's address to a US provider — the one thing the About page says does
+ * not happen. A development build or a unit test still gets the fallback, which
+ * is what keeps a fresh clone looking right. Point the variable at a mirror on
+ * the CDN to bring the relief back in production.
+ */
+const buildAtlasStyle = (source: BasemapSource, options: AtlasStyleOptions): StyleSpecification => {
+  const style = buildAtlasStyleWithRelief(source, options)
+  if (!import.meta.env.PROD || source.terrainUrl.length > 0) return style
+
+  return {
+    ...style,
+    sources: Object.fromEntries(Object.entries(style.sources).filter(([id]) => id !== 'terrain')),
+    layers: style.layers.filter((layer) => layer.id !== 'atlas-hillshade'),
+  }
+}
 
 /**
  * The empire's extent at a given date, drawn as an overlay above whichever

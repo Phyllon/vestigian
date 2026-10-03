@@ -10,25 +10,25 @@
 # have. Built once, and covered by `pnpm lint:dockerfile` like the other two.
 FROM postgres:17-alpine
 
-# openssh-client: restic's sftp backend shells out to `ssh` — without it the
-# repository opens locally and fails only when it tries to reach the host.
+# The off-box repository is a directory: netcup Storage Space is mounted over NFS
+# on the host and bind-mounted into the container at /offsite (see
+# documents/runbook_prod.deployment.md §20), so restic needs its local backend
+# and nothing network-aware — no ssh client, no keys, no known_hosts.
 #
 # Runs as `postgres` (already present in the base image), not root. Nothing here
 # needs root: pg_dump connects over the network, restic reads the dump and
 # writes to a remote, and neither touches a privileged path.
 #
-# The two directories are created and chowned *before* the volume is attached
+# The directory is created and chowned *before* the volume is attached
 # because Docker seeds a fresh named volume from the image's own directory —
 # ownership included. Without this, /backups would arrive root-owned and the
 # first dump would fail on a permission error that looks like a broken script.
 # hadolint ignore=DL3018
-RUN apk add --no-cache restic openssh-client \
-    && mkdir -p /backups /var/lib/postgresql/.ssh \
-    && chown -R postgres:postgres /backups /var/lib/postgresql/.ssh \
-    && chmod 700 /var/lib/postgresql/.ssh
+RUN apk add --no-cache restic \
+    && mkdir -p /backups \
+    && chown -R postgres:postgres /backups
 
-# ssh resolves the key and known_hosts through $HOME, and reads neither if it
-# points somewhere this user cannot open.
+# restic keeps its cache under $HOME, which must be somewhere this user can write.
 ENV HOME=/var/lib/postgresql
 
 USER postgres

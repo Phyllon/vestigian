@@ -50,6 +50,21 @@ run_backup() {
     return 0
   fi
 
+  # The off-box target is a directory the operator mounted over NFS on the host.
+  # If that mount is missing the bind source is just an empty local directory,
+  # and restic would happily write the "off-box" copy to this very disk — a
+  # backup that survives nothing and reports success. The marker file lives on
+  # the Storage Space itself (created once, runbook §20), so it is absent
+  # exactly when the mount is.
+  case "$RESTIC_REPOSITORY" in
+    /offsite/*)
+      if [ ! -f /offsite/.vestigian-offsite ]; then
+        echo "backup.outcome=failed stage=offsite reason=offsite-not-mounted file=${DUMP}"
+        return 1
+      fi
+      ;;
+  esac
+
   # `init` is idempotent in effect but noisy on an existing repository, so its
   # failure is expected on every run after the first and is not an error.
   restic cat config >/dev/null 2>&1 || restic init >/dev/null 2>&1 || true

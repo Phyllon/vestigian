@@ -1,5 +1,6 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import type {
+  BackgroundLayerSpecification,
   FillLayerSpecification,
   LineLayerSpecification,
   RasterDEMSourceSpecification,
@@ -261,9 +262,8 @@ describe('buildBasemapStyle, osm-standard view', () => {
     const vestigianStyle = buildBasemapStyle({ view: 'vestigian', isDark: false, source })
     const osmStyle = buildBasemapStyle({ view: 'osm-standard', isDark: false, source })
     const background = (style: typeof vestigianStyle) =>
-      (style.layers.find((layer) => layer.id === 'background') as FillLayerSpecification).paint?.[
-        'background-color'
-      ]
+      (style.layers.find((layer) => layer.id === 'background') as BackgroundLayerSpecification)
+        .paint?.['background-color']
     const water = (style: typeof vestigianStyle) =>
       (style.layers.find((layer) => layer.id === 'water') as FillLayerSpecification).paint?.[
         'fill-color'
@@ -634,5 +634,55 @@ describe('the views on offer', () => {
     // otherwise request tiles from '' — a flat sheet, and nothing logged.
     const blank = atlasStyle({ terrainUrl: '' }).sources.terrain as RasterDEMSourceSpecification
     expect(blank.tiles?.[0]).toContain('tiles.mapterhorn.com')
+  })
+
+  describe('a PMTiles elevation mirror', () => {
+    const terrain = (terrainUrl: string) =>
+      atlasStyle({ terrainUrl }).sources.terrain as RasterDEMSourceSpecification
+
+    it('is addressed by `url`, with the protocol prefix added when it is missing', () => {
+      const bare = terrain('https://mirror.example/terrain.pmtiles')
+      expect(bare.url).toBe('pmtiles://https://mirror.example/terrain.pmtiles')
+      expect(bare.tiles).toBeUndefined()
+      expect(bare.encoding).toBe('terrarium')
+      expect(bare.tileSize).toBe(512)
+    })
+
+    it('keeps an explicit protocol prefix as it is and states no zoom limit of its own', () => {
+      const prefixed = terrain('pmtiles://https://mirror.example/terrain.pmtiles')
+      expect(prefixed.url).toBe('pmtiles://https://mirror.example/terrain.pmtiles')
+      expect(prefixed.maxzoom).toBeUndefined()
+    })
+
+    it('is told apart from a tile template by the extension, query string included', () => {
+      expect(terrain('https://mirror.example/t.pmtiles?v=2').url).toContain('pmtiles://')
+      expect(terrain('https://mirror.example/{z}/{x}/{y}.webp').tiles?.[0]).toContain('{z}')
+    })
+
+    it('credits Mapterhorn and links to the sources it lists', () => {
+      expect(terrain('https://mirror.example/terrain.pmtiles').attribution).toContain(
+        'mapterhorn.com/attribution',
+      )
+    })
+  })
+
+  describe('in a production build', () => {
+    afterEach(() => vi.unstubAllEnvs())
+
+    it('draws no relief from the public fallback, which is a Cloudflare-fronted host', () => {
+      vi.stubEnv('PROD', true)
+      const style = atlasStyle({ terrainUrl: '' })
+
+      expect(style.sources.terrain).toBeUndefined()
+      expect(style.layers.some((layer) => layer.id === 'atlas-hillshade')).toBe(false)
+    })
+
+    it('keeps the relief when the deployment configured its own elevation source', () => {
+      vi.stubEnv('PROD', true)
+      const style = atlasStyle({ terrainUrl: 'https://mirror.example/{z}/{x}/{y}.webp' })
+
+      expect(style.sources.terrain).toBeDefined()
+      expect(style.layers.some((layer) => layer.id === 'atlas-hillshade')).toBe(true)
+    })
   })
 })

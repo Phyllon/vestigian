@@ -32,8 +32,10 @@ backup does leave, and that is new.
 so restic is present) writes the local dump exactly as before, then pushes it to
 a restic repository — content-addressed, deduplicated, and **encrypted
 client-side**, so the copy on somebody else's disk is not a second place the
-atlas is readable in the clear. `RESTIC_REPOSITORY` points at a Hetzner Storage
-Box over SFTP: same provider and jurisdiction as the VPS, roughly €3/month.
+atlas is readable in the clear. `RESTIC_REPOSITORY` is `/offsite/restic`, a
+directory on **netcup Storage Space** — mounted over NFS on the host
+(`RESTIC_OFFSITE_DIR`) and bind-mounted into the container. Same provider as the
+VPS, but an external storage cluster, not the VPS's own disk.
 
 Everything `RESTIC_*` is optional. With nothing configured the service behaves
 exactly as it always did and says so once per run, so an instance that has not
@@ -45,12 +47,17 @@ Three details that are deliberate rather than incidental:
   recovery path; losing it makes every off-box snapshot permanently unreadable.
   It belongs somewhere that is neither this VPS nor this repository — the same
   category of secret as `NUXT_TOTP_ENCRYPTION_KEY`, and the same failure mode.
-- **Host keys are pinned, not accepted on first use.** A backup that trusts
-  whatever answers at the remote's address can be redirected by DNS alone.
-  `ssh-keyscan -H <storagebox-host> > docker/restic_known_hosts`.
-- **The SSH key should be restricted on the remote to the one repository path.**
-  A backup job that can also delete the remote turns one compromised host into
-  the loss of both copies at once.
+- **A missing mount must not look like a backup.** If the NFS mount is absent, the
+  bind source is an empty directory on the VPS's own disk and restic would write
+  the "off-box" copy there. `backup.sh` therefore refuses unless
+  `/offsite/.vestigian-offsite` exists — a marker created once on the Storage
+  Space — and reports `reason=offsite-not-mounted`.
+- **Known weakening against the earlier SFTP design:** an SFTP key could be
+  restricted to one path; an NFS mount is writable by anything on the VPS that
+  can reach it, so a compromised host can delete the repository as well as write
+  it. restic's client-side encryption protects confidentiality, not deletion.
+  Access is by registered IP address, not credentials. Treat the Storage Space as
+  a second copy, not an immutable one, and keep the local dumps.
 
 ### Proving it, which is the part that was missing
 
@@ -144,8 +151,8 @@ exists. Config and the full reasoning: `docker/security/README.md`.
 **Nothing is enforced yet.** A decision does nothing until a bouncer reads it,
 and the right place is the Bunny edge rather than this box: CrowdSec, Traefik's
 limiter and the Valkey limits all run _after_ a request has paid for a TCP
-connection and a TLS handshake. Hetzner's included DDoS protection covers L3/L4
-and explicitly not L7 HTTP floods, so those can only be absorbed at the edge.
+connection and a TLS handshake. A VPS provider's DDoS protection works at L3/L4
+and does not absorb L7 HTTP floods, so those can only be absorbed at the edge.
 
 Rejected, with reasons, so they are not revisited by default: **fingerprinting**
 (EDPB 2024 puts it under GDPR _and_ ePrivacy, and it duplicates ALTCHA plus

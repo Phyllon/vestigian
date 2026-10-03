@@ -1,12 +1,11 @@
 # Production Deployment Runbook — Vestigian on Netcup
 
-**Status (2026-09-30): executed.** This replaces the earlier Hetzner-era plan
-(a migration that never ran) with what actually happened: VPS hardening,
-Dokploy, Bunny, mail and the first admin account are live on a Netcup RS 4000
-G12. Follow this in order to reproduce the setup on a fresh instance, or as a
-reference for what's actually running. **Still open:** off-box backups
-(`RESTIC_*`), the Bunny CrowdSec bouncer (a real Bunny-API bug, unresolved —
-see §17), and a CORS wildcard on the API (see §18).
+**Status (2026-09-30): executed.** VPS hardening, Dokploy, Bunny, mail and the
+first admin account are live on a Netcup RS 4000 G12. Follow this in order to
+reproduce the setup on a fresh instance, or as a reference for what's actually
+running. **Still open — see §19:** off-box backups (§20), the hillshade mirror
+(§15a), the Bunny CrowdSec bouncer (a real Bunny-API bug, unresolved), and the
+CrowdSec community-sharing decision.
 
 Placeholders to replace throughout: `<vps-ip>` / `<vps-ipv6>`, `<domain>`
 (e.g. `vestigian.org`), `<github-user>/<repo>`, `<dokploy-app-id>` (Dokploy
@@ -30,6 +29,14 @@ redeploy. Verify after deploying:
 curl -sI -H "Origin: https://<domain>" "https://<domain>/api/health" | grep -i access-control-allow-origin
 # expect: access-control-allow-origin: https://<domain>  (not *)
 ```
+
+Two behaviours that look like failures and are not (confirmed against a
+production build, 2026-10-02): a request **without** an `Origin` header always
+answers `access-control-allow-origin: *` (that is h3's rule, and browsers send no
+`Origin` on a same-origin GET); and a request from any origin other than
+`SITE_URL` — `https://www.<domain>`, `http://<domain>`, `null`, a lookalike
+subdomain — gets **no** `access-control-allow-origin` at all. Test with the
+`Origin` header set, as above.
 
 ---
 
@@ -458,6 +465,121 @@ Set `PMTILES_URL=https://<images-zone>.b-cdn.net/basemap.pmtiles` in Dokploy,
 Deploy. **Env var changes need a redeploy** — Dokploy writes to `.env`, the
 running container's environment is fixed at creation.
 
+## 15a. Hillshade — the Mapterhorn mirror
+
+**What this is.** The Barrington antiquity view (and only that view) draws a
+hillshade from elevation tiles. Until now it fetched them from
+`tiles.mapterhorn.com`, which is **Cloudflare** (checked 2026-10-02: `server:
+cloudflare`, a `cf-ray` header), so every visitor on that view sent their
+address to a US provider — and Mapterhorn's own privacy policy says it stores
+IP, user agent and more for 30 days. A production build therefore now draws **no
+relief** unless `TERRAIN_URL` points at a mirror on our own CDN, and the
+production CSP does not allow `tiles.mapterhorn.com` at all. This section makes
+the mirror and turns the relief back on. Until it is done the antiquity view is
+simply flat; nothing else is affected.
+
+**What gets mirrored.** One PMTiles archive cut from Mapterhorn's
+`planet.pmtiles` (Terrarium-encoded WebP, 512 px, zoom 0–12 upstream): the
+Europe + Mediterranean bounding box this project already uses, `-12,30,45,62`,
+up to a chosen maximum zoom. MapLibre overzooms beyond the archive's own maximum,
+which costs sharpness in a hillshade and nothing else. Measured with
+`pmtiles extract --dry-run` on 2026-10-02:
+
+| Max zoom | Archive size | Notes                                                  |
+| -------- | ------------ | ------------------------------------------------------ |
+| 9        | 634 MB       |                                                        |
+| **10**   | **1.9 GB**   | **default** — plenty for a scenery layer under a sheet |
+| 11       | 5.5 GB       |                                                        |
+| 12       | 22 GB        | everything upstream has                                |
+
+**Licence.** Mapterhorn's code is BSD-3-Clause; the elevation data is a mix of
+open sources listed in `https://download.mapterhorn.com/attribution.json` (151
+sources on 2026-10-02: CC BY 4.0, US-government public domain, Licence Ouverte
+2.0, Datenlizenz Deutschland, Copernicus, CC0 and similar — no non-commercial
+terms found). All of them require attribution. The map's credit now reads
+"Elevation: Mapterhorn and the open elevation sources it lists" and links to
+`https://mapterhorn.com/attribution`; the script stores `attribution.json` next
+to the archive as `terrain-attribution.json` as the record of what is inside it.
+
+**Steps.**
+
+1. **Have the prerequisites on the VPS.** `curl`, `tar`, `sha256sum` (all in the
+   base image) and `rclone` with the `bunny` remote from §10 step 6. Check:
+
+   ```bash
+   rclone listremotes          # must list: bunny:
+   rclone lsd bunny:           # must list the storage zone
+   df -h .                     # needs ~1.3× the archive size free (≈2.5 GB for the default)
+   ```
+
+2. **Get the script onto the VPS.** It is self-contained and downloads the pinned
+   `pmtiles` CLI itself (SHA-256 checked):
+
+   ```bash
+   scp scripts/ops/mirror-terrain.sh <user>@<vps-ip>:~/
+   ssh <user>@<vps-ip>
+   chmod +x ~/mirror-terrain.sh
+   ```
+
+3. **Dry run — sizes only, nothing downloaded.** Use the same storage zone as the
+   basemap (§15, `<images-storage-zone>`):
+
+   ```bash
+   tmux new -s terrain
+   BUNNY_ZONE=<images-storage-zone> ./mirror-terrain.sh --dry-run
+   # expect: "... for an archive size of 1.9 GB"
+   ```
+
+4. **The real run** (still in tmux; it survives a dropped SSH session). It
+   extracts, runs `pmtiles verify`, checks the archive is WebP with the right
+   maximum zoom, uploads `terrain.pmtiles` and `terrain-attribution.json`,
+   compares byte counts on both sides, and deletes the local copy:
+
+   ```bash
+   BUNNY_ZONE=<images-storage-zone> ./mirror-terrain.sh
+   # other sizes:  MAXZOOM=11 BUNNY_ZONE=<images-storage-zone> ./mirror-terrain.sh
+   # other area:   BBOX=<min_lon,min_lat,max_lon,max_lat> ...
+   ```
+
+   It stops with a message at the first thing that is wrong. Do not use
+   `terrain.pmtiles` if it reports a size mismatch.
+
+5. **Check the CDN serves it correctly** — ranges and CORS, the same two things
+   the basemap needs (§15). From any machine:
+
+   ```bash
+   curl -sI -H "Origin: https://<domain>" -H "Range: bytes=0-16383" \
+     https://<images-zone>.b-cdn.net/terrain.pmtiles | grep -i -E "^HTTP|content-range|access-control|accept-ranges"
+   # expect: HTTP/2 206, a content-range, and an access-control-allow-origin that allows <domain>
+   ```
+
+   If the pull zone strips CORS or ranges, the basemap would already be broken;
+   fix it there (§9/§15) rather than here.
+
+6. **Turn it on.** Dokploy → this project → Environment:
+
+   ```
+   TERRAIN_URL=https://<images-zone>.b-cdn.net/terrain.pmtiles
+   ```
+
+   `docker/compose.prod.yml` passes it on as `NUXT_PUBLIC_BASEMAP_TERRAIN_URL`.
+   **Deploy** — an environment change needs a redeploy (§15). No rebuild is
+   involved: the value is read at container start.
+
+7. **Verify in a browser.** Open the site → Maps → Antiquity (Barrington). The
+   sheet shows shaded relief. In DevTools → Network, filter `terrain`: you must
+   see only `*.b-cdn.net/terrain.pmtiles` range requests (status 206) and **no
+   request to `mapterhorn.com` or `cloudflare`**. The attribution (ⓘ) must read
+   "Elevation: Mapterhorn and the open elevation sources it lists".
+
+**Updating.** Mapterhorn republishes now and then. Re-run step 4 (it replaces
+`terrain.pmtiles`), then purge that one URL in Bunny (Pull Zone → Purge Cache →
+URL) so the edge stops serving the old bytes.
+
+**Rolling back.** Unset `TERRAIN_URL` and redeploy: the antiquity view goes back
+to flat. Do **not** point it at `https://tiles.mapterhorn.com/...` — production's
+CSP refuses that host on purpose.
+
 ## 16. Mail — Brevo
 
 Replaces Lettermint (operator's own choice). `server/utils/mail.ts`'s
@@ -562,9 +684,12 @@ shows a correct `Set-Cookie`, but the same request through
 
 ## 19. Still open
 
-- **`RESTIC_*` backups.** Nightly dump still never leaves the box. Needs an
-  off-site target (Hetzner Storage Box works cross-provider, or check
-  Netcup's own storage product) — see `.claude/rules/deployment-and-releases.md`.
+- **Hillshade mirror (§15a).** Not run yet. Until `TERRAIN_URL` is set the
+  Barrington antiquity view draws no relief — by design, because the public
+  host is Cloudflare. Script: `scripts/ops/mirror-terrain.sh`.
+- **`RESTIC_*` off-box backups (§20).** Nightly dump still never leaves the box.
+  The target is **netcup Storage Space** over NFS; nothing is booked or mounted
+  yet. See `.claude/rules/deployment-and-releases.md`.
 - **Bunny CrowdSec bouncer** (`docker/security/bunny-bouncer/`). Every manual,
   isolated API call to Bunny's `edgerules/addOrUpdate` succeeds — identical
   payload, identical credentials — but the automated poller consistently
@@ -577,6 +702,18 @@ shows a correct `Set-Cookie`, but the same request through
   (`docker stop <bouncer-container>`). Origin is still protected by §9's
   secret header regardless — this bouncer would only add automatic banning
   at Bunny's edge on top of that.
+- **CrowdSec community sharing — decide later; left unchanged.**
+  `docker/compose.prod.yml` sets `DISABLE_ONLINE_API: 'false'`, so IP addresses
+  the local engine flags as abusive are sent to CrowdSec's central API. Checked
+  2026-10-02 with a real lookup: `api.crowdsec.net` resolves to AWS address space
+  (AS16509) geolocated in Ireland — an EU region, but run by a French company on
+  a US-parent cloud, which sits awkwardly beside "EU-based providers". It is
+  already disclosed (`privacy.recipientSecurity`, and `about.euException` in all
+  six locales). Options: **keep** (community blocklist, as disclosed) or set
+  `DISABLE_ONLINE_API: 'true'` (nothing visitor-derived leaves the box; local
+  detection still works, the community blocklist is lost). If it changes, update
+  the compose file, both i18n keys in every locale, and the table in
+  `.claude/rules/gdpr-legal.md`.
 - ~~CORS wildcard~~ — fixed 2026-09-30, see §12's `NUXT_SECURITY_CORS_HANDLER_ORIGIN` note.
 - **Ask AFE (afe@dainst.de) and PAS for an explicit licence to mirror their
   single coin-find data.** Neither states one today — see
@@ -585,3 +722,74 @@ shows a correct `Set-Cookie`, but the same request through
   these databases was removed 2026-09-30 for adding no reader benefit, but
   the underlying question — whether this data could ever be imported outright,
   on the CHRR model — is independent of that panel and still open.
+
+## 20. Off-site backups — netcup Storage Space
+
+The nightly dump is pushed by restic to a directory on **netcup Storage Space**:
+an external storage cluster that netcup attaches to a VPS over **NFS** and
+authorises by **registered IP address** (product page,
+`https://www.netcup.com/en/server/storage-space`: "The storage space is addressed
+using NFS", "Customers are registered to use the storage space via their IP
+address"; tariffs A 250 GB / B 500 GB / C 1 TB). restic encrypts client-side, so
+netcup never holds a readable copy. The repository is a plain directory, so the
+backup container needs no ssh client, key or known_hosts.
+
+1. **Book it.** netcup Customer Control Panel (CCP) → book Storage Space for this
+   VPS (tariff A is far more than a 58 MB dump needs). The CCP then shows the NFS
+   server and export path, and registers `<vps-ip>` as allowed.
+2. **Mount it on the VPS.** Use the server and path the CCP shows:
+
+   ```bash
+   apt-get install -y nfs-common
+   mkdir -p /mnt/netcup-backup
+   echo '<nfs-server>:<export-path> /mnt/netcup-backup nfs defaults,_netdev 0 0' >> /etc/fstab
+   mount -a
+   df -h /mnt/netcup-backup        # must show the Storage Space, not the root disk
+   ```
+
+   If `mount` fails, add the options the CCP documents (the NFS version in
+   particular — **not verified here**, netcup's page does not state it).
+
+3. **Create the repository directory and the marker** — once, on the mounted
+   storage. The `backup` container runs as uid 70 (`postgres`), so it must be able
+   to write there:
+
+   ```bash
+   mkdir -p /mnt/netcup-backup/restic
+   touch /mnt/netcup-backup/.vestigian-offsite
+   chown -R 70:70 /mnt/netcup-backup/restic
+   ```
+
+   The marker is what stops a missing mount from passing as a backup: without it
+   `backup.sh` reports `reason=offsite-not-mounted` and writes nothing.
+
+4. **Set the variables in Dokploy:**
+
+   ```
+   RESTIC_REPOSITORY=/offsite/restic
+   RESTIC_OFFSITE_DIR=/mnt/netcup-backup
+   RESTIC_PASSWORD=<openssl rand -base64 32>   # store a copy OUTSIDE this VPS and this repo
+   ```
+
+   `RESTIC_PASSWORD` **is** the backup: lose it and every snapshot is unreadable.
+
+5. **Redeploy** (the `backup` image changed: it no longer carries ssh), then watch
+   the first run:
+
+   ```bash
+   docker compose logs -f backup | grep backup.outcome
+   # expect: stage=dump ok, stage=offsite ok
+   ```
+
+6. **Prove it restores** — a backup nobody has restored is not one. On the VPS
+   (the drill reads the repository by its **host** path, not the container's):
+
+   ```bash
+   RESTIC_REPOSITORY=/mnt/netcup-backup/restic RESTIC_PASSWORD=... docker/restore-drill.sh --offsite
+   ```
+
+**Known weakening.** A previous SFTP design could restrict the key to one path;
+an NFS mount is writable by anything on the VPS that can reach it, so a
+compromised host can delete the repository as well as write it. Treat the Storage
+Space as a second copy, keep the local 14-day dumps, and consider a periodic copy
+to a second, unrelated target.

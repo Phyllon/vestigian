@@ -267,6 +267,31 @@ same projection `moderation/queue.get.ts` builds, minus that status filter.
   to what a record says, and revision history is append-only, so a bulk
   backfill has nowhere to go there even if it wanted to.
 
+## CORS — what a production build actually does
+
+Checked 2026-10-02 against `pnpm build` output started with
+`NUXT_SECURITY_CORS_HANDLER_ORIGIN=https://vestigian.example` (nuxt-security 2.6.0
+over h3 1.15; read `corsHandler.js` and h3's `createOriginHeaders` too):
+
+- The env override works. `Origin: https://vestigian.example` gets
+  `access-control-allow-origin: https://vestigian.example` + `vary: origin`; every
+  other origin — `evil.example`, `null`, `https://www.…`, `http://…`, a lookalike
+  subdomain — gets **no** ACAO header. No `access-control-allow-credentials` anywhere,
+  so no credentialed cross-origin read is possible even from the allowed origin.
+- **A request with no `Origin` header always answers `ACAO: *`** (h3: `!origin → "*"`).
+  Not exploitable — browsers send `Origin` on every cross-origin request and omit it on
+  same-origin GETs — but it is why `curl` without `-H Origin` "shows a wildcard".
+- **Known imperfection:** the no-match response carries no `Vary: Origin`, while the
+  match response does. Behind a CDN that ignores `Vary`, one cached variant could be
+  served for another origin. It only affects third-party cross-origin consumers, of
+  which there are none by design; not changed.
+- Preflights from a disallowed origin still answer `204` with `allow-methods` and an
+  echo of the requested headers, but without ACAO, so the browser refuses the request.
+- `/api/data/sites.geojson` and `sites.lp.json` send an explicit `ACAO: *` — public,
+  read-only, bounded; intended.
+- The CDN pull zone that serves PMTiles (basemap, terrain) is configured in Bunny, not
+  here: it must answer `206` to ranges and allow the site origin (runbook §15a step 5).
+
 ## Drift sampling — watching trust after it is granted
 
 Trust is binary and permanent until revoked: two accepted contributions and

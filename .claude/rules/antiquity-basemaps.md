@@ -133,7 +133,7 @@ does a place Pleiades declines to locate: `unlocated` and `related` rows carry a
 representative point that is a filing convenience, and 8,545 of them are dropped
 rather than drawn.
 
-Relief comes from the elevation tiles at `NUXT_PUBLIC_BASEMAP_TERRAIN_URL`. CAWM's
+Relief comes from the elevation tiles at `NUXT_PUBLIC_BASEMAP_TERRAIN_URL` — in production a PMTiles mirror on our CDN (`scripts/ops/mirror-terrain.sh`, runbook §15a), with **no relief at all while it is unset** (the public fallback host is Cloudflare and the production CSP refuses it). CAWM's
 raster sheet is exactly that and nothing else, and mirroring it would have cost
 3.2 GB and thirty thousand requests to Iowa for imagery carrying no information
 this map does not already draw. Where the ground genuinely has changed — a

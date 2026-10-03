@@ -165,13 +165,12 @@ Components put `<script setup>` before `<template>`, use inline Tailwind, and ke
 
 ## Deployment
 
-One VPS, Docker Compose, orchestrated by [Dokploy](https://dokploy.com). Roughly €27/month including object storage:
+One VPS, Docker Compose, orchestrated by [Dokploy](https://dokploy.com):
 
-|                   |                                             |
-| ----------------- | ------------------------------------------- |
-| Hetzner CPX41     | app, Postgres, Valkey, imgproxy, Traefik    |
-| Cloudflare R2     | images and the PMTiles basemap, zero egress |
-| Cloudflare (free) | CDN                                         |
+|                    |                                                                    |
+| ------------------ | ------------------------------------------------------------------ |
+| Netcup RS 4000 G12 | app, Postgres, Valkey, imgproxy, Traefik and the rest of the stack |
+| Bunny.net          | CDN and Edge Storage: photographs and the PMTiles basemap          |
 
 `docker/compose.prod.yml` is the deployment unit. GitHub Actions builds a multi-stage image to GHCR, and calls the Dokploy webhook.
 
@@ -183,9 +182,9 @@ The app is strictly 12-factor — env-only config, no local disk writes, `/api/h
 
 ```bash
 # A Europe + Mediterranean extract, roughly 15–25 GB
-# Download from https://maps.protomaps.com and upload to R2, then:
+# Download from https://maps.protomaps.com and upload to Bunny Edge Storage, then:
 NUXT_PUBLIC_BASEMAP_PROVIDER=pmtiles
-NUXT_PUBLIC_BASEMAP_PMTILES_URL=https://your-bucket.r2.dev/europe.pmtiles
+NUXT_PUBLIC_BASEMAP_PMTILES_URL=https://your-zone.b-cdn.net/europe.pmtiles
 ```
 
 PMTiles is read directly by the browser over HTTP range requests. There is no tile server to run.

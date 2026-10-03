@@ -15,6 +15,8 @@
 #
 #   docker/restore-drill.sh                  # newest local dump in ./backups
 #   docker/restore-drill.sh --offsite        # newest snapshot from restic
+#                                            # (RESTIC_REPOSITORY = the HOST path of the NFS mount,
+#                                            #  e.g. /mnt/netcup-backup/restic, not /offsite/restic)
 #   docker/restore-drill.sh path/to.dump     # a specific file
 #
 # Run it after any change to the backup path, and on a schedule a human actually

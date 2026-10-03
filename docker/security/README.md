@@ -50,9 +50,9 @@ show bans that nothing is applying.
 **The right place is the Bunny edge**, so blocked traffic never reaches the box.
 That matters more than it sounds: everything on this machine — CrowdSec,
 Traefik's limiter, the Valkey limits — runs _after_ the request has arrived and
-paid for a TCP connection and a TLS handshake. Hetzner's included DDoS
-protection covers L3/L4 and explicitly does not cover L7 HTTP floods, so
-absorbing those at the edge is the only thing that actually works.
+paid for a TCP connection and a TLS handshake. A VPS provider's DDoS
+protection works at L3/L4 and does not absorb L7 HTTP floods, so absorbing
+those at the edge is the only thing that actually works.
 
 CrowdSec has no first-party Bunny bouncer. Options, in order of preference:
 
@@ -90,19 +90,20 @@ Everything above assumes `x-real-ip` is trustworthy, and it is trustworthy only
 while the origin refuses connections that did not come from Bunny.
 `NUXT_BEHIND_TRUSTED_PROXY=true` without this rule is **worse than leaving it
 false**: it takes an attacker-supplied header as identity, so anyone who finds
-the Hetzner address gets a fresh rate-limit bucket per request and every policy
+the origin address gets a fresh rate-limit bucket per request and every policy
 in `RATE_LIMITS` stops existing.
 
-Hetzner Cloud Firewall, inbound:
+As deployed on the Netcup VPS, the lock is a **secret request header, not an IP
+allowlist**: Bunny's edge sets `X-Origin-Key` (an Edge Rule), and both app
+routers in `docker/compose.prod.yml` require it, so a request that reaches
+Traefik without it gets a 404 (`documents/runbook_prod.deployment.md` §9). The
+host firewall is `ufw` with `ufw-docker` and the self-healing Traefik route rule
+(§4 and §13); SSH is the only other open port.
 
-- `80`, `443` — Bunny edge ranges only (published via their API)
-- `22` — your address only
-- everything else — denied
-
-Verify from a host outside the allowlist:
+Verify from a host that is not Bunny:
 
 ```bash
-curl -m 5 https://<origin-ip>/api/health   # must time out, not answer
+curl -sk -m 5 -o /dev/null -w '%{http_code}\n' -H 'Host: <domain>' https://<origin-ip>/api/health   # must print 404
 ```
 
 That test is what makes every other control in this directory real.

@@ -31,4 +31,4 @@ tsconfig.e2e.tsbuildinfo
 # Local database dumps that docker/restore-drill.sh reads without --offsite,
 # and the pinned host keys the backup service mounts. Both are per-machine.
 docker/backups/
-docker/restic_known_hosts
+docker/offsite-unconfigured/

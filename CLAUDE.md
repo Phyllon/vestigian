@@ -57,7 +57,7 @@ Tokens live in `app/assets/css/main.css` as Tailwind v4 `@theme` variables. Nuxt
 | **Brevo**                                | Transactional mail, hosted in the EU (Paris). Replaced Lettermint, the operator's own choice — same EU-hosting rationale either way, carried over from replacing Resend originally.                                                  |
 | **terra-draw**                           | Framework-agnostic drawing that works with MapLibre.                                                                                                                                                                                 |
 | **Grafana + Loki + Tempo + Prometheus**  | One agent (Alloy) carries logs, traces and metrics; Vector carries no traces, and Alloy's built-in exporters replace four separate exporter containers. Promtail reached EOL in March 2026. All on local disk — see "Observability". |
-| **Dokploy on one Hetzner VPS**           | ~€27/month all-in vs ~€60–90 for managed k8s. Dokploy _is_ Docker Compose, so dev and prod are the same artifact.                                                                                                                    |
+| **Dokploy on one Netcup VPS**            | One machine, no cluster to run. Dokploy _is_ Docker Compose, so dev and prod are the same artifact.                                                                                                                                  |
 
 The app is strictly 12-factor (env-only config, no local disk writes, `/api/health` + `/api/ready`), so moving to Kubernetes later is a translation, not a rewrite.
 
