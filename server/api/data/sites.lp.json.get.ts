@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { siteCategoryEnum } from '~~/server/database/schema'
 import {
   buildLinkedPlaceFeature,
   buildLinkedPlacesCollection,
@@ -11,8 +12,11 @@ export const querySchema = z.object({
     .string()
     .regex(/^-?[\d.]+,-?[\d.]+,-?[\d.]+,-?[\d.]+$/, 'bbox must be west,south,east,north')
     .optional(),
-  category: z.string().max(40).optional(),
+  // An unknown category used to reach the `::site_category` cast and answer 500.
+  category: z.enum(siteCategoryEnum.enumValues).optional(),
   limit: z.coerce.number().int().min(1).max(1000).default(500),
+  /** Rows skipped, in `id` order — see the same field on `sites.geojson.get.ts`. */
+  offset: z.coerce.number().int().min(0).max(10_000_000).default(0),
   /**
    * Only records this atlas actually dates. LPF requires a `when` on every
    * Feature and roughly half of these sites carry no dating at all, so a
@@ -49,7 +53,7 @@ defineRouteMeta({
 
 export default defineEventHandler(async (event) => {
   await enforceRateLimit(event, 'search')
-  const { bbox, category, limit, dated } = await getValidatedQuery(event, querySchema.parse)
+  const { bbox, category, limit, offset, dated } = await getValidatedQuery(event, querySchema.parse)
   const sql = useSql()
 
   const [west, south, east, north] = bbox ? bbox.split(',').map(Number) : [-180, -85, 180, 85]
@@ -93,7 +97,7 @@ export default defineEventHandler(async (event) => {
       ${dated ? sql`AND (s.period_from IS NOT NULL OR s.period_to IS NOT NULL)` : sql``}
     GROUP BY s.id
     ORDER BY s.id
-    LIMIT ${limit}
+    LIMIT ${limit} OFFSET ${offset}
   `
 
   setResponseHeaders(event, {

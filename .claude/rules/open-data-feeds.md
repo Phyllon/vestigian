@@ -18,6 +18,50 @@ means of reuse belong together.
 | `/api/data/sites.geojson` | plain GeoJSON             | maps, analysis           |
 | `/api/data/sites.lp.json` | Linked Places Format v1.3 | gazetteer reconciliation |
 
+Both read the live `sites` table on every call, filtered to `status = 'approved'`;
+the only staleness is the 5-minute `cache-control`. **Both page with `offset`**
+(in `id` order, `limit` ≤ 1000) — they once documented themselves as "paged"
+while ignoring every paging parameter, so 60,273 of 61,273 sites were
+unreachable; walk them with `offset += limit` until a page comes back short.
+Checked against the dev database on 3 Oct 2026: 61,273 approved rows, the last
+page at `offset=61272` returns the final site, and `offset=61273` is empty.
+
+The query schema (`bbox`, `category`, `limit`, `offset`, and `dated` on the LPF
+feed only) is documented for reusers on `/licence`, under "Query parameters",
+with two working example URLs — `licence.reuseParam*` in all six locales. Change
+a parameter in either endpoint's `querySchema` and that list in the same change.
+`category` is a `z.enum` over the DB enum: it used to be a free string cast in
+SQL, so an unknown value answered 500 instead of 400.
+
+## Credits owed, and where each is paid
+
+`/licence` is where every upstream is credited in full; the map's own attribution
+control carries the live credit for the layer that is switched on. Audited
+against the code and, for each licence, a real request (3 Oct 2026):
+
+| Source                                                                                                           | Licence                                                             | Where credited                                                |
+| ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------- |
+| vici.org records (René Voorburg and contributors)                                                                | CC BY-SA / CC0                                                      | `recordsBody` (named only since then)                         |
+| OpenStreetMap via Protomaps basemap extract                                                                      | ODbL 1.0 produced work                                              | `modernMapBody`, map attribution                              |
+| Mapterhorn elevation, 151 sources in `attribution.json`                                                          | mostly CC BY 4.0 or open-government licences; 7 CC0; 41 PD or other | `elevationBody`, map attribution → mapterhorn.com/attribution |
+| AWMC, Pleiades, DARE, EOX Sentinel-2, OHM, Wikidata, ports, ORBIS, CHRR, GeoNames, Trajan/Marcus Aurelius plates | various                                                             | existing sections                                             |
+| EDH inscriptions, Attic Inscriptions Online                                                                      | CC BY-SA 4.0 / 3.0                                                  | `overlayInscriptions`, `overlayAtticInscriptions`             |
+| Wikipedia extract (+ Wikidata, Pleiades only to match)                                                           | CC BY-SA 4.0 / CC0 / CC BY 3.0                                      | `enrichmentBody`, under each extract                          |
+| Tabula Peutingeriana network (René Voorburg; Talbert)                                                            | none stated; reuse confirmed by the compiler                        | `overlayTabulaPeutingeriana`, map attribution                 |
+| Natural Earth country boundaries                                                                                 | public domain                                                       | `placeNamesBody`                                              |
+| game-icons.net (Delapouite, Lorc), Lucide, fonts                                                                 | CC BY 3.0 / ISC / OFL                                               | `iconsBody`                                                   |
+
+The game-icons credit was the one that was a genuine breach, not a gap in
+courtesy: CC BY 3.0 requires naming the author, and nothing in the UI did until
+`iconsBody`. game-icons.net's own About page asks for "Icons made by {author}.
+Available on https://game-icons.net". Left out on purpose: EDH
+inscription photographs (not imported for publication — see
+`scripts/import/13-edh-inscription-images.ts`). The Tabula Peutingeriana network
+has its own `overlayTabulaPeutingeriana` line: no stated licence, credited
+as used with its compiler's permission. **Adding a data source, a basemap, an overlay or an
+icon set means adding its line here and to `licence.*` in all six locales in
+the same change.**
+
 ## Linked Places Format — why, and the parts that are easy to get wrong
 
 LPF is what the Pelagios Network actually reads: Recogito, Peripleo and the

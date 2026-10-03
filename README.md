@@ -245,7 +245,7 @@ Licences are chosen from a closed list at upload time, since an image with an un
 
 ## Public data
 
-`GET /api/data/sites.geojson?bbox=west,south,east,north` returns approved sites as GeoJSON with licence and attribution on every feature, CORS-open and bounded to 1000 records per request. RDF and a Pelagios-compatible gazetteer dump are the natural next step if you want other projects to link to Vestigian's places.
+`GET /api/data/sites.geojson?bbox=west,south,east,north` returns approved sites as GeoJSON with licence and attribution on every feature, CORS-open and bounded to 1000 records per request; `offset` pages through the rest in `id` order. `GET /api/data/sites.lp.json` serves the same atlas as Linked Places Format v1.3 (what Recogito, Peripleo and the World Historical Gazetteer read), with the same `bbox`, `category`, `limit` and `offset`, plus `dated=true` for only the dated records.
 
 ## Operations
 
@@ -412,6 +412,6 @@ own "Not built" section, which is the authoritative copy:
 - **Purging withdrawn images** from object storage. Withdrawal is reversible by design; there is no operation that actually deletes bytes.
 - **Notifications beyond mail.** A review decision and a trust change reach the person by email, and it can be turned off from `/settings` — but a role change and a revert still send nothing, and there is nothing in the interface itself.
 - **Full-text search across descriptions.** Search covers titles and summaries only.
-- **RDF / Pelagios linked data.** The GeoJSON feed at `/api/data/sites.geojson` exists; linked data does not.
+- **RDF.** The Linked Places Format feed exists (`/api/data/sites.lp.json`); an RDF serialisation does not.
 - **Full i18n component coverage.** See "i18n" in CLAUDE.md for what is and is not migrated.
-- **Off-box backups.** `docker/backup.sh` dumps Postgres nightly to a volume on the same VPS, and `pnpm db:snapshot` writes beside the database it copies. Neither leaves the machine yet.
+- **Off-box backups, until configured.** `docker/backup.sh` dumps Postgres nightly and pushes it to netcup Storage Space through restic, but only once `RESTIC_REPOSITORY`, `RESTIC_OFFSITE_DIR` and `RESTIC_PASSWORD` are set and the storage is mounted (runbook §20); without them the dump stays on the VPS. `pnpm db:snapshot` writes beside the database it copies.

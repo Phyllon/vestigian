@@ -4,7 +4,7 @@
 first admin account are live on a Netcup RS 4000 G12. Follow this in order to
 reproduce the setup on a fresh instance, or as a reference for what's actually
 running. **Still open — see §19:** off-box backups (§20), the hillshade mirror
-(§15a), the Bunny CrowdSec bouncer (a real Bunny-API bug, unresolved), and the
+(§15a), the Bunny CrowdSec bouncer (rewritten 2026-10-03, not yet run against live Bunny), and the
 CrowdSec community-sharing decision.
 
 Placeholders to replace throughout: `<vps-ip>` / `<vps-ipv6>`, `<domain>`
@@ -451,6 +451,34 @@ docker compose -f <compose-path> restart app   # reconnect cleanly, not against 
 Production hard-codes `NUXT_PUBLIC_BASEMAP_PROVIDER: pmtiles` — the map is
 blank without this.
 
+**Serve the archives from a pull zone whose origin is the storage zone — not
+the images pull zone of §10.** The images pull zone's origin is imgproxy
+(`images-origin.<domain>`), which answers any path it cannot parse with
+`404 Invalid URL`. A `.pmtiles` file uploaded to the storage zone is therefore
+invisible through it: only byte ranges that happened to be cached earlier come
+back (`206`, `cdn-cache: HIT`), and every other range is a 404 on a cache miss
+— the map shows holes. Found 2026-10-03 by requesting `basemap.pmtiles` at
+offsets from 20 KB to 40 GB: only the first ~MB answered. Make a second pull
+zone first:
+
+1. **CDN → Add Pull Zone**, name it e.g. `<maps-zone>`. Origin Type: **Storage
+   Zone**, select the storage zone of §10 (not Origin URL).
+2. Headers → enable **CORS** (the browser reads the archive cross-origin).
+3. Caching → turn on cache slicing / large-file optimisation if offered; the
+   archives are tens of GB read by range.
+4. Check a _deep_ range, not just the start — the start can be served from an
+   old cache entry while the origin is broken:
+   ```bash
+   curl -sI -H "Origin: https://<domain>" -H "Range: bytes=5000000000-5000016383" \
+     https://<maps-zone>.b-cdn.net/basemap.pmtiles | grep -i -E "^HTTP|content-range|access-control"
+   # expect HTTP/2 206 and an allow-origin header
+   ```
+
+`<images-zone>` was used for these URLs before; it is now `<maps-zone>`
+everywhere in §15 and §15a. Use a **dated object name** for a replacement
+archive (`basemap-YYYYMMDD.pmtiles`): the pull zone ignores query strings in
+its cache key, so `?v=…` does not bust anything.
+
 ```bash
 # on the VPS, inside tmux (long-running, survives a dropped SSH session)
 tmux new -s basemap
@@ -461,7 +489,7 @@ rclone copyto basemap.pmtiles bunny:<images-storage-zone>/basemap.pmtiles --prog
 rm basemap.pmtiles   # ~40GB extract, free the disk
 ```
 
-Set `PMTILES_URL=https://<images-zone>.b-cdn.net/basemap.pmtiles` in Dokploy,
+Set `PMTILES_URL=https://<maps-zone>.b-cdn.net/basemap.pmtiles` in Dokploy,
 Deploy. **Env var changes need a redeploy** — Dokploy writes to `.env`, the
 running container's environment is fixed at creation.
 
@@ -545,21 +573,26 @@ to the archive as `terrain-attribution.json` as the record of what is inside it.
    `terrain.pmtiles` if it reports a size mismatch.
 
 5. **Check the CDN serves it correctly** — ranges and CORS, the same two things
-   the basemap needs (§15). From any machine:
+   the basemap needs (§15). From any machine. Request a **deep** range, not just
+   the start: the start of an object can come from an old cache entry while the
+   origin is broken (see §15's note on the `<maps-zone>` pull zone):
 
    ```bash
-   curl -sI -H "Origin: https://<domain>" -H "Range: bytes=0-16383" \
-     https://<images-zone>.b-cdn.net/terrain.pmtiles | grep -i -E "^HTTP|content-range|access-control|accept-ranges"
+   SIZE=$(rclone size --json bunny:<images-storage-zone>/terrain.pmtiles | sed -n 's/.*"bytes":\([0-9]*\).*/\1/p')
+   curl -sI -H "Origin: https://<domain>" -H "Range: bytes=$((SIZE / 2))-$((SIZE / 2 + 16383))" \
+     https://<maps-zone>.b-cdn.net/terrain.pmtiles | grep -i -E "^HTTP|content-range|access-control|accept-ranges"
    # expect: HTTP/2 206, a content-range, and an access-control-allow-origin that allows <domain>
    ```
 
-   If the pull zone strips CORS or ranges, the basemap would already be broken;
-   fix it there (§9/§15) rather than here.
+   A 404 here means the URL's pull zone is not the one whose origin is the
+   storage zone (e.g. `<images-zone>`, whose origin is imgproxy). If the pull
+   zone strips CORS or ranges, the basemap would already be broken; fix it
+   there (§15) rather than here.
 
 6. **Turn it on.** Dokploy → this project → Environment:
 
    ```
-   TERRAIN_URL=https://<images-zone>.b-cdn.net/terrain.pmtiles
+   TERRAIN_URL=https://<maps-zone>.b-cdn.net/terrain.pmtiles
    ```
 
    `docker/compose.prod.yml` passes it on as `NUXT_PUBLIC_BASEMAP_TERRAIN_URL`.
@@ -572,9 +605,12 @@ to the archive as `terrain-attribution.json` as the record of what is inside it.
    request to `mapterhorn.com` or `cloudflare`**. The attribution (ⓘ) must read
    "Elevation: Mapterhorn and the open elevation sources it lists".
 
-**Updating.** Mapterhorn republishes now and then. Re-run step 4 (it replaces
-`terrain.pmtiles`), then purge that one URL in Bunny (Pull Zone → Purge Cache →
-URL) so the edge stops serving the old bytes.
+**Updating.** Mapterhorn republishes now and then. Re-run step 4 with a new
+dated object name (`OBJECT=terrain-YYYYMMDD.pmtiles`), repeat step 5 against it,
+point `TERRAIN_URL` at it and redeploy, then delete the old object. Don't
+overwrite `terrain.pmtiles` in place: the pull zone ignores query strings, so a
+`?v=…` cannot bust the cache, and browsers hold byte ranges of the old layout.
+A URL-level purge (Pull Zone → Purge Cache → URL) is the fallback.
 
 **Rolling back.** Unset `TERRAIN_URL` and redeploy: the antiquity view goes back
 to flat. Do **not** point it at `https://tiles.mapterhorn.com/...` — production's
@@ -690,18 +726,24 @@ shows a correct `Set-Cookie`, but the same request through
 - **`RESTIC_*` off-box backups (§20).** Nightly dump still never leaves the box.
   The target is **netcup Storage Space** over NFS; nothing is booked or mounted
   yet. See `.claude/rules/deployment-and-releases.md`.
-- **Bunny CrowdSec bouncer** (`docker/security/bunny-bouncer/`). Every manual,
-  isolated API call to Bunny's `edgerules/addOrUpdate` succeeds — identical
-  payload, identical credentials — but the automated poller consistently
-  fails with a misleading `"Maximum 5 triggers are allowed per condition"`
-  error, even from a cold container start with zero pre-existing state.
-  Exponential backoff was added (`bouncer.mjs`) since the original code
-  retried a failing call every 15s forever with no backoff, which is a real
-  fix regardless of the root cause, but the underlying Bunny-side behavior is
-  unresolved. Currently **stopped**
-  (`docker stop <bouncer-container>`). Origin is still protected by §9's
-  secret header regardless — this bouncer would only add automatic banning
-  at Bunny's edge on top of that.
+- **Bunny CrowdSec bouncer** (`docker/security/bunny-bouncer/`). The Edge Rule
+  version failed on the real API: manual `edgerules/addOrUpdate` calls
+  succeeded, the poller failed with a misleading `"Maximum 5 triggers are
+allowed per condition"`, root cause never found. **Rewritten 2026-10-03** to
+  use the pull zone's blocked-IP list (`addBlockedIp` / `removeBlockedIp`,
+  confirmed in Bunny's API reference) with paced per-IP calls and 429 handling.
+  Exercised only against a mock so far. Still **stopped** until this passes:
+  1. `docker compose up -d --build bunny-bouncer`, watch its log for
+     `LAPI and Bunny both reachable`.
+  2. `docker exec <crowdsec> cscli decisions add --ip <your-test-ip> --duration 10m`
+     and confirm the log shows `synchronised with Bunny`.
+  3. From that IP, `curl -sI https://<domain>/` must be refused by Bunny (not a
+     404 from Traefik); then `cscli decisions delete --ip <your-test-ip>` and
+     confirm it works again within a poll interval.
+  4. Burst test: add ~50 test decisions, watch for 429s in the log.
+     Origin is protected by §9's secret header regardless — this only adds
+     automatic banning at Bunny's edge. If step 3 or 4 fails, fall back to the
+     CrowdSec Traefik plugin bouncer (`docker/security/README.md`, option 2).
 - **CrowdSec community sharing — decide later; left unchanged.**
   `docker/compose.prod.yml` sets `DISABLE_ONLINE_API: 'false'`, so IP addresses
   the local engine flags as abusive are sent to CrowdSec's central API. Checked

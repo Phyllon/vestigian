@@ -148,4 +148,18 @@ test.describe('Linked Places feed', () => {
   }) => {
     expect((await request.get(`${FEED}?bbox=nonsense`)).status()).toBe(400)
   })
+
+  test('pages with offset, so the whole gazetteer is reachable and no page repeats', async ({
+    request,
+  }) => {
+    const titlesAt = async (offset: number) => {
+      const body = await (await request.get(`${FEED}?limit=5&offset=${offset}`)).json()
+      return (body.features as LinkedPlaceFeature[]).map((feature) => feature['@id'])
+    }
+
+    const first = await titlesAt(0)
+    const second = await titlesAt(5)
+    expect(second.length).toBeGreaterThan(0)
+    expect(first.filter((id) => second.includes(id))).toEqual([])
+  })
 })

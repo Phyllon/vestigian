@@ -82,7 +82,7 @@ pnpm import:edh-inscriptions    # → 79,201 inscriptions (of 79,206), CC BY-SA 
 pnpm import:edh-inscription-images # → 24,779 photo records, metadata only, ~20s (no image bytes — every one is rights-reserved)
 pnpm exec tsx --env-file-if-exists=.env scripts/verify-concordances.ts --repair       # overnight-scale, see its own docstring
 pnpm import:cities              # → 235,666 modern cities and towns, CC BY 4.0
-pnpm import:tabula-peutingeriana # → 2,574 places, 2,397 roads; licence unconfirmed, off by default
+pnpm import:tabula-peutingeriana # → 2,574 places, 2,397 roads; no stated licence; reuse confirmed by its compiler, on by default
 pnpm import:column-reliefs      # → Trajan's Column plates from Wikimedia Commons, public domain
 pnpm import:empire-extents      # → 52 dated extent slices, OpenHistoricalMap, CC0
 pnpm import:attic-inscriptions  # → 3,412 Attic Inscriptions Online records, CC BY-SA 3.0, ~30-40 min (politely rate-limited)

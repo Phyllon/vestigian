@@ -275,7 +275,7 @@ mindmap
       EDH inscriptions corpus, EpiDoc TEI (CC BY-SA 4.0)
       Attic Inscriptions Online (CC BY-SA 3.0)
       Natural Earth country boundaries (public domain)
-      OmnesViae / Tabula Peutingeriana (unlicensed, gated)
+      OmnesViae / Tabula Peutingeriana (no stated licence; compiler confirmed reuse)
       Wikidata battles (CC0)
       Catalogue of Ancient Ports (CC BY)
       ORBIS v2 routes (CC BY)
@@ -1090,10 +1090,11 @@ a footnote:
   ODbL's share-alike clause attaches to a derivative _database_, and folding
   these rows together would risk pulling the contributed-data feed under
   ODbL's terms.
-- **A dataset with no confirmed licence (the Tabula Peutingeriana network)
-  is imported into its own tables but never served** until an operator
-  explicitly enables it — the import touches nothing a visitor can see;
-  serving is a separate, consciously flipped switch.
+- **A dataset with no stated licence (the Tabula Peutingeriana network)
+  lives in its own tables, never joined to the contributed data.** It is
+  served because its compiler confirmed reuse, credited on the map and on
+  `/licence`, and a single switch (`TABULA_PEUTINGERIANA_ENABLED`) withdraws
+  it.
 - **Every later overlay (battles, ports, routes, minor antiquities, coin
   hoards) got the same own-table, own-attribution treatment from the start**
   — and for four of them (ports CC BY, routes CC BY, minor antiquities

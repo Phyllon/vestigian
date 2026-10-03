@@ -447,7 +447,7 @@ export default defineNuxtConfig({
       /**
        * Empty until an operator picks a donation destination — the app menu's
        * "Support this project" link is hidden while this is unset, the same
-       * gate `tabulaPeutingerianaEnabled` below uses for a feature nothing
+       * gate `tabulaPeutingerianaEnabled` below once used for a feature nothing
        * should show until someone has actually decided on it.
        */
       donateUrl: '',
@@ -543,7 +543,14 @@ export default defineNuxtConfig({
          */
         glyphsUrl: '/fonts/{fontstack}/{range}.pbf',
       },
-      tabulaPeutingerianaEnabled: false,
+      /**
+       * The Tabula Peutingeriana network overlay. On: René Voorburg (omnesviae.org),
+       * who compiled the dataset, confirmed reuse in this atlas. The dataset states
+       * no licence of its own, so that confirmation is the only basis — keep it
+       * credited (`TABULA_PEUTINGERIANA_ATTRIBUTION`, `/licence`) and keep this
+       * switch as the way to take the layer down again if he ever asks.
+       */
+      tabulaPeutingerianaEnabled: true,
     },
   },
 

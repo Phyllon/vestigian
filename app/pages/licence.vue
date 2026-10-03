@@ -10,6 +10,21 @@
   const config = useRuntimeConfig()
   const base = config.public.siteUrl.replace(/\/$/, '')
 
+  /** The query schema of `/api/data/sites.geojson` and `/api/data/sites.lp.json`, as one list. */
+  const feedParameters = [
+    { name: 'bbox', hint: 'licence.reuseParamBbox' },
+    { name: 'category', hint: 'licence.reuseParamCategory' },
+    { name: 'limit', hint: 'licence.reuseParamLimit' },
+    { name: 'offset', hint: 'licence.reuseParamOffset' },
+    { name: 'dated', hint: 'licence.reuseParamDated' },
+  ]
+
+  const exampleQuery = 'bbox=6,50,8,52&category=fortification&limit=100'
+  const exampleUrls = [
+    `${base}/api/data/sites.geojson?${exampleQuery}&offset=100`,
+    `${base}/api/data/sites.lp.json?${exampleQuery}&offset=100`,
+  ]
+
   useHead({ title: t('licence.title') })
   useSeoMeta({ description: t('licence.intro') })
   useCanonicalUrl()
@@ -46,6 +61,24 @@
       </h2>
       <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
         {{ t('licence.imagesBody') }}
+      </p>
+    </section>
+
+    <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
+      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+        {{ t('licence.modernMapHeading') }}
+      </h2>
+      <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
+        {{ t('licence.modernMapBody') }}
+      </p>
+    </section>
+
+    <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
+      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+        {{ t('licence.elevationHeading') }}
+      </h2>
+      <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
+        {{ t('licence.elevationBody') }}
       </p>
     </section>
 
@@ -99,6 +132,9 @@
         <li>{{ t('licence.overlayMinorFeatures') }}</li>
         <li>{{ t('licence.overlayCoinHoards') }}</li>
         <li>{{ t('licence.overlayEmpireExtents') }}</li>
+        <li>{{ t('licence.overlayInscriptions') }}</li>
+        <li>{{ t('licence.overlayAtticInscriptions') }}</li>
+        <li>{{ t('licence.overlayTabulaPeutingeriana') }}</li>
       </ul>
     </section>
 
@@ -117,6 +153,24 @@
       </h2>
       <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
         {{ t('licence.placeNamesBody') }}
+      </p>
+    </section>
+
+    <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
+      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+        {{ t('licence.enrichmentHeading') }}
+      </h2>
+      <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
+        {{ t('licence.enrichmentBody') }}
+      </p>
+    </section>
+
+    <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
+      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+        {{ t('licence.iconsHeading') }}
+      </h2>
+      <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
+        {{ t('licence.iconsBody') }}
       </p>
     </section>
 
@@ -148,6 +202,36 @@
             >/api/data/sites.lp.json</a
           >
           — {{ t('licence.reuseLinkedPlaces') }}
+        </li>
+      </ul>
+
+      <h3 class="mt-5 font-display text-lg text-ink-900 dark:text-paper-100">
+        {{ t('licence.reuseParamsHeading') }}
+      </h3>
+      <p class="mt-1 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
+        {{ t('licence.reuseParamsIntro') }}
+      </p>
+      <dl
+        class="mt-3 grid grid-cols-1 gap-y-1 text-sm leading-relaxed text-ink-700 sm:grid-cols-[max-content_1fr] sm:gap-x-4 sm:gap-y-3 dark:text-paper-200"
+      >
+        <template v-for="parameter in feedParameters" :key="parameter.name">
+          <dt class="mt-2 font-mono text-ink-900 sm:mt-0 dark:text-paper-100">
+            {{ parameter.name }}
+          </dt>
+          <dd>{{ t(parameter.hint) }}</dd>
+        </template>
+      </dl>
+
+      <p class="mt-4 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
+        {{ t('licence.reuseExampleLabel') }}
+      </p>
+      <ul class="mt-1 space-y-1 text-xs">
+        <li v-for="url in exampleUrls" :key="url">
+          <a
+            :href="url"
+            class="block break-all font-mono text-ink-900 underline decoration-paper-400 underline-offset-2 dark:text-paper-100"
+            >{{ url }}</a
+          >
         </li>
       </ul>
     </section>

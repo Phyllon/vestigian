@@ -129,7 +129,7 @@ surfaced what client-side navigation never had:**
    `viewer.value` is reliably the real element. One tick is enough; nothing
    here needs a longer wait.
 
-## The Tabula Peutingeriana network — an overlay, off by default
+## The Tabula Peutingeriana network — an overlay, on by default
 
 A second, unrelated use of the same manuscript: not the viewer above, but the
 network it records — towns and the roads between them — reconstructed to real
@@ -157,26 +157,26 @@ this project already drops Pleiades' unlocated rows on the Barrington import;
 2,397 of the 3,523 legs survive with both endpoints located.
 
 **This dataset states no licence anywhere** — not in the JSON-LD's own
-`@context`, not on omnesviae.org, not confirmed on its Codeberg repository.
-That is a materially different position from every other borrowed source in
-this project (AWMC is ODbL, Pleiades is CC BY, DARE is CC BY-SA, EOX is CC
-BY-NC-SA): linking out to Voorburg's own IIIF viewer needed no licence claim,
-since nothing left his server through this app; _importing his compiled data
-into this project's own tables_ is a bigger ask, and this project has been
-consistent about not doing that on an unconfirmed licence. The resolution:
-**import freely, serve nothing until told to.** `pnpm import:tabula-peutingeriana`
-populates `tabula_peutingeriana_places`/`_roads` regardless — the import
-touches nothing a visitor ever sees — but
-`server/api/tabula-peutingeriana/network.geojson.get.ts` 404s and the
-overlay switcher's toggle is hidden outright unless
-`NUXT_PUBLIC_TABULA_PEUTINGERIANA_ENABLED=true` is set, which an operator
-should do only after confirming reuse is fine with Voorburg — the same
-courtesy this project already extends to Åhlfeldt (DARE) and EOX, applied
-here to data rather than bandwidth.
+`@context`, not on omnesviae.org, not on its Codeberg repository. That is a
+materially different position from every other borrowed source in this project
+(AWMC is ODbL, Pleiades is CC BY, DARE is CC BY-SA, EOX is CC BY-NC-SA).
+**René Voorburg, who compiled it, has confirmed that this atlas may use it**
+(told to the operator, 3 Oct 2026; there is no written record in this
+repository, so keep his message with the operator's own files). That
+confirmation is the whole basis, which is why the layer is credited on the map
+(`TABULA_PEUTINGERIANA_ATTRIBUTION`) and on `/licence`, and why the switch
+below stays: `NUXT_PUBLIC_TABULA_PEUTINGERIANA_ENABLED` defaults to `true` in
+`nuxt.config.ts` and, in production, via `TABULA_PEUTINGERIANA_ENABLED`
+(default `true`) in `docker/compose.prod.yml`. Setting it to `false` makes
+`server/api/tabula-peutingeriana/network.geojson.get.ts` 404 and hides the
+overlay toggle — the way to withdraw the layer at once if he ever asks.
+Production holds the data because the initial load (runbook §14) is a full
+`pg_dump`; a re-import is `pnpm import:tabula-peutingeriana`.
 
 Kept in its own tables, never joined to `sites` or `antiquity_places`, for a
-stronger version of the reason the AWMC/Pleiades tables already are: an
-unconfirmed licence is a harder line than a known share-alike one.
+stronger version of the reason the AWMC/Pleiades tables already are: a
+dataset with no stated licence is a harder line than a known share-alike one,
+and nothing here may leak into the CC BY-SA/CC0 feeds.
 
 Three things not obvious from the schema:
 

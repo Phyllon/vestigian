@@ -75,4 +75,30 @@ test.describe('the public data feed', () => {
     const response = await request.get('/api/data/sites.geojson?bbox=not-a-box')
     expect(response.status()).toBe(400)
   })
+
+  // An unknown category used to reach the database cast and answer 500.
+  test('rejects an unknown category rather than failing inside the query', async ({ request }) => {
+    const response = await request.get('/api/data/sites.geojson?category=nonsense')
+    expect(response.status()).toBe(400)
+  })
+
+  // The feed once called itself "paged" while ignoring every paging parameter, so
+  // all but the first 1,000 sites were unreachable. Two adjacent pages must be
+  // disjoint and in id order, or a consumer loops over the same records forever.
+  test('pages through the atlas with offset, in id order and without overlap', async ({
+    request,
+  }) => {
+    const idsAt = async (offset: number) => {
+      const response = await request.get(`/api/data/sites.geojson?limit=5&offset=${offset}`)
+      expect(response.ok()).toBeTruthy()
+      const body = (await response.json()) as { features: { id: number }[] }
+      return body.features.map((feature) => feature.id)
+    }
+
+    const first = await idsAt(0)
+    const second = await idsAt(5)
+    expect(second.length).toBeGreaterThan(0)
+    expect(first.filter((id) => second.includes(id))).toEqual([])
+    expect(Math.min(...second)).toBeGreaterThan(Math.max(...first))
+  })
 })

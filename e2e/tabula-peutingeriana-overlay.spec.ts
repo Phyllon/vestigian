@@ -4,33 +4,28 @@ import { openMap, openOverlays } from './helpers/map'
 /**
  * The Tabula Peutingeriana network overlay (places and roads reconstructed
  * to real coordinates, drawn over any basemap) — not the manuscript viewer
- * covered by `tabula-peutingeriana.spec.ts`. Unlike every other view this
- * suite covers, this one has no confirmed licence with its source
- * (omnesviae.org), so it is off unless
- * `NUXT_PUBLIC_TABULA_PEUTINGERIANA_ENABLED=true` is set — off is therefore
- * the only state this suite can assert against in the ordinary CI/dev run,
- * and that is the point: a fresh clone must show no trace of it.
+ * covered by `tabula-peutingeriana.spec.ts`. The dataset states no licence of
+ * its own; its compiler, René Voorburg, confirmed reuse, so the layer is on by
+ * default and `NUXT_PUBLIC_TABULA_PEUTINGERIANA_ENABLED=false` withdraws it.
  */
 test.describe('the Tabula Peutingeriana network overlay', () => {
-  test('is hidden while the frontier switch stays offered when the feature flag is off', async ({
-    page,
-  }) => {
+  test('is offered in the overlay menu next to the frontier switch', async ({ page }) => {
     await openMap(page)
     await openOverlays(page)
 
-    // The overlay switcher itself is not gated on this flag — "Follow the
-    // limes" lives there too, and works on every basemap regardless of this
-    // licence-driven gate — so only the Tabula Peutingeriana entry inside it
-    // is asserted absent.
     await expect(page.getByRole('menu', { name: 'Overlays' })).toHaveCount(1)
     await expect(page.getByRole('menuitemcheckbox', { name: /Follow the limes/ })).toHaveCount(1)
     await expect(
       page.getByRole('menuitemcheckbox', { name: /Tabula Peutingeriana network/ }),
-    ).toHaveCount(0)
+    ).toHaveCount(1)
   })
 
-  test('the network endpoint 404s when the feature flag is off', async ({ page }) => {
+  test('the network endpoint serves places and roads as GeoJSON', async ({ page }) => {
     const response = await page.request.get('/api/tabula-peutingeriana/network.geojson')
-    expect(response.status()).toBe(404)
+    expect(response.status()).toBe(200)
+
+    const body = (await response.json()) as { type: string; features: unknown[] }
+    expect(body.type).toBe('FeatureCollection')
+    expect(body.features.length).toBeGreaterThan(0)
   })
 })

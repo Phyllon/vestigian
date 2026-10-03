@@ -25,13 +25,12 @@ const lineGeometry = customType<{ data: string; driverData: string }>({
  * is lost, cross-checked against Pleiades. Kept in its own tables and never
  * joined to `sites` or `antiquity_places`, for a stronger reason than the
  * ODbL/CC-BY isolation those tables already document: **this dataset states
- * no licence anywhere** — not in the JSON-LD, not on omnesviae.org, not
- * confirmed on its Codeberg repository. `NUXT_PUBLIC_TABULA_PEUTINGERIANA_ENABLED`
- * gates the feature off by default for exactly that reason (see
- * `server/api/tabula-peutingeriana/network.geojson.get.ts`) — importing the
- * rows is safe (nothing is served), switching the flag on is the step that
- * needs Voorburg's explicit yes first. See CLAUDE.md's "The Tabula
- * Peutingeriana network" section.
+ * no licence anywhere** — not in the JSON-LD, not on omnesviae.org, not on
+ * its Codeberg repository. Its compiler, René Voorburg, confirmed reuse here,
+ * and `NUXT_PUBLIC_TABULA_PEUTINGERIANA_ENABLED` (on by default) is how that
+ * permission is withdrawn if he ever asks (see
+ * `server/api/tabula-peutingeriana/network.geojson.get.ts`). See
+ * `.claude/rules/tabula-peutingeriana.md`.
  */
 export const tabulaPeutingerianaPlaces = pgTable(
   'tabula_peutingeriana_places',

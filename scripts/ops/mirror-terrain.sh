@@ -165,7 +165,7 @@ mirror-terrain: done.
 
 Next, in Dokploy → this project → Environment (runbook §15a, step 5):
 
-  TERRAIN_URL=https://<pull-zone>.b-cdn.net/${OBJECT}
+  TERRAIN_URL=https://<maps-zone>.b-cdn.net/${OBJECT}   (the pull zone whose origin is the storage zone, runbook §15)
 
 then Deploy: an environment change needs a redeploy. The licence record for the
 sources inside the archive is stored beside it as terrain-attribution.json.

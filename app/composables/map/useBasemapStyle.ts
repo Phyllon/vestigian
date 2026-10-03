@@ -1867,9 +1867,9 @@ export const useBasemapStyle = () => {
    * `useTabulaPeutingerianaOverlay`), not a reading of one antiquity sheet in
    * particular.
    *
-   * `canShow` reflects the server-side gate — the source data states no
-   * licence, so `NUXT_PUBLIC_TABULA_PEUTINGERIANA_ENABLED` must be turned on
-   * deliberately (see `nuxt.config.ts`) before the toggle is even offered.
+   * `canShow` reflects the server-side switch, on by default
+   * (`NUXT_PUBLIC_TABULA_PEUTINGERIANA_ENABLED`, see `nuxt.config.ts`): the
+   * toggle is not offered while it is `false`.
    * Not persisted, for the same reason `isLimesActive` is not.
    */
   const isTabulaPeutingerianaOverlayActive = useState<boolean>(

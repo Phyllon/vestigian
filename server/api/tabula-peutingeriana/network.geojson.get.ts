@@ -4,14 +4,11 @@
  * `/tabula-peutingeriana` (an unrelated feature; see that page's own
  * docstring).
  *
- * **404s unless `NUXT_PUBLIC_TABULA_PEUTINGERIANA_ENABLED=true`.** The
- * imported data (`pnpm import:tabula-peutingeriana`) carries no stated
- * licence — not in its source JSON-LD, not on omnesviae.org, not confirmed
- * on its Codeberg repository — so nothing here is served to a visitor until
- * that is explicitly turned on by an operator who has confirmed reuse is
- * fine with René Voorburg. Importing the rows is safe; serving them is the
- * step that needs his yes first. See CLAUDE.md's "The Tabula Peutingeriana
- * network" section.
+ * **404s when `NUXT_PUBLIC_TABULA_PEUTINGERIANA_ENABLED` is `false`** — on by
+ * default. The imported data (`pnpm import:tabula-peutingeriana`) carries no
+ * stated licence of its own, so the basis for serving it is René Voorburg's
+ * (the compiler's) confirmation that reuse is fine; the switch stays as the
+ * way to withdraw it. See `.claude/rules/tabula-peutingeriana.md`.
  *
  * Not under `/api/data/` and not CORS-open, unlike `sites.geojson` — that
  * path is this project's documented CC BY-SA/CC0 reuse feed, and advertising
@@ -31,7 +28,7 @@ defineRouteMeta({
     tags: ['tabula-peutingeriana'],
     summary: 'The Tabula Peutingeriana network as GeoJSON, when enabled',
     description:
-      '404s unless NUXT_PUBLIC_TABULA_PEUTINGERIANA_ENABLED=true. Licence unconfirmed with the source (omnesviae.org) — see CLAUDE.md before enabling in production.',
+      'On by default; 404s when NUXT_PUBLIC_TABULA_PEUTINGERIANA_ENABLED=false. Reuse confirmed by the compiler, René Voorburg (omnesviae.org); the dataset states no licence of its own.',
   },
 })
 

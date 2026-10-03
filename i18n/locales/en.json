@@ -46,8 +46,14 @@
     "groupToday": "Today",
     "groupAntiquity": "Antiquity",
     "views": {
-      "vestigian": { "label": "Vestigian", "hint": "Antiquity foregrounded" },
-      "satellite": { "label": "Satellite", "hint": "Sentinel-2 imagery" },
+      "vestigian": {
+        "label": "Vestigian",
+        "hint": "Antiquity foregrounded"
+      },
+      "satellite": {
+        "label": "Satellite",
+        "hint": "Sentinel-2 imagery"
+      },
       "osmStandard": {
         "label": "Standard",
         "hint": "The familiar OpenStreetMap look, unmodified"
@@ -473,9 +479,13 @@
     "title": "Data & licences",
     "intro": "Vestigian is built on data that others made freely reusable. Terms differ by layer — here is what applies to each.",
     "recordsHeading": "Contributed records",
-    "recordsBody": "Site and tracing text is CC BY-SA — free to reuse and adapt, including commercially, provided changes are shared under the same licence and the source is credited. The structured metadata (coordinates, dates, categories) is CC0 — no rights reserved.",
+    "recordsBody": "Site and tracing text is CC BY-SA — free to reuse and adapt, including commercially, provided changes are shared under the same licence and the source is credited. The structured metadata (coordinates, dates, categories) is CC0 — no rights reserved. The atlas began from the openly licensed records of Vici.org, contributed by René Voorburg and its many contributors; each record keeps the attribution it carried there.",
     "imagesHeading": "Photographs",
     "imagesBody": "Every photograph carries its own licence and attribution, shown beneath the image itself. Licences vary per record; check the image before reusing it separately from the site it illustrates.",
+    "modernMapHeading": "Modern basemap",
+    "modernMapBody": "The modern map is drawn from OpenStreetMap data, © OpenStreetMap contributors, available under the Open Database Licence (ODbL 1.0). It is served from a Protomaps basemap extract, a produced work under the ODbL; the licence asks for the OpenStreetMap credit that the map itself shows.",
+    "elevationHeading": "Elevation (hillshade)",
+    "elevationBody": "The relief shading under the Barrington sheet is computed from Mapterhorn's elevation tiles, compiled from more than 150 open sources — national surveys and open-government terrain models, mostly CC BY 4.0 or comparable open-government licences, some CC0 or public domain. The full list with each licence is at mapterhorn.com/attribution, and the map's own credit line points there while the relief is shown.",
     "barringtonHeading": "Antiquity (Barrington) basemap",
     "barringtonBody": "Ancient coastline, roads, water and places are drawn from the Ancient World Mapping Center (ODbL 1.0) and Pleiades (CC BY 3.0). Both are reusable, including commercially, with attribution — ODbL's share-alike applies to the underlying database, not to the rendered map tiles.",
     "dareHeading": "Antiquity (DARE) basemap",
@@ -492,14 +502,29 @@
     "overlayMinorFeatures": "Minor antiquities (bridges, mines, quarries and more): Ancient World Mapping Center (ODbL 1.0).",
     "overlayCoinHoards": "Coin hoards: Coin Hoards of the Roman Republic, American Numismatic Society (CC BY-NC-SA 4.0) — non-commercial use only.",
     "overlayEmpireExtents": "Empire extent over time: OpenHistoricalMap contributors (CC0 1.0).",
+    "overlayInscriptions": "Inscriptions: Epigraphic Database Heidelberg (CC BY-SA 4.0).",
+    "overlayAtticInscriptions": "Attic inscriptions: Attic Inscriptions Online (CC BY-SA 3.0).",
+    "overlayTabulaPeutingeriana": "Tabula Peutingeriana network: compiled by René Voorburg (omnesviae.org) from Richard Talbert's georeferencing; the dataset states no licence of its own and is used with his permission.",
     "columnReliefHeading": "Column reliefs",
     "columnReliefBody": "Trajan's Column plates are mirrored from Wikimedia Commons' Cichorius Plates category, marked public domain there. The Column of Marcus Aurelius's plates are served live from Heidelberg University Library's digitisation of Petersen, Domaszewski & Calderini's 1896 study — also public domain; nothing is mirrored into this project's own storage for that column.",
     "placeNamesHeading": "Modern place names",
-    "placeNamesBody": "Present-day town and city names used in place search come from GeoNames.org (CC BY 4.0).",
+    "placeNamesBody": "Present-day town and city names used in place search come from GeoNames.org (CC BY 4.0). Which country a site lies in is worked out from Natural Earth boundaries (public domain).",
+    "enrichmentHeading": "Borrowed descriptions and links",
+    "enrichmentBody": "Where a site's description is supplemented, the text is a Wikipedia extract (CC BY-SA 4.0), credited beneath it and marked when it was machine-translated. Wikidata (CC0 1.0) and Pleiades (CC BY 3.0) are consulted only to find and check the matching article. Links to the iDAI.gazetteer, Historic England's National Heritage List, Trismegistos and the Epigraphic Database Heidelberg point to those projects and carry nothing but their identifiers.",
+    "iconsHeading": "Symbols and typefaces",
+    "iconsBody": "Several map symbols are from game-icons.net (CC BY 3.0): icons made by Delapouite and Lorc, available on https://game-icons.net. The others are Lucide icons (ISC licence). The typefaces — Fraunces, IBM Plex Sans, IBM Plex Mono and, for map labels, Noto Sans — are under the SIL Open Font Licence 1.1 and are served from this site, not from a font service.",
     "reuseHeading": "Reusing this data",
     "reuseBody": "Vestigian is built from openly licensed sources, so it publishes its own records back in the same spirit. Both feeds are read-only, bounded and paged, and open to cross-origin requests. Text is CC BY-SA and metadata CC0; image licences vary per record and are not included.",
     "reuseGeojson": "plain GeoJSON, for maps and analysis",
-    "reuseLinkedPlaces": "Linked Places Format, the gazetteer standard read by the Pelagios Network, with closeMatch links to Pleiades and Wikidata"
+    "reuseLinkedPlaces": "Linked Places Format, the gazetteer standard read by the Pelagios Network, with closeMatch links to Pleiades and Wikidata",
+    "reuseParamsHeading": "Query parameters",
+    "reuseParamsIntro": "Both feeds take the same parameters, all optional. Records come back in a stable order, and requests are rate-limited.",
+    "reuseParamBbox": "West,south,east,north in degrees (WGS 84), for example 6,50,8,52. Only sites inside the box. Default: the whole world.",
+    "reuseParamCategory": "One of settlement, fortification, sanctuary, burial, infrastructure, villa, production, findspot, other. Any other value is refused with 400.",
+    "reuseParamLimit": "Records per page, 1 to 1000. Default: 500.",
+    "reuseParamOffset": "Records to skip. To fetch everything, raise it by limit each time until a page comes back with fewer records than limit.",
+    "reuseParamDated": "Linked Places feed only. true returns only records that carry a period; the others have no dating at all.",
+    "reuseExampleLabel": "Example: fortifications around Cologne, second page of 100"
   },
   "impressum": {
     "title": "Legal notice",

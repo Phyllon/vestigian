@@ -30,9 +30,8 @@ const TABULA_PEUTINGERIANA_LABEL_COLOUR = '#2c4d42'
  * Unlike the notebook overlay, this is off until a reader switches it on
  * (`isShowingTabulaPeutingerianaOverlay` in `useBasemapStyle`) — the data is
  * fetched lazily on first activation, not on every map load, since most
- * readers will never turn it on: the source states no licence and the
- * feature is off by default in production until that is resolved (see
- * `nuxt.config.ts`'s `tabulaPeutingerianaEnabled`).
+ * readers will never turn it on. The layer can be withdrawn with
+ * `tabulaPeutingerianaEnabled` (see `nuxt.config.ts`).
  *
  * The lines and marks draw filled rather than as bare outlines — legible
  * against a basemap on its own now, not only once a reader already knows to
