@@ -65,13 +65,12 @@ services:
       # own CDN (runbook §15a). Empty means no relief is drawn — deliberately: the
       # public fallback host is Cloudflare, which a production build must not reach.
       NUXT_PUBLIC_BASEMAP_TERRAIN_URL: ${TERRAIN_URL:-}
-      # Off until an operator confirms reuse with the data source — see the
-      # licence note on tabulaPeutingerianaEnabled in nuxt.config.ts. Dokploy's
+      # On: the data's compiler, René Voorburg, confirmed reuse — see the note on
+      # tabulaPeutingerianaEnabled in nuxt.config.ts. Set TABULA_PEUTINGERIANA_ENABLED=false
+      # in Dokploy to take the overlay down (redeploy to apply). Dokploy's
       # "Environment" tab only fills `${...}` substitutions actually referenced
-      # in this file; it does not inject arbitrary vars into the container, so
-      # this line has to exist before TABULA_PEUTINGERIANA_ENABLED=true set there
-      # does anything.
-      NUXT_PUBLIC_TABULA_PEUTINGERIANA_ENABLED: ${TABULA_PEUTINGERIANA_ENABLED:-false}
+      # in this file, which is why the line has to exist at all.
+      NUXT_PUBLIC_TABULA_PEUTINGERIANA_ENABLED: ${TABULA_PEUTINGERIANA_ENABLED:-true}
       NUXT_IMGPROXY_BASE_URL: ${IMAGE_BASE_URL}
       NUXT_IMGPROXY_KEY: ${IMGPROXY_KEY}
       NUXT_IMGPROXY_SALT: ${IMGPROXY_SALT}
@@ -502,11 +501,12 @@ services:
     logging: *default-logging
 
   # The enforcement half. Polls CrowdSec's own decision stream and mirrors the
-  # current ban list onto one Bunny Edge Rule, so abusive IPs are blocked at
-  # the CDN edge rather than reaching Traefik at all. See
-  # docker/security/bunny-bouncer/bouncer.mjs for the full reasoning and the
-  # unverified-Bunny-enum-values warning — confirm it actually blocks with the
-  # test in .plans/runbook_prod.deployment.md's bouncer step before trusting it.
+  # current ban list onto the pull zone's blocked-IP list, so abusive IPs are
+  # blocked at the CDN edge rather than reaching Traefik at all. See
+  # docker/security/bunny-bouncer/bouncer.mjs for the reasoning and the list of
+  # what is still unproven against the live API — confirm it actually blocks
+  # with the bouncer step in documents/runbook_prod.deployment.md §19 before
+  # trusting it. BUNNY_PRUNE_UNKNOWN (optional, default off) is explained there.
   bunny-bouncer:
     build: ./security/bunny-bouncer
     restart: unless-stopped
@@ -520,6 +520,7 @@ services:
       # zone, which would only block image requests and leave everything else
       # open.
       BUNNY_PULL_ZONE_ID: ${BUNNY_SITE_PULL_ZONE_ID}
+      BUNNY_PRUNE_UNKNOWN: ${BUNNY_PRUNE_UNKNOWN:-false}
     deploy:
       resources:
         limits:

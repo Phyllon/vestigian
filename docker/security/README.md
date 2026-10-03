@@ -56,17 +56,20 @@ those at the edge is the only thing that actually works.
 
 CrowdSec has no first-party Bunny bouncer. Options, in order of preference:
 
-1. **A small custom bouncer** driving Bunny's Edge Rule API from the LAPI
-   decision stream. **Built** — `docker/security/bunny-bouncer/`, wired into
-   `docker/compose.prod.yml` as its own service. Polls the LAPI decision
-   stream and mirrors the current IP-scope ban list onto one Bunny Edge Rule
-   (`RemoteIP` trigger, `BlockRequest` action) rather than one rule per IP.
-   The exact Bunny enum values it sends (`ActionType`, trigger `Type`,
-   `PatternMatchingType`) come from Bunny's API reference, not from a request
-   against a real account — there is no Bunny account to verify against from
-   a dev environment. **Confirm it actually blocks** before relying on it: the
-   test is in the "5. CrowdSec-Bouncer" step of
-   `.plans/runbook_prod.deployment.md`. Needs `CROWDSEC_BUNNY_BOUNCER_KEY`
+1. **A small custom bouncer** driving Bunny's pull-zone blocked-IP list from
+   the LAPI decision stream. **Built** — `docker/security/bunny-bouncer/`,
+   wired into `docker/compose.prod.yml` as its own service. Polls the LAPI
+   decision stream and makes the pull zone's blocked-IP list match the
+   IP-scope ban list, one `addBlockedIp` / `removeBlockedIp` call per
+   difference. It replaced an Edge Rule design that failed against the real
+   API with an unrelated-looking "Maximum 5 triggers" error (reasoning and the
+   endpoint check are in the header of `bouncer.mjs`). **The blocked-IP
+   version has only been run against a mock** — confirm it actually blocks
+   before relying on it, with the test in the bouncer step of
+   `documents/runbook_prod.deployment.md` §19. Set `BUNNY_PRUNE_UNKNOWN=true`
+   only if nobody edits the blocked-IP list by hand; otherwise entries it did
+   not just add are left alone, at the price of a ban that expired during a
+   restart lingering on Bunny. Needs `CROWDSEC_BUNNY_BOUNCER_KEY`
    (register with `cscli bouncers add bunny`, or let the `BOUNCER_KEY_bunny`
    env var on the `crowdsec` service pre-register it), `BUNNY_API_KEY`, and
    `BUNNY_SITE_PULL_ZONE_ID` — the pull zone in front of `SITE_HOST`

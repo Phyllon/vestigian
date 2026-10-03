@@ -8,7 +8,7 @@
  * because everything on the origin box — CrowdSec, Traefik's own limiter, the
  * Valkey rate limits in server/utils/ratelimit.ts — runs *after* a request has
  * already paid for a TCP connection and a TLS handshake. Blocking at Bunny
- * means an L7 flood never reaches Hetzner at all.
+ * means an L7 flood never reaches the origin at all.
  *
  * Deliberately dependency-free: Node 22 ships global fetch, and this is a
  * ~150-line poller, not an application. No package.json, no node_modules, no
@@ -19,25 +19,32 @@
  *   2. Maintain the current set of banned IPs in memory, pruning anything
  *      past its own expiry as a second line of defence against a missed
  *      "deleted" entry.
- *   3. When that set has actually changed, push the whole thing to Bunny as
- *      one Edge Rule's RemoteIP trigger, rather than one rule per IP — Bunny
- *      does not document a rule-count ceiling generous enough to risk the
- *      other design, and one rule is one API call regardless of ban count.
+ *   3. Make the pull zone's own blocked-IP list match that set, one
+ *      `addBlockedIp` / `removeBlockedIp` call per difference, paced and
+ *      capped per cycle.
+ *
+ * Why the blocked-IP list and not an Edge Rule. The first version mirrored the
+ * ban set onto one Edge Rule's RemoteIP trigger. Against a real account every
+ * manual call succeeded while the automated poller failed with "Maximum 5
+ * triggers are allowed per condition" — an error unrelated to what was sent,
+ * never root-caused. The blocked-IP list needs no rule model, no enum values
+ * and no Guid bookkeeping: both endpoints take `{ "BlockedIp": "<ip>" }`
+ * (checked against Bunny's API reference, 2026-10-03). The cost is one call per
+ * IP instead of one per change, which is what CALL_SPACING_MS,
+ * MAX_CALLS_PER_CYCLE and the 429 handling are for.
  *
  * Only IP-scoped `ban` decisions are acted on. Range (CIDR) and country-scope
- * decisions are logged and skipped — Bunny's RemoteIP trigger matches literal
- * addresses, and translating a CIDR into the right pattern shape is unverified
- * against the live API, so this does not guess.
+ * decisions are logged and skipped. Bunny's reference says nothing about IPv6
+ * or CIDR on these endpoints, so an address Bunny rejects is logged once and
+ * skipped, not retried.
  *
- * The Bunny Edge Rule field values below (ActionType 4 = BlockRequest, Trigger
- * Type 5 = RemoteIP, PatternMatchingType 0 = match any of PatternMatches) come
- * from Bunny's own API reference, not from a request made against a real
- * account — there is no Bunny account to test against from this environment.
- * **Before trusting this in production**, run the verification in the
- * "5. CrowdSec-Bouncer" section of .plans/runbook_prod.deployment.md: add a
- * decision for a test IP, confirm curl gets a 403 through Bunny, then remove
- * it. If PatternMatchingType 0 turns out to mean something else, that step is
- * where it is caught, not in front of real traffic.
+ * **Still unproven against the live API:** that a listed IP is actually refused
+ * at the edge (the test is in the bouncer step of
+ * documents/runbook_prod.deployment.md), that the per-IP calls survive a real
+ * burst without a 429, and how many entries the list accepts. Bunny documents
+ * none of those.
+ *
+ * Ownership of the list: see PRUNE_UNKNOWN below.
  */
 
 // http, not https: this is the default for the `crowdsec` hostname on the
@@ -49,15 +56,6 @@ const BOUNCER_KEY = process.env.CROWDSEC_BOUNCER_KEY
 const BUNNY_API_KEY = process.env.BUNNY_API_KEY
 const BUNNY_PULL_ZONE_ID = process.env.BUNNY_PULL_ZONE_ID
 const POLL_INTERVAL_SECONDS = Number(process.env.POLL_INTERVAL_SECONDS ?? 15)
-
-/** Marks the one Edge Rule this process owns, so a restart finds and reuses it
- * instead of accumulating duplicates. Nothing else on the pull zone should use
- * this string as its Description. */
-const EDGE_RULE_DESCRIPTION = 'crowdsec-bouncer-managed'
-
-const BUNNY_ACTION_BLOCK_REQUEST = 4
-const BUNNY_TRIGGER_REMOTE_IP = 5
-const BUNNY_PATTERN_MATCH_ANY = 0
 
 for (const [name, value] of Object.entries({ BOUNCER_KEY, BUNNY_API_KEY, BUNNY_PULL_ZONE_ID })) {
   if (!value) {
@@ -156,63 +154,128 @@ const fetchLapiDecisions = async () => {
 }
 
 const bunnyHeaders = { AccessKey: BUNNY_API_KEY, 'content-type': 'application/json' }
+const BUNNY_API = `https://api.bunny.net/pullzone/${BUNNY_PULL_ZONE_ID}`
 
-/** Finds the rule this process manages, if a previous run already created one
- * — makes a container restart idempotent instead of piling up duplicate rules. */
-const findManagedRuleGuid = async () => {
-  const response = await fetch(`https://api.bunny.net/pullzone/${BUNNY_PULL_ZONE_ID}`, {
+/** Thrown for a Bunny response worth reacting to rather than just logging. */
+class BunnyRateLimited extends Error {
+  constructor(retryAfterSeconds) {
+    super(`Bunny answered 429, retry after ${retryAfterSeconds}s`)
+    this.retryAfterSeconds = retryAfterSeconds
+  }
+}
+
+const callBunny = async (path, body) => {
+  const response = await fetch(`${BUNNY_API}${path}`, {
+    method: 'POST',
     headers: bunnyHeaders,
+    body: JSON.stringify(body),
   })
+  if (response.status === 429) {
+    throw new BunnyRateLimited(Number(response.headers.get('retry-after')) || 30)
+  }
+  if (!response.ok) {
+    throw new Error(`Bunny ${path} returned ${response.status}: ${await response.text()}`)
+  }
+}
+
+/** The pull zone's own blocked-IP list, as Bunny currently holds it. */
+const fetchBunnyBlockedIps = async () => {
+  const response = await fetch(BUNNY_API, { headers: bunnyHeaders })
   if (!response.ok) {
     throw new Error(`Bunny pull zone lookup returned ${response.status}: ${await response.text()}`)
   }
-
   const pullZone = await response.json()
-  const managed = (pullZone.EdgeRules ?? []).find(
-    (rule) => rule.Description === EDGE_RULE_DESCRIPTION,
-  )
-  return managed?.Guid ?? null
+  return new Set(pullZone.BlockedIps ?? [])
 }
 
-const pushBannedIpsToBunny = async (ips) => {
-  const guid = await findManagedRuleGuid()
+const blockOnBunny = (ip) => callBunny('/addBlockedIp', { BlockedIp: ip })
+const unblockOnBunny = (ip) => callBunny('/removeBlockedIp', { BlockedIp: ip })
 
-  const body = {
-    // Omitted, not sent as `null`, when no managed rule exists yet. Verified
-    // against the real API (2026-09-28): a literal `"Guid": null` makes Bunny
-    // reject the whole request with "Maximum 5 triggers are allowed per
-    // condition" — a misleading error for what is actually an invalid Guid,
-    // not a real trigger-count limit. Omitting the field on first creation and
-    // only including it on the update path once a real Guid exists (a run
-    // after the first successful push) is what a create endpoint expects.
-    ...(guid ? { Guid: guid } : {}),
-    ActionType: BUNNY_ACTION_BLOCK_REQUEST,
-    Triggers: [
-      {
-        Type: BUNNY_TRIGGER_REMOTE_IP,
-        PatternMatches: ips.length > 0 ? ips : ['0.0.0.0'],
-        PatternMatchingType: BUNNY_PATTERN_MATCH_ANY,
-      },
-    ],
-    TriggerMatchingType: BUNNY_PATTERN_MATCH_ANY,
-    Description: EDGE_RULE_DESCRIPTION,
-    // Disabled rather than deleted when there is nothing to block, so the
-    // Guid survives for the next update and the rule's own history stays on
-    // one object in the Bunny dashboard.
-    Enabled: ips.length > 0,
-  }
+/** What Bunny is believed to hold *because this process put it there*. Seeded
+ * from the pull zone at startup (see `reconcileAtStartup`) and then kept in
+ * step call by call, so a failed call leaves the set truthful rather than
+ * optimistic and the next cycle retries only the difference. */
+const onBunny = new Set()
 
-  const response = await fetch(
-    `https://api.bunny.net/pullzone/${BUNNY_PULL_ZONE_ID}/edgerules/addOrUpdate`,
-    { method: 'POST', headers: bunnyHeaders, body: JSON.stringify(body) },
-  )
+/** IPs Bunny refused with a 4xx. Remembered so one malformed or unsupported
+ * address (the docs say nothing about IPv6 or CIDR) is logged once rather than
+ * retried every cycle forever. Cleared when CrowdSec stops listing the IP. */
+const refused = new Set()
 
-  if (!response.ok) {
-    throw new Error(`Bunny edge rule update returned ${response.status}: ${await response.text()}`)
-  }
-}
+/** Pause between consecutive Bunny calls, and the most calls per cycle. The
+ * earlier design was one Edge Rule rewritten in full on every change; this one
+ * is a call per IP, so a burst of decisions is spread over cycles instead of
+ * hitting Bunny's (undocumented) limit in one go. */
+const CALL_SPACING_MS = 250
+const MAX_CALLS_PER_CYCLE = 40
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
+/**
+ * The pull zone's blocked-IP list is shared state: an operator may have added
+ * entries by hand in the Bunny dashboard. By default those are left alone and
+ * only reported. After a restart, entries this process added earlier are
+ * indistinguishable from manual ones, so a ban that expired while the bouncer
+ * was down stays on Bunny until BUNNY_PRUNE_UNKNOWN=true is set — which makes
+ * this process the sole owner of the list and removes anything CrowdSec does
+ * not currently ban. Choose that only if nobody maintains the list by hand.
+ */
+const PRUNE_UNKNOWN = process.env.BUNNY_PRUNE_UNKNOWN === 'true'
+
+const reconcileAtStartup = async () => {
+  const existing = await fetchBunnyBlockedIps()
+  const unmanaged = [...existing].filter((ip) => !bannedUntil.has(ip))
+
+  for (const ip of existing) {
+    if (bannedUntil.has(ip) || PRUNE_UNKNOWN) onBunny.add(ip)
+  }
+  if (unmanaged.length > 0) {
+    log(
+      PRUNE_UNKNOWN
+        ? 'pull zone holds IPs CrowdSec does not ban — they will be removed'
+        : 'pull zone holds IPs CrowdSec does not ban — left alone (BUNNY_PRUNE_UNKNOWN is not true)',
+      { count: unmanaged.length },
+    )
+  }
+}
+
+/** One synchronisation pass: make `onBunny` equal to the CrowdSec ban set,
+ * oldest difference first, within MAX_CALLS_PER_CYCLE. Returns how many
+ * differences remain so the caller knows whether to poll again promptly. */
+const synchroniseWithBunny = async () => {
+  for (const ip of refused) {
+    if (!bannedUntil.has(ip)) refused.delete(ip)
+  }
+
+  const toBlock = [...bannedUntil.keys()].filter((ip) => !onBunny.has(ip) && !refused.has(ip))
+  const toUnblock = [...onBunny].filter((ip) => !bannedUntil.has(ip))
+  const work = [
+    ...toUnblock.map((ip) => ({ ip, apply: unblockOnBunny, done: () => onBunny.delete(ip) })),
+    ...toBlock.map((ip) => ({ ip, apply: blockOnBunny, done: () => onBunny.add(ip) })),
+  ]
+
+  let calls = 0
+  for (const { ip, apply, done } of work) {
+    if (calls >= MAX_CALLS_PER_CYCLE) break
+    if (calls > 0) await wait(CALL_SPACING_MS)
+    calls += 1
+    try {
+      await apply(ip)
+      done()
+    } catch (error) {
+      if (error instanceof BunnyRateLimited) throw error
+      // A 4xx on one address must not stall every other ban behind it.
+      warn('Bunny refused one address, skipping it until CrowdSec stops listing it', {
+        ip,
+        message: error.message,
+      })
+      refused.add(ip)
+    }
+  }
+
+  if (calls > 0) log('synchronised with Bunny', { calls, blockedOnBunny: onBunny.size })
+  return work.length - calls
+}
 
 /** Retries with a fixed backoff rather than crash-looping the container —
  * Docker's own restart policy would otherwise hide a slow-starting CrowdSec
@@ -222,7 +285,7 @@ const waitUntilReachable = async () => {
     try {
       await fetchLapiDecisions()
       seenFirstStream = false // that call must not consume the real startup snapshot
-      await findManagedRuleGuid()
+      await fetchBunnyBlockedIps()
       return
     } catch (error) {
       warn('not ready yet, retrying in 10s', { message: error.message })
@@ -237,38 +300,36 @@ process.on('SIGTERM', () => {
   running = false
 })
 
-// Caps exponential backoff after repeated failures. Long enough to give a
-// transient Bunny-side issue (rate limiting was observed in practice on
-// 2026-09-29 — every isolated manual retry of the exact same call succeeded,
-// but the poller hammering the same endpoint every POLL_INTERVAL_SECONDS with
-// no backoff kept failing, which is consistent with a frequency-based limit
-// the misleading "Maximum 5 triggers" error gave no direct sign of) room to
-// clear, short enough that a real recovery is still noticed the same day.
+// Caps exponential backoff after repeated failures. Rate limiting by Bunny was
+// the working theory for the original failure (2026-09-29: every isolated
+// manual call succeeded, the poller failed consistently), so this stays: long
+// enough for a transient Bunny-side issue to clear, short enough that a real
+// recovery is noticed the same day.
 const MAX_BACKOFF_SECONDS = 300
 
 const main = async () => {
-  log('starting', { LAPI_URL, BUNNY_PULL_ZONE_ID, POLL_INTERVAL_SECONDS })
+  log('starting', { LAPI_URL, BUNNY_PULL_ZONE_ID, POLL_INTERVAL_SECONDS, PRUNE_UNKNOWN })
   await waitUntilReachable()
   log('LAPI and Bunny both reachable')
 
-  let lastPushedKey = null
+  // The startup snapshot has to land in `bannedUntil` before reconciling, or
+  // every existing ban would look "unknown".
+  const snapshot = await fetchLapiDecisions()
+  applyDecisions(snapshot.new, { removing: false })
+  await reconcileAtStartup()
+
   let consecutiveFailures = 0
+  let backlog = 0
 
   while (running) {
+    let rateLimitedForSeconds = 0
     try {
       const { new: added, deleted } = await fetchLapiDecisions()
       applyDecisions(deleted, { removing: true })
       applyDecisions(added, { removing: false })
       pruneExpired(Date.now())
 
-      const ips = [...bannedUntil.keys()].sort((a, b) => a.localeCompare(b))
-      const key = ips.join(',')
-
-      if (key !== lastPushedKey) {
-        await pushBannedIpsToBunny(ips)
-        log('pushed updated ban list to Bunny', { count: ips.length })
-        lastPushedKey = key
-      }
+      backlog = await synchroniseWithBunny()
       consecutiveFailures = 0
     } catch (error) {
       // Fails open, the same way server/utils/ratelimit.ts does on a Valkey
@@ -276,13 +337,20 @@ const main = async () => {
       // "the site is down", since CrowdSec is defence-in-depth on top of the
       // rate limits that already run inside the app.
       consecutiveFailures += 1
+      if (error instanceof BunnyRateLimited) rateLimitedForSeconds = error.retryAfterSeconds
       warn('cycle failed, backing off', { message: error.message, consecutiveFailures })
     }
 
+    // A backlog (more differences than one cycle's call budget) is worked off
+    // at the normal poll interval, not backed off — nothing has failed.
     const backoffSeconds =
       consecutiveFailures > 0
-        ? Math.min(POLL_INTERVAL_SECONDS * 2 ** consecutiveFailures, MAX_BACKOFF_SECONDS)
+        ? Math.min(
+            Math.max(POLL_INTERVAL_SECONDS * 2 ** consecutiveFailures, rateLimitedForSeconds),
+            MAX_BACKOFF_SECONDS,
+          )
         : POLL_INTERVAL_SECONDS
+    if (backlog > 0) log('differences remain, continuing next cycle', { backlog })
     await wait(backoffSeconds * 1000)
   }
 }
