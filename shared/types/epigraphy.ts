@@ -172,3 +172,38 @@ export interface NearbyAtticInscription {
   monumentType: string | null
   distanceMetres: number
 }
+
+/**
+ * One I.Sicily record (`GET /api/isicily-inscriptions/:isicilyId`) — the third
+ * epigraphic corpus, beside EDH and Attic Inscriptions Online. `position` is the
+ * modern settlement the stone is attributed to, an approximate place and never an
+ * excavated findspot. There is deliberately no image field: the photographs are
+ * not licensed for reuse, so the page links to I.Sicily's own.
+ */
+export interface IsicilyInscriptionDetail {
+  isicilyId: string
+  title: string
+  /** ISO 639 code of the main text: grc, la, xpu, xly, scx, osc, he. */
+  language: string | null
+  inscriptionFunction: string | null
+  objectType: string | null
+  material: string | null
+  dateText: string | null
+  notBefore: number | null
+  notAfter: number | null
+  placeName: string | null
+  ancientPlaceName: string | null
+  pleiadesId: string | null
+  geonamesUrl: string | null
+  repository: string | null
+  provenance: string | null
+  /** The primary edition, Leiden convention, one line of the stone per line. */
+  edition: string | null
+  translation: string | null
+  trismegistosId: string | null
+  edcsId: string | null
+  edrId: string | null
+  licence: 'CC-BY-4.0' | 'CC-BY-NC-4.0'
+  sourceUrl: string
+  position: { lon: number; lat: number } | null
+}

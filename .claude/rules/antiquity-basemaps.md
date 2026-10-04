@@ -802,7 +802,9 @@ at one exact site. `SiteCoinFindDatabases.vue` and
 deleted with it — it's the answer to "can any of this ever be mirrored", a
 question separate from whether the link-out panel was worth keeping.** Every
 link was fetched and its page title checked (2026-09-14), except PAS, which
-answers scripts only with a Cloudflare challenge. None of the eight passed a
+answers scripts only with a Cloudflare challenge (still 403 on 2026-10-04, with a browser
+User-Agent too; its terms page was read from a Wayback copy — CC BY 3.0, see the runbook's
+"Still open") None of the eight passed a
 mirrorable-licence check at the time:
 
 - **SICF's "Coins online" page embeds its map data** — 382 single-find
@@ -817,10 +819,13 @@ mirrorable-licence check at the time:
   AFE describes itself as five-star Linked Open Data — but no page states a
   licence, and the Impressum defaults everything to copyright. The sitemap
   lists 20 coin, 6 findspot and 3 place pages of 1,000 entries each.
-- **Also checked, not used:** Nomisma.org's SPARQL endpoint returned 400 for
+- **Also checked, not used (2026-09-14):** Nomisma.org's SPARQL endpoint returned 400 for
   `SELECT ?s WHERE { ?s rdf:type ?o } LIMIT 1` in every output format, and
-  OCRE/CRRO's `findspots.geojson` an empty FeatureCollection — the aggregator
-  route is down, not refused; re-check it first. CoinSampo (Finland) is
+  OCRE/CRRO's `findspots.geojson` an empty FeatureCollection. **Re-checked 2026-10-04: the
+  endpoint answers** (`https://nomisma.org/query`, `Accept: application/sparql-results+json`,
+  a query naming the `nmo:`/`geo:`/`skos:` prefixes) and the mints are now imported —
+  `.claude/rules/reference-overlays.md`. The coin _findspot_ aggregator (OCRE/CRRO
+  `findspots.geojson`) was not re-checked. CoinSampo (Finland) is
   verifiably CC BY 4.0 over SPARQL, but holds 5 Roman-period coins in 18,342.
   MEDEA's `vondsten.be` fails the TLS handshake from here. FMRD (300,000
   German finds) is print-only.

@@ -86,6 +86,12 @@ pnpm import:tabula-peutingeriana # → 2,574 places, 2,397 roads; no stated lice
 pnpm import:column-reliefs      # → Trajan's Column plates from Wikimedia Commons, public domain
 pnpm import:empire-extents      # → 52 dated extent slices, OpenHistoricalMap, CC0
 pnpm import:attic-inscriptions  # → 3,412 Attic Inscriptions Online records, CC BY-SA 3.0, ~30-40 min (politely rate-limited)
+pnpm import:itinere-roads       # → 14,769 Roman road segments, Itiner-e, CC BY 4.0, ~20 s
+pnpm import:nomisma-mints       # → 2,194 mints, Nomisma.org, CC BY 3.0
+pnpm import:wikidata-monuments  # → 3,437 Roman monuments, Wikidata, CC0, ~30 s (ten polite SPARQL calls)
+pnpm import:isicily-inscriptions # → 5,136 Sicilian inscriptions, I.Sicily, CC BY 4.0 (6 × CC BY-NC), ~15 s
+pnpm import:cliopatria-polities # → 655 slices of 87 neighbouring realms, Cliopatria, CC BY 4.0, ~15 s
+pnpm import:hillforts-atlas     # → 4,147 hillforts of Britain and Ireland, Atlas of Hillforts, CC BY 4.0, ~10 s
 pnpm tiles:warm <url>
 ```
 
@@ -305,10 +311,12 @@ Four rules that are easy to get wrong:
 ### Wired so far
 
 `09-cities.ts` (`geonames:cities500`, 235,666 rows), `12-edh-inscriptions.ts`
-(`edh:inscriptions`, ~79,200) and `02-mysql-to-postgres.ts` (`vici:points` and
-`vici:tracings` — the atlas itself). The remaining twenty follow the pattern
-above; the guard was worth nothing until proven on a real import, so it was
-proven on three before being spread further.
+(`edh:inscriptions`, ~79,200), `02-mysql-to-postgres.ts` (`vici:points` and
+`vici:tracings` — the atlas itself) and the six newest, `21`–`26`
+(`zenodo:17122148:itinere_roads`, `nomisma:mints`, `wikidata:roman-monuments`,
+`github:isicily`, `seshat:cliopatria:v0.2.0`, `ads:atlas-of-hillforts:1118744`; see `reference-overlays.md`). The remaining
+older scripts follow the pattern above; the guard was worth nothing until proven on a real
+import, so it was proven on three before being spread further.
 
 ### Two traps found while wiring these
 

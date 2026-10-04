@@ -34,8 +34,8 @@ import { pipeline } from 'node:stream/promises'
 import { createGunzip } from 'node:zlib'
 import { parse } from 'csv-parse'
 import { isLocatedPrecisely, resolvePlaceCategory } from '../../shared/utils/pleiades'
-import { Redis } from 'ioredis'
 import postgres from 'postgres'
+import { refreshAtlasCache } from './atlas-cache'
 import { requireDatabaseUrl } from '../../server/database/database-url'
 
 const sql = postgres(requireDatabaseUrl(), { max: 1 })
@@ -577,33 +577,13 @@ const main = async (): Promise<void> => {
 
   /**
    * Bumped here rather than left to the operator. Every atlas tile is cached
-   * under this generation for a week, so a rebuild that does not change it is
+   * under the atlas generation for a week, so a rebuild that does not change it is
    * invisible — the import reports success and the map keeps drawing the old
-   * sheet. Doing it by hand also invites the trap that the counter starts at
-   * one *by default*, so the first INCR of an unset key is a no-op.
+   * sheet. `refreshAtlasCache` bumps the generation upwards and drops the sheet's
+   * own cached tiles (`atlas:v*`); see its docstring for why this no longer clears
+   * the counter first.
    */
-  const redis = new Redis(process.env.NUXT_REDIS_URL ?? 'redis://127.0.0.1:6379', {
-    maxRetriesPerRequest: 2,
-    lazyConnect: true,
-  })
-
-  try {
-    await redis.connect()
-    // Cleared rather than incremented: an unset key already reads as 1, so the
-    // first increment would leave the prefix where it was.
-    await redis.del('vestigian:atlas-version')
-    const version = await redis.incr('vestigian:atlas-version')
-    const stale = await redis.keys('atlas:v*')
-    if (stale.length > 0) await redis.del(...stale)
-    console.log(`\nAtlas cache generation is now ${version}; ${stale.length} stale tiles dropped.`)
-  } catch (error) {
-    console.warn(
-      `\nAtlas rebuilt, but the cache generation could not be bumped ` +
-        `(${(error as Error).message}). Until it is, the map keeps serving the previous sheet.`,
-    )
-  } finally {
-    redis.disconnect()
-  }
+  await refreshAtlasCache(['atlas:v*'])
 
   await sql.end()
 }

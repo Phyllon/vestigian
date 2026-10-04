@@ -1,4 +1,3 @@
-import { Popup } from 'maplibre-gl'
 import type { Map as MapLibreMap, MapLayerMouseEvent, SymbolLayerSpecification } from 'maplibre-gl'
 import { escapeHtmlForPopup } from './useBattleOverlay'
 import { PORT_ATTRIBUTION } from './useBasemapStyle'
@@ -72,15 +71,18 @@ export const buildPortPopupHtml = (
 export const usePortOverlay = () => {
   const { isShowingPorts, portTilesUrl } = useBasemapStyle()
   const { t } = useI18n()
+  const { openOverlayPopup } = useOverlayPopup()
 
   const showPortPopup = (map: MapLibreMap, event: MapLayerMouseEvent): void => {
     const feature = event.features?.[0]
     if (feature?.geometry.type !== 'Point') return
 
-    new Popup({ closeButton: true, maxWidth: '260px' })
-      .setLngLat(feature.geometry.coordinates as [number, number])
-      .setHTML(buildPortPopupHtml(feature.properties as PortFeatureProperties, t))
-      .addTo(map)
+    openOverlayPopup({
+      map,
+      position: feature.geometry.coordinates as [number, number],
+      html: buildPortPopupHtml(feature.properties as PortFeatureProperties, t),
+      maxWidth: '260px',
+    })
   }
 
   const attachPortOverlay = (map: MapLibreMap): void => {

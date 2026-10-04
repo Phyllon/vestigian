@@ -39,8 +39,8 @@ import { Readable } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
 import { fileURLToPath } from 'node:url'
 import { DOMParser, type Document, type Element, type Node as XmlNode } from '@xmldom/xmldom'
-import { Redis } from 'ioredis'
 import postgres from 'postgres'
+import { refreshAtlasCache } from './atlas-cache'
 import * as tar from 'tar'
 import {
   checksumOfSource,
@@ -699,31 +699,9 @@ const main = async (): Promise<void> => {
   // Rides the shared atlas cache generation, same as every other imported
   // reference layer (`ports.ts`, `battles.ts`) — a moderator's approval
   // bumps `data-version` instead, this table has nothing to do with that
-  // clock. Cleared rather than incremented first: an unset key already
-  // reads as 1, so the first increment alone would leave the prefix where
-  // it was (see `05-antiquity-atlas.ts`'s own note on this).
-  const redis = new Redis(process.env.NUXT_REDIS_URL ?? 'redis://127.0.0.1:6379', {
-    maxRetriesPerRequest: 2,
-    lazyConnect: true,
-  })
-
-  try {
-    await redis.connect()
-    await redis.del('vestigian:atlas-version')
-    const version = await redis.incr('vestigian:atlas-version')
-    const stale = await redis.keys('inscription:v*')
-    if (stale.length > 0) await redis.del(...stale)
-    console.log(
-      `\nAtlas cache generation is now ${version}; ${stale.length} stale inscription tiles dropped.`,
-    )
-  } catch (error) {
-    console.warn(
-      `\nInscriptions imported, but the cache generation could not be bumped ` +
-        `(${(error as Error).message}). Until it is, the map keeps serving the previous tiles.`,
-    )
-  } finally {
-    redis.disconnect()
-  }
+  // clock. `refreshAtlasCache` bumps the generation upwards and drops the
+  // inscription tiles it feeds.
+  await refreshAtlasCache(['inscription:v*'])
 
   console.log(
     '\nNext: pnpm exec tsx scripts/verify-concordances.ts (unaffected by this table, but the',

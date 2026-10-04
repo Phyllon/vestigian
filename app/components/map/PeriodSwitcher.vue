@@ -11,12 +11,15 @@
    * through first, so there is no reason left to nest it inside a menu named
    * after the sheet.
    *
-   * Named for what it actually is rather than the generic "Periods" a reader
-   * would have to open the panel to understand: every step this scrubber
-   * moves through is a state of the Roman Empire specifically, not a general
-   * notion of historical period.
+   * Named "Ancient empires" rather than the generic "Periods" a reader would
+   * have to open the panel to understand: the slider moves the Roman state
+   * through time, and the switch under it adds the realms it faced (Carthage,
+   * Parthia, the Goths) in the same year. That switch lives here, not among
+   * the overlays, because it has no meaning without the slider — it is shown
+   * only while a date is chosen.
    */
-  const { periodYear, setPeriodYear } = useBasemapStyle()
+  const { periodYear, setPeriodYear, canShowPolities, isShowingPolities, setPolitiesEnabled } =
+    useBasemapStyle()
   const { steps: periodSteps, load: loadPeriodSteps } = useEmpirePeriods()
   const { t } = useI18n()
 
@@ -210,6 +213,19 @@
         >
           {{ currentPeriodStep.endEvent }}
         </p>
+        <!--
+          Directly under the slider it belongs to. `USwitch` is Reka UI's
+          switch, so the keyboard and screen-reader behaviour is not hand-built.
+        -->
+        <USwitch
+          v-if="canShowPolities"
+          :model-value="isShowingPolities"
+          :label="t('periodSwitcher.showPolities')"
+          :description="t('periodSwitcher.showPolitiesHint')"
+          size="sm"
+          class="mt-3 border-t border-paper-200 pt-3 dark:border-night-700"
+          @update:model-value="setPolitiesEnabled"
+        />
         <p class="mt-2 text-xs italic text-ink-400 dark:text-paper-500">
           {{ t('periodSwitcher.approximate') }}
         </p>

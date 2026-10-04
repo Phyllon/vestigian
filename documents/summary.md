@@ -274,6 +274,12 @@ mindmap
       EDH findspots (CC BY-SA)
       EDH inscriptions corpus, EpiDoc TEI (CC BY-SA 4.0)
       Attic Inscriptions Online (CC BY-SA 3.0)
+      Itiner-e Roman roads (CC BY 4.0)
+      Nomisma.org mints (CC BY 3.0)
+      Wikidata Roman monuments (CC0)
+      I.Sicily inscriptions (CC BY 4.0; 6 records CC BY-NC 4.0; text only)
+      Cliopatria neighbouring realms (CC BY 4.0)
+      Atlas of Hillforts of Britain and Ireland (CC BY 4.0)
       Natural Earth country boundaries (public domain)
       OmnesViae / Tabula Peutingeriana (no stated licence; compiler confirmed reuse)
       Wikidata battles (CC0)
@@ -578,7 +584,14 @@ source catalogue through a self-hosted LibreTranslate instance.
   Barrington sheet's own places already live in — resolving a findspot for
   **78%** of records, far denser than EDH's 17% because this corpus is
   concentrated in Attica.
-- **Both are imported reference material, not contributed data** — their own
+- **A third corpus, I.Sicily** (Oxford / ERC Crossreads, CC BY 4.0; six records
+  CC BY-NC 4.0): 5,136 Sicilian inscriptions in Greek, Latin, Elymian, Sikel and
+  Punic, 5,009 with a position, 1,218 with an English translation. Its own table,
+  tile layer and detail page (`/inscriptions/sicily/:id`). **Text only** — the
+  photographs are captioned "with the permission of" the Sicilian heritage
+  department, a permission to the project and not a licence downstream, so the page
+  links to I.Sicily instead of mirroring them.
+- **Both EDH and Attic are imported reference material, not contributed data** — their own
   table, no `siteId`, outside the revision/moderation pipeline entirely, the
   same treatment already given the Barrington sheet and the other overlay
   datasets in §6.3.

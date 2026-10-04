@@ -25,6 +25,17 @@ test.describe('the licence page', () => {
     await expect(page.getByText('Delapouite and Lorc')).toBeVisible()
     await expect(page.getByText('Epigraphic Database Heidelberg (CC BY-SA 4.0)')).toBeVisible()
     await expect(page.getByText('Attic Inscriptions Online (CC BY-SA 3.0)')).toBeVisible()
+    await expect(page.getByText('Itiner-e, the digital atlas of ancient roads')).toBeVisible()
+    await expect(page.getByText('Nomisma.org, the American Numismatic Society')).toBeVisible()
+    await expect(page.getByText('Roman monuments (theatres')).toBeVisible()
+    await expect(
+      page.getByText('Cliopatria, Seshat Global History Databank (CC BY 4.0)'),
+    ).toBeVisible()
+    await expect(page.getByText('the Atlas of Hillforts, Ralston & Lock')).toBeVisible()
+    // The photographs are the one thing left out, and the page says why.
+    await expect(
+      page.getByText('the photographs are not, because they are not licensed'),
+    ).toBeVisible()
   })
 
   test('documents the query parameters of both public feeds, with working examples', async ({

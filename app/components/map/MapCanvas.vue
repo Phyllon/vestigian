@@ -7,7 +7,15 @@
   const map = shallowRef<MapLibreMap | null>(null)
   const isReady = ref(false)
 
-  const { currentStyle, view, isDark, periodYear, isClusteringSites } = useBasemapStyle()
+  const {
+    currentStyle,
+    view,
+    isDark,
+    periodYear,
+    isClusteringSites,
+    referenceOverlaysActive,
+    isShowingPolities,
+  } = useBasemapStyle()
 
   /**
    * An antiquity sheet is parchment in both themes — filtering the raster would
@@ -32,8 +40,13 @@
     detachLimesOverlay,
     keepLimesOverlayThroughStyleChanges,
   } = useLimesOverlay()
-  const { attachPeriodOverlay, detachPeriodOverlay, keepPeriodOverlayThroughStyleChanges } =
-    usePeriodOverlay()
+  const {
+    attachPeriodOverlay,
+    detachPeriodOverlay,
+    syncPolities,
+    keepPeriodOverlayThroughStyleChanges,
+  } = usePeriodOverlay()
+  const { syncReferenceOverlays, keepReferenceOverlaysThroughStyleChanges } = useReferenceOverlays()
   const {
     isActive: isShowingBattles,
     attachBattleOverlay,
@@ -215,6 +228,20 @@
     attachPeriodOverlay(map.value)
   })
 
+  /** The neighbours have their own switch; the extent they sit under is untouched. */
+  watch(isShowingPolities, () => {
+    if (map.value) syncPolities(map.value)
+  })
+
+  /** One record of switches for Itiner-e, Nomisma, the Wikidata monuments and I.Sicily. */
+  watch(
+    referenceOverlaysActive,
+    () => {
+      if (map.value) syncReferenceOverlays(map.value)
+    },
+    { deep: true },
+  )
+
   watch(isShowingBattles, (isActive) => {
     if (!map.value) return
     if (isActive) {
@@ -347,6 +374,8 @@
       keepInscriptionsOverlayThroughStyleChanges(instance)
       attachAtticInscriptionsOverlay(instance)
       keepAtticInscriptionsOverlayThroughStyleChanges(instance)
+      syncReferenceOverlays(instance)
+      keepReferenceOverlaysThroughStyleChanges(instance)
       attachModernLabelsOverlay(instance)
       keepModernLabelsOverlayThroughStyleChanges(instance)
       attachOverlay(instance)
@@ -366,9 +395,13 @@
     instance.on('moveend', () => rememberCamera(readCamera(instance)))
     instance.on('click', (event) => handleFeatureTap(instance, event.point))
 
+    // Sites, and every overlay icon that opens a popup: the layers' own `mouseenter`
+    // handlers cannot be the answer, since this handler would overwrite them.
     instance.on('mousemove', (event) => {
-      const hits = findFeaturesAtPoint(instance, event.point)
-      instance.getCanvas().style.cursor = hits.length > 0 ? 'pointer' : ''
+      const isOverClickable =
+        findFeaturesAtPoint(instance, event.point).length > 0 ||
+        isOverClickableOverlay(instance, event.point)
+      instance.getCanvas().style.cursor = isOverClickable ? 'pointer' : ''
     })
 
     map.value = instance

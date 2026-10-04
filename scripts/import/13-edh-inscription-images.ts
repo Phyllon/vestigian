@@ -37,8 +37,8 @@ import { Readable } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
 import { fileURLToPath } from 'node:url'
 import { DOMParser, type Document, type Element } from '@xmldom/xmldom'
-import { Redis } from 'ioredis'
 import postgres from 'postgres'
+import { refreshAtlasCache } from './atlas-cache'
 import * as tar from 'tar'
 import { requireDatabaseUrl } from '../../server/database/database-url'
 
@@ -313,22 +313,7 @@ const main = async (): Promise<void> => {
       : 'No record carried an open rights statement, as expected — nothing was mirrored, every row links out to EDH instead.',
   )
 
-  const redis = new Redis(process.env.NUXT_REDIS_URL ?? 'redis://127.0.0.1:6379', {
-    maxRetriesPerRequest: 2,
-    lazyConnect: true,
-  })
-  try {
-    await redis.connect()
-    await redis.del('vestigian:atlas-version')
-    const version = await redis.incr('vestigian:atlas-version')
-    console.log(`\nAtlas cache generation is now ${version}.`)
-  } catch (error) {
-    console.warn(
-      `\nImages imported, but the cache generation could not be bumped (${(error as Error).message}).`,
-    )
-  } finally {
-    redis.disconnect()
-  }
+  await refreshAtlasCache([])
 
   await sql.end()
 }

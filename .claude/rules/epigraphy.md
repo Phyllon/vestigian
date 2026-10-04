@@ -277,6 +277,15 @@ error at all** — the kind of failure that looks like success:
 P1.is_identified_by > E42.Identifier`, present on 61% of records) was
    also verified this way, not assumed from the RDF's apparent shape.
 
+## I.Sicily — a third corpus, text only
+
+5,136 Sicilian inscriptions (Greek, Latin, Elymian, Sikel, Punic), CC BY 4.0 with six
+CC BY-NC 4.0 records, in `isicily_inscriptions`. **Its photographs are deliberately not
+mirrored** — the captions grant a permission to the project, not a licence downstream.
+Source, licence reading, the four files with a wrong `<idno>`, the layer and the detail
+page (`/inscriptions/sicily/:id`) are all in `.claude/rules/reference-overlays.md`, which
+loads when you touch those files; it is not repeated here.
+
 ## Attic Inscriptions Online (Phase 2) — a second, genuinely separate corpus
 
 The plan's own open item was "confirm AIO's bulk-access mechanism before

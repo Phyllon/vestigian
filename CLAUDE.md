@@ -163,6 +163,7 @@ app/
           useAtlasPlaceOverlay useLimesOverlay usePeriodOverlay useEmpirePeriods
           useBattleOverlay usePortOverlay useRouteOverlay useCoinHoardOverlay
           useMinorFeatureOverlay useInscriptionsOverlay useAtticInscriptionsOverlay
+          useReferenceOverlays useOverlayPopup
                                                                                    (+__test__/)
     data/ useSiteQuery useSiteEnrichment useSiteEndorsement useImageUrl useCanonicalUrl
           useNoIndex useSocialMeta                                                     (+__test__/)
@@ -185,12 +186,15 @@ app/
          limes/index limes/[slug]
          inscriptions/index inscriptions/[edhId]
          inscriptions/attic/index inscriptions/attic/[aioKey]
+         inscriptions/sicily/[isicilyId]
          moderation/index          admin/index (one station, sections in the query string)
          tabula-peutingeriana columns nearby
 server/
   plugins/ observability.ts   the only per-request hook: id, access log, span
   middleware/ content-language.ts   sets Content-Language from the locale cookie
   api/ tiles/[z]/[x]/[y]  tiles/antiquity/[z]/[x]/[y]
+       tiles/reference/[layer]/[z]/[x]/[y]  tiles/antiquity-polities/[year]/[z]/[x]/[y]
+       isicily-inscriptions/[isicilyId]
        tiles/limes/[z]/[x]/[y]  tiles/basemap/[z]/[x]/[y]
        sites/ (+ [id]/endorse.post.ts endorse.delete.ts needs-work)  tracings/  contributions/  places/
        auth/ (+ account.delete.ts export.get.ts change-password.post.ts change-email.post.ts)
@@ -228,6 +232,9 @@ scripts/import/  four-stage vici.org import + vici-licences.ts (shared vocabular
                  13-battles.ts 13-edh-inscription-images.ts 14-ancient-ports.ts
                  15-orbis-routes.ts 16-awmc-minor-features.ts 17-awmc-minor-lines.ts
                  18-chrr-coin-hoards.ts 19-ohm-empire-extents.ts 20-attic-inscriptions.ts
+                 21-itinere-roads.ts 22-nomisma-mints.ts 23-wikidata-monuments.ts
+                 24-isicily-inscriptions.ts 25-cliopatria-polities.ts 26-hillforts-atlas.ts
+                 atlas-cache.ts
 scripts/generate-og-placeholders.ts  static per-category Open Graph cards, run by hand
 scripts/warm-tiles.ts snapshot-database.ts reconcile-images.ts build-glyphs.ts
                  strip-description-html.ts backfill-country-codes.ts verify-concordances.ts

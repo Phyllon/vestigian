@@ -1,6 +1,6 @@
-import { Popup } from 'maplibre-gl'
 import type { Map as MapLibreMap, MapLayerMouseEvent } from 'maplibre-gl'
 import { escapeHtmlForPopup } from './useBattleOverlay'
+import { registerClickableOverlayLayer } from './useMapInstance'
 import type { FrontierTranslate } from '../limes/useLimes'
 import { formatFrontierYears } from '../limes/useLimes'
 
@@ -81,19 +81,23 @@ export const buildAtlasPlacePopupHtml = (
  */
 export const useAtlasPlaceOverlay = () => {
   const { t } = useI18n()
+  const { openOverlayPopup } = useOverlayPopup()
 
   const showAtlasPlacePopup = (map: MapLibreMap, event: MapLayerMouseEvent): void => {
     const feature = event.features?.[0]
     if (feature?.geometry.type !== 'Point') return
 
-    new Popup({ closeButton: true, maxWidth: '280px' })
-      .setLngLat(feature.geometry.coordinates as [number, number])
-      .setHTML(buildAtlasPlacePopupHtml(feature.properties as AtlasPlaceProperties, t))
-      .addTo(map)
+    openOverlayPopup({
+      map,
+      position: feature.geometry.coordinates as [number, number],
+      html: buildAtlasPlacePopupHtml(feature.properties as AtlasPlaceProperties, t),
+      maxWidth: '280px',
+    })
   }
 
   const attachAtlasPlaceOverlay = (map: MapLibreMap): void => {
     for (const layerId of ATLAS_PLACE_LAYER_IDS) {
+      registerClickableOverlayLayer(layerId)
       map.on('click', layerId, (event) => showAtlasPlacePopup(map, event))
       map.on('mouseenter', layerId, () => {
         map.getCanvas().style.cursor = 'pointer'

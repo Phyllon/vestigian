@@ -48,7 +48,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import osmtogeojson from 'osmtogeojson'
 import postgres from 'postgres'
-import Redis from 'ioredis'
+import { refreshAtlasCache } from './atlas-cache'
 import { requireDatabaseUrl } from '../../server/database/database-url'
 
 const sql = postgres(requireDatabaseUrl(), { max: 1 })
@@ -264,21 +264,7 @@ const main = async (): Promise<void> => {
   // Rides the shared atlas generation, like every other antiquity import:
   // this data changes on the same clock as the rest of the sheet, and the
   // reader-facing tiles are already keyed to that counter.
-  const redis = new Redis(process.env.NUXT_REDIS_URL ?? 'redis://127.0.0.1:6379', {
-    maxRetriesPerRequest: 2,
-    lazyConnect: true,
-  })
-
-  try {
-    await redis.connect()
-    await redis.del('vestigian:atlas-version')
-    const version = await redis.incr('vestigian:atlas-version')
-    console.log(`\nAtlas cache generation is now ${version}.`)
-  } catch (error) {
-    console.warn('Could not bump the atlas cache generation:', error)
-  } finally {
-    redis.disconnect()
-  }
+  await refreshAtlasCache(['atlas:v*:empire:*'])
 
   await sql.end()
 }

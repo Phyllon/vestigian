@@ -40,8 +40,8 @@ import { join } from 'node:path'
 import { Readable } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
 import AdmZip from 'adm-zip'
-import { Redis } from 'ioredis'
 import postgres from 'postgres'
+import { refreshAtlasCache } from './atlas-cache'
 import { read as readShapefile } from 'shapefile'
 import { requireDatabaseUrl } from '../../server/database/database-url'
 
@@ -182,24 +182,7 @@ const main = async (): Promise<void> => {
   await sql`ANALYZE antiquity_areas`
 
   // Rides the atlas cache generation, same as every other antiquity_* import.
-  const redis = new Redis(process.env.NUXT_REDIS_URL ?? 'redis://127.0.0.1:6379', {
-    maxRetriesPerRequest: 2,
-    lazyConnect: true,
-  })
-
-  try {
-    await redis.connect()
-    await redis.del('vestigian:atlas-version')
-    const version = await redis.incr('vestigian:atlas-version')
-    console.log(`\nAtlas cache generation is now ${version}.`)
-  } catch (error) {
-    console.warn(
-      `\nImported, but the cache generation could not be bumped ` +
-        `(${(error as Error).message}). Until it is, the map keeps serving the previous sheet.`,
-    )
-  } finally {
-    redis.disconnect()
-  }
+  await refreshAtlasCache(['atlas:v*'])
 
   await sql.end()
 }

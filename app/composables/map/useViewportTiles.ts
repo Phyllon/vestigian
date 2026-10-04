@@ -179,6 +179,7 @@ export const useViewportTiles = () => {
       registerCoinHoardIcon(map, colours)
       registerInscriptionIcon(map, colours)
       registerAtticInscriptionIcon(map, colours)
+      registerReferenceIcons(map, colours)
     } finally {
       isRegisteringIcons = false
     }

@@ -18,6 +18,14 @@ means of reuse belong together.
 | `/api/data/sites.geojson` | plain GeoJSON             | maps, analysis           |
 | `/api/data/sites.lp.json` | Linked Places Format v1.3 | gazetteer reconciliation |
 
+**Neither feed carries imported reference data.** Roads, mints, monuments, inscriptions and
+the neighbouring realms live in their own tables under their own licences and are drawn
+only as tiles; republishing them here would put third-party terms inside a feed that
+promises CC BY-SA / CC0, and an I.Sicily record under CC BY-NC would break that promise
+outright. `/licence` says so (`licence.reuseNotIncluded`). Nothing about the five new
+sources therefore changes either endpoint, `bbox`/`category`/`limit`/`offset`/`dated`, or
+the `closeMatch` links.
+
 Both read the live `sites` table on every call, filtered to `status = 'approved'`;
 the only staleness is the 5-minute `cache-control`. **Both page with `offset`**
 (in `id` order, `limit` ≤ 1000) — they once documented themselves as "paged"
@@ -39,17 +47,23 @@ SQL, so an unknown value answered 500 instead of 400.
 control carries the live credit for the layer that is switched on. Audited
 against the code and, for each licence, a real request (3 Oct 2026):
 
-| Source                                                                                                           | Licence                                                             | Where credited                                                |
-| ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------- |
-| vici.org records (René Voorburg and contributors)                                                                | CC BY-SA / CC0                                                      | `recordsBody` (named only since then)                         |
-| OpenStreetMap via Protomaps basemap extract                                                                      | ODbL 1.0 produced work                                              | `modernMapBody`, map attribution                              |
-| Mapterhorn elevation, 151 sources in `attribution.json`                                                          | mostly CC BY 4.0 or open-government licences; 7 CC0; 41 PD or other | `elevationBody`, map attribution → mapterhorn.com/attribution |
-| AWMC, Pleiades, DARE, EOX Sentinel-2, OHM, Wikidata, ports, ORBIS, CHRR, GeoNames, Trajan/Marcus Aurelius plates | various                                                             | existing sections                                             |
-| EDH inscriptions, Attic Inscriptions Online                                                                      | CC BY-SA 4.0 / 3.0                                                  | `overlayInscriptions`, `overlayAtticInscriptions`             |
-| Wikipedia extract (+ Wikidata, Pleiades only to match)                                                           | CC BY-SA 4.0 / CC0 / CC BY 3.0                                      | `enrichmentBody`, under each extract                          |
-| Tabula Peutingeriana network (René Voorburg; Talbert)                                                            | none stated; reuse confirmed by the compiler                        | `overlayTabulaPeutingeriana`, map attribution                 |
-| Natural Earth country boundaries                                                                                 | public domain                                                       | `placeNamesBody`                                              |
-| game-icons.net (Delapouite, Lorc), Lucide, fonts                                                                 | CC BY 3.0 / ISC / OFL                                               | `iconsBody`                                                   |
+| Source                                                                                                           | Licence                                                             | Where credited                                                   |
+| ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| vici.org records (René Voorburg and contributors)                                                                | CC BY-SA / CC0                                                      | `recordsBody` (named only since then)                            |
+| OpenStreetMap via Protomaps basemap extract                                                                      | ODbL 1.0 produced work                                              | `modernMapBody`, map attribution                                 |
+| Mapterhorn elevation, 151 sources in `attribution.json`                                                          | mostly CC BY 4.0 or open-government licences; 7 CC0; 41 PD or other | `elevationBody`, map attribution → mapterhorn.com/attribution    |
+| AWMC, Pleiades, DARE, EOX Sentinel-2, OHM, Wikidata, ports, ORBIS, CHRR, GeoNames, Trajan/Marcus Aurelius plates | various                                                             | existing sections                                                |
+| EDH inscriptions, Attic Inscriptions Online                                                                      | CC BY-SA 4.0 / 3.0                                                  | `overlayInscriptions`, `overlayAtticInscriptions`                |
+| Wikipedia extract (+ Wikidata, Pleiades only to match)                                                           | CC BY-SA 4.0 / CC0 / CC BY 3.0                                      | `enrichmentBody`, under each extract                             |
+| Tabula Peutingeriana network (René Voorburg; Talbert)                                                            | none stated; reuse confirmed by the compiler                        | `overlayTabulaPeutingeriana`, map attribution                    |
+| Itiner-e Roman roads (Brughmans, Pažout, de Soto, Bjerregaard Vahlstrup)                                         | CC BY 4.0                                                           | `overlayRomanRoads`, map attribution                             |
+| Nomisma.org mints                                                                                                | CC BY 3.0                                                           | `overlayMints`, map attribution                                  |
+| Wikidata Roman monuments                                                                                         | CC0 1.0                                                             | `overlayMonuments`, map attribution                              |
+| I.Sicily inscriptions (text only; photographs not mirrored)                                                      | CC BY 4.0, 6 × CC BY-NC 4.0                                         | `overlayIsicily`, map attribution, per-record on the detail page |
+| Cliopatria neighbouring realms (Seshat)                                                                          | CC BY 4.0                                                           | `overlayPolities`, map attribution                               |
+| Atlas of Hillforts of Britain and Ireland (Ralston & Lock)                                                       | CC BY 4.0                                                           | `overlayHillforts`, map attribution                              |
+| Natural Earth country boundaries                                                                                 | public domain                                                       | `placeNamesBody`                                                 |
+| game-icons.net (Delapouite, Lorc), Lucide, fonts                                                                 | CC BY 3.0 / ISC / OFL                                               | `iconsBody`                                                      |
 
 The game-icons credit was the one that was a genuine breach, not a gap in
 courtesy: CC BY 3.0 requires naming the author, and nothing in the UI did until

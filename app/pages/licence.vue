@@ -135,6 +135,12 @@
         <li>{{ t('licence.overlayInscriptions') }}</li>
         <li>{{ t('licence.overlayAtticInscriptions') }}</li>
         <li>{{ t('licence.overlayTabulaPeutingeriana') }}</li>
+        <li>{{ t('licence.overlayRomanRoads') }}</li>
+        <li>{{ t('licence.overlayMonuments') }}</li>
+        <li>{{ t('licence.overlayMints') }}</li>
+        <li>{{ t('licence.overlayIsicily') }}</li>
+        <li>{{ t('licence.overlayPolities') }}</li>
+        <li>{{ t('licence.overlayHillforts') }}</li>
       </ul>
     </section>
 
@@ -185,6 +191,9 @@
       </h2>
       <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
         {{ t('licence.reuseBody') }}
+      </p>
+      <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
+        {{ t('licence.reuseNotIncluded') }}
       </p>
       <ul class="mt-3 space-y-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
         <li>

@@ -85,6 +85,10 @@ export interface BasemapSource {
   inscriptionTilesUrl: string
   /** Attic Inscriptions Online with a resolved findspot, added when "Show Attic inscriptions" is on. */
   atticInscriptionTilesUrl: string
+  /** Itiner-e roads, Nomisma mints, Wikidata monuments and I.Sicily, one endpoint with the layer in the path. */
+  referenceTilesUrl: string
+  /** Cliopatria neighbours of the Roman state in the scrubber's year, added with the period overlay. */
+  polityTilesUrl: string
   glyphsUrl: string
 }
 

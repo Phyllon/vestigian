@@ -1,4 +1,3 @@
-import { Popup } from 'maplibre-gl'
 import type { LineLayerSpecification, Map as MapLibreMap, MapLayerMouseEvent } from 'maplibre-gl'
 import { ROUTE_ATTRIBUTION } from './useBasemapStyle'
 import { bindOverlayListenersOnce } from './useMapInstance'
@@ -75,15 +74,19 @@ export const buildRoutePopupHtml = (
 export const useRouteOverlay = () => {
   const { isShowingRoutes, routeTilesUrl } = useBasemapStyle()
   const { t } = useI18n()
+  const { openOverlayPopup } = useOverlayPopup()
 
   const showRoutePopup = (map: MapLibreMap, event: MapLayerMouseEvent): void => {
     const feature = event.features?.[0]
     if (!feature) return
 
-    new Popup({ closeButton: true, maxWidth: '260px' })
-      .setLngLat(event.lngLat)
-      .setHTML(buildRoutePopupHtml(feature.properties as RouteFeatureProperties, t))
-      .addTo(map)
+    openOverlayPopup({
+      map,
+      position: [event.lngLat.lng, event.lngLat.lat],
+      html: buildRoutePopupHtml(feature.properties as RouteFeatureProperties, t),
+      maxWidth: '260px',
+      withRing: false,
+    })
   }
 
   const attachRouteOverlay = (map: MapLibreMap): void => {

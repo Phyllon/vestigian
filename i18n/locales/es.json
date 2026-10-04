@@ -85,7 +85,17 @@
     "showInscriptions": "Inscripciones",
     "showInscriptionsHint": "Inscripciones reflejadas con un lugar de hallazgo identificado (EDH)",
     "showAtticInscriptions": "Inscripciones áticas",
-    "showAtticInscriptionsHint": "Attic Inscriptions Online con un lugar de hallazgo identificado (AIO)"
+    "showAtticInscriptionsHint": "Attic Inscriptions Online con un lugar de hallazgo identificado (AIO)",
+    "showIsicily": "Inscripciones sicilianas",
+    "showIsicilyHint": "Inscripciones de la Sicilia antigua de I.Sicily: griego, latín, élimo, sículo, púnico",
+    "showRomanRoads": "Calzadas romanas",
+    "showRomanRoadsHint": "La red de Itiner-e: línea continua si está comprobada, discontinua si es conjetural",
+    "showMonuments": "Monumentos romanos",
+    "showMonumentsHint": "Teatros, villas, fuertes, termas y más, de Wikidata",
+    "showMints": "Cecas",
+    "showMintsHint": "Dónde se acuñó moneda, según Nomisma",
+    "showHillforts": "Fortificaciones de altura",
+    "showHillfortsHint": "Recintos fortificados de Gran Bretaña e Irlanda, muchos reocupados bajo Roma"
   },
   "tabulaPeutingeriana": {
     "title": "Tabula Peutingeriana",
@@ -153,7 +163,24 @@
     "inscriptionsTitle": "Inscripciones",
     "inscriptionMark": "Inscripción reflejada con un lugar de hallazgo identificado",
     "atticInscriptionsTitle": "Inscripciones áticas",
-    "atticInscriptionMark": "Inscripción ática con un lugar de hallazgo identificado"
+    "atticInscriptionMark": "Inscripción ática con un lugar de hallazgo identificado",
+    "romanRoadsTitle": "Calzadas romanas",
+    "romanRoadKind": {
+      "certain": "Trazado comprobado",
+      "conjectured": "Trazado conjetural",
+      "hypothetical": "Trazado hipotético"
+    },
+    "isicilyTitle": "Inscripciones sicilianas",
+    "isicilyMark": "Inscripción de I.Sicily, en un lugar aproximado",
+    "monumentsTitle": "Monumentos romanos",
+    "mintsTitle": "Cecas",
+    "mintMark": "Ceca, de Nomisma",
+    "empiresTitle": "Imperios antiguos",
+    "romanExtentMark": "Extensión del Estado romano en el año elegido",
+    "emptyHint": "La leyenda está vacía por ahora. Active una capa y sus marcas se explicarán aquí.",
+    "politiesMark": "Contorno de un reino en el año elegido",
+    "hillfortsTitle": "Fortificaciones de altura",
+    "hillfortMark": "Recinto fortificado, del Atlas of Hillforts"
   },
   "siteDetail": {
     "loading": "Cargando",
@@ -358,6 +385,12 @@
     "overlayInscriptions": "Inscripciones: Epigraphic Database Heidelberg (CC BY-SA 4.0).",
     "overlayAtticInscriptions": "Inscripciones áticas: Attic Inscriptions Online (CC BY-SA 3.0).",
     "overlayTabulaPeutingeriana": "Red de la Tabla de Peutinger: compilada por René Voorburg (omnesviae.org) a partir de la georreferenciación de Richard Talbert; el conjunto de datos no indica licencia propia y se usa con su permiso.",
+    "overlayRomanRoads": "Calzadas romanas: Itiner-e, el atlas digital de caminos antiguos — Brughmans, Pažout, de Soto y Bjerregaard Vahlstrup, Universidad de Aarhus (CC BY 4.0). Los trazados comprobados, conjeturales e hipotéticos se dibujan de forma distinta.",
+    "overlayMonuments": "Monumentos romanos (teatros, anfiteatros, villas, acueductos, puentes, templos, fuertes, termas, foros, mitreos): Wikidata (CC0 1.0), sin derechos reservados.",
+    "overlayMints": "Cecas: Nomisma.org, el nodo de datos abiertos enlazados de la American Numismatic Society (CC BY 3.0).",
+    "overlayIsicily": "Inscripciones sicilianas: I.Sicily, Universidad de Oxford (CC BY 4.0; seis registros CC BY-NC 4.0, solo uso no comercial). Los textos se reproducen; las fotografías no, porque no tienen licencia de reutilización.",
+    "overlayPolities": "Reinos vecinos (Cartago, Partia, los reinos seléucida y ptolemaico, los godos y otros): Cliopatria, Seshat Global History Databank (CC BY 4.0), una lectura académica de un límite aproximado.",
+    "overlayHillforts": "Recintos fortificados de Gran Bretaña e Irlanda: Atlas of Hillforts, Ralston y Lock (universidades de Oxford, Edimburgo y Cork), a través del Archaeology Data Service (CC BY 4.0).",
     "columnReliefHeading": "Relieves de columna",
     "columnReliefBody": "Las placas de la Columna de Trajano están reflejadas desde la categoría «Cichorius Plates» de Wikimedia Commons, marcadas allí como dominio público. Las placas de la Columna de Marco Aurelio se sirven en directo desde la digitalización de la Biblioteca de la Universidad de Heidelberg del estudio de Petersen, Domaszewski & Calderini de 1896 — también dominio público; nada se copia en el almacenamiento propio de este proyecto para esa columna.",
     "placeNamesHeading": "Nombres de lugar modernos",
@@ -370,6 +403,7 @@
     "satelliteBody": "La vista satélite es imagen Sentinel-2 sin nubes de EOX IT Services (Viena), construida a partir de datos abiertos de ESA Copernicus Sentinel-2. La versión que usa esta aplicación está bajo CC BY-NC-SA 4.0 — solo uso no comercial, y cualquier reutilización debe compartirse bajo la misma licencia.",
     "reuseHeading": "Reutilizar estos datos",
     "reuseBody": "Vestigian se construye a partir de fuentes con licencia abierta y publica sus propios registros con el mismo espíritu. Ambos canales son de solo lectura, acotados, paginados y abiertos a peticiones de otros dominios. Los textos están bajo CC BY-SA y los metadatos bajo CC0; las licencias de las imágenes varían según el registro y no se incluyen.",
+    "reuseNotIncluded": "Los feeds solo contienen los registros aportados aquí. Las capas de referencia enumeradas arriba (calzadas, cecas, monumentos, inscripciones y las demás) no se republican en ellos: tómelas de sus propias fuentes, con sus propias licencias.",
     "reuseGeojson": "GeoJSON simple, para mapas y análisis",
     "reuseLinkedPlaces": "Linked Places Format, el estándar de nomenclátor de la red Pelagios, con enlaces closeMatch a Pleiades y Wikidata",
     "reuseParamsHeading": "Parámetros de consulta",
@@ -594,6 +628,122 @@
   "coinHoardPopup": {
     "hoardCount": "Ningún tesoro registrado aquí | 1 tesoro registrado | {n} tesoros registrados",
     "viewOnGeonames": "Ver en GeoNames"
+  },
+  "referencePopup": {
+    "road": {
+      "unnamed": "Tramo de calzada sin nombre",
+      "main": "Calzada principal",
+      "secondary": "Calzada secundaria",
+      "certainty": {
+        "certain": "Trazado comprobado",
+        "conjectured": "Trazado conjetural",
+        "hypothetical": "Trazado hipotético"
+      }
+    },
+    "mint": {
+      "kind": "Ceca",
+      "viewOnNomisma": "Ver en Nomisma"
+    },
+    "monument": {
+      "kind": {
+        "theatre": "Teatro",
+        "amphitheatre": "Anfiteatro",
+        "villa": "Villa",
+        "aqueduct": "Acueducto",
+        "bridge": "Puente",
+        "temple": "Templo",
+        "fort": "Fuerte",
+        "bath": "Termas",
+        "forum": "Foro",
+        "mithraeum": "Mitreo"
+      }
+    },
+    "viewOnPleiades": "Ver en Pleiades",
+    "viewOnWikidata": "Ver en Wikidata",
+    "hillfort": {
+      "type": {
+        "contour": "Fortificación de contorno",
+        "partial-contour": "Fortificación de contorno parcial",
+        "promontory": "Fortificación de promontorio",
+        "hillslope": "Fortificación de ladera",
+        "level-terrain": "Fortificación en terreno llano",
+        "marsh": "Fortificación de pantano",
+        "multiple-enclosure": "Recintos múltiples"
+      },
+      "country": {
+        "england": "Inglaterra",
+        "scotland": "Escocia",
+        "wales": "Gales",
+        "northern-ireland": "Irlanda del Norte",
+        "republic-of-ireland": "República de Irlanda",
+        "isle-of-man": "Isla de Man"
+      },
+      "reliability": {
+        "unconfirmed": "Posible recinto fortificado: el atlas no pudo confirmarlo.",
+        "irreconciled": "El atlas registra desacuerdos sin resolver sobre este sitio."
+      },
+      "area": "{hectares} ha cercadas",
+      "altitude": "{metres} m sobre el nivel del mar",
+      "dated": "Indicios de datación: {periods}",
+      "viewDataset": "Atlas of Hillforts (Archaeology Data Service)"
+    }
+  },
+  "polityPopup": {
+    "outline": "Contorno para {period}",
+    "caveat": "Una lectura académica de un límite aproximado. No se dibuja lo que cubre la extensión romana.",
+    "viewOnWikipedia": "Ver en Wikipedia",
+    "viewOnWikidata": "Ver en Wikidata"
+  },
+  "isicilyInscriptions": {
+    "languages": {
+      "grc": "Griego antiguo",
+      "la": "Latín",
+      "xly": "Élimo",
+      "scx": "Sículo",
+      "xpu": "Púnico",
+      "osc": "Osco",
+      "he": "Hebreo"
+    },
+    "functions": {
+      "funerary": "Funeraria",
+      "dedication": "Dedicatoria",
+      "honorific": "Honorífica",
+      "attribution": "Marca de propiedad o de fabricante",
+      "building": "Inscripción de obra",
+      "defixio": "Tablilla de maldición",
+      "decree": "Decreto",
+      "invocation": "Invocación",
+      "account": "Cuenta",
+      "list": "Lista",
+      "legal": "Texto jurídico",
+      "milestone": "Miliario",
+      "seat": "Inscripción de asiento",
+      "civic-allotment": "Ficha de sorteo cívico",
+      "terminus": "Mojón",
+      "certification": "Certificación",
+      "expressive": "Saludo o exhortación"
+    },
+    "detail": {
+      "eyebrow": "Inscripción de la Sicilia antigua",
+      "dated": "Datación",
+      "language": "Lengua",
+      "kind": "Tipo",
+      "object": "Objeto",
+      "material": "Material",
+      "place": "Lugar",
+      "ancientPlace": "Lugar antiguo",
+      "repository": "Conservada en",
+      "provenance": "Hallazgo",
+      "edition": "Texto",
+      "translation": "Traducción al inglés",
+      "identifiers": "También catalogada como",
+      "approximatePlace": "La posición es la población actual a la que se atribuye la piedra, no un lugar de excavación.",
+      "photoNote": "Las fotografías no se reproducen aquí: no tienen licencia de reutilización. La imagen está en I.Sicily.",
+      "nonCommercialNote": "Este registro tiene licencia CC BY-NC 4.0: solo uso no comercial.",
+      "showOnMap": "Mostrar en el mapa",
+      "viewOnIsicily": "Ver en I.Sicily (con fotografía)",
+      "credit": "{licence}, I.Sicily"
+    }
   },
   "siteExternalLinks": {
     "title": "También se registró en",
@@ -1089,15 +1239,17 @@
     "labelActive": "Capas: {count} activas"
   },
   "periodSwitcher": {
-    "label": "Imperio romano: {state}",
-    "menuLabel": "El Imperio romano, a través del tiempo",
-    "title": "Imperio romano",
+    "label": "Imperios antiguos: {state}",
+    "menuLabel": "Los imperios antiguos, a través del tiempo",
+    "title": "Imperios antiguos",
     "heading": "Imperio romano: extensión en el tiempo",
     "scrubberLabel": "El Imperio romano, a través del tiempo",
     "off": "Fuera",
     "yearBce": "{year} a. C.",
     "yearCe": "{year} d. C.",
-    "approximate": "Las fronteras son aproximadas, trazadas por colaboradores de OpenHistoricalMap."
+    "approximate": "Las fronteras son aproximadas, trazadas por colaboradores de OpenHistoricalMap.",
+    "showPolities": "Reinos vecinos",
+    "showPolitiesHint": "Cartago, Partia, los godos y otros bajo la extensión romana"
   },
   "languageNotice": {
     "body": "Esta página se muestra en {language}. El inglés es el idioma en el que más se puede confiar aquí — otros pueden tener un significado ligeramente distinto.",

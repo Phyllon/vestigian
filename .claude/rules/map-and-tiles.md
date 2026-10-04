@@ -842,6 +842,14 @@ MapLibre's own `Hash` control (`readCameraFromHash` is this project's own
 parser), and `setData` is called with one argument and its return value ignored.
 CSP already allowed `worker-src 'self'`, which is all a self-hosted worker needs.
 
+## Newer reference overlays share one endpoint
+
+Itiner-e roads, Nomisma mints, the Wikidata monuments and I.Sicily are served by
+`/api/tiles/reference/:layer/...` and drawn by `useReferenceOverlays.ts`; the Roman
+state's neighbours (Cliopatria) ride the period overlay. The one-file-per-overlay
+pattern described elsewhere in this file is the older shape. See
+`.claude/rules/reference-overlays.md`.
+
 ## How the map stays fast
 
 1. `GET /api/tiles/{z}/{x}/{y}.mvt` → validate coordinate → check Valkey → `ST_AsMVT` against a GiST index.

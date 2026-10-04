@@ -536,6 +536,18 @@ export default defineNuxtConfig({
          */
         atticInscriptionTilesUrl: '/api/tiles/attic-inscriptions',
         /**
+         * Itiner-e roads, Nomisma mints, Wikidata monuments and I.Sicily — four
+         * reference overlays on any basemap that share one endpoint, the layer
+         * id coming after this path (`/roman-roads/{z}/{x}/{y}`). See
+         * `server/utils/reference-layers.ts`.
+         */
+        referenceTilesUrl: '/api/tiles/reference',
+        /**
+         * Cliopatria polities valid in the scrubber's year, the year in the
+         * path like `empireExtentTilesUrl`.
+         */
+        polityTilesUrl: '/api/tiles/antiquity-polities',
+        /**
          * Label glyphs ship with the app rather than being fetched from a font
          * server, for the same reason `@fontsource` is used for the interface:
          * reading the map should tell no third party that you did. Same-origin,

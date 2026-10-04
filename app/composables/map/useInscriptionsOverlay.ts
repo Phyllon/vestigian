@@ -1,4 +1,3 @@
-import { Popup } from 'maplibre-gl'
 import type { Map as MapLibreMap, MapLayerMouseEvent, SymbolLayerSpecification } from 'maplibre-gl'
 import { escapeHtmlForPopup } from './useBattleOverlay'
 import { INSCRIPTION_ATTRIBUTION } from './useBasemapStyle'
@@ -83,6 +82,7 @@ export const buildInscriptionPopupHtml = (
 export const useInscriptionsOverlay = () => {
   const { isShowingInscriptions, inscriptionTilesUrl } = useBasemapStyle()
   const { t } = useI18n()
+  const { openOverlayPopup } = useOverlayPopup()
 
   const showInscriptionPopup = (map: MapLibreMap, event: MapLayerMouseEvent): void => {
     const feature = event.features?.[0]
@@ -90,10 +90,12 @@ export const useInscriptionsOverlay = () => {
 
     const properties = feature.properties as InscriptionFeatureProperties
 
-    const popup = new Popup({ closeButton: true, maxWidth: '260px' })
-      .setLngLat(feature.geometry.coordinates as [number, number])
-      .setHTML(buildInscriptionPopupHtml(properties, t))
-      .addTo(map)
+    const popup = openOverlayPopup({
+      map,
+      position: feature.geometry.coordinates as [number, number],
+      html: buildInscriptionPopupHtml(properties, t),
+      maxWidth: '260px',
+    })
 
     // `Popup.setHTML` is raw markup, not a Vue template — its own "Open
     // inscription" link is a plain `<a>` with no router interception. Left

@@ -46,8 +46,8 @@ import { createWriteStream } from 'node:fs'
 import { join } from 'node:path'
 import { Readable } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
-import { Redis } from 'ioredis'
 import postgres from 'postgres'
+import { refreshAtlasCache } from './atlas-cache'
 import { LIMES_SECTORS, claimLimesSectors } from '../../shared/utils/limes'
 import type { LimesSegmentKind } from '../../shared/types'
 import { requireDatabaseUrl } from '../../server/database/database-url'
@@ -487,26 +487,7 @@ const main = async (): Promise<void> => {
    * Both change only when an import runs, and a reader who rebuilt the atlas
    * has almost certainly rebuilt this too.
    */
-  const redis = new Redis(process.env.NUXT_REDIS_URL ?? 'redis://127.0.0.1:6379', {
-    maxRetriesPerRequest: 2,
-    lazyConnect: true,
-  })
-
-  try {
-    await redis.connect()
-    await redis.del('vestigian:atlas-version')
-    const version = await redis.incr('vestigian:atlas-version')
-    const stale = [...(await redis.keys('atlas:v*')), ...(await redis.keys('limes:v*'))]
-    if (stale.length > 0) await redis.del(...stale)
-    console.log(`  Atlas cache generation is now ${version}; ${stale.length} stale tiles dropped.`)
-  } catch (error) {
-    console.warn(
-      `\n  Frontier rebuilt, but the cache generation could not be bumped ` +
-        `(${(error as Error).message}). Until it is, the map keeps serving the previous sheet.`,
-    )
-  } finally {
-    redis.disconnect()
-  }
+  await refreshAtlasCache(['atlas:v*', 'limes:v*'])
 
   await sql.end()
 }

@@ -3,6 +3,7 @@ import {
   customType,
   index,
   integer,
+  numeric,
   pgEnum,
   pgTable,
   serial,
@@ -367,6 +368,158 @@ export const antiquityCoinHoards = pgTable(
     geom: pointGeometry('geom').notNull(),
   },
   (table) => [index('antiquity_coin_hoards_geom_idx').using('gist', table.geom)],
+)
+
+/**
+ * Itiner-e — the digital atlas of ancient roads (Brughmans, Pažout, de Soto
+ * and Bjerregaard Vahlstrup; CC BY 4.0, itiner-e.org). A far denser network
+ * than the Barrington roads in `antiquity_lines`: 14,769 segments, ~299,000
+ * km. Its own table because the two are different scholarship with different
+ * licences, and because this one carries per-segment certainty the Barrington
+ * layer cannot express. `certainty` is Itiner-e's own `Segment_s` vocabulary,
+ * `main` its `Route_Type` 2 versus 1.
+ */
+export const antiquityRoadCertaintyEnum = pgEnum('antiquity_road_certainty', [
+  'certain',
+  'conjectured',
+  'hypothetical',
+])
+
+export const antiquityRomanRoads = pgTable(
+  'antiquity_roman_roads',
+  {
+    id: serial('id').primaryKey(),
+    name: varchar('name', { length: 240 }),
+    /** Itiner-e's `Route_Type` 2 ("Main Road") versus 1 ("Secondary Road"). */
+    isMain: boolean('is_main').notNull().default(false),
+    certainty: antiquityRoadCertaintyEnum('certainty').notNull(),
+    /** The itinerary that attests the segment ("Itinerarium Antonini"), when one does. */
+    itinerary: varchar('itinerary', { length: 160 }),
+    /** Who traced it, and the printed source ("BAtlas 28, Lenoir 1993"). */
+    citation: varchar('citation', { length: 300 }),
+    bibliography: varchar('bibliography', { length: 400 }),
+    geom: multiLineGeometry('geom').notNull(),
+  },
+  (table) => [index('antiquity_roman_roads_geom_idx').using('gist', table.geom)],
+)
+
+/**
+ * Mints from Nomisma.org (CC BY 3.0) — 2,194 places with a coordinate, 1,425
+ * of them linked to a Pleiades place. `nomismaId` is the trailing segment of
+ * the concept URI (`http://nomisma.org/id/Paktye` → `Paktye`), the natural key.
+ */
+export const antiquityMints = pgTable(
+  'antiquity_mints',
+  {
+    id: serial('id').primaryKey(),
+    nomismaId: varchar('nomisma_id', { length: 120 }).notNull().unique(),
+    name: varchar('name', { length: 240 }).notNull(),
+    pleiadesId: varchar('pleiades_id', { length: 24 }),
+    geom: pointGeometry('geom').notNull(),
+  },
+  (table) => [index('antiquity_mints_geom_idx').using('gist', table.geom)],
+)
+
+/**
+ * Roman-period monuments from Wikidata (CC0 1.0): one row per item with a
+ * coordinate whose `instance of` is exactly one of these classes. Direct
+ * `P31` only — walking `P279*` subclasses times the public endpoint out, and
+ * the exact-class set is already ~6,000 items.
+ */
+export const antiquityMonumentKindEnum = pgEnum('antiquity_monument_kind', [
+  'theatre',
+  'amphitheatre',
+  'villa',
+  'aqueduct',
+  'bridge',
+  'temple',
+  'fort',
+  'bath',
+  'forum',
+  'mithraeum',
+])
+
+export const antiquityMonuments = pgTable(
+  'antiquity_monuments',
+  {
+    id: serial('id').primaryKey(),
+    wikidataId: varchar('wikidata_id', { length: 24 }).notNull().unique(),
+    name: varchar('name', { length: 240 }).notNull(),
+    kind: antiquityMonumentKindEnum('kind').notNull(),
+    geom: pointGeometry('geom').notNull(),
+  },
+  (table) => [
+    index('antiquity_monuments_geom_idx').using('gist', table.geom),
+    index('antiquity_monuments_kind_idx').on(table.kind),
+  ],
+)
+
+/**
+ * The neighbours of the Roman state — Carthage, Parthia, the Seleucid and
+ * Ptolemaic kingdoms, Pontus, the Goths and Vandals — as dated boundary slices
+ * from Cliopatria (Seshat Global History Databank, CC BY 4.0). Only
+ * `POLITY` rows that are not Roman and that touch Europe and the
+ * Mediterranean between 509 BCE and 476 CE: the Roman state itself comes from
+ * `antiquity_empire_extents` (OpenHistoricalMap), which is some fifty times
+ * more detailed. Years follow Cliopatria's own convention, negative for BCE.
+ * The boundaries are schematic, one scholarly version of a territory.
+ */
+export const antiquityPolities = pgTable(
+  'antiquity_polities',
+  {
+    id: serial('id').primaryKey(),
+    name: varchar('name', { length: 200 }).notNull(),
+    fromYear: integer('from_year').notNull(),
+    toYear: integer('to_year').notNull(),
+    wikidataId: varchar('wikidata_id', { length: 24 }),
+    /** Cliopatria's Wikipedia page phrase ("History of Sumer"), not a URL. */
+    wikipediaTitle: varchar('wikipedia_title', { length: 240 }),
+    areaSquareKilometres: integer('area_square_kilometres'),
+    geom: multiPolygonGeometry('geom').notNull(),
+  },
+  (table) => [
+    index('antiquity_polities_geom_idx').using('gist', table.geom),
+    index('antiquity_polities_years_idx').on(table.fromYear, table.toYear),
+  ],
+)
+
+/**
+ * The Atlas of Hillforts of Britain and Ireland (Ralston & Lock; Oxford, Edinburgh and
+ * University College Cork; CC BY 4.0, Archaeology Data Service doi:10.5284/1118744):
+ * 4,147 enclosed hilltop and promontory sites. Mostly Iron Age, but the atlas itself says
+ * it is "not an Atlas of Iron Age Hillforts" — 192 sites carry dating evidence for AD 50–400,
+ * and many were reoccupied in the Roman period. Own table, never joined to `sites`.
+ *
+ * `types` and `datedPeriods` hold the atlas's own yes/no flag columns as small key arrays
+ * (see `scripts/import/26-hillforts-atlas.ts` for the vocabularies); `reliability` is the
+ * atlas's own judgement of whether a site is a confirmed hillfort. Coordinates are the
+ * atlas's WGS 84 `Longitude`/`Latitude` columns, not its OSGB36/IRENET95 grid references.
+ * Its long free-text summaries (average 1,094 characters) are deliberately not kept: nothing
+ * here would show them, and they would only make every tile heavier if they were ever selected.
+ */
+export const hillfortReliabilityEnum = pgEnum('hillfort_reliability', [
+  'confirmed',
+  'unconfirmed',
+  'irreconciled',
+])
+
+export const antiquityHillforts = pgTable(
+  'antiquity_hillforts',
+  {
+    id: serial('id').primaryKey(),
+    /** The atlas's own number, zero-padded as published ("0031"); the natural key. */
+    atlasNumber: varchar('atlas_number', { length: 8 }).notNull().unique(),
+    name: varchar('name', { length: 240 }).notNull(),
+    /** England, Scotland, Wales, Northern Ireland, Republic of Ireland or Isle of Man. */
+    country: varchar('country', { length: 40 }).notNull(),
+    reliability: hillfortReliabilityEnum('reliability').notNull(),
+    types: text('types').array().notNull().default([]),
+    datedPeriods: text('dated_periods').array().notNull().default([]),
+    areaHectares: numeric('area_hectares', { precision: 10, scale: 3 }),
+    altitudeMetres: integer('altitude_metres'),
+    geom: pointGeometry('geom').notNull(),
+  },
+  (table) => [index('antiquity_hillforts_geom_idx').using('gist', table.geom)],
 )
 
 export const limesSegmentKindEnum = pgEnum('limes_segment_kind', ['barrier', 'river', 'notional'])

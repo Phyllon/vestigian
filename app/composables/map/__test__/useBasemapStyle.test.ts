@@ -34,6 +34,8 @@ const source: BasemapSource = {
   coinHoardTilesUrl: 'http://localhost:3000/api/tiles/antiquity-coin-hoards',
   inscriptionTilesUrl: 'http://localhost:3000/api/tiles/inscriptions',
   atticInscriptionTilesUrl: 'http://localhost:3000/api/tiles/attic-inscriptions',
+  referenceTilesUrl: 'http://localhost:3000/api/tiles/reference',
+  polityTilesUrl: 'http://localhost:3000/api/tiles/antiquity-polities',
   glyphsUrl: '/fonts/{fontstack}/{range}.pbf',
 }
 

@@ -1,4 +1,3 @@
-import { Popup } from 'maplibre-gl'
 import type { Map as MapLibreMap, MapLayerMouseEvent, SymbolLayerSpecification } from 'maplibre-gl'
 import { escapeHtmlForPopup } from './useBattleOverlay'
 import { COIN_HOARD_ATTRIBUTION } from './useBasemapStyle'
@@ -62,15 +61,18 @@ export const buildCoinHoardPopupHtml = (
 export const useCoinHoardOverlay = () => {
   const { isShowingCoinHoards, coinHoardTilesUrl } = useBasemapStyle()
   const { t } = useI18n()
+  const { openOverlayPopup } = useOverlayPopup()
 
   const showCoinHoardPopup = (map: MapLibreMap, event: MapLayerMouseEvent): void => {
     const feature = event.features?.[0]
     if (feature?.geometry.type !== 'Point') return
 
-    new Popup({ closeButton: true, maxWidth: '240px' })
-      .setLngLat(feature.geometry.coordinates as [number, number])
-      .setHTML(buildCoinHoardPopupHtml(feature.properties as CoinHoardFeatureProperties, t))
-      .addTo(map)
+    openOverlayPopup({
+      map,
+      position: feature.geometry.coordinates as [number, number],
+      html: buildCoinHoardPopupHtml(feature.properties as CoinHoardFeatureProperties, t),
+      maxWidth: '240px',
+    })
   }
 
   const attachCoinHoardOverlay = (map: MapLibreMap): void => {

@@ -85,7 +85,17 @@
     "showInscriptions": "Inscripties",
     "showInscriptionsHint": "Gespiegelde inscripties met een geïdentificeerde vindplaats (EDH)",
     "showAtticInscriptions": "Attische inscripties",
-    "showAtticInscriptionsHint": "Attic Inscriptions Online met een geïdentificeerde vindplaats (AIO)"
+    "showAtticInscriptionsHint": "Attic Inscriptions Online met een geïdentificeerde vindplaats (AIO)",
+    "showIsicily": "Siciliaanse inscripties",
+    "showIsicilyHint": "Inscripties uit het antieke Sicilië van I.Sicily: Grieks, Latijn, Elymisch, Sikelisch, Punisch",
+    "showRomanRoads": "Romeinse wegen",
+    "showRomanRoadsHint": "Het netwerk van Itiner-e: doorgetrokken waar vastgesteld, gestreept waar vermoed",
+    "showMonuments": "Romeinse monumenten",
+    "showMonumentsHint": "Theaters, villa’s, forten, baden en meer, uit Wikidata",
+    "showMints": "Munthuizen",
+    "showMintsHint": "Waar munten geslagen werden, uit Nomisma",
+    "showHillforts": "Heuvelvestingen",
+    "showHillfortsHint": "Heuvelvestingen van Groot-Brittannië en Ierland, veel opnieuw bewoond onder Rome"
   },
   "tabulaPeutingeriana": {
     "title": "Tabula Peutingeriana",
@@ -153,7 +163,24 @@
     "inscriptionsTitle": "Inscripties",
     "inscriptionMark": "Gespiegelde inscriptie met een geïdentificeerde vindplaats",
     "atticInscriptionsTitle": "Attische inscripties",
-    "atticInscriptionMark": "Attische inscriptie met een geïdentificeerde vindplaats"
+    "atticInscriptionMark": "Attische inscriptie met een geïdentificeerde vindplaats",
+    "romanRoadsTitle": "Romeinse wegen",
+    "romanRoadKind": {
+      "certain": "Loop vastgesteld",
+      "conjectured": "Loop vermoed",
+      "hypothetical": "Loop hypothetisch"
+    },
+    "isicilyTitle": "Siciliaanse inscripties",
+    "isicilyMark": "Inscriptie uit I.Sicily, op een bij benadering bepaalde plaats",
+    "monumentsTitle": "Romeinse monumenten",
+    "mintsTitle": "Munthuizen",
+    "mintMark": "Munthuis, uit Nomisma",
+    "empiresTitle": "Antieke rijken",
+    "romanExtentMark": "Omvang van de Romeinse staat in het gekozen jaar",
+    "emptyHint": "De legenda is voorlopig leeg. Zet een laag aan en de tekens ervan worden hier uitgelegd.",
+    "politiesMark": "Omtrek van een rijk in het gekozen jaar",
+    "hillfortsTitle": "Heuvelvestingen",
+    "hillfortMark": "Heuvelvestiging, uit de Atlas of Hillforts"
   },
   "siteDetail": {
     "loading": "Laden",
@@ -358,6 +385,12 @@
     "overlayInscriptions": "Inscripties: Epigraphic Database Heidelberg (CC BY-SA 4.0).",
     "overlayAtticInscriptions": "Attische inscripties: Attic Inscriptions Online (CC BY-SA 3.0).",
     "overlayTabulaPeutingeriana": "Netwerk van de Tabula Peutingeriana: samengesteld door René Voorburg (omnesviae.org) op basis van Richard Talberts georeferentie; de dataset vermeldt geen eigen licentie en wordt met zijn toestemming gebruikt.",
+    "overlayRomanRoads": "Romeinse wegen: Itiner-e, de digitale atlas van antieke wegen — Brughmans, Pažout, de Soto & Bjerregaard Vahlstrup, Universiteit van Aarhus (CC BY 4.0). Vastgestelde, vermoede en hypothetische lopen worden verschillend getekend.",
+    "overlayMonuments": "Romeinse monumenten (theaters, amfitheaters, villa's, aquaducten, bruggen, tempels, forten, baden, fora, mithraea): Wikidata (CC0 1.0), geen rechten voorbehouden.",
+    "overlayMints": "Munthuizen: Nomisma.org, het linked-open-datacentrum van de American Numismatic Society (CC BY 3.0).",
+    "overlayIsicily": "Siciliaanse inscripties: I.Sicily, Universiteit van Oxford (CC BY 4.0; zes records CC BY-NC 4.0, alleen niet-commercieel gebruik). De teksten worden overgenomen; de foto's niet, omdat ze niet voor hergebruik zijn gelicentieerd.",
+    "overlayPolities": "Naburige rijken (Carthago, Parthië, het Seleucidische en Ptolemaeïsche rijk, de Goten en anderen): Cliopatria, Seshat Global History Databank (CC BY 4.0), één wetenschappelijke lezing van een grove grens.",
+    "overlayHillforts": "Heuvelvestingen van Groot-Brittannië en Ierland: de Atlas of Hillforts, Ralston & Lock (universiteiten van Oxford, Edinburgh en Cork), via de Archaeology Data Service (CC BY 4.0).",
     "columnReliefHeading": "Kolomreliëf",
     "columnReliefBody": "De platen van de Zuil van Trajanus zijn gespiegeld vanuit de categorie 'Cichorius Plates' op Wikimedia Commons, waar ze als publiek domein zijn gemarkeerd. De platen van de Kolom van Marcus Aurelius worden live geserveerd vanuit de digitalisering door de Universiteitsbibliotheek Heidelberg van Petersen, Domaszewski & Calderini's studie uit 1896 — eveneens publiek domein; voor deze zuil wordt niets naar de eigen opslag van dit project gekopieerd.",
     "placeNamesHeading": "Moderne plaatsnamen",
@@ -370,6 +403,7 @@
     "satelliteBody": "De satellietweergave toont wolkenloze Sentinel-2-beelden van EOX IT Services (Wenen), opgebouwd uit open data van ESA Copernicus Sentinel-2. De versie die deze app gebruikt is CC BY-NC-SA 4.0 — alleen niet-commercieel gebruik, en elk hergebruik moet onder dezelfde licentie worden gedeeld.",
     "reuseHeading": "Deze gegevens hergebruiken",
     "reuseBody": "Vestigian is opgebouwd uit open gelicentieerde bronnen en publiceert zijn eigen records in dezelfde geest terug. Beide feeds zijn alleen-lezen, begrensd, gepagineerd en open voor verzoeken vanaf andere domeinen. Teksten vallen onder CC BY-SA en metadata onder CC0; beeldlicenties verschillen per record en zijn niet inbegrepen.",
+    "reuseNotIncluded": "De feeds bevatten alleen hier bijgedragen records. De hierboven genoemde referentielagen (wegen, munthuizen, monumenten, inscripties en de rest) worden daarin niet opnieuw gepubliceerd: haal ze bij hun eigen bronnen, onder hun eigen licenties.",
     "reuseGeojson": "eenvoudige GeoJSON, voor kaarten en analyse",
     "reuseLinkedPlaces": "Linked Places Format, de gazetteer-standaard van het Pelagios-netwerk, met closeMatch-verwijzingen naar Pleiades en Wikidata",
     "reuseParamsHeading": "Queryparameters",
@@ -594,6 +628,122 @@
   "coinHoardPopup": {
     "hoardCount": "Geen schatten geregistreerd | 1 geregistreerde schat | {n} geregistreerde schatten",
     "viewOnGeonames": "Bekijken op GeoNames"
+  },
+  "referencePopup": {
+    "road": {
+      "unnamed": "Naamloos wegsegment",
+      "main": "Hoofdweg",
+      "secondary": "Secundaire weg",
+      "certainty": {
+        "certain": "Loop vastgesteld",
+        "conjectured": "Loop vermoed",
+        "hypothetical": "Loop hypothetisch"
+      }
+    },
+    "mint": {
+      "kind": "Munthuis",
+      "viewOnNomisma": "Bekijk op Nomisma"
+    },
+    "monument": {
+      "kind": {
+        "theatre": "Theater",
+        "amphitheatre": "Amfitheater",
+        "villa": "Villa",
+        "aqueduct": "Aquaduct",
+        "bridge": "Brug",
+        "temple": "Tempel",
+        "fort": "Fort",
+        "bath": "Baden",
+        "forum": "Forum",
+        "mithraeum": "Mithraeum"
+      }
+    },
+    "viewOnPleiades": "Bekijk op Pleiades",
+    "viewOnWikidata": "Bekijk op Wikidata",
+    "hillfort": {
+      "type": {
+        "contour": "Contourvesting",
+        "partial-contour": "Gedeeltelijke contourvesting",
+        "promontory": "Landtongvesting",
+        "hillslope": "Hellingvesting",
+        "level-terrain": "Vesting op vlak terrein",
+        "marsh": "Moerasvesting",
+        "multiple-enclosure": "Meervoudige omwalling"
+      },
+      "country": {
+        "england": "Engeland",
+        "scotland": "Schotland",
+        "wales": "Wales",
+        "northern-ireland": "Noord-Ierland",
+        "republic-of-ireland": "Ierland",
+        "isle-of-man": "Man"
+      },
+      "reliability": {
+        "unconfirmed": "Mogelijke heuvelvesting: de atlas kon dit niet bevestigen.",
+        "irreconciled": "De atlas vermeldt onopgeloste tegenstrijdigheden over deze plaats."
+      },
+      "area": "{hectares} ha omsloten",
+      "altitude": "{metres} m boven zeeniveau",
+      "dated": "Dateringsgegevens: {periods}",
+      "viewDataset": "Atlas of Hillforts (Archaeology Data Service)"
+    }
+  },
+  "polityPopup": {
+    "outline": "Omtrek voor {period}",
+    "caveat": "Eén wetenschappelijke lezing van een grove grens. Wat het Romeinse gebied bedekt, wordt niet getekend.",
+    "viewOnWikipedia": "Bekijk op Wikipedia",
+    "viewOnWikidata": "Bekijk op Wikidata"
+  },
+  "isicilyInscriptions": {
+    "languages": {
+      "grc": "Oudgrieks",
+      "la": "Latijn",
+      "xly": "Elymisch",
+      "scx": "Sikelisch",
+      "xpu": "Punisch",
+      "osc": "Oskisch",
+      "he": "Hebreeuws"
+    },
+    "functions": {
+      "funerary": "Grafinscriptie",
+      "dedication": "Opdracht",
+      "honorific": "Eerbetoon",
+      "attribution": "Eigenaars- of makersmerk",
+      "building": "Bouwinscriptie",
+      "defixio": "Vloektablet",
+      "decree": "Besluit",
+      "invocation": "Aanroeping",
+      "account": "Rekening",
+      "list": "Lijst",
+      "legal": "Juridische tekst",
+      "milestone": "Mijlpaal",
+      "seat": "Zitplaatsinscriptie",
+      "civic-allotment": "Penning voor burgerlijke loting",
+      "terminus": "Grenssteen",
+      "certification": "Certificering",
+      "expressive": "Groet of aansporing"
+    },
+    "detail": {
+      "eyebrow": "Inscriptie uit het antieke Sicilië",
+      "dated": "Datering",
+      "language": "Taal",
+      "kind": "Soort",
+      "object": "Object",
+      "material": "Materiaal",
+      "place": "Plaats",
+      "ancientPlace": "Antieke plaats",
+      "repository": "Nu in",
+      "provenance": "Vondst",
+      "edition": "Tekst",
+      "translation": "Engelse vertaling",
+      "identifiers": "Ook gecatalogiseerd als",
+      "approximatePlace": "De positie is de huidige nederzetting waaraan de steen wordt toegeschreven, geen opgegraven vindplaats.",
+      "photoNote": "Foto’s worden hier niet getoond: ze zijn niet gelicentieerd voor hergebruik. De afbeelding staat bij I.Sicily.",
+      "nonCommercialNote": "Dit record valt onder CC BY-NC 4.0: alleen niet-commercieel gebruik.",
+      "showOnMap": "Toon op de kaart",
+      "viewOnIsicily": "Bekijk op I.Sicily (met foto)",
+      "credit": "{licence}, I.Sicily"
+    }
   },
   "siteExternalLinks": {
     "title": "Ook opgenomen in",
@@ -1089,15 +1239,17 @@
     "labelActive": "Overlays: {count} actief"
   },
   "periodSwitcher": {
-    "label": "Romeinse Rijk: {state}",
-    "menuLabel": "Het Romeinse Rijk in de tijd",
-    "title": "Romeinse Rijk",
+    "label": "Antieke rijken: {state}",
+    "menuLabel": "Antieke rijken in de tijd",
+    "title": "Antieke rijken",
     "heading": "Romeinse Rijk: omvang in de tijd",
     "scrubberLabel": "Het Romeinse Rijk in de tijd",
     "off": "Uit",
     "yearBce": "{year} v.Chr.",
     "yearCe": "{year} n.Chr.",
-    "approximate": "Grenzen zijn bij benadering, getekend door OpenHistoricalMap-bijdragers."
+    "approximate": "Grenzen zijn bij benadering, getekend door OpenHistoricalMap-bijdragers.",
+    "showPolities": "Naburige rijken",
+    "showPolitiesHint": "Carthago, Parthië, de Goten en anderen onder het Romeinse gebied"
   },
   "languageNotice": {
     "body": "Deze pagina wordt weergegeven in {language}. Engels is hier de taal om het meest op te vertrouwen — andere talen kunnen een iets andere betekenis hebben.",

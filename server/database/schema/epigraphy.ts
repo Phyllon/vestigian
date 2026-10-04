@@ -243,3 +243,63 @@ export interface AtticReference {
   externalLinks: string[]
   isTranslationSource?: boolean
 }
+
+/**
+ * I.Sicily — the inscriptions of ancient Sicily across all its languages
+ * (`scripts/import/24-isicily-inscriptions.ts`), Oxford / ERC Crossreads, from
+ * `github.com/ISicily/ISicily`. A third, genuinely separate corpus beside EDH
+ * and Attic Inscriptions Online: 5,136 EpiDoc records, 3,210 of them Greek and
+ * several in Elymian, Sikel and Punic that neither of the others covers.
+ *
+ * **Licence is per record and read from it**: 5,130 files state CC BY 4.0 and
+ * six state CC BY-NC 4.0 (`licence`). **The photographs are not mirrored**, even
+ * though the text is: each `<graphic>` is captioned "with the permission of the
+ * Assessorato Regionale dei Beni Culturali e dell'Identità Siciliana", a
+ * permission to I.Sicily, not a licence to anyone downstream — see
+ * `.claude/rules/epigraphy.md`.
+ *
+ * `geom` is the file's own `<geo>`, which is the modern settlement the stone is
+ * attributed to, not an excavated findspot. It is shown as an approximate place.
+ */
+export const isicilyInscriptions = pgTable(
+  'isicily_inscriptions',
+  {
+    id: serial('id').primaryKey(),
+    /** e.g. 'ISic000001' — I.Sicily's own filename and natural key. */
+    isicilyId: varchar('isicily_id', { length: 16 }).notNull().unique(),
+    title: text('title').notNull(),
+    /** ISO 639 code of the main text language: grc, la, xpu, xly, scx, osc, he. */
+    language: varchar('language', { length: 8 }),
+    /** I.Sicily's own `function.*` vocabulary: funerary, dedication, honorific, … */
+    inscriptionFunction: varchar('inscription_function', { length: 60 }),
+    objectType: varchar('object_type', { length: 80 }),
+    material: varchar('material', { length: 80 }),
+    /** The editor's wording, e.g. "between later 1st and 3rd century CE". */
+    dateText: text('date_text'),
+    /** Traditional year counts, negative for BCE — the same convention as `attic_inscriptions`. */
+    notBefore: integer('not_before'),
+    notAfter: integer('not_after'),
+    placeName: varchar('place_name', { length: 160 }),
+    ancientPlaceName: varchar('ancient_place_name', { length: 160 }),
+    pleiadesId: varchar('pleiades_id', { length: 24 }),
+    geonamesUrl: varchar('geonames_url', { length: 300 }),
+    /** Where it is now: the museum or collection, if the record names one. */
+    repository: varchar('repository', { length: 240 }),
+    /** How and when it was found, in the editor's words. */
+    provenance: text('provenance'),
+    /** The primary edition as plain text, one line of the stone per line. */
+    edition: text('edition'),
+    /** English translation, when the record carries one (1,218 of them do). */
+    translation: text('translation'),
+    trismegistosId: varchar('trismegistos_id', { length: 24 }),
+    edcsId: varchar('edcs_id', { length: 24 }),
+    edrId: varchar('edr_id', { length: 24 }),
+    licence: varchar('licence', { length: 24 }).notNull(),
+    sourceUrl: varchar('source_url', { length: 300 }).notNull(),
+    geom: pointGeometry('geom'),
+  },
+  (table) => [
+    index('isicily_inscriptions_geom_idx').using('gist', table.geom),
+    index('isicily_inscriptions_function_idx').on(table.inscriptionFunction),
+  ],
+)

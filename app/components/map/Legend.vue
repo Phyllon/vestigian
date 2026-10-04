@@ -1,4 +1,5 @@
 <script setup lang="ts">
+  import { MONUMENT_KINDS, REFERENCE_OVERLAY_IDS } from '#shared/utils/reference-overlays'
   import type { IconGlyph } from '~/composables/map/useSiteIcons'
 
   /**
@@ -8,9 +9,17 @@
    * Collapsed by default: on a phone the map is the whole screen, and a key
    * that covers a quarter of it to explain nine glyphs is a poor trade until
    * the reader asks for it.
+   *
+   * **It explains only what is drawn.** It used to open on the site glyphs and
+   * the specific marks whatever was switched on — a key for markers the reader
+   * had hidden, over a map that showed none of them. Every section is now gated
+   * on its own switch, and with nothing on the panel says so rather than
+   * showing a table that describes nothing.
    */
   const {
     view,
+    periodYear,
+    isShowingSites,
     isFollowingLimes,
     isShowingBattles,
     isShowingPorts,
@@ -19,9 +28,30 @@
     isShowingCoinHoards,
     isShowingInscriptions,
     isShowingAtticInscriptions,
+    isShowingReferenceOverlay,
+    isShowingPolities,
   } = useBasemapStyle()
   const { t } = useI18n()
   const isOpen = ref(false)
+
+  const isShowingAnyReferenceOverlay = computed(() =>
+    REFERENCE_OVERLAY_IDS.some((id) => isShowingReferenceOverlay(id)),
+  )
+
+  const hasKey = computed(
+    () =>
+      isShowingSites.value ||
+      isFollowingLimes.value ||
+      isShowingBattles.value ||
+      isShowingPorts.value ||
+      isShowingRoutes.value ||
+      isShowingFeatures.value ||
+      isShowingCoinHoards.value ||
+      isShowingInscriptions.value ||
+      isShowingAtticInscriptions.value ||
+      isShowingAnyReferenceOverlay.value ||
+      periodYear.value !== null,
+  )
 
   /**
    * The three line treatments, kept beside the paths they describe rather than
@@ -62,6 +92,33 @@
     { kind: 'ferry', dashes: '1 2' },
   ] as const
 
+  /**
+   * Itiner-e's three certainty treatments, an eight-pixel swatch each — see
+   * `buildRomanRoadLayers` for the real dash arrays. Bronze, like the layer.
+   */
+  const ROMAN_ROAD_LINE_KEY = [
+    { certainty: 'certain', dashes: 'none' },
+    { certainty: 'conjectured', dashes: '4 2' },
+    { certainty: 'hypothetical', dashes: '1 2' },
+  ] as const
+
+  /** The single-mark reference overlays that share the key's icon-and-caption shape. */
+  const REFERENCE_MARK_KEY = [
+    {
+      id: 'isicily',
+      path: ISICILY_ICON_PATH,
+      title: 'legend.isicilyTitle',
+      mark: 'legend.isicilyMark',
+    },
+    { id: 'mints', path: MINT_ICON_PATH, title: 'legend.mintsTitle', mark: 'legend.mintMark' },
+    {
+      id: 'hillforts',
+      path: HILLFORT_ICON_PATH,
+      title: 'legend.hillfortsTitle',
+      mark: 'legend.hillfortMark',
+    },
+  ] as const
+
   const toggle = (): void => {
     isOpen.value = !isOpen.value
   }
@@ -81,112 +138,120 @@
         class="max-h-[min(70vh,32rem)] overflow-y-auto rounded-notebook border border-paper-300 bg-paper-50/95 p-3 shadow-leaf backdrop-blur-sm dark:border-night-600 dark:bg-night-800/95"
       >
         <h2 class="eyebrow mb-1">{{ t('legend.title') }}</h2>
-        <p class="mb-2 max-w-64 text-xs leading-snug text-ink-500 dark:text-paper-400">
+        <p
+          v-if="!hasKey"
+          class="max-w-64 text-xs leading-snug text-ink-500 dark:text-paper-400"
+          role="status"
+        >
+          {{ t('legend.emptyHint') }}
+        </p>
+        <p v-else class="mb-2 max-w-64 text-xs leading-snug text-ink-500 dark:text-paper-400">
           {{ t('legend.tapForDetails') }}
         </p>
 
-        <ul class="grid grid-cols-2 gap-x-4 gap-y-1.5">
-          <li v-for="category in SITE_CATEGORIES" :key="category" class="flex items-center gap-2">
-            <svg
-              viewBox="0 0 24 24"
-              class="h-5 w-5 shrink-0"
-              aria-hidden="true"
-              fill="none"
-              stroke-width="1.6"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <circle
-                cx="12"
-                cy="12"
-                r="10.4"
-                class="fill-paper-50 stroke-paper-500 dark:fill-night-800 dark:stroke-paper-800"
-                stroke-width="1"
-              />
-              <path
-                v-if="SITE_ICON_GLYPHS[category].filled"
-                :d="SITE_ICON_GLYPHS[category].path"
-                :transform="`translate(${GAME_ICON_OFFSET} ${GAME_ICON_OFFSET}) scale(${GAME_ICON_SCALE})`"
-                class="fill-bronze-600 dark:fill-bronze-300"
-              />
-              <path
-                v-else
-                :d="SITE_ICON_GLYPHS[category].path"
-                class="stroke-bronze-600 dark:stroke-bronze-300"
-              />
-            </svg>
+        <!-- The contributed sites' own marks: explained only while the sites are drawn. -->
+        <template v-if="isShowingSites">
+          <ul class="grid grid-cols-2 gap-x-4 gap-y-1.5">
+            <li v-for="category in SITE_CATEGORIES" :key="category" class="flex items-center gap-2">
+              <svg
+                viewBox="0 0 24 24"
+                class="h-5 w-5 shrink-0"
+                aria-hidden="true"
+                fill="none"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10.4"
+                  class="fill-paper-50 stroke-paper-500 dark:fill-night-800 dark:stroke-paper-800"
+                  stroke-width="1"
+                />
+                <path
+                  v-if="SITE_ICON_GLYPHS[category].filled"
+                  :d="SITE_ICON_GLYPHS[category].path"
+                  :transform="`translate(${GAME_ICON_OFFSET} ${GAME_ICON_OFFSET}) scale(${GAME_ICON_SCALE})`"
+                  class="fill-bronze-600 dark:fill-bronze-300"
+                />
+                <path
+                  v-else
+                  :d="SITE_ICON_GLYPHS[category].path"
+                  class="stroke-bronze-600 dark:stroke-bronze-300"
+                />
+              </svg>
 
-            <span class="text-xs text-ink-700 dark:text-paper-200">
-              {{ t(`categories.${category}`) }}
-            </span>
-          </li>
-        </ul>
+              <span class="text-xs text-ink-700 dark:text-paper-200">
+                {{ t(`categories.${category}`) }}
+              </span>
+            </li>
+          </ul>
 
-        <!--
-          Always shown, not gated behind a toggle: these are vici's own
-          `subcategory` on the always-on site layer above, not an optional
-          overlay — a reader who sees a milestone glyph on the map needs this
-          section whether or not they ever open "Show battles" or similar.
+          <!--
+          vici's own `subcategory` on the site layer above: gated with it, since
+          these marks are drawn by the same layer and by nothing else.
         -->
-        <h2 class="eyebrow mb-1 mt-3 border-t border-paper-300 pt-2.5 dark:border-night-600">
-          {{ t('legend.siteMarksTitle') }}
-        </h2>
+          <h2 class="eyebrow mb-1 mt-3 border-t border-paper-300 pt-2.5 dark:border-night-600">
+            {{ t('legend.siteMarksTitle') }}
+          </h2>
 
-        <ul class="grid grid-cols-2 gap-x-4 gap-y-1.5">
-          <li v-for="mark in SITE_MARK_KINDS" :key="mark" class="flex items-center gap-2">
-            <svg
-              viewBox="0 0 24 24"
-              class="h-5 w-5 shrink-0"
-              aria-hidden="true"
-              fill="none"
-              stroke-width="1.6"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <circle
-                cx="12"
-                cy="12"
-                r="10.4"
-                class="fill-paper-50 stroke-paper-500 dark:fill-night-800 dark:stroke-paper-800"
-                stroke-width="1"
-              />
-              <path
-                v-if="SITE_MARK_ICON_GLYPHS[mark].filled"
-                :d="SITE_MARK_ICON_GLYPHS[mark].path"
-                :transform="`translate(${GAME_ICON_OFFSET} ${GAME_ICON_OFFSET}) scale(${GAME_ICON_SCALE})`"
-                class="fill-bronze-600 dark:fill-bronze-300"
-              />
-              <path
-                v-else
-                :d="SITE_MARK_ICON_GLYPHS[mark].path"
-                :transform="
-                  SITE_MARK_ICON_GLYPHS[mark].inset
-                    ? `translate(${OUTLINE_INSET_OFFSET} ${OUTLINE_INSET_OFFSET}) scale(${OUTLINE_INSET_SCALE})`
-                    : undefined
-                "
-                vector-effect="non-scaling-stroke"
-                class="stroke-bronze-600 dark:stroke-bronze-300"
-              />
-            </svg>
+          <ul class="grid grid-cols-2 gap-x-4 gap-y-1.5">
+            <li v-for="mark in SITE_MARK_KINDS" :key="mark" class="flex items-center gap-2">
+              <svg
+                viewBox="0 0 24 24"
+                class="h-5 w-5 shrink-0"
+                aria-hidden="true"
+                fill="none"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10.4"
+                  class="fill-paper-50 stroke-paper-500 dark:fill-night-800 dark:stroke-paper-800"
+                  stroke-width="1"
+                />
+                <path
+                  v-if="SITE_MARK_ICON_GLYPHS[mark].filled"
+                  :d="SITE_MARK_ICON_GLYPHS[mark].path"
+                  :transform="`translate(${GAME_ICON_OFFSET} ${GAME_ICON_OFFSET}) scale(${GAME_ICON_SCALE})`"
+                  class="fill-bronze-600 dark:fill-bronze-300"
+                />
+                <path
+                  v-else
+                  :d="SITE_MARK_ICON_GLYPHS[mark].path"
+                  :transform="
+                    SITE_MARK_ICON_GLYPHS[mark].inset
+                      ? `translate(${OUTLINE_INSET_OFFSET} ${OUTLINE_INSET_OFFSET}) scale(${OUTLINE_INSET_SCALE})`
+                      : undefined
+                  "
+                  vector-effect="non-scaling-stroke"
+                  class="stroke-bronze-600 dark:stroke-bronze-300"
+                />
+              </svg>
 
-            <span class="text-xs text-ink-700 dark:text-paper-200">
-              {{ t(`siteMarks.${mark}`) }}
-            </span>
-          </li>
-        </ul>
+              <span class="text-xs text-ink-700 dark:text-paper-200">
+                {{ t(`siteMarks.${mark}`) }}
+              </span>
+            </li>
+          </ul>
 
-        <!--
+          <!--
           The antiquity sheet carries twenty-two thousand places borrowed from
           Pleiades alongside the records contributed here, and the borrowed ones
           outnumber them. Same glyphs, drawn without the disc — so the reader can
           tell the atlas from the work without being told twice.
         -->
-        <p
-          v-if="isAntiquityView(view)"
-          class="mt-2.5 max-w-64 border-t border-paper-300 pt-2 text-xs leading-snug text-ink-500 dark:border-night-600 dark:text-paper-400"
-        >
-          {{ t('legend.referencedNote') }}
-        </p>
+          <p
+            v-if="isAntiquityView(view)"
+            class="mt-2.5 max-w-64 border-t border-paper-300 pt-2 text-xs leading-snug text-ink-500 dark:border-night-600 dark:text-paper-400"
+          >
+            {{ t('legend.referencedNote') }}
+          </p>
+        </template>
 
         <!--
           Basemap credit, per layer — DARE's own terms require attribution and
@@ -194,7 +259,7 @@
           one either. See /licence for the full terms.
         -->
         <p
-          v-if="view === 'antiquity-dare'"
+          v-if="hasKey && view === 'antiquity-dare'"
           class="mt-2 max-w-64 text-xs leading-snug text-ink-500 dark:text-paper-400"
         >
           {{ t('legend.basemapCreditDare') }}
@@ -208,7 +273,7 @@
           </a>
         </p>
         <p
-          v-else-if="view === 'antiquity-awmc'"
+          v-else-if="hasKey && view === 'antiquity-awmc'"
           class="mt-2 max-w-64 text-xs leading-snug text-ink-500 dark:text-paper-400"
         >
           {{ t('legend.basemapCreditBarrington') }}
@@ -460,6 +525,147 @@
               </svg>
               <span class="text-xs text-ink-700 dark:text-paper-200">
                 {{ t('legend.atticInscriptionMark') }}
+              </span>
+            </li>
+          </ul>
+        </template>
+
+        <!--
+          Itiner-e's roads: told apart by certainty, not by colour — a surveyed
+          road is solid, a conjectured one dashed, a hypothetical one dotted.
+        -->
+        <template v-if="isShowingReferenceOverlay('roman-roads')">
+          <h2 class="eyebrow mb-2 mt-3 border-t border-paper-300 pt-2.5 dark:border-night-600">
+            {{ t('legend.romanRoadsTitle') }}
+          </h2>
+
+          <ul class="flex flex-col gap-1.5">
+            <li
+              v-for="line in ROMAN_ROAD_LINE_KEY"
+              :key="line.certainty"
+              class="flex items-center gap-2"
+            >
+              <svg class="h-2 w-8 shrink-0" viewBox="0 0 32 8" aria-hidden="true">
+                <path
+                  d="M0 4h32"
+                  stroke="#5d5237"
+                  stroke-width="1.8"
+                  :stroke-dasharray="line.dashes"
+                />
+              </svg>
+              <span class="text-xs text-ink-700 dark:text-paper-200">
+                {{ t(`legend.romanRoadKind.${line.certainty}`) }}
+              </span>
+            </li>
+          </ul>
+        </template>
+
+        <!--
+          Monuments carry a mark per kind, so the key lists every one. Marks the atlas
+          already draws elsewhere (villa, temple, fort, bridge, aqueduct) are the same
+          glyphs; see `MONUMENT_ICON_GLYPHS`.
+        -->
+        <template v-if="isShowingReferenceOverlay('monuments')">
+          <h2 class="eyebrow mb-2 mt-3 border-t border-paper-300 pt-2.5 dark:border-night-600">
+            {{ t('legend.monumentsTitle') }}
+          </h2>
+
+          <ul class="grid grid-cols-2 gap-x-4 gap-y-1.5">
+            <li v-for="kind in MONUMENT_KINDS" :key="kind" class="flex items-center gap-2">
+              <svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  v-if="MONUMENT_ICON_GLYPHS[kind].filled"
+                  :d="MONUMENT_ICON_GLYPHS[kind].path"
+                  :transform="`translate(${GAME_ICON_OFFSET} ${GAME_ICON_OFFSET}) scale(${GAME_ICON_SCALE})`"
+                  fill="currentColor"
+                />
+                <path
+                  v-else
+                  :d="MONUMENT_ICON_GLYPHS[kind].path"
+                  stroke="currentColor"
+                  stroke-width="1.1"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              <span class="text-xs text-ink-700 dark:text-paper-200">
+                {{ t(`referencePopup.monument.kind.${kind}`) }}
+              </span>
+            </li>
+          </ul>
+        </template>
+
+        <!-- Mints and I.Sicily and the hillforts: one mark each, own key entry like coin hoards. -->
+        <template v-for="entry in REFERENCE_MARK_KEY" :key="entry.id">
+          <template v-if="isShowingReferenceOverlay(entry.id)">
+            <h2 class="eyebrow mb-2 mt-3 border-t border-paper-300 pt-2.5 dark:border-night-600">
+              {{ t(entry.title) }}
+            </h2>
+
+            <ul class="flex flex-col gap-1.5">
+              <li class="flex items-center gap-2">
+                <svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path
+                    :d="entry.path"
+                    stroke="currentColor"
+                    stroke-width="1.1"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                <span class="text-xs text-ink-700 dark:text-paper-200">
+                  {{ t(entry.mark) }}
+                </span>
+              </li>
+            </ul>
+          </template>
+        </template>
+
+        <!--
+          The scrubber's two fills, keyed together: the Roman state in its own
+          amber, and — when their switch is on — the realms around it in blue.
+          Drawn only while a date is chosen.
+        -->
+        <template v-if="periodYear !== null">
+          <h2 class="eyebrow mb-2 mt-3 border-t border-paper-300 pt-2.5 dark:border-night-600">
+            {{ t('legend.empiresTitle') }}
+          </h2>
+
+          <ul class="flex flex-col gap-1.5">
+            <li class="flex items-center gap-2">
+              <svg class="size-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                <rect
+                  x="3"
+                  y="5"
+                  width="18"
+                  height="14"
+                  fill="#c99b52"
+                  fill-opacity="0.4"
+                  stroke="#6b4d17"
+                  stroke-width="1.6"
+                  stroke-dasharray="5 2.5"
+                />
+              </svg>
+              <span class="text-xs text-ink-700 dark:text-paper-200">
+                {{ t('legend.romanExtentMark') }}
+              </span>
+            </li>
+            <li v-if="isShowingPolities" class="flex items-center gap-2">
+              <svg class="size-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                <rect
+                  x="3"
+                  y="5"
+                  width="18"
+                  height="14"
+                  fill="#2a5d8f"
+                  fill-opacity="0.4"
+                  stroke="#0f2f52"
+                  stroke-width="1.6"
+                  stroke-dasharray="3 2"
+                />
+              </svg>
+              <span class="text-xs text-ink-700 dark:text-paper-200">
+                {{ t('legend.politiesMark') }}
               </span>
             </li>
           </ul>

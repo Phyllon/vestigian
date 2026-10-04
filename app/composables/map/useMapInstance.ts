@@ -101,6 +101,43 @@ export const toLngLat = (position: LonLat): [number, number] => [position.lon, p
 
 const mapsWithBoundOverlayListeners = new WeakMap<MapLibreMap, Set<string>>()
 
+const clickableOverlayLayerIds = new Set<string>()
+
+/**
+ * Every layer that opens a popup when clicked. `bindOverlayListenersOnce` records
+ * the ones it binds; the Pleiades place layers, which bind their own listeners,
+ * call this directly.
+ */
+export const registerClickableOverlayLayer = (layerId: string): void => {
+  clickableOverlayLayerIds.add(layerId)
+}
+
+/**
+ * Whether the pointer is over something that answers a click — the cursor's one
+ * source of truth. Each overlay also sets `pointer` on its own `mouseenter`, but
+ * `MapCanvas`'s `mousemove` handler wrote `''` back on the very next pixel of
+ * movement, because it only knew about sites; the cursor therefore flickered to a
+ * pointer for one frame over every icon that is not a site. Asking one question
+ * of one list here replaces that race with an answer.
+ *
+ * Filtered to layers that exist: `queryRenderedFeatures` throws for an unknown
+ * layer id rather than returning nothing, and most of these are absent at any
+ * moment (an overlay that is off has no layer).
+ */
+export const isOverClickableOverlay = (
+  map: MapLibreMap,
+  point: { x: number; y: number },
+): boolean => {
+  const layers = [...clickableOverlayLayerIds].filter((id) => map.getLayer(id))
+  if (layers.length === 0) return false
+
+  const box: [[number, number], [number, number]] = [
+    [point.x - 6, point.y - 6],
+    [point.x + 6, point.y + 6],
+  ]
+  return map.queryRenderedFeatures(box, { layers }).length > 0
+}
+
 /**
  * Every reference overlay's `attach*Overlay` re-runs on each `styledata`
  * event whenever its own source is missing — including right after
@@ -119,6 +156,7 @@ export const bindOverlayListenersOnce = (
 ): void => {
   const bound = mapsWithBoundOverlayListeners.get(map) ?? new Set<string>()
   if (bound.has(layerId)) return
+  registerClickableOverlayLayer(layerId)
   bind()
   bound.add(layerId)
   mapsWithBoundOverlayListeners.set(map, bound)

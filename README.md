@@ -71,8 +71,9 @@ multi-hour crawl of someone else's server. Run them in order; each one is safe
 to re-run and picks up where it stopped. Beyond vici.org itself, the atlas
 also carries the limes frontier, Barrington-style antiquity cartography,
 Trajan's Column, the Tabula Peutingeriana, ancient ports, ORBIS routes,
-battles and more — each its own numbered, independently re-runnable import
-script. **Full list, sources and licences: [`documents/scripts.md`](documents/scripts.md).**
+battles, Roman roads (Itiner-e), mints (Nomisma), Roman monuments (Wikidata),
+Sicilian inscriptions (I.Sicily), the Roman state's neighbours (Cliopatria), the hillforts of Britain and Ireland and more —
+each its own numbered, independently re-runnable import script. **Full list, sources and licences: [`documents/scripts.md`](documents/scripts.md).**
 
 ```bash
 # The scratch MariaDB is NOT part of pnpm stack:up — the dumps are read once

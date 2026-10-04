@@ -1,6 +1,7 @@
 import type { ExpressionSpecification, Map as MapLibreMap } from 'maplibre-gl'
 import type { LimesMark, SiteCategory } from '#shared/types'
 import { LIMES_MARKS, VICI_MARKS } from '#shared/utils/limes'
+import { MONUMENT_KINDS, type MonumentKind } from '#shared/utils/reference-overlays'
 
 /**
  * A drawn mark per category, so a fort reads as a fort at a glance rather than
@@ -966,4 +967,114 @@ export const registerCoinHoardIcon = (map: MapLibreMap, palette: SiteIconPalette
 
   if (map.hasImage(COIN_HOARD_ICON_ID)) map.removeImage(COIN_HOARD_ICON_ID)
   map.addImage(COIN_HOARD_ICON_ID, image, { pixelRatio: ICON_PIXEL_RATIO })
+}
+
+export const MINT_ICON_ID = 'vestigian-mint'
+
+/** A coin seen face-on: a rim and an inner field, hand-drawn in the 24-unit outline space. */
+export const MINT_ICON_PATH =
+  'M12 3.5a8.5 8.5 0 1 0 0 17a8.5 8.5 0 0 0 0 -17M12 8a4 4 0 1 0 0 8a4 4 0 0 0 0 -8'
+
+export const MONUMENT_ICON_ID = 'vestigian-monument'
+
+/**
+ * The generic pedimented front, kept as the fallback for a kind the database gains
+ * before the map has a mark for it. Hand-drawn, so it carries no third-party credit;
+ * Lucide's `landmark` is already the app-menu glyph for `/inscriptions`, and a map
+ * marker wants a mark distinct from a menu glyph.
+ */
+export const MONUMENT_ICON_PATH =
+  'M4 9.5l8 -5.5l8 5.5M5.5 9.5h13M7.5 9.5v8M12 9.5v8M16.5 9.5v8M4 20h16'
+
+export const monumentIconId = (kind: MonumentKind): string => `${MONUMENT_ICON_ID}-${kind}`
+
+/**
+ * A theatre in plan and section at once: the semicircular bowl of seats cut by two
+ * stairways, the orchestra in front of them and the straight line of the stage
+ * building behind. All hand-drawn in the 24-unit outline space.
+ */
+const THEATRE_ICON_PATH =
+  'M3 9h18a9 9 0 0 1-18 0z M8 9a4 4 0 0 0 8 0 M12 13v5 M9.2 11.8l-3.5 3.5 M14.8 11.8l3.5 3.5 M6 5.5h12'
+
+/** An amphitheatre is the closed ellipse: outer wall, the arena, and the stairways between. */
+const AMPHITHEATRE_ICON_PATH =
+  'M2.5 12a9.5 6 0 1 0 19 0a9.5 6 0 1 0-19 0 M7.5 12a4.5 2.5 0 1 0 9 0a4.5 2.5 0 1 0-9 0 M12 6v3.5 M12 14.5V18 M5.6 8.4l2.3 1.9 M18.4 8.4l-2.3 1.9 M5.6 15.6l2.3-1.9 M18.4 15.6l-2.3-1.9'
+
+/** A plunge pool with the steam of the hot rooms over it — the thermae, not a modern bathtub. */
+const BATH_ICON_PATH =
+  'M3.5 12h17v1.5a6 6 0 0 1-6 6h-5a6 6 0 0 1-6-6z M7 8.5c-1-1.2 1-2.3 0-3.5 M12 8.5c-1-1.2 1-2.3 0-3.5 M17 8.5c-1-1.2 1-2.3 0-3.5 M6 19.5l-1 1.5 M18 19.5l1 1.5'
+
+/** A colonnade under a flat architrave on a stepped base: the forum's porticoes, against the temple's pediment. */
+const FORUM_ICON_PATH =
+  'M3.5 7.5h17 M5.5 7.5v10 M10 7.5v10 M14 7.5v10 M18.5 7.5v10 M3.5 17.5h17 M2.5 20.5h19'
+
+/** A rayed sun in a vaulted cave: a Mithraeum was built to look like the cave of the myth, with the god's sun in it. */
+const MITHRAEUM_ICON_PATH =
+  'M4 20.5V12a8 8 0 0 1 16 0v8.5 M2.5 20.5h19 M12 9.6a2.4 2.4 0 1 0 0 4.8a2.4 2.4 0 0 0 0-4.8 M12 5.8v1.6 M12 16.6v1.6 M7.8 12h1.6 M14.6 12h1.6 M9 9l1.1 1.1 M13.9 13.9l1.1 1.1 M15 9l-1.1 1.1 M10.1 13.9L9 15'
+
+/**
+ * One mark per monument kind. Where the atlas already has a mark for the same thing
+ * it is reused, not redrawn — a villa, a temple (the sanctuary front), a fort, a
+ * bridge and an aqueduct read as they do everywhere else on the map. Theatre,
+ * amphitheatre, bath, forum and mithraeum are new, drawn in the same
+ * line-and-hatch idiom as the existing hand-drawn marks.
+ */
+export const MONUMENT_ICON_GLYPHS: Record<MonumentKind, IconGlyph> = {
+  theatre: outline(THEATRE_ICON_PATH),
+  amphitheatre: outline(AMPHITHEATRE_ICON_PATH),
+  villa: SITE_ICON_GLYPHS.villa,
+  aqueduct: filled(AQUEDUCT_ICON_PATH),
+  bridge: filled(STONE_BRIDGE_ICON_PATH),
+  temple: SITE_ICON_GLYPHS.sanctuary,
+  fort: SITE_ICON_GLYPHS.fortification,
+  bath: outline(BATH_ICON_PATH),
+  forum: outline(FORUM_ICON_PATH),
+  mithraeum: outline(MITHRAEUM_ICON_PATH),
+}
+
+export const ISICILY_ICON_ID = 'vestigian-isicily'
+
+/** A rounded-top stele with three carved lines — distinct from EDH's and AIO's scrolls. */
+export const ISICILY_ICON_PATH =
+  'M7.5 20.5v-12a4.5 4.5 0 0 1 9 0v12M5.5 20.5h13M10 10h4M10 13h4M10 16h4'
+
+export const HILLFORT_ICON_ID = 'vestigian-hillfort'
+
+/** A hill with two concentric ramparts drawn across it, hand-drawn in the 24-unit outline space. */
+export const HILLFORT_ICON_PATH =
+  'M3 19.5h18M4.5 19.5c1.2-6 4-10.5 7.5-10.5s6.3 4.5 7.5 10.5M8 19.5c.8-3.2 2.3-5.3 4-5.3s3.2 2.1 4 5.3'
+
+/**
+ * Registered with the other reference marks, for the same reason as
+ * `registerCoinHoardIcon`: four more canvases, cheaper than a hook that has to
+ * know which of these overlays is on.
+ */
+export const registerReferenceIcons = (map: MapLibreMap, palette: SiteIconPalette): void => {
+  const marks = [
+    { id: MINT_ICON_ID, path: MINT_ICON_PATH },
+    { id: MONUMENT_ICON_ID, path: MONUMENT_ICON_PATH },
+    { id: ISICILY_ICON_ID, path: ISICILY_ICON_PATH },
+    { id: HILLFORT_ICON_ID, path: HILLFORT_ICON_PATH },
+  ]
+
+  const glyphs = [
+    ...marks.map((mark) => ({ id: mark.id, glyph: outline(mark.path) })),
+    ...MONUMENT_KINDS.map((kind) => ({
+      id: monumentIconId(kind),
+      glyph: MONUMENT_ICON_GLYPHS[kind],
+    })),
+  ]
+
+  for (const entry of glyphs) {
+    const image = rasteriseIcon({
+      glyph: entry.glyph,
+      ink: referenceInk(palette),
+      palette,
+      reference: true,
+    })
+    if (!image) continue
+
+    if (map.hasImage(entry.id)) map.removeImage(entry.id)
+    map.addImage(entry.id, image, { pixelRatio: ICON_PIXEL_RATIO })
+  }
 }

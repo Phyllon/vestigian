@@ -1,4 +1,3 @@
-import { Popup } from 'maplibre-gl'
 import type {
   ExpressionSpecification,
   Map as MapLibreMap,
@@ -150,15 +149,18 @@ export const buildFeaturePopupHtml = (
 export const useMinorFeatureOverlay = () => {
   const { isShowingFeatures, featureTilesUrl } = useBasemapStyle()
   const { t } = useI18n()
+  const { openOverlayPopup } = useOverlayPopup()
 
   const showFeaturePopup = (map: MapLibreMap, event: MapLayerMouseEvent): void => {
     const feature = event.features?.[0]
     if (feature?.geometry.type !== 'Point') return
 
-    new Popup({ closeButton: true, maxWidth: '240px' })
-      .setLngLat(feature.geometry.coordinates as [number, number])
-      .setHTML(buildFeaturePopupHtml(feature.properties as FeatureProperties, t))
-      .addTo(map)
+    openOverlayPopup({
+      map,
+      position: feature.geometry.coordinates as [number, number],
+      html: buildFeaturePopupHtml(feature.properties as FeatureProperties, t),
+      maxWidth: '240px',
+    })
   }
 
   const attachFeatureOverlay = (map: MapLibreMap): void => {

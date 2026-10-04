@@ -1,4 +1,3 @@
-import { Popup } from 'maplibre-gl'
 import type { Map as MapLibreMap, MapLayerMouseEvent, SymbolLayerSpecification } from 'maplibre-gl'
 import type { FrontierTranslate } from '../limes/useLimes'
 import { formatYear } from '../limes/useLimes'
@@ -84,15 +83,18 @@ export const buildBattlePopupHtml = (
 export const useBattleOverlay = () => {
   const { isShowingBattles, battleTilesUrl } = useBasemapStyle()
   const { t } = useI18n()
+  const { openOverlayPopup } = useOverlayPopup()
 
   const showBattlePopup = (map: MapLibreMap, event: MapLayerMouseEvent): void => {
     const feature = event.features?.[0]
     if (feature?.geometry.type !== 'Point') return
 
-    new Popup({ closeButton: true, maxWidth: '240px' })
-      .setLngLat(feature.geometry.coordinates as [number, number])
-      .setHTML(buildBattlePopupHtml(feature.properties as BattleFeatureProperties, t))
-      .addTo(map)
+    openOverlayPopup({
+      map,
+      position: feature.geometry.coordinates as [number, number],
+      html: buildBattlePopupHtml(feature.properties as BattleFeatureProperties, t),
+      maxWidth: '240px',
+    })
   }
 
   const attachBattleOverlay = (map: MapLibreMap): void => {

@@ -98,5 +98,5 @@ export const toggleOverlay = async (page: Page, name: string): Promise<void> => 
  * specifically and started drawing over any basemap.
  */
 export const openPeriods = async (page: Page): Promise<void> => {
-  await page.getByRole('button', { name: /^Roman Empire:/ }).click()
+  await page.getByRole('button', { name: /^Ancient empires:/ }).click()
 }

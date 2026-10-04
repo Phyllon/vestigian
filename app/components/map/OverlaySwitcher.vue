@@ -52,6 +52,8 @@
     canShowModernLabels,
     isShowingModernLabels,
     setModernLabelsActive,
+    isShowingReferenceOverlay,
+    setReferenceOverlayActive,
   } = useBasemapStyle()
   const { t } = useI18n()
 
@@ -177,6 +179,47 @@
       hint: t('basemapSwitcher.showAtticInscriptionsHint'),
       toggle: () => setAtticInscriptionsActive(!isShowingAtticInscriptions.value),
     },
+    {
+      key: 'isicily',
+      canShow: true,
+      isActive: isShowingReferenceOverlay('isicily'),
+      label: t('basemapSwitcher.showIsicily'),
+      hint: t('basemapSwitcher.showIsicilyHint'),
+      toggle: () => setReferenceOverlayActive('isicily', !isShowingReferenceOverlay('isicily')),
+    },
+    {
+      key: 'roman-roads',
+      canShow: true,
+      isActive: isShowingReferenceOverlay('roman-roads'),
+      label: t('basemapSwitcher.showRomanRoads'),
+      hint: t('basemapSwitcher.showRomanRoadsHint'),
+      toggle: () =>
+        setReferenceOverlayActive('roman-roads', !isShowingReferenceOverlay('roman-roads')),
+    },
+    {
+      key: 'monuments',
+      canShow: true,
+      isActive: isShowingReferenceOverlay('monuments'),
+      label: t('basemapSwitcher.showMonuments'),
+      hint: t('basemapSwitcher.showMonumentsHint'),
+      toggle: () => setReferenceOverlayActive('monuments', !isShowingReferenceOverlay('monuments')),
+    },
+    {
+      key: 'mints',
+      canShow: true,
+      isActive: isShowingReferenceOverlay('mints'),
+      label: t('basemapSwitcher.showMints'),
+      hint: t('basemapSwitcher.showMintsHint'),
+      toggle: () => setReferenceOverlayActive('mints', !isShowingReferenceOverlay('mints')),
+    },
+    {
+      key: 'hillforts',
+      canShow: true,
+      isActive: isShowingReferenceOverlay('hillforts'),
+      label: t('basemapSwitcher.showHillforts'),
+      hint: t('basemapSwitcher.showHillfortsHint'),
+      toggle: () => setReferenceOverlayActive('hillforts', !isShowingReferenceOverlay('hillforts')),
+    },
   ])
 
   const activeCount = computed(
@@ -252,9 +295,11 @@
         class="leaf absolute right-0 top-full z-20 mt-2 max-h-[70vh] w-64 overflow-y-auto shadow-lifted"
       >
         <!--
-          A toggle whose own `canShow` is false (only ever the Tabula
-          Peutingeriana network, gated on the server's licence flag) is
-          skipped rather than shown disabled.
+          A toggle whose own `canShow` is false (the Tabula Peutingeriana
+          network when the server withdraws it) is skipped rather than shown
+          disabled. The neighbouring realms are not here at all: they only
+          exist under the period scrubber, so their switch sits in its panel
+          (`PeriodSwitcher.vue`).
         -->
         <template v-for="entry in overlayToggles" :key="entry.key">
           <button

@@ -74,12 +74,13 @@ route so a reader who never asks for them pays nothing:
 ## Background work (not request-driven)
 
 - **Import pipeline** (`scripts/import/`): a resumable, numbered pipeline
-  (20 stages and growing) that pulls vici.org's MySQL dump, converts it to
+  (26 stages and growing) that pulls vici.org's MySQL dump, converts it to
   the Postgres schema, mirrors photographs and the DARE raster basemap,
   builds the Barrington/limes vector data, and imports every later overlay
   (battles, ports, routes, minor antiquities, coin hoards, empire extents,
-  Tabula Peutingeriana, column relief plates, modern cities, two inscription
-  corpora). Run once per environment, not per request.
+  Tabula Peutingeriana, column relief plates, modern cities, three inscription
+  corpora, Itiner-e roads, Nomisma mints, Wikidata monuments, Cliopatria realms, the
+  Atlas of Hillforts). Run once per environment, not per request.
 - **`pnpm tiles:warm`**: pre-populates the Valkey tile cache after a deploy or
   bulk import so the first visitors don't pay for cold PostGIS renders.
   Each guarded stage records its row count and a checksum in `import_runs`
@@ -181,24 +182,25 @@ Kubernetes would be a translation of the same containers, not a rewrite.
 
 ## Directory-to-architecture map
 
-| Layer                                          | Where                                                                                                                |
-| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| UI / map rendering                             | `app/components/map/` (basemap switcher + separate overlay switcher), `app/composables/map/`                         |
-| Column relief viewers (OpenSeadragon)          | `app/components/columns/`, `app/composables/columns/`                                                                |
-| Record detail, contribution forms              | `app/components/site/`, `contribute/`, `moderation/`                                                                 |
-| Admin command station                          | `app/pages/admin/`, `app/components/admin/`, `server/api/admin/**`                                                   |
-| Epigraphy (EDH + Attic Inscriptions Online)    | `app/pages/inscriptions/`, `app/components/epigraphy/`, `server/utils/inscriptions.ts`, `server/api/inscriptions/**` |
-| Domain vocabulary shared by client + server    | `shared/types/`, `shared/utils/`                                                                                     |
-| API routes                                     | `server/api/**` (one file per route, Nitro file-based routing)                                                       |
-| Tile SQL generation                            | `server/utils/mvt.ts`, `atlas.ts`, `limes.ts`                                                                        |
-| Governance (revisions, trust, permissions)     | `server/utils/revisions.ts`, `permissions.ts`, `sampling.ts`                                                         |
-| Open-data feeds out (GeoJSON + Linked Places)  | `server/api/data/**`, `shared/utils/linkedPlaces.ts`                                                                 |
-| Contribution queue ("what needs work near me") | `server/api/sites/needs-work.get.ts`, `shared/utils/completeness.ts`, `app/pages/nearby.vue`                         |
-| Local security scanning                        | `scripts/security/`, `.opengrep/rules/`                                                                              |
-| DB schema (Drizzle)                            | `server/database/schema/`                                                                                            |
-| Hand-written SQL migrations                    | `server/database/migrations/`                                                                                        |
-| One-off data pipelines                         | `scripts/import/`, `scripts/*.ts`                                                                                    |
-| Container definitions                          | `docker/`                                                                                                            |
+| Layer                                                                            | Where                                                                                                                                           |
+| -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| UI / map rendering                                                               | `app/components/map/` (basemap switcher + separate overlay switcher), `app/composables/map/`                                                    |
+| Column relief viewers (OpenSeadragon)                                            | `app/components/columns/`, `app/composables/columns/`                                                                                           |
+| Record detail, contribution forms                                                | `app/components/site/`, `contribute/`, `moderation/`                                                                                            |
+| Admin command station                                                            | `app/pages/admin/`, `app/components/admin/`, `server/api/admin/**`                                                                              |
+| Epigraphy (EDH, Attic Inscriptions Online, I.Sicily)                             | `app/pages/inscriptions/`, `app/components/epigraphy/`, `server/utils/inscriptions.ts`, `isicily-inscriptions.ts`, `server/api/inscriptions/**` |
+| Reference overlays (Itiner-e, Nomisma, Wikidata monuments, I.Sicily, Cliopatria) | `server/utils/reference-layers.ts`, `server/api/tiles/reference/**`, `antiquity-polities/**`, `app/composables/map/useReferenceOverlays.ts`     |
+| Domain vocabulary shared by client + server                                      | `shared/types/`, `shared/utils/`                                                                                                                |
+| API routes                                                                       | `server/api/**` (one file per route, Nitro file-based routing)                                                                                  |
+| Tile SQL generation                                                              | `server/utils/mvt.ts`, `atlas.ts`, `limes.ts`, `reference-layers.ts`                                                                            |
+| Governance (revisions, trust, permissions)                                       | `server/utils/revisions.ts`, `permissions.ts`, `sampling.ts`                                                                                    |
+| Open-data feeds out (GeoJSON + Linked Places)                                    | `server/api/data/**`, `shared/utils/linkedPlaces.ts`                                                                                            |
+| Contribution queue ("what needs work near me")                                   | `server/api/sites/needs-work.get.ts`, `shared/utils/completeness.ts`, `app/pages/nearby.vue`                                                    |
+| Local security scanning                                                          | `scripts/security/`, `.opengrep/rules/`                                                                                                         |
+| DB schema (Drizzle)                                                              | `server/database/schema/`                                                                                                                       |
+| Hand-written SQL migrations                                                      | `server/database/migrations/`                                                                                                                   |
+| One-off data pipelines                                                           | `scripts/import/`, `scripts/*.ts`                                                                                                               |
+| Container definitions                                                            | `docker/`                                                                                                                                       |
 
 ## What this diagram leaves out
 

@@ -616,6 +616,124 @@ A URL-level purge (Pull Zone → Purge Cache → URL) is the fallback.
 to flat. Do **not** point it at `https://tiles.mapterhorn.com/...` — production's
 CSP refuses that host on purpose.
 
+## 15b. Reference datasets — Itiner-e, Nomisma, Wikidata monuments, I.Sicily, Cliopatria, Atlas of Hillforts
+
+**What this is.** Six datasets drawn as map layers or pages, each mirrored into our
+own Postgres so a visitor's browser asks nobody else for anything (no new CSP origin,
+no new third-party request). Sources, licences and the facts behind each are in
+`.claude/rules/reference-overlays.md`; the credits are on `/licence`.
+
+| Table                   | Rows (dev, 4 Oct 2026) | Layer / page                                                     |
+| ----------------------- | ---------------------- | ---------------------------------------------------------------- |
+| `antiquity_roman_roads` | 14,769                 | Overlays → Roman roads                                           |
+| `antiquity_mints`       | 2,194                  | Overlays → Mints                                                 |
+| `antiquity_monuments`   | 3,437                  | Overlays → Roman monuments                                       |
+| `antiquity_polities`    | 655 (87 realms)        | Ancient empires → Neighbouring realms (under the slider)         |
+| `isicily_inscriptions`  | 5,136 (5,009 located)  | Overlays → Sicilian inscriptions, and `/inscriptions/sicily/:id` |
+| `antiquity_hillforts`   | 4,147                  | Overlays → Hillforts                                             |
+
+**Release order — everything in the reference-layers release, in sequence.** The order
+matters: restoring before the deploy finds no tables, and skipping step 5 can serve
+empty tiles cached before the data arrived.
+
+1. **Dokploy → Environment:** make sure `TABULA_PEUTINGERIANA_ENABLED` is either absent
+   (the compose default is now `true`) or `true`. An explicit `false` left over from
+   before keeps the overlay off. Nothing else is new: no secret, no pull zone, no CSP origin.
+2. **Deploy the new build** (Dokploy → Deploy). The app's startup applies migrations
+   `0030` (five tables) and `0031` (hillforts); the layers draw nothing yet.
+3. **Confirm the migrations ran**, and that the tables are empty:
+   `docker exec <postgres-container> psql -U vestigian -d vestigian -c "SELECT count(*) FROM antiquity_hillforts"`
+   → `0`. An error "relation does not exist" means the app did not start cleanly: read its
+   log before going on.
+4. **Load the data** — "Load the data" below, steps 1–3 (local imports, data-only dump,
+   restore, count check).
+5. **Bump the tile generation** — step 4 below (`INCR vestigian:atlas-version`). Always,
+   also on a first release: the Cliopatria tile SQL was changed after its first dev
+   tiles were cached, and one `INCR` costs nothing.
+6. **Verify from outside** — the curls below, then switch each of the six overlays on
+   once and the scrubber on, and check the credit shows in the attribution line.
+7. **Check `/licence`** in the browser (new credits, and the query-parameter hints under
+   the two feeds), and `/api/data/sites.geojson?limit=2&offset=2` answers.
+8. **Pull-zone cache:** nothing to purge for new paths. Purge only `/licence` and `/` if a
+   stale HTML copy is served after the deploy (Pull Zone → Purge Cache → URL).
+
+**Nothing new to configure.** No environment variable, no secret, no pull zone, no
+CSP change. The tables are created by the app's own startup migrations (`0030` and `0031`) the
+first time the new build starts, empty — until the data below is loaded the six
+overlays draw nothing and the detail pages answer 404, and nothing else is affected.
+
+**Load the data** (once per dataset refresh). It is a data-only dump of just these
+six tables from the machine that ran the imports, restored into the running
+Postgres. Do **not** run the import scripts on the VPS: they need the repository,
+Node and the `.import/` caches, and the dump is the route §14 already established.
+
+```bash
+# 1. Local — make sure the imports are current, then dump only these tables.
+pnpm import:itinere-roads && pnpm import:nomisma-mints && pnpm import:wikidata-monuments   && pnpm import:isicily-inscriptions && pnpm import:cliopatria-polities \
+  && pnpm import:hillforts-atlas
+pg_dump "$NUXT_DATABASE_URL" -Fc --no-owner --no-acl --data-only   -t antiquity_roman_roads -t antiquity_mints -t antiquity_monuments   -t antiquity_polities -t isicily_inscriptions -t antiquity_hillforts -f reference-layers.dump
+pg_restore --list reference-layers.dump | grep -c "TABLE DATA"   # expect 6
+rsync -avP reference-layers.dump deploy@<vps-ip>:/tmp/
+
+# 2. VPS — the build must already be deployed, so the tables exist (and are empty).
+docker exec <postgres-container> psql -U vestigian -d vestigian -c \
+  "TRUNCATE antiquity_roman_roads, antiquity_mints, antiquity_monuments,
+            antiquity_polities, isicily_inscriptions, antiquity_hillforts RESTART IDENTITY"
+docker exec -i <postgres-container> pg_restore \
+  --no-owner --no-acl --data-only -U vestigian -d vestigian < /tmp/reference-layers.dump
+
+# 3. VPS — check the counts against the table above.
+docker exec <postgres-container> psql -U vestigian -d vestigian -c "
+  SELECT 'roads' AS t, count(*) FROM antiquity_roman_roads UNION ALL
+  SELECT 'mints', count(*) FROM antiquity_mints UNION ALL
+  SELECT 'monuments', count(*) FROM antiquity_monuments UNION ALL
+  SELECT 'polities', count(*) FROM antiquity_polities UNION ALL
+  SELECT 'isicily', count(*) FROM isicily_inscriptions UNION ALL
+  SELECT 'hillforts', count(*) FROM antiquity_hillforts"
+
+# 4. VPS — tell the app the atlas changed. Tiles are cached in Valkey under a generation
+#    counter that a restore does not touch; without this the first requests can be served
+#    empty tiles cached before the data arrived.
+docker exec <valkey-container> valkey-cli INCR vestigian:atlas-version
+```
+
+_Rehearsed 4 Oct 2026 against a scratch database in the dev Postgres container, with all six
+tables: migrations `0030`/`0031` created them empty, the dump listed six `TABLE DATA` entries,
+the restore gave exactly the counts above (text arrays and numerics included), and the next
+insert into `antiquity_hillforts` took `id` 4148 (the sequences came across)._
+
+**Verify from outside** (replace `<domain>`):
+
+```bash
+curl -s -o /dev/null -w '%{http_code} %{size_download}B\n' \
+  https://<domain>/api/tiles/reference/roman-roads/6/33/22.mvt            # 200, a few KB
+curl -s https://<domain>/api/isicily-inscriptions/ISic000001 | head -c 200  # JSON, "Funerary inscription of Zethus"
+curl -s -o /dev/null -w '%{http_code}\n' \
+  https://<domain>/api/tiles/antiquity-polities/-200/4/8/5.mvt              # 200 or 204, never 4xx/5xx
+```
+
+Then open the map, switch each overlay on once and confirm the credit appears in the
+attribution line (it leaves with the layer). **No Bunny purge is needed** — these are
+new paths. Only if one of them answers a cached `404` from before the deploy, purge that
+URL in the pull zone.
+
+**Backups.** The five `antiquity_*` tables are excluded from the nightly dump by
+design (`docker/backup.sh`) and are rebuilt from the dump above or the import scripts
+after a restore; `isicily_inscriptions` is included in the nightly dump (it is small).
+`docker/restore-drill.sh` therefore does not prove these five — re-run step 2 after
+a disaster restore.
+
+**Refreshing.** Re-run the matching import locally and repeat steps 1–4. Each import is
+guarded (`import_runs`): it refuses an upstream that shrank by more than 10 % or grew
+threefold, and prints `content-changed` when the bytes differ at the same row count.
+I.Sicily's `master` branch moves continuously, so `content-changed` there is routine.
+
+**Licence reminders that are operational, not legal fine print:** six I.Sicily records
+are **CC BY-NC 4.0** (non-commercial use only) — the detail page says so per record;
+if this deployment ever becomes commercial, filter `licence = 'CC-BY-NC-4.0'` out of
+`reference-layers.ts`'s `isicilyTileSql` and `loadIsicilyInscriptionDetail`. I.Sicily's
+**photographs are not mirrored** and must not be (see the rules file).
+
 ## 16. Mail — Brevo
 
 Replaces Lettermint (operator's own choice). `server/utils/mail.ts`'s
@@ -757,8 +875,31 @@ allowed per condition"`, root cause never found. **Rewritten 2026-10-03** to
   the compose file, both i18n keys in every locale, and the table in
   `.claude/rules/gdpr-legal.md`.
 - ~~CORS wildcard~~ — fixed 2026-09-30, see §12's `NUXT_SECURITY_CORS_HANDLER_ORIGIN` note.
+- **Oxford Roman Economy Project databases — ask for terms, then decide.** Shipwrecks,
+  mines, quarries, olive-oil and wine presses, water technology and cities
+  (`oxrep.classics.ox.ac.uk/databases`). The pages state **no licence** ("Content: OXREP,
+  2005–2026"), the site-wide terms page returned 403 behind an Oxford SSO login when
+  checked, and quarries' coordinates are only "accurate to within several kilometres".
+  Not mirrorable until someone with an Oxford contact has an explicit yes. The
+  _Cities_ database carries a Bodleian DOI, which may carry its own licence — check
+  that first. Detail: `.claude/rules/antiquity-basemaps.md`, "Researched and rejected".
+- **EDH photographs — ask Heidelberg for permission, or leave out.** The EDH
+  inscription _texts_ are CC BY-SA 4.0 and mirrored; the **43,199 photograph records
+  are all Europeana `rr-f` ("Rights Reserved – Free Access")**, re-checked 3 Oct 2026
+  against 2,000 local metadata files. We store metadata and a link-out only
+  (`scripts/import/13-edh-inscription-images.ts`), no bytes. To show or mirror them
+  EDH has to grant it in writing; the import already re-checks every record's rights
+  text (`isOpenRightsStatement`), so a genuinely open licence upstream would be picked
+  up without a code change.
+- **Further sources investigated 3–4 Oct 2026, not built** — Portable Antiquities Scheme (terms say CC BY 3.0 but the site
+  blocks us and find-spot rules are unread — ask), Trismegistos (licence unverified),
+  OSM `historic=archaeological_site` (ODbL, mixed value). Table and reasoning:
+  `.claude/rules/reference-overlays.md`, "Candidates investigated and not built".
 - **Ask AFE (afe@dainst.de) and PAS for an explicit licence to mirror their
-  single coin-find data.** Neither states one today — see
+  single coin-find data.** AFE states none. PAS's website terms (read from a Wayback
+  copy of 3 Dec 2025, because the site answers 403 to us) say "We licence all our work
+  under a Creative Commons Share-Alike agreement (CC BY 3.0)", which is self-contradictory
+  and says nothing about the records' find-spot precision — so ask rather than assume. See
   `.claude/rules/antiquity-basemaps.md`'s coin-finds section for the full
   per-source research (2026-09-14). The site panel that used to link out to
   these databases was removed 2026-09-30 for adding no reader benefit, but

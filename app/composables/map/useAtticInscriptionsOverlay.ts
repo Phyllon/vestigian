@@ -1,4 +1,3 @@
-import { Popup } from 'maplibre-gl'
 import type { Map as MapLibreMap, MapLayerMouseEvent, SymbolLayerSpecification } from 'maplibre-gl'
 import { escapeHtmlForPopup } from './useBattleOverlay'
 import { ATTIC_INSCRIPTION_ATTRIBUTION } from './useBasemapStyle'
@@ -63,6 +62,7 @@ export const buildAtticInscriptionPopupHtml = (
 export const useAtticInscriptionsOverlay = () => {
   const { isShowingAtticInscriptions, atticInscriptionTilesUrl } = useBasemapStyle()
   const { t } = useI18n()
+  const { openOverlayPopup } = useOverlayPopup()
 
   const showAtticInscriptionPopup = (map: MapLibreMap, event: MapLayerMouseEvent): void => {
     const feature = event.features?.[0]
@@ -70,10 +70,12 @@ export const useAtticInscriptionsOverlay = () => {
 
     const properties = feature.properties as AtticInscriptionFeatureProperties
 
-    const popup = new Popup({ closeButton: true, maxWidth: '260px' })
-      .setLngLat(feature.geometry.coordinates as [number, number])
-      .setHTML(buildAtticInscriptionPopupHtml(properties, t))
-      .addTo(map)
+    const popup = openOverlayPopup({
+      map,
+      position: feature.geometry.coordinates as [number, number],
+      html: buildAtticInscriptionPopupHtml(properties, t),
+      maxWidth: '260px',
+    })
 
     // Same fix as `useInscriptionsOverlay.ts`'s own popup link, and for the
     // same reason: raw `Popup.setHTML` markup has no router interception on

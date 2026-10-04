@@ -90,7 +90,17 @@
     "showInscriptions": "Inscriptions",
     "showInscriptionsHint": "Mirrored inscriptions with a resolved findspot (EDH)",
     "showAtticInscriptions": "Attic inscriptions",
-    "showAtticInscriptionsHint": "Attic Inscriptions Online with a resolved findspot (AIO)"
+    "showAtticInscriptionsHint": "Attic Inscriptions Online with a resolved findspot (AIO)",
+    "showIsicily": "Sicilian inscriptions",
+    "showIsicilyHint": "Inscriptions of ancient Sicily from I.Sicily — Greek, Latin, Elymian, Sikel, Punic",
+    "showRomanRoads": "Roman roads",
+    "showRomanRoadsHint": "Itiner-e's network — solid where surveyed, dashed where conjectured",
+    "showMonuments": "Roman monuments",
+    "showMonumentsHint": "Theatres, villas, forts, baths and more, from Wikidata",
+    "showMints": "Mints",
+    "showMintsHint": "Where coins were struck, from Nomisma",
+    "showHillforts": "Hillforts",
+    "showHillfortsHint": "Hillforts of Britain and Ireland, many reoccupied under Rome"
   },
   "featuredSites": {
     "show": "Show featured sites nearby",
@@ -114,15 +124,17 @@
     "labelActive": "Overlays: {count} on"
   },
   "periodSwitcher": {
-    "label": "Roman Empire: {state}",
-    "menuLabel": "Roman Empire, over time",
-    "title": "Roman Empire",
+    "label": "Ancient empires: {state}",
+    "menuLabel": "Ancient empires, over time",
+    "title": "Ancient empires",
     "heading": "Roman Empire: extent over time",
     "scrubberLabel": "The Roman Empire, over time",
     "off": "Off",
     "yearBce": "{year} BCE",
     "yearCe": "{year} CE",
-    "approximate": "Frontiers are approximate, drawn by OpenHistoricalMap contributors."
+    "approximate": "Frontiers are approximate, drawn by OpenHistoricalMap contributors.",
+    "showPolities": "Neighbouring realms",
+    "showPolitiesHint": "Carthage, Parthia, the Goths and others under the Roman extent"
   },
   "tabulaPeutingeriana": {
     "title": "Tabula Peutingeriana",
@@ -297,6 +309,23 @@
     "inscriptionMark": "Mirrored inscription with a resolved findspot",
     "atticInscriptionsTitle": "Attic inscriptions",
     "atticInscriptionMark": "Attic inscription with a resolved findspot",
+    "romanRoadsTitle": "Roman roads",
+    "romanRoadKind": {
+      "certain": "Course established",
+      "conjectured": "Course conjectured",
+      "hypothetical": "Course hypothetical"
+    },
+    "isicilyTitle": "Sicilian inscriptions",
+    "isicilyMark": "Inscription from I.Sicily, at an approximate place",
+    "monumentsTitle": "Roman monuments",
+    "mintsTitle": "Mints",
+    "mintMark": "Mint, from Nomisma",
+    "empiresTitle": "Ancient empires",
+    "romanExtentMark": "The Roman state's extent in the chosen year",
+    "emptyHint": "The key is empty for now. Switch on an overlay and its marks are explained here.",
+    "politiesMark": "A realm's outline in the chosen year",
+    "hillfortsTitle": "Hillforts",
+    "hillfortMark": "Hillfort, from the Atlas of Hillforts",
     "basemapCreditDare": "Antiquity (DARE): © Johan Åhlfeldt, Gothenburg University, CC BY-SA 3.0.",
     "basemapCreditBarrington": "Antiquity (Barrington): roads, coastline and places from the Ancient World Mapping Center (ODbL 1.0) and Pleiades (CC BY 3.0)."
   },
@@ -505,6 +534,12 @@
     "overlayInscriptions": "Inscriptions: Epigraphic Database Heidelberg (CC BY-SA 4.0).",
     "overlayAtticInscriptions": "Attic inscriptions: Attic Inscriptions Online (CC BY-SA 3.0).",
     "overlayTabulaPeutingeriana": "Tabula Peutingeriana network: compiled by René Voorburg (omnesviae.org) from Richard Talbert's georeferencing; the dataset states no licence of its own and is used with his permission.",
+    "overlayRomanRoads": "Roman roads: Itiner-e, the digital atlas of ancient roads — Brughmans, Pažout, de Soto & Bjerregaard Vahlstrup, Aarhus University (CC BY 4.0). Surveyed, conjectured and hypothetical courses are drawn differently.",
+    "overlayMonuments": "Roman monuments (theatres, amphitheatres, villas, aqueducts, bridges, temples, forts, baths, fora, mithraea): Wikidata (CC0 1.0) — no rights reserved.",
+    "overlayMints": "Mints: Nomisma.org, the American Numismatic Society's linked open data hub (CC BY 3.0).",
+    "overlayIsicily": "Sicilian inscriptions: I.Sicily, University of Oxford (CC BY 4.0; six records CC BY-NC 4.0 — non-commercial use only). The texts are mirrored; the photographs are not, because they are not licensed for reuse.",
+    "overlayPolities": "Neighbouring realms (Carthage, Parthia, the Seleucid and Ptolemaic kingdoms, the Goths and others): Cliopatria, Seshat Global History Databank (CC BY 4.0) — one scholarly reading of a coarse boundary.",
+    "overlayHillforts": "Hillforts of Britain and Ireland: the Atlas of Hillforts, Ralston & Lock (Universities of Oxford, Edinburgh and Cork), via the Archaeology Data Service (CC BY 4.0).",
     "columnReliefHeading": "Column reliefs",
     "columnReliefBody": "Trajan's Column plates are mirrored from Wikimedia Commons' Cichorius Plates category, marked public domain there. The Column of Marcus Aurelius's plates are served live from Heidelberg University Library's digitisation of Petersen, Domaszewski & Calderini's 1896 study — also public domain; nothing is mirrored into this project's own storage for that column.",
     "placeNamesHeading": "Modern place names",
@@ -515,6 +550,7 @@
     "iconsBody": "Several map symbols are from game-icons.net (CC BY 3.0): icons made by Delapouite and Lorc, available on https://game-icons.net. The others are Lucide icons (ISC licence). The typefaces — Fraunces, IBM Plex Sans, IBM Plex Mono and, for map labels, Noto Sans — are under the SIL Open Font Licence 1.1 and are served from this site, not from a font service.",
     "reuseHeading": "Reusing this data",
     "reuseBody": "Vestigian is built from openly licensed sources, so it publishes its own records back in the same spirit. Both feeds are read-only, bounded and paged, and open to cross-origin requests. Text is CC BY-SA and metadata CC0; image licences vary per record and are not included.",
+    "reuseNotIncluded": "The feeds carry only records contributed here. The reference layers listed above (roads, mints, monuments, inscriptions and the rest) are not republished in them — take those from their own sources, under their own licences.",
     "reuseGeojson": "plain GeoJSON, for maps and analysis",
     "reuseLinkedPlaces": "Linked Places Format, the gazetteer standard read by the Pelagios Network, with closeMatch links to Pleiades and Wikidata",
     "reuseParamsHeading": "Query parameters",
@@ -739,6 +775,122 @@
   "coinHoardPopup": {
     "hoardCount": "No hoards recorded here | 1 recorded hoard | {n} recorded hoards",
     "viewOnGeonames": "View on GeoNames"
+  },
+  "referencePopup": {
+    "road": {
+      "unnamed": "Unnamed road segment",
+      "main": "Main road",
+      "secondary": "Secondary road",
+      "certainty": {
+        "certain": "Course established",
+        "conjectured": "Course conjectured",
+        "hypothetical": "Course hypothetical"
+      }
+    },
+    "mint": {
+      "kind": "Mint",
+      "viewOnNomisma": "View on Nomisma"
+    },
+    "monument": {
+      "kind": {
+        "theatre": "Theatre",
+        "amphitheatre": "Amphitheatre",
+        "villa": "Villa",
+        "aqueduct": "Aqueduct",
+        "bridge": "Bridge",
+        "temple": "Temple",
+        "fort": "Fort",
+        "bath": "Baths",
+        "forum": "Forum",
+        "mithraeum": "Mithraeum"
+      }
+    },
+    "viewOnPleiades": "View on Pleiades",
+    "viewOnWikidata": "View on Wikidata",
+    "hillfort": {
+      "type": {
+        "contour": "Contour fort",
+        "partial-contour": "Partial contour fort",
+        "promontory": "Promontory fort",
+        "hillslope": "Hillslope fort",
+        "level-terrain": "Level-terrain fort",
+        "marsh": "Marsh fort",
+        "multiple-enclosure": "Multiple enclosure"
+      },
+      "country": {
+        "england": "England",
+        "scotland": "Scotland",
+        "wales": "Wales",
+        "northern-ireland": "Northern Ireland",
+        "republic-of-ireland": "Republic of Ireland",
+        "isle-of-man": "Isle of Man"
+      },
+      "reliability": {
+        "unconfirmed": "Possible hillfort: the atlas could not confirm it.",
+        "irreconciled": "The atlas records unresolved disagreements about this site."
+      },
+      "area": "{hectares} ha enclosed",
+      "altitude": "{metres} m above sea level",
+      "dated": "Dating evidence: {periods}",
+      "viewDataset": "Atlas of Hillforts (Archaeology Data Service)"
+    }
+  },
+  "polityPopup": {
+    "outline": "Outline for {period}",
+    "caveat": "One scholarly reading of a coarse boundary. Ground the Roman extent covers is not drawn.",
+    "viewOnWikipedia": "View on Wikipedia",
+    "viewOnWikidata": "View on Wikidata"
+  },
+  "isicilyInscriptions": {
+    "languages": {
+      "grc": "Ancient Greek",
+      "la": "Latin",
+      "xly": "Elymian",
+      "scx": "Sikel",
+      "xpu": "Punic",
+      "osc": "Oscan",
+      "he": "Hebrew"
+    },
+    "functions": {
+      "funerary": "Funerary",
+      "dedication": "Dedication",
+      "honorific": "Honorific",
+      "attribution": "Ownership or maker's mark",
+      "building": "Building inscription",
+      "defixio": "Curse tablet",
+      "decree": "Decree",
+      "invocation": "Invocation",
+      "account": "Account",
+      "list": "List",
+      "legal": "Legal text",
+      "milestone": "Milestone",
+      "seat": "Seat inscription",
+      "civic-allotment": "Civic allotment token",
+      "terminus": "Boundary marker",
+      "certification": "Certification",
+      "expressive": "Greeting or exhortation"
+    },
+    "detail": {
+      "eyebrow": "Inscription of ancient Sicily",
+      "dated": "Dated",
+      "language": "Language",
+      "kind": "Type",
+      "object": "Object",
+      "material": "Material",
+      "place": "Place",
+      "ancientPlace": "Ancient place",
+      "repository": "Now in",
+      "provenance": "Found",
+      "edition": "Text",
+      "translation": "English translation",
+      "identifiers": "Also catalogued as",
+      "approximatePlace": "The position is the modern settlement the stone is attributed to, not an excavated findspot.",
+      "photoNote": "Photographs are not reproduced here: they are not licensed for reuse. See I.Sicily for the image.",
+      "nonCommercialNote": "This record is licensed CC BY-NC 4.0: non-commercial use only.",
+      "showOnMap": "Show on the map",
+      "viewOnIsicily": "View on I.Sicily (with photograph)",
+      "credit": "{licence}, I.Sicily"
+    }
   },
   "siteExternalLinks": {
     "title": "Also recorded in",

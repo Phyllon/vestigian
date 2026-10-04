@@ -21,6 +21,7 @@ import type {
   BasemapView,
   LimesSegmentKind,
 } from '#shared/types'
+import type { ReferenceOverlayId } from '#shared/utils/reference-overlays'
 
 let protocolRegistered = false
 
@@ -197,6 +198,24 @@ export const ATTIC_INSCRIPTION_ATTRIBUTION =
 
 export const TABULA_PEUTINGERIANA_ATTRIBUTION =
   'Tabula Peutingeriana network compiled by René Voorburg, <a href="https://omnesviae.org" target="_blank" rel="noopener">omnesviae.org</a>'
+
+export const ROMAN_ROAD_ATTRIBUTION =
+  'Roman roads: <a href="https://itiner-e.org" target="_blank" rel="noopener">Itiner-e</a>, Brughmans, Pažout, de Soto &amp; Bjerregaard Vahlstrup (CC BY 4.0)'
+
+export const MINT_ATTRIBUTION =
+  'Mints: <a href="https://nomisma.org" target="_blank" rel="noopener">Nomisma.org</a> (CC BY 3.0)'
+
+export const MONUMENT_ATTRIBUTION =
+  'Monuments: <a href="https://www.wikidata.org" target="_blank" rel="noopener">Wikidata</a> (CC0 1.0)'
+
+export const ISICILY_ATTRIBUTION =
+  'Sicilian inscriptions: <a href="https://isicily.org" target="_blank" rel="noopener">I.Sicily</a> (CC BY 4.0)'
+
+export const HILLFORT_ATTRIBUTION =
+  'Hillforts: <a href="https://doi.org/10.5284/1118744" target="_blank" rel="noopener">Atlas of Hillforts</a>, Ralston &amp; Lock, via the Archaeology Data Service (CC BY 4.0)'
+
+export const POLITY_ATTRIBUTION =
+  'Neighbouring realms: <a href="https://seshat-db.com" target="_blank" rel="noopener">Seshat Cliopatria</a> (CC BY 4.0)'
 
 /** Neither antiquity view is a recolouring of the modern vector source. */
 export type AntiquityView = Extract<BasemapView, 'antiquity-dare' | 'antiquity-awmc'>
@@ -1105,6 +1124,12 @@ const ATLAS_COLOURS: AtlasColours = {
 export interface PeriodExtentColours {
   fill: string
   line: string
+  /** A solid under-stroke beneath the dashed outline, so the dashes survive any ground. */
+  casing: string
+  /** The state's name over its own territory — a darker tone of the same hue as `line`. */
+  label: string
+  /** Pale on a light sheet, dark on photography, as `PolityColours.halo`. */
+  halo: string
 }
 
 /**
@@ -1117,7 +1142,10 @@ export interface PeriodExtentColours {
  */
 export const PERIOD_EXTENT_COLOURS: PeriodExtentColours = {
   fill: '#c99b52',
-  line: '#8a6a2f',
+  line: '#6b4d17',
+  casing: '#faf7ef',
+  label: '#5a4216',
+  halo: '#faf7ef',
 }
 
 /**
@@ -1131,6 +1159,9 @@ export const PERIOD_EXTENT_COLOURS: PeriodExtentColours = {
 const DARE_PERIOD_EXTENT_COLOURS: PeriodExtentColours = {
   fill: '#241f19',
   line: '#120f0c',
+  casing: '#fffdf4',
+  label: '#120f0c',
+  halo: '#faf7ef',
 }
 
 /**
@@ -1143,7 +1174,23 @@ const DARE_PERIOD_EXTENT_COLOURS: PeriodExtentColours = {
  */
 const SATELLITE_PERIOD_EXTENT_COLOURS: PeriodExtentColours = {
   fill: '#9a3b22',
-  line: '#5c2013',
+  line: '#ffd9c9',
+  casing: '#3d1509',
+  label: '#ffd9c9',
+  halo: '#3d1509',
+}
+
+/**
+ * The night notebook keeps the amber wash — it reads well on warm charcoal — but
+ * the name it carries has to be pale with a dark halo, or it is a bright blot
+ * on a dark sheet.
+ */
+const DARK_PERIOD_EXTENT_COLOURS: PeriodExtentColours = {
+  fill: '#c99b52',
+  line: '#f0d9a0',
+  casing: '#1c1610',
+  label: '#f0dcae',
+  halo: '#1c1610',
 }
 
 /**
@@ -1154,9 +1201,13 @@ const SATELLITE_PERIOD_EXTENT_COLOURS: PeriodExtentColours = {
  * tears down and rebuilds every overlay via `styledata`, same as every
  * other overlay in this file) picks up the right palette automatically.
  */
-export const resolvePeriodExtentColours = (view: BasemapView): PeriodExtentColours => {
+export const resolvePeriodExtentColours = (
+  view: BasemapView,
+  isDark = false,
+): PeriodExtentColours => {
   if (view === 'antiquity-dare') return DARE_PERIOD_EXTENT_COLOURS
   if (view === 'satellite') return SATELLITE_PERIOD_EXTENT_COLOURS
+  if (view === 'vestigian' && isDark) return DARK_PERIOD_EXTENT_COLOURS
   return PERIOD_EXTENT_COLOURS
 }
 
@@ -1654,7 +1705,18 @@ export const buildPeriodExtentLayers = (
     type: 'fill',
     source: 'atlas-period',
     'source-layer': 'extent',
-    paint: { 'fill-color': colours.fill, 'fill-opacity': 0.22 },
+    paint: { 'fill-color': colours.fill, 'fill-opacity': 0.4 },
+  },
+  {
+    id: 'atlas-period-extent-casing',
+    type: 'line',
+    source: 'atlas-period',
+    'source-layer': 'extent',
+    paint: {
+      'line-color': colours.casing,
+      'line-opacity': 0.8,
+      'line-width': ['interpolate', ['linear'], ['zoom'], 3, 3.4, 10, 5.6],
+    },
   },
   {
     id: 'atlas-period-extent-outline',
@@ -1663,7 +1725,171 @@ export const buildPeriodExtentLayers = (
     'source-layer': 'extent',
     paint: {
       'line-color': colours.line,
-      'line-width': ['interpolate', ['linear'], ['zoom'], 3, 0.5, 10, 1.4],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 3, 1.6, 10, 2.8],
+      // Longer dashes than the neighbouring realms' [3, 2], so the two never read as one line.
+      'line-dasharray': [5, 2.5],
+    },
+  },
+  /**
+   * The state's own name over its territory, drawn the way the neighbouring
+   * realms' names are so the two read as one family — in capitals and wide
+   * set, because it is the largest area on the map. The source's name is used
+   * as it stands (`Res Publica Romana`, `Imperium Romanum`, and after 395 the
+   * Western and Eastern halves each under their own), as the realms' names are.
+   * Gone beyond zoom 9: the label is placed once per tile, so a closer view
+   * would repeat it across a territory the reader can no longer see whole.
+   */
+  {
+    id: 'atlas-period-extent-label',
+    type: 'symbol',
+    source: 'atlas-period',
+    'source-layer': 'extent',
+    maxzoom: 9,
+    layout: {
+      'text-field': ['get', 'state_name'],
+      'text-font': [MAP_LABEL_FONT],
+      'text-size': ['interpolate', ['linear'], ['zoom'], 3, 11, 8, 16],
+      'text-max-width': 8,
+      'text-letter-spacing': 0.18,
+      'text-transform': 'uppercase',
+      // The label is placed once per tile, so a territory crossing a tile edge would
+      // carry two. The padding is what makes the second one yield.
+      'text-padding': 40,
+    },
+    paint: {
+      'text-color': colours.label,
+      'text-halo-color': colours.halo,
+      'text-halo-width': 1.8,
+    },
+  },
+]
+
+export const POLITY_SOURCE_ID = 'atlas-polities'
+
+export interface PolityColours {
+  fill: string
+  line: string
+  /** A solid under-stroke beneath the dashed outline, so it survives any ground. */
+  casing: string
+  label: string
+  halo: string
+}
+
+/**
+ * Deep slate blue, deliberately the opposite of the Roman extent's amber: a
+ * neighbouring realm should read as "someone else's territory" at a glance.
+ * Raised well beyond the first version ("increase contrast a lot"): a barely
+ * tinted fill and a thin grey-blue dash vanished on every sheet. The fill now
+ * carries real weight, the outline is a two-stroke line (a solid pale casing
+ * under a dark dashed stroke) and the name has a wide halo — each of the four
+ * grounds below gets a palette measured against it, not one shared compromise.
+ * Cliopatria's boundaries are still one scholarly version of a coarse outline,
+ * and the popup says so.
+ */
+const POLITY_COLOURS: PolityColours = {
+  fill: '#2a5d8f',
+  line: '#0f2f52',
+  casing: '#faf7ef',
+  label: '#0b2745',
+  halo: '#faf7ef',
+}
+
+/** Pale parchment needs a still darker ink, and a casing as pale as the sheet. */
+const DARE_POLITY_COLOURS: PolityColours = {
+  fill: '#17406b',
+  line: '#071a2e',
+  casing: '#fffdf4',
+  label: '#06182b',
+  halo: '#fffdf4',
+}
+
+/**
+ * The night notebook: a light, cool blue on warm charcoal, with the casing in
+ * the ground's own tone so the dashes stay crisp.
+ */
+const DARK_POLITY_COLOURS: PolityColours = {
+  fill: '#6fb0e6',
+  line: '#bfe0fa',
+  casing: '#10202e',
+  label: '#d9edfc',
+  halo: '#10202e',
+}
+
+/**
+ * Satellite photography has no stable background tone, so a bright cyan fill,
+ * a white dashed line and a near-black casing: one of the pair contrasts with
+ * whatever the pixel underneath is.
+ */
+const SATELLITE_POLITY_COLOURS: PolityColours = {
+  fill: '#46c2ff',
+  line: '#ffffff',
+  casing: '#0a1a2a',
+  label: '#ffffff',
+  halo: '#0a1a2a',
+}
+
+export const resolvePolityColours = (view: BasemapView, isDark = false): PolityColours => {
+  if (view === 'antiquity-dare') return DARE_POLITY_COLOURS
+  if (view === 'satellite') return SATELLITE_POLITY_COLOURS
+  if (view === 'vestigian' && isDark) return DARK_POLITY_COLOURS
+  return POLITY_COLOURS
+}
+
+/**
+ * The neighbours of the Roman state (`antiquity_polities`, Cliopatria) in the
+ * scrubber's year: a fill, a casing and a dashed outline, and the realm's name.
+ * Added by `usePeriodOverlay` *before* the Roman extent so Rome draws over
+ * anything it overlaps. The dashed outline separates "territory a source drew"
+ * from the solid line the frontier uses.
+ */
+export const buildPolityLayers = (
+  colours: PolityColours = POLITY_COLOURS,
+): LayerSpecification[] => [
+  {
+    id: 'atlas-polity-fill',
+    type: 'fill',
+    source: POLITY_SOURCE_ID,
+    'source-layer': 'polities',
+    paint: { 'fill-color': colours.fill, 'fill-opacity': 0.34 },
+  },
+  {
+    id: 'atlas-polity-casing',
+    type: 'line',
+    source: POLITY_SOURCE_ID,
+    'source-layer': 'polities',
+    paint: {
+      'line-color': colours.casing,
+      'line-opacity': 0.8,
+      'line-width': ['interpolate', ['linear'], ['zoom'], 3, 3, 10, 5],
+    },
+  },
+  {
+    id: 'atlas-polity-outline',
+    type: 'line',
+    source: POLITY_SOURCE_ID,
+    'source-layer': 'polities',
+    paint: {
+      'line-color': colours.line,
+      'line-width': ['interpolate', ['linear'], ['zoom'], 3, 1.4, 10, 2.6],
+      'line-dasharray': [3, 2],
+    },
+  },
+  {
+    id: 'atlas-polity-label',
+    type: 'symbol',
+    source: POLITY_SOURCE_ID,
+    'source-layer': 'polities',
+    layout: {
+      'text-field': ['get', 'name'],
+      'text-font': [MAP_LABEL_FONT],
+      'text-size': ['interpolate', ['linear'], ['zoom'], 3, 12, 8, 15],
+      'text-max-width': 7,
+      'text-letter-spacing': 0.06,
+    },
+    paint: {
+      'text-color': colours.label,
+      'text-halo-color': colours.halo,
+      'text-halo-width': 2,
     },
   },
 ]
@@ -1789,6 +2015,8 @@ export const useBasemapStyle = () => {
     coinHoardTilesUrl: absolute(config.public.basemap.coinHoardTilesUrl),
     inscriptionTilesUrl: absolute(config.public.basemap.inscriptionTilesUrl),
     atticInscriptionTilesUrl: absolute(config.public.basemap.atticInscriptionTilesUrl),
+    referenceTilesUrl: absolute(config.public.basemap.referenceTilesUrl),
+    polityTilesUrl: absolute(config.public.basemap.polityTilesUrl),
     glyphsUrl: config.public.basemap.glyphsUrl,
   }))
 
@@ -2024,6 +2252,46 @@ export const useBasemapStyle = () => {
     isAtticInscriptionsActive.value = next
   }
 
+  /**
+   * The five reference overlays that share one tile endpoint (`reference-layers.ts`):
+   * Itiner-e roads, Nomisma mints, the Wikidata monuments, I.Sicily and the Atlas of Hillforts. One record of
+   * switches rather than four copies of the same three lines, because nothing about
+   * them differs but the id. Off by default and not persisted, like every other
+   * reference overlay here.
+   */
+  const referenceOverlaysActive = useState<Record<ReferenceOverlayId, boolean>>(
+    'reference-overlays-active',
+    () => ({
+      'roman-roads': false,
+      mints: false,
+      monuments: false,
+      isicily: false,
+      hillforts: false,
+    }),
+  )
+
+  const isShowingReferenceOverlay = (id: ReferenceOverlayId): boolean =>
+    referenceOverlaysActive.value[id]
+
+  const setReferenceOverlayActive = (id: ReferenceOverlayId, next: boolean): void => {
+    referenceOverlaysActive.value = { ...referenceOverlaysActive.value, [id]: next }
+  }
+
+  /**
+   * The Roman state's neighbours (Cliopatria) are drawn with the period scrubber, so
+   * they can only be offered while it is on. On by default once it is — a scrubber
+   * that shows Rome alone at the Second Punic War hides what it was fighting.
+   */
+  const arePolitiesEnabled = useState<boolean>('polities-enabled', () => true)
+
+  const canShowPolities = computed(() => periodYear.value !== null)
+
+  const isShowingPolities = computed(() => canShowPolities.value && arePolitiesEnabled.value)
+
+  const setPolitiesEnabled = (next: boolean): void => {
+    arePolitiesEnabled.value = next
+  }
+
   const currentStyle = computed(() =>
     buildBasemapStyle({
       view: view.value,
@@ -2106,5 +2374,13 @@ export const useBasemapStyle = () => {
     isShowingAtticInscriptions,
     setAtticInscriptionsActive,
     atticInscriptionTilesUrl: computed(() => source.value.atticInscriptionTilesUrl),
+    isShowingReferenceOverlay,
+    setReferenceOverlayActive,
+    referenceOverlaysActive,
+    referenceTilesUrl: computed(() => source.value.referenceTilesUrl),
+    canShowPolities,
+    isShowingPolities,
+    setPolitiesEnabled,
+    polityTilesUrl: computed(() => source.value.polityTilesUrl),
   }
 }
