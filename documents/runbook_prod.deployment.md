@@ -439,12 +439,75 @@ pg_restore --list vestigian-full.dump | wc -l   # plausibility check
 rsync -avP vestigian-full.dump deploy@<vps-ip>:/tmp/   # apt install rsync first if missing
 
 # on the VPS, restore into the already-running container — --clean --if-exists
-# makes this safe against the schema the app's own startup migration already created
+# makes this safe against tables that already exist (a restored dump is the schema at
+# that moment; later migrations are applied by the `migrate` service, §14a)
 docker exec -i <postgres-container> pg_restore \
   --no-owner --no-acl --clean --if-exists \
   -U vestigian -d vestigian < /tmp/vestigian-full.dump
 docker compose -f <compose-path> restart app   # reconnect cleanly, not against dropped/recreated objects
 ```
+
+## 14a. Schema migrations — the `migrate` service
+
+**Every deploy applies pending migrations itself.** `docker/compose.prod.yml` has a
+one-shot `migrate` service running the same image as the app: it executes
+`.output/migrate.mjs` (drizzle's migrator, bundled by `pnpm build:migrate` in the
+Dockerfile) against `server/database/migrations`, applies whatever the journal lists that
+`drizzle.__drizzle_migrations` does not hold yet, and exits. `app` has
+`depends_on: migrate: service_completed_successfully`, so:
+
+- a release that adds a table needs **no manual step** — Dokploy → Deploy is enough, and the
+  log of the `migrate` container says `Migrations applied.`;
+- a migration that fails leaves the previous `app` container serving (Compose does not
+  recreate it) and Dokploy shows the deploy as failed — read the `migrate` container's log;
+- migrations must stay **additive and backwards-compatible** (new tables, new nullable
+  columns, new indexes): the old app keeps running against the new schema until the new one
+  is up. A destructive change needs two releases.
+
+_History:_ before this service existed nothing ran migrations in production (the runtime
+image had no migrations folder and no migrator), and the first reference-layers release
+logged `relation "antiquity_hillforts" does not exist`. The service was added then, and the
+manual route below remains the fallback.
+
+**Manual fallback** — if the `migrate` service itself cannot run (an image without it, an
+emergency), apply the SQL by hand. The tracking rows matter: Drizzle's record is
+`drizzle.__drizzle_migrations` (SHA-256 of each `.sql` file and the journal's `when`), and
+inserting them keeps the automatic service consistent afterwards.
+
+```bash
+# 1. VPS — what does production already have? The newest created_at is the cut-off.
+docker exec <postgres-container> psql -U vestigian -d vestigian -At -c \
+  "SELECT max(created_at) FROM drizzle.__drizzle_migrations"
+#   → e.g. 1789328264139 (0029). If the schema "drizzle" does not exist at all, stop and
+#   look: production was not built from a dump of a migrated database.
+
+# 2. Local — one SQL file with every migration newer than that, plus its tracking row.
+LAST=1789328264139      # the value from step 1
+{
+  echo 'BEGIN;'
+  jq -r --argjson last "$LAST" '.entries[] | select(.when > $last) | "\(.tag) \(.when)"' \
+    server/database/migrations/meta/_journal.json |
+  while read -r tag when; do
+    file="server/database/migrations/$tag.sql"
+    cat "$file"; echo
+    echo "INSERT INTO drizzle.__drizzle_migrations (hash, created_at) VALUES ('$(sha256sum "$file" | cut -d' ' -f1)', $when);"
+  done
+  echo 'COMMIT;'
+} > pending-migrations.sql
+grep -c "^CREATE TABLE" pending-migrations.sql      # 6 for 0030 + 0031
+rsync -avP pending-migrations.sql deploy@<vps-ip>:/tmp/
+
+# 3. VPS — apply it. One transaction: a failure leaves the database untouched.
+docker exec -i <postgres-container> psql -U vestigian -d vestigian \
+  -v ON_ERROR_STOP=1 < /tmp/pending-migrations.sql
+```
+
+_Rehearsed 6 Oct 2026 on a scratch copy of the dev database with the six tables, the three
+enums and the two tracking rows removed. Both routes: the generated file above applied
+cleanly with tracking rows identical to the migrator's own; and the bundled `migrate.mjs`,
+run from an empty directory containing only it and the migrations folder (no
+`node_modules`), applied `0030`/`0031` on the first run, did nothing on the second, and
+exits non-zero without `NUXT_DATABASE_URL`._
 
 ## 15. Basemap (PMTiles)
 
@@ -639,12 +702,14 @@ empty tiles cached before the data arrived.
 1. **Dokploy → Environment:** make sure `TABULA_PEUTINGERIANA_ENABLED` is either absent
    (the compose default is now `true`) or `true`. An explicit `false` left over from
    before keeps the overlay off. Nothing else is new: no secret, no pull zone, no CSP origin.
-2. **Deploy the new build** (Dokploy → Deploy). The app's startup applies migrations
-   `0030` (five tables) and `0031` (hillforts); the layers draw nothing yet.
-3. **Confirm the migrations ran**, and that the tables are empty:
+2. **Deploy the new build** (Dokploy → Deploy). Its `migrate` service creates the tables
+   (§14a: `0030` five tables, `0031` hillforts) before the app starts; the `migrate`
+   container's log ends in `Migrations applied.`. If you already deployed an older image
+   that lacks the service and applied the SQL by hand with the tracking rows (§14a fallback),
+   the service finds nothing to do.
+3. **Confirm the tables exist and are empty:**
    `docker exec <postgres-container> psql -U vestigian -d vestigian -c "SELECT count(*) FROM antiquity_hillforts"`
-   → `0`. An error "relation does not exist" means the app did not start cleanly: read its
-   log before going on.
+   → `0`.
 4. **Load the data** — "Load the data" below, steps 1–3 (local imports, data-only dump,
    restore, count check).
 5. **Bump the tile generation** — step 4 below (`INCR vestigian:atlas-version`). Always,
@@ -658,9 +723,9 @@ empty tiles cached before the data arrived.
    stale HTML copy is served after the deploy (Pull Zone → Purge Cache → URL).
 
 **Nothing new to configure.** No environment variable, no secret, no pull zone, no
-CSP change. The tables are created by the app's own startup migrations (`0030` and `0031`) the
-first time the new build starts, empty — until the data below is loaded the six
-overlays draw nothing and the detail pages answer 404, and nothing else is affected.
+CSP change. The tables are created by migrations `0030` and `0031`, which the `migrate` service
+(§14a) applies on the deploy. Until the data below is loaded the six overlays draw nothing
+and the detail pages answer 404, and nothing else is affected.
 
 **Load the data** (once per dataset refresh). It is a data-only dump of just these
 six tables from the machine that ran the imports, restored into the running
@@ -675,7 +740,7 @@ pg_dump "$NUXT_DATABASE_URL" -Fc --no-owner --no-acl --data-only   -t antiquity_
 pg_restore --list reference-layers.dump | grep -c "TABLE DATA"   # expect 6
 rsync -avP reference-layers.dump deploy@<vps-ip>:/tmp/
 
-# 2. VPS — the build must already be deployed, so the tables exist (and are empty).
+# 2. VPS — the deploy must be done (migrations applied, §14a), so the tables exist and are empty.
 docker exec <postgres-container> psql -U vestigian -d vestigian -c \
   "TRUNCATE antiquity_roman_roads, antiquity_mints, antiquity_monuments,
             antiquity_polities, isicily_inscriptions, antiquity_hillforts RESTART IDENTITY"

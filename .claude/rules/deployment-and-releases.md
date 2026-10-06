@@ -217,6 +217,15 @@ beside `tabulaPeutingerianaEnabled` in `nuxt.config.ts`) had to be added to this
 file before the flag could be turned on in production at all; the key existing
 in `.env.example` only covers `pnpm dev`, which reads `.env` directly.
 
+**Migrations run as a one-shot `migrate` service in `compose.prod.yml`**, same image as the
+app, `app` waiting on `service_completed_successfully`. The runtime image holds only `.output`
+plus the SQL folder, so the migrator is bundled into `.output/migrate.mjs` by `pnpm build:migrate`
+(esbuild; Nitro's trace of the app omits drizzle's migrator). It was missing at first — nothing
+ran migrations in production, and the reference-layers release logged
+`relation "antiquity_hillforts" does not exist`. Consequences: migrations must stay additive
+(the old app serves against the new schema between the two steps), and a failing one leaves the
+old `app` container running. Manual fallback with tracking rows: runbook §14a.
+
 ## Versioning & releases
 
 Semantic versioning, via [Changesets](https://github.com/changesets/changesets)

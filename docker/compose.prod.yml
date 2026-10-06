@@ -10,6 +10,30 @@ x-logging: &default-logging
     max-file: '3'
 
 services:
+  # ---------------------------------------------------------------------------
+  # Schema migrations, once per deploy, before the app starts.
+  #
+  # The app image carries `.output/migrate.mjs` (drizzle's migrator bundled into one
+  # file, see the Dockerfile) and the SQL under `server/database/migrations`. It
+  # applies whatever the journal lists that `drizzle.__drizzle_migrations` does not
+  # already hold, then exits. `app` waits for it to exit 0: a migration that fails
+  # leaves the old container serving rather than a new one without its tables.
+  #
+  # A release that adds a table used to need the SQL applied by hand (runbook §14a);
+  # this replaces that. Migrations must stay additive and backwards-compatible, since
+  # the old app keeps running against the new schema for the seconds in between.
+  migrate:
+    image: ghcr.io/${GITHUB_REPOSITORY:-vestigian/vestigian}:${IMAGE_TAG:-latest}
+    pull_policy: always
+    restart: 'no'
+    command: ['node', '.output/migrate.mjs']
+    environment:
+      NUXT_DATABASE_URL: postgres://vestigian:${POSTGRES_PASSWORD}@postgres:5432/vestigian
+    depends_on:
+      postgres:
+        condition: service_healthy
+    logging: *default-logging
+
   app:
     image: ghcr.io/${GITHUB_REPOSITORY:-vestigian/vestigian}:${IMAGE_TAG:-latest}
     # Dokploy's own deploy command is `up -d --build --remove-orphans` — no
@@ -83,6 +107,8 @@ services:
       # Brevo, or every message is refused at the API rather than bounced.
       NUXT_MAIL_FROM: ${MAIL_FROM}
     depends_on:
+      migrate:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
       valkey:

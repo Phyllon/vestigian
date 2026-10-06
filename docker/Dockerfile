@@ -23,10 +23,14 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NODE_ENV=production
-RUN pnpm build
+# The migrator is bundled into one file beside the app (`.output/migrate.mjs`):
+# the runtime image has no node_modules, and Nitro's trace of the app leaves out
+# drizzle's migrator (it is imported by nothing the app runs). See the `migrate`
+# service in compose.prod.yml.
+RUN pnpm build && pnpm build:migrate
 
 # ---- runtime ----------------------------------------------------------------
-# Only .output ships. No source, no dev dependencies, no package manager.
+# Only .output and the SQL migrations ship. No source, no dev dependencies, no package manager.
 FROM node:26-alpine AS runtime
 WORKDIR /app
 
@@ -35,6 +39,8 @@ RUN apk add --no-cache tini vips \
  && adduser -u 1001 -S vestigian -G vestigian
 
 COPY --from=build --chown=vestigian:vestigian /app/.output ./.output
+# Only the migration files — `migrate.mjs` reads them from this path, relative to /app.
+COPY --from=build --chown=vestigian:vestigian /app/server/database/migrations ./server/database/migrations
 
 USER vestigian
 
