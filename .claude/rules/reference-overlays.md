@@ -243,7 +243,7 @@ layer's key survived), and an unreachable Valkey prints a warning and exits 0. B
 old purge pattern matched nothing, are now actually dropped (84 in the dev cache).
 
 **A code-only change to a tile's SQL still needs a bump** — the counter is not derived from the
-query. After deploying such a change, `INCR vestigian:atlas-version` (runbook §15b step 4).
+query. After deploying such a change, `INCRBY 2 vestigian:atlas-version` — **not** `INCR`, which on an unset counter creates it at 1, the value an unset counter already reads as (runbook §15b step 4). Hit for real on the first release: bare `INCR` left `x-atlas-version: 1`, and empty tiles cached before the data arrived were still served at zoom 5 and below.
 
 ### Candidates investigated and _not_ built (3–4 Oct 2026)
 

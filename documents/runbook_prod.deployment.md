@@ -712,9 +712,9 @@ empty tiles cached before the data arrived.
    → `0`.
 4. **Load the data** — "Load the data" below, steps 1–3 (local imports, data-only dump,
    restore, count check).
-5. **Bump the tile generation** — step 4 below (`INCR vestigian:atlas-version`). Always,
+5. **Bump the tile generation** — step 4 below (`INCRBY 2`, not `INCR`). Always,
    also on a first release: the Cliopatria tile SQL was changed after its first dev
-   tiles were cached, and one `INCR` costs nothing.
+   tiles were cached, and one bump costs nothing.
 6. **Verify from outside** — the curls below, then switch each of the six overlays on
    once and the scrubber on, and check the credit shows in the attribution line.
 7. **Check `/licence`** in the browser (new credits, and the query-parameter hints under
@@ -733,11 +733,17 @@ Postgres. Do **not** run the import scripts on the VPS: they need the repository
 Node and the `.import/` caches, and the dump is the route §14 already established.
 
 ```bash
-# 1. Local — make sure the imports are current, then dump only these tables.
-pnpm import:itinere-roads && pnpm import:nomisma-mints && pnpm import:wikidata-monuments   && pnpm import:isicily-inscriptions && pnpm import:cliopatria-polities \
-  && pnpm import:hillforts-atlas
-pg_dump "$NUXT_DATABASE_URL" -Fc --no-owner --no-acl --data-only   -t antiquity_roman_roads -t antiquity_mints -t antiquity_monuments   -t antiquity_polities -t isicily_inscriptions -t antiquity_hillforts -f reference-layers.dump
-pg_restore --list reference-layers.dump | grep -c "TABLE DATA"   # expect 6
+# 1. Local — the dev database already holds the data (counts in the table above); re-run
+#    the six `pnpm import:*` scripts first only when refreshing. There is no local
+#    pg_dump, so dump through the dev container (PostgreSQL 17, same as production).
+docker exec vestigian-dev-postgres-1 pg_dump -U vestigian -d vestigian \
+  -Fc --no-owner --no-acl --data-only \
+  -t antiquity_roman_roads -t antiquity_mints -t antiquity_monuments \
+  -t antiquity_polities -t isicily_inscriptions -t antiquity_hillforts \
+  > reference-layers.dump
+ls -lh reference-layers.dump                                   # ~17 MB
+docker exec -i vestigian-dev-postgres-1 pg_restore --list < reference-layers.dump \
+  | grep -c "TABLE DATA"                                       # expect 6
 rsync -avP reference-layers.dump deploy@<vps-ip>:/tmp/
 
 # 2. VPS — the deploy must be done (migrations applied, §14a), so the tables exist and are empty.
@@ -759,7 +765,12 @@ docker exec <postgres-container> psql -U vestigian -d vestigian -c "
 # 4. VPS — tell the app the atlas changed. Tiles are cached in Valkey under a generation
 #    counter that a restore does not touch; without this the first requests can be served
 #    empty tiles cached before the data arrived.
-docker exec <valkey-container> valkey-cli INCR vestigian:atlas-version
+#    INCRBY 2, never plain INCR: an unset counter already reads as 1, and INCR on a missing
+#    key creates it at 1 — the generation would not move and every cached tile (including
+#    the empty ones) would stay valid. INCRBY 2 lands on 2 when unset, N+2 otherwise.
+docker exec <valkey-container> valkey-cli INCRBY vestigian:atlas-version 2
+#    Check: any tile response must now carry x-atlas-version of 2 or more, never 1.
+curl -sI https://<domain>/api/tiles/reference/hillforts/9/252/170.mvt | grep -i x-atlas-version
 ```
 
 _Rehearsed 4 Oct 2026 against a scratch database in the dev Postgres container, with all six
@@ -781,6 +792,29 @@ Then open the map, switch each overlay on once and confirm the credit appears in
 attribution line (it leaves with the layer). **No Bunny purge is needed** — these are
 new paths. Only if one of them answers a cached `404` from before the deploy, purge that
 URL in the pull zone.
+
+**A layer is missing at some zooms only** (seen on the first release: hillforts present up to
+zoom 6, gone from 7). The data and the endpoint are fine — an empty `204` tile, requested while
+the table was still empty, is being served from one of two caches. Tile URLs carry no
+generation, so neither cache knows the data arrived. Find which:
+
+```bash
+# a high-zoom tile over Britain; -D - prints the response headers
+curl -s -D - -o /dev/null https://<domain>/api/tiles/reference/hillforts/8/126/85.mvt | \
+  grep -iE '^(HTTP|x-tile-cache|x-atlas-version|cdn-cache|content-length)'
+```
+
+- `200` with a body → the server is right; clear the browser's cache (private window).
+- `204` and `x-tile-cache: hit` → Valkey holds the empty tile: run the `INCRBY 2` above (step 4 of "Load the data") — and if `x-atlas-version` was `1`, that is the cause: the earlier bare `INCR` left the counter at 1.
+- `204` and `cdn-cache: HIT` (no `x-tile-cache`) → Bunny holds it (`max-age=86400`, stale
+  copies up to a week): on the pull zone whose **Hostnames** list the domain, press the
+  plain **Purge Cache** button. A wildcard Purge URL (`…/reference/*`) did not clear these on
+  the first release; the full purge did. Query strings and `no-cache` request headers do not
+  get past the cache, so a curl cannot tell you the origin is fine — use a tile that was never
+  requested (its `cdn-cache` says `MISS`) to read the generation the origin really serves.
+
+Avoid it by not opening the overlays in a browser between the deploy and the bump — a
+browser pans through high-zoom tiles and leaves the empty ones in the pull zone.
 
 **Backups.** The five `antiquity_*` tables are excluded from the nightly dump by
 design (`docker/backup.sh`) and are rebuilt from the dump above or the import scripts

@@ -555,8 +555,9 @@ The one case that needs a manual bump is writing to Postgres from outside
 the app — e.g. restoring `scripts/restore-dev-bundle.ts`'s dump directly
 onto a database whose tiles are already cached. Nothing in that path calls
 either bump function, so do it by hand once, against the same Redis/Valkey
-instance the app uses: `INCR vestigian:data-version` and
-`INCR vestigian:atlas-version`. Skipping this doesn't corrupt anything —
+instance the app uses: `INCRBY vestigian:data-version 2` and
+`INCRBY vestigian:atlas-version 2` (`INCRBY 2`, not `INCR`: an unset counter reads as 1 and `INCR` creates
+it at 1, so the generation would not move). Skipping this doesn't corrupt anything —
 Postgres and Redis are just out of step until the existing TTLs expire — but
 readers see stale tiles for up to an hour in the meantime.
 
