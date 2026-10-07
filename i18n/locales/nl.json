@@ -590,6 +590,16 @@
     "resultsLabel": "Zoekresultaten",
     "modernPlace": "Moderne plaats · {country}",
     "ancientPlace": "Oude naam",
+    "layer": {
+      "hillfort": "Heuvelfort",
+      "port": "Antieke haven",
+      "monument": "Monument",
+      "mint": "Munthuis",
+      "battle": "Slag",
+      "coin-hoard": "Muntschat",
+      "feature": "Kleine oudheid",
+      "tabula-place": "Plaats op de Tabula Peutingeriana"
+    },
     "clear": "Zoekopdracht wissen"
   },
   "mapCanvas": {

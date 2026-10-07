@@ -590,6 +590,16 @@
     "resultsLabel": "Suchergebnisse",
     "modernPlace": "Moderner Ort · {country}",
     "ancientPlace": "Alte Bezeichnung",
+    "layer": {
+      "hillfort": "Wallburg",
+      "port": "Antiker Hafen",
+      "monument": "Monument",
+      "mint": "Münzstätte",
+      "battle": "Schlacht",
+      "coin-hoard": "Münzhort",
+      "feature": "Kleineres Altertum",
+      "tabula-place": "Ort der Tabula Peutingeriana"
+    },
     "clear": "Suche leeren"
   },
   "mapCanvas": {

@@ -590,6 +590,16 @@
     "resultsLabel": "Résultats de la recherche",
     "modernPlace": "Lieu moderne · {country}",
     "ancientPlace": "Nom ancien",
+    "layer": {
+      "hillfort": "Fort de hauteur",
+      "port": "Port antique",
+      "monument": "Monument",
+      "mint": "Atelier monétaire",
+      "battle": "Bataille",
+      "coin-hoard": "Trésor monétaire",
+      "feature": "Petit vestige",
+      "tabula-place": "Lieu de la Table de Peutinger"
+    },
     "clear": "Effacer la recherche"
   },
   "mapCanvas": {

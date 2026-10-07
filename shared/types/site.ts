@@ -98,6 +98,30 @@ export interface AncientPlaceSummary {
   relevance?: number
 }
 
+/**
+ * The borrowed reference layers the map search can find by name, one value per
+ * source table (`server/utils/reference-search.ts`). Each is also an overlay
+ * the reader can switch on, which is what `useRevealSearchLayer` does when a
+ * result is picked.
+ */
+export type ReferenceSearchLayer =
+  'hillfort' | 'port' | 'monument' | 'mint' | 'battle' | 'coin-hoard' | 'feature' | 'tabula-place'
+
+/**
+ * A named point from one of the reference layers (hillforts, ports, monuments
+ * and the rest). Not a Vestigian record, the same reasoning as
+ * `AncientPlaceSummary`: no page of its own, so picking one moves the camera
+ * there and switches its layer on. `id` is unique only within its `layer`.
+ */
+export interface ReferenceSearchSummary {
+  id: number
+  layer: ReferenceSearchLayer
+  title: string
+  position: LonLat
+  /** Set by the search endpoints only; see `server/utils/search-relevance.ts`. */
+  relevance?: number
+}
+
 export interface SiteImage {
   id: number
   storageKey: string

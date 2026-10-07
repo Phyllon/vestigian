@@ -590,6 +590,16 @@
     "resultsLabel": "Risultati ricerca",
     "modernPlace": "Luogo moderno · {country}",
     "ancientPlace": "Nome antico",
+    "layer": {
+      "hillfort": "Fortificazione d'altura",
+      "port": "Porto antico",
+      "monument": "Monumento",
+      "mint": "Zecca",
+      "battle": "Battaglia",
+      "coin-hoard": "Ripostiglio monetale",
+      "feature": "Testimonianza minore",
+      "tabula-place": "Luogo della Tabula Peutingeriana"
+    },
     "clear": "Cancella ricerca"
   },
   "mapCanvas": {

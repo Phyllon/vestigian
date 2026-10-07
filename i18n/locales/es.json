@@ -590,6 +590,16 @@
     "resultsLabel": "Resultados de la búsqueda",
     "modernPlace": "Lugar moderno · {country}",
     "ancientPlace": "Nombre antiguo",
+    "layer": {
+      "hillfort": "Castro",
+      "port": "Puerto antiguo",
+      "monument": "Monumento",
+      "mint": "Ceca",
+      "battle": "Batalla",
+      "coin-hoard": "Tesorillo de monedas",
+      "feature": "Vestigio menor",
+      "tabula-place": "Lugar de la Tabla de Peutinger"
+    },
     "clear": "Borrar búsqueda"
   },
   "mapCanvas": {

@@ -1,4 +1,10 @@
-import type { AncientPlaceSummary, LonLat, PlaceSummary, SiteSummary } from './site'
+import type {
+  AncientPlaceSummary,
+  LonLat,
+  PlaceSummary,
+  ReferenceSearchSummary,
+  SiteSummary,
+} from './site'
 
 /**
  * The views offered by the basemap switcher, in two families. 'vestigian' is a
@@ -136,3 +142,4 @@ export type MapSearchResult =
   | ({ kind: 'site' } & SiteSummary)
   | ({ kind: 'place' } & PlaceSummary)
   | ({ kind: 'ancient-place' } & AncientPlaceSummary)
+  | ({ kind: 'reference' } & ReferenceSearchSummary)

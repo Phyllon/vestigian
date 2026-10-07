@@ -6,6 +6,7 @@
   const map = useMapInstance()
   const { term, results, isSearching } = useSiteSearch()
   const { selectSite } = useSiteQuery()
+  const revealSearchLayer = useRevealSearchLayer()
   const { countryName } = useCountryName()
 
   /**
@@ -40,11 +41,14 @@
    * Vestigian record — it has nothing to open, so this only moves the
    * camera there. An ancient place gets a closer zoom than a modern town:
    * it marks one small point on the Barrington sheet, not a settlement
-   * with its own extent.
+   * with its own extent. A reference-layer name (hillfort, port, monument…)
+   * is a point of the same size, and also switches its layer on — see
+   * `useRevealSearchLayer`.
    */
   const RESULT_ZOOM: Record<MapSearchResult['kind'], number> = {
     site: 15,
     'ancient-place': 14,
+    reference: 14,
     place: 12,
   }
 
@@ -56,6 +60,7 @@
   const resultSubtitle = (result: MapSearchResult): string => {
     if (result.kind === 'site') return t(`categories.${result.category}`)
     if (result.kind === 'ancient-place') return t('mapSearch.ancientPlace')
+    if (result.kind === 'reference') return t(`mapSearch.layer.${result.layer}`)
     return t('mapSearch.modernPlace', { country: countryName(result.countryCode) })
   }
 
@@ -67,6 +72,7 @@
       essential: true,
     })
     if (result.kind === 'site') selectSite(result.id)
+    if (result.kind === 'reference') revealSearchLayer(result.layer)
     term.value = ''
   }
 
@@ -94,7 +100,10 @@
         id="map-search"
         ref="searchInput"
         v-model="term"
-        type="search"
+        type="text"
+        role="searchbox"
+        inputmode="search"
+        enterkeyhint="search"
         :placeholder="placeholder"
         class="w-full bg-transparent py-2.5 text-sm text-ink-900 outline-none placeholder:text-ink-300 dark:text-paper-100"
         autocomplete="off"

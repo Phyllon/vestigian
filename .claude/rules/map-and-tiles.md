@@ -1446,6 +1446,39 @@ Vitudurum, followed by unrelated near-misses. Modern places still sort by
 population within the prefix band (every prefix match scores exactly 1), which
 is what keeps London ahead of Londa.
 
+### Reference-layer names are searchable too
+
+Until now a hillfort, port, monument or battle could be drawn but not found:
+search read only `sites`, `cities` and `antiquity_places` ("Dun Mor, Angus", an
+Atlas of Hillforts row, returned nothing). `GET /api/search/reference`
+(`server/utils/reference-search.ts`) is one `UNION ALL` over hillforts, ports,
+monuments, mints, battles, coin hoards, minor features and Tabula places, and
+`useSiteSearch` merges it as a fourth list (`kind: 'reference'`).
+**Inscriptions are left out on purpose** (79k rows would bury everything); they
+have their own browse pages.
+
+- **Matching is word-wise, not phrase-wise.** Names carry commas, brackets and
+  county suffixes ("Dun Mor, Angus (Acharn)"), so the term is split into words
+  (`tokeniseSearchTerm`) and every word must appear; "dun mor angus" and
+  "Dun Mor, Angus" are the same search. Relevance: 1 = starts with the phrase as
+  typed, 0.9 = every word starts a word, 0.8 = words inside longer ones, below
+  that trigram near-misses (misspellings).
+- **Accent-insensitive through an immutable wrapper.** `unaccent()` is STABLE and
+  cannot be indexed, so `0032_reference_search.sql` pins the dictionary in
+  `vestigian_unaccent()` and builds a trigram GIN index on it per table. Query
+  and index must use the same expression or the index is ignored.
+- **Production:** the migration is additive (one function, eight
+  `CREATE INDEX IF NOT EXISTS`), applied by the `migrate` service on deploy; no
+  data changes and no importer re-run. Names are searchable by their primary name
+  only (`modern_name` on ports and Tabula places is not).
+- **Picking a result flies there and switches its overlay on**
+  (`useRevealSearchLayer`) — a reference row has no record panel, and without
+  the layer on the camera would arrive at an empty map. A new layer needs an
+  entry in `REFERENCE_SEARCH_SOURCES`, an index, and a reveal.
+- The input is `type="text" role="searchbox"`, not `type="search"`: the native
+  search type draws its own clear button on hover, a second X beside ours.
+- Debounce is 450 ms (`SEARCH_DEBOUNCE_MS`) — four requests go out per search.
+
 ## Featured sites nearby
 
 `MapFeaturedSitesButton` (sparkles, top of the bottom-right control stack) toggles

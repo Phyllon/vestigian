@@ -3,6 +3,7 @@ import type {
   AncientPlaceSummary,
   MapSearchResult,
   PlaceSummary,
+  ReferenceSearchSummary,
   SiteDetail,
   SiteSummary,
 } from '#shared/types'
@@ -148,7 +149,9 @@ export const formatLength = (metres: number | null): string => {
  * Backs the map search bar. Queries Vestigian's own sites, GeoNames' modern
  * cities/towns (`PlaceSummary` — `/api/places/search`) and the Barrington
  * sheet's own ancient names (`AncientPlaceSummary` — `/api/atlas/places/
- * search`, e.g. "Bratananium" near modern Gauting) in parallel and merges
+ * search`, e.g. "Bratananium" near modern Gauting), and the names in every
+ * borrowed reference layer (`ReferenceSearchSummary` — `/api/search/reference`:
+ * hillforts, ports, monuments and the rest) in parallel and merges
  * them into one ranked list, sites first: this atlas's own records are the
  * primary content, a modern or ancient place is here only to get a reader
  * to the right patch of map. `Promise.allSettled` rather than `Promise.all`
@@ -177,10 +180,11 @@ export const useSiteSearch = () => {
     const token = ++requestToken
     isSearching.value = true
 
-    const [sites, places, ancientPlaces] = await Promise.allSettled([
+    const [sites, places, ancientPlaces, referencePlaces] = await Promise.allSettled([
       $fetch<SiteSummary[]>('/api/sites/search', { query: { q: trimmed } }),
       $fetch<PlaceSummary[]>('/api/places/search', { query: { q: trimmed } }),
       $fetch<AncientPlaceSummary[]>('/api/atlas/places/search', { query: { q: trimmed } }),
+      $fetch<ReferenceSearchSummary[]>('/api/search/reference', { query: { q: trimmed } }),
     ])
 
     // A stale-response guard (an in-flight search whose token was superseded
@@ -199,11 +203,21 @@ export const useSiteSearch = () => {
       ...(ancientPlaces.status === 'fulfilled'
         ? ancientPlaces.value.map((place) => ({ kind: 'ancient-place' as const, ...place }))
         : []),
+      ...(referencePlaces.status === 'fulfilled'
+        ? referencePlaces.value.map((place) => ({ kind: 'reference' as const, ...place }))
+        : []),
     ])
     isSearching.value = false
   }
 
-  const debouncedSearch = useDebounceFn(runSearch, 220)
+  /**
+   * Four requests go out per search now (sites, places, ancient places, the
+   * reference layers), so a pause shorter than a typist's natural gap between
+   * words fired a full set mid-word and discarded it on the next key.
+   */
+  const SEARCH_DEBOUNCE_MS = 450
+
+  const debouncedSearch = useDebounceFn(runSearch, SEARCH_DEBOUNCE_MS)
 
   watch(term, (next) => {
     void debouncedSearch(next)

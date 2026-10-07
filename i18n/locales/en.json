@@ -737,6 +737,16 @@
     "resultsLabel": "Search results",
     "modernPlace": "Modern place · {country}",
     "ancientPlace": "Ancient name",
+    "layer": {
+      "hillfort": "Hillfort",
+      "port": "Ancient port",
+      "monument": "Monument",
+      "mint": "Mint",
+      "battle": "Battle",
+      "coin-hoard": "Coin hoard",
+      "feature": "Minor antiquity",
+      "tabula-place": "Place on the Tabula Peutingeriana"
+    },
     "clear": "Clear search"
   },
   "mapCanvas": {
