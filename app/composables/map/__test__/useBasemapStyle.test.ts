@@ -216,6 +216,13 @@ describe('buildBasemapStyle, satellite view', () => {
     expect(satelliteSource().maxzoom).toBe(13)
   })
 
+  it('does not ask a mirror for the zooms it starts below', () => {
+    // The mirror pyramid starts at z3. A declared minzoom of 0 requested z0–2
+    // tiles that exist only on EOX's live server, so they 404 once mirrored.
+    expect(satelliteSource().minzoom).toBe(3)
+    expect(dareSource().minzoom).toBe(3)
+  })
+
   it('prefers a configured mirror over asking EOX directly', () => {
     const mirrored = satelliteSource({
       satelliteUrl: 'https://cdn.example/basemap/satellite/{z}/{y}/{x}.jpg',

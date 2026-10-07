@@ -115,6 +115,16 @@ const SATELLITE_ATTRIBUTION =
 const SATELLITE_MAX_ZOOM = 13
 
 /**
+ * The shallowest zoom either raster mirror holds — `MIN_ZOOM` in
+ * `scripts/import/04-mirror-basemap-tiles.ts` must agree. The satellite source
+ * used to declare `minzoom: 0`, which was harmless against EOX's live server
+ * (it serves z0) and a 404 for z0–2 the moment a mirror is configured. The map
+ * itself goes down to z2, so those two levels now show the paper ground rather
+ * than a request for tiles that do not exist.
+ */
+const RASTER_MIRROR_MIN_ZOOM = 3
+
+/**
  * The AWMC sheet is ours to draw, not someone else's to borrow.
  *
  * The CAWM tile server publishes only physical relief — no roads, no names, no
@@ -673,7 +683,7 @@ const buildDareStyle = (source: BasemapSource): StyleSpecification => ({
       type: 'raster',
       tiles: [resolveDareUrl(source)],
       tileSize: 256,
-      minzoom: 3,
+      minzoom: RASTER_MIRROR_MIN_ZOOM,
       maxzoom: DARE_MAX_ZOOM,
       attribution: DARE_ATTRIBUTION,
     },
@@ -702,7 +712,7 @@ const buildSatelliteStyle = (source: BasemapSource): StyleSpecification => {
         type: 'raster',
         tiles: [resolveSatelliteUrl(source)],
         tileSize: 256,
-        minzoom: 0,
+        minzoom: RASTER_MIRROR_MIN_ZOOM,
         maxzoom: SATELLITE_MAX_ZOOM,
         attribution: SATELLITE_ATTRIBUTION,
       },

@@ -833,6 +833,82 @@ if this deployment ever becomes commercial, filter `licence = 'CC-BY-NC-4.0'` ou
 `reference-layers.ts`'s `isicilyTileSql` and `loadIsicilyInscriptionDetail`. I.Sicily's
 **photographs are not mirrored** and must not be (see the rules file).
 
+## 15c. DARE and satellite rasters — per-tile mirror
+
+**Why this exists.** Until `DARE_TILES_URL` and `SATELLITE_TILES_URL` are set, the
+browser falls back to the upstream servers (`dh.gu.se`, Gothenburg; `tiles.maps.eox.at`,
+Vienna), so every visitor's IP reaches a third party. Checked against the live site on
+2026-10-07: `https://<maps-zone>.b-cdn.net/basemap/dare/6/34/23.png` and the satellite
+equivalent both returned **404** — nothing is mirrored under that prefix yet.
+
+The tiles are stored **one object per tile**, not as a PMTiles archive, on purpose:
+the offline download can then fetch each tile as an ordinary cacheable response.
+
+**Steps.** Run on a machine with the repo, Node, Docker and `rclone` (the VPS for the
+long satellite run, inside `tmux`).
+
+1. **Local bucket, then a five-tile proof** (proves credentials and the format check
+   before touching anyone's server):
+
+   ```bash
+   pnpm stack:up
+   MIRROR_LIMIT=5 pnpm import:basemap dare
+   ```
+
+2. **Tell the sources first** with the printed tile counts: johan.ahlfeldt@lir.gu.se
+   (DARE), cloudless@eox.at (satellite). The crawl is 1 request / 1.2 s by design.
+
+3. **The real runs** (resumable — a tile already in the bucket costs no upstream
+   request):
+
+   ```bash
+   tmux new -s dare && pnpm import:basemap dare           # ≈ 10 h, 29,593 tiles, ≈ 1.2 GB
+   tmux new -s sat  && pnpm import:basemap satellite      # ≈ 26 days at z13 — see below
+   # shallower, ≈ ¼ of the tiles:  MIRROR_MAX_ZOOM=12 pnpm import:basemap satellite
+   ```
+
+   `SATELLITE_MAX_ZOOM` in `useBasemapStyle.ts` must equal the depth actually mirrored,
+   or MapLibre requests zooms that 404.
+
+4. **Copy to Bunny with rclone** (not the script's own S3 client against Bunny: its S3
+   layer is a public preview, §10 step 6). The `minio` and `bunny` remotes are the ones
+   from §10 step 6:
+
+   ```bash
+   rclone listremotes                                       # minio: and bunny:
+   rclone copy minio:vestigian/basemap/dare bunny:<storage-zone>/basemap/dare \
+     --dry-run --stats-one-line
+   rclone copy minio:vestigian/basemap/dare bunny:<storage-zone>/basemap/dare \
+     --transfers 16 --checkers 16 --progress
+   rclone copy minio:vestigian/basemap/satellite bunny:<storage-zone>/basemap/satellite \
+     --transfers 16 --checkers 16 --progress
+   rclone size minio:vestigian/basemap/dare && rclone size bunny:<storage-zone>/basemap/dare
+   ```
+
+   Object counts must match. Use `copy`, never `sync`, on a prefix of a zone that also
+   holds images and the archives.
+
+5. **Check through the maps pull zone** (§15: origin = the storage zone, CORS on) —
+   a tile over Rome, expect `200`, an `image/png`/`image/jpeg` type and an
+   `access-control-allow-origin` header:
+
+   ```bash
+   B=https://<maps-zone>.b-cdn.net
+   curl -sI -H "Origin: https://vestigian.org" $B/basemap/dare/6/34/23.png
+   curl -sI -H "Origin: https://vestigian.org" $B/basemap/satellite/6/34/23.jpg
+   ```
+
+6. **Switch over.** In Dokploy set, then redeploy:
+
+   ```
+   DARE_TILES_URL=https://<maps-zone>.b-cdn.net/basemap/dare/{z}/{x}/{y}.png
+   SATELLITE_TILES_URL=https://<maps-zone>.b-cdn.net/basemap/satellite/{z}/{x}/{y}.jpg
+   ```
+
+   Then confirm in the browser's network tab that neither `dh.gu.se` nor
+   `tiles.maps.eox.at` is requested. **A missing tile is a hole in the map**, so do not
+   switch before the object counts in step 4 match the planned counts.
+
 ## 16. Mail — Brevo
 
 Replaces Lettermint (operator's own choice). `server/utils/mail.ts`'s

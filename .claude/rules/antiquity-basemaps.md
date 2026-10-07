@@ -91,6 +91,14 @@ DARE (Sentinel-2's own ~10m/pixel resolution rules out going deeper; see
 (cloudless@eox.at), same courtesy as Åhlfeldt and Voorburg. Until
 `NUXT_PUBLIC_BASEMAP_SATELLITE_URL` is set the app falls back to EOX's server.
 
+**Both raster sources declare `minzoom: 3`** (`RASTER_MIRROR_MIN_ZOOM`, equal to the
+mirror script's `MIN_ZOOM`). The satellite source used to say 0, which was harmless
+against EOX's live server and a 404 for z0–2 once a mirror was configured. Checked
+2026-10-07: production had neither mirror under `basemap/dare|satellite/` on the maps
+pull zone (404), so the browser was still calling `dh.gu.se` and `tiles.maps.eox.at`;
+`docker/compose.prod.yml` now forwards `DARE_TILES_URL` / `SATELLITE_TILES_URL`, and
+the procedure is runbook §15c.
+
 Building and testing the satellite mirror surfaced a real, previously-latent
 bug in `04-mirror-basemap-tiles.ts`, unrelated to satellite tiles themselves:
 **S3 object metadata must be US-ASCII, and DARE's own attribution string

@@ -89,6 +89,12 @@ services:
       # own CDN (runbook §15a). Empty means no relief is drawn — deliberately: the
       # public fallback host is Cloudflare, which a production build must not reach.
       NUXT_PUBLIC_BASEMAP_TERRAIN_URL: ${TERRAIN_URL:-}
+      # The DARE and satellite rasters, mirrored per-tile into the storage zone and
+      # served through the maps pull zone (runbook §15b), as `…/{z}/{x}/{y}.png|jpg`
+      # templates. Empty means the browser falls back to the upstream servers
+      # (dh.gu.se, tiles.maps.eox.at) — a visitor's IP reaching a third party.
+      NUXT_PUBLIC_BASEMAP_ANTIQUITY_DARE_URL: ${DARE_TILES_URL:-}
+      NUXT_PUBLIC_BASEMAP_SATELLITE_URL: ${SATELLITE_TILES_URL:-}
       # On: the data's compiler, René Voorburg, confirmed reuse — see the note on
       # tabulaPeutingerianaEnabled in nuxt.config.ts. Set TABULA_PEUTINGERIANA_ENABLED=false
       # in Dokploy to take the overlay down (redeploy to apply). Dokploy's
