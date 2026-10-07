@@ -124,6 +124,15 @@
 
     <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
       <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+        {{ t('privacy.locationHeading') }}
+      </h2>
+      <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
+        {{ t('privacy.locationBody') }}
+      </p>
+    </section>
+
+    <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
+      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
         {{ t('privacy.logsHeading') }}
       </h2>
       <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">

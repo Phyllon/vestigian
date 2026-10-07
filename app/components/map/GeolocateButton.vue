@@ -4,13 +4,14 @@
 
   const { t } = useI18n()
   const map = useMapInstance()
-  const { status, position, isFollowing, errorCode, toggleFollow } = useGeolocation()
+  const { status, position, isFollowing, errorCode, toggleFollow, releaseFollow } = useGeolocation()
 
   const errorMessage = computed(() =>
     errorCode.value ? t(`geolocate.errors.${errorCode.value}`) : null,
   )
 
   const POSITION_SOURCE_ID = 'device-position'
+  const FOLLOW_MOVE_FLAG = 'geolocateFollow'
 
   const iconName = computed(() => {
     if (status.value === 'denied' || status.value === 'unavailable') return 'i-lucide-locate-off'
@@ -74,13 +75,36 @@
   watch(position, (reading) => {
     drawPosition()
     if (reading && isFollowing.value) {
-      map.value?.easeTo({
-        center: [reading.coords.lon, reading.coords.lat],
-        zoom: Math.max(map.value.getZoom(), 15),
-        duration: 700,
-      })
+      map.value?.easeTo(
+        {
+          center: [reading.coords.lon, reading.coords.lat],
+          zoom: Math.max(map.value.getZoom(), 15),
+          duration: 700,
+        },
+        { [FOLLOW_MOVE_FLAG]: true },
+      )
     }
   })
+
+  /**
+   * Following ends on any move that is not our own recentring — a drag, wheel,
+   * pinch or key press, but also a programmatic jump such as a search result
+   * or a picked feature, which would otherwise be undone by the next fix.
+   * `easeTo`'s second argument is merged into the `movestart` event it fires
+   * synchronously, so our own moves identify themselves by `FOLLOW_MOVE_FLAG`.
+   */
+  watch(
+    map,
+    (instance, _previous, onCleanup) => {
+      if (!instance) return
+      const releaseOnUserMove = (event: object): void => {
+        if (!(FOLLOW_MOVE_FLAG in event)) releaseFollow()
+      }
+      instance.on('movestart', releaseOnUserMove)
+      onCleanup(() => instance.off('movestart', releaseOnUserMove))
+    },
+    { immediate: true },
+  )
 </script>
 
 <template>

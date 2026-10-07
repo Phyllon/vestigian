@@ -75,7 +75,9 @@ export default defineNitroPlugin((nitro) => {
       kind: SpanKind.SERVER,
       attributes: {
         [ATTR_HTTP_REQUEST_METHOD]: event.method,
-        [ATTR_URL_PATH]: event.path,
+        // Path only. `event.path` carries the query string, and for
+        // `/api/sites/needs-work` that is the visitor's coordinates.
+        [ATTR_URL_PATH]: event.path.split('?')[0],
       },
     })
 

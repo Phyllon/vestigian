@@ -64,13 +64,23 @@ export const useGeolocation = () => {
     }
   }
 
+  /**
+   * Leaves follow mode but keeps the marker on the map. Called by the button
+   * and by `GeolocateButton` when the person pans away — without the latter
+   * every fix re-centred the map and made it impossible to look elsewhere.
+   */
+  const releaseFollow = (): void => {
+    if (!isFollowing.value) return
+    isFollowing.value = false
+    startWatching(false)
+    status.value = position.value ? 'locating' : 'prompting'
+  }
+
   /** Off → locate once → follow → off. One button, three states. */
   const toggleFollow = (): void => {
     if (status.value === 'denied') return
     if (isFollowing.value) {
-      isFollowing.value = false
-      startWatching(false)
-      status.value = position.value ? 'locating' : 'prompting'
+      releaseFollow()
       return
     }
     isFollowing.value = true
@@ -93,6 +103,7 @@ export const useGeolocation = () => {
     isFollowing: readonly(isFollowing),
     errorCode: readonly(errorCode),
     toggleFollow,
+    releaseFollow,
     stop,
   }
 }
