@@ -164,6 +164,18 @@ prometheus.scrape "app" {
   job_name   = "vestigian-app"
 }
 
+// CrowdSec's own metrics (`cs_active_decisions`, `cs_alerts`, parser hit counts),
+// served on :6060 inside the compose network and not published. Without this the
+// security dashboard can see that an alert fired in the logs but not how many
+// bans are standing.
+prometheus.scrape "crowdsec" {
+  targets = [
+    { __address__ = sys.env("CROWDSEC_ADDR") },
+  ]
+  forward_to = [prometheus.remote_write.default.receiver]
+  job_name   = "crowdsec"
+}
+
 prometheus.remote_write "default" {
   endpoint {
     url = "http://prometheus:9090/api/v1/write"

@@ -22,6 +22,7 @@ address cannot produce a decision.
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
 | `acquis.yaml`            | Docker log source for the app container, plus Traefik's access log                                                     |
 | `parsers/vestigian.yaml` | Pino JSON → `evt.Meta.source_ip` and the fields scenarios filter on                                                    |
+| `profiles.yaml`          | Ban length per scenario, escalating for repeat offenders (1–2h first, up to 7 days). Without it every ban is 4h        |
 | `scenarios/*.yaml`       | One file per scenario — `cscli` registers local items per file, so a multi-document file silently loads only the first |
 
 Verify any change with `cscli explain`, which shows the whole chain:
@@ -66,10 +67,20 @@ CrowdSec has no first-party Bunny bouncer. Options, in order of preference:
    endpoint check are in the header of `bouncer.mjs`). **The blocked-IP
    version has only been run against a mock** — confirm it actually blocks
    before relying on it, with the test in the bouncer step of
-   `documents/runbook_prod.deployment.md` §19. Set `BUNNY_PRUNE_UNKNOWN=true`
-   only if nobody edits the blocked-IP list by hand; otherwise entries it did
-   not just add are left alone, at the price of a ban that expired during a
-   restart lingering on Bunny. Needs `CROWDSEC_BUNNY_BOUNCER_KEY`
+   `documents/runbook_prod.deployment.md` §19. `BUNNY_PRUNE_UNKNOWN` defaults to `true` in
+   compose: the pull zone's blocked-IP list belongs to the bouncer, and every
+   10 minutes (and at startup) anything on it that CrowdSec does not currently
+   ban is removed. Set it `false` if someone maintains the list by hand;
+   entries the bouncer did not add are then left alone, and a ban that expired
+   while it was down lingers. **Bunny caps the list at 100 entries** (found live
+   2026-10-08, undocumented), so only decisions this deployment made itself
+   (`crowdsec`, `cscli` origins — `BUNNY_ENFORCED_ORIGINS`) are mirrored, never
+   the community blocklist; beyond 100 a ban is logged as not enforced at the
+   edge. Single IPv4 and IPv6 addresses were confirmed blocking on 2026-10-08.
+   IPv4 `/16` and `/24` ranges map to Bunny's `a.b.c.*` wildcard (untested
+   live); other ranges are skipped, and IPv6 ranges cannot be blocked this way
+   at all (Bunny rejected `x:x:x:x:*` and `x:x:x:x::/64`). Needs
+   `CROWDSEC_BUNNY_BOUNCER_KEY`
    (register with `cscli bouncers add bunny`, or let the `BOUNCER_KEY_bunny`
    env var on the `crowdsec` service pre-register it), `BUNNY_API_KEY`, and
    `BUNNY_SITE_PULL_ZONE_ID` — the pull zone in front of `SITE_HOST`

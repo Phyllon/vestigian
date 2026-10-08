@@ -271,6 +271,7 @@ services:
       # `nuxt dev` runs on the host, so Alloy reaches it back out through the
       # gateway rather than over the compose network.
       APP_ADDR: host.docker.internal:3000
+      CROWDSEC_ADDR: crowdsec:6060
     extra_hosts:
       - 'host.docker.internal:host-gateway'
     ports:
@@ -305,6 +306,9 @@ services:
       - ./security/acquis.yaml:/etc/crowdsec/acquis.yaml:ro
       - ./security/parsers:/etc/crowdsec/parsers/s01-parse/vestigian:ro
       - ./security/scenarios:/etc/crowdsec/scenarios/vestigian:ro
+      # Ban lengths per scenario, escalating for repeat offenders. Without it
+      # every ban is CrowdSec's packaged 4h. See the file for the reasoning.
+      - ./security/profiles.yaml:/etc/crowdsec/profiles.yaml:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - crowdsec-config:/etc/crowdsec
       - crowdsec-data:/var/lib/crowdsec/data

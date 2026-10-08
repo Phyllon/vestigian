@@ -870,9 +870,9 @@ long satellite run, inside `tmux`).
    `SATELLITE_MAX_ZOOM` in `useBasemapStyle.ts` must equal the depth actually mirrored,
    or MapLibre requests zooms that 404.
 
-4. **Copy to Bunny with rclone** (not the script's own S3 client against Bunny: its S3
-   layer is a public preview, §10 step 6). The `minio` and `bunny` remotes are the ones
-   from §10 step 6:
+4. **Copy to Bunny with rclone** — only if step 3 wrote to the local MinIO. Skip this
+   step if the script was pointed at Bunny directly (see "Variant" below). The `minio`
+   and `bunny` remotes are the ones from §10 step 6:
 
    ```bash
    rclone listremotes                                       # minio: and bunny:
@@ -908,6 +908,31 @@ long satellite run, inside `tmux`).
    Then confirm in the browser's network tab that neither `dh.gu.se` nor
    `tiles.maps.eox.at` is requested. **A missing tile is a hole in the map**, so do not
    switch before the object counts in step 4 match the planned counts.
+
+**Variant — crawl straight into Bunny.** The script's S3 client works against Bunny
+(the DARE run of 2026-10-08 did exactly this), so steps 3 and 4 can collapse into one
+by setting the storage variables in `.env` before the run: `NUXT_STORAGE_ENDPOINT` =
+`BUNNY_S3_ENDPOINT`, `NUXT_STORAGE_BUCKET` = the storage zone name,
+`NUXT_STORAGE_ACCESS_KEY_ID` / `NUXT_STORAGE_SECRET_ACCESS_KEY` = the zone name and
+password (§10 step 3). Trade-offs: no second copy to verify, but §10 step 6 calls Bunny's
+S3 layer a public preview, and every skipped tile on a resume costs a HEAD against it.
+Prove it with `MIRROR_LIMIT=5` first and look at `rclone lsf bunny:<zone>/basemap/dare`.
+
+**Reconciling the final count.** The planned tile count includes tiles the source does
+not publish, so the object count ends below it. The script's last line reports
+`mirrored`, `skipped`, `absent` and `deferred`:
+
+- objects in Bunny must equal `mirrored + skipped`
+  (`rclone size bunny:<zone>/basemap/dare`);
+- `deferred` must be **0** before switching — rerun the identical command until it is;
+  it resumes without a request to the source for tiles already stored;
+- watch progress meanwhile with `rclone size` (the count rises ≈ 50 per minute at the
+  1.2 s pace) and `rclone lsf bunny:<zone>/basemap/dare --max-depth 1` (the zoom
+  directories present so far).
+
+The pull zone serves these with `cache-control: public, max-age=2592000` (30 days), not
+the one-year `immutable` the script stores; harmless for tiles that never change in
+place.
 
 ## 16. Mail — Brevo
 
@@ -1030,10 +1055,22 @@ allowed per condition"`, root cause never found. **Rewritten 2026-10-03** to
      `LAPI and Bunny both reachable`.
   2. `docker exec <crowdsec> cscli decisions add --ip <your-test-ip> --duration 10m`
      and confirm the log shows `synchronised with Bunny`.
-  3. From that IP, `curl -sI https://<domain>/` must be refused by Bunny (not a
+  3. From that IP, `curl -4sI https://<domain>/` (and `curl -6sI` for an IPv6 ban — curl prefers IPv6, which makes an IPv4 ban look broken) must be refused by Bunny (not a
      404 from Traefik); then `cscli decisions delete --ip <your-test-ip>` and
      confirm it works again within a poll interval.
   4. Burst test: add ~50 test decisions, watch for 429s in the log.
+     **First live run, 2026-10-08:** `addBlockedIp` worked, then Bunny answered
+     400 `The Pull Zone already has 100 blocked IPs` — an undocumented cap, filled
+     by the community blocklist (`CAPI`). The bouncer now mirrors only `crowdsec`
+     and `cscli` origins and stops at the cap. **One-time cleanup:** the 100
+     community IPs already on the pull zone are unmanaged after this change and
+     still use every slot; `BUNNY_PRUNE_UNKNOWN` now defaults to `true` in compose, so the first deploy clears them (and every 10 min
+     thereafter). Set it `false` only if someone edits that list by hand.
+     **Verified live 2026-10-08:** single IPv4 and IPv6 bans return 403 from a
+     real client. Bunny rejected both IPv6 range forms (`2a02:…:*` and `…::/64`); IPv4 `a.b.c.*`
+     wildcards (mapped from `/16` and `/24` range decisions) and the burst
+     test are still untested. Full notes: `.claude/rules/deployment-and-releases.md`
+     ("Security layer").
      Origin is protected by §9's secret header regardless — this only adds
      automatic banning at Bunny's edge. If step 3 or 4 fails, fall back to the
      CrowdSec Traefik plugin bouncer (`docker/security/README.md`, option 2).

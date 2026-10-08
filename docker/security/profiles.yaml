@@ -1,0 +1,93 @@
+# Ban lengths, per scenario, escalating for repeat offenders.
+#
+# Without this file CrowdSec applies its packaged default: 4 hours for every
+# scenario, every time (checked against crowdsec v1.6.11's config/profiles.yaml).
+# Two things make that wrong here:
+#
+#   - Bunny holds at most 100 blocked entries per pull zone, and the bouncer
+#     mirrors only this engine's own decisions onto it. A short first ban frees
+#     the slot quickly; a long ban on a one-off wastes it.
+#   - Scenarios differ in how sure they are. `rate-limit-abuse` is
+#     confidence 2 (a heavy legitimate user behind shared NAT can trip it);
+#     the others are 3.
+#
+# Escalation: `GetDecisionsCount(value)` is how many decisions CrowdSec already
+# holds for that address, so the Nth offence indexes the Nth tier, capped at the
+# last. Whether the count survives a decision's expiry (CrowdSec garbage-collects
+# expired rows) is NOT verified — if it does not, every offence simply gets the
+# first tier, which is the safe direction to fail. Watch `cscli decisions list`
+# after a repeat offender and read the `duration` column.
+#
+# Order matters: profiles are evaluated top to bottom and `on_success: break`
+# stops at the first match, so the specific scenarios come before the catch-all.
+# Ranges (`Alert.GetScope() == "Range"`) keep CrowdSec's default 4h, and the
+# bouncer only mirrors the /16 and /24 ones anyway.
+#
+# Tiers are hours: [first, second, third, fourth and beyond].
+
+name: login_bruteforce
+filters:
+  - Alert.Remediation == true && Alert.GetScope() == "Ip" && Alert.GetScenario() == "vestigian/login-bruteforce"
+decisions:
+  - type: ban
+    duration: 2h
+# Ten refused logins in two minutes. 2h first because a shared office address
+# can trip it with one forgotten password; credential stuffing that returns
+# earns a day, then three, then a week.
+duration_expr: "Sprintf('%dh', [2, 24, 72, 168][min(GetDecisionsCount(Alert.GetValue()), 3)])"
+on_success: break
+---
+name: rate_limit_abuse
+filters:
+  - Alert.Remediation == true && Alert.GetScope() == "Ip" && Alert.GetScenario() == "vestigian/rate-limit-abuse"
+decisions:
+  - type: ban
+    duration: 1h
+# The only confidence-2 scenario, and the one most likely to catch somebody
+# who is not an attacker (a heavy mapper, a school behind one address). Gentlest
+# ladder: an hour, then six, then a day, then three.
+duration_expr: "Sprintf('%dh', [1, 6, 24, 72][min(GetDecisionsCount(Alert.GetValue()), 3)])"
+on_success: break
+---
+name: route_scanning
+filters:
+  - Alert.Remediation == true && Alert.GetScope() == "Ip" && Alert.GetScenario() == "vestigian/route-scanning"
+decisions:
+  - type: ban
+    duration: 1h
+# A sweep for admin panels and .env files. Scanners rotate addresses, so a long
+# first ban would only fill Bunny's 100 slots; one that comes back is the
+# interesting case.
+duration_expr: "Sprintf('%dh', [1, 24, 72, 168][min(GetDecisionsCount(Alert.GetValue()), 3)])"
+on_success: break
+---
+name: registration_enumeration
+filters:
+  - Alert.Remediation == true && Alert.GetScope() == "Ip" && Alert.GetScenario() == "vestigian/registration-enumeration"
+decisions:
+  - type: ban
+    duration: 4h
+# Eight "already exists" answers in a minute is deliberate probing of the
+# email-enumeration oracle, not a typo.
+duration_expr: "Sprintf('%dh', [4, 24, 72][min(GetDecisionsCount(Alert.GetValue()), 2)])"
+on_success: break
+---
+# Everything else: the hub collections' scenarios (Traefik, linux, AppSec
+# virtual patching and generic rules). Their detections are specific attacks,
+# so the first ban keeps CrowdSec's own 4h rather than shortening it.
+name: default_ip_remediation
+filters:
+  - Alert.Remediation == true && Alert.GetScope() == "Ip"
+decisions:
+  - type: ban
+    duration: 4h
+duration_expr: "Sprintf('%dh', [4, 24, 72, 168][min(GetDecisionsCount(Alert.GetValue()), 3)])"
+on_success: break
+---
+name: default_range_remediation
+filters:
+  - Alert.Remediation == true && Alert.GetScope() == "Range"
+decisions:
+  - type: ban
+    duration: 4h
+on_success: break

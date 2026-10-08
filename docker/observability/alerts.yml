@@ -16,6 +16,16 @@ groups:
           summary: 'Rate limiting is not being applied'
           description: 'Valkey is unreachable from enforceRateLimit, so every limit in RATE_LIMITS is absent. Signup and login are unthrottled.'
 
+      # CrowdSec's own metrics, scraped by Alloy. Down means detection is blind,
+      # and the Bunny bouncer's decision stream goes stale with it.
+      - alert: CrowdSecDown
+        expr: up{job="crowdsec"} == 0
+        for: 5m
+        labels: { severity: warning }
+        annotations:
+          summary: 'CrowdSec is not being scraped'
+          description: 'Detection and the Bunny bouncer depend on it; check the crowdsec container and its :6060 metrics endpoint.'
+
       - alert: AppDown
         expr: up{job="vestigian-app"} == 0
         for: 2m

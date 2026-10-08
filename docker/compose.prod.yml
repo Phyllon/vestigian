@@ -460,6 +460,7 @@ services:
       POSTGRES_DSN: postgresql://vestigian:${POSTGRES_PASSWORD}@postgres:5432/vestigian?sslmode=disable
       REDIS_ADDR: valkey:6379
       APP_ADDR: app:3000
+      CROWDSEC_ADDR: crowdsec:6060
     volumes:
       - ./observability/alloy.alloy:/etc/alloy/config.alloy:ro
       # Read-only. Alloy needs the socket to discover containers and read their
@@ -521,6 +522,9 @@ services:
       - ./security/acquis.yaml:/etc/crowdsec/acquis.yaml:ro
       - ./security/parsers:/etc/crowdsec/parsers/s01-parse/vestigian:ro
       - ./security/scenarios:/etc/crowdsec/scenarios/vestigian:ro
+      # Ban lengths per scenario, escalating for repeat offenders. Without it
+      # every ban is CrowdSec's packaged 4h. See the file for the reasoning.
+      - ./security/profiles.yaml:/etc/crowdsec/profiles.yaml:ro
       # Read-only: CrowdSec discovers containers and reads their logs through
       # the socket, exactly as Alloy does. It never writes through it.
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -538,7 +542,9 @@ services:
   # docker/security/bunny-bouncer/bouncer.mjs for the reasoning and the list of
   # what is still unproven against the live API — confirm it actually blocks
   # with the bouncer step in documents/runbook_prod.deployment.md §19 before
-  # trusting it. BUNNY_PRUNE_UNKNOWN (optional, default off) is explained there.
+  # trusting it. BUNNY_PRUNE_UNKNOWN defaults to true: the pull zone's
+  # blocked-IP list belongs to this bouncer, so anything CrowdSec does not ban
+  # is removed (explained in bouncer.mjs). Set false if the list is edited by hand.
   bunny-bouncer:
     build: ./security/bunny-bouncer
     restart: unless-stopped
@@ -552,7 +558,7 @@ services:
       # zone, which would only block image requests and leave everything else
       # open.
       BUNNY_PULL_ZONE_ID: ${BUNNY_SITE_PULL_ZONE_ID}
-      BUNNY_PRUNE_UNKNOWN: ${BUNNY_PRUNE_UNKNOWN:-false}
+      BUNNY_PRUNE_UNKNOWN: ${BUNNY_PRUNE_UNKNOWN:-true}
     deploy:
       resources:
         limits:

@@ -1,0 +1,82 @@
+# Loki alerting rules for the Bunny-edge bouncer.
+#
+# Same layout rules as backup.yml: the `fake/` tenant directory is Loki's own
+# name for the single tenant when `auth_enabled: false`.
+#
+# Why logs and not metrics: the bouncer is a dependency-free Node script with no
+# scrape endpoint. It prints one JSON object per line (see bouncer.mjs), and
+# `reconciled with Bunny` is its heartbeat — emitted at startup and every ten
+# minutes. Alloy ships container stdout to Loki whether or not anyone reads it.
+#
+# **Every "absence" rule below wraps its count in `or vector(0)`.** With no
+# matching line in the window `count_over_time` returns no series at all, `sum`
+# of nothing is nothing, and `== 0` on nothing is nothing — the alert silently
+# cannot fire in exactly the case it exists for. Verified against Loki 3.4.2.
+groups:
+  - name: bunny-bouncer
+    interval: 1m
+    rules:
+      # Stopped, crash-looping, or wedged before its first reconcile. Bans would
+      # still be decided by CrowdSec and never reach the edge. Also fires while
+      # the bouncer is deliberately stopped (as it was until 2026-10-08), which
+      # is the point: a stopped enforcement layer should not be quiet.
+      - alert: BunnyBouncerSilent
+        expr: |
+          (sum(count_over_time({service="bunny-bouncer"} |= "reconciled with Bunny" [30m])) or vector(0)) == 0
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: The Bunny bouncer has not reported in 30 minutes
+          description: >
+            No "reconciled with Bunny" line in half an hour; it logs one at
+            startup and every ten minutes. CrowdSec is still deciding who to ban,
+            but nothing is applying those decisions at the Bunny edge. Check
+            `docker compose logs bunny-bouncer`.
+
+      # Repeated failed cycles are the bouncer talking to Bunny or CrowdSec and
+      # being refused. It backs off up to 5 minutes, so three in a quarter of an
+      # hour is persistent, not a blip.
+      - alert: BunnyBouncerFailing
+        expr: |
+          sum(count_over_time({service="bunny-bouncer"} |= "cycle failed" [15m])) >= 3
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: The Bunny bouncer keeps failing its cycles
+          description: >
+            Three or more failed cycles in 15 minutes. The log line says whether
+            Bunny (bad key, 429, outage) or CrowdSec's local API refused. Until it
+            clears, new bans are not reaching the edge and expired ones are not
+            being lifted.
+
+      # Bunny refuses the 101st entry. The bouncer then logs that bans are not
+      # enforced at the edge; those IPs are still decided on, just not blocked
+      # before the origin.
+      - alert: BunnyBlockedListFull
+        expr: |
+          sum(count_over_time({service="bunny-bouncer"} |= "list is full" [30m])) > 0
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: Bunny's blocked-IP list is full, some bans are not enforced at the edge
+          description: >
+            The pull zone holds Bunny's maximum of 100 blocked IPs. Convicted
+            addresses beyond that are logged as "not enforcing every ban at the
+            edge". Either an attack is rotating addresses faster than bans expire,
+            or entries are stuck (BUNNY_PRUNE_UNKNOWN=false leaves unknown ones in
+            place). See the "Entries on Bunny" panel.
+
+      - alert: BunnyBlockedListNearlyFull
+        expr: |
+          max(last_over_time({service="bunny-bouncer"} |= "reconciled with Bunny" | json | unwrap blockedOnBunny [30m])) >= 90
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: Bunny's blocked-IP list is over 90% full
+          description: >
+            90 of 100 slots used. Ban lengths live in docker/security/profiles.yaml;
+            shorter first bans free slots sooner.

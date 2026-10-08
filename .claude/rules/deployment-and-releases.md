@@ -148,11 +148,66 @@ decisions. AppSec covers the WAF slot in the same ~150 MB engine — virtual
 patching plus generic SQLi/XSS rules — which is why no separate WAF container
 exists. Config and the full reasoning: `docker/security/README.md`.
 
-**Nothing is enforced yet.** A decision does nothing until a bouncer reads it,
-and the right place is the Bunny edge rather than this box: CrowdSec, Traefik's
-limiter and the Valkey limits all run _after_ a request has paid for a TCP
-connection and a TLS handshake. A VPS provider's DDoS protection works at L3/L4
-and does not absorb L7 HTTP floods, so those can only be absorbed at the edge.
+**Enforcement is the Bunny bouncer** (`docker/security/bunny-bouncer/`), which
+mirrors CrowdSec's decisions onto the site pull zone's blocked-IP list. The
+right place is the Bunny edge rather than this box: CrowdSec, Traefik's limiter
+and the Valkey limits all run _after_ a request has paid for a TCP connection
+and a TLS handshake. A VPS provider's DDoS protection works at L3/L4 and does
+not absorb L7 HTTP floods, so those can only be absorbed at the edge.
+
+What was learned getting it to work (2026-10-03 to 10-08), all against the real
+account unless marked otherwise:
+
+- **The Edge Rule design failed and was replaced.** One rule with a `RemoteIP`
+  trigger rewritten on every change answered `"Maximum 5 triggers are allowed
+per condition"` from the poller while the same payload succeeded by hand. The
+  cause was never found; the bouncer now uses `addBlockedIp` /
+  `removeBlockedIp` (`{ "BlockedIp": "<ip>" }`, 204), one call per IP.
+- **Bunny holds at most 100 blocked entries per pull zone.** The API
+  reference does not say so; the 101st call returns 400 `The Pull Zone already
+has 100 blocked IPs`. The community blocklist (`CAPI`/`lists` origins) is
+  thousands of addresses and filled it at once, so only decisions with origin
+  `crowdsec` or `cscli` are mirrored (`BUNNY_ENFORCED_ORIGINS`). "crowdsec"
+  includes the hub collections' detections, not only the four local scenarios.
+- **Single IPv4 and IPv6 addresses block** (403 from a real client). IPv4
+  wildcards (`a.b.c.*`) are accepted by Bunny and the bouncer maps `/16` and
+  `/24` range decisions onto them — **not yet tested live**. Both IPv6 range forms were
+  **rejected** by the dashboard (`2a02:…:6471:*` and `2a02:…:6471::/64`), so the blocked-IP
+  list cannot hold an IPv6 range at all and those decisions are skipped; an IPv6
+  abuser rotating inside a /64 is blocked address by address only.
+- **`curl` prefers IPv6.** A ban on an IPv4 address looked like it did nothing
+  because the test request went over IPv6. Test with `curl -4` / `curl -6`.
+- **The list belongs to the bouncer** (`BUNNY_PRUNE_UNKNOWN`, default `true` in
+  compose): at startup and every 10 minutes anything CrowdSec does not
+  currently ban is removed. The decision stream reports changes, never state,
+  so a removal missed once (restart, outage) would otherwise stand forever;
+  stale entries found this way were the "3 IPs nobody could explain".
+  Consequence: a block added by hand in the Bunny dashboard disappears within
+  10 minutes. Set it `false` if the list is ever maintained manually.
+- **Bans lift by themselves**: an expired decision arrives in the stream's
+  `deleted` list and is removed within one poll (15 s).
+- **Ban lengths are set in `docker/security/profiles.yaml`**, mounted into the
+  `crowdsec` service. Without it CrowdSec applies its packaged default, 4 h for
+  everything (checked against v1.6.11's `config/profiles.yaml`). First ban /
+  escalation ladder in hours: `rate-limit-abuse` 1/6/24/72 (the only
+  confidence-2 scenario, so the gentlest), `route-scanning` 1/24/72/168,
+  `login-bruteforce` 2/24/72/168 (shared NAT can trip it), `registration-enumeration`
+  4/24/72, hub-collection scenarios 4/24/72/168, ranges a flat 4. Short first
+  bans exist because of Bunny's 100-slot cap. **Verified** in a throwaway
+  v1.6.11 container with the real parser and scenarios: first bans came out at
+  4h/2h/1h/1h, and a repeat offence got the second tier both while the earlier
+  ban was active and after it had expired (`GetDecisionsCount` still counted
+  it). **Unverified:** how long an expired decision keeps counting before
+  CrowdSec garbage-collects it, i.e. whether an offender returning after days
+  still escalates. Profiles are order-sensitive (`on_success: break`), so a new
+  scenario's profile goes above the catch-all.
+- **`cscli decisions list` hides community decisions**; use `-a`. An empty
+  list means no active local decisions, so nothing has a remaining time to show.
+- **Not yet proven live:** `/16` and `/24` wildcards, a burst of ~50 decisions
+  (does Bunny answer 429?), propagation delay after an add, and that
+  `DISABLE_ONLINE_API: 'false'` is acceptable (it still downloads the community
+  list, which nothing enforces, and shares signals — the open GDPR decision in
+  `documents/runbook_prod.deployment.md` §19).
 
 Rejected, with reasons, so they are not revisited by default: **fingerprinting**
 (EDPB 2024 puts it under GDPR _and_ ePrivacy, and it duplicates ALTCHA plus

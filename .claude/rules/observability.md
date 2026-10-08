@@ -101,16 +101,39 @@ the generator and commit both. `overview.json` predates it and stays hand-writte
 The build formats its output with the repo's Prettier config so a rebuild is
 never a formatting diff.
 
-| Dashboard              | uid                        | Answers                                                                                                                                               |
-| ---------------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| overview               | `vestigian-overview`       | Is the app alive: rate, latency, 5xx, rate-limit decisions.                                                                                           |
-| infrastructure         | `vestigian-infrastructure` | Host, per container, Postgres, Valkey, Node process — all already scraped by Alloy, previously shown nowhere.                                         |
-| map & tiles            | `vestigian-map`            | Tile cache/render/size **by zoom**, clustered vs every-site mode, search, featured, photographs, and browser-reported timings.                        |
-| community & moderation | `vestigian-community`      | Backlog and its age, contribution flow, trust funnel, accounts, uploads, licences, mail.                                                              |
-| security & abuse       | `vestigian-security`       | Fail-open first, sign-in outcomes, rate limits, refused requests, step-up, bans, audit and CrowdSec logs.                                             |
-| logs & traces          | `vestigian-logs`           | Loki (levels, errors, slow requests) and Tempo (slowest, failed, `postgis.render_tile`). Fields like `route`/`status` are JSON, so queries `\| json`. |
-| SLOs                   | `vestigian-slo`            | Availability, tile latency, API latency; budget remaining and burn rate over **14 d** (Prometheus keeps 15).                                          |
-| data & import health   | `vestigian-data`           | Catalogue size and completeness, import freshness (`import_runs`), enrichment/translation upstreams.                                                  |
+| Dashboard              | uid                        | Answers                                                                                                                                                                            |
+| ---------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| overview               | `vestigian-overview`       | Is the app alive: rate, latency, 5xx, rate-limit decisions.                                                                                                                        |
+| infrastructure         | `vestigian-infrastructure` | Host, per container, Postgres, Valkey, Node process — all already scraped by Alloy, previously shown nowhere.                                                                      |
+| map & tiles            | `vestigian-map`            | Tile cache/render/size **by zoom**, clustered vs every-site mode, search, featured, photographs, and browser-reported timings.                                                     |
+| community & moderation | `vestigian-community`      | Backlog and its age, contribution flow, trust funnel, accounts, uploads, licences, mail.                                                                                           |
+| security & abuse       | `vestigian-security`       | Fail-open first, CrowdSec → Bunny enforcement, sign-in outcomes and lockouts, rate limits and scraping pressure, refused requests, step-up, bans, audit and CrowdSec/bouncer logs. |
+| logs & traces          | `vestigian-logs`           | Loki (levels, errors, slow requests) and Tempo (slowest, failed, `postgis.render_tile`). Fields like `route`/`status` are JSON, so queries `\| json`.                              |
+| SLOs                   | `vestigian-slo`            | Availability, tile latency, API latency; budget remaining and burn rate over **14 d** (Prometheus keeps 15).                                                                       |
+| data & import health   | `vestigian-data`           | Catalogue size and completeness, import freshness (`import_runs`), enrichment/translation upstreams.                                                                               |
+
+**The security board's CrowdSec and Bunny row** (added 2026-10-08) draws on three
+sources, all verified against real output rather than assumed:
+
+- **CrowdSec's own metrics**, scraped by Alloy from `crowdsec:6060` (job
+  `crowdsec`, address from `CROWDSEC_ADDR` in both compose files). Useful ones,
+  confirmed by triggering a ban in a throwaway v1.6.11 container:
+  `cs_active_decisions{action,origin,reason}` (gauge, only exists once a
+  decision does) and `cs_alerts{reason}`. IP addresses are never labels.
+- **The bouncer's logs**, now one JSON object per line (`level`, `msg`, plus
+  fields) so `| json` works; the earlier multi-line object printing reached Loki
+  as unparseable fragments. Its `reconciled with Bunny` line, emitted at startup
+  and every 10 minutes, is both the heartbeat (**Bouncer heartbeat** is zero when
+  it stops) and the source of the **Entries on Bunny (cap 100)** gauge. The LogQL
+  queries were run against a real Loki 3.4.2 fed real bouncer output.
+  `or vector(0)` needs the `sum(...)` inside it, or a labelled series and the
+  empty one both come back.
+- **The app's rate-limit counters**, for lockouts (login, second factor, admin
+  step-up) and scraping pressure (`record`, `recordDaily`, `search`, `tiles`,
+  `enrichment`, `expensive`).
+
+Not alerting yet: nothing pages on a silent bouncer or a full Bunny list; the
+panels only show it. A Loki ruler exists (`rules/fake/`) if that is wanted.
 
 **Verification and its limit.** All 235 PromQL expressions parse
 (`@prometheus-io/lezer-promql`) and every app-side metric name was checked

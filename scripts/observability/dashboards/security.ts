@@ -1,4 +1,4 @@
-import { Dashboard, STEPS, ratio } from './helpers'
+import { Dashboard, LOKI, STEPS, ratio } from './helpers'
 
 /**
  * Abuse and access. The rate limiter fails open by design, so the first panel
@@ -42,6 +42,124 @@ export const buildSecurity = (): Record<string, unknown> =>
         'sum(rate(rate_limit_decisions_total[$__rate_interval]))',
       ),
       { unit: 'percentunit', min: 0, max: 1, width: 6 },
+    )
+    .row('Detection and edge enforcement (CrowdSec → Bunny)')
+    .stat('CrowdSec reachable', 'max(up{job="crowdsec"}) or vector(0)', {
+      graph: false,
+      thresholds: STEPS.lowerIsWorse(1, 1),
+      min: 0,
+      max: 1,
+      width: 4,
+      description: 'Zero: Prometheus cannot scrape CrowdSec, so nothing below is current.',
+    })
+    .stat(
+      'Bouncer heartbeat (30 min)',
+      'sum(count_over_time({service="bunny-bouncer"} |= "reconciled with Bunny" [30m])) or vector(0)',
+      {
+        datasource: LOKI,
+        graph: false,
+        thresholds: STEPS.lowerIsWorse(1, 1),
+        width: 4,
+        description:
+          'The bouncer reconciles with Bunny every 10 minutes and logs it. Zero: it is stopped or stuck, and bans are no longer reaching the edge.',
+      },
+    )
+    .stat(
+      'Entries on Bunny (cap 100)',
+      'max(last_over_time({service="bunny-bouncer"} |= "reconciled with Bunny" | json | unwrap blockedOnBunny [30m]))',
+      {
+        datasource: LOKI,
+        graph: true,
+        min: 0,
+        max: 100,
+        thresholds: STEPS.higherIsWorse(70, 95),
+        width: 4,
+        description:
+          'Bunny refuses the 101st blocked IP. Past the cap, bans are logged as not enforced at the edge.',
+      },
+    )
+    .stat(
+      'Standing local bans',
+      'sum(cs_active_decisions{origin=~"crowdsec|cscli"}) or vector(0)',
+      {
+        graph: true,
+        width: 4,
+        description: 'Decisions this deployment made itself: the only ones mirrored to Bunny.',
+      },
+    )
+    .stat(
+      'Community decisions held',
+      'sum(cs_active_decisions{origin!~"crowdsec|cscli"}) or vector(0)',
+      {
+        graph: false,
+        width: 4,
+        description: 'Downloaded from CrowdSec; deliberately not mirrored (Bunny holds 100).',
+      },
+    )
+    .stat('Alerts raised (24h)', 'sum(increase(cs_alerts[24h])) or vector(0)', {
+      graph: false,
+      width: 4,
+    })
+    .timeseries(
+      'Standing bans by origin',
+      [
+        {
+          expr: 'sum by (origin, action) (cs_active_decisions)',
+          legend: '{{origin}} · {{action}}',
+        },
+      ],
+      {
+        stacked: true,
+        description: 'Falls as bans expire; a staircase up is an attack in progress.',
+      },
+    )
+    .bargauge(
+      'Alerts by scenario in range',
+      [
+        {
+          expr: 'sort_desc(sum by (reason) (increase(cs_alerts[$__range])))',
+          legend: '{{reason}}',
+        },
+      ],
+      {
+        min: 0,
+        description:
+          'Which detection fires: a local scenario (vestigian/…) or a hub one (Traefik, AppSec).',
+      },
+    )
+    .lokiTimeseries(
+      'What the bouncer did at the edge',
+      [
+        {
+          expr: 'sum(count_over_time({service="bunny-bouncer"} |= "blocked at Bunny" [$__interval]))',
+          legend: 'blocked',
+        },
+        {
+          expr: 'sum(count_over_time({service="bunny-bouncer"} |= "unblocked at Bunny" [$__interval]))',
+          legend: 'unblocked (ban expired)',
+        },
+        {
+          expr: 'sum(count_over_time({service="bunny-bouncer"} |= "list is full" [$__interval]))',
+          legend: 'list full, not enforced',
+        },
+        {
+          expr: 'sum(count_over_time({service="bunny-bouncer"} |= "refused one address" [$__interval]))',
+          legend: 'Bunny refused an address',
+        },
+        {
+          expr: 'sum(count_over_time({service="bunny-bouncer"} |= "cycle failed" [$__interval]))',
+          legend: 'cycle failed (Bunny/LAPI error)',
+        },
+      ],
+      {
+        seriesColours: {
+          blocked: 'red',
+          'unblocked (ban expired)': 'green',
+          'list full, not enforced': 'orange',
+          'Bunny refused an address': 'orange',
+          'cycle failed (Bunny/LAPI error)': 'dark-red',
+        },
+      },
     )
     .row('Sign-in and accounts')
     .timeseries(
@@ -101,6 +219,27 @@ export const buildSecurity = (): Record<string, unknown> =>
           'Four sign-ups an hour per address is the limit; ALTCHA + honeypot sit before it.',
       },
     )
+    .timeseries(
+      'Lockouts: people who hit a limit',
+      [
+        {
+          expr: 'sum(increase(rate_limit_decisions_total{policy="login",outcome="blocked"}[$__rate_interval]))',
+          legend: 'sign-in (8 per 15 min)',
+        },
+        {
+          expr: 'sum(increase(rate_limit_decisions_total{policy="twoFactorVerify",outcome="blocked"}[$__rate_interval]))',
+          legend: 'second factor',
+        },
+        {
+          expr: 'sum(increase(rate_limit_decisions_total{policy="adminStepUp",outcome="blocked"}[$__rate_interval]))',
+          legend: 'admin step-up',
+        },
+      ],
+      {
+        description:
+          'Each is a 429 shown to someone. A real person mistyping looks like one or two; a run of them is a script.',
+      },
+    )
     .timeseries('Second factor and password recovery', [
       {
         expr: 'sum(increase(rate_limit_decisions_total{policy="twoFactorVerify",outcome="blocked"}[$__rate_interval]))',
@@ -129,6 +268,20 @@ export const buildSecurity = (): Record<string, unknown> =>
         },
       ],
       { unit: 'reqps' },
+    )
+    .timeseries(
+      'Scraping pressure (blocked)',
+      [
+        {
+          expr: 'sum by (policy) (increase(rate_limit_decisions_total{policy=~"record|recordDaily|search|tiles|enrichment|expensive",outcome="blocked"}[$__rate_interval]))',
+          legend: '{{policy}}',
+        },
+      ],
+      {
+        stacked: true,
+        description:
+          'recordDaily is the cap that makes full-database enumeration take weeks; any hit there is somebody walking the ids.',
+      },
     )
     .bargauge(
       'Blocked by policy in range',
@@ -215,7 +368,16 @@ export const buildSecurity = (): Record<string, unknown> =>
       '{service=~"crowdsec.*"} |~ "(?i)decision|alert|ban|scenario"',
       {
         height: 8,
-        description: 'Detection only: nothing applies these decisions until a bouncer exists.',
+        description: 'Detection. Enforcement at the Bunny edge is the bouncer, in the next panel.',
+      },
+    )
+    .logs(
+      'Bunny bouncer',
+      '{service="bunny-bouncer"} | json | line_format "{{.level}} {{.msg}} {{.ip}}{{.pattern}} {{.origin}} {{.scenario}} {{.duration}} {{.message}}"',
+      {
+        height: 9,
+        description:
+          'Every ban received and every IP added to or removed from the Bunny blocked list, with the reason when something is refused.',
       },
     )
     .build()

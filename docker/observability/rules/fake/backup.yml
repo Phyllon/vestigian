@@ -10,6 +10,11 @@
 # `backup.outcome=` line per stage per run; Alloy already ships every
 # container's stdout to Loki, so the lines are there whether or not anyone is
 # watching them. These rules are what makes somebody watch.
+#
+# The "nothing succeeded" rules wrap their count in `or vector(0)`. Without it,
+# a job that has stopped logging entirely returns no series, `== 0` on nothing
+# is nothing, and the alert cannot fire in exactly the case it exists for
+# (found and verified against Loki 3.4.2 on 2026-10-08).
 groups:
   - name: backup
     # Hourly. A nightly job does not need a tighter evaluation interval, and a
@@ -23,7 +28,7 @@ groups:
       # fires when the count is zero.
       - alert: BackupNotRunning
         expr: |
-          sum(count_over_time({service="backup"} |= "backup.outcome=ok stage=dump" [26h])) == 0
+          (sum(count_over_time({service="backup"} |= "backup.outcome=ok stage=dump" [26h])) or vector(0)) == 0
         for: 1h
         labels:
           severity: critical
@@ -55,7 +60,7 @@ groups:
       # that was configured once and has since been unset.
       - alert: BackupNotLeavingTheMachine
         expr: |
-          sum(count_over_time({service="backup"} |= "backup.outcome=ok stage=offsite" [26h])) == 0
+          (sum(count_over_time({service="backup"} |= "backup.outcome=ok stage=offsite" [26h])) or vector(0)) == 0
           and
           sum(count_over_time({service="backup"} |= "backup.outcome=ok stage=dump" [26h])) > 0
         for: 1h
@@ -71,7 +76,7 @@ groups:
 
       - alert: BackupRepositoryUnverified
         expr: |
-          sum(count_over_time({service="backup"} |= "backup.outcome=ok stage=check" [9d])) == 0
+          (sum(count_over_time({service="backup"} |= "backup.outcome=ok stage=check" [9d])) or vector(0)) == 0
           and
           sum(count_over_time({service="backup"} |= "backup.outcome=ok stage=offsite" [9d])) > 0
         for: 6h
