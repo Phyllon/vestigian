@@ -869,10 +869,15 @@ pattern described elsewhere in this file is the older shape. See
    `ST_Transform(geom, 3857) && env` could not use the GiST indexes: 236 ms (sites) and
    194 ms (tracings) against 1.7/1.1 ms on a zoom-10 tile, local, 61k sites. Pinned by
    `buildFeatureTileSql` tests. Output is unchanged apart from feature order.
-   **Still open:** `buildClusterTileSql` reprojects all 61k sites on every miss
-   (405–567 ms at zoom 5–8, measured) — that is the clustered route the latency SLO watches.
-   A stored `geom_3857` column with its own GiST index is the fix if misses still matter
-   once the long TTL is in; it was deliberately not done with the first two changes.
+   **The cluster query got the same fix, because the latency SLO watches that route:**
+   `buildClusterTileSql` reprojected all 61k sites per miss (405–567 ms at zoom 5–8) and
+   `TileLatencyBudgetSlowBurn` (250 ms target) kept firing after the feature query and the
+   TTL were fixed. It now prefilters with `s.geom && b.env_expanded_wgs` (the expanded
+   envelope transformed once) and keeps the exact 3857 comparison as a second term.
+   Local, same tiles: zoom 8 432→2 ms, 7 452→4 ms, 6 442→12 ms, 5 469→57 ms, 3 676→265 ms
+   (zoom 0–3 still read most of the table; few tiles, cached a week). Decoded output
+   identical on seven tiles. A stored `geom_3857` column was **not** needed and is not
+   planned. The alert's 6 h window keeps the old misses for up to 6 h after a deploy.
 
 After any deploy or bulk import, run `pnpm tiles:warm <url>`.
 

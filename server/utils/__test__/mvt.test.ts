@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  buildClusterTileSql,
   buildFeatureTileSql,
   buildTileCacheKey,
   CLUSTER_ZOOM_CEILING,
@@ -97,5 +98,20 @@ describe('buildFeatureTileSql', () => {
   it('keeps the approved-status predicate that the partial indexes need', () => {
     expect(build(true)).toContain("sites.status = 'approved'")
     expect(build(true)).toContain("tracings.status = 'approved'")
+  })
+})
+
+describe('buildClusterTileSql', () => {
+  const sql = buildClusterTileSql({ tile: { z: 6, x: 33, y: 22 }, gridSize: 100000 })
+
+  // Without the raw-column comparison the query reprojects every site on every
+  // miss and the latency SLO on this route cannot be met.
+  it('prefilters on the raw geometry column so the GiST index applies', () => {
+    expect(sql).toContain('s.geom && b.env_expanded_wgs')
+  })
+
+  it('keeps the exact projected comparison and the approved-status predicate', () => {
+    expect(sql).toContain('ST_Transform(s.geom, 3857) && b.env_expanded')
+    expect(sql).toContain("s.status = 'approved'")
   })
 })

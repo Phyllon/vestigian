@@ -104,10 +104,25 @@ interface ClusterTileQuery {
  * than the 48/256 = 0.188 this query already expands by. Those ratios are
  * zoom-independent, so it holds at every level — and it stops holding if the
  * grid shrinks or the buffer grows.
+ *
+ * The first `WHERE` term is the one that lets the GiST index on `sites.geom`
+ * be used: the expanded envelope is transformed into 4326 once, and the raw
+ * column is compared against it. Alone, `ST_Transform(s.geom, 3857) && …`
+ * reprojected all 61k sites on every cache miss — 405–567 ms at zoom 5–8 on
+ * the local import, which is what kept `TileLatencyBudgetSlowBurn` (a 250 ms
+ * target on this route) firing after the feature query was fixed. With the
+ * prefilter, zoom 6–8 miss in 2–12 ms and zoom 5 in 57 ms; zoom 0–3 still read
+ * most of the table (265 ms at zoom 3) but there are only a few dozen such
+ * tiles and they cache for a week. The exact 3857 comparison stays as the
+ * second term so the selected set is byte-for-byte what it was: a rectangle in
+ * Mercator is a rectangle in lon/lat, so the prefilter never drops a site the
+ * second term would keep.
  */
 export const buildClusterTileSql = (query: ClusterTileQuery): string => `
   WITH bounds AS (
-    SELECT ST_TileEnvelope(${query.tile.z}, ${query.tile.x}, ${query.tile.y}) AS env
+    SELECT env, ST_Expand(env, ${query.gridSize}) AS env_expanded,
+           ST_Transform(ST_Expand(env, ${query.gridSize}), 4326) AS env_expanded_wgs
+    FROM (SELECT ST_TileEnvelope(${query.tile.z}, ${query.tile.x}, ${query.tile.y}) AS env) AS t
   ),
   clustered AS (
     SELECT
@@ -117,7 +132,8 @@ export const buildClusterTileSql = (query: ClusterTileQuery): string => `
       min(s.title) AS sample_title
     FROM sites s, bounds b
     WHERE s.status = 'approved'
-      AND ST_Transform(s.geom, 3857) && ST_Expand(b.env, ${query.gridSize})
+      AND s.geom && b.env_expanded_wgs
+      AND ST_Transform(s.geom, 3857) && b.env_expanded
     GROUP BY ST_SnapToGrid(ST_Transform(s.geom, 3857), ${query.gridSize})
   ),
   projected AS (
