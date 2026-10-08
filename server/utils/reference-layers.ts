@@ -1,6 +1,7 @@
 import type { TileCoordinate } from '#shared/types'
 import { isReferenceOverlayId, type ReferenceOverlayId } from '#shared/utils/reference-overlays'
 import { TILE_BUFFER, TILE_EXTENT } from './mvt'
+import { assertFiniteNumber, buildTileEnvelopeSql } from './sql-guard'
 
 /**
  * Tile assembly for the reference overlays added with Itiner-e, Nomisma, the
@@ -39,7 +40,7 @@ export const buildPolityCacheKey = (
 const BOUNDS_CTE = (tile: TileCoordinate): string => `
   WITH bounds AS (
     SELECT env, ST_Transform(env, 4326) AS env_wgs
-    FROM (SELECT ST_TileEnvelope(${tile.z}, ${tile.x}, ${tile.y}) AS env) AS t
+    FROM (SELECT ${buildTileEnvelopeSql(tile)} AS env) AS t
   )
 `
 
@@ -55,7 +56,10 @@ export const ROAD_SECONDARY_MINIMUM_ZOOM = 6
  * index, `ST_Transform(geom, 3857) && env` cannot. Roads are simplified to about
  * a pixel at the requested zoom (`simplifyTolerance`, Web Mercator metres).
  */
-const roadTileSql = (tile: TileCoordinate, simplifyTolerance: number): string => `
+const roadTileSql = (tile: TileCoordinate, simplifyTolerance: number): string => {
+  assertFiniteNumber(simplifyTolerance, 'simplifyTolerance')
+
+  return `
   ${BOUNDS_CTE(tile)}
   SELECT ST_AsMVT(rd, 'roman_roads', ${TILE_EXTENT}, 'geom', 'id') AS tile
   FROM (
@@ -75,6 +79,7 @@ const roadTileSql = (tile: TileCoordinate, simplifyTolerance: number): string =>
   ) AS rd
   WHERE rd.geom IS NOT NULL
 `
+}
 
 const mintTileSql = (tile: TileCoordinate): string => `
   ${BOUNDS_CTE(tile)}
@@ -226,6 +231,8 @@ export interface PolityTileQuery {
  */
 export const buildPolityTileSql = (query: PolityTileQuery): string => {
   const { tile, year, simplifyTolerance } = query
+  assertFiniteNumber(year, 'year')
+  assertFiniteNumber(simplifyTolerance, 'simplifyTolerance')
 
   return `
     ${BOUNDS_CTE(tile)},

@@ -1517,3 +1517,14 @@ selection ring is `MapCanvas`'s `selectedSiteId` watcher, which is now also
 re-run when the layer turns on) and, on compact screens, closes the list.
 **Known limit:** on a phone the detail sheet (78vh) covers the map, so the
 marker is hidden behind it exactly as for a tap or a search result.
+
+## Raw SQL tile builders are guarded
+
+Every `build*TileSql` function returns a string run through `sql.unsafe`, so each
+number interpolated into it is an injection point. `server/utils/sql-guard.ts` is
+the only gate: z/x/y enter a statement solely through `buildTileEnvelopeSql(tile)`
+(throws unless all three pass `Number.isInteger`), and every other interpolated
+number (`gridSize`, `simplifyTolerance`, `year`) goes through `assertFiniteNumber`
+at the top of its builder. Routes still return 4xx first via `isValidTileCoordinate`;
+the guard is the backstop. A new builder must use both and be added to the builder list in `sql-guard.test.ts`;
+that list is hand-maintained, nothing detects a builder missing from it.

@@ -1,6 +1,7 @@
 import type { TileCoordinate } from '#shared/types'
 import { buildMilitaryFeatureTypePattern, buildPleiadesMarkSql } from '#shared/utils/limes'
 import { TILE_BUFFER, TILE_EXTENT, getSimplifyTolerance } from './mvt'
+import { assertFiniteNumber, buildTileEnvelopeSql } from './sql-guard'
 
 /**
  * Tile assembly for the antiquity atlas — the reference cartography behind the
@@ -74,6 +75,7 @@ interface AtlasTileQuery {
 export const buildAtlasTileSql = (query: AtlasTileQuery): string => {
   const { tile, plan } = query
   const { simplifyTolerance } = plan
+  assertFiniteNumber(simplifyTolerance, 'simplifyTolerance')
 
   /**
    * `ST_Simplify`, not `ST_SimplifyPreserveTopology`, and only here.
@@ -214,7 +216,7 @@ export const buildAtlasTileSql = (query: AtlasTileQuery): string => {
   return `
     WITH bounds AS (
       SELECT env, ST_Transform(env, 4326) AS env_wgs
-      FROM (SELECT ST_TileEnvelope(${tile.z}, ${tile.x}, ${tile.y}) AS env) AS t
+      FROM (SELECT ${buildTileEnvelopeSql(tile)} AS env) AS t
     )
     SELECT ${layers.map((layer) => `(${layer})`).join(' || ')} AS tile
   `
@@ -264,6 +266,8 @@ interface EmpireExtentTileQuery {
  */
 export const buildEmpireExtentTileSql = (query: EmpireExtentTileQuery): string => {
   const { tile, year, simplifyTolerance } = query
+  assertFiniteNumber(year, 'year')
+  assertFiniteNumber(simplifyTolerance, 'simplifyTolerance')
 
   const extentLayer = `
     SELECT ST_AsMVT(e, 'extent', ${TILE_EXTENT}, 'geom', 'id') AS tile
@@ -288,7 +292,7 @@ export const buildEmpireExtentTileSql = (query: EmpireExtentTileQuery): string =
   return `
     WITH bounds AS (
       SELECT env, ST_Transform(env, 4326) AS env_wgs
-      FROM (SELECT ST_TileEnvelope(${tile.z}, ${tile.x}, ${tile.y}) AS env) AS t
+      FROM (SELECT ${buildTileEnvelopeSql(tile)} AS env) AS t
     )
     SELECT (${extentLayer}) AS tile
   `

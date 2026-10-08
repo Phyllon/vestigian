@@ -10,6 +10,7 @@ import type {
   TileCoordinate,
 } from '#shared/types'
 import { TILE_BUFFER, TILE_EXTENT } from './mvt'
+import { buildTileEnvelopeSql } from './sql-guard'
 
 /**
  * Cross-referencing for Attic Inscriptions Online (`.claude/rules/
@@ -131,7 +132,7 @@ export const buildAtticInscriptionCacheKey = (tile: TileCoordinate, atlasVersion
 export const buildAtticInscriptionTileSql = (tile: TileCoordinate): string => `
   WITH bounds AS (
     SELECT env, ST_Transform(env, 4326) AS env_wgs
-    FROM (SELECT ST_TileEnvelope(${tile.z}, ${tile.x}, ${tile.y}) AS env) AS t
+    FROM (SELECT ${buildTileEnvelopeSql(tile)} AS env) AS t
   )
   SELECT ST_AsMVT(pt, 'attic_inscriptions', ${TILE_EXTENT}, 'geom', 'id') AS tile
   FROM (

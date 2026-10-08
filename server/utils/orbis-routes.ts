@@ -1,5 +1,6 @@
 import type { TileCoordinate } from '#shared/types'
 import { TILE_BUFFER, TILE_EXTENT } from './mvt'
+import { buildTileEnvelopeSql } from './sql-guard'
 
 /**
  * Tile assembly for the ORBIS route network — the layer the map gains when
@@ -27,7 +28,7 @@ export const buildRouteCacheKey = (tile: TileCoordinate, atlasVersion: number): 
 export const buildRouteTileSql = (tile: TileCoordinate): string => `
   WITH bounds AS (
     SELECT env, ST_Transform(env, 4326) AS env_wgs
-    FROM (SELECT ST_TileEnvelope(${tile.z}, ${tile.x}, ${tile.y}) AS env) AS t
+    FROM (SELECT ${buildTileEnvelopeSql(tile)} AS env) AS t
   )
   SELECT ST_AsMVT(rt, 'routes', ${TILE_EXTENT}, 'geom', 'id') AS tile
   FROM (

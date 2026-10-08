@@ -1,5 +1,6 @@
 import type { TileCoordinate } from '#shared/types'
 import { TILE_BUFFER, TILE_EXTENT, getSimplifyTolerance } from './mvt'
+import { assertFiniteNumber, buildTileEnvelopeSql } from './sql-guard'
 
 /**
  * Tile assembly for the frontier — the layer the Barrington sheet gains when
@@ -52,6 +53,7 @@ interface LimesTileQuery {
  */
 export const buildLimesTileSql = (query: LimesTileQuery): string => {
   const { tile, plan } = query
+  assertFiniteNumber(plan.simplifyTolerance, 'simplifyTolerance')
 
   const frontierLayer = `
     SELECT ST_AsMVT(f, 'frontier', ${TILE_EXTENT}, 'geom', 'id') AS tile
@@ -107,7 +109,7 @@ export const buildLimesTileSql = (query: LimesTileQuery): string => {
   return `
     WITH bounds AS (
       SELECT env, ST_Transform(env, 4326) AS env_wgs
-      FROM (SELECT ST_TileEnvelope(${tile.z}, ${tile.x}, ${tile.y}) AS env) AS t
+      FROM (SELECT ${buildTileEnvelopeSql(tile)} AS env) AS t
     )
     SELECT ${layers.map((layer) => `(${layer})`).join(' || ')} AS tile
   `

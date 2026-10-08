@@ -1,5 +1,6 @@
 import type { TileCoordinate } from '#shared/types'
 import { TILE_BUFFER, TILE_EXTENT } from './mvt'
+import { buildTileEnvelopeSql } from './sql-guard'
 
 /**
  * Tile assembly for AWMC's minor point features — bridges, mines/
@@ -30,7 +31,7 @@ export const buildMinorFeatureCacheKey = (tile: TileCoordinate, atlasVersion: nu
 export const buildMinorFeatureTileSql = (tile: TileCoordinate): string => `
   WITH bounds AS (
     SELECT env, ST_Transform(env, 4326) AS env_wgs
-    FROM (SELECT ST_TileEnvelope(${tile.z}, ${tile.x}, ${tile.y}) AS env) AS t
+    FROM (SELECT ${buildTileEnvelopeSql(tile)} AS env) AS t
   )
   SELECT ST_AsMVT(ft, 'features', ${TILE_EXTENT}, 'geom', 'id') AS tile
   FROM (

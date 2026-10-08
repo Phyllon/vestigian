@@ -1,5 +1,6 @@
 import type { TileCoordinate, TileRenderPlan } from '#shared/types'
 import { MAX_ZOOM, MIN_ZOOM } from '#shared/utils/tile-limits'
+import { assertFiniteNumber, buildTileEnvelopeSql } from './sql-guard'
 
 export const TILE_EXTENT = 4096
 export const TILE_BUFFER = 64
@@ -118,11 +119,14 @@ interface ClusterTileQuery {
  * Mercator is a rectangle in lon/lat, so the prefilter never drops a site the
  * second term would keep.
  */
-export const buildClusterTileSql = (query: ClusterTileQuery): string => `
+export const buildClusterTileSql = (query: ClusterTileQuery): string => {
+  assertFiniteNumber(query.gridSize, 'gridSize')
+
+  return `
   WITH bounds AS (
     SELECT env, ST_Expand(env, ${query.gridSize}) AS env_expanded,
            ST_Transform(ST_Expand(env, ${query.gridSize}), 4326) AS env_expanded_wgs
-    FROM (SELECT ST_TileEnvelope(${query.tile.z}, ${query.tile.x}, ${query.tile.y}) AS env) AS t
+    FROM (SELECT ${buildTileEnvelopeSql(query.tile)} AS env) AS t
   ),
   clustered AS (
     SELECT
@@ -147,6 +151,7 @@ export const buildClusterTileSql = (query: ClusterTileQuery): string => `
   SELECT ST_AsMVT(t, 'clusters', ${TILE_EXTENT}, 'geom') AS tile
   FROM (SELECT * FROM projected WHERE geom IS NOT NULL) AS t
 `
+}
 
 interface FeatureTileQuery {
   tile: TileCoordinate
@@ -182,6 +187,7 @@ interface FeatureTileQuery {
  */
 export const buildFeatureTileSql = (query: FeatureTileQuery): string => {
   const { tile, simplifyTolerance, includeTracings, compactSiteProperties } = query
+  assertFiniteNumber(simplifyTolerance, 'simplifyTolerance')
 
   const siteLayer = `
     SELECT ST_AsMVT(s, 'sites', ${TILE_EXTENT}, 'geom', 'id') AS tile
@@ -229,7 +235,7 @@ export const buildFeatureTileSql = (query: FeatureTileQuery): string => {
   return `
     WITH bounds AS (
       SELECT env, ST_Transform(env, 4326) AS env_wgs
-      FROM (SELECT ST_TileEnvelope(${tile.z}, ${tile.x}, ${tile.y}) AS env) AS t
+      FROM (SELECT ${buildTileEnvelopeSql(tile)} AS env) AS t
     )
     SELECT (${siteLayer})${includeTracings ? ` || (${tracingLayer})` : ''} AS tile
   `
