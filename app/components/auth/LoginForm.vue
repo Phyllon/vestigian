@@ -8,6 +8,20 @@
   const { t } = useI18n()
   const isSubmitting = ref(false)
 
+  /**
+   * One notice per step, because the two limits are separate policies on the
+   * server (`login`, `twoFactorVerify`): being paused on one must not leave the
+   * other looking paused when someone goes back a step.
+   */
+  const signInNotice = useRateLimitNotice()
+  const verifyNotice = useRateLimitNotice()
+  const { isPaused: isSignInPaused, lockedFor: signInLockedFor } = signInNotice
+  const { isPaused: isVerifyPaused, lockedFor: verifyLockedFor } = verifyNotice
+
+  /** Attempts left on this connection, from the last refused sign-in. */
+  const attemptsRemaining = ref<number | null>(null)
+  const showAttemptsWarning = computed(() => shouldWarnAboutAttempts(attemptsRemaining.value))
+
   const schema = z.object({
     email: z.string().email(t('auth.login.errorEmail')),
     password: z.string().min(1, t('auth.login.errorPassword')),
@@ -58,6 +72,12 @@
       toast.add({ title: t('auth.login.successTitle'), color: 'success' })
       await navigateTo((route.query.next as string) || '/')
     } catch (error) {
+      if (signInNotice.handle(error)) {
+        attemptsRemaining.value = null
+        return
+      }
+
+      attemptsRemaining.value = readAttemptsRemaining(error)
       toast.add({
         title: t('auth.login.failedTitle'),
         description:
@@ -82,6 +102,8 @@
       toast.add({ title: t('auth.login.successTitle'), color: 'success' })
       await navigateTo((route.query.next as string) || '/')
     } catch (error) {
+      if (verifyNotice.handle(error)) return
+
       toast.add({
         title: t('auth.login.twoFactor.failedTitle'),
         description:
@@ -146,8 +168,28 @@
       </NuxtLink>
     </p>
 
-    <UButton type="submit" :loading="isSubmitting" :disabled="!isComplete" color="primary" block>
-      {{ t('auth.login.submit') }}
+    <UiRateLimitAlert
+      v-if="isSignInPaused"
+      :locked-for="signInLockedFor"
+      :description="t('auth.login.rateLimited.description', { wait: signInLockedFor })"
+    />
+    <UAlert
+      v-else-if="showAttemptsWarning"
+      role="status"
+      color="warning"
+      variant="subtle"
+      icon="i-lucide-triangle-alert"
+      :description="t('auth.login.rateLimited.remaining', attemptsRemaining ?? 0)"
+    />
+
+    <UButton
+      type="submit"
+      :loading="isSubmitting"
+      :disabled="!isComplete || isSignInPaused"
+      color="primary"
+      block
+    >
+      {{ isSignInPaused ? signInNotice.waitingLabel.value : t('auth.login.submit') }}
     </UButton>
 
     <p class="text-sm text-ink-500 dark:text-paper-400">
@@ -196,14 +238,20 @@
       />
     </UFormField>
 
+    <UiRateLimitAlert
+      v-if="isVerifyPaused"
+      :locked-for="verifyLockedFor"
+      :description="t('auth.login.rateLimited.twoFactorDescription', { wait: verifyLockedFor })"
+    />
+
     <UButton
       type="submit"
       :loading="isVerifying"
-      :disabled="code.trim().length === 0"
+      :disabled="code.trim().length === 0 || isVerifyPaused"
       color="primary"
       block
     >
-      {{ t('auth.login.twoFactor.submit') }}
+      {{ isVerifyPaused ? verifyNotice.waitingLabel.value : t('auth.login.twoFactor.submit') }}
     </UButton>
 
     <div class="flex items-center justify-between text-sm">

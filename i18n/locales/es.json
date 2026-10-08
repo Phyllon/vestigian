@@ -214,6 +214,15 @@
       "dare": "el Atlas Digital del Imperio Romano"
     }
   },
+  "rateLimit": {
+    "title": "Demasiados intentos",
+    "message": "Demasiadas solicitudes desde esta conexión. Podrás volver a intentarlo en {wait}.",
+    "waiting": "Reintentar en {wait}",
+    "wait": {
+      "seconds": "{n} segundo | {n} segundos",
+      "minutes": "{n} minuto | {n} minutos"
+    }
+  },
   "auth": {
     "login": {
       "title": "Iniciar sesión",
@@ -240,6 +249,11 @@
         "startOver": "Empieza de nuevo",
         "failedTitle": "Ese código no funciona",
         "failedDescription": "Revisa el código e intenta de nuevo."
+      },
+      "rateLimited": {
+        "description": "El inicio de sesión está en pausa para esta conexión. Podrás volver a intentarlo en {wait}.",
+        "twoFactorDescription": "La introducción de códigos está en pausa para esta conexión. Podrás volver a intentarlo en {wait}.",
+        "remaining": "Ese fue tu último intento antes de que se pause el inicio de sesión. | Te queda un intento antes de que se pause el inicio de sesión. | Te quedan {n} intentos antes de que se pause el inicio de sesión."
       }
     },
     "register": {

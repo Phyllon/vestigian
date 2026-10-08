@@ -132,8 +132,18 @@ sources, all verified against real output rather than assumed:
   step-up) and scraping pressure (`record`, `recordDaily`, `search`, `tiles`,
   `enrichment`, `expensive`).
 
-Not alerting yet: nothing pages on a silent bouncer or a full Bunny list; the
-panels only show it. A Loki ruler exists (`rules/fake/`) if that is wanted.
+**Alerts** (`docker/observability/rules/fake/security.yml`, Loki ruler; and
+`CrowdSecDown` in `alerts.yml`): `BunnyBouncerSilent` (no heartbeat in 30 min,
+critical — also fires while the bouncer is deliberately stopped, on purpose),
+`BunnyBouncerFailing` (3+ failed cycles in 15 min), `BunnyBlockedListFull` and
+`BunnyBlockedListNearlyFull` (90+ of Bunny's 100 slots). All loaded into a real
+Loki 3.4.2 with the repo's `loki.yml` and each expression evaluated in three
+states (no logs, healthy, failing). **Every "nothing happened" rule must wrap its
+count as `(sum(count_over_time(...)) or vector(0)) == 0`**: with no matching line
+the plain form returns no series and the alert can never fire. That bug was in
+`backup.yml`'s `BackupNotRunning`, `BackupNotLeavingTheMachine` and
+`BackupRepositoryUnverified` until 2026-10-08, i.e. they were silent in precisely
+the case they exist for.
 
 **Verification and its limit.** All 235 PromQL expressions parse
 (`@prometheus-io/lezer-promql`) and every app-side metric name was checked

@@ -12,6 +12,8 @@
   const route = useRoute()
   const toast = useToast()
   const isSubmitting = ref(false)
+  const notice = useRateLimitNotice()
+  const { isPaused, lockedFor } = notice
 
   const schema = z
     .object({
@@ -39,6 +41,8 @@
       toast.add({ title: t('resetPasswordPage.changed'), color: 'success' })
       await navigateTo('/login')
     } catch (error) {
+      if (notice.handle(error)) return
+
       toast.add({
         title: t('resetPasswordPage.resetFailedTitle'),
         description:
@@ -75,8 +79,16 @@
         <AuthPasswordField v-model="state.passwordConfirmation" purpose="new" />
       </UFormField>
 
-      <UButton type="submit" :loading="isSubmitting" :disabled="!isComplete" color="primary" block>
-        {{ t('resetPasswordPage.savePassword') }}
+      <UiRateLimitAlert v-if="isPaused" :locked-for="lockedFor" />
+
+      <UButton
+        type="submit"
+        :loading="isSubmitting"
+        :disabled="!isComplete || isPaused"
+        color="primary"
+        block
+      >
+        {{ isPaused ? notice.waitingLabel.value : t('resetPasswordPage.savePassword') }}
       </UButton>
     </UForm>
   </div>

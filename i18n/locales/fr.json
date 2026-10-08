@@ -214,6 +214,15 @@
       "dare": "l'Atlas numérique de l'Empire romain"
     }
   },
+  "rateLimit": {
+    "title": "Trop de tentatives",
+    "message": "Trop de requêtes depuis ce réseau. Vous pourrez réessayer dans {wait}.",
+    "waiting": "Réessayer dans {wait}",
+    "wait": {
+      "seconds": "{n} seconde | {n} secondes",
+      "minutes": "{n} minute | {n} minutes"
+    }
+  },
   "auth": {
     "login": {
       "title": "Connexion",
@@ -240,6 +249,11 @@
         "startOver": "Recommencer",
         "failedTitle": "Ce code n'a pas fonctionné",
         "failedDescription": "Vérifiez le code et essayez encore."
+      },
+      "rateLimited": {
+        "description": "La connexion est suspendue depuis ce réseau. Vous pourrez réessayer dans {wait}.",
+        "twoFactorDescription": "La saisie du code est suspendue depuis ce réseau. Vous pourrez réessayer dans {wait}.",
+        "remaining": "C'était votre dernière tentative avant la suspension de la connexion. | Il vous reste une tentative avant la suspension de la connexion. | Il vous reste {n} tentatives avant la suspension de la connexion."
       }
     },
     "register": {

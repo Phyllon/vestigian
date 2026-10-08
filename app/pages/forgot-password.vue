@@ -14,15 +14,25 @@
   const state = reactive<Partial<ForgotState>>({ email: '' })
   const isSent = ref(false)
   const isSubmitting = ref(false)
+  const notice = useRateLimitNotice()
+  const { isPaused, lockedFor } = notice
 
   const request = async (event: FormSubmitEvent<ForgotState>): Promise<void> => {
     isSubmitting.value = true
     try {
       await $fetch('/api/auth/forgot-password', { method: 'POST', body: event.data })
-    } finally {
-      // The confirmation is shown either way, so this page cannot be used to
-      // discover which addresses have accounts.
       isSent.value = true
+    } catch (error) {
+      // The one failure that is *not* hidden. The limit counts this connection,
+      // not the address typed, so saying so reveals nothing about which
+      // addresses have accounts — and the alternative is "check your inbox" for
+      // a mail that was never sent.
+      if (notice.handle(error)) return
+
+      // Anything else still shows the same confirmation as success, so this page
+      // cannot be used to discover which addresses have accounts.
+      isSent.value = true
+    } finally {
       isSubmitting.value = false
     }
   }
@@ -49,8 +59,10 @@
         <UInput v-model="state.email" type="email" autocomplete="email" class="w-full" />
       </UFormField>
 
-      <UButton type="submit" :loading="isSubmitting" color="primary" block>{{
-        t('forgotPasswordPage.sendLink')
+      <UiRateLimitAlert v-if="isPaused" :locked-for="lockedFor" />
+
+      <UButton type="submit" :loading="isSubmitting" :disabled="isPaused" color="primary" block>{{
+        isPaused ? notice.waitingLabel.value : t('forgotPasswordPage.sendLink')
       }}</UButton>
     </UForm>
   </div>

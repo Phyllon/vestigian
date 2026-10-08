@@ -361,6 +361,15 @@
       "dare": "the Digital Atlas of the Roman Empire"
     }
   },
+  "rateLimit": {
+    "title": "Too many attempts",
+    "message": "Too many requests from this connection. You can try again in {wait}.",
+    "waiting": "Try again in {wait}",
+    "wait": {
+      "seconds": "{n} second | {n} seconds",
+      "minutes": "{n} minute | {n} minutes"
+    }
+  },
   "auth": {
     "login": {
       "title": "Sign in",
@@ -387,6 +396,11 @@
         "startOver": "Start over",
         "failedTitle": "That code did not work",
         "failedDescription": "Check the code and try again."
+      },
+      "rateLimited": {
+        "description": "Signing in is paused for this connection. You can try again in {wait}.",
+        "twoFactorDescription": "Entering codes is paused for this connection. You can try again in {wait}.",
+        "remaining": "That was your last attempt before signing in pauses. | One attempt left before signing in pauses. | {n} attempts left before signing in pauses."
       }
     },
     "register": {

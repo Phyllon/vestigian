@@ -214,6 +214,15 @@
       "dare": "de Digitale Atlas van het Romeinse Rijk"
     }
   },
+  "rateLimit": {
+    "title": "Te veel pogingen",
+    "message": "Te veel verzoeken vanaf deze verbinding. U kunt het over {wait} opnieuw proberen.",
+    "waiting": "Opnieuw proberen over {wait}",
+    "wait": {
+      "seconds": "{n} seconde | {n} seconden",
+      "minutes": "{n} minuut | {n} minuten"
+    }
+  },
   "auth": {
     "login": {
       "title": "Aanmelden",
@@ -240,6 +249,11 @@
         "startOver": "Opnieuw beginnen",
         "failedTitle": "Die code werkte niet",
         "failedDescription": "Controleer de code en probeer het opnieuw."
+      },
+      "rateLimited": {
+        "description": "Aanmelden is voor deze verbinding tijdelijk gepauzeerd. U kunt het over {wait} opnieuw proberen.",
+        "twoFactorDescription": "Codes invoeren is voor deze verbinding tijdelijk gepauzeerd. U kunt het over {wait} opnieuw proberen.",
+        "remaining": "Dat was uw laatste poging voordat aanmelden wordt gepauzeerd. | Nog één poging voordat aanmelden wordt gepauzeerd. | Nog {n} pogingen voordat aanmelden wordt gepauzeerd."
       }
     },
     "register": {

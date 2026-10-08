@@ -218,7 +218,20 @@ export const pseudonymiseIdentifier = (
   secret: Buffer = PROCESS_SECRET,
 ): string => createHmac('sha256', secret).update(identifier).digest('hex').slice(0, 16)
 
-export const enforceRateLimit = async (event: H3Event, name: RateLimitName): Promise<void> => {
+/**
+ * Counts the request against `name` and refuses it with a 429 once the policy
+ * is spent.
+ *
+ * Resolves to the decision for an allowed request, so a caller that wants to
+ * tell the person how close they are (the sign-in form warns before the last
+ * attempts) can. It resolves to `undefined` when the cache is unreachable and
+ * the policy was **not applied** — "unknown" must not read as "plenty left", so
+ * callers treat `undefined` as "say nothing".
+ */
+export const enforceRateLimit = async (
+  event: H3Event,
+  name: RateLimitName,
+): Promise<RateLimitDecision | undefined> => {
   const policy: RateLimitPolicy = RATE_LIMITS[name]
   const now = Date.now()
   const address = resolveClientIdentifier(event)
@@ -255,7 +268,7 @@ export const enforceRateLimit = async (event: H3Event, name: RateLimitName): Pro
 
   if (decision.allowed) {
     rateLimitDecisionsTotal().inc({ policy: name, outcome: 'allowed' })
-    return
+    return decision
   }
 
   rateLimitDecisionsTotal().inc({ policy: name, outcome: 'blocked' })
@@ -274,5 +287,9 @@ export const enforceRateLimit = async (event: H3Event, name: RateLimitName): Pro
     statusCode: 429,
     statusMessage: 'Too many requests',
     message: `Too many attempts. Try again in ${decision.retryAfterSeconds} seconds.`,
+    // Structured, so the interface can show its own translated wording and a
+    // countdown instead of echoing this English sentence. `message` stays for
+    // API clients that only read it.
+    data: { retryAfterSeconds: decision.retryAfterSeconds, policy: name },
   })
 }

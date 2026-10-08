@@ -10,6 +10,8 @@
   const altchaPayload = ref('')
   const isSubmitting = ref(false)
   const isDone = ref(false)
+  const notice = useRateLimitNotice()
+  const { isPaused, lockedFor } = notice
 
   const schema = z
     .object({
@@ -73,6 +75,11 @@
       })
       isDone.value = true
     } catch (error) {
+      // The limit is checked before anything else, so a refused request never
+      // reached the proof-of-work check: the solved challenge is still good and
+      // is deliberately kept, rather than making the person solve another.
+      if (notice.handle(error)) return
+
       const response = (error as { data?: { message?: string; data?: { field?: string } } }).data
       const message = response?.message ?? t('auth.register.failedDefault')
 
@@ -186,8 +193,16 @@
       />
     </div>
 
-    <UButton type="submit" :loading="isSubmitting" :disabled="!isComplete" color="primary" block>
-      {{ t('auth.register.submit') }}
+    <UiRateLimitAlert v-if="isPaused" :locked-for="lockedFor" />
+
+    <UButton
+      type="submit"
+      :loading="isSubmitting"
+      :disabled="!isComplete || isPaused"
+      color="primary"
+      block
+    >
+      {{ isPaused ? notice.waitingLabel.value : t('auth.register.submit') }}
     </UButton>
 
     <!--

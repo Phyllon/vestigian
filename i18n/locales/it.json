@@ -214,6 +214,15 @@
       "dare": "l'Atlante Digitale dell'Impero Romano"
     }
   },
+  "rateLimit": {
+    "title": "Troppi tentativi",
+    "message": "Troppe richieste da questa connessione. Potrai riprovare tra {wait}.",
+    "waiting": "Riprova tra {wait}",
+    "wait": {
+      "seconds": "{n} secondo | {n} secondi",
+      "minutes": "{n} minuto | {n} minuti"
+    }
+  },
   "auth": {
     "login": {
       "title": "Accedi",
@@ -240,6 +249,11 @@
         "startOver": "Iniziare",
         "failedTitle": "Quel codice non funzionava",
         "failedDescription": "Controlla il codice e riprova."
+      },
+      "rateLimited": {
+        "description": "L'accesso è in pausa per questa connessione. Potrai riprovare tra {wait}.",
+        "twoFactorDescription": "L'inserimento dei codici è in pausa per questa connessione. Potrai riprovare tra {wait}.",
+        "remaining": "Era l'ultimo tentativo prima che l'accesso venga messo in pausa. | Ti resta un tentativo prima che l'accesso venga messo in pausa. | Ti restano {n} tentativi prima che l'accesso venga messo in pausa."
       }
     },
     "register": {

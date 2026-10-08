@@ -214,6 +214,15 @@
       "dare": "der digitale Atlas des Römischen Reiches"
     }
   },
+  "rateLimit": {
+    "title": "Zu viele Versuche",
+    "message": "Zu viele Anfragen von dieser Verbindung. Sie können es in {wait} erneut versuchen.",
+    "waiting": "Erneut versuchen in {wait}",
+    "wait": {
+      "seconds": "{n} Sekunde | {n} Sekunden",
+      "minutes": "{n} Minute | {n} Minuten"
+    }
+  },
   "auth": {
     "login": {
       "title": "Anmelden",
@@ -240,6 +249,11 @@
         "startOver": "Neu beginnen",
         "failedTitle": "Dieser Code funktionierte nicht",
         "failedDescription": "Überprüfen Sie den Code und versuchen Sie es erneut."
+      },
+      "rateLimited": {
+        "description": "Die Anmeldung ist für diese Verbindung vorübergehend pausiert. Sie können es in {wait} erneut versuchen.",
+        "twoFactorDescription": "Die Code-Eingabe ist für diese Verbindung vorübergehend pausiert. Sie können es in {wait} erneut versuchen.",
+        "remaining": "Das war Ihr letzter Versuch, bevor die Anmeldung pausiert. | Noch ein Versuch, bevor die Anmeldung pausiert. | Noch {n} Versuche, bevor die Anmeldung pausiert."
       }
     },
     "register": {

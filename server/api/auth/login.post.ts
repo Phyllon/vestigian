@@ -97,7 +97,7 @@ defineRouteMeta({
 })
 
 export default defineEventHandler(async (event) => {
-  await enforceRateLimit(event, 'login')
+  const rateLimit = await enforceRateLimit(event, 'login')
   const credentials = await readValidatedBody(event, credentialsSchema.parse)
   const database = useDatabase()
 
@@ -141,7 +141,14 @@ export default defineEventHandler(async (event) => {
     // over HTTP.
     authEventsTotal().inc({ event: 'login', outcome: 'rejected' })
     event.context.log.warn({ audit: 'auth.login' }, 'login rejected')
-    throw createError({ statusCode: 401, message: 'That email and password do not match.' })
+    // `attemptsRemaining` counts this connection's attempts, not this account's,
+    // and is attached to the answer for a missing account and a wrong password
+    // alike, so it tells a caller nothing about which one it was.
+    throw createError({
+      statusCode: 401,
+      message: 'That email and password do not match.',
+      data: { attemptsRemaining: rateLimit?.remaining },
+    })
   }
 
   /**

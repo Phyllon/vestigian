@@ -1,6 +1,7 @@
-import { describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   buildRateLimitKey,
+  enforceRateLimit,
   evaluateRateLimit,
   pseudonymiseIdentifier,
   RATE_LIMITS,
@@ -150,5 +151,87 @@ describe('pseudonymiseIdentifier', () => {
 
   it('is what the anonymous measurement policy asks for', () => {
     expect(RATE_LIMITS.vitals.anonymise).toBe(true)
+  })
+})
+
+describe('enforceRateLimit', () => {
+  // The Nitro auto-imports `enforceRateLimit` reaches for, replaced by stand-ins.
+  const incr = vi.fn()
+  const expire = vi.fn()
+  const setResponseHeader = vi.fn()
+  const decisionsInc = vi.fn()
+  const logError = vi.fn()
+  const event = { context: { log: { warn: vi.fn() } } } as never
+
+  beforeAll(() => {
+    vi.stubGlobal('getRequestIP', () => '203.0.113.9')
+    vi.stubGlobal('getRequestHeader', () => undefined)
+    vi.stubGlobal('useRuntimeConfig', () => ({ behindTrustedProxy: false }))
+    vi.stubGlobal('useRedis', () => ({ incr, expire }))
+    vi.stubGlobal('rateLimitDecisionsTotal', () => ({ inc: decisionsInc }))
+    vi.stubGlobal('useLogger', () => ({ error: logError }))
+    vi.stubGlobal('setResponseHeader', setResponseHeader)
+    vi.stubGlobal('createError', (input: { message: string }) =>
+      Object.assign(new Error(input.message), input),
+    )
+  })
+
+  afterAll(() => vi.unstubAllGlobals())
+
+  beforeEach(() => vi.clearAllMocks())
+
+  it('resolves to the decision for an allowed request, so a form can warn before the limit', async () => {
+    incr.mockResolvedValue(6)
+
+    const decision = await enforceRateLimit(event, 'login')
+
+    // login allows 8: the sixth request leaves two.
+    expect(decision).toMatchObject({ allowed: true, remaining: RATE_LIMITS.login.limit - 6 })
+    expect(decisionsInc).toHaveBeenCalledWith({ policy: 'login', outcome: 'allowed' })
+  })
+
+  it('sets the expiry on the first request of a window and only then', async () => {
+    incr.mockResolvedValueOnce(1).mockResolvedValueOnce(2)
+
+    await enforceRateLimit(event, 'login')
+    await enforceRateLimit(event, 'login')
+
+    expect(expire).toHaveBeenCalledOnce()
+    expect(expire).toHaveBeenCalledWith(expect.stringContaining('rl:login:'), 900)
+  })
+
+  it('refuses the request over the limit with a 429 that carries the wait as data', async () => {
+    incr.mockResolvedValue(RATE_LIMITS.login.limit + 1)
+
+    const refusal = await enforceRateLimit(event, 'login').then(
+      () => null,
+      (error: unknown) =>
+        error as Error & {
+          statusCode: number
+          data: { retryAfterSeconds: number; policy: string }
+        },
+    )
+
+    expect(refusal?.statusCode).toBe(429)
+    expect(refusal?.data.policy).toBe('login')
+    expect(refusal?.data.retryAfterSeconds).toBeGreaterThan(0)
+    expect(refusal?.data.retryAfterSeconds).toBeLessThanOrEqual(RATE_LIMITS.login.windowSeconds)
+    // The header and the body must agree: clients read either.
+    expect(setResponseHeader).toHaveBeenCalledWith(
+      event,
+      'retry-after',
+      refusal?.data.retryAfterSeconds,
+    )
+    expect(decisionsInc).toHaveBeenCalledWith({ policy: 'login', outcome: 'blocked' })
+  })
+
+  it('fails open when the cache is down, and resolves to undefined — unknown is not "plenty left"', async () => {
+    incr.mockRejectedValue(new Error('connection refused'))
+
+    const decision = await enforceRateLimit(event, 'login')
+
+    expect(decision).toBeUndefined()
+    expect(decisionsInc).toHaveBeenCalledWith({ policy: 'login', outcome: 'failed_open' })
+    expect(logError).toHaveBeenCalledOnce()
   })
 })
