@@ -121,6 +121,22 @@ rather than Semgrep and why the vendored ruleset is an allowlist, is in
 | `scan-dast.sh`        | `pnpm scan:dast`       | Builds and boots the app, then runs an OWASP ZAP **baseline** scan against it. Passive only — it crawls and inspects headers, never sending the attack payloads a full active scan does, which is what makes it safe against a real build. Not blocking.                             |
 | `scan-sonar.sh`       | `pnpm scan:sonar`      | Starts SonarQube Community on `127.0.0.1:9110`, scans with the official scanner image and prints open issues through the SonarQube CLI (`sonar list issues`; extra arguments pass through). Local only — no SonarQube Cloud, no account; needs the CLI installed once. Not blocking. |
 
+## Lint (`scripts/lint/`)
+
+Local, official images, all **blocking** and part of `pnpm check`. Like
+`lint-dockerfile.sh`, `lint-shell.sh` enumerates its files so a new shell
+script must be added deliberately. Details and what each caught:
+`.claude/rules/security-scanning.md`.
+
+| Script           | Run with           | What it does                                                                                                                                                       |
+| ---------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `lint-shell.sh`  | `pnpm lint:shell`  | shellcheck over every hand-written `.sh` and the Husky hooks (as POSIX `sh`).                                                                                      |
+| `lint-config.sh` | `pnpm lint:config` | actionlint on the workflows, `docker compose config` on both Compose files, `promtool check config` (plus the rule files it references) and `amtool check-config`. |
+
+`pnpm db:check` runs `drizzle-kit check` (migration journal and snapshot
+consistency; no database connection). `pnpm test` runs with coverage and fails
+below the floor in `vitest.config.ts`.
+
 ## Backup and recovery (`docker/`)
 
 | Script             | Run with                                         | What it does                                                                                                                                                                               |

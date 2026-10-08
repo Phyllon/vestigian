@@ -8,6 +8,8 @@ reset="$(printf '\033[0m')"
 # .changeset/README.md: the bump level and summary are a judgment call
 # Changesets deliberately asks a human for, not something a hook should guess
 # or block on.
+# git feeds four fields per line; only two are used here.
+# shellcheck disable=SC2034
 while read -r local_ref local_sha remote_ref remote_sha; do
   [ "$local_sha" = "$zero" ] && continue
 
@@ -30,5 +32,12 @@ while read -r local_ref local_sha remote_ref remote_sha; do
   fi
 done
 
-echo "pre-push: running pnpm check (lint, typecheck, tests, format) before pushing..."
+echo "pre-push: running pnpm check before pushing..."
 pnpm check
+
+# Advisory, never blocking: osv.dev is a network call and an advisory against
+# an unchanged lockfile is no reason to refuse a push that did not touch it.
+# The full table is `pnpm scan:deps`.
+if ! pnpm --silent scan:deps >/dev/null 2>&1; then
+  printf '%b\n' "${red}pre-push: warning — scan:deps reported vulnerable dependencies (or osv.dev was unreachable). Run \`pnpm scan:deps\` for the list.${reset}" >&2
+fi

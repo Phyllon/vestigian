@@ -25,7 +25,14 @@ export default defineConfig({
       provider: 'v8',
       include: ['server/utils/**', 'app/composables/**', 'shared/utils/**', 'scripts/i18n/**'],
       exclude: ['**/__test__/**'],
-      thresholds: { statements: 70, branches: 70, functions: 70, lines: 70 },
+      reporter: ['text-summary', 'html'],
+      // A floor, not a target: measured 2026-10-08 at 41.05% statements,
+      // 39.97% branches, 36.11% functions, 41.78% lines (the included paths
+      // hold a lot of database- and Nitro-bound glue the unit tests do not
+      // reach). The earlier 70% was never met because nothing ever ran with
+      // `--coverage`. Raise these as tests are added; never lower them to
+      // make a failing run pass.
+      thresholds: { statements: 41, branches: 39, functions: 36, lines: 41 },
     },
   },
   resolve: {

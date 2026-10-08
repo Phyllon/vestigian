@@ -255,7 +255,8 @@ application above the map: auth, contribution, moderation, revisions.
 2. `pnpm stack:up && pnpm db:migrate && pnpm dev`
 3. Import — see "Import pipeline" below. The map is populated after
    `import:convert`; photographs come later and cost someone else's bandwidth.
-4. `pnpm check` — lint, typecheck, tests and formatting, run in parallel by
+4. `pnpm check` — lint, typecheck, tests (with coverage floor), formatting, SAST,
+   secrets, and Dockerfile / shell / workflow-and-config / migration checks, run in parallel by
    `concurrently` and reported under one exit code. It is the same gate CI
    runs. **It passes; treat any output as a regression rather than as the
    backlog it used to be.** Typecheck in particular was 36 errors and is now
