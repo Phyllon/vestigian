@@ -18,7 +18,7 @@ const WARM_ZOOM_RANGE = { from: 2, to: 8 }
  * Europe and the Mediterranean — the extent of the data. Warming the whole
  * world would render thousands of empty ocean tiles for nothing.
  */
-const DATA_BOUNDS = { west: -12, south: 30, east: 45, north: 60 }
+const DATA_BOUNDS = { west: -12, south: 30, east: 45, north: 62 }
 
 /** Parallelism. High enough to be quick, low enough not to saturate Postgres. */
 const CONCURRENCY = 6

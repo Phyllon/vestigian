@@ -1,6 +1,18 @@
 import type { H3Event } from 'h3'
 import type { TileCoordinate } from '#shared/types'
 
+/**
+ * Deliberately far longer than the `max-age` sent to the CDN (3600 s). With the
+ * two equal, a CDN edge revalidating a tile after an hour found the Valkey entry
+ * written at the same moment already expired, so nearly every origin request was
+ * a miss and a PostGIS render (`TileCacheHitRateLow`, `TileRenderSlow`,
+ * `TileLatencyBudgetSlowBurn` all traced back to this). Correctness does not
+ * depend on the TTL — the data version in the key invalidates every tile on an
+ * approved edit — so it is only a memory bound under `allkeys-lru`. Matches the
+ * atlas layers.
+ */
+const SITE_TILE_CACHE_SECONDS = 604800
+
 interface SiteTileOptions {
   showEverySite: boolean
 }
@@ -105,7 +117,7 @@ export const serveSiteTile = async (event: H3Event, options: SiteTileOptions) =>
 
   // An empty tile is still worth caching: most of the pyramid is ocean.
   try {
-    await redis.set(cacheKey, body, 'EX', body.length === 0 ? 86400 : 3600)
+    await redis.set(cacheKey, body, 'EX', SITE_TILE_CACHE_SECONDS)
   } catch (error) {
     // Non-fatal, but it means the next request for this tile pays the same
     // PostGIS cost again.

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  buildFeatureTileSql,
   buildTileCacheKey,
   CLUSTER_ZOOM_CEILING,
   getSimplifyTolerance,
@@ -71,5 +72,30 @@ describe('buildTileCacheKey', () => {
   it('changes when the data version is bumped', () => {
     const tile = { z: 8, x: 133, y: 87 }
     expect(buildTileCacheKey(tile, 1)).not.toBe(buildTileCacheKey(tile, 2))
+  })
+})
+
+describe('buildFeatureTileSql', () => {
+  const build = (includeTracings: boolean) =>
+    buildFeatureTileSql({
+      tile: { z: 10, x: 543, y: 380 },
+      simplifyTolerance: getSimplifyTolerance(10),
+      includeTracings,
+      compactSiteProperties: false,
+    })
+
+  // `ST_Transform(geom, 3857) && env` cannot use the GiST indexes on the 4326
+  // column: it was a sequential scan per cache miss, and the cause of the
+  // TileRenderSlow alert. The filter must compare the raw column.
+  it('filters sites and tracings on the raw geometry column so the GiST index applies', () => {
+    const sql = build(true)
+    expect(sql).toContain('sites.geom && b.env_wgs')
+    expect(sql).toContain('tracings.geom && b.env_wgs')
+    expect(sql).not.toMatch(/ST_Transform\((sites|tracings)\.geom, 3857\) &&/)
+  })
+
+  it('keeps the approved-status predicate that the partial indexes need', () => {
+    expect(build(true)).toContain("sites.status = 'approved'")
+    expect(build(true)).toContain("tracings.status = 'approved'")
   })
 })

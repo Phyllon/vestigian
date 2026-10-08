@@ -153,6 +153,16 @@ interface FeatureTileQuery {
  *
  * It also makes the tile smaller — the id stops being a key/value pair in the
  * layer's string table — so this is not a trade.
+ *
+ * The bounding-box filter compares in 4326 against the tile envelope
+ * transformed into it (`geom && b.env_wgs`), exactly as `limes.ts` and
+ * `atlas.ts` do. The earlier `ST_Transform(geom, 3857) && env` cannot use the
+ * GiST indexes, which sit on the raw 4326 column: every cache miss was a
+ * sequential scan that reprojected all 61k sites and every tracing —
+ * 236 ms and 194 ms against 1.7 ms and 1.1 ms on a zoom-10 tile, and the
+ * cause of `TileRenderSlow`. Keep `status = 'approved'` in the predicate so the
+ * partial `*_approved_geom_idx` indexes qualify. `ST_AsMVTGeom` still does the
+ * exact clipping, so the tile is unchanged.
  */
 export const buildFeatureTileSql = (query: FeatureTileQuery): string => {
   const { tile, simplifyTolerance, includeTracings, compactSiteProperties } = query
@@ -175,7 +185,7 @@ export const buildFeatureTileSql = (query: FeatureTileQuery): string => {
         ) AS geom
       FROM sites, bounds b
       WHERE sites.status = 'approved'
-        AND ST_Transform(sites.geom, 3857) && b.env
+        AND sites.geom && b.env_wgs
     ) AS s
   `
 
@@ -195,14 +205,15 @@ export const buildFeatureTileSql = (query: FeatureTileQuery): string => {
         ) AS geom
       FROM tracings, bounds b
       WHERE tracings.status = 'approved'
-        AND ST_Transform(tracings.geom, 3857) && b.env
+        AND tracings.geom && b.env_wgs
     ) AS t
     WHERE t.geom IS NOT NULL
   `
 
   return `
     WITH bounds AS (
-      SELECT ST_TileEnvelope(${tile.z}, ${tile.x}, ${tile.y}) AS env
+      SELECT env, ST_Transform(env, 4326) AS env_wgs
+      FROM (SELECT ST_TileEnvelope(${tile.z}, ${tile.x}, ${tile.y}) AS env) AS t
     )
     SELECT (${siteLayer})${includeTracings ? ` || (${tracingLayer})` : ''} AS tile
   `

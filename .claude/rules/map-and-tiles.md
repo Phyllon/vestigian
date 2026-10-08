@@ -858,7 +858,21 @@ pattern described elsewhere in this file is the older shape. See
    **Individual-markers mode:** `SiteDensityToggle` (floating button, bottom right, only while "Sites" is on) flips `isClusteringSites` (`useBasemapStyle`, not persisted). Off-cluster, the source's tile URL becomes `/api/tiles/every/{z}/{x}/{y}.mvt` (`serveSiteTile`, `server/utils/site-tile.ts`, shared with the clustered route). **The mode is a path, not `?sites=all`, because the Bunny pull zone ignores query strings in its cache key** — as a query it served whichever mode's tile it cached first, so turning the switch off left every-site markers drawn among the clusters in production (dev and the production build, with no CDN, never showed it). Purge the zone's cache once after deploying: stale `/api/tiles/z/x/y.mvt` entries can hold every-site tiles for up to an hour (`max-age`) plus the day of `stale-while-revalidate`. (`refreshSiteClustering` detaches and re-attaches the overlay — `VectorTileSource.setTiles` was tried and left the current zoom's tiles undrawn until the zoom changed), the server answers every zoom with `feature` tiles (`planTileRender(z, { showEverySite })`), and the cluster layers are built hidden. Below zoom 9 those tiles drop `slug` and `period_*` (`compactSiteProperties`) — they carry the whole continent's points. Cache key gains `:every`. **Unmeasured:** payload at zoom 3–5 on the full 61k-site import; `icon-size` has extra stops at zoom 4/6 so the markers are not a solid smear. Not covered by offline areas — an offline pack downloads the clustered URLs only.
 3. Tiles carry `id`, `slug`, `title`, `category` **only**. Descriptions and images come from `/api/sites/:id` on demand — this keeps tiles small and cacheable far longer than editable content allows.
 4. Cache invalidation is **one counter**. `bumpDataVersion()` changes the key prefix for every tile at once. Approvals are rare; tile reads are not.
-5. Empty tiles are cached for 24h — most of the pyramid is ocean.
+5. Empty tiles are cached like any other — most of the pyramid is ocean.
+6. **Site tiles live 7 days in Valkey, not the 1 h the CDN gets (`SITE_TILE_CACHE_SECONDS`).**
+   Equal TTLs phase-locked: Bunny revalidates after `max-age=3600`, exactly as the Valkey
+   entry written at the same moment expired, so nearly every origin request missed and
+   rendered. That one cause fired `TileCacheHitRateLow`, `TileRenderSlow` and
+   `TileLatencyBudgetSlowBurn` together. The data version in the key — not the TTL — is what
+   keeps tiles correct; the TTL only bounds memory under `allkeys-lru`.
+7. **The `feature` query filters in 4326** (`geom && b.env_wgs`), like every atlas layer.
+   `ST_Transform(geom, 3857) && env` could not use the GiST indexes: 236 ms (sites) and
+   194 ms (tracings) against 1.7/1.1 ms on a zoom-10 tile, local, 61k sites. Pinned by
+   `buildFeatureTileSql` tests. Output is unchanged apart from feature order.
+   **Still open:** `buildClusterTileSql` reprojects all 61k sites on every miss
+   (405–567 ms at zoom 5–8, measured) — that is the clustered route the latency SLO watches.
+   A stored `geom_3857` column with its own GiST index is the fix if misses still matter
+   once the long TTL is in; it was deliberately not done with the first two changes.
 
 After any deploy or bulk import, run `pnpm tiles:warm <url>`.
 

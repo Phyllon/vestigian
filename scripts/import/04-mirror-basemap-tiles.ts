@@ -65,7 +65,7 @@ const CONTENT_TYPE_FOR_FORMAT: Record<AcceptedImageFormat, string> = {
 }
 
 /** Pause between requests to the source server, in milliseconds. */
-const REQUEST_INTERVAL = 1200
+const REQUEST_INTERVAL = 500
 
 /**
  * DARE holds z3–z11, and z11 alone is three quarters of the pyramid for a
