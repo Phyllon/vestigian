@@ -3,7 +3,7 @@ import type { FrontierTranslate } from '../limes/useLimes'
 import { formatYear } from '../limes/useLimes'
 import { BATTLE_ATTRIBUTION } from './useBasemapStyle'
 import { bindOverlayListenersOnce } from './useMapInstance'
-import { BATTLE_ICON_ID } from './useSiteIcons'
+import { BATTLE_ICON_ID, MARKER_ICON_SIZE } from './useSiteIcons'
 
 export const BATTLE_SOURCE_ID = 'battles'
 export const BATTLE_LAYER_ID = 'vestigian-battles'
@@ -24,7 +24,7 @@ export const buildBattleLayer = (): SymbolLayerSpecification => ({
   'source-layer': 'battles',
   layout: {
     'icon-image': BATTLE_ICON_ID,
-    'icon-size': ['interpolate', ['linear'], ['zoom'], 3, 0.7, 8, 1, 14, 1.2],
+    'icon-size': MARKER_ICON_SIZE,
     'icon-allow-overlap': true,
   },
 })

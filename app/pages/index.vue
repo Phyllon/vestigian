@@ -21,6 +21,7 @@
     () => isPanelOpen.value || isTracingPanelOpen.value || isPickerOpen.value,
   )
   const config = useRuntimeConfig()
+  const { isOpen: isIntroOpen, openIfNew: openIntroIfNew } = useIntroTour()
 
   const isContributing = ref(false)
   const base = config.public.siteUrl.replace(/\/$/, '')
@@ -51,6 +52,20 @@
   const stopContributing = (): void => {
     isContributing.value = false
   }
+
+  /**
+   * Offered once the map has had a moment to appear, so the first thing a new
+   * visitor sees is the atlas and not a dimmed loading screen. Never over an
+   * open record: a shared link to a site is someone who came for that site,
+   * and the panel moves the controls the tour would point at.
+   */
+  const INTRO_DELAY_MS = 1200
+
+  onMounted(() => {
+    window.setTimeout(() => {
+      if (!isRecordPanelOpen.value) openIntroIfNew()
+    }, INTRO_DELAY_MS)
+  })
 </script>
 
 <template>
@@ -75,7 +90,7 @@
       :class="[isFollowingLimes ? 'md:pl-[23rem]' : '', isRecordPanelOpen ? 'md:pr-[27rem]' : '']"
     >
       <div class="pointer-events-auto flex items-start gap-2">
-        <div class="w-full max-w-sm">
+        <div class="w-full max-w-sm" data-tour="search">
           <MapSearchField />
         </div>
         <!--
@@ -83,9 +98,9 @@
           drawn over it, and when it is drawn as of. See `OverlaySwitcher.vue`
           and `PeriodSwitcher.vue` for why each split out on its own.
         -->
-        <MapOverlaySwitcher class="ml-auto" />
-        <MapPeriodSwitcher />
-        <MapBasemapSwitcher />
+        <MapOverlaySwitcher class="ml-auto" data-tour="overlays" />
+        <MapPeriodSwitcher data-tour="period" />
+        <MapBasemapSwitcher data-tour="basemap" />
       </div>
 
       <!--
@@ -95,6 +110,7 @@
       -->
       <MapLegend
         class="pointer-events-auto absolute bottom-4 left-3 md:left-4"
+        data-tour="legend"
         :class="isFollowingLimes ? 'md:left-[23.5rem]' : ''"
       />
 
@@ -107,16 +123,17 @@
       <div
         class="pointer-events-auto absolute bottom-12 right-3 flex flex-col items-end gap-2 md:right-4"
       >
-        <MapFeaturedSitesButton />
-        <MapSiteDensityToggle />
-        <MapOfflineDownloadControl />
-        <MapGeolocateButton />
+        <MapFeaturedSitesButton data-tour="featured" />
+        <MapSiteDensityToggle data-tour="density" />
+        <MapOfflineDownloadControl data-tour="offline" />
+        <MapGeolocateButton data-tour="geolocate" />
 
         <UButton
           v-if="loggedIn && !isContributing"
           color="primary"
           icon="i-lucide-map-pin-plus"
           class="shadow-leaf"
+          data-tour="contribute"
           @click="startContributing"
         >
           {{ t('indexPage.addToAtlas') }}
@@ -151,6 +168,9 @@
       the roll, its formatting or the sector fetch.
     -->
     <LazyLimesPanel v-if="isFollowingLimes" />
+
+    <!-- Lazy and `v-if`: a visitor who has already answered never downloads it. -->
+    <LazyOnboardingIntroTour v-if="isIntroOpen" />
 
     <MapFeaturePicker />
     <SiteDetailPanel />

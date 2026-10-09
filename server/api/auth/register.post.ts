@@ -3,14 +3,7 @@ import { emailTokens, users } from '~~/server/database/schema'
 import { passwordSchema } from '#shared/utils/password'
 
 export const registrationSchema = z.object({
-  email: z
-    .string()
-    .email()
-    .max(320)
-    .refine((email) => !isDisposableEmailDomain(email), {
-      message:
-        'Temporary or disposable email addresses cannot be used to register. Please use a permanent address.',
-    }),
+  email: z.string().email().max(320),
   displayName: z
     .string()
     .trim()
@@ -22,6 +15,9 @@ export const registrationSchema = z.object({
   /** Honeypot. Real browsers leave it empty; most bots fill every field. */
   website: z.string().max(0).optional(),
 })
+
+const DISPOSABLE_EMAIL_MESSAGE =
+  'Temporary or disposable email addresses cannot be used to register. Please use a permanent address.'
 
 defineRouteMeta({
   openAPI: {
@@ -41,8 +37,9 @@ export default defineEventHandler(async (event) => {
    * `.message` and drops `.data` to `{issues, name}` — no `field` key. That's
    * invisible for the plain `.email()` format check, since `RegisterForm.vue`
    * already runs the identical check client-side and never lets a malformed
-   * address reach this handler, but the disposable-domain `.refine()` above
-   * has no client-side twin, so a real user can genuinely hit it. Reshaping
+   * address reach this handler, but the disposable-domain check below
+   * (not a `.refine()`: the list loads lazily, so it is async) has no
+   * client-side twin, so a real user can genuinely hit it. Reshaping
    * the failure the same way the 409 conflict below already is keeps it
    * landing under the email field instead of a garbled toast.
    */
@@ -60,6 +57,14 @@ export default defineEventHandler(async (event) => {
   }
 
   const body = parsedBody.data
+
+  if (await isDisposableEmailDomain(body.email)) {
+    throw createError({
+      statusCode: 400,
+      message: DISPOSABLE_EMAIL_MESSAGE,
+      data: { field: 'email' },
+    })
+  }
 
   if (body.website) {
     // Answer as though it succeeded so the bot learns nothing from the response.

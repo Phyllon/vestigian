@@ -503,8 +503,9 @@ an account would show it only to people already contributing.
 ### 5.4 Accounts & identity
 
 - Registration with **ALTCHA proof-of-work** + honeypot + per-IP rate limit
-  - email verification + a **disposable/throwaway-domain check** — a zod
-    `.refine()` against the `disposable-email-domains` package's list, applied
+  - email verification + a **disposable/throwaway-domain check** — a check
+    against the `disposable-email-domains` package's list (loaded lazily, on first
+    use, in the handler rather than the zod schema), applied
     identically to registration and to email change, so a burner address is
     refused before it can ever receive a verification link.
 - **Opt-in TOTP two-factor authentication** — QR enrollment, 10 single-use

@@ -2,7 +2,7 @@ import type { Map as MapLibreMap, MapLayerMouseEvent, SymbolLayerSpecification }
 import { escapeHtmlForPopup } from './useBattleOverlay'
 import { ATTIC_INSCRIPTION_ATTRIBUTION } from './useBasemapStyle'
 import { bindOverlayListenersOnce } from './useMapInstance'
-import { ATTIC_INSCRIPTION_ICON_ID } from './useSiteIcons'
+import { ATTIC_INSCRIPTION_ICON_ID, MARKER_ICON_SIZE } from './useSiteIcons'
 import { formatPeriod } from '../data/useSiteQuery'
 
 export const ATTIC_INSCRIPTION_SOURCE_ID = 'attic-inscriptions'
@@ -24,7 +24,7 @@ export const buildAtticInscriptionLayer = (): SymbolLayerSpecification => ({
   'source-layer': 'attic_inscriptions',
   layout: {
     'icon-image': ATTIC_INSCRIPTION_ICON_ID,
-    'icon-size': ['interpolate', ['linear'], ['zoom'], 3, 0.7, 8, 1, 14, 1.2],
+    'icon-size': MARKER_ICON_SIZE,
     'icon-allow-overlap': true,
   },
 })

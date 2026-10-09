@@ -8,6 +8,7 @@ paths:
   - 'server/utils/cache.ts'
   - 'service-worker/**'
   - 'app/pages/offline.vue'
+  - 'app/shims/**'
 ---
 
 ## "Show on the map" and a popup's own link were both hard-navigating, quietly discarding every overlay toggle
@@ -855,7 +856,7 @@ pattern described elsewhere in this file is the older shape. See
 
 1. `GET /api/tiles/{z}/{x}/{y}.mvt` → validate coordinate → check Valkey → `ST_AsMVT` against a GiST index.
 2. **Below zoom 9**: counted clusters, snapped to a grid in _projected_ space (square cells at every latitude). **At 9+**: individual sites. **Tracings from zoom 7**, simplified with a tolerance derived from metres-per-pixel.
-   **Individual-markers mode:** `SiteDensityToggle` (floating button, bottom right, only while "Sites" is on) flips `isClusteringSites` (`useBasemapStyle`, not persisted). Off-cluster, the source's tile URL becomes `/api/tiles/every/{z}/{x}/{y}.mvt` (`serveSiteTile`, `server/utils/site-tile.ts`, shared with the clustered route). **The mode is a path, not `?sites=all`, because the Bunny pull zone ignores query strings in its cache key** — as a query it served whichever mode's tile it cached first, so turning the switch off left every-site markers drawn among the clusters in production (dev and the production build, with no CDN, never showed it). Purge the zone's cache once after deploying: stale `/api/tiles/z/x/y.mvt` entries can hold every-site tiles for up to an hour (`max-age`) plus the day of `stale-while-revalidate`. (`refreshSiteClustering` detaches and re-attaches the overlay — `VectorTileSource.setTiles` was tried and left the current zoom's tiles undrawn until the zoom changed), the server answers every zoom with `feature` tiles (`planTileRender(z, { showEverySite })`), and the cluster layers are built hidden. Below zoom 9 those tiles drop `slug` and `period_*` (`compactSiteProperties`) — they carry the whole continent's points. Cache key gains `:every`. **Unmeasured:** payload at zoom 3–5 on the full 61k-site import; `icon-size` has extra stops at zoom 4/6 so the markers are not a solid smear. Not covered by offline areas — an offline pack downloads the clustered URLs only.
+   **Individual-markers mode:** `SiteDensityToggle` (floating button, bottom right, only while "Sites" is on) flips `isClusteringSites` (`useBasemapStyle`, not persisted). Off-cluster, the source's tile URL becomes `/api/tiles/every/{z}/{x}/{y}.mvt` (`serveSiteTile`, `server/utils/site-tile.ts`, shared with the clustered route). **The mode is a path, not `?sites=all`, because the Bunny pull zone ignores query strings in its cache key** — as a query it served whichever mode's tile it cached first, so turning the switch off left every-site markers drawn among the clusters in production (dev and the production build, with no CDN, never showed it). Purge the zone's cache once after deploying: stale `/api/tiles/z/x/y.mvt` entries can hold every-site tiles for up to an hour (`max-age`) plus the day of `stale-while-revalidate`. (`refreshSiteClustering` detaches and re-attaches the overlay — `VectorTileSource.setTiles` was tried and left the current zoom's tiles undrawn until the zoom changed), the server answers every zoom with `feature` tiles (`planTileRender(z, { showEverySite })`), and the cluster layers are built hidden. Below zoom 9 those tiles drop `slug` and `period_*` (`compactSiteProperties`) — they carry the whole continent's points. Cache key gains `:every`. **Unmeasured:** payload at zoom 3–5 on the full 61k-site import; `icon-size` has extra stops at zoom 4/6 so the markers are not a solid smear. Every symbol layer — sites, frontier plans, atlas places, every overlay — shares that one curve, `MARKER_ICON_SIZE` in `useSiteIcons.ts`; a new symbol layer takes the constant instead of its own stops, or its marks jump in size against the sites beneath. Not covered by offline areas — an offline pack downloads the clustered URLs only.
 3. Tiles carry `id`, `slug`, `title`, `category` **only**. Descriptions and images come from `/api/sites/:id` on demand — this keeps tiles small and cacheable far longer than editable content allows.
 4. Cache invalidation is **one counter**. `bumpDataVersion()` changes the key prefix for every tile at once. Approvals are rare; tile reads are not.
 5. Empty tiles are cached like any other — most of the pyramid is ocean.
@@ -1528,3 +1529,45 @@ number (`gridSize`, `simplifyTolerance`, `year`) goes through `assertFiniteNumbe
 at the top of its builder. Routes still return 4xx first via `isValidTileCoordinate`;
 the guard is the backstop. A new builder must use both and be added to the builder list in `sql-guard.test.ts`;
 that list is hand-maintained, nothing detects a builder missing from it.
+
+## MapLibre never loads on the server
+
+Several composables import MapLibre _values_ at module scope (`Map`, `Popup`,
+`LngLat`, `addProtocol`), and the SSR bundle follows every import of a component
+it renders — so the server was loading ~1 MB of WebGL library per start and
+shipping it in `.output/server/node_modules`, to render no map. The SSR build now
+aliases the bare `maplibre-gl` specifier to `app/shims/maplibre-gl.server.ts`
+(the `vite:extendConfig` hook in `nuxt.config.ts`; `vite.$server.resolve.alias` works at runtime but fails typecheck), whose exports throw by name if
+called. Measured on the production build: `.output` loses `maplibre-gl` entirely.
+
+- **The alias is an exact match (`/^maplibre-gl$/`).** A plain-string alias is a
+  prefix, and rewrote `maplibre-gl/dist/maplibre-gl.css` (global CSS) into a path
+  under the shim — build failed with "Not a directory".
+- **Adding a runtime `import { X } from 'maplibre-gl'` means adding `X` to the
+  shim.** A missing one is a build error ("is not exported by"), not a runtime
+  surprise. `import type` needs nothing.
+- Client chunks are untouched: the `$server` override applies to the SSR
+  environment only (checked: map, featured sites, site panel work on the build).
+
+## Bundle audit (2026-10-08, `nuxt analyze`)
+
+Nothing test-shaped is in either production bundle (0 of 1,196 client / 678 server
+modules). Things the audit found and what was done:
+
+- `disposable-email-domains` (~2.3 MB) was inlined in the main server chunk and its
+  `Set` built on every start. Now a dynamic import in `server/utils/disposable-email.ts`
+  (own chunk, loaded on first use) — `nitro.mjs` went 3.16 MB → 0.73 MB. The check
+  therefore moved out of the zod schemas into `register.post.ts` and
+  `change-email.post.ts` (a `.refine()` would need an async parse); both still answer
+  400 with `data.field = 'email'`.
+- Nitro registered `server/api/auth/__test__/login.post.test.ts` as a route in dev,
+  and its `vitest` import took the dev server down (500 on every request). Production
+  already skipped it. `nitro.ignore: ['**/__test__/**']` fixes dev; verified by
+  starting `nuxt dev` (200, no test route in `.nuxt/dev`).
+- reka-ui: tree-shaking works — unused components (Calendar, Tree, DatePicker, …)
+  contribute 0 KB; what ships is exactly what the Nuxt UI components in use need.
+  The one avoidable cost was `USelectMenu` (Combobox) in the offline panel, preloaded
+  on the home page for a panel opened on click: now `LazyUSelectMenu`, −41 KB raw /
+  −11 KB gzip preloaded. `USlider` (period scrubber) was **left eager**: its ref is
+  poked for ARIA attributes and e2e waits on its `aria-valuemax`, so laziness there
+  would trade a few KB for a timing hazard.

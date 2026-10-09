@@ -161,7 +161,7 @@
         </UFormField>
 
         <UFormField :label="t('offline.detail')">
-          <USelectMenu
+          <LazyUSelectMenu
             v-model="maxZoom"
             :items="
               ZOOM_TIERS.map((tier) => ({ label: t(tier.labelKey), value: tier.value as number }))

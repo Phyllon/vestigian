@@ -4,16 +4,7 @@ import { emailTokens, users } from '~~/server/database/schema'
 
 export const changeEmailSchema = z.object({
   currentPassword: z.string().min(1).max(200),
-  email: z
-    .string()
-    .trim()
-    .toLowerCase()
-    .email()
-    .max(320)
-    .refine((email) => !isDisposableEmailDomain(email), {
-      message:
-        'Temporary or disposable email addresses cannot be used. Please use a permanent address.',
-    }),
+  email: z.string().trim().toLowerCase().email().max(320),
 })
 
 /**
@@ -46,6 +37,16 @@ export default defineEventHandler(async (event) => {
   await enforceRateLimit(event, 'passwordReset')
 
   const { currentPassword, email } = await readValidatedBody(event, changeEmailSchema.parse)
+
+  if (await isDisposableEmailDomain(email)) {
+    throw createError({
+      statusCode: 400,
+      message:
+        'Temporary or disposable email addresses cannot be used. Please use a permanent address.',
+      data: { field: 'email' },
+    })
+  }
+
   const database = useDatabase()
 
   const [account] = await database

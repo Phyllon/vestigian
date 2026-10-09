@@ -12,7 +12,11 @@ import type {
 // while the style is built, so the unit tests — which import this module
 // directly — would otherwise fail on an undefined reference that the running
 // application never sees.
-import { buildAtlasIconExpression, buildLimesReferenceIconExpression } from './useSiteIcons'
+import {
+  MARKER_ICON_SIZE,
+  buildAtlasIconExpression,
+  buildLimesReferenceIconExpression,
+} from './useSiteIcons'
 import type {
   BasemapGroup,
   BasemapOption,
@@ -1374,7 +1378,7 @@ export const buildLimesLayers = (): LayerSpecification[] => [
     filter: ['all', ['get', 'military'], ['has', 'mark']],
     layout: {
       'icon-image': buildLimesReferenceIconExpression(),
-      'icon-size': ['interpolate', ['linear'], ['zoom'], 7, 0.7, 11, 1, 14, 1.2],
+      'icon-size': MARKER_ICON_SIZE,
       'icon-optional': true,
       'text-field': ['get', 'title'],
       'text-font': [MAP_LABEL_FONT],
@@ -1623,7 +1627,7 @@ const buildAtlasStyleWithRelief = (
         : {}),
       layout: {
         'icon-image': buildAtlasIconExpression(),
-        'icon-size': ['interpolate', ['linear'], ['zoom'], 6, 0.45, 9, 0.75, 13, 1],
+        'icon-size': MARKER_ICON_SIZE,
         'icon-optional': true,
         'text-field': ['get', 'title'],
         'text-font': [MAP_LABEL_FONT],

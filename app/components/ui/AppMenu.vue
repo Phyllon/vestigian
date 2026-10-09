@@ -8,6 +8,14 @@
    */
   const { t } = useI18n()
   const config = useRuntimeConfig()
+  const { open: openIntroduction } = useIntroTour()
+
+  // The tour lives on the map. From any other page, go there first: the
+  // map page mounts the tour the moment it sees the shared open flag.
+  const replayIntroduction = async (): Promise<void> => {
+    openIntroduction()
+    await navigateTo('/')
+  }
 
   // Several named groups, each its own array (which also draws the
   // separator between them) with a non-interactive `type: 'label'` header —
@@ -18,6 +26,8 @@
     [
       { type: 'label' as const, label: t('layout.menuGroupAbout') },
       { label: t('about.menuLabel'), icon: 'i-lucide-info', to: '/about' },
+      // Quiet by design: a line in a menu, not a button on the map.
+      { label: t('introTour.menuLabel'), icon: 'i-lucide-compass', onSelect: replayIntroduction },
     ],
     [
       { type: 'label' as const, label: t('layout.menuGroupReference') },
@@ -77,6 +87,7 @@
     <button
       type="button"
       class="grid size-9 place-items-center rounded-notebook text-ink-700 transition hover:bg-paper-200 dark:text-paper-200 dark:hover:bg-night-700"
+      data-tour="menu"
       :aria-label="t('layout.menu')"
       :title="t('layout.menu')"
     >

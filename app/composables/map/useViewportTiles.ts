@@ -314,25 +314,7 @@ export const useViewportTiles = () => {
         : {}),
       layout: {
         'icon-image': buildSiteIconExpression(),
-        // Full size only once the drawing is worth reading; smaller at the zoom
-        // where the map is about density rather than about individual records.
-        // The 4 and 6 stops only matter in the every-site mode, where markers
-        // exist below zoom 9 and full size would be a solid smear.
-        'icon-size': [
-          'interpolate',
-          ['linear'],
-          ['zoom'],
-          4,
-          0.3,
-          6,
-          0.42,
-          9,
-          0.62,
-          13,
-          0.85,
-          17,
-          1,
-        ],
+        'icon-size': MARKER_ICON_SIZE,
         /**
          * Never let collision hide a marker. A dropped site is a record the
          * reader has no way of knowing exists, and it cannot be tapped either
@@ -369,7 +351,7 @@ export const useViewportTiles = () => {
         'icon-image': buildLimesRecordIconExpression(),
         // Larger than the general site marker. These are plans rather than
         // silhouettes, so they need the room to be read as plans.
-        'icon-size': ['interpolate', ['linear'], ['zoom'], 7, 0.65, 11, 1, 16, 1.3],
+        'icon-size': MARKER_ICON_SIZE,
         'icon-allow-overlap': true,
         'icon-ignore-placement': true,
       },

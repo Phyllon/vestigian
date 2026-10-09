@@ -1,3 +1,4 @@
+import { answerIntroTour } from './fixtures'
 import { expect, type APIRequestContext, type Browser, type Page } from '@playwright/test'
 import { ACCOUNTS, E2E_PASSWORD, type AccountName } from './accounts'
 
@@ -56,6 +57,7 @@ export const openSessionAs = async (
     baseURL: process.env.E2E_BASE_URL ?? 'http://127.0.0.1:3111',
     extraHTTPHeaders: { 'x-real-ip': clientAddress },
   })
+  await answerIntroTour(context)
   const page = await context.newPage()
 
   await signIn(page, account)

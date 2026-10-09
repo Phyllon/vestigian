@@ -2,7 +2,7 @@ import type { Map as MapLibreMap, MapLayerMouseEvent, SymbolLayerSpecification }
 import { escapeHtmlForPopup } from './useBattleOverlay'
 import { PORT_ATTRIBUTION } from './useBasemapStyle'
 import { bindOverlayListenersOnce } from './useMapInstance'
-import { PORT_ICON_ID } from './useSiteIcons'
+import { MARKER_ICON_SIZE, PORT_ICON_ID } from './useSiteIcons'
 
 export const PORT_SOURCE_ID = 'ports'
 export const PORT_LAYER_ID = 'vestigian-ports'
@@ -24,7 +24,7 @@ export const buildPortLayer = (): SymbolLayerSpecification => ({
   'source-layer': 'ports',
   layout: {
     'icon-image': PORT_ICON_ID,
-    'icon-size': ['interpolate', ['linear'], ['zoom'], 3, 0.7, 8, 1, 14, 1.2],
+    'icon-size': MARKER_ICON_SIZE,
     'icon-allow-overlap': true,
   },
 })

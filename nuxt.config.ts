@@ -249,6 +249,35 @@ export default defineNuxtConfig({
 
   hooks: {
     /**
+     * The server never draws a map, so it must not load the library that does:
+     * the SSR build resolves `maplibre-gl` to `app/shims/maplibre-gl.server.ts`.
+     * Types are untouched — they come from the real package through TypeScript.
+     *
+     * A hook rather than `vite.$server.resolve.alias`: the per-environment
+     * options type has no `alias` (it works at runtime, but fails typecheck).
+     * Exact match only — `maplibre-gl/dist/maplibre-gl.css` (global CSS) must
+     * still resolve into the package, and a plain-string alias is a prefix.
+     */
+    'vite:extendConfig': (config, { isServer }) => {
+      if (!isServer) return
+      const aliases = [
+        {
+          find: /^maplibre-gl$/,
+          replacement: fileURLToPath(new URL('./app/shims/maplibre-gl.server.ts', import.meta.url)),
+        },
+      ]
+      const existing = config.resolve?.alias
+      const existingAliases = Array.isArray(existing)
+        ? existing
+        : Object.entries(existing ?? {}).map(([find, replacement]) => ({ find, replacement }))
+      // `resolve` is readonly on the type; assigning through `Object.assign` is
+      // the supported way to extend it here.
+      Object.assign(config, {
+        resolve: { ...config.resolve, alias: [...aliases, ...existingAliases] },
+      })
+    },
+
+    /**
      * Withdraws a Vue language-tools plugin that cannot load here.
      *
      * Nuxt 4.5 asks for `vue-router/volar/sfc-route-blocks`, which exists only
@@ -830,6 +859,14 @@ export default defineNuxtConfig({
   },
 
   nitro: {
+    /**
+     * Unit tests sit beside the code in `__test__/` folders, including under
+     * `server/api/`, where Nitro would otherwise register one as a route in dev
+     * (`/api/auth/__test__/login.post.test`) — and its `vitest` import then
+     * crashed the whole dev server. The default `*.test.ts` ignore did not
+     * catch it there.
+     */
+    ignore: ['**/__test__/**'],
     compressPublicAssets: { gzip: true, brotli: true },
     storage: {
       tiles: isProduction

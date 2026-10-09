@@ -454,7 +454,7 @@
     "photographHeading": "Photographies",
     "photographBody": "Chaque image téléchargée est réencodée sur notre serveur avant le stockage, ce qui enlève les métadonnées EXIF — y compris les coordonnées GPS ou les identifiants de caméra/dispositif embarqués — donc aucune de celles-ci n'arrive au stockage ou à un autre visiteur.",
     "cookiesHeading": "Cookies et stockage du navigateur",
-    "cookiesBody": "Deux cookies, tous deux strictement nécessaires à une fonctionnalité que vous avez expressément demandée et aucun utilisé pour le suivi ou la publicité : un cookie de session, déposé seulement lorsque vous vous connectez (conservé 7 jours, ou jusqu'à la déconnexion), et un cookie qui retient la langue d'interface choisie (déposé à la première visite, conservé jusqu'à un an). Le stockage local de votre navigateur conserve en outre quelques éléments sur votre propre appareil, jamais envoyés à nous : votre préférence clair/sombre, le fait que vous ayez fermé l'avis de langue, un cache de courte durée du texte d'article emprunté pour qu'un site rouvert s'affiche aussitôt, votre position dans la visionneuse des plaques de colonne et — uniquement si vous choisissez de télécharger une zone pour l'usage hors ligne — la liste de ces zones et les données cartographiques téléchargées elles-mêmes. Comme tout cela est nécessaire pour fournir ce que vous avez demandé, le droit allemand (§ 25 al. 2 n° 2 TDDDG, transposant la directive ePrivacy) n'impose pas de demander le consentement — il n'y a donc pas de bandeau de cookies ici. Cette section en est l'information. La mesure anonyme des performances décrite ci-dessous ne stocke rien sur votre appareil.",
+    "cookiesBody": "Deux cookies, tous deux strictement nécessaires à une fonctionnalité que vous avez expressément demandée et aucun utilisé pour le suivi ou la publicité : un cookie de session, déposé seulement lorsque vous vous connectez (conservé 7 jours, ou jusqu'à la déconnexion), et un cookie qui retient la langue d'interface choisie (déposé à la première visite, conservé jusqu'à un an). Le stockage local de votre navigateur conserve en outre quelques éléments sur votre propre appareil, jamais envoyés à nous : votre préférence clair/sombre, le fait que vous ayez fermé l'avis de langue, le fait que vous ayez terminé ou passé l'introduction à la carte, un cache de courte durée du texte d'article emprunté pour qu'un site rouvert s'affiche aussitôt, votre position dans la visionneuse des plaques de colonne et — uniquement si vous choisissez de télécharger une zone pour l'usage hors ligne — la liste de ces zones et les données cartographiques téléchargées elles-mêmes. Comme tout cela est nécessaire pour fournir ce que vous avez demandé, le droit allemand (§ 25 al. 2 n° 2 TDDDG, transposant la directive ePrivacy) n'impose pas de demander le consentement — il n'y a donc pas de bandeau de cookies ici. Cette section en est l'information. La mesure anonyme des performances décrite ci-dessous ne stocke rien sur votre appareil.",
     "performanceHeading": "Mesure des performances",
     "performanceBody": "Lorsqu'une page se charge, votre navigateur envoie à notre propre serveur quelques chiffres indiquant le temps pris — la rapidité d'affichage de la page et de la carte et la vitesse de réponse. Chaque chiffre est ajouté à un total anonyme (un histogramme) puis écarté : aucun identifiant, cookie, route ni autre trace de vous n'est conservé avec lui, rien n'est écrit sur votre appareil et rien n'est transmis à un tiers. Pour cette requête, notre serveur n'enregistre ni votre adresse IP ni les informations de votre navigateur, et la compte dans une limite de débit au moyen d'un simple code à sens unique, impossible à reconvertir en votre adresse, supprimé en moins d'une minute et modifié à chaque redémarrage du serveur. Comme toute requête web, elle transite par notre CDN et notre proxy, qui ne la traitent que pour la livrer. Elle sert uniquement à repérer et corriger les lenteurs, sur la base de l'intérêt légitime d'exploiter le service (art. 6, par. 1, point f). Rien n'est envoyé si votre navigateur signale Do Not Track ou Global Privacy Control.",
     "locationHeading": "Localisation (GPS)",
@@ -1281,6 +1281,75 @@
     "body": "Cette page est affichée dans {language}. L'anglais est la langue la plus fiable ici — les autres peuvent avoir un sens légèrement différent.",
     "switchToEnglish": "Passer à l'anglais",
     "dismiss": "Ignorer cet avis"
+  },
+  "introTour": {
+    "menuLabel": "Revoir l’introduction",
+    "eyebrowWelcome": "Bienvenue",
+    "progress": "Étape {current} sur {total}",
+    "try": "Essayez :",
+    "start": "Commencer la visite",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "skip": "Passer l’introduction",
+    "finish": "Terminé",
+    "steps": {
+      "welcome": {
+        "title": "Bienvenue sur Vestigian",
+        "body": "Un atlas du monde antique : habitats, routes, fortifications et lieux de découverte, consignés par celles et ceux qui les visitent. Cette courte visite présente les commandes de la carte et leur usage. Vous pouvez la quitter à tout moment."
+      },
+      "search": {
+        "title": "Recherche",
+        "body": "Trouvez un site enregistré, une route, un nom antique ou une ville actuelle. Choisir un résultat envoie la carte sur place.",
+        "try": "Saisissez un lieu comme Pompéi ou Trèves et choisissez un résultat."
+      },
+      "overlays": {
+        "title": "Surcouches",
+        "body": "Superposez d’autres données à la carte : batailles, ports, itinéraires antiques, trésors monétaires, inscriptions et plus encore. Le nombre indique combien sont activées.",
+        "try": "Activez-en une, puis ouvrez la légende pour comprendre ses symboles."
+      },
+      "period": {
+        "title": "Empires antiques",
+        "body": "Trace l’étendue de l’Empire romain, et si vous le souhaitez celle des royaumes voisins, telle qu’elle était à l’année choisie.",
+        "try": "Faites glisser le curseur d’année et regardez la frontière se déplacer."
+      },
+      "basemap": {
+        "title": "Cartes",
+        "body": "Change le fond sous tout le reste : la carte Vestigian, l’imagerie satellite, ou les cartes de l’Antiquité de DARE et de l’Atlas Barrington. Vous pouvez aussi suivre la frontière romaine (le limes) d’ici.",
+        "try": "Choisissez une carte de l’Antiquité pour voir routes et peuples romains."
+      },
+      "legend": {
+        "title": "La légende",
+        "body": "Explique chaque symbole de la carte. Ouvrez-la dès qu’un signe vous est inconnu.",
+        "try": "Touchez un symbole sur la carte pour lire ce qui est consigné à son sujet."
+      },
+      "featured": {
+        "title": "À la une, tout près",
+        "body": "Liste des sites remarquables dans la vue, un bon départ quand on ne sait pas quoi chercher.",
+        "try": "Ouvrez la liste et choisissez un site pour lire sa fiche."
+      },
+      "density": {
+        "title": "Groupes ou sites isolés",
+        "body": "Alterne entre groupes dénombrés, qui gardent la carte fluide, et chaque site avec son propre marqueur.",
+        "try": "Zoomez sur une région dense, puis basculez pour voir les marqueurs isolés."
+      },
+      "offline": {
+        "title": "Cartes hors ligne",
+        "body": "Enregistre la zone affichée sur cet appareil, pour que l’atlas s’ouvre même dans une vallée sans réseau. Conçu pour le terrain.",
+        "try": "Cadrez le terrain que vous allez parcourir, puis choisissez un niveau de détail."
+      },
+      "geolocate": {
+        "title": "Votre position",
+        "body": "Centre la carte sur l’endroit où vous êtes et vous suit pendant vos déplacements. Votre navigateur demande d’abord l’autorisation, et votre position ne nous est jamais envoyée."
+      },
+      "contribute": {
+        "title": "Ajouter à l’atlas",
+        "body": "Consignez un site que vous avez visité, ou tracez une route ou un mur. Les premières contributions sont relues d’abord ; après deux acceptées, les vôtres sont publiées aussitôt."
+      },
+      "menu": {
+        "title": "Menu",
+        "body": "Les pages de référence comme les inscriptions et la Table de Peutinger, les licences, la confidentialité et les cartes hors ligne se trouvent ici. Pour revoir cette introduction, choisissez « Revoir l’introduction »."
+      }
+    }
   },
   "epigraphy": {
     "menuLabel": "Inscriptions",

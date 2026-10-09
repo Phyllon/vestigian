@@ -7,7 +7,7 @@ import type {
 import { MINOR_FEATURE_ATTRIBUTION } from './useBasemapStyle'
 import { escapeHtmlForPopup } from './useBattleOverlay'
 import { bindOverlayListenersOnce } from './useMapInstance'
-import { type MinorFeatureKind, minorFeatureIconId } from './useSiteIcons'
+import { MARKER_ICON_SIZE, type MinorFeatureKind, minorFeatureIconId } from './useSiteIcons'
 
 export const FEATURE_SOURCE_ID = 'features'
 export const FEATURE_LAYER_ID = 'vestigian-features'
@@ -38,7 +38,7 @@ export const buildFeatureLayer = (): SymbolLayerSpecification => ({
   'source-layer': 'features',
   layout: {
     'icon-image': buildFeatureIconExpression(),
-    'icon-size': ['interpolate', ['linear'], ['zoom'], 3, 0.7, 8, 1, 14, 1.2],
+    'icon-size': MARKER_ICON_SIZE,
     'icon-allow-overlap': true,
   },
 })

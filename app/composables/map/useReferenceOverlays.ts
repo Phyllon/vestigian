@@ -23,6 +23,7 @@ import { bindOverlayListenersOnce } from './useMapInstance'
 import {
   HILLFORT_ICON_ID,
   ISICILY_ICON_ID,
+  MARKER_ICON_SIZE,
   MINT_ICON_ID,
   MONUMENT_ICON_ID,
   monumentIconId,
@@ -52,18 +53,6 @@ export interface ReferenceOverlayDefinition {
   /** Where a popup's own link goes inside the app, so it navigates without a reload. */
   internalPath?: (properties: Record<string, unknown>) => string | null
 }
-
-const POINT_ICON_SIZE: ExpressionSpecification = [
-  'interpolate',
-  ['linear'],
-  ['zoom'],
-  3,
-  0.5,
-  8,
-  0.9,
-  14,
-  1.2,
-]
 
 const text = (value: unknown): string => (typeof value === 'string' ? value : '')
 
@@ -192,7 +181,7 @@ export const buildMintLayers = (): LayerSpecification[] => [
     'source-layer': 'mints',
     layout: {
       'icon-image': MINT_ICON_ID,
-      'icon-size': POINT_ICON_SIZE,
+      'icon-size': MARKER_ICON_SIZE,
       'icon-allow-overlap': true,
       'text-field': ['step', ['zoom'], '', 8, ['get', 'name']],
       'text-font': [MAP_LABEL_FONT],
@@ -265,7 +254,7 @@ export const buildMonumentLayers = (): LayerSpecification[] => [
     'source-layer': 'monuments',
     layout: {
       'icon-image': buildMonumentIconExpression(),
-      'icon-size': POINT_ICON_SIZE,
+      'icon-size': MARKER_ICON_SIZE,
       'icon-allow-overlap': true,
       'text-field': ['step', ['zoom'], '', 9, ['get', 'name']],
       'text-font': [MAP_LABEL_FONT],
@@ -311,7 +300,7 @@ export const buildIsicilyLayers = (): LayerSpecification[] => [
     'source-layer': 'isicily',
     layout: {
       'icon-image': ISICILY_ICON_ID,
-      'icon-size': POINT_ICON_SIZE,
+      'icon-size': MARKER_ICON_SIZE,
       'icon-allow-overlap': true,
     },
   },
@@ -370,7 +359,7 @@ export const buildHillfortLayers = (): LayerSpecification[] => [
     'source-layer': 'hillforts',
     layout: {
       'icon-image': HILLFORT_ICON_ID,
-      'icon-size': POINT_ICON_SIZE,
+      'icon-size': MARKER_ICON_SIZE,
       'icon-allow-overlap': true,
       'text-field': ['step', ['zoom'], '', 10, ['get', 'name']],
       'text-font': [MAP_LABEL_FONT],

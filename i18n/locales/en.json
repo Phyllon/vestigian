@@ -39,6 +39,75 @@
     "switchToEnglish": "Switch to English",
     "dismiss": "Dismiss this notice"
   },
+  "introTour": {
+    "menuLabel": "Show the introduction",
+    "eyebrowWelcome": "Welcome",
+    "progress": "Step {current} of {total}",
+    "try": "Try:",
+    "start": "Start the tour",
+    "next": "Next",
+    "previous": "Previous",
+    "skip": "Skip intro",
+    "finish": "Done",
+    "steps": {
+      "welcome": {
+        "title": "Welcome to Vestigian",
+        "body": "An atlas of the ancient world: settlements, roads, forts and findspots, recorded by the people who visit them. This short tour points out the controls on the map and what each one is for. You can leave it at any time."
+      },
+      "search": {
+        "title": "Search",
+        "body": "Look up a recorded site, a road, an ancient name or a modern town. Choosing a result flies the map there.",
+        "try": "Type a place such as Pompeii or Trier and pick a result."
+      },
+      "overlays": {
+        "title": "Overlays",
+        "body": "Lay extra material over the map: battles, ports, ancient routes, coin hoards, inscriptions and more. The number tells you how many are on.",
+        "try": "Switch one on, then open the key to see what its marks mean."
+      },
+      "period": {
+        "title": "Ancient empires",
+        "body": "Draws the extent of the Roman Empire, and optionally its neighbouring realms, as it stood in a chosen year.",
+        "try": "Drag the year slider and watch the frontier move."
+      },
+      "basemap": {
+        "title": "Maps",
+        "body": "Changes the sheet under everything else: the Vestigian map, satellite imagery, or antiquity maps from DARE and the Barrington Atlas. You can follow the Roman frontier (the limes) from here too.",
+        "try": "Pick an antiquity sheet to see Roman roads and peoples drawn out."
+      },
+      "legend": {
+        "title": "The key",
+        "body": "Explains every mark on the map. Open it whenever a symbol is unfamiliar.",
+        "try": "Tap a mark on the map to read what is recorded about it."
+      },
+      "featured": {
+        "title": "Featured nearby",
+        "body": "Lists remarkable sites within view, a good place to start when you do not know what to look for.",
+        "try": "Open the list and choose a site to read its record."
+      },
+      "density": {
+        "title": "Clusters or single sites",
+        "body": "Switches between counted clusters, which keep the map quick, and every site as its own marker.",
+        "try": "Zoom into a dense region, then switch to see the single markers."
+      },
+      "offline": {
+        "title": "Offline maps",
+        "body": "Saves the area on screen to this device, so the atlas still opens in a valley with no signal. Made for field visits.",
+        "try": "Frame the ground you will walk, then choose a level of detail."
+      },
+      "geolocate": {
+        "title": "Your position",
+        "body": "Centres the map on where you are and follows you as you move. Your browser asks permission first, and your position is never sent to us."
+      },
+      "contribute": {
+        "title": "Add to the atlas",
+        "body": "Record a site you have visited, or draw a road or wall. Early contributions are reviewed first; after two are accepted, yours publish straight away."
+      },
+      "menu": {
+        "title": "Menu",
+        "body": "Reference pages such as inscriptions and the Tabula Peutingeriana, licences, privacy and offline maps live here. To see this introduction again, choose “Show the introduction”."
+      }
+    }
+  },
   "basemapSwitcher": {
     "label": "Basemap: {label}",
     "menuLabel": "Basemap",
@@ -601,7 +670,7 @@
     "photographHeading": "Photographs",
     "photographBody": "Every uploaded image is re-encoded on our server before storage, which strips EXIF metadata — including any embedded GPS coordinates or camera/device identifiers — so none of that reaches storage or another visitor.",
     "cookiesHeading": "Cookies and browser storage",
-    "cookiesBody": "Two cookies, both strictly necessary for functionality you directly requested and neither used for tracking or advertising: a session cookie, set only when you sign in (kept 7 days, or until you sign out), and a cookie that remembers your chosen interface language (set on your first visit, kept for up to a year). Your browser's local storage also keeps a few things on your own device that are never sent to us: your light/dark preference, whether you dismissed the language notice, a short-lived cache of borrowed article text so a site you reopen appears instantly, your place in the column plates viewer, and — only if you choose to download an area for offline use — the list of those areas and the downloaded map data itself. Because all of it is needed to provide something you asked for, German law (§25(2) no. 2 TDDDG, implementing the ePrivacy Directive) does not require asking for consent — so there is no cookie banner here. This section is that disclosure. The anonymous performance measurement described below stores nothing on your device.",
+    "cookiesBody": "Two cookies, both strictly necessary for functionality you directly requested and neither used for tracking or advertising: a session cookie, set only when you sign in (kept 7 days, or until you sign out), and a cookie that remembers your chosen interface language (set on your first visit, kept for up to a year). Your browser's local storage also keeps a few things on your own device that are never sent to us: your light/dark preference, whether you dismissed the language notice, whether you finished or skipped the introduction to the map, a short-lived cache of borrowed article text so a site you reopen appears instantly, your place in the column plates viewer, and — only if you choose to download an area for offline use — the list of those areas and the downloaded map data itself. Because all of it is needed to provide something you asked for, German law (§25(2) no. 2 TDDDG, implementing the ePrivacy Directive) does not require asking for consent — so there is no cookie banner here. This section is that disclosure. The anonymous performance measurement described below stores nothing on your device.",
     "performanceHeading": "Performance measurement",
     "performanceBody": "When a page loads, your browser reports how long it took — how fast the page and the map appeared and how quickly it responded — as a few numbers sent to our own server. Each number is added to an anonymous running total (a histogram) and discarded: no identifier, cookie, route or other trace of you is stored with it, nothing is written to your device, and nothing is sent to anyone else. For this request our server does not log your IP address or browser details at all, and it counts the request against a rate limit using only a one-way code that cannot be turned back into your address, is dropped within a minute and changes whenever the server restarts. Like any web request it passes through our CDN and proxy, which handle it only to deliver it. It is used only to find and fix slowness, on the legitimate-interest basis of operating the service (Art. 6(1)(f)). Nothing is sent if your browser signals Do Not Track or Global Privacy Control.",
     "locationHeading": "Location (GPS)",

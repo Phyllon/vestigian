@@ -344,3 +344,4 @@ this project.
   how.
 - **Maintain documentation** Keep documentation up-to-date (documents/, .claude/rules/) after implementing a new feature
 - **commits** never commit code yourself, always wait for user instruction
+- **changesets** fill in changesets with brief descriptions of the current commit's changes

@@ -205,6 +205,31 @@ const ICON_PIXEL_RATIO = 2
 const ICON_RASTER_PIXELS = ICON_DISPLAY_PIXELS * ICON_PIXEL_RATIO
 
 /**
+ * The one `icon-size` curve every symbol layer on the map uses — the sites,
+ * the frontier plans, the atlas places and each overlay (battles, ports,
+ * inscriptions, coin hoards, minor features, mints, monuments, ...). It is the
+ * curve the every-site marker mode had: small while the map is about density,
+ * full size once the drawing is worth reading. Layers used to carry their own
+ * stops, so switching an overlay on made its marks jump in size against the
+ * sites beneath them. A new symbol layer takes this constant, not new stops.
+ */
+export const MARKER_ICON_SIZE: ExpressionSpecification = [
+  'interpolate',
+  ['linear'],
+  ['zoom'],
+  4,
+  0.3,
+  6,
+  0.42,
+  9,
+  0.62,
+  13,
+  0.85,
+  17,
+  1,
+]
+
+/**
  * `museum`'s roofline reaches the very edge of its 24-unit box — Lucide
  * draws `university` to fill the space the way a game-icons silhouette
  * fills its own 512-unit one, which most of this file's outlines don't

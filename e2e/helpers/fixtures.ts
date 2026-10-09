@@ -1,4 +1,9 @@
-import { test as base, type APIRequestContext, type Page } from '@playwright/test'
+import {
+  test as base,
+  type APIRequestContext,
+  type BrowserContext,
+  type Page,
+} from '@playwright/test'
 
 /**
  * Gives every test its own rate-limit identity.
@@ -25,12 +30,33 @@ const nextTestAddress = (): string => {
   return `203.0.113.${nextOctet}`
 }
 
+/**
+ * A first visit to `/` opens the dimmed introduction after a short delay, and
+ * it makes the whole app `inert` — every test that clicks the map would fail
+ * on it. So every context starts as a browser that has already answered; the
+ * one spec about the tour opts out with `test.use({ isFirstVisit: true })`.
+ * The key is the app's own (`INTRO_STORAGE_KEY` in `useIntroTour.ts`).
+ */
+export const answerIntroTour = async (context: BrowserContext): Promise<void> => {
+  await context.addInitScript(() => {
+    try {
+      localStorage.setItem('vestigian-intro-tour', 'done')
+    } catch {
+      // Opaque origins (about:blank) have no storage; nothing to answer there.
+    }
+  })
+}
+
 interface Fixtures {
   /** The address this test is counted against. Useful when asserting on 429s. */
   clientAddress: string
+  /** Leave the browser unmarked, so the first-visit introduction appears. */
+  isFirstVisit: boolean
 }
 
 export const test = base.extend<Fixtures>({
+  isFirstVisit: [false, { option: true }],
+
   /*
    * The empty pattern is mandatory, not sloppiness: Playwright inspects the
    * first parameter's destructuring to work out which fixtures this one
@@ -42,10 +68,12 @@ export const test = base.extend<Fixtures>({
     await use(nextTestAddress())
   },
 
-  context: async ({ browser, baseURL, clientAddress }, use) => {
+  context: async ({ browser, baseURL, clientAddress, isFirstVisit }, use) => {
     const context = await browser.newContext({
       extraHTTPHeaders: { 'x-real-ip': clientAddress },
     })
+
+    if (!isFirstVisit) await answerIntroTour(context)
 
     /**
      * `extraHTTPHeaders` is set per context, not per origin, so it rides along

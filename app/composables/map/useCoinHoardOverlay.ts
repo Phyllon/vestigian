@@ -2,7 +2,7 @@ import type { Map as MapLibreMap, MapLayerMouseEvent, SymbolLayerSpecification }
 import { escapeHtmlForPopup } from './useBattleOverlay'
 import { COIN_HOARD_ATTRIBUTION } from './useBasemapStyle'
 import { bindOverlayListenersOnce } from './useMapInstance'
-import { COIN_HOARD_ICON_ID } from './useSiteIcons'
+import { COIN_HOARD_ICON_ID, MARKER_ICON_SIZE } from './useSiteIcons'
 
 export const COIN_HOARD_SOURCE_ID = 'coin-hoards'
 export const COIN_HOARD_LAYER_ID = 'vestigian-coin-hoards'
@@ -21,7 +21,7 @@ export const buildCoinHoardLayer = (): SymbolLayerSpecification => ({
   'source-layer': 'coin_hoards',
   layout: {
     'icon-image': COIN_HOARD_ICON_ID,
-    'icon-size': ['interpolate', ['linear'], ['zoom'], 3, 0.7, 8, 1, 14, 1.2],
+    'icon-size': MARKER_ICON_SIZE,
     'icon-allow-overlap': true,
   },
 })
