@@ -3,6 +3,20 @@ import type { DevicePosition, GeolocationStatus } from '#shared/types'
 export type GeolocationErrorCode = 'denied' | 'timeout' | 'unavailable' | 'insecureContext'
 
 /**
+ * The last fix the locate button produced, readable from anywhere — a
+ * reference mark's info box shows how far the mark is from the reader, and has
+ * no business starting a position request of its own (a permission prompt
+ * appearing because a popup opened is not something the reader asked for).
+ *
+ * A mirror, not the source: each `useGeolocation()` call keeps its own
+ * position, so the pages that read one are unchanged. Client-only and never
+ * persisted — it is set from a browser callback and cleared by `stop()`.
+ */
+const useDeviceFixState = () => useState<DevicePosition | null>('device-fix', () => null)
+
+export const useDeviceFix = () => readonly(useDeviceFixState())
+
+/**
  * Live device position. High accuracy is requested only while the map is
  * following the user, because continuous GPS is the single largest battery
  * cost in a field application.
@@ -13,6 +27,7 @@ export type GeolocationErrorCode = 'denied' | 'timeout' | 'unavailable' | 'insec
 export const useGeolocation = () => {
   const status = ref<GeolocationStatus>('idle')
   const position = ref<DevicePosition | null>(null)
+  const deviceFix = useDeviceFixState()
   const isFollowing = ref(false)
   const errorCode = ref<GeolocationErrorCode | null>(null)
 
@@ -28,6 +43,7 @@ export const useGeolocation = () => {
       heading: Number.isFinite(reading.coords.heading) ? reading.coords.heading : null,
       timestamp: reading.timestamp,
     }
+    deviceFix.value = position.value
     status.value = isFollowing.value ? 'tracking' : 'locating'
     errorCode.value = null
   }
@@ -90,6 +106,7 @@ export const useGeolocation = () => {
   const stop = (): void => {
     isFollowing.value = false
     stopWatching()
+    deviceFix.value = null
     status.value = 'idle'
   }
 

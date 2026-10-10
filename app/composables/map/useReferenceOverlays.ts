@@ -4,6 +4,7 @@ import type {
   Map as MapLibreMap,
   MapLayerMouseEvent,
 } from 'maplibre-gl'
+import type { SpotSourceId } from '#shared/types'
 import {
   MONUMENT_KINDS,
   REFERENCE_OVERLAY_IDS,
@@ -18,7 +19,7 @@ import {
   MONUMENT_ATTRIBUTION,
   ROMAN_ROAD_ATTRIBUTION,
 } from './useBasemapStyle'
-import { escapeHtmlForPopup } from './useBattleOverlay'
+import { escapeHtmlForPopup } from './popupHtml'
 import { bindOverlayListenersOnce } from './useMapInstance'
 import {
   HILLFORT_ICON_ID,
@@ -52,6 +53,11 @@ export interface ReferenceOverlayDefinition {
   buildPopupHtml: (properties: Record<string, unknown>, t: ReferencePopupTranslate) => string
   /** Where a popup's own link goes inside the app, so it navigates without a reload. */
   internalPath?: (properties: Record<string, unknown>) => string | null
+  /**
+   * Whose records these are, for the "about this spot" block. Absent for a layer
+   * whose features are lines (the roads): a line has no coordinate of its own.
+   */
+  spotSourceId?: SpotSourceId
 }
 
 const text = (value: unknown): string => (typeof value === 'string' ? value : '')
@@ -486,6 +492,7 @@ export const REFERENCE_OVERLAY_DEFINITIONS: Record<ReferenceOverlayId, Reference
       buildLayers: buildMintLayers,
       clickableLayerIds: [MINT_LAYER_ID],
       buildPopupHtml: buildMintPopupHtml,
+      spotSourceId: 'nomisma',
     },
     monuments: {
       id: 'monuments',
@@ -494,6 +501,7 @@ export const REFERENCE_OVERLAY_DEFINITIONS: Record<ReferenceOverlayId, Reference
       buildLayers: buildMonumentLayers,
       clickableLayerIds: [MONUMENT_LAYER_ID],
       buildPopupHtml: buildMonumentPopupHtml,
+      spotSourceId: 'wikidata',
     },
     isicily: {
       id: 'isicily',
@@ -502,6 +510,7 @@ export const REFERENCE_OVERLAY_DEFINITIONS: Record<ReferenceOverlayId, Reference
       buildLayers: buildIsicilyLayers,
       clickableLayerIds: [ISICILY_LAYER_ID],
       buildPopupHtml: buildIsicilyPopupHtml,
+      spotSourceId: 'isicily',
       internalPath: isicilyPath,
     },
     hillforts: {
@@ -511,6 +520,7 @@ export const REFERENCE_OVERLAY_DEFINITIONS: Record<ReferenceOverlayId, Reference
       buildLayers: buildHillfortLayers,
       clickableLayerIds: [HILLFORT_LAYER_ID],
       buildPopupHtml: buildHillfortPopupHtml,
+      spotSourceId: 'hillforts-atlas',
     },
   }
 
@@ -541,6 +551,7 @@ export const useReferenceOverlays = () => {
       html: definition.buildPopupHtml(properties, t),
       maxWidth: '260px',
       withRing: isPoint,
+      spot: isPoint && definition.spotSourceId ? { sourceId: definition.spotSourceId } : undefined,
     })
 
     // Raw `Popup.setHTML` markup has no router interception, so an in-app link

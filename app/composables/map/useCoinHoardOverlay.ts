@@ -1,5 +1,5 @@
 import type { Map as MapLibreMap, MapLayerMouseEvent, SymbolLayerSpecification } from 'maplibre-gl'
-import { escapeHtmlForPopup } from './useBattleOverlay'
+import { escapeHtmlForPopup } from './popupHtml'
 import { COIN_HOARD_ATTRIBUTION } from './useBasemapStyle'
 import { bindOverlayListenersOnce } from './useMapInstance'
 import { COIN_HOARD_ICON_ID, MARKER_ICON_SIZE } from './useSiteIcons'
@@ -72,6 +72,7 @@ export const useCoinHoardOverlay = () => {
       position: feature.geometry.coordinates as [number, number],
       html: buildCoinHoardPopupHtml(feature.properties as CoinHoardFeatureProperties, t),
       maxWidth: '240px',
+      spot: { sourceId: 'chrr' },
     })
   }
 

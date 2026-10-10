@@ -137,7 +137,7 @@ const RASTER_MIRROR_MIN_ZOOM = 3
  * `/api/tiles/antiquity` now serves it from this project's own PostGIS: AWMC's
  * Barrington-derived geodata under ODbL 1.0 and Pleiades places under CC BY 3.0.
  */
-const ATLAS_ATTRIBUTION =
+export const ATLAS_ATTRIBUTION =
   'Antiquity data © <a href="https://github.com/AWMC/geodata" target="_blank" rel="noopener">Ancient World Mapping Center</a> (ODbL 1.0) and <a href="https://pleiades.stoa.org" target="_blank" rel="noopener">Pleiades</a> (CC BY 3.0)'
 
 /**
@@ -202,7 +202,7 @@ export const MINOR_FEATURE_ATTRIBUTION =
   'Minor antiquities: <a href="https://github.com/AWMC/geodata" target="_blank" rel="noopener">Ancient World Mapping Center</a> (ODbL 1.0)'
 
 export const COIN_HOARD_ATTRIBUTION =
-  'Coin hoards: <a href="http://numismatics.org/chrr/" target="_blank" rel="noopener">Coin Hoards of the Roman Republic</a>, American Numismatic Society (CC BY-NC-SA 4.0)'
+  'Coin hoards: <a href="https://numismatics.org/chrr/" target="_blank" rel="noopener">Coin Hoards of the Roman Republic</a>, American Numismatic Society (CC BY-NC-SA 4.0)'
 
 export const INSCRIPTION_ATTRIBUTION =
   'Inscriptions: <a href="https://edh.ub.uni-heidelberg.de/" target="_blank" rel="noopener">Epigraphic Database Heidelberg</a> (CC BY-SA 4.0)'

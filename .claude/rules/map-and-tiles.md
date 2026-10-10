@@ -1241,6 +1241,70 @@ keeps it through `vestigian-color-mode`. Nothing else keyed off the old default 
 `resolveSheetTone` already forces `osm-standard` light in both themes, so the
 sheet and the interface agree on a first visit.
 
+## "About this spot" in a reference mark's info box
+
+Every reference mark that stands at a point (Barrington places and the frontier's
+installations, battles, ports, coin hoards, minor antiquities, EDH and Attic
+inscriptions, mints, monuments, hillforts, I.Sicily) opens an info box through
+`openOverlayPopup` (`useOverlayPopup.ts`). Passing `spot: { sourceId }` there
+appends one shared block, built by `useSpotFacts.ts` — no per-overlay markup. Lines and
+areas (routes, roads, realms) pass nothing: they have no coordinate of their own.
+
+**Always shown, no network:** the coordinate; how far the reader is, when they have a
+usable fix; the record's source and licence. **Behind a collapsed `<details>`, fetched
+on opening:** nearest town, country, elevation, and the Roman state's recorded extent,
+from `GET /api/spot?lon&lat` (`server/utils/spot.ts`). Collapsed by default so most
+taps cost no request and a phone keeps its screen. Closing and reopening retries after
+a failure; a popup closed mid-request is left alone.
+
+- **A coordinate from a tile is quantised.** Marks come through a 4096-unit grid, so at
+  zoom 5 a point is only good to ~300 m. `coordinateDecimalsForZoom` therefore shows 1–4
+  decimals (never more: 4 ≈ 11 m) and `elevationStepForZoom` rounds elevation to 10, 50
+  or 100 m. Every reference source stops at zoom 12 (`SPOT_TILE_MAX_ZOOM`).
+- **Distance reads a fix, never asks for one.** `useGeolocation` mirrors each fix into
+  shared state (`useDeviceFix`); a popup opening a permission prompt would not be
+  something the reader asked for. A fix worse than 2 km or older than 10 min is ignored
+  (`distanceFromFix`). The reader's position is computed on in the browser and is never
+  sent: `/api/spot` receives only the mark's coordinate.
+- **Elevation is a surface model.** Read server-side from the same terrain tiles the
+  hillshade uses (`server/utils/terrain.ts`: the `terrain-z12-*.pmtiles` mirror, or
+  Mapterhorn's tiles in dev), Copernicus GLO-30 underneath, so towns and forests read a
+  few metres high. One tile is 50–150 KB, which is why it is not done in the browser.
+  Spot checks against remembered heights were within ~25 m at five of six points (the
+  Zugspitze summit reads ~23 m low, pixel smoothing); not checked against a survey.
+  The mirror covers 25°W–80°E, 12°N–66°N; outside it the row is simply absent.
+- **Country needs a tolerance.** Of 6,007 ports only 3,461 (58%) fall inside a Natural
+  Earth 1:50m polygon; a 10 km tolerance (`COASTAL_COUNTRY_TOLERANCE_METRES`) rescues
+  2,270 more, leaving 276 (4.6%: islands, offshore and legendary places) with none —
+  the row then shows the town alone, or nothing. `geo_names` is not used: it covers
+  five countries.
+- **The extent row is OpenHistoricalMap's generalised slices, not provincial
+  history.** The 52 slices run 509 BC–AD 476, and the early ones are generous (Mainz is
+  "inside" from 58 BC, Mogontiacum was founded about 13 BC), which is why the wording is
+  "recorded extent", not "in the Empire". The server returns merged year spans, so one
+  cached answer serves any year; the client uses the scrubber's year if it is on and the
+  whole span if not. A failed lookup is `null`, deliberately not `[]` — a database
+  hiccup must not read as "never inside".
+- **Caching.** Valkey `spot:v{atlasVersion}:{lon4}:{lat4}`, a week; the browser may keep
+  it an hour. `cache-control` is **`private`**: the input is in the query string and the
+  site's CDN ignores query strings in its cache key (runbook §9), so a public response
+  would be served to every other spot. A partial answer (one part failed) is `no-store`.
+  `import:extents` bumps the atlas version; the towns, borders and terrain mirror do not,
+  so after replacing those, bump it by hand or wait out the week.
+- **Source and licence** come from `REFERENCE_SOURCES` (`shared/utils/reference-sources.ts`),
+  pinned to the map's own credit strings by `referenceSources.test.ts`. They are two
+  statements of one fact written two ways, not one generated from the other; the test is
+  what stops them drifting. The derived rows credit GeoNames (CC BY 4.0), Natural Earth,
+  Mapterhorn and OpenHistoricalMap (CC0) — only for rows actually shown.
+- **MapLibre keeps a popup inside the map, not clear of the floating controls.** An
+  opened disclosure grew the box upward under the search field. `keepPopupClearOfControls`
+  pans the map just enough to leave 72 px at the top.
+
+Deliberately not built, on request: a side panel for reference marks, a nearby list, a
+link to the matching vici site (3.9% of Pleiades places match one by id, and one place can
+match 26), "I've stood here" for reference marks (their numeric ids are reassigned by
+every `TRUNCATE … RESTART IDENTITY` import, so it would need stable source keys first).
+
 ## Named-feature labels on `osm-standard` — investigated before building, one category dropped by design
 
 Asked next: mountain names and their height, caves, river names, road

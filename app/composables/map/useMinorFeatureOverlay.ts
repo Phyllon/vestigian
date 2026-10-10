@@ -5,7 +5,7 @@ import type {
   SymbolLayerSpecification,
 } from 'maplibre-gl'
 import { MINOR_FEATURE_ATTRIBUTION } from './useBasemapStyle'
-import { escapeHtmlForPopup } from './useBattleOverlay'
+import { escapeHtmlForPopup } from './popupHtml'
 import { bindOverlayListenersOnce } from './useMapInstance'
 import { MARKER_ICON_SIZE, type MinorFeatureKind, minorFeatureIconId } from './useSiteIcons'
 
@@ -160,6 +160,7 @@ export const useMinorFeatureOverlay = () => {
       position: feature.geometry.coordinates as [number, number],
       html: buildFeaturePopupHtml(feature.properties as FeatureProperties, t),
       maxWidth: '240px',
+      spot: { sourceId: 'awmc' },
     })
   }
 

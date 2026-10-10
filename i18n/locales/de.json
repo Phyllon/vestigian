@@ -554,6 +554,22 @@
     "metresAway": "{metres} m entfernt",
     "kilometresAway": "{kilometres} km entfernt"
   },
+  "spotFacts": {
+    "summary": "Über diesen Ort",
+    "loading": "Wird nachgeschlagen …",
+    "unavailable": "Das ließ sich gerade nicht nachschlagen – schließen Sie diesen Abschnitt und öffnen Sie ihn erneut, um es noch einmal zu versuchen.",
+    "nearTown": "In der Nähe von {town} ({distance}), {country}",
+    "nearTownOnly": "In der Nähe von {town} ({distance})",
+    "countryOnly": "Land: {country}",
+    "elevation": "Höhe etwa {metres} m",
+    "extentInside": "Innerhalb der erfassten Ausdehnung des römischen Staates im Jahr {year}",
+    "extentOutside": "Außerhalb der erfassten Ausdehnung des römischen Staates im Jahr {year}",
+    "extentSpans": "Innerhalb der erfassten Ausdehnung des römischen Staates: {spans}",
+    "extentNever": "In keiner Epoche innerhalb der erfassten Ausdehnung des römischen Staates",
+    "distance": "{distance} von Ihnen entfernt",
+    "sourceLabel": "Quelle",
+    "derivedLabel": "Abgeleitet aus"
+  },
   "limesFormat": {
     "bc": "{year} v. Chr.",
     "ad": "{year} n. Chr.",

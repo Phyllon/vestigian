@@ -2,6 +2,7 @@ import type { Map as MapLibreMap, MapLayerMouseEvent, SymbolLayerSpecification }
 import type { FrontierTranslate } from '../limes/useLimes'
 import { formatYear } from '../limes/useLimes'
 import { BATTLE_ATTRIBUTION } from './useBasemapStyle'
+import { escapeHtmlForPopup } from './popupHtml'
 import { bindOverlayListenersOnce } from './useMapInstance'
 import { BATTLE_ICON_ID, MARKER_ICON_SIZE } from './useSiteIcons'
 
@@ -28,15 +29,6 @@ export const buildBattleLayer = (): SymbolLayerSpecification => ({
     'icon-allow-overlap': true,
   },
 })
-
-/**
- * `Popup.setHTML` renders raw markup, unlike every Vue template in this app
- * — the one place here that needs its own escaping rather than relying on
- * `{{ }}`. A battle's title comes from Wikidata, not user input, but
- * nothing here is worth relying on that for.
- */
-export const escapeHtmlForPopup = (value: string): string =>
-  value.replace(/[&<>"']/g, (char) => `&#${char.codePointAt(0)};`)
 
 export const buildBattlePopupHtml = (
   properties: BattleFeatureProperties,
@@ -94,6 +86,7 @@ export const useBattleOverlay = () => {
       position: feature.geometry.coordinates as [number, number],
       html: buildBattlePopupHtml(feature.properties as BattleFeatureProperties, t),
       maxWidth: '240px',
+      spot: { sourceId: 'wikidata' },
     })
   }
 

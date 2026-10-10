@@ -1,5 +1,6 @@
 import { Popup } from 'maplibre-gl'
 import type { GeoJSONSource, Map as MapLibreMap } from 'maplibre-gl'
+import type { SpotSourceId } from '#shared/types'
 
 export const SELECTION_RING_SOURCE_ID = 'vestigian-overlay-selection'
 export const SELECTION_RING_LAYER_ID = 'vestigian-overlay-selection-ring'
@@ -34,6 +35,12 @@ export interface OverlayPopupRequest {
   maxWidth: string
   /** Ring the icon the popup belongs to, as a selected site is. Off for lines and areas. */
   withRing?: boolean
+  /**
+   * Adds the "about this spot" block — coordinates, distance, source and
+   * licence, and a disclosure for the derived rows. For a mark that stands at a
+   * point; a line or an area has no coordinate of its own to state.
+   */
+  spot?: { sourceId: SpotSourceId }
 }
 
 /**
@@ -57,6 +64,7 @@ export interface OverlayPopupRequest {
  */
 export const useOverlayPopup = () => {
   const { sheetTone } = useBasemapStyle()
+  const { prepareSpotFacts } = useSpotFacts()
 
   const ringColour = (): string =>
     sheetTone.value === 'dark' ? DARK_RING_COLOUR : LIGHT_RING_COLOUR
@@ -99,12 +107,14 @@ export const useOverlayPopup = () => {
   }
 
   const openOverlayPopup = (request: OverlayPopupRequest): Popup => {
-    const { map, position, html, maxWidth, withRing = true } = request
+    const { map, position, html, maxWidth, withRing = true, spot } = request
+    const spotFacts = spot ? prepareSpotFacts({ map, position, sourceId: spot.sourceId }) : null
 
     const popup = new Popup({ closeButton: true, maxWidth })
       .setLngLat(position)
-      .setHTML(html)
+      .setHTML(spotFacts ? html + spotFacts.html : html)
       .addTo(map)
+    spotFacts?.bind(popup)
 
     selectionByMap.set(map, { popup, position: withRing ? position : null })
     keepRingThroughStyleChanges(map)

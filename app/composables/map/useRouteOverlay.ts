@@ -2,7 +2,7 @@ import type { LineLayerSpecification, Map as MapLibreMap, MapLayerMouseEvent } f
 import { ROUTE_ATTRIBUTION } from './useBasemapStyle'
 import { bindOverlayListenersOnce } from './useMapInstance'
 import { ATLAS_MARK_INK } from './useSiteIcons'
-import { escapeHtmlForPopup } from './useBattleOverlay'
+import { escapeHtmlForPopup } from './popupHtml'
 
 export const ROUTE_SOURCE_ID = 'routes'
 export const ROUTE_LAYER_ID = 'vestigian-routes'

@@ -1,5 +1,5 @@
 import type { Map as MapLibreMap, MapLayerMouseEvent, SymbolLayerSpecification } from 'maplibre-gl'
-import { escapeHtmlForPopup } from './useBattleOverlay'
+import { escapeHtmlForPopup } from './popupHtml'
 import { INSCRIPTION_ATTRIBUTION } from './useBasemapStyle'
 import { bindOverlayListenersOnce } from './useMapInstance'
 import { INSCRIPTION_ICON_ID, MARKER_ICON_SIZE } from './useSiteIcons'
@@ -95,6 +95,7 @@ export const useInscriptionsOverlay = () => {
       position: feature.geometry.coordinates as [number, number],
       html: buildInscriptionPopupHtml(properties, t),
       maxWidth: '260px',
+      spot: { sourceId: 'edh' },
     })
 
     // `Popup.setHTML` is raw markup, not a Vue template — its own "Open

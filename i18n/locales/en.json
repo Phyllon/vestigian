@@ -770,6 +770,22 @@
     "metresAway": "{metres} m away",
     "kilometresAway": "{kilometres} km away"
   },
+  "spotFacts": {
+    "summary": "About this spot",
+    "loading": "Looking this up…",
+    "unavailable": "Couldn’t look this up just now — close and reopen this section to try again.",
+    "nearTown": "Near {town} ({distance}), {country}",
+    "nearTownOnly": "Near {town} ({distance})",
+    "countryOnly": "Country: {country}",
+    "elevation": "Elevation about {metres} m",
+    "extentInside": "Inside the Roman state’s recorded extent in {year}",
+    "extentOutside": "Outside the Roman state’s recorded extent in {year}",
+    "extentSpans": "Inside the Roman state’s recorded extent: {spans}",
+    "extentNever": "Outside the Roman state’s recorded extent in every period",
+    "distance": "{distance} from you",
+    "sourceLabel": "Source",
+    "derivedLabel": "Derived from"
+  },
   "limesFormat": {
     "bc": "{year} BC",
     "ad": "AD {year}",

@@ -23,12 +23,19 @@ import type { TileCoordinate } from '#shared/types'
  * own directory cache (`SharedPromiseCache`, the library's default), so
  * reusing the instance is what makes a second tile in the same directory
  * branch cost one range read instead of the two or three a cold client needs.
+ * A map rather than one slot, because a second archive is read through here
+ * too (the terrain mirror, for a spot's elevation) and a single slot would
+ * have the two evicting each other's directory cache on every alternation.
  */
-let client: { url: string; pmtiles: PMTiles } | null = null
+const clients = new Map<string, PMTiles>()
 
 const resolveClient = (url: string): PMTiles => {
-  if (client?.url !== url) client = { url, pmtiles: new PMTiles(url) }
-  return client.pmtiles
+  let pmtiles = clients.get(url)
+  if (!pmtiles) {
+    pmtiles = new PMTiles(url)
+    clients.set(url, pmtiles)
+  }
+  return pmtiles
 }
 
 const CONTENT_TYPE_BY_TILE_TYPE: Partial<Record<TileType, string>> = {

@@ -554,12 +554,28 @@
     "metresAway": "{metres} m verderop",
     "kilometresAway": "{kilometres} km verderop"
   },
+  "spotFacts": {
+    "summary": "Over deze plek",
+    "loading": "Wordt opgezocht…",
+    "unavailable": "Dit kon nu niet worden opgezocht — sluit dit onderdeel en open het opnieuw om het nogmaals te proberen.",
+    "nearTown": "Bij {town} ({distance}), {country}",
+    "nearTownOnly": "Bij {town} ({distance})",
+    "countryOnly": "Land: {country}",
+    "elevation": "Hoogte circa {metres} m",
+    "extentInside": "Binnen de vastgelegde omvang van de Romeinse staat in {year}",
+    "extentOutside": "Buiten de vastgelegde omvang van de Romeinse staat in {year}",
+    "extentSpans": "Binnen de vastgelegde omvang van de Romeinse staat: {spans}",
+    "extentNever": "In geen enkele periode binnen de vastgelegde omvang van de Romeinse staat",
+    "distance": "{distance} van u vandaan",
+    "sourceLabel": "Bron",
+    "derivedLabel": "Afgeleid van"
+  },
   "limesFormat": {
     "bc": "{year} v.Chr.",
     "ad": "{year} n.Chr.",
     "toYear": "tot {year}",
     "fromYear": "vanaf {year}",
-    "yearRange": "{from} Wat {to}",
+    "yearRange": "{from} – {to}",
     "atTheStart": "bij het begin",
     "kmAlong": "{km} km langs de route"
   },
@@ -999,7 +1015,7 @@
     "undated": "Niet gedateerd",
     "fromYear": "Van {year}",
     "untilYear": "Tot {year}",
-    "yearRange": "{from} Wat {to}"
+    "yearRange": "{from} – {to}"
   },
   "siteDetailPage": {
     "showOnMap": "Op de kaart tonen",

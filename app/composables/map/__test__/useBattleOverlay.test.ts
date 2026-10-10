@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import {
-  BATTLE_LAYER_ID,
-  buildBattleLayer,
-  buildBattlePopupHtml,
-  escapeHtmlForPopup,
-} from '../useBattleOverlay'
+import { escapeHtmlForPopup } from '../popupHtml'
+import { BATTLE_LAYER_ID, buildBattleLayer, buildBattlePopupHtml } from '../useBattleOverlay'
 
 const t = (key: string, params?: Record<string, unknown>): string => {
   if (key === 'limesFormat.bc') return `${params?.year} BC`

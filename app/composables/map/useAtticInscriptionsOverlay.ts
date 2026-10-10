@@ -1,5 +1,5 @@
 import type { Map as MapLibreMap, MapLayerMouseEvent, SymbolLayerSpecification } from 'maplibre-gl'
-import { escapeHtmlForPopup } from './useBattleOverlay'
+import { escapeHtmlForPopup } from './popupHtml'
 import { ATTIC_INSCRIPTION_ATTRIBUTION } from './useBasemapStyle'
 import { bindOverlayListenersOnce } from './useMapInstance'
 import { ATTIC_INSCRIPTION_ICON_ID, MARKER_ICON_SIZE } from './useSiteIcons'
@@ -75,6 +75,7 @@ export const useAtticInscriptionsOverlay = () => {
       position: feature.geometry.coordinates as [number, number],
       html: buildAtticInscriptionPopupHtml(properties, t),
       maxWidth: '260px',
+      spot: { sourceId: 'attic-inscriptions' },
     })
 
     // Same fix as `useInscriptionsOverlay.ts`'s own popup link, and for the

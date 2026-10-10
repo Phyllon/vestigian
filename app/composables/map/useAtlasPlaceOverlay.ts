@@ -1,5 +1,5 @@
 import type { Map as MapLibreMap, MapLayerMouseEvent } from 'maplibre-gl'
-import { escapeHtmlForPopup } from './useBattleOverlay'
+import { escapeHtmlForPopup } from './popupHtml'
 import { registerClickableOverlayLayer } from './useMapInstance'
 import type { FrontierTranslate } from '../limes/useLimes'
 import { formatFrontierYears } from '../limes/useLimes'
@@ -92,6 +92,7 @@ export const useAtlasPlaceOverlay = () => {
       position: feature.geometry.coordinates as [number, number],
       html: buildAtlasPlacePopupHtml(feature.properties as AtlasPlaceProperties, t),
       maxWidth: '280px',
+      spot: { sourceId: 'pleiades' },
     })
   }
 

@@ -61,6 +61,7 @@ import { paramsSchema as endorseDeleteParams } from './sites/[id]/endorse.delete
 import { paramsSchema as endorsePostParams } from './sites/[id]/endorse.post'
 import { paramsSchema as siteRevisionsParams } from './sites/[id]/revisions.get'
 import { querySchema as siteSearchQuery } from './sites/search.get'
+import { querySchema as spotQuery } from './spot.get'
 import { paramsSchema as siteSlugParams } from './sites/slug/[slug].get'
 import { paramsSchema as tracingIdParams } from './tracings/[id].get'
 import { paramsSchema as tracingRevisionsParams } from './tracings/[id]/revisions.get'
@@ -648,6 +649,18 @@ const OPERATION_OVERRIDES: Record<
       responses: {
         200: jsonResponse('{ status: "ready", checks: { database: true, cache: true } }'),
         503: jsonResponse('{ status: "degraded", checks: {...} }'),
+        429: COMMON_RESPONSES[429],
+      },
+    },
+  },
+  '/api/spot': {
+    get: {
+      parameters: paramsFromSchema(spotQuery, 'query'),
+      responses: {
+        200: jsonResponse(
+          'SpotContext: { nearestTown, countryCode, elevationMetres, extentSpans }; a part that could not be worked out is null.',
+        ),
+        400: COMMON_RESPONSES[400],
         429: COMMON_RESPONSES[429],
       },
     },

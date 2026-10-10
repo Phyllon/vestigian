@@ -8,7 +8,7 @@ import {
   resolvePeriodExtentColours,
   resolvePolityColours,
 } from './useBasemapStyle'
-import { escapeHtmlForPopup } from './useBattleOverlay'
+import { escapeHtmlForPopup } from './popupHtml'
 import { bindOverlayListenersOnce } from './useMapInstance'
 import { formatPeriod } from '../data/useSiteQuery'
 

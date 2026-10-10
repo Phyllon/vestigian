@@ -1,5 +1,5 @@
 import type { Map as MapLibreMap, MapLayerMouseEvent, SymbolLayerSpecification } from 'maplibre-gl'
-import { escapeHtmlForPopup } from './useBattleOverlay'
+import { escapeHtmlForPopup } from './popupHtml'
 import { PORT_ATTRIBUTION } from './useBasemapStyle'
 import { bindOverlayListenersOnce } from './useMapInstance'
 import { MARKER_ICON_SIZE, PORT_ICON_ID } from './useSiteIcons'
@@ -82,6 +82,7 @@ export const usePortOverlay = () => {
       position: feature.geometry.coordinates as [number, number],
       html: buildPortPopupHtml(feature.properties as PortFeatureProperties, t),
       maxWidth: '260px',
+      spot: { sourceId: 'ancient-ports' },
     })
   }
 
