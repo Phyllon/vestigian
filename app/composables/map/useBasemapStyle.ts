@@ -356,10 +356,13 @@ export interface ModernSchema {
    * provider, not a filter difference**: OpenMapTiles keeps these in their
    * own `waterway` layer, nothing to filter out. Protomaps' own docs
    * (docs.protomaps.com/basemaps/layers) say its `water` layer carries
-   * "polygons, lines and point labels" together in one layer — so reading it
-   * as a `line`-type MapLibre layer already renders only the LineString
-   * features; `waterwayFilter` narrows it to the genuinely linear `kind_detail`
-   * values so a lake polygon's own outline isn't drawn a second time.
+   * "polygons, lines and point labels" together in one layer, so
+   * `waterwayFilter` has to pick the lines out by geometry. It cannot go by
+   * `kind_detail` alone: measured against the production archive, the
+   * LineString features carry `kind: river|canal|stream` and **no**
+   * `kind_detail`, while the river *polygons* carry `kind: water` plus
+   * `kind_detail: river` — a `kind_detail` filter selected exactly the
+   * polygons, drew their outlines, and missed the lines.
    */
   waterwayLayer: string
   waterwayFilter?: FilterSpecification
@@ -475,7 +478,11 @@ const PROTOMAPS_SCHEMA: ModernSchema = {
   secondaryFilter: ['==', 'kind_detail', 'secondary'],
   localRoadFilter: ['!in', 'kind_detail', 'motorway', 'trunk', 'primary', 'secondary'],
   waterwayLayer: 'water',
-  waterwayFilter: ['in', 'kind_detail', 'river', 'canal', 'stream', 'ditch', 'drain'],
+  waterwayFilter: [
+    'all',
+    ['==', ['geometry-type'], 'LineString'],
+    ['in', ['get', 'kind'], ['literal', ['river', 'canal', 'stream', 'ditch', 'drain']]],
+  ],
   peakLayer: 'pois',
   peakFilter: ['==', 'kind', 'peak'],
   roadNameLayer: 'roads',
@@ -521,6 +528,23 @@ export const buildPlaceLabelsLayer = (
   },
 })
 
+/**
+ * What a `fill` layer reading `water` has to be restricted to.
+ *
+ * MapLibre does not skip a feature whose geometry the layer type cannot draw:
+ * a `fill` layer handed a LineString closes it into a ring and fills the area
+ * between the line and its own chord. OpenMapTiles' `water` is polygons only,
+ * which is why dev never showed it; Protomaps' `water` also carries the river,
+ * canal and stream centrelines from zoom 9 up. Unfiltered, each one came out
+ * as a long blue wedge across dry land, worst where a river runs long and
+ * straight through a tile — the Thur at Frauenfeld was the report — and fading
+ * only once the zoom is high enough that no line is long any more.
+ *
+ * Harmless on OpenMapTiles, so it is applied to both providers rather than
+ * branched on the schema.
+ */
+const POLYGONS_ONLY: FilterSpecification = ['==', ['geometry-type'], 'Polygon']
+
 const buildBasemapLayers = (
   colours: StyleColours,
   roadOpacity: number,
@@ -543,6 +567,7 @@ const buildBasemapLayers = (
     type: 'fill',
     source: 'basemap',
     'source-layer': 'water',
+    filter: POLYGONS_ONLY,
     paint: { 'fill-color': colours.water },
   },
   {
@@ -972,6 +997,7 @@ const buildOsmStandardStyle = (source: BasemapSource): StyleSpecification => {
         type: 'fill',
         source: 'basemap',
         'source-layer': 'water',
+        filter: POLYGONS_ONLY,
         paint: { 'fill-color': colours.water },
       },
       {
@@ -1943,6 +1969,14 @@ export const buildBasemapStyle = (request: StyleRequest): StyleSpecification => 
 }
 
 /**
+ * The sheet a first visit opens on: the familiar OpenStreetMap look, so a
+ * reader meets a map they already know how to read before any of the atlas's
+ * own layers are switched on. `vestigian` stays one tap away in the switcher.
+ * Not persisted — the camera hash is the only durable map state.
+ */
+export const DEFAULT_BASEMAP_VIEW: BasemapView = 'osm-standard'
+
+/**
  * `label`/`hint` hold i18n key paths, not display text — this array is a
  * plain module-scope constant, outside any component's `t()` context, so it
  * cannot translate itself. `BasemapSwitcher.vue` is what calls `t()` on
@@ -2007,7 +2041,7 @@ export const BASEMAP_GROUP_LABELS: Record<BasemapGroup, string> = {
 export const useBasemapStyle = () => {
   const config = useRuntimeConfig()
   const colorMode = useColorMode()
-  const view = useState<BasemapView>('basemap-view', () => 'vestigian')
+  const view = useState<BasemapView>('basemap-view', () => DEFAULT_BASEMAP_VIEW)
 
   /**
    * Tile URLs have to be absolute.

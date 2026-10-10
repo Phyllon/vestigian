@@ -1128,7 +1128,9 @@ render against the reference rather than trusting the plan:**
   their own `waterway` layer. Protomaps' own docs state its `water` layer
   carries "polygons, lines and point labels" together — so the line
   geometry is read from the _same_ layer as the lake/sea fill, filtered to
-  the linear `kind_detail` values. Found by comparing a rendered screenshot
+  LineStrings of `kind` river/canal/stream/ditch/drain (this said
+  `kind_detail` at first, which selects the polygons instead — see "Protomaps'
+  `water` layer carries river lines" below). Found by comparing a rendered screenshot
   against the `vici.org` reference a second time after the colour fix
   landed: the reference's Aniene valley shows a clear blue river thread
   this build had no layer drawing at all, since nothing reads `waterway`
@@ -1186,6 +1188,58 @@ dominant green forest, a visible river thread, a red/orange/yellow/white
 cased road hierarchy — against both the reference screenshot and a second,
 independent smoke test switching through all five views with the browser
 console watched for errors.
+
+## Protomaps' `water` layer carries river lines — an unfiltered fill painted them as wedges
+
+Reported on production (`vestigian.org`, mobile, both the Vestigian and the
+Standard view): around Frauenfeld, between the Bodensee and Zürich, long
+slivers and triangles of water lay across dry land, and cleared once the
+reader zoomed in far enough. Dev (OpenFreeMap) never showed it.
+
+**Cause, reproduced and isolated, not inferred.** The production archive
+(`basemap-20261002.pmtiles`, Protomaps basemap 4.15.2) keeps river, canal and
+stream **centrelines as LineString features in the `water` layer from zoom 9 up**
+(none below; 320 river lines in the nine tiles around Frauenfeld at z9). Both
+vector views draw `water` as a `fill` layer with no filter, and MapLibre does
+not skip a feature the layer type cannot draw: it closes the line into a ring and
+fills the area between the line and its own chord. The longer and straighter a
+river runs through a tile, the bigger the wedge (the Thur at Warth is a
+band several kilometres wide at z11); at high zoom every line is short and the
+error shrinks to nothing, which is exactly "appears correct when zoomed in".
+OpenMapTiles' `water` is polygons only and its rivers sit in a separate
+`waterway` layer, so the same style was correct in dev.
+
+Ruled out first, each with a real read of the tiles: the tile geometry itself
+(no self-intersecting rings, every hole inside its exterior, no tile-sized fill,
+decoded with `@mapbox/vector-tile` straight from the archive), the service
+worker (it answers only the app's own tile routes, never the basemap), and
+OpenFreeMap's tiles. A bare MapLibre page reading the production archive with
+only the `water` layer reproduced the shards unfiltered and was clean with
+`['==', ['geometry-type'], 'Polygon']`.
+
+**Fix** (`useBasemapStyle.ts`): `POLYGONS_ONLY` on both `water` fills, applied to
+both providers rather than branched on the schema. Same mistake, second place:
+the Protomaps `waterwayFilter` selected on `kind_detail`, but the LineStrings
+carry `kind: river|canal|stream` and **no** `kind_detail`, while the river
+_polygons_ carry `kind: water` + `kind_detail: river`. The `osm-standard` rivers
+were therefore the outlines of river polygons, the real network was missing, and
+each named river was labelled along both banks. It now selects LineStrings by
+`kind`. `useBasemapStyle.test.ts` pins both filters.
+
+**How to check a basemap schema claim:** read tiles from the archive
+(`PMTiles.getZxy` + `VectorTile`, count `feature.type` per `kind`/`kind_detail`),
+do not rely on the docs' layer list — the docs said "polygons, lines and point
+labels" and the style still read it as if it were polygons.
+
+## The default sheet is the standard OSM view, in light mode
+
+A first visit opens on `osm-standard` (`DEFAULT_BASEMAP_VIEW`), not `vestigian`,
+and `colorMode.preference` is `'light'` rather than `'system'`. Neither is
+persisted beyond what already was: the view lives in `useState` (the camera hash
+is the only durable map state), and a reader who switches to the night notebook
+keeps it through `vestigian-color-mode`. Nothing else keyed off the old default —
+`resolveSheetTone` already forces `osm-standard` light in both themes, so the
+sheet and the interface agree on a first visit.
 
 ## Named-feature labels on `osm-standard` — investigated before building, one category dropped by design
 

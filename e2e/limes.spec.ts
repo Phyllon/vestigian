@@ -26,7 +26,7 @@ test.describe('following the limes', () => {
     await openMap(page)
     await openOverlays(page)
 
-    // The default view is 'vestigian', a modern road map — the switch used to
+    // The default view is the standard OSM sheet, a modern road map — the switch used to
     // be hidden here entirely. It lives in the overlay switcher now, which is
     // not tied to any one basemap at all.
     const overlays = page.getByRole('menu', { name: 'Overlays' })
@@ -47,7 +47,7 @@ test.describe('following the limes', () => {
     })
 
     await openMap(page)
-    // Deliberately left on the default 'vestigian' view — the whole point of
+    // Deliberately left on the default modern view — the whole point of
     // this test is that the switch no longer requires the Barrington sheet.
     await toggleLimes(page)
     await waitForTiles(page)

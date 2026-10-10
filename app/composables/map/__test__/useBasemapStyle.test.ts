@@ -196,6 +196,28 @@ describe('buildBasemapStyle, vector views', () => {
     ) as SymbolLayerSpecification
     expect(labels.paint?.['text-opacity']).toBeCloseTo(0.7)
   })
+
+  // Protomaps' `water` layer carries river/canal/stream LineStrings from zoom 9
+  // up (320 river lines in nine tiles around Frauenfeld, measured against the
+  // production archive). A `fill` layer closes each line into a ring, so
+  // unfiltered it painted long blue wedges across dry land — gone only once the
+  // zoom was high enough for every line to be short. OpenMapTiles' `water` is
+  // polygons only, so dev never showed it.
+  it.each(['vestigian', 'osm-standard'] as const)(
+    'fills only water polygons in %s, never the river lines Protomaps keeps in the same layer',
+    (view) => {
+      const providers: BasemapSource[] = [
+        { ...source, provider: 'openfreemap' },
+        { ...source, provider: 'pmtiles', pmtilesUrl: 'https://cdn.example/basemap.pmtiles' },
+      ]
+      for (const provider of providers) {
+        const style = buildBasemapStyle({ view, isDark: false, source: provider })
+        const water = style.layers.find((layer) => layer.id === 'water') as FillLayerSpecification
+        expect(water['source-layer']).toBe('water')
+        expect(water.filter).toEqual(['==', ['geometry-type'], 'Polygon'])
+      }
+    },
+  )
 })
 
 describe('buildBasemapStyle, satellite view', () => {
@@ -381,7 +403,15 @@ describe('buildBasemapStyle, osm-standard view', () => {
     expect(waterway(openfreemap)?.['source-layer']).toBe('waterway')
     expect(waterway(openfreemap)?.filter).toBeUndefined()
     expect(waterway(pmtiles)?.['source-layer']).toBe('water')
-    expect(JSON.stringify(waterway(pmtiles)?.filter)).toContain('river')
+    // Measured against the production archive: the LineString features carry
+    // `kind: river|canal|stream` and no `kind_detail`; the river polygons carry
+    // `kind: water` + `kind_detail: river`. Filtering on `kind_detail` selected
+    // the polygons — drawing their outlines, and labelling each river along
+    // both banks — and missed the lines entirely.
+    const filter = JSON.stringify(waterway(pmtiles)?.filter)
+    expect(filter).toContain('"LineString"')
+    expect(filter).toContain('"kind"')
+    expect(filter).not.toContain('kind_detail')
   })
 
   it('labels mountain peaks by name only — elevation is asymmetric between providers and was dropped from both on request', () => {

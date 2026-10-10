@@ -352,7 +352,11 @@ export default defineNuxtConfig({
   },
 
   colorMode: {
-    preference: 'system',
+    // Light, not the visitor's system setting: the standard OSM sheet the map
+    // opens on is a light sheet in both themes, and the notebook ground is paper.
+    // A reader who switches to the night notebook keeps that choice
+    // (`storageKey`); only a first visit with nothing stored lands here.
+    preference: 'light',
     fallback: 'light',
     classSuffix: '',
     storageKey: 'vestigian-color-mode',
