@@ -144,6 +144,11 @@
     "siteMarksTitle": "Marcas más precisas",
     "frontierTitle": "La frontera",
     "frontierMarksBarringtonOnly": "Estas marcas de fortificación proceden de la hoja de Barrington y solo aparecen mientras esta es el mapa base activo. La línea de la frontera en sí se muestra en todos los mapas base.",
+    "frontierWall": "Muro, terraplén o foso",
+    "frontierRiver": "Frontera fluvial, defendida desde la orilla",
+    "frontierNoWorks": "Línea fronteriza sin obras construidas",
+    "frontierTraced": "Línea continua: sigue restos cartografiados o levantados",
+    "frontierApproximate": "Línea discontinua: aproximada, generalizada a partir del límite de una provincia o de un mapa de atlas; puede desviarse varios kilómetros",
     "battlesTitle": "Batallas",
     "battleMark": "Batalla, antes de 500 CE",
     "portsTitle": "Puertos antiguos",
@@ -387,7 +392,7 @@
     "dareHeading": "Antigüedad (DARE), mapa base",
     "dareBody": "Esta base es CC BY-SA 3.0 de Johan Åhlfeldt (Atlas Digital del Imperio Romano, Universidad de Gotemburgo), pero dos de sus propias capas fuente se acreditan no comerciales (CC BY-NC 3.0 / CC BY-NC-SA), que la licencia CC BY-SA general no puede anular. Tratar esta capa específica como uso no comercial solamente.",
     "limesHeading": "La frontera (limes)",
-    "limesBody": "La línea de frontera se deriva de la extensión del imperio del Ancient World Mapping Center (ODbL 1.0) y no forma parte de la base de datos aportada.",
+    "limesBody": "Las líneas continuas de la frontera se trazan según OpenStreetMap (ODbL), OpenHistoricalMap (CC0) y los trazados de los colaboradores de vici.org (CC0 o CC BY-SA 3.0); las discontinuas se derivan de la extensión del imperio y del trazado de muros del Ancient World Mapping Center (ODbL 1.0). Nada de ello forma parte de la base de datos aportada.",
     "overlaysHeading": "Superposiciones adicionales del mapa",
     "overlaysIntro": "Las capas intercambiables sobre el mapa, cada una bajo su propia licencia — visible en la propia atribución del mapa mientras se activa.",
     "overlayBattles": "Batallas: Wikidata (CC0 1.0) — sin derechos reservados.",
@@ -565,7 +570,7 @@
     "theLimes": "El limes",
     "showFrontier": "Mostrar la frontera",
     "hideFrontier": "Ocultar la frontera",
-    "introBody": "Cinco mil kilómetros de frontera, en los tramos el nombre de las fuentes. Elija uno para seguirlo final a fin.",
+    "introBody": "Unos nueve mil kilómetros de frontera, en los tramos que nombran las fuentes. Elija uno para seguirlo de principio a fin.",
     "unrolling": "Desenrollando la frontera…",
     "readingRoll": "Leyendo el rollo..",
     "recorded": "{count} registrado",
@@ -589,10 +594,10 @@
   "limesIndexPage": {
     "title": "El limes",
     "description": "La frontera del imperio romano, sector por sector: sus muros, sus ríos y las fortalezas y torres a lo largo de ellos.",
-    "intro": "El límite del mundo romano, desde el Solway hasta el Éufrates. Nunca fue una sola cosa: un muro de mampostería a través de la meseta rética, un río patrullado desde su orilla occidental, una línea de fuertes en el último punto de agua fiable antes del desierto. Lo que sigue es ese límite en los tramos que las fuentes nombran, extraído de la extensión del imperio hacia el 200 d. C. según el Ancient World Mapping Center y de su registro de los muros que realmente se construyeron.",
+    "intro": "El límite del mundo romano, desde el Solway hasta el Éufrates. Nunca fue una sola cosa: un muro de mampostería a través de la meseta rética, un río patrullado desde su orilla occidental, una línea de fuertes en el último punto de agua fiable antes del desierto. Lo que sigue es ese límite en los tramos que las fuentes nombran, extraído de los restos donde se han cartografiado y trazado y, en línea discontinua, de la extensión del imperio hacia el 200 d. C. según el Ancient World Mapping Center y de su registro de los muros, donde no ha sido así.",
     "acrossStretches": "{length} a lo largo de {count} tramos",
-    "attribution": "Frontera derivada de la extensión del imperio y el trazado de sus muros según {link}, ODbL 1.0. Los nombres y las notas anteriores son propios de este atlas; la geometría no lo es.",
-    "attributionLinkText": "Antiguo World Mapping Center"
+    "attribution": "Frontera trazada según los colaboradores de {osm}, OpenHistoricalMap y vici.org donde los restos están cartografiados (líneas continuas), y derivada de la extensión del imperio y el trazado de sus muros según {link}, ODbL 1.0, donde no lo están (líneas discontinuas). Los nombres y las notas anteriores son propios de este atlas; la geometría no lo es.",
+    "attributionLinkText": "Ancient World Mapping Center"
   },
   "mapSearch": {
     "searching": "Búsqueda",

@@ -49,7 +49,10 @@ import { pipeline } from 'node:stream/promises'
 import postgres from 'postgres'
 import { refreshAtlasCache } from './atlas-cache'
 import { LIMES_SECTORS, claimLimesSectors } from '../../shared/utils/limes'
-import type { LimesSegmentKind } from '../../shared/types'
+import type { LimesSegmentKind, LimesSource } from '../../shared/types'
+import { TRACED_LIMES_SOURCES } from '../../shared/types'
+import { readTracedStretches } from './limes-traces'
+import type { TraceStretch } from './limes-traces'
 import { requireDatabaseUrl } from '../../server/database/database-url'
 
 const sql = postgres(requireDatabaseUrl(), { max: 1 })
@@ -85,6 +88,93 @@ const COAST_BUFFER_METRES = 6000
 const MAINLAND_SPAN_DEGREES = 2
 
 /**
+ * Narrow gaps in the extent, in degrees, closed before the boundary is taken.
+ * About 6–9 km, depending on latitude.
+ *
+ * AWMC's extent is 112 separate polygons, not one shape, and the ones that
+ * abut do not abut cleanly: seams and slivers a few kilometres wide run between
+ * provinces. The boundary of that multipolygon includes every seam, so the map
+ * drew straight chords across the Alps and the Balkans, pairs of near-parallel
+ * lines on either side of a sliver, and a 100 km-long spike in Swabia that a
+ * sector then claimed as river. None of it is frontier. Dissolving the polygons
+ * and closing gaps narrower than this (dilate, then erode by the same amount)
+ * leaves the outer edge untouched and removes the seams; measured against the
+ * real data, 0.03° left the Swabian spike and 0.08° removed it. Wider than
+ * about 0.15° would start bridging real bays and river mouths.
+ */
+const EXTENT_SEAM_DEGREES = 0.08
+
+/**
+ * A derived stretch this close to the middle of a built work of the same sector
+ * is dropped, and the work is drawn instead.
+ *
+ * The extent is hand-generalised and AWMC's wall linework is surveyed, so where
+ * both describe one frontier — Hadrian's Wall, the Antonine Wall, the Raetian
+ * limes — they run kilometres apart and the sheet showed two lines where there
+ * is one. The surveyed one wins; the derived line carries on wherever no work
+ * does. 25 km is what it takes to catch the Upper German limes, where the
+ * extent follows the later, straighter Jüngerer Limes about 20 km from the
+ * surveyed Neckar–Odenwald line; the 8 km that sufficed for Hadrian's Wall left
+ * that pair doubled.
+ */
+const PARALLEL_BUFFER_METRES = 25000
+
+/**
+ * Within this distance of either end of a work the derived line is kept. The
+ * point of the derived line is to join the works up — the Rhine runs into the
+ * start of the Upper German limes — and cutting a whole parallel-zone radius off
+ * each end would leave a gap in the frontier at every junction.
+ */
+const WORK_END_CLEARANCE_METRES = 10000
+
+/**
+ * What survives of a derived stretch after the parallel part is cut away must
+ * still be this long, or it is a stub left where the cut was made.
+ */
+const MIN_FRAGMENT_METRES = 10000
+
+/**
+ * A traced line is only drawn where no higher-priority trace lies within this
+ * reach, so two traces of one wall draw as one line. OpenHistoricalMap gets a
+ * wider reach because it sometimes closes a bend with a straight chord a
+ * kilometre or more off the course the other sources agree on; a chord is not
+ * a second work.
+ */
+const TRACE_DEDUPE_METRES = 1000
+const TRACE_DEDUPE_OHM_METRES = 2500
+
+/**
+ * AWMC's own wall linework is dropped within this reach of any traced line (a
+ * wall, or a river the wall follows, as at the Main) in the same sector. The offsets measured against survey data were a median 0.3–0.6 km
+ * with excursions to ~5 km (the ORL), so anything nearer than 6 km is the same
+ * wall drawn worse. Further away it is a different work — the Cumbrian coast
+ * milefortlets, the Fossatum Africae — and stays, drawn dashed as approximate.
+ */
+const AWMC_SUPPRESS_METRES = 6000
+
+/** What is left of an AWMC wall after that cut must still be this long, or it is a stub. */
+const MIN_AWMC_FRAGMENT_METRES = 2000
+
+/**
+ * A derived river is dropped within this reach of the traced river centreline of
+ * the same sector, and a traced river is kept only this close to the derived
+ * frontier. The second half is what stops the Danube upstream of the frontier
+ * (Ulm to Eining) and the Rhine inside the empire from being drawn as frontier:
+ * the derived edge says *where* the frontier is, the river centreline says
+ * exactly *where on the river*.
+ */
+const RIVER_REACH_METRES = 8000
+
+/**
+ * A wall whose two ends meet within this fraction of its own length encloses
+ * ground; it does not divide anything. AWMC's `walls` layer holds one such: the
+ * Langmauer near Trier, a ~55 km circuit round an estate, which the sector
+ * bounds around the Moselle swept in and which drew as a box among the
+ * frontier works.
+ */
+const ENCLOSURE_GAP_RATIO = 0.05
+
+/**
  * Runs shorter than this are dropped. Below about 25 km a run is not a stretch
  * of frontier but an artefact of the coast buffer clipping the boundary into
  * fragments around an estuary.
@@ -100,6 +190,7 @@ interface Bounds {
 
 interface DerivedStretch {
   kind: LimesSegmentKind
+  source: LimesSource
   certain: boolean
   bounds: Bounds
   geojson: string
@@ -194,7 +285,13 @@ const deriveFrontier = async (extentGeoJson: string): Promise<DerivedStretch[]> 
     { geojson: string; west: number; south: number; east: number; north: number }[]
   >`
     WITH extent AS (
-      SELECT ST_MakeValid(ST_SetSRID(ST_GeomFromGeoJSON(${extentGeoJson}), 4326)) AS g
+      SELECT ST_Buffer(
+        ST_Buffer(
+          ST_UnaryUnion(ST_MakeValid(ST_SetSRID(ST_GeomFromGeoJSON(${extentGeoJson}), 4326))),
+          ${EXTENT_SEAM_DEGREES}::float8
+        ),
+        -${EXTENT_SEAM_DEGREES}::float8
+      ) AS g
     ),
     edge AS (SELECT ST_Boundary(g) AS g FROM extent),
     coast AS (
@@ -218,6 +315,7 @@ const deriveFrontier = async (extentGeoJson: string): Promise<DerivedStretch[]> 
     // Which of 'river' or 'notional' it becomes is the claiming sector's to
     // say — see `frontierKind` in the gazetteer. Marked 'notional' until then.
     kind: 'notional' as LimesSegmentKind,
+    source: 'extent' as LimesSource,
     certain: true,
     bounds: { west: row.west, south: row.south, east: row.east, north: row.north },
     geojson: row.geojson,
@@ -241,11 +339,16 @@ const readBarriers = async (): Promise<DerivedStretch[]> => {
            ST_XMax(geom) AS east, ST_YMax(geom) AS north
     FROM antiquity_lines
     WHERE kind = 'wall'
+      AND ST_Distance(
+            ST_StartPoint(ST_GeometryN(geom, 1)),
+            ST_EndPoint(ST_GeometryN(geom, ST_NumGeometries(geom)))
+          ) >= ${ENCLOSURE_GAP_RATIO}::float8 * ST_Length(geom)
   `
 
-  console.log(`  AWMC wall linework: ${rows.length} features`)
+  console.log(`  AWMC wall linework: ${rows.length} features (enclosures left out)`)
   return rows.map((row) => ({
     kind: 'barrier' as LimesSegmentKind,
+    source: 'awmc' as LimesSource,
     certain: row.certain,
     bounds: { west: row.west, south: row.south, east: row.east, north: row.north },
     geojson: row.geojson,
@@ -255,6 +358,11 @@ const readBarriers = async (): Promise<DerivedStretch[]> => {
 interface ClaimedSegment {
   slug: string
   kind: LimesSegmentKind
+  source: LimesSource
+  /** Lower wins among traced sources; 99 for the approximate ones, which never compete. */
+  priority: number
+  /** See `TraceStretch.exclusive`. */
+  exclusive: boolean
   certain: boolean
   geojson: string
   /** GeoJSON MultiPolygon of the ground an earlier sector already claimed, or null. */
@@ -283,9 +391,10 @@ const boundsToPolygon = (bounds: Bounds): number[][][] => [
  */
 const claimStretches = (
   stretches: DerivedStretch[],
-): { claimed: ClaimedSegment[]; unclaimed: DerivedStretch[] } => {
+): { claimed: ClaimedSegment[]; unclaimed: DerivedStretch[]; omitted: number } => {
   const claimed: ClaimedSegment[] = []
   const unclaimed: DerivedStretch[] = []
+  let omitted = 0
 
   for (const stretch of stretches) {
     const claims = claimLimesSectors({ kind: stretch.kind, bounds: stretch.bounds })
@@ -296,25 +405,135 @@ const claimStretches = (
     }
 
     for (const claim of claims) {
+      // A sector the gazetteer says is drawn from traced lines alone does not
+      // take the approximate ones: the generalised line would sit beside the
+      // real one as a second, wrong, frontier.
+      const omit =
+        (stretch.source === 'extent' && claim.sector.drawsExtent === false) ||
+        (stretch.source === 'awmc' && claim.sector.drawsAwmcWalls === false)
+      if (omit) {
+        omitted += 1
+        continue
+      }
+
       claimed.push({
         slug: claim.sector.slug,
         // A built work stays a barrier; a derived stretch becomes whatever the
         // claiming sector says the frontier physically was there.
         kind: stretch.kind === 'barrier' ? 'barrier' : claim.sector.frontierKind,
+        source: stretch.source,
+        priority: 99,
+        exclusive: false,
         certain: stretch.certain,
         geojson: stretch.geojson,
-        exclude:
-          claim.excludes.length === 0
-            ? null
-            : JSON.stringify({
-                type: 'MultiPolygon',
-                coordinates: claim.excludes.map(boundsToPolygon),
-              }),
+        exclude: excludeOf(claim.excludes),
       })
     }
   }
 
-  return { claimed, unclaimed }
+  return { claimed, unclaimed, omitted }
+}
+
+const excludeOf = (bounds: Bounds[]): string | null =>
+  bounds.length === 0
+    ? null
+    : JSON.stringify({ type: 'MultiPolygon', coordinates: bounds.map(boundsToPolygon) })
+
+/**
+ * A trace belongs to the sectors it was chosen for, in the order listed — not
+ * to whichever sector's rectangle it happens to cross. The Danube centreline
+ * runs through half the gazetteer's boxes, and most of them are not frontier.
+ * Overlap between the listed sectors is subtracted exactly as it is for the
+ * derived stretches: the later one leaves the earlier one's rectangle alone.
+ */
+const boundsOfSector = (slug: string): Bounds | undefined =>
+  LIMES_SECTORS.find((sector) => sector.slug === slug)?.bounds
+
+const claimTraced = (traces: TraceStretch[]): ClaimedSegment[] =>
+  traces.flatMap((trace) =>
+    trace.sectors.map((slug, index): ClaimedSegment => {
+      const earlier = trace.sectors
+        .slice(0, index)
+        .map(boundsOfSector)
+        .filter((bounds): bounds is Bounds => bounds !== undefined)
+      return {
+        slug,
+        kind: trace.kind,
+        source: trace.source,
+        priority: trace.priority,
+        exclusive: trace.exclusive === true,
+        certain: true,
+        geojson: trace.geojson,
+        exclude: excludeOf(earlier),
+      }
+    }),
+  )
+
+/**
+ * Cuts each trace down to the part that is frontier: inside its `clip` box where
+ * it has one, and — for a river with no box — only where it lies within reach of
+ * the derived frontier (see {@link RIVER_REACH_METRES}). Done in PostGIS on the
+ * merged lines because the Danube alone is ~2,700 km of vertices.
+ */
+const refineTraces = async (
+  traces: TraceStretch[],
+  derived: DerivedStretch[],
+): Promise<TraceStretch[]> => {
+  const frontier = derived
+    .filter((stretch) => stretch.source === 'extent')
+    .map((stretch) => stretch.geojson)
+
+  const refined: TraceStretch[] = []
+  for (const trace of traces) {
+    let geojson = trace.geojson
+
+    if (trace.clip) {
+      const { west, south, east, north } = trace.clip
+      const [row] = await sql<{ geojson: string | null }[]>`
+        SELECT ST_AsGeoJSON(
+                 ST_CollectionExtract(
+                   ST_Intersection(
+                     ST_SetSRID(ST_GeomFromGeoJSON(${geojson}), 4326),
+                     ST_MakeEnvelope(${west}, ${south}, ${east}, ${north}, 4326)
+                   ),
+                   2
+                 )
+               ) AS geojson
+      `
+      if (!row?.geojson) {
+        console.log(`  ${trace.label}: nothing inside its box — skipped`)
+        continue
+      }
+      geojson = row.geojson
+    }
+
+    if (trace.maskToFrontier) {
+      const [row] = await sql<{ geojson: string | null }[]>`
+        WITH reach AS (
+          SELECT ST_Buffer(
+                   ST_Collect(ST_SetSRID(ST_GeomFromGeoJSON(g), 4326))::geography,
+                   ${RIVER_REACH_METRES}
+                 )::geometry AS geom
+          FROM unnest(${frontier}::text[]) AS g
+        )
+        SELECT ST_AsGeoJSON(
+                 ST_CollectionExtract(
+                   ST_Intersection(ST_SetSRID(ST_GeomFromGeoJSON(${geojson}), 4326), reach.geom),
+                   2
+                 )
+               ) AS geojson
+        FROM reach
+      `
+      if (!row?.geojson) {
+        console.log(`  ${trace.label}: nothing within reach of the frontier — skipped`)
+        continue
+      }
+      geojson = row.geojson
+    }
+
+    refined.push({ ...trace, geojson })
+  }
+  return refined
 }
 
 /**
@@ -341,12 +560,19 @@ const writeSector = async (slug: string, segments: ClaimedSegment[]): Promise<nu
   const geometries = segments.map((segment) => segment.geojson)
   const kinds = segments.map((segment) => segment.kind)
   const certainties = segments.map((segment) => segment.certain)
+  const sources = segments.map((segment) => segment.source)
+  const priorities = segments.map((segment) => segment.priority)
+  const exclusives = segments.map((segment) => segment.exclusive)
   const excludes = segments.map((segment) => segment.exclude)
+  const traced = [...TRACED_LIMES_SOURCES]
 
   const clipped = sql`
     clipped AS (
       SELECT v.kind::limes_segment_kind AS kind,
              v.certain::boolean AS certain,
+             v.source,
+             v.priority::int AS priority,
+             v.exclusive::boolean AS exclusive,
              ST_CollectionExtract(
                ST_Difference(
                  ST_Intersection(
@@ -373,10 +599,114 @@ const writeSector = async (slug: string, segments: ClaimedSegment[]): Promise<nu
                ), 2) AS geom
       FROM unnest(
         ${geometries}::text[], ${kinds}::text[], ${certainties.map(String)}::text[],
+        ${sources}::text[], ${priorities.map(String)}::text[], ${exclusives.map(String)}::text[],
         ${excludes}::text[]
-      ) AS v(geometry, kind, certain, exclude)
+      ) AS v(geometry, kind, certain, source, priority, exclusive, exclude)
     ),
-    kept AS (SELECT * FROM clipped WHERE NOT ST_IsEmpty(geom))
+    nonempty AS (SELECT * FROM clipped WHERE NOT ST_IsEmpty(geom)),
+
+    -- ## Traced lines: one line per work, best source first.
+    --
+    -- Each is cut back by the buffer of every traced line ranked above it, so
+    -- two traces of one wall draw once. Ranking is by priority, then by length
+    -- (a longer trace is the more complete one). OpenHistoricalMap's reach is
+    -- wider: see TRACE_DEDUPE_OHM_METRES.
+    traced_ranked AS (
+      SELECT *, row_number() OVER (ORDER BY priority, ST_Length(geom::geography) DESC) AS rank
+      FROM nonempty WHERE source = ANY(${traced}::text[])
+    ),
+    traced_kept AS (
+      SELECT t.kind, t.certain, t.source,
+             CASE WHEN t.exclusive THEN t.geom ELSE ST_CollectionExtract(
+               ST_Difference(
+                 t.geom,
+                 COALESCE(
+                   (SELECT ST_Union(
+                             ST_Buffer(
+                               higher.geom::geography,
+                               CASE WHEN t.source = 'ohm'
+                                    THEN ${TRACE_DEDUPE_OHM_METRES}::float8
+                                    ELSE ${TRACE_DEDUPE_METRES}::float8 END
+                             )::geometry
+                           )
+                    FROM traced_ranked higher WHERE higher.rank < t.rank),
+                   ST_GeomFromText('POLYGON EMPTY', 4326)
+                 )
+               ), 2) END AS geom
+      FROM traced_ranked t
+    ),
+
+    -- ## AWMC walls: only where nothing traced stands within reach.
+    awmc_kept AS (
+      SELECT n.kind, n.certain, n.source,
+             ST_CollectionExtract(
+               ST_Difference(
+                 n.geom,
+                 COALESCE(
+                   (SELECT ST_Union(ST_Buffer(t.geom::geography, ${AWMC_SUPPRESS_METRES})::geometry)
+                    FROM traced_kept t WHERE NOT ST_IsEmpty(t.geom)),
+                   ST_GeomFromText('POLYGON EMPTY', 4326)
+                 )
+               ), 2) AS geom
+      FROM nonempty n WHERE n.source = 'awmc'
+    ),
+
+    -- ## The derived frontier: only where nothing better describes the ground.
+    --
+    -- Ground beside the middle of this sector's built works (their buffer, less
+    -- the clearance round each end), and ground within reach of its traced
+    -- river. NULL when there is none, hence the COALESCE: ST_Difference against
+    -- NULL is NULL.
+    works AS (
+      SELECT ST_Difference(
+               ST_Buffer(u.geom::geography, ${PARALLEL_BUFFER_METRES})::geometry,
+               ST_Buffer(
+                 ST_Boundary(ST_LineMerge(u.geom))::geography,
+                 ${WORK_END_CLEARANCE_METRES}
+               )::geometry
+             ) AS geom
+      FROM (
+        SELECT ST_Union(geom) AS geom FROM (
+          SELECT geom FROM traced_kept WHERE kind = 'barrier' AND NOT ST_IsEmpty(geom)
+          UNION ALL
+          SELECT geom FROM awmc_kept WHERE NOT ST_IsEmpty(geom)
+        ) b
+      ) u
+    ),
+    rivers AS (
+      SELECT ST_Buffer(ST_Union(geom)::geography, ${RIVER_REACH_METRES})::geometry AS geom
+      FROM traced_kept WHERE kind = 'river' AND NOT ST_IsEmpty(geom)
+    ),
+    extent_kept AS (
+      SELECT n.kind, n.certain, n.source,
+             ST_CollectionExtract(
+               ST_Difference(
+                 ST_Difference(
+                   n.geom,
+                   COALESCE((SELECT geom FROM works), ST_GeomFromText('POLYGON EMPTY', 4326))
+                 ),
+                 COALESCE((SELECT geom FROM rivers), ST_GeomFromText('POLYGON EMPTY', 4326))
+               ), 2) AS geom
+      FROM nonempty n WHERE n.source = 'extent'
+    ),
+
+    parts AS (
+      SELECT kind, certain, source, (ST_Dump(geom)).geom AS geom
+      FROM (
+        SELECT * FROM traced_kept
+        UNION ALL SELECT * FROM awmc_kept
+        UNION ALL SELECT * FROM extent_kept
+      ) u
+      WHERE NOT ST_IsEmpty(geom)
+    ),
+    kept AS (
+      SELECT kind, certain, source, ST_Multi(ST_Collect(geom)) AS geom
+      FROM parts
+      WHERE source = ANY(${traced}::text[])
+         OR ST_Length(geom::geography) >=
+            CASE source WHEN 'awmc' THEN ${MIN_AWMC_FRAGMENT_METRES}::float8 ELSE ${MIN_FRAGMENT_METRES}::float8 END
+      GROUP BY kind, certain, source
+    )
   `
 
   const inserted = await sql<{ id: number; length_metres: number }[]>`
@@ -417,8 +747,8 @@ const writeSector = async (slug: string, segments: ClaimedSegment[]): Promise<nu
 
   await sql`
     WITH ${clipped}
-    INSERT INTO limes_segments (sector_id, kind, certain, geom)
-    SELECT ${sector.id}, kind, certain, ST_Multi(geom) FROM kept
+    INSERT INTO limes_segments (sector_id, kind, certain, source, geom)
+    SELECT ${sector.id}, kind, certain, source, ST_Multi(geom) FROM kept
   `
 
   return sector.length_metres
@@ -426,7 +756,7 @@ const writeSector = async (slug: string, segments: ClaimedSegment[]): Promise<nu
 
 const main = async (): Promise<void> => {
   await mkdir(CACHE_DIR, { recursive: true })
-  console.log('The limes — derived from AWMC (ODbL 1.0)\n')
+  console.log('The limes — traced from OSM / OHM / vici.org, filled from AWMC (ODbL 1.0)\n')
 
   const [walls] = await sql<{ count: number }[]>`
     SELECT count(*)::int FROM antiquity_lines WHERE kind = 'shoreline'
@@ -438,8 +768,13 @@ const main = async (): Promise<void> => {
   const extentPath = await fetchCached(EXTENT_URL, EXTENT_FILE)
   const extent = await readMainlandExtent(extentPath)
 
-  const stretches = [...(await deriveFrontier(extent)), ...(await readBarriers())]
-  const { claimed, unclaimed } = claimStretches(stretches)
+  const derived = [...(await deriveFrontier(extent)), ...(await readBarriers())]
+  const traces = await refineTraces(await readTracedStretches(sql), derived)
+  const { claimed: claimedDerived, unclaimed, omitted } = claimStretches(derived)
+  const claimed = [...claimedDerived, ...claimTraced(traces)]
+  console.log(
+    `  Traced: ${traces.length} stretches; ${omitted} approximate ones left out where a sector is drawn from traced lines alone`,
+  )
 
   await sql`TRUNCATE limes_sectors, limes_segments RESTART IDENTITY CASCADE`
 
@@ -453,9 +788,13 @@ const main = async (): Promise<void> => {
     }
     const length = await writeSector(definition.slug, segments)
     total += length
-    console.log(
-      `  ${definition.name}: ${Math.round(length / 1000)} km, ${segments.length} stretches`,
-    )
+    const bySource = await sql<{ source: string; km: number }[]>`
+      SELECT g.source, round((sum(ST_Length(g.geom::geography)) / 1000)::numeric)::int AS km
+      FROM limes_segments g JOIN limes_sectors s ON s.id = g.sector_id
+      WHERE s.slug = ${definition.slug} GROUP BY g.source ORDER BY 2 DESC
+    `
+    const breakdown = bySource.map((row) => row.source + ' ' + row.km).join(', ')
+    console.log(`  ${definition.name}: ${Math.round(length / 1000)} km — ${breakdown}`)
   }
 
   /**

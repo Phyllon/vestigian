@@ -152,7 +152,7 @@ const ATLAS_ATTRIBUTION =
  * `atlas` source — and so AWMC's own credit — is not in the style at all.
  */
 export const LIMES_ATTRIBUTION =
-  'Frontier derived from <a href="https://github.com/AWMC/geodata" target="_blank" rel="noopener">Ancient World Mapping Center</a>\'s extent of the empire at 200 CE (ODbL 1.0)'
+  'Frontier: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors (ODbL), <a href="https://www.openhistoricalmap.org/copyright" target="_blank" rel="noopener">OpenHistoricalMap</a>, <a href="https://vici.org" target="_blank" rel="noopener">vici.org</a>; dashed: derived from <a href="https://github.com/AWMC/geodata" target="_blank" rel="noopener">Ancient World Mapping Center</a>'
 
 /**
  * The period scrubber's own source, credited separately because it is the one
@@ -1226,30 +1226,42 @@ export const resolvePeriodExtentColours = (
 }
 
 /**
- * The frontier's own palette. Only two colours, and one of them is the accent
- * the rest of the interface spends once per screen.
- */
-/**
- * One line layer per kind, because `line-dasharray` is not data-driven.
+ * How the frontier is told apart on the map: **colour says what the line is,
+ * dash says how far to trust where it is drawn.**
  *
- * A `match` on the feature's kind is the obvious way to write this and MapLibre
- * accepts the style without complaint — `line-dasharray` is a cross-faded
- * property, so a data expression is simply ignored and every stretch comes out
- * solid. Three layers is the supported form, and it also makes the ordering
- * explicit: the built barriers draw last and win where a wall meets a river.
+ * - `barrier` — a built work (wall, rampart, ditch): oxide red, the house accent.
+ * - `river` — a frontier held along a watercourse: a deep teal. Nothing was built
+ *   across it, so it is a different colour as well as a different weight.
+ * - `notional` — a line with no structure to point at: umber.
+ *
+ * Solid means the line follows mapped or surveyed remains (OpenStreetMap,
+ * OpenHistoricalMap, vici.org — within tens of metres of survey polygons);
+ * dashed means it is generalised from the edge of AWMC's empire polygon or from
+ * Barrington Atlas linework — a median 0.3–0.6 km off, with excursions of
+ * several. Kept in one exported table so the key panel cannot drift from the map.
+ *
+ * Every colour clears 4.5:1 against the paper casing underneath it, and the
+ * casing is what carries the line across a photograph or a dark sheet.
  */
-const LIMES_LINE_KINDS: { kind: LimesSegmentKind; dashes: [number, number] | null }[] = [
-  /** A line the sources agree on with no structure to point at. */
-  { kind: 'notional', dashes: [1.6, 1.4] },
-  /** Held from the bank, not built across: a long dash reads as a patrol, not a wall. */
-  { kind: 'river', dashes: [4, 1.6] },
-  /** A rampart, a palisade, a ditch. The only one drawn solid. */
-  { kind: 'barrier', dashes: null },
-]
+export const LIMES_KIND_COLOURS: Record<LimesSegmentKind, string> = {
+  barrier: '#b3321a',
+  river: '#0b6e86',
+  notional: '#6b4a2b',
+}
+
+/** Plain numbers, in units of line width: `line-dasharray` is not data-driven. */
+export const LIMES_APPROXIMATE_DASH: [number, number] = [2.2, 1.6]
+
+/** Widest for the built work, which is the subject; the others are still heavier than a road. */
+const LIMES_KIND_WIDTHS: Record<LimesSegmentKind, [number, number, number]> = {
+  barrier: [2.8, 4.2, 7.5],
+  river: [2.4, 3.6, 6.5],
+  notional: [2.2, 3.2, 5.5],
+}
+
+const LIMES_KINDS_DRAW_ORDER: LimesSegmentKind[] = ['notional', 'river', 'barrier']
 
 const LIMES_COLOURS = {
-  /** Oxide red. The frontier, and on this view the only thing wearing it. */
-  line: '#9a3b22',
   /**
    * The casing under it. Paper rather than white: the line crosses sea, land,
    * hillshade and urban fill along its length, and a casing that matches the
@@ -1296,40 +1308,42 @@ export const buildLimesLayers = (): LayerSpecification[] => [
     layout: { 'line-cap': 'round', 'line-join': 'round' },
     paint: {
       'line-color': LIMES_COLOURS.casing,
-      'line-opacity': 0.85,
-      'line-width': ['interpolate', ['linear'], ['zoom'], 3, 4.5, 8, 7, 14, 11],
+      'line-opacity': 0.92,
+      'line-width': ['interpolate', ['linear'], ['zoom'], 3, 5.4, 8, 8, 14, 12.5],
     },
   },
-  ...LIMES_LINE_KINDS.map(({ kind, dashes }): LayerSpecification => ({
-    id: `limes-frontier-${kind}`,
-    type: 'line',
-    source: 'limes',
-    'source-layer': 'frontier',
-    filter: ['==', ['get', 'kind'], kind],
-    layout: { 'line-cap': dashes ? 'butt' : 'round', 'line-join': 'round' },
-    paint: {
-      'line-color': LIMES_COLOURS.line,
-      /**
-       * A built work outweighs a line inferred from the edge of a province, and
-       * the two run side by side for most of Britain and the Rhine — the wall,
-       * and the boundary a few kilometres behind it. Given equal weight they
-       * read as two frontiers, which is one more than there was.
-       */
-      'line-opacity': kind === 'barrier' ? 1 : 0.62,
-      'line-width': [
-        'interpolate',
-        ['linear'],
-        ['zoom'],
-        3,
-        kind === 'barrier' ? 2.2 : 1.6,
-        8,
-        kind === 'barrier' ? 3.4 : 2.4,
-        14,
-        kind === 'barrier' ? 6 : 4,
-      ],
-      ...(dashes ? { 'line-dasharray': dashes } : {}),
-    },
-  })),
+  /**
+   * Six layers — three kinds, solid or dashed — because `line-dasharray` is not
+   * data-driven. Within each precision the order is notional, river, barrier, so
+   * a built work wins where it meets a river; and every approximate layer is
+   * added before every traced one, so a traced line is never under a dashed one.
+   */
+  ...[false, true].flatMap((isTraced) =>
+    LIMES_KINDS_DRAW_ORDER.map((kind): LayerSpecification => ({
+      id: `limes-frontier-${kind}${isTraced ? '' : '-approximate'}`,
+      type: 'line',
+      source: 'limes',
+      'source-layer': 'frontier',
+      filter: ['all', ['==', ['get', 'kind'], kind], ['==', ['get', 'traced'], isTraced]],
+      layout: { 'line-cap': isTraced ? 'round' : 'butt', 'line-join': 'round' },
+      paint: {
+        'line-color': LIMES_KIND_COLOURS[kind],
+        'line-opacity': 1,
+        'line-width': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          3,
+          LIMES_KIND_WIDTHS[kind][0],
+          8,
+          LIMES_KIND_WIDTHS[kind][1],
+          14,
+          LIMES_KIND_WIDTHS[kind][2],
+        ],
+        ...(isTraced ? {} : { 'line-dasharray': LIMES_APPROXIMATE_DASH }),
+      },
+    })),
+  ),
   /**
    * The name, written along the line rather than beside it.
    *

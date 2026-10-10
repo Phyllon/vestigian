@@ -1,0 +1,1 @@
+ALTER TABLE "limes_segments" ADD COLUMN "source" varchar(16) DEFAULT 'extent' NOT NULL;

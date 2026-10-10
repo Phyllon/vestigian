@@ -80,6 +80,14 @@
 
     <p class="mt-8 text-xs leading-relaxed text-ink-500 dark:text-paper-400">
       <i18n-t keypath="limesIndexPage.attribution">
+        <template #osm>
+          <a
+            href="https://www.openstreetmap.org/copyright"
+            rel="noopener"
+            class="underline underline-offset-2"
+            >OpenStreetMap</a
+          >
+        </template>
         <template #link>
           <a
             href="https://github.com/AWMC/geodata"

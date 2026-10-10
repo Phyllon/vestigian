@@ -509,6 +509,46 @@ run from an empty directory containing only it and the migrations folder (no
 `node_modules`), applied `0030`/`0031` on the first run, did nothing on the second, and
 exits non-zero without `NUXT_DATABASE_URL`._
 
+## 14b. Frontier (limes) data — migration `0033` and a table dump
+
+**The schema half is automatic; the data half is not.** Migration `0033` adds
+`limes_segments.source` (`varchar(16) NOT NULL DEFAULT 'extent'`) and is applied by the
+`migrate` service on the deploy (§14a) — additive and backwards-compatible, so the previous
+`app` keeps serving against it. **Migrations never carry the frontier's rows**: they come from
+`pnpm import:limes` on the machine that has the repository, `.import/` and the vici
+tracings, exactly as for the reference layers (§ "Load the data" above — never run the
+importers on the VPS).
+
+Until the data is loaded, every existing production row reads as `source = 'extent'`, so
+the new app draws the **old** geometry, all dashed (approximate) — safe, just not better.
+
+```bash
+# 1. Local — re-run the import (needs import:atlas and import:convert already done), then dump.
+pnpm import:limes
+docker exec vestigian-dev-postgres-1 pg_dump -U vestigian -d vestigian \
+  -Fc --no-owner --no-acl --data-only -t limes_sectors -t limes_segments > limes.dump
+rsync -avP limes.dump deploy@<vps-ip>:/tmp/
+
+# 2. VPS — after the deploy (migration applied: \d limes_segments shows `source`).
+docker exec <postgres-container> psql -U vestigian -d vestigian -c \
+  "TRUNCATE limes_sectors, limes_segments RESTART IDENTITY CASCADE"
+docker exec -i <postgres-container> pg_restore --no-owner --no-acl --data-only \
+  -U vestigian -d vestigian < /tmp/limes.dump
+
+# 3. VPS — check: 24 rows over five sources, none of them only 'extent'.
+docker exec <postgres-container> psql -U vestigian -d vestigian -c \
+  "SELECT source, count(*), round(sum(ST_Length(geom::geography))/1000) AS km FROM limes_segments GROUP BY 1"
+
+# 4. VPS — bump the atlas generation (the limes tiles ride it), then purge the CDN.
+docker exec <valkey-container> valkey-cli INCRBY vestigian:atlas-version 2
+#    Bunny: purge the pull zone's cache for /api/tiles/limes/ (query strings are ignored in
+#    the cache key, and these tiles carry no version in the path).
+```
+
+Expect roughly: `osm` ~3.4k km, `vici` ~0.7k, `ohm` ~0.15k, `awmc` ~0.5k, `extent` ~3.9k.
+If `limes_segments.source` is missing the deploy's migration did not run — read the `migrate`
+container's log before restoring.
+
 ## 15. Basemap (PMTiles)
 
 Production hard-codes `NUXT_PUBLIC_BASEMAP_PROVIDER: pmtiles` — the map is
@@ -1117,6 +1157,18 @@ allowed per condition"`, root cause never found. **Rewritten 2026-10-03** to
   these databases was removed 2026-09-30 for adding no reader benefit, but
   the underlying question — whether this data could ever be imported outright,
   on the CHRR model — is independent of that panel and still open.
+- **Ask the Verein Deutsche Limes-Straße for permission to use their Limes track.**
+  <https://www.limesstrasse.de/deutsche-limes-strasse/limes-strasse/gps-daten-limes-verlauf>
+  offers the course of the whole German Limes as GPX/KML/OVL (`Gesamtlimes-092022.gpx`:
+  one 1,002 km track from Kleve along the Lower Rhine, the ORL and the Raetian section to
+  Passau; per province and per state too). The page states **no licence** and credits only
+  "© OpenStreetMap-Mitwirkende" for its map, so by default it is all-rights-reserved and is
+  **not used as a source** — only as a comparison (2026-10-09: 88% of it lies within 1 km
+  of the drawn frontier, 73% within 100 m; vici's ORL tracings match it to a median 1 m, so
+  they were very likely taken from it). Ask what terms apply and whether the course may be
+  drawn or stored. If granted, it would replace vici/OSM for the ORL and the German
+  Rhine; if refused, nothing changes. Details: `.claude/rules/antiquity-basemaps.md`,
+  "Traced lines".
 
 ## 20. Off-site backups — netcup Storage Space
 

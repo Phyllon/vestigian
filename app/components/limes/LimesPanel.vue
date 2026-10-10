@@ -14,6 +14,7 @@
   const { sectors, sectorsStatus, sector, sectorStatus, selectedSectorSlug, selectSector } =
     useLimes()
   const { selectSite } = useSiteQuery()
+  const { setSitesActive } = useBasemapStyle()
   const { isCompact } = useBreakpoint()
   const map = useMapInstance()
 
@@ -67,6 +68,11 @@
    * A contributed record opens the panel it already has. A borrowed place has
    * no page here — it is Pleiades' record, not ours — so the map goes to it and
    * the name in the roll is the whole of what this atlas says about it.
+   *
+   * A contributed fort is drawn by the "Show sites" layer, which is off until a
+   * reader switches it on — so the camera used to arrive at a bare stretch of
+   * line with the record selected but nothing marking it. Opening one turns the
+   * layer on, as picking a featured site does.
    */
   const openInstallation = (installation: LimesInstallation): void => {
     map.value?.flyTo({
@@ -75,7 +81,9 @@
       duration: 900,
       essential: true,
     })
-    if (installation.slug) selectSite(installation.id)
+    if (!installation.slug) return
+    setSitesActive(true)
+    selectSite(installation.id)
   }
 </script>
 

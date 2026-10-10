@@ -54,16 +54,23 @@
   )
 
   /**
-   * The three line treatments, kept beside the paths they describe rather than
-   * imported from the style: these are eight-pixel swatches on a legend, not
-   * the map's own dash arrays, and matching them exactly would make the key
-   * unreadable at this size.
+   * The frontier's line treatments, kept in step with the map by reading the
+   * same colour table and dash array the style does (`LIMES_KIND_COLOURS`,
+   * `LIMES_APPROXIMATE_DASH`). Colour says what a line is; dash says how far to
+   * trust where it is drawn — so the key lists the three kinds solid, then the
+   * dash once, rather than six near-identical rows.
+   *
+   * The swatch carries its own paper casing, as the line on the map does: the
+   * casing is what the colour was contrast-checked against.
    */
   const LIMES_LINE_KEY = [
-    { kind: 'barrier', label: 'Wall, rampart or ditch', dashes: 'none' },
-    { kind: 'river', label: 'River frontier, held from the bank', dashes: '7 3' },
-    { kind: 'notional', label: 'Frontier without built works', dashes: '3 2.5' },
-  ]
+    { kind: 'barrier', labelKey: 'legend.frontierWall' },
+    { kind: 'river', labelKey: 'legend.frontierRiver' },
+    { kind: 'notional', labelKey: 'legend.frontierNoWorks' },
+  ] as const
+
+  const LIMES_SWATCH_WIDTH = 2.8
+  const LIMES_SWATCH_DASHES = `${LIMES_APPROXIMATE_DASH[0] * LIMES_SWATCH_WIDTH} ${LIMES_APPROXIMATE_DASH[1] * LIMES_SWATCH_WIDTH}`
 
   /** The order the minor-features legend renders in — every `MinorFeatureKind`, once. */
   const MINOR_FEATURE_KINDS = [
@@ -291,15 +298,45 @@
 
           <ul class="flex flex-col gap-1.5">
             <li v-for="line in LIMES_LINE_KEY" :key="line.kind" class="flex items-center gap-2">
-              <svg class="h-2 w-8 shrink-0" viewBox="0 0 32 8" aria-hidden="true">
+              <svg class="h-2.5 w-8 shrink-0" viewBox="0 0 32 10" aria-hidden="true">
+                <path d="M0 5h32" stroke="#faf7ef" stroke-width="6.5" />
                 <path
-                  d="M0 4h32"
-                  stroke="#9a3b22"
-                  stroke-width="2.5"
-                  :stroke-dasharray="line.dashes"
+                  d="M0 5h32"
+                  :stroke="LIMES_KIND_COLOURS[line.kind]"
+                  :stroke-width="LIMES_SWATCH_WIDTH"
                 />
               </svg>
-              <span class="text-xs text-ink-700 dark:text-paper-200">{{ line.label }}</span>
+              <span class="text-xs text-ink-700 dark:text-paper-200">{{ t(line.labelKey) }}</span>
+            </li>
+          </ul>
+
+          <!--
+            Solid and dashed, once, in neutral ink: the dash is a statement about
+            every colour above it, not a fourth kind of frontier.
+          -->
+          <ul class="mt-2 flex flex-col gap-1.5">
+            <li class="flex items-center gap-2">
+              <svg class="h-2.5 w-8 shrink-0" viewBox="0 0 32 10" aria-hidden="true">
+                <path d="M0 5h32" stroke="#faf7ef" stroke-width="6.5" />
+                <path d="M0 5h32" stroke="#2b2621" :stroke-width="LIMES_SWATCH_WIDTH" />
+              </svg>
+              <span class="max-w-52 text-xs leading-snug text-ink-700 dark:text-paper-200">
+                {{ t('legend.frontierTraced') }}
+              </span>
+            </li>
+            <li class="flex items-start gap-2">
+              <svg class="mt-0.5 h-2.5 w-8 shrink-0" viewBox="0 0 32 10" aria-hidden="true">
+                <path d="M0 5h32" stroke="#faf7ef" stroke-width="6.5" />
+                <path
+                  d="M0 5h32"
+                  stroke="#2b2621"
+                  :stroke-width="LIMES_SWATCH_WIDTH"
+                  :stroke-dasharray="LIMES_SWATCH_DASHES"
+                />
+              </svg>
+              <span class="max-w-52 text-xs leading-snug text-ink-700 dark:text-paper-200">
+                {{ t('legend.frontierApproximate') }}
+              </span>
             </li>
           </ul>
 

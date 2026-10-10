@@ -1,0 +1,5 @@
+---
+'vestigian': minor
+---
+
+The frontier now follows the real remains. Where OpenStreetMap, OpenHistoricalMap and vici.org have traced a wall or river the line is theirs (median 25–42 m off Historic England's and Historic Environment Scotland's survey polygons, against 335–413 m before); AWMC and the generalised empire edge only fill the rest, drawn dashed. Lines are told apart by colour (wall red, river teal, no built works umber) with a paper casing for contrast, and the key panel explains colour and dash in all six languages. The German Rhine and the Main section now follow the OSM river (a published Limes track is 96% within 1 km of the drawn line, up from 88%). Doubled corridors, the Langmauer box, the Veluwe chord and the Dacian province loop are gone. Opening a fort in the limes panel switches the sites layer on. Adds migration 0033 (`limes_segments.source`); the data is loaded by re-running `pnpm import:limes` and restoring the two tables (runbook §14b). The basemap mirror script now lists the bucket once and fetches only the tiles it does not hold.

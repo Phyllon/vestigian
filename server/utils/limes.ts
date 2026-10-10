@@ -1,5 +1,6 @@
 import type { TileCoordinate } from '#shared/types'
 import { TILE_BUFFER, TILE_EXTENT, getSimplifyTolerance } from './mvt'
+import { TRACED_LIMES_SOURCES } from '#shared/types'
 import { assertFiniteNumber, buildTileEnvelopeSql } from './sql-guard'
 
 /**
@@ -54,6 +55,10 @@ interface LimesTileQuery {
 export const buildLimesTileSql = (query: LimesTileQuery): string => {
   const { tile, plan } = query
   assertFiniteNumber(plan.simplifyTolerance, 'simplifyTolerance')
+  // Literal, not a parameter: this string runs through `sql.unsafe`, and the
+  // values are a closed vocabulary from `shared/types`, never user input.
+  const tracedLiterals = TRACED_LIMES_SOURCES.map((source) => "'" + source + "'").join(', ')
+  const tracedSourcesArray = `ARRAY[${tracedLiterals}]::text[]`
 
   const frontierLayer = `
     SELECT ST_AsMVT(f, 'frontier', ${TILE_EXTENT}, 'geom', 'id') AS tile
@@ -62,6 +67,11 @@ export const buildLimesTileSql = (query: LimesTileQuery): string => {
         limes_segments.id,
         limes_segments.kind::text AS kind,
         limes_segments.certain,
+        limes_segments.source,
+        -- Whether the line follows mapped remains (solid on the map) or a
+        -- generalised one (dashed). Derived here rather than stored because the
+        -- vocabulary lives in TRACED_LIMES_SOURCES, and the tile is the only reader.
+        limes_segments.source = ANY(${tracedSourcesArray}) AS traced,
         limes_sectors.slug AS sector_slug,
         limes_sectors.name AS sector_name,
         ST_AsMVTGeom(

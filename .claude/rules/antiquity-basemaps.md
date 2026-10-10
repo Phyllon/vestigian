@@ -222,22 +222,29 @@ the basemap switcher, shown only when the Barrington sheet is chosen, and
 it would have left two copies of a hundred layer specs to drift. There is a test
 asserting the switch-off layer list is byte-for-byte what it was.
 
-**There is no open dataset of "the limes".** There is one of where the empire
-ended, which is the same thing: the boundary of AWMC's
+**Where remains are mapped, the line follows them; where they are not, it is
+generalised and drawn dashed.** See "Traced lines" below — the AWMC derivation
+described next is now the _fallback_, not the line. **There is no open dataset of
+"the limes" as one followable line.** There is one of where the empire ended,
+which is the same thing: the boundary of AWMC's
 `roman_empire_ce_200_extent` polygon, minus a 6 km buffer around the ancient
 shoreline already in `antiquity_lines`. Measured, not assumed —
-**5,123 km in 11 runs** over Europe and the Mediterranean, ~12,000 km over the
-whole empire, against UNESCO's "over 5,000 km". The built works come from the 92
+**5,123 km in 11 runs** over Europe and the Mediterranean (before the seam closing
+in item 8 below; the drawn total across all sectors is now ~10,000 km, Africa and
+the East included), ~12,000 km over the whole empire, against UNESCO's "over
+5,000 km". The built works come from the 92
 rows of `antiquity_lines.kind = 'wall'` the atlas import already loads.
 
 `shared/utils/limes.ts` is the one editorial input: **names, dates, prose and a
-bounding box** for seventeen sectors. Every metre of geometry is AWMC's. The
-import reports every run and wall no sector claimed — deliberately including
+bounding box** for seventeen sectors, and which approximate sources each may draw.
+No geometry (it comes from the sources above). The import reports every run and wall no sector claimed — deliberately including
 ~2,200 km of southern Egyptian desert edge, which was a provincial boundary and
 not a frontier system, and the city and isthmus walls in AWMC's `walls` layer.
 
-`pnpm import:limes`, after `pnpm import:atlas`. One 553 KB download and about a
-minute of PostGIS; ~2 MB in Postgres. It rides the **atlas** cache generation
+`pnpm import:limes`, after `pnpm import:atlas` and `pnpm import:convert` (the vici
+lines). One 553 KB download, the Overpass responses (cached in `.import/atlas/`,
+retried with backoff — the public instance answers 429/504 under load) and about
+a minute of PostGIS; ~2 MB in Postgres. It rides the **atlas** cache generation
 rather than a third counter and clears `limes:v*` alongside `atlas:v*`.
 
 Seven things that are not obvious, five of them found by running it:
@@ -277,6 +284,136 @@ Seven things that are not obvious, five of them found by running it:
    `ON CONFLICT … DO UPDATE … WHERE subcategory IS NULL`, the only column a
    re-run may overwrite. 12,804 fortifications split into 6,914 watchtowers,
    5,551 forts, 339 camps.
+8. **The extent is 112 polygons that do not abut cleanly, so its boundary is
+   not the frontier.** Taking `ST_Boundary` of the raw multipolygon drew every
+   seam between provinces: straight chords across the Alps and the Balkans,
+   pairs of near-parallel lines either side of a sliver, and a ~100 km spike in
+   Swabia that a sector claimed as 'river'. `06-limes.ts` now dissolves the
+   polygons and closes gaps narrower than `EXTENT_SEAM_DEGREES` (0.08°, dilate
+   then erode) before taking the boundary; 0.03° still left the spike, wider
+   than ~0.15° would bridge real bays. Measured: 24 runs became 7.
+9. **A derived line within `PARALLEL_BUFFER_METRES` (25 km) of the middle of a
+   built work of the same sector is dropped; the work is drawn instead.** The
+   extent is hand-generalised, AWMC's wall linework is surveyed, and where both
+   describe one frontier (Hadrian's, Antonine, Raetian, Upper German) the sheet
+   showed two lines. The ends of each work keep a `WORK_END_CLEARANCE_METRES`
+   (10 km) clearance, so a river still runs into the start of a wall. **Cost,
+   stated:** AWMC's own wall pieces are gappy (the ORL is several separate
+   features), so in the Upper German sector the frontier now reads as broken
+   where the derived straight Jüngerer Limes used to fill the gaps. 25 km is
+   what removes the doubling there (the extent follows the straighter later
+   line ~20 km from the surveyed Neckar–Odenwald one — both are real, a lay
+   reader reads them as a mistake); 8 km sufficed for Hadrian's Wall. Lower it
+   to trade gaps for doubled lines.
+10. **Enclosures are not frontier.** A wall whose two ends meet within
+    `ENCLOSURE_GAP_RATIO` (5%) of its own length is skipped: the Langmauer near
+    Trier, a ~55 km circuit round an estate, was swept in by the Upper German
+    sector's bounds and drew as a box among the frontier works. It is the only
+    wall in the layer that matches. (The Dacian loop that used to read as a
+    rounded square is the 200 CE extent's own provincial edge, not a limes; it is
+    no longer drawn — see `drawsExtent` below.)
+
+### Traced lines (2026-10-09) — measured against survey data, then rebuilt
+
+**Why.** AWMC's wall linework is digitised from the Barrington Atlas and the
+extent is a hand-generalised polygon. Scored against **Historic England's
+scheduled-monument polygons** (OGL, 109 Hadrian's Wall polygons, via the NHLE
+ArcGIS service) and **Historic Environment Scotland's** (OGL v3, 55 Antonine Wall
+polygons, "digitised on OS MasterMap") — survey-grade, ~100 m wide — the drawn
+lines were a **median 413 m (Hadrian's) and 335 m (Antonine) off**, p90 1.2 km, and
+up to 5 km on the ORL (Hadrian's 114 km section had 34 vertices). Candidate
+sources against the same polygons, median / within 100 m:
+
+| Source              | Hadrian's   | Antonine   |
+| ------------------- | ----------- | ---------- |
+| AWMC (the old line) | 413 m / 14% | 335 m / 9% |
+| OpenStreetMap       | 42 m / 68%  | 25 m / 89% |
+| OpenHistoricalMap   | 33 m / 76%  | 39 m / 76% |
+| vici.org tracings   | 22 m / 88%  | 26 m / 93% |
+
+The three agree with each other to a median 5–27 m (p90 ≤ ~200 m), so the floor is
+the polygons' own width. After the rebuild the drawn lines score **42 m and 25 m**
+against the held-out official polygons.
+
+**Sources, in priority order** (`scripts/import/limes-traces.ts`): OSM relations
+(Hadrian's `wall`/`wall-route`, Antonine, ORL, Csörsz-árok; Danube and Rhine
+`main_stream` centrelines; closed ways are fort enclosures and skipped) → vici.org
+tracings **by `source_ref`** (`vici.org-line#N`, stable between dev and prod; Hadrian's
+is deliberately not read from vici — its tracings are labelled as Vallum and several
+are double-traced) → OpenHistoricalMap (the Lower Germanic limes relation, the only
+one that follows the Oude Rijn; walls as gap-filler). A lower source is drawn only
+where no higher one lies within 1 km (2.5 km for OHM, which sometimes closes a bend
+with a straight chord), so two traces of one wall never draw twice. **Not used:**
+Wikidata (points only), Pleiades (one 1.9 km-accuracy label line), Natural Earth
+rivers (1–5 km off), Itiner-e (no limes roads). **Not reachable, so the German ORL
+has no official check:** Hessen's core-zone WFS (DL-DE-BY 2.0, portal 403s), RLP's
+(CC0, endpoint not found), BW's (restricted, fee), Bavaria's (errors upstream), and
+the Dutch PDOK/Zuid-Holland services. If one becomes reachable, re-score with it.
+
+**Checked against the Deutsche Limes-Straße's published course (2026-10-09), then
+corrected.** <https://www.limesstrasse.de/.../gps-daten-limes-verlauf> offers the
+whole German Limes as one 1,002 km GPX track (Kleve → Lower Rhine → ORL → Raetian →
+Passau). It states no licence, so it is **a comparison only, never a source** (runbook
+§19 asks the Verein for terms). It showed three things, two fixed:
+
+- **The Main section had no line at all** (~55 km, Großkrotzenburg to Miltenberg, where
+  the ORL follows the Main — the Mainlinie): no source maps it as a wall. Now drawn from
+  the OSM Main `main_stream` clipped to `MAIN_FRONTIER` (a box, because the Main upstream
+  of Großkrotzenburg and downstream of Miltenberg is not frontier).
+- **OHM's Lower Germanic relation leaves the Rhine in Germany** (up to ~12 km off near
+  Xanten and Moers; 83% of the track within 100 m against 99% for the OSM Rhine main
+  stream, median 23 m). Now OSM Rhine for the German reach (`GERMAN_RHINE_FRONTIER`,
+  Rheinbrohl to the Dutch border at 6.03°E) and OHM only west of it
+  (`OHM_LOWER_GERMANIC_CLIP`, `exclusive` so the join is not cut back into a gap).
+- **vici's ORL tracings match the track to a median 1 m**, so they were very likely
+  taken from it: for the ORL they are not an independent check. OSM's relation is the
+  independent one (49 m).
+
+Result: **96% of the track within 1 km of the drawn frontier (was 88%), 82% within
+100 m (was 73%), uncovered 25 km (was 113)**; the remainder is the Rheinbrohl and Wetterau
+junctions (4–7 km) and ~14 km near Eining. An earlier OSM "upper Rhine" piece (30 km of
+the Rhine above Rheinbrohl, which is inside the empire) was removed. Still 0 doubled
+corridors within 1.5 km (a Main point beside an AWMC wall piece went when AWMC walls
+started being cut back around any traced line, rivers included) and no enclosures.
+
+**What is still approximate, and drawn dashed.** AWMC walls survive only where no
+traced work lies within 6 km (the Cumbrian coast, the Claustra Alpium, the Fossatum
+Africae) and the derived extent edge survives only in sectors that have no trace
+(Mauretania, Tripolitania, Arabia, Syria, Cappadocia). `limes_segments.source` is
+`osm | ohm | vici | awmc | extent`; the tile derives `traced` from it
+(`TRACED_LIMES_SOURCES`). Per-sector gazetteer flags: **`drawsExtent: false`**
+(Hadrian's, Antonine, Lower German, Upper German, Raetian, Danube Moesia, Dacian —
+the generalised edge beside a trace is a worse drawing of the same frontier, a chord
+across the Veluwe, a province outline, or a copy of the Limes Alutanus 5 km from
+vici's) and **`drawsAwmcWalls: false`** (Lower German, Sarmatian, Transalutanus — only
+~10–15% of AWMC's lines there lie within 2 km of the traced works, so they are a
+different, unverified drawing, not a fill). A traced river is kept only within 8 km of
+the derived frontier, which is what stops the Danube upstream of Eining and the Rhine
+inside the empire from being drawn as frontier.
+
+**Rendering: colour says what the line is, dash says how far to trust it**
+(`LIMES_KIND_COLOURS`, `LIMES_APPROXIMATE_DASH`, six layers because
+`line-dasharray` is not data-driven). Wall/rampart/ditch oxide red `#b3321a`, river
+frontier teal `#0b6e86`, frontier without works umber `#6b4a2b`; solid = traced,
+dashed = approximate. Every colour clears 4.5:1 against the paper casing under it
+(unit-tested), which is what carries the line over a satellite photograph or a dark
+sheet. `Legend.vue` reads the same table; the strings are `legend.frontier*` in all
+six locales. The map credit is the line's own (`LIMES_ATTRIBUTION`) and stays short:
+the Key button shares the bottom edge with the attribution, and a long credit
+covered it.
+
+**Verified clean.** After the rebuild: 0 interior points with another line within
+1.5 km (2.3% within 5 km — Danube and Rhine meanders), 0 near-closed enclosures. The
+Langmauer box, the Swabian spike, the Veluwe chord and the Dacian loop are gone.
+**Licence:** `limes_segments` now mixes ODbL (OSM, AWMC), CC0 (OHM, most vici) and CC
+BY-SA 3.0 (the vici ORL tracings). It stays in its own tables, is never joined to
+`sites`, and is in no `/api/data` feed; the tiles credit all four.
+
+**Production.** The schema change is migration `0033` (`limes_segments.source`,
+default `'extent'`), applied by the `migrate` service on deploy. **The data is not
+carried by a migration**: production gets it by dump and restore (runbook §
+"Frontier (limes) data"), and until then every old row reads as `extent` and draws
+dashed.
 
 **Licence:** the sector tables are ODbL, like `antiquity_*`, and are never
 joined to `sites`. The one judgement call is `offsetMetres` in

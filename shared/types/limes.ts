@@ -13,6 +13,20 @@ import type { BoundingBox, LonLat } from './site'
 export type LimesSegmentKind = 'barrier' | 'river' | 'notional'
 
 /**
+ * Where a stretch's geometry comes from, which is also how far to trust where
+ * it is drawn.
+ *
+ * `osm`, `ohm` and `vici` are traced against mapped or surveyed remains and sit
+ * within tens of metres of them. `awmc` is the Barrington Atlas wall linework
+ * and `extent` is the edge of AWMC's generalised empire polygon: both are
+ * approximate — a median 0.3–0.6 km off the remains, with excursions of several
+ * kilometres — and the map draws them dashed for that reason.
+ */
+export type LimesSource = 'osm' | 'ohm' | 'vici' | 'awmc' | 'extent'
+
+export const TRACED_LIMES_SOURCES: readonly LimesSource[] = ['osm', 'ohm', 'vici']
+
+/**
  * The marks the frontier is drawn with — a deliberately smaller vocabulary
  * than either source uses, because a reader following a frontier needs to tell
  * a tower from a fort at a glance and does not need twenty-two Pleiades terms.

@@ -97,6 +97,32 @@ test.describe('following the limes', () => {
     expect(problems.pageErrors).toEqual([])
   })
 
+  test('explains the line colours and the dash in the key', async ({ page }) => {
+    // Colour says what a line is (wall, river, no built works) and dash says how
+    // far to trust where it is drawn. Neither can be read off the map alone, so
+    // the key has to carry both — in the same words the style's own table uses.
+    await openMap(page)
+    await toggleLimes(page)
+    await page.getByRole('button', { name: 'Key' }).click()
+
+    const key = page.locator('#map-legend')
+    await expect(key.getByText('Wall, rampart or ditch')).toBeVisible()
+    await expect(key.getByText('River frontier, held from the bank')).toBeVisible()
+    await expect(key.getByText('Frontier line without built works')).toBeVisible()
+    await expect(key.getByText(/^Solid: follows mapped or surveyed remains/)).toBeVisible()
+    await expect(key.getByText(/^Dashed: approximate/)).toBeVisible()
+  })
+
+  test('tells the map whether each line is traced, in the tile itself', async ({ page }) => {
+    // `traced` is what makes a line solid or dashed; a tile without it would draw
+    // every line dashed, with nothing logged. A frontier tile over Britain holds
+    // the Antonine and Hadrian lines, so the property is checked on real bytes.
+    await page.goto('/')
+    const response = await page.request.get('/api/tiles/limes/6/31/20.mvt')
+    expect(response.status()).toBe(200)
+    expect((await response.body()).toString('latin1')).toContain('traced')
+  })
+
   test('serves a binary tile with the atlas generation on it', async ({ page }) => {
     await page.goto('/')
     const response = await page.request.get('/api/tiles/limes/6/32/21.mvt')

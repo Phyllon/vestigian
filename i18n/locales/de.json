@@ -144,6 +144,11 @@
     "siteMarksTitle": "Genauere Markierungen",
     "frontierTitle": "Die Grenze",
     "frontierMarksBarringtonOnly": "Diese Befestigungszeichen stammen aus dem Barrington-Blatt und erscheinen nur, solange es die aktive Kartengrundlage ist. Die Grenzlinie selbst wird auf jeder Kartengrundlage angezeigt.",
+    "frontierWall": "Mauer, Wall oder Graben",
+    "frontierRiver": "Flussgrenze, vom Ufer aus gehalten",
+    "frontierNoWorks": "Grenzlinie ohne Bauwerke",
+    "frontierTraced": "Durchgezogen: folgt kartierten oder vermessenen Überresten",
+    "frontierApproximate": "Gestrichelt: ungefähr, aus einer Provinzgrenze oder Atlaskarte verallgemeinert – bis zu einigen Kilometern daneben",
     "battlesTitle": "Schlachten",
     "battleMark": "Schlacht vor 500 CE",
     "portsTitle": "Antike Häfen",
@@ -387,7 +392,7 @@
     "dareHeading": "Antike (DARE) Basiskarte",
     "dareBody": "Diese Basiskarte ist CC BY-SA 3.0 von Johan Åhlfeldt (Digitaler Atlas des Römischen Reiches, Universität Göteborg) - aber zwei eigene Quellenebenen werden als nicht-kommerziell (CC BY-NC 3.0 / CC BY-NC-SA) bezeichnet, was die CC BY-SA nicht überschreiben kann. Behandeln Sie diese spezielle Schicht nur als nicht-kommerzielle Nutzung.",
     "limesHeading": "Die Grenze (limes)",
-    "limesBody": "Die Grenzlinie ergibt sich aus der Ausdehnung des Reiches nach dem Ancient World Mapping Center (ODbL 1.0) und ist nicht Teil der beigetragenen Datenbank.",
+    "limesBody": "Die durchgezogenen Grenzlinien sind nachgezeichnet nach OpenStreetMap (ODbL), OpenHistoricalMap (CC0) und den Zeichnungen der vici.org-Mitwirkenden (CC0 oder CC BY-SA 3.0); die gestrichelten sind abgeleitet aus der Ausdehnung des Reiches und der Mauerlinie des Ancient World Mapping Center (ODbL 1.0). Nichts davon ist Teil der beigetragenen Datenbank.",
     "overlaysHeading": "Zusätzliche Kartenüberlagerungen",
     "overlaysIntro": "Schaltbare Schichten über der Karte, jeweils unter eigener Lizenz — sichtbar in der eigenen Zuordnung der Karte beim Einschalten.",
     "overlayBattles": "Schlachten: Wikidata (CC0 1.0) – keine Rechte vorbehalten.",
@@ -565,7 +570,7 @@
     "theLimes": "Der Limes",
     "showFrontier": "Zeigen Sie die Grenze",
     "hideFrontier": "Verstecken Sie die Grenze",
-    "introBody": "Fünftausend Kilometer Grenze, in den Strecken die Quellen Namen. Wählen Sie einen, um ihm Ende zu Ende zu folgen.",
+    "introBody": "Rund neuntausend Kilometer Grenze, in den Abschnitten, die die Quellen benennen. Wählen Sie einen, um ihm von Anfang bis Ende zu folgen.",
     "unrolling": "Die Grenze aufrollen..",
     "readingRoll": "Die Rolle lesen..",
     "recorded": "{count} aufgezeichnet",
@@ -589,10 +594,10 @@
   "limesIndexPage": {
     "title": "Der Limes",
     "description": "Die Grenze des römischen Reiches, Sektor für Sektor: seine Mauern, seine Flüsse und die Festungen und Wachtürme entlang ihnen.",
-    "intro": "Der Rand der römischen Welt, vom Solway bis zum Euphrat. Er war nie ein Einzelnes: eine gemauerte Mauer über das rätische Plateau, ein Fluss, patrouilliert von seinem Westufer, eine Reihe von Kastellen am letzten verlässlichen Wasser vor der Wüste. Was folgt, ist dieser Rand in den Abschnitten, die die Quellen benennen, gezogen aus dem Ausmaß des Imperiums um 200 n. Chr. des Ancient World Mapping Center und aus dessen Aufzeichnung der tatsächlich errichteten Mauern.",
+    "intro": "Der Rand der römischen Welt, vom Solway bis zum Euphrat. Er war nie ein Einzelnes: eine gemauerte Mauer über das rätische Plateau, ein Fluss, patrouilliert von seinem Westufer, eine Reihe von Kastellen am letzten verlässlichen Wasser vor der Wüste. Was folgt, ist dieser Rand in den Abschnitten, die die Quellen benennen, gezogen nach den Überresten, wo sie kartiert und nachgezeichnet sind, und – gestrichelt – nach dem Ausmaß des Imperiums um 200 n. Chr. des Ancient World Mapping Center und dessen Aufzeichnung der Mauern, wo das nicht der Fall ist.",
     "acrossStretches": "{length} über {count} Abschnitte",
-    "attribution": "Grenze abgeleitet aus der {link}, dem Ausmaß des Imperiums und seiner Mauerlinie, ODbL 1.0. Die Namen und die obigen Anmerkungen sind die dieses Atlas; die Geometrie ist es nicht.",
-    "attributionLinkText": "Aktivitäten in der Nähe von Ancient World Mapping Center"
+    "attribution": "Grenze, wo Überreste kartiert sind (durchgezogene Linien), nachgezeichnet nach {osm}-Mitwirkenden, OpenHistoricalMap und vici.org, sonst (gestrichelte Linien) abgeleitet aus der {link}, dem Ausmaß des Imperiums und seiner Mauerlinie, ODbL 1.0. Die Namen und die obigen Anmerkungen sind die dieses Atlas; die Geometrie ist es nicht.",
+    "attributionLinkText": "Ancient World Mapping Center"
   },
   "mapSearch": {
     "searching": "Suche",

@@ -578,12 +578,16 @@ describe('the period scrubber', () => {
     expect(layerIds(style).some((id) => id.startsWith('atlas-period'))).toBe(false)
   })
 
-  it('says the frontier is derived rather than surveyed', () => {
-    // It is the boundary of AWMC's extent of the empire with the coast taken
-    // out of it, not a dataset anyone published. A reader is owed that before
-    // they cite it — and it is carried on the frontier's *own* source
-    // (`useLimesOverlay`), not the antiquity sheet's, because the frontier is
-    // drawn over basemaps that have no `atlas` source at all.
+  it('credits every source the frontier is drawn from, and says which part is derived', () => {
+    // The solid lines are traced from three third-party sources and the dashed
+    // ones are derived from AWMC's extent of the empire, not a dataset anyone
+    // published. A reader is owed both before they cite it — and it is carried
+    // on the frontier's *own* source (`useLimesOverlay`), not the antiquity
+    // sheet's, because the frontier is drawn over basemaps that have no `atlas`
+    // source at all.
+    for (const credit of ['OpenStreetMap', 'OpenHistoricalMap', 'vici.org']) {
+      expect(LIMES_ATTRIBUTION).toContain(credit)
+    }
     expect(LIMES_ATTRIBUTION).toContain('Ancient World Mapping Center')
     expect(LIMES_ATTRIBUTION).toContain('derived')
     expect(LIMES_ATTRIBUTION).toContain('ODbL')

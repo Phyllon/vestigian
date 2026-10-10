@@ -192,6 +192,26 @@ export interface LimesSectorDefinition {
    * the Danube frontier running through the same rectangle.
    */
   accepts: readonly LimesSegmentKind[]
+  /**
+   * Whether the edge of AWMC's extent is drawn here at all. Defaults to yes.
+   * Turned off where traced lines describe the whole frontier — the generalised
+   * boundary beside them is not a second frontier but a worse drawing of the
+   * first (the Lower Germanic limes' extent edge crosses the Veluwe in a
+   * straight chord ~30 km from the Rhine it was meant to follow), or follows no
+   * limes at all (the Dacian salient's province outline). Also off wherever the
+   * leftovers beside a traced wall were measured: stubs of the generalised edge
+   * 5–25 km from the ORL, the Antonine Wall and the Iron Gates, and a copy of
+   * the Limes Alutanus drawn 5 km from vici's trace of it.
+   */
+  drawsExtent?: boolean
+  /**
+   * Whether AWMC's Barrington wall linework is drawn here at all. Defaults to
+   * yes. Turned off where it was measured against traced remains and does not
+   * describe the same works: for the Sarmatian ramparts only ~10% of it lies
+   * within 2 km of the OSM trace of the Csörsz-árok, and for the Limes
+   * Transalutanus ~15% within 2 km of vici's.
+   */
+  drawsAwmcWalls?: boolean
   bounds: BoundingBox
   minYear: number
   maxYear: number
@@ -220,6 +240,7 @@ export const LIMES_SECTORS: readonly LimesSectorDefinition[] = [
     latinName: 'Vallum Aelium',
     frontierKind: 'notional',
     accepts: EVERYTHING,
+    drawsExtent: false,
     bounds: { west: -3.9, south: 54.4, east: -1.2, north: 55.5 },
     minYear: 122,
     maxYear: 410,
@@ -233,6 +254,7 @@ export const LIMES_SECTORS: readonly LimesSectorDefinition[] = [
     latinName: 'Vallum Antonini',
     frontierKind: 'notional',
     accepts: EVERYTHING,
+    drawsExtent: false,
     bounds: { west: -4.9, south: 55.4, east: -3.3, north: 56.4 },
     minYear: 142,
     maxYear: 162,
@@ -246,6 +268,8 @@ export const LIMES_SECTORS: readonly LimesSectorDefinition[] = [
     latinName: 'Limes Germaniae Inferioris',
     frontierKind: 'river',
     accepts: EVERYTHING,
+    drawsExtent: false,
+    drawsAwmcWalls: false,
     bounds: { west: 2.9, south: 50.3, east: 7.35, north: 52.7 },
     minYear: -12,
     maxYear: 410,
@@ -259,6 +283,7 @@ export const LIMES_SECTORS: readonly LimesSectorDefinition[] = [
     latinName: 'Limes Germaniae Superioris',
     frontierKind: 'river',
     accepts: EVERYTHING,
+    drawsExtent: false,
     bounds: { west: 6.2, south: 48.3, east: 9.7, north: 50.5 },
     minYear: 83,
     maxYear: 260,
@@ -272,6 +297,7 @@ export const LIMES_SECTORS: readonly LimesSectorDefinition[] = [
     latinName: 'Limes Raetiae',
     frontierKind: 'notional',
     accepts: EVERYTHING,
+    drawsExtent: false,
     bounds: { west: 9.7, south: 47.9, east: 12.15, north: 49.5 },
     minYear: 90,
     maxYear: 260,
@@ -285,6 +311,7 @@ export const LIMES_SECTORS: readonly LimesSectorDefinition[] = [
     latinName: 'Limes Sarmatiae',
     frontierKind: 'notional',
     accepts: BARRIER_ONLY,
+    drawsAwmcWalls: false,
     bounds: { west: 18.9, south: 44.6, east: 21.9, north: 48.2 },
     minYear: 324,
     maxYear: 380,
@@ -298,12 +325,13 @@ export const LIMES_SECTORS: readonly LimesSectorDefinition[] = [
     latinName: 'Limes Daciae',
     frontierKind: 'notional',
     accepts: FRONTIER_ONLY,
+    drawsExtent: false,
     bounds: { west: 20.0, south: 45.3, east: 27.6, north: 48.3 },
     minYear: 106,
     maxYear: 275,
     pleiadesId: '207241',
     summary:
-      'The salient north of the Danube taken by Trajan and given up under Aurelian — the only province the empire held on the far bank for long, and the only frontier here that is a loop rather than a line.',
+      'The salient north of the Danube taken by Trajan and given up under Aurelian — the only province the empire held on the far bank for long. What is drawn is the limes as traced on the ground along the Carpathian foothills; the province outline, which is not a frontier work, is left out.',
   },
   {
     slug: 'limes-transalutanus',
@@ -311,12 +339,13 @@ export const LIMES_SECTORS: readonly LimesSectorDefinition[] = [
     latinName: 'Limes Transalutanus',
     frontierKind: 'notional',
     accepts: BARRIER_ONLY,
-    bounds: { west: 22.7, south: 43.6, east: 26.5, north: 45.2 },
+    drawsAwmcWalls: false,
+    bounds: { west: 22.7, south: 43.6, east: 26.5, north: 45.7 },
     minYear: 106,
     maxYear: 245,
     pleiadesId: '221217',
     summary:
-      'An earth rampart running north from the Danube east of the Olt, with the Brazda lui Novac beyond it. Forward of the river line and held for barely a century.',
+      'An earth rampart running north from the Danube east of the Olt, with the Brazda lui Novac beyond it, and the line of forts along the Olt itself (the Limes Alutanus). Forward of the river line and held for barely a century.',
   },
   {
     slug: 'danube-limes-noricum-pannonia',
@@ -337,6 +366,7 @@ export const LIMES_SECTORS: readonly LimesSectorDefinition[] = [
     latinName: 'Ripa Danuvii',
     frontierKind: 'river',
     accepts: FRONTIER_ONLY,
+    drawsExtent: false,
     bounds: { west: 19.5, south: 43.0, east: 30.2, north: 45.9 },
     minYear: -15,
     maxYear: 602,

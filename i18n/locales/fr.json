@@ -144,6 +144,11 @@
     "siteMarksTitle": "Marques plus précises",
     "frontierTitle": "La frontière",
     "frontierMarksBarringtonOnly": "Ces symboles de fortification proviennent de la carte de Barrington et n'apparaissent que lorsqu'elle est le fond de carte actif. La ligne de frontière elle-même s'affiche sur tous les fonds de carte.",
+    "frontierWall": "Mur, rempart ou fossé",
+    "frontierRiver": "Frontière fluviale, tenue depuis la rive",
+    "frontierNoWorks": "Ligne frontière sans ouvrage construit",
+    "frontierTraced": "Trait plein : suit des vestiges cartographiés ou relevés",
+    "frontierApproximate": "Pointillé : approximatif, généralisé d'après une limite de province ou une carte d'atlas – jusqu'à quelques kilomètres d'écart",
     "battlesTitle": "Batailles",
     "battleMark": "Bataille, avant 500 CE",
     "portsTitle": "Ports antiques",
@@ -387,7 +392,7 @@
     "dareHeading": "Carte de base de l'antiquité (DARE)",
     "dareBody": "Cette carte de base est CC BY-SA 3.0 de Johan Åhlfeldt (Atlas numérique de l'Empire romain, Université de Göteborg) — mais deux de ses propres couches de source sont créditées non commerciales (CC BY-NC 3.0 / CC BY-NC-SA), que la licence CC BY-SA générale ne peut pas remplacer. Traiter cette couche comme une utilisation non commerciale seulement.",
     "limesHeading": "La frontière (limes)",
-    "limesBody": "La ligne de frontière est dérivée de l'étendue de l'empire de l'Ancient World Mapping Center (ODbL 1.0) et ne fait pas partie de la base contribuée.",
+    "limesBody": "Les lignes de frontière en trait plein sont relevées d'après OpenStreetMap (ODbL), OpenHistoricalMap (CC0) et les tracés des contributeurs de vici.org (CC0 ou CC BY-SA 3.0) ; celles en pointillé sont dérivées de l'étendue de l'empire et du tracé des murs de l'Ancient World Mapping Center (ODbL 1.0). Rien de cela ne fait partie de la base contribuée.",
     "overlaysHeading": "Superpositions de cartes supplémentaires",
     "overlaysIntro": "Les couches commutables sur la carte, chacune sous sa propre licence — visible dans la propre attribution de la carte pendant l'activation.",
     "overlayBattles": "Batailles: Wikidata (CC0 1.0) — aucun droit réservé.",
@@ -565,7 +570,7 @@
     "theLimes": "Le limes",
     "showFrontier": "Afficher la frontière",
     "hideFrontier": "Cacher la frontière",
-    "introBody": "Cinq mille kilomètres de frontière, dans les tronçons que les sources nomment. Choisissez-en un pour le suivre de bout en bout.",
+    "introBody": "Environ neuf mille kilomètres de frontière, dans les tronçons que les sources nomment. Choisissez-en un pour le suivre de bout en bout.",
     "unrolling": "Dérouler la frontière..",
     "readingRoll": "Lire le rouleau..",
     "recorded": "{count} enregistré",
@@ -589,10 +594,10 @@
   "limesIndexPage": {
     "title": "Le limes",
     "description": "La frontière de l'empire romain, secteur par secteur: ses murs, ses rivières et les forts et tours de guet le long d'eux.",
-    "intro": "Le bord du monde romain, du Solway à l'Euphrate. Ce n'était jamais une chose unique : un mur maçonné sur le plateau rhétique, un fleuve patrouillé depuis sa rive occidentale, une ligne de forts au dernier point d'eau fiable avant le désert. Ce qui suit est ce bord dans les tronçons que les sources nomment, tiré de l'étendue de l'empire à 200 apr. J.-C. selon l'Ancient World Mapping Center et de son relevé des murs réellement construits.",
+    "intro": "Le bord du monde romain, du Solway à l'Euphrate. Ce n'était jamais une chose unique : un mur maçonné sur le plateau rhétique, un fleuve patrouillé depuis sa rive occidentale, une ligne de forts au dernier point d'eau fiable avant le désert. Ce qui suit est ce bord dans les tronçons que les sources nomment, tiré des vestiges là où ils ont été relevés et cartographiés et, en pointillé, de l'étendue de l'empire à 200 apr. J.-C. selon l'Ancient World Mapping Center et de son relevé des murs, là où ils ne l'ont pas été.",
     "acrossStretches": "{length} sur {count} tronçons",
-    "attribution": "Frontière dérivée de {link}, de l'étendue de l'empire et du tracé de ses murs, ODbL 1.0. Les noms et les notes ci-dessus sont propres à cet atlas ; la géométrie ne l'est pas.",
-    "attributionLinkText": "Centre de cartographie du monde ancien"
+    "attribution": "Frontière relevée d'après les contributeurs d'{osm}, OpenHistoricalMap et vici.org là où les vestiges sont cartographiés (traits pleins), et dérivée de {link}, de l'étendue de l'empire et du tracé de ses murs, ODbL 1.0, ailleurs (pointillés). Les noms et les notes ci-dessus sont propres à cet atlas ; la géométrie ne l'est pas.",
+    "attributionLinkText": "Ancient World Mapping Center"
   },
   "mapSearch": {
     "searching": "Recherche",

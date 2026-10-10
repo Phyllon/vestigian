@@ -81,3 +81,17 @@ describe('buildLimesTileSql', () => {
     expect(buildLimesTileSql({ tile, plan: planLimesRender(12) })).not.toContain("'sectors'")
   })
 })
+
+describe('buildLimesTileSql — precision', () => {
+  it('tells the map whether a line is traced, from the same vocabulary the importer writes', () => {
+    // The solid/dashed split is a paint decision, and it only works if the tile
+    // carries the answer: a missing `traced` property would draw every line
+    // dashed (MapLibre filters a missing property as false) with nothing logged.
+    const sql = buildLimesTileSql({ tile, plan: planLimesRender(9) })
+    expect(sql).toContain('limes_segments.source')
+    expect(sql).toContain('AS traced')
+    for (const source of ['osm', 'ohm', 'vici']) expect(sql).toContain(`'${source}'`)
+    expect(sql).not.toContain("'awmc'")
+    expect(sql).not.toContain("'extent'")
+  })
+})

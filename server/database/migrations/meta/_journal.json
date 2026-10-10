@@ -232,6 +232,13 @@
       "when": 1791377000000,
       "tag": "0032_reference_search",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1791571006121,
+      "tag": "0033_lethal_lady_vermin",
+      "breakpoints": true
     }
   ]
 }

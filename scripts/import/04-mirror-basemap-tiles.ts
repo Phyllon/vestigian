@@ -36,9 +36,11 @@
  * once per visitor rather than once in total, which is why the pyramid is
  * copied at all; vici.org mirrors the DARE tileset for the same reason.
  *
- * Resumable: a tile already in storage costs a HEAD against our own bucket and
- * no request to the origin, so an interrupted run is restarted freely and a
- * second full run is nearly free.
+ * Resumable: storage is the only record of what has been mirrored. Each run
+ * lists the tileset's prefix once and skips every tile already there, so
+ * tiles uploaded by any means (a previous run, a direct upload, another
+ * machine) are recognised and cost no request to the origin. An interrupted
+ * run is restarted freely and a second full run is nearly free.
  *
  *   pnpm import:basemap dare
  *   pnpm import:basemap satellite
@@ -46,7 +48,7 @@
  */
 import {
   HeadBucketCommand,
-  HeadObjectCommand,
+  ListObjectsV2Command,
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3'
@@ -202,13 +204,33 @@ const fillTemplate = (template: string, tile: TileAddress): string =>
 const storageKeyFor = (tileset: Tileset, tile: TileAddress): string =>
   `${tileset.prefix}/${tile.z}/${tile.x}/${tile.y}.${EXTENSION_FOR_FORMAT[tileset.format]}`
 
-const isAlreadyStored = async (key: string): Promise<boolean> => {
-  try {
-    await storage.send(new HeadObjectCommand({ Bucket: BUCKET, Key: key }))
-    return true
-  } catch {
-    return false
-  }
+/**
+ * One paginated listing instead of a HEAD per planned tile: a handful of
+ * requests rather than tens of thousands, and an error here stops the run
+ * instead of being read as "not stored" and re-downloading the pyramid. Bunny
+ * lists its folders as zero-byte keys ending in `/`; those are not tiles.
+ * The set holds one string per stored tile, a couple of hundred MB at the
+ * satellite pyramid's ~1.9M.
+ */
+const listStoredKeys = async (prefix: string): Promise<Set<string>> => {
+  const stored = new Set<string>()
+  let continuationToken: string | undefined
+
+  do {
+    const page = await storage.send(
+      new ListObjectsV2Command({
+        Bucket: BUCKET,
+        Prefix: `${prefix}/`,
+        ContinuationToken: continuationToken,
+      }),
+    )
+    for (const object of page.Contents ?? []) {
+      if (object.Key && !object.Key.endsWith('/')) stored.add(object.Key)
+    }
+    continuationToken = page.NextContinuationToken
+  } while (continuationToken)
+
+  return stored
 }
 
 /** A missing tile is missing for good; a failing server is having a bad day. */
@@ -303,13 +325,16 @@ const main = async (): Promise<void> => {
       `hours at the configured pace, plus transfer.\n`,
   )
 
+  const stored = await listStoredKeys(tileset.prefix)
+  console.log(`${stored.size} tiles already under ${tileset.prefix}/ — those are skipped.\n`)
+
   let mirrored = 0
   let skipped = 0
   let absent = 0
   let deferred = 0
 
   for (const tile of planned) {
-    if (await isAlreadyStored(storageKeyFor(tileset, tile))) {
+    if (stored.has(storageKeyFor(tileset, tile))) {
       // No pause: nothing was asked of the origin, so there is nothing to be
       // polite about, and a resumed run reaches new ground in minutes.
       skipped += 1

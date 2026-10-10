@@ -564,6 +564,13 @@ export const limesSegments = pgTable(
       .references(() => limesSectors.id, { onDelete: 'cascade' }),
     kind: limesSegmentKindEnum('kind').notNull(),
     certain: boolean('certain').notNull().default(true),
+    /**
+     * `LimesSource` — `osm`, `ohm`, `vici`, `awmc` or `extent`. A plain varchar
+     * rather than an enum so the vocabulary can grow without a migration; rows
+     * written before the column existed read as `extent`, which is the safe
+     * answer (drawn dashed, as approximate) until the importer is re-run.
+     */
+    source: varchar('source', { length: 16 }).notNull().default('extent'),
     geom: multiLineGeometry('geom').notNull(),
   },
   (table) => [

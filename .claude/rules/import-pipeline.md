@@ -74,7 +74,7 @@ pnpm import:geo-names           # → 447,053 rows, geo.sql.gz already in the sc
 pnpm import:basemap dare        # → the DARE sheet; ~10 hours, ~1.2 GB, resumable
 pnpm import:basemap satellite   # → Sentinel-2 cloudless; ~1.9M tiles, ~19 GB, resumable
 pnpm import:atlas               # → the Barrington sheet: AWMC + Pleiades into PostGIS
-pnpm import:limes               # → the frontier, derived from the atlas; ~1 minute
+pnpm import:limes               # → the frontier: traced from OSM/OHM (Overpass, cached in .import/atlas) + vici tracings, AWMC as fallback; ~1–2 min; needs import:atlas and import:convert first
 pnpm import:country-boundaries  # → 239 countries, Natural Earth, public domain
 pnpm exec tsx --env-file-if-exists=.env scripts/backfill-country-codes.ts --repair   # needs country-boundaries first
 pnpm import:edh-findspots       # → 29,861 inscription findspots, CC BY-SA 4.0
