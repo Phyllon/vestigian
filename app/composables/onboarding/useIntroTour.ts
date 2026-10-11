@@ -54,8 +54,7 @@ export const INTRO_STEPS: readonly IntroStep[] = [
   { id: 'period', target: 'period', side: 'bottom' },
   { id: 'basemap', target: 'basemap', side: 'bottom' },
   { id: 'legend', target: 'legend', side: 'top' },
-  { id: 'featured', target: 'featured', side: 'left' },
-  { id: 'density', target: 'density', side: 'left' },
+  { id: 'settings', target: 'settings', side: 'left' },
   { id: 'offline', target: 'offline', side: 'left' },
   { id: 'geolocate', target: 'geolocate', side: 'left' },
   { id: 'contribute', target: 'contribute', side: 'left' },
@@ -64,8 +63,8 @@ export const INTRO_STEPS: readonly IntroStep[] = [
 
 /**
  * Steps whose control is not on screen are dropped rather than shown pointing
- * at nothing: "Add to the atlas" exists only when signed in, and the density
- * toggle only while sites are drawn. The welcome has no target and always stays.
+ * at nothing: "Add to the atlas" exists only when signed in. The welcome has no
+ * target and always stays.
  */
 export const resolveIntroSteps = (
   steps: readonly IntroStep[],

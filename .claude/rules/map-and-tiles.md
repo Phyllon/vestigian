@@ -856,7 +856,7 @@ pattern described elsewhere in this file is the older shape. See
 
 1. `GET /api/tiles/{z}/{x}/{y}.mvt` → validate coordinate → check Valkey → `ST_AsMVT` against a GiST index.
 2. **Below zoom 9**: counted clusters, snapped to a grid in _projected_ space (square cells at every latitude). **At 9+**: individual sites. **Tracings from zoom 7**, simplified with a tolerance derived from metres-per-pixel.
-   **Individual-markers mode:** `SiteDensityToggle` (floating button, bottom right, only while "Sites" is on) flips `isClusteringSites` (`useBasemapStyle`, not persisted). Off-cluster, the source's tile URL becomes `/api/tiles/every/{z}/{x}/{y}.mvt` (`serveSiteTile`, `server/utils/site-tile.ts`, shared with the clustered route). **The mode is a path, not `?sites=all`, because the Bunny pull zone ignores query strings in its cache key** — as a query it served whichever mode's tile it cached first, so turning the switch off left every-site markers drawn among the clusters in production (dev and the production build, with no CDN, never showed it). Purge the zone's cache once after deploying: stale `/api/tiles/z/x/y.mvt` entries can hold every-site tiles for up to an hour (`max-age`) plus the day of `stale-while-revalidate`. (`refreshSiteClustering` detaches and re-attaches the overlay — `VectorTileSource.setTiles` was tried and left the current zoom's tiles undrawn until the zoom changed), the server answers every zoom with `feature` tiles (`planTileRender(z, { showEverySite })`), and the cluster layers are built hidden. Below zoom 9 those tiles drop `slug` and `period_*` (`compactSiteProperties`) — they carry the whole continent's points. Cache key gains `:every`. **Unmeasured:** payload at zoom 3–5 on the full 61k-site import; `icon-size` has extra stops at zoom 4/6 so the markers are not a solid smear. Every symbol layer — sites, frontier plans, atlas places, every overlay — shares that one curve, `MARKER_ICON_SIZE` in `useSiteIcons.ts`; a new symbol layer takes the constant instead of its own stops, or its marks jump in size against the sites beneath. Not covered by offline areas — an offline pack downloads the clustered URLs only.
+   **Individual-markers mode:** the _Every site as its own marker_ switch in `SettingsMenu` (bottom-right gear, only while "Sites" is on) flips `isClusteringSites` (`useBasemapStyle`, not persisted). Off-cluster, the source's tile URL becomes `/api/tiles/every/{z}/{x}/{y}.mvt` (`serveSiteTile`, `server/utils/site-tile.ts`, shared with the clustered route). **The mode is a path, not `?sites=all`, because the Bunny pull zone ignores query strings in its cache key** — as a query it served whichever mode's tile it cached first, so turning the switch off left every-site markers drawn among the clusters in production (dev and the production build, with no CDN, never showed it). Purge the zone's cache once after deploying: stale `/api/tiles/z/x/y.mvt` entries can hold every-site tiles for up to an hour (`max-age`) plus the day of `stale-while-revalidate`. (`refreshSiteClustering` detaches and re-attaches the overlay — `VectorTileSource.setTiles` was tried and left the current zoom's tiles undrawn until the zoom changed), the server answers every zoom with `feature` tiles (`planTileRender(z, { showEverySite })`), and the cluster layers are built hidden. Below zoom 9 those tiles drop `slug` and `period_*` (`compactSiteProperties`) — they carry the whole continent's points. Cache key gains `:every`. **Unmeasured:** payload at zoom 3–5 on the full 61k-site import; `icon-size` has extra stops at zoom 4/6 so the markers are not a solid smear. Every symbol layer — sites, frontier plans, atlas places, every overlay — shares that one curve, `MARKER_ICON_SIZE` in `useSiteIcons.ts`; a new symbol layer takes the constant instead of its own stops, or its marks jump in size against the sites beneath. Not covered by offline areas — an offline pack downloads the clustered URLs only.
 3. Tiles carry `id`, `slug`, `title`, `category` **only**. Descriptions and images come from `/api/sites/:id` on demand — this keeps tiles small and cacheable far longer than editable content allows.
 4. Cache invalidation is **one counter**. `bumpDataVersion()` changes the key prefix for every tile at once. Approvals are rare; tile reads are not.
 5. Empty tiles are cached like any other — most of the pyramid is ocean.
@@ -1619,23 +1619,84 @@ have their own browse pages.
 
 ## Featured sites nearby
 
-`MapFeaturedSitesButton` (sparkles, top of the bottom-right control stack) toggles
-`MapFeaturedSitesPanel`: a bottom sheet on phones (`max-h-[45dvh]`, rows scroll
-inside it, `bottom-10` to clear the attribution control), a 20rem card left of the
-control column from `md` (shifted to `md:right-[28rem]` while a record panel is
-open). It loads `GET /api/sites/featured` for the camera centre and a radius of
-half the visible diagonal (1–300 km), refreshing on `moveend` — **only while open**.
+A **switch in the map settings** (`MapSettingsMenu`, the gear at the top of the
+bottom-right control stack), not a button that opens a panel. On, it puts
+`MapFeaturedSitesPanel` on the map and keeps it there: **every entry the endpoint returns** (its default of eight, scrollable — a three-row cap was tried and
+removed on request), **the compact list never taller than half the
+dynamic viewport** (`max-h-[min(50dvh,…)]`, rows scroll inside; big picture below is the exception). The choice is
+remembered (below), and **off by default** — half a phone screen is not something to
+open on someone's first visit.
+
+- **Phone:** a sheet along the bottom edge, lifted to `bottom-[5.5rem]` to clear the
+  key and the "Add to the atlas" button, and stopping at `right-[4.75rem]` so the
+  control column — which holds the switch that turns the list off — stays reachable.
+  The key sits at `z-30` so its open panel is not hidden under the sheet. A record
+  panel (the 78vh detail sheet) hides the list with `max-md:hidden` and it comes back
+  when the record closes; it is **not** switched off, because the switch is the
+  reader's. From `md` it is a card beside the column (`md:right-[4.75rem]`, or
+  `md:right-[28rem]` while a record panel is open), 20rem wide, 26rem in big picture.
+- **Big picture** (`isBigPicture`): **not a settings switch** — an enlarge/shrink arrow button in the
+  list's own header (`aria-pressed`, label "Big picture"), because it resizes the list and only
+  makes sense while the list is showing. A nested settings switch was tried and removed on request.
+  Its value is remembered with the list's and kept while the list is off. **One site
+  at a time** — a 3:2 `card` photograph across the full width of the sheet, `40dvh` tall
+  (`44dvh` from `md`), with the text **underneath** (title, category and period, modern
+  place and country with distance, two lines of summary, photograph count, how many
+  readers found it useful, and the photograph's **credit line** — a larger picture owes
+  the reader the attribution the gallery prints). The entries snap past vertically
+  (`snap-y snap-mandatory`); the next one peeks at the bottom edge. **This deliberately
+  exceeds the compact list's half-screen budget** (measured: photograph 40% of a 375×667
+  phone, panel 67%; photograph 44% of a 1280×800 desktop, panel 78%) — the photograph is
+  the point of the mode — so the sheet is capped by what is left clear above it
+  (`calc(100% - 9.5rem)`, `7.5rem` from `md`), not by a fraction. The fields ride along on every `/api/sites/featured` response
+  (`FeaturedSiteSummary`), a few hundred bytes per row; the summary is cut in SQL
+  (`left(…, 400)`) and at a word (`excerptSummary`, 220 characters), and one that only
+  repeats the title is not shown. **Cost:** 720×480 `card` photographs are fetched
+  instead of 160px thumbnails (lazily, so only the entries scrolled to).
+- **Remembered in `localStorage` `vestigian-featured-nearby`** as
+  `{"isEnabled":bool,"isBigPicture":bool}` (`parseFeaturedPreference` treats anything
+  that is not exactly `true` as off). Read once in `onMounted` (`restore()`, called by
+  both the settings menu and the panel), never in a `useState` factory — that runs in
+  SSR and the client would hydrate from its answer. Same class of storage as the intro
+  tour's answer: the reader's own act, two booleans, never sent to us, so no consent
+  banner; disclosed in `privacy.cookiesBody` (six locales) and the table in
+  `gdpr-legal.md` — **if the key changes, change both.** Blocked storage degrades to
+  "lasts until the tab closes".
+- **Escape inside the list, or its × ("Turn off featured nearby"), is the switch** and
+  is remembered like it. Nothing moves focus into the list when it turns on (the
+  settings popover has to stay open, and a restored list must not take focus on page
+  load); `role="status"` announces the count.
+- It loads `GET /api/sites/featured` for the camera centre and a radius of half the
+  visible diagonal (1–300 km), refreshing on `moveend` — **only while on**, so a
+  reader who never switches it on costs the map nothing. A remembered "on" costs one
+  request at startup (plus one when the first `moveend` settles; the later supersedes).
 
 "Featured" is **derived, not flagged**: the vici import carries no editorial
 marker. A site must have a published photograph (licence not `UNKNOWN`/`ARR`)
 and a description; the 80 nearest such sites are ranked by
 `scoreFeaturedSite` (`shared/utils/featured.ts`: completeness + capped photo and
 endorsement bonuses), distance excluded from the score. Picking a row switches
-the sites layer on, flies to `max(current zoom, 14)`, selects the site (the
+the sites layer on, flies to `max(current zoom, 14)` and selects the site (the
 selection ring is `MapCanvas`'s `selectedSiteId` watcher, which is now also
-re-run when the layer turns on) and, on compact screens, closes the list.
+re-run when the layer turns on).
 **Known limit:** on a phone the detail sheet (78vh) covers the map, so the
 marker is hidden behind it exactly as for a tap or a search result.
+
+### The settings menu
+
+`SettingsMenu.vue` replaced two floating buttons (the sparkles "featured" button and
+`SiteDensityToggle`) so the column does not grow by one control per switch. It is a
+Nuxt UI `UPopover` of `USwitch`es — Reka UI owns focus, Escape and outside click — which
+**stays open while a switch is flipped** and renders nothing until opened. Rows:
+_Featured nearby_ and _Every site as its own marker_ (only while the
+sites layer is on; the same `isClusteringSites` flip the old density button made, still
+not persisted). Overlays stay in `OverlaySwitcher`: those are layers drawn on the map,
+these are readings of it. **Cost:** turning the list on is two taps (gear, switch) where
+it used to be one; the trigger is in the thumb-reach column and the list's own header
+holds big picture (enlarge) and off.
+
+The tour anchors one step on it (`data-tour="settings"`, on the trigger inside the
+component — a `UPopover` root has no element for an attribute to fall through to).
 
 ## Raw SQL tile builders are guarded
 

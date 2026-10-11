@@ -45,3 +45,34 @@ export const scoreFeaturedSite = (candidate: FeaturedCandidate): number => {
 
   return completeness.score + imageBonus + endorsementBonus
 }
+
+const ELLIPSIS = '…'
+const TRAILING_PUNCTUATION = new Set([' ', ',', ';', ':', '.', '-', '–', '—'])
+
+/** A loop rather than a pattern: `[…]+$` backtracks quadratically on a long run of spaces. */
+const trimTrailingPunctuation = (text: string): string => {
+  let end = text.length
+  while (end > 0 && TRAILING_PUNCTUATION.has(text.charAt(end - 1))) end -= 1
+  return text.slice(0, end)
+}
+
+/**
+ * A summary cut to at most `maximumLength` characters (the ellipsis included),
+ * at the last word that fits. Collapses runs of whitespace first so a line
+ * break inside a summary cannot eat the budget. Returns `null` for nothing to
+ * show, so the caller needs no empty-string check of its own.
+ */
+export const excerptSummary = (
+  summary: string | null | undefined,
+  maximumLength: number,
+): string | null => {
+  const text = summary?.replace(/\s+/g, ' ').trim()
+  if (!text) return null
+  if (text.length <= maximumLength) return text
+
+  const room = text.slice(0, Math.max(maximumLength - ELLIPSIS.length, 0))
+  const lastSpace = room.lastIndexOf(' ')
+  // A single very long word has no boundary to cut at; cut inside it.
+  const cut = lastSpace > 0 ? room.slice(0, lastSpace) : room
+  return `${trimTrailingPunctuation(cut)}${ELLIPSIS}`
+}

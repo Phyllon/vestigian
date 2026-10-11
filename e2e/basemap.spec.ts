@@ -2,6 +2,7 @@ import { expect, test } from './helpers/fixtures'
 import { watchForProblems } from './helpers/console'
 import {
   openMap,
+  openMapSettings,
   openOverlays,
   openPeriods,
   showSites,
@@ -336,20 +337,19 @@ test.describe('the basemap switcher', () => {
     })
 
     await openMap(page)
-    await expect(
-      page.getByRole('button', { name: 'Show every site as its own marker' }),
-    ).toBeHidden()
+    await openMapSettings(page)
+    const toggle = page.getByRole('switch', { name: 'Every site as its own marker' })
+    await expect(toggle).toBeHidden()
+    await page.keyboard.press('Escape')
 
     await showSites(page)
-    const toggle = page.getByRole('button', { name: 'Show every site as its own marker' })
-    await expect(toggle).toHaveAttribute('aria-pressed', 'false')
+    await openMapSettings(page)
+    await expect(toggle).toHaveAttribute('aria-checked', 'false')
     expect(everySiteTiles.length, 'clusters are the default').toBe(0)
 
     await toggle.click()
     await expect.poll(() => everySiteTiles.length, { timeout: 15_000 }).toBeGreaterThan(0)
-
-    const back = page.getByRole('button', { name: 'Group nearby sites into counted clusters' })
-    await expect(back).toHaveAttribute('aria-pressed', 'true')
+    await expect(toggle).toHaveAttribute('aria-checked', 'true')
 
     expect(problems.cspViolations).toEqual([])
     expect(problems.pageErrors).toEqual([])

@@ -459,7 +459,7 @@
     "photographHeading": "Photographies",
     "photographBody": "Chaque image téléchargée est réencodée sur notre serveur avant le stockage, ce qui enlève les métadonnées EXIF — y compris les coordonnées GPS ou les identifiants de caméra/dispositif embarqués — donc aucune de celles-ci n'arrive au stockage ou à un autre visiteur.",
     "cookiesHeading": "Cookies et stockage du navigateur",
-    "cookiesBody": "Deux cookies, tous deux strictement nécessaires à une fonctionnalité que vous avez expressément demandée et aucun utilisé pour le suivi ou la publicité : un cookie de session, déposé seulement lorsque vous vous connectez (conservé 7 jours, ou jusqu'à la déconnexion), et un cookie qui retient la langue d'interface choisie (déposé à la première visite, conservé jusqu'à un an). Le stockage local de votre navigateur conserve en outre quelques éléments sur votre propre appareil, jamais envoyés à nous : votre préférence clair/sombre, le fait que vous ayez fermé l'avis de langue, le fait que vous ayez terminé ou passé l'introduction à la carte, un cache de courte durée du texte d'article emprunté pour qu'un site rouvert s'affiche aussitôt, votre position dans la visionneuse des plaques de colonne et — uniquement si vous choisissez de télécharger une zone pour l'usage hors ligne — la liste de ces zones et les données cartographiques téléchargées elles-mêmes. Comme tout cela est nécessaire pour fournir ce que vous avez demandé, le droit allemand (§ 25 al. 2 n° 2 TDDDG, transposant la directive ePrivacy) n'impose pas de demander le consentement — il n'y a donc pas de bandeau de cookies ici. Cette section en est l'information. La mesure anonyme des performances décrite ci-dessous ne stocke rien sur votre appareil.",
+    "cookiesBody": "Deux cookies, tous deux strictement nécessaires à une fonctionnalité que vous avez expressément demandée et aucun utilisé pour le suivi ou la publicité : un cookie de session, déposé seulement lorsque vous vous connectez (conservé 7 jours, ou jusqu'à la déconnexion), et un cookie qui retient la langue d'interface choisie (déposé à la première visite, conservé jusqu'à un an). Le stockage local de votre navigateur conserve en outre quelques éléments sur votre propre appareil, jamais envoyés à nous : votre préférence clair/sombre, le fait que vous ayez fermé l'avis de langue, le fait que vous ayez terminé ou passé l'introduction à la carte, le fait que vous ayez activé la liste des sites à la une et son mode grand format, un cache de courte durée du texte d'article emprunté pour qu'un site rouvert s'affiche aussitôt, votre position dans la visionneuse des plaques de colonne et — uniquement si vous choisissez de télécharger une zone pour l'usage hors ligne — la liste de ces zones et les données cartographiques téléchargées elles-mêmes. Comme tout cela est nécessaire pour fournir ce que vous avez demandé, le droit allemand (§ 25 al. 2 n° 2 TDDDG, transposant la directive ePrivacy) n'impose pas de demander le consentement — il n'y a donc pas de bandeau de cookies ici. Cette section en est l'information. La mesure anonyme des performances décrite ci-dessous ne stocke rien sur votre appareil.",
     "performanceHeading": "Mesure des performances",
     "performanceBody": "Lorsqu'une page se charge, votre navigateur envoie à notre propre serveur quelques chiffres indiquant le temps pris — la rapidité d'affichage de la page et de la carte et la vitesse de réponse. Chaque chiffre est ajouté à un total anonyme (un histogramme) puis écarté : aucun identifiant, cookie, route ni autre trace de vous n'est conservé avec lui, rien n'est écrit sur votre appareil et rien n'est transmis à un tiers. Pour cette requête, notre serveur n'enregistre ni votre adresse IP ni les informations de votre navigateur, et la compte dans une limite de débit au moyen d'un simple code à sens unique, impossible à reconvertir en votre adresse, supprimé en moins d'une minute et modifié à chaque redémarrage du serveur. Comme toute requête web, elle transite par notre CDN et notre proxy, qui ne la traitent que pour la livrer. Elle sert uniquement à repérer et corriger les lenteurs, sur la base de l'intérêt légitime d'exploiter le service (art. 6, par. 1, point f). Rien n'est envoyé si votre navigateur signale Do Not Track ou Global Privacy Control.",
     "locationHeading": "Localisation (GPS)",
@@ -1265,19 +1265,24 @@
     "removeFailed": "Cette zone n'a pas pu être retirée. Réessayez dans un instant."
   },
   "featuredSites": {
-    "show": "Afficher les sites à la une à proximité",
-    "hide": "Masquer les sites à la une à proximité",
     "title": "À la une, à proximité",
-    "close": "Fermer les sites à la une",
     "loading": "Recherche des sites à la une…",
     "empty": "Aucun site à la une dans la vue. Dézoomez ou déplacez la carte.",
     "count": "Aucun site à la une | Un site à la une | {n} sites à la une",
+    "bigPicture": "Grand format",
+    "turnOff": "Désactiver les sites à la une à proximité",
+    "photographs": "Une photographie | {n} photographies",
+    "endorsed": "Jugé utile par une personne | Jugé utile par {n} personnes",
+    "photoCredit": "Photo : {credit}",
     "metres": "{metres} m",
     "kilometres": "{kilometres} km"
   },
-  "siteDensity": {
-    "showEverySite": "Afficher chaque site comme un repère distinct",
-    "showClusters": "Regrouper les sites proches en amas numérotés"
+  "mapSettings": {
+    "label": "Réglages de la carte",
+    "featured": "À la une, à proximité",
+    "featuredHint": "Des sites bien documentés autour de la vue, chacun avec une photographie.",
+    "everySite": "Chaque site comme repère distinct",
+    "everySiteHint": "Au lieu d’amas numérotés. Peut charger davantage sur une connexion lente."
   },
   "overlaySwitcher": {
     "title": "Calques",
@@ -1343,15 +1348,10 @@
         "body": "Explique chaque symbole de la carte. Ouvrez-la dès qu’un signe vous est inconnu.",
         "try": "Touchez un symbole sur la carte pour lire ce qui est consigné à son sujet."
       },
-      "featured": {
-        "title": "À la une, tout près",
-        "body": "Liste des sites remarquables dans la vue, un bon départ quand on ne sait pas quoi chercher.",
-        "try": "Ouvrez la liste et choisissez un site pour lire sa fiche."
-      },
-      "density": {
-        "title": "Groupes ou sites isolés",
-        "body": "Alterne entre groupes dénombrés, qui gardent la carte fluide, et chaque site avec son propre marqueur.",
-        "try": "Zoomez sur une région dense, puis basculez pour voir les marqueurs isolés."
+      "settings": {
+        "title": "Réglages de la carte",
+        "body": "Des interrupteurs pour la façon de lire la carte : une liste de sites à la une près de la vue, que vous pouvez agrandir depuis son en-tête pour une plus grande photographie et plus de détails sur chacun, et des amas numérotés ou chaque site avec son propre repère. La liste et sa taille sont retenues sur cet appareil.",
+        "try": "Ouvrez les réglages et activez « À la une, à proximité »."
       },
       "offline": {
         "title": "Cartes hors ligne",

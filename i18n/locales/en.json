@@ -79,15 +79,10 @@
         "body": "Explains every mark on the map. Open it whenever a symbol is unfamiliar.",
         "try": "Tap a mark on the map to read what is recorded about it."
       },
-      "featured": {
-        "title": "Featured nearby",
-        "body": "Lists remarkable sites within view, a good place to start when you do not know what to look for.",
-        "try": "Open the list and choose a site to read its record."
-      },
-      "density": {
-        "title": "Clusters or single sites",
-        "body": "Switches between counted clusters, which keep the map quick, and every site as its own marker.",
-        "try": "Zoom into a dense region, then switch to see the single markers."
+      "settings": {
+        "title": "Map settings",
+        "body": "Switches for how the map is read: a list of featured sites near the view, which you can enlarge from its own header for a bigger photograph and more about each, and counted clusters or every site as its own marker. The list and its size are remembered on this device.",
+        "try": "Open the settings and switch on Featured nearby."
       },
       "offline": {
         "title": "Offline maps",
@@ -172,19 +167,24 @@
     "showHillfortsHint": "Hillforts of Britain and Ireland, many reoccupied under Rome"
   },
   "featuredSites": {
-    "show": "Show featured sites nearby",
-    "hide": "Hide featured sites nearby",
     "title": "Featured nearby",
-    "close": "Close featured sites",
     "loading": "Looking for featured sites…",
     "empty": "No featured sites in view. Zoom out or move the map.",
     "count": "No featured sites | One featured site | {n} featured sites",
+    "bigPicture": "Big picture",
+    "turnOff": "Turn off featured nearby",
+    "photographs": "One photograph | {n} photographs",
+    "endorsed": "Found useful by one person | Found useful by {n} people",
+    "photoCredit": "Photo: {credit}",
     "metres": "{metres} m",
     "kilometres": "{kilometres} km"
   },
-  "siteDensity": {
-    "showEverySite": "Show every site as its own marker",
-    "showClusters": "Group nearby sites into counted clusters"
+  "mapSettings": {
+    "label": "Map settings",
+    "featured": "Featured nearby",
+    "featuredHint": "Well-documented sites around the view, each with a photograph.",
+    "everySite": "Every site as its own marker",
+    "everySiteHint": "Instead of counted clusters. May load more on a slow connection."
   },
   "overlaySwitcher": {
     "title": "Overlays",
@@ -675,7 +675,7 @@
     "photographHeading": "Photographs",
     "photographBody": "Every uploaded image is re-encoded on our server before storage, which strips EXIF metadata — including any embedded GPS coordinates or camera/device identifiers — so none of that reaches storage or another visitor.",
     "cookiesHeading": "Cookies and browser storage",
-    "cookiesBody": "Two cookies, both strictly necessary for functionality you directly requested and neither used for tracking or advertising: a session cookie, set only when you sign in (kept 7 days, or until you sign out), and a cookie that remembers your chosen interface language (set on your first visit, kept for up to a year). Your browser's local storage also keeps a few things on your own device that are never sent to us: your light/dark preference, whether you dismissed the language notice, whether you finished or skipped the introduction to the map, a short-lived cache of borrowed article text so a site you reopen appears instantly, your place in the column plates viewer, and — only if you choose to download an area for offline use — the list of those areas and the downloaded map data itself. Because all of it is needed to provide something you asked for, German law (§25(2) no. 2 TDDDG, implementing the ePrivacy Directive) does not require asking for consent — so there is no cookie banner here. This section is that disclosure. The anonymous performance measurement described below stores nothing on your device.",
+    "cookiesBody": "Two cookies, both strictly necessary for functionality you directly requested and neither used for tracking or advertising: a session cookie, set only when you sign in (kept 7 days, or until you sign out), and a cookie that remembers your chosen interface language (set on your first visit, kept for up to a year). Your browser's local storage also keeps a few things on your own device that are never sent to us: your light/dark preference, whether you dismissed the language notice, whether you finished or skipped the introduction to the map, whether you switched on the featured-sites list and its big-picture mode, a short-lived cache of borrowed article text so a site you reopen appears instantly, your place in the column plates viewer, and — only if you choose to download an area for offline use — the list of those areas and the downloaded map data itself. Because all of it is needed to provide something you asked for, German law (§25(2) no. 2 TDDDG, implementing the ePrivacy Directive) does not require asking for consent — so there is no cookie banner here. This section is that disclosure. The anonymous performance measurement described below stores nothing on your device.",
     "performanceHeading": "Performance measurement",
     "performanceBody": "When a page loads, your browser reports how long it took — how fast the page and the map appeared and how quickly it responded — as a few numbers sent to our own server. Each number is added to an anonymous running total (a histogram) and discarded: no identifier, cookie, route or other trace of you is stored with it, nothing is written to your device, and nothing is sent to anyone else. For this request our server does not log your IP address or browser details at all, and it counts the request against a rate limit using only a one-way code that cannot be turned back into your address, is dropped within a minute and changes whenever the server restarts. Like any web request it passes through our CDN and proxy, which handle it only to deliver it. It is used only to find and fix slowness, on the legitimate-interest basis of operating the service (Art. 6(1)(f)). Nothing is sent if your browser signals Do Not Track or Global Privacy Control.",
     "locationHeading": "Location (GPS)",

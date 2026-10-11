@@ -32,8 +32,8 @@ to once per page load. A shared link to a record (panel open) never triggers it.
   library (driver.js etc.) was not adopted: it ships its own DOM and CSS outside
   the Tailwind tokens and Nuxt UI, against the no-`<style>` rule.
 - **Targets are `data-tour="…"` attributes** on the controls in `pages/index.vue` and
-  `AppMenu.vue`. A step whose target is not on screen (density toggle while sites
-  are off, "Add to the atlas" while signed out) is dropped, not shown pointing at
+  `AppMenu.vue`. A step whose target is not on screen ("Add to the atlas" while
+  signed out) is dropped, not shown pointing at
   nothing (`resolveIntroSteps`). Adding a control to the tour = a `data-tour`
   attribute, an entry in `INTRO_STEPS`, and `introTour.steps.<id>.*` in six locales.
 - **`#__nuxt` is made `inert` while open**, which is why the component teleports to

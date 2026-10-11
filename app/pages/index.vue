@@ -109,7 +109,7 @@
         the panel on a wide screen and cannot be opened.
       -->
       <MapLegend
-        class="pointer-events-auto absolute bottom-4 left-3 md:left-4"
+        class="pointer-events-auto absolute bottom-4 left-3 z-30 md:left-4"
         data-tour="legend"
         :class="isFollowingLimes ? 'md:left-[23.5rem]' : ''"
       />
@@ -123,8 +123,7 @@
       <div
         class="pointer-events-auto absolute bottom-12 right-3 flex flex-col items-end gap-2 md:right-4"
       >
-        <MapFeaturedSitesButton data-tour="featured" />
-        <MapSiteDensityToggle data-tour="density" />
+        <MapSettingsMenu />
         <MapOfflineDownloadControl data-tour="offline" />
         <MapGeolocateButton data-tour="geolocate" />
 

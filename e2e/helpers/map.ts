@@ -100,3 +100,14 @@ export const toggleOverlay = async (page: Page, name: string): Promise<void> => 
 export const openPeriods = async (page: Page): Promise<void> => {
   await page.getByRole('button', { name: /^Ancient empires:/ }).click()
 }
+
+/**
+ * Opens the map settings — the switches for how the map is read (featured
+ * nearby, every site as its own marker). One popover in
+ * the bottom-right column, see `SettingsMenu.vue`. Left open, like the overlay
+ * menu: a caller flips what it needs and dismisses it with Escape.
+ */
+export const openMapSettings = async (page: Page): Promise<void> => {
+  await page.getByRole('button', { name: 'Map settings' }).click()
+  await expect(page.getByRole('switch', { name: 'Featured nearby' })).toBeVisible()
+}

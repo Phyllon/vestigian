@@ -52,6 +52,10 @@ export interface SiteSummary {
  * A site picked out for the "featured nearby" list — derived, not flagged; see
  * `shared/utils/featured.ts`. `thumbnailImageId` is always present because a
  * record without a published photograph is never featured.
+ *
+ * The fields below `thumbnailImageId` are what the list's "big picture" size
+ * adds to a row. They ride along on every response rather than behind a second
+ * request: the endpoint returns at most eight rows, so it is a few hundred bytes.
  */
 export interface FeaturedSiteSummary {
   id: number
@@ -62,6 +66,17 @@ export interface FeaturedSiteSummary {
   position: LonLat
   distanceMetres: number
   thumbnailImageId: number
+  /** Cut at a word by `excerptSummary`; the full text is in the record panel. */
+  summary: string | null
+  periodFrom: number | null
+  periodTo: number | null
+  modernPlace: string | null
+  /** Published photographs only — the count a reader would find in the gallery. */
+  imageCount: number
+  endorsementCount: number
+  /** The leading photograph's credit; a larger picture owes its reader the line the gallery prints. */
+  thumbnailAttribution: string | null
+  thumbnailLicence: string
 }
 
 /**

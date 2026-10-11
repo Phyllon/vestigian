@@ -459,7 +459,7 @@
     "photographHeading": "Fotografia",
     "photographBody": "Ogni immagine caricata viene ri-encoded sul nostro server prima dell'archiviazione, che rimuove i metadati EXIF, comprese le coordinate GPS embedded o gli identificatori di fotocamera/dispositivo, quindi nessuna di queste raggiunge lo storage o un altro visitatore.",
     "cookiesHeading": "Cookie e archiviazione del browser",
-    "cookiesBody": "Due cookie, entrambi strettamente necessari per una funzione da te espressamente richiesta e nessuno usato per tracciamento o pubblicità: un cookie di sessione, impostato solo quando accedi (conservato 7 giorni, o fino all'uscita), e un cookie che ricorda la lingua dell'interfaccia scelta (impostato alla prima visita, conservato fino a un anno). L'archiviazione locale del tuo browser conserva inoltre alcune cose sul tuo dispositivo che non ci vengono mai inviate: la preferenza chiaro/scuro, se hai chiuso l'avviso di lingua, se hai completato o saltato l'introduzione alla mappa, una cache di breve durata del testo di articoli presi in prestito perché un sito riaperto appaia subito, la tua posizione nel visualizzatore delle lastre delle colonne e — solo se scegli di scaricare un'area per l'uso offline — l'elenco di quelle aree e i dati cartografici scaricati stessi. Poiché tutto ciò serve a fornire qualcosa che hai richiesto, il diritto tedesco (§ 25, comma 2, n. 2 TDDDG, che recepisce la direttiva ePrivacy) non richiede il consenso — quindi qui non c'è alcun banner dei cookie. Questa sezione è tale informativa. La misurazione anonima delle prestazioni descritta sotto non memorizza nulla sul tuo dispositivo.",
+    "cookiesBody": "Due cookie, entrambi strettamente necessari per una funzione da te espressamente richiesta e nessuno usato per tracciamento o pubblicità: un cookie di sessione, impostato solo quando accedi (conservato 7 giorni, o fino all'uscita), e un cookie che ricorda la lingua dell'interfaccia scelta (impostato alla prima visita, conservato fino a un anno). L'archiviazione locale del tuo browser conserva inoltre alcune cose sul tuo dispositivo che non ci vengono mai inviate: la preferenza chiaro/scuro, se hai chiuso l'avviso di lingua, se hai completato o saltato l'introduzione alla mappa, se hai attivato l'elenco dei siti in evidenza e la sua vista ingrandita, una cache di breve durata del testo di articoli presi in prestito perché un sito riaperto appaia subito, la tua posizione nel visualizzatore delle lastre delle colonne e — solo se scegli di scaricare un'area per l'uso offline — l'elenco di quelle aree e i dati cartografici scaricati stessi. Poiché tutto ciò serve a fornire qualcosa che hai richiesto, il diritto tedesco (§ 25, comma 2, n. 2 TDDDG, che recepisce la direttiva ePrivacy) non richiede il consenso — quindi qui non c'è alcun banner dei cookie. Questa sezione è tale informativa. La misurazione anonima delle prestazioni descritta sotto non memorizza nulla sul tuo dispositivo.",
     "performanceHeading": "Misurazione delle prestazioni",
     "performanceBody": "Quando una pagina si carica, il browser invia al nostro server alcuni numeri su quanto tempo è occorso: quanto in fretta sono comparsi la pagina e la mappa e quanto rapidamente ha risposto. Ogni numero viene sommato a un totale anonimo (un istogramma) e scartato: insieme a esso non viene conservato alcun identificativo, cookie, percorso o altra traccia di te, nulla viene scritto sul tuo dispositivo e nulla viene inviato a terzi. Per questa richiesta il nostro server non registra né il tuo indirizzo IP né i dati del browser, e la conta per un limite di frequenza solo tramite un codice a senso unico che non può essere riconvertito nel tuo indirizzo, viene scartato entro un minuto e cambia a ogni riavvio del server. Come ogni richiesta web, passa attraverso il nostro CDN e proxy, che la trattano solo per consegnarla. Serve solo a trovare e correggere i rallentamenti, sulla base del legittimo interesse a gestire il servizio (art. 6, par. 1, lett. f). Non viene inviato nulla se il browser segnala Do Not Track o Global Privacy Control.",
     "locationHeading": "Posizione (GPS)",
@@ -1265,19 +1265,24 @@
     "removeFailed": "Non è stato possibile rimuovere quell'area. Riprova tra poco."
   },
   "featuredSites": {
-    "show": "Mostra i siti in evidenza vicini",
-    "hide": "Nascondi i siti in evidenza vicini",
     "title": "In evidenza nelle vicinanze",
-    "close": "Chiudi i siti in evidenza",
     "loading": "Ricerca dei siti in evidenza…",
     "empty": "Nessun sito in evidenza nella vista. Riduci lo zoom o sposta la mappa.",
     "count": "Nessun sito in evidenza | Un sito in evidenza | {n} siti in evidenza",
+    "bigPicture": "Vista ingrandita",
+    "turnOff": "Disattiva i siti in evidenza vicini",
+    "photographs": "Una fotografia | {n} fotografie",
+    "endorsed": "Giudicato utile da una persona | Giudicato utile da {n} persone",
+    "photoCredit": "Foto: {credit}",
     "metres": "{metres} m",
     "kilometres": "{kilometres} km"
   },
-  "siteDensity": {
-    "showEverySite": "Mostra ogni sito come segnaposto singolo",
-    "showClusters": "Raggruppa i siti vicini in gruppi numerati"
+  "mapSettings": {
+    "label": "Impostazioni della mappa",
+    "featured": "In evidenza nelle vicinanze",
+    "featuredHint": "Siti ben documentati intorno alla vista, ciascuno con una fotografia.",
+    "everySite": "Ogni sito come segnaposto singolo",
+    "everySiteHint": "Al posto dei gruppi numerati. Può caricare di più con una connessione lenta."
   },
   "overlaySwitcher": {
     "title": "Livelli",
@@ -1343,15 +1348,10 @@
         "body": "Spiega ogni segno sulla mappa. Aprila quando un simbolo non ti è familiare.",
         "try": "Tocca un segno sulla mappa per leggere cosa è registrato su di esso."
       },
-      "featured": {
-        "title": "In evidenza qui vicino",
-        "body": "Elenca i siti notevoli in vista, un buon punto di partenza quando non sai cosa cercare.",
-        "try": "Apri l’elenco e scegli un sito per leggerne la scheda."
-      },
-      "density": {
-        "title": "Gruppi o siti singoli",
-        "body": "Passa dai gruppi con conteggio, che tengono la mappa veloce, a ogni sito con il proprio indicatore.",
-        "try": "Ingrandisci una regione fitta e cambia per vedere gli indicatori singoli."
+      "settings": {
+        "title": "Impostazioni della mappa",
+        "body": "Interruttori per come si legge la mappa: un elenco di siti in evidenza vicino alla vista, che puoi ingrandire dalla sua intestazione per una fotografia più grande e più dettagli su ciascuno, e gruppi numerati o ogni sito con il proprio indicatore. L’elenco e la sua dimensione restano memorizzati su questo dispositivo.",
+        "try": "Apri le impostazioni e attiva «In evidenza nelle vicinanze»."
       },
       "offline": {
         "title": "Mappe offline",

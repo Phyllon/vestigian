@@ -459,7 +459,7 @@
     "photographHeading": "Foto's",
     "photographBody": "Elke geüploade afbeelding wordt op onze server opnieuw gecodeerd voor opslag, wat EXIF-metadata verwijdert — inclusief eventuele GPS-coördinaten of camera/apparaat-identificatoren — zodat niets daarvan de opslag of een andere bezoeker bereikt.",
     "cookiesHeading": "Cookies en browseropslag",
-    "cookiesBody": "Twee cookies, beide strikt noodzakelijk voor functionaliteit die je uitdrukkelijk hebt gevraagd en geen van beide gebruikt voor tracking of reclame: een sessiecookie, alleen gezet wanneer je inlogt (7 dagen bewaard, of tot je uitlogt), en een cookie die je gekozen interfacetaal onthoudt (gezet bij je eerste bezoek, tot een jaar bewaard). De lokale opslag van je browser bewaart daarnaast een paar dingen op je eigen apparaat die nooit naar ons worden gestuurd: je licht/donker-voorkeur, of je het taalbericht hebt weggeklikt, of je de introductie van de kaart hebt afgerond of overgeslagen, een kortlevende cache van geleende artikeltekst zodat een heropende site direct verschijnt, je plek in de zuilplatenviewer en — alleen als je een gebied voor offlinegebruik downloadt — de lijst van die gebieden en de gedownloade kaartgegevens zelf. Omdat dit allemaal nodig is om iets te leveren wat je hebt gevraagd, vereist Duits recht (§ 25 lid 2 nr. 2 TDDDG, ter implementatie van de ePrivacyrichtlijn) geen toestemming — daarom is er hier geen cookiebanner. Deze sectie is die informatie. De anonieme prestatiemeting hieronder slaat niets op je apparaat op.",
+    "cookiesBody": "Twee cookies, beide strikt noodzakelijk voor functionaliteit die je uitdrukkelijk hebt gevraagd en geen van beide gebruikt voor tracking of reclame: een sessiecookie, alleen gezet wanneer je inlogt (7 dagen bewaard, of tot je uitlogt), en een cookie die je gekozen interfacetaal onthoudt (gezet bij je eerste bezoek, tot een jaar bewaard). De lokale opslag van je browser bewaart daarnaast een paar dingen op je eigen apparaat die nooit naar ons worden gestuurd: je licht/donker-voorkeur, of je het taalbericht hebt weggeklikt, of je de introductie van de kaart hebt afgerond of overgeslagen, of je de lijst met uitgelichte sites en de grote weergave ervan hebt aangezet, een kortlevende cache van geleende artikeltekst zodat een heropende site direct verschijnt, je plek in de zuilplatenviewer en — alleen als je een gebied voor offlinegebruik downloadt — de lijst van die gebieden en de gedownloade kaartgegevens zelf. Omdat dit allemaal nodig is om iets te leveren wat je hebt gevraagd, vereist Duits recht (§ 25 lid 2 nr. 2 TDDDG, ter implementatie van de ePrivacyrichtlijn) geen toestemming — daarom is er hier geen cookiebanner. Deze sectie is die informatie. De anonieme prestatiemeting hieronder slaat niets op je apparaat op.",
     "performanceHeading": "Prestatiemeting",
     "performanceBody": "Wanneer een pagina laadt, stuurt je browser een paar getallen naar onze eigen server over hoe lang het duurde: hoe snel de pagina en de kaart verschenen en hoe snel ze reageerden. Elk getal wordt opgeteld bij een anoniem lopend totaal (een histogram) en weggegooid: er wordt geen identificatie, cookie, route of ander spoor van jou bij bewaard, er wordt niets op je apparaat geschreven en niets naar anderen gestuurd. Voor dit verzoek logt onze server noch je IP-adres noch browsergegevens, en telt het verzoek voor een snelheidslimiet alleen mee via een eenrichtingscode die niet terug te rekenen is naar je adres, binnen een minuut wordt weggegooid en bij elke herstart van de server verandert. Zoals elk webverzoek loopt het via ons CDN en onze proxy, die het alleen verwerken om het af te leveren. Het wordt alleen gebruikt om traagheid te vinden en te verhelpen, op grond van het gerechtvaardigd belang bij het bedrijven van de dienst (art. 6 lid 1 sub f). Er wordt niets verstuurd als je browser Do Not Track of Global Privacy Control aangeeft.",
     "locationHeading": "Locatie (GPS)",
@@ -1265,19 +1265,24 @@
     "removeFailed": "Dat gebied kon niet worden verwijderd. Probeer het zo nog eens."
   },
   "featuredSites": {
-    "show": "Uitgelichte sites in de buurt tonen",
-    "hide": "Uitgelichte sites in de buurt verbergen",
     "title": "Uitgelicht in de buurt",
-    "close": "Uitgelichte sites sluiten",
     "loading": "Uitgelichte sites zoeken…",
     "empty": "Geen uitgelichte sites in beeld. Zoom uit of verschuif de kaart.",
     "count": "Geen uitgelichte sites | Eén uitgelichte site | {n} uitgelichte sites",
+    "bigPicture": "Grote weergave",
+    "turnOff": "Uitgelichte sites in de buurt uitzetten",
+    "photographs": "Eén foto | {n} foto’s",
+    "endorsed": "Door één persoon nuttig gevonden | Door {n} personen nuttig gevonden",
+    "photoCredit": "Foto: {credit}",
     "metres": "{metres} m",
     "kilometres": "{kilometres} km"
   },
-  "siteDensity": {
-    "showEverySite": "Elke site als eigen markering tonen",
-    "showClusters": "Nabije sites groeperen in genummerde clusters"
+  "mapSettings": {
+    "label": "Kaartinstellingen",
+    "featured": "Uitgelicht in de buurt",
+    "featuredHint": "Goed gedocumenteerde sites rond het beeld, elk met een foto.",
+    "everySite": "Elke site als eigen markering",
+    "everySiteHint": "In plaats van getelde clusters. Kan op een trage verbinding meer laden."
   },
   "overlaySwitcher": {
     "title": "Overlays",
@@ -1343,15 +1348,10 @@
         "body": "Verklaart elk teken op de kaart. Open haar zodra een symbool onbekend is.",
         "try": "Tik op een teken op de kaart om te lezen wat erover is vastgelegd."
       },
-      "featured": {
-        "title": "Uitgelicht in de buurt",
-        "body": "Toont opmerkelijke plekken in beeld, een goed beginpunt als je niet weet waar je naar moet zoeken.",
-        "try": "Open de lijst en kies een plek om het dossier te lezen."
-      },
-      "density": {
-        "title": "Clusters of losse plekken",
-        "body": "Schakelt tussen getelde clusters, die de kaart snel houden, en elke plek als eigen markering.",
-        "try": "Zoom in op een drukke streek en schakel om de losse markeringen te zien."
+      "settings": {
+        "title": "Kaartinstellingen",
+        "body": "Schakelaars voor hoe de kaart wordt gelezen: een lijst met uitgelichte sites bij het beeld, die je via de kop kunt vergroten voor een grotere foto en meer over elk ervan, en getelde clusters of elke site als eigen markering. Dit apparaat onthoudt de lijst en de grootte ervan.",
+        "try": "Open de instellingen en zet ‘Uitgelicht in de buurt’ aan."
       },
       "offline": {
         "title": "Offline kaarten",

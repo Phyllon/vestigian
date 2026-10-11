@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { isFeaturable, scoreFeaturedSite } from '#shared/utils/featured'
+import { excerptSummary, isFeaturable, scoreFeaturedSite } from '#shared/utils/featured'
 import type { FeaturedSiteSummary, SiteCategory } from '#shared/types'
 
 /** "Nearby" stops being a neighbourhood well before a continent. */
@@ -12,6 +12,14 @@ const DEFAULT_RADIUS_METRES = 25_000
  * rank among.
  */
 const CANDIDATE_POOL = 80
+
+/**
+ * Plenty for three lines on the widest card, and a bound on what one response
+ * can carry whatever a contributor wrote: the cut happens in the database so the
+ * rest of a long summary never leaves it.
+ */
+const SUMMARY_SQL_LIMIT = 400
+const SUMMARY_EXCERPT_LENGTH = 220
 
 export const querySchema = z.object({
   lon: z.coerce.number().min(-180).max(180),
@@ -55,11 +63,17 @@ export default defineEventHandler(async (event): Promise<FeaturedSiteSummary[]> 
       lon: number
       lat: number
       distance_metres: number
+      summary: string | null
+      period_from: number | null
+      period_to: number | null
+      modern_place: string | null
       has_summary: boolean
       has_description: boolean
       has_period: boolean
       image_count: number
       thumbnail_image_id: number | null
+      thumbnail_attribution: string | null
+      thumbnail_licence: string | null
       endorsement_count: number
     }[]
   >`
@@ -69,16 +83,21 @@ export default defineEventHandler(async (event): Promise<FeaturedSiteSummary[]> 
     SELECT s.id, s.slug, s.title, s.category::text AS category, s.country_code,
            ST_X(s.geom) AS lon, ST_Y(s.geom) AS lat,
            ST_Distance(s.geom::geography, origin.point::geography) AS distance_metres,
+           left(s.summary, ${SUMMARY_SQL_LIMIT}) AS summary,
+           s.period_from, s.period_to, s.modern_place,
            (s.summary IS NOT NULL AND s.summary <> '') AS has_summary,
            (s.description IS NOT NULL AND s.description <> '') AS has_description,
            (s.period_from IS NOT NULL OR s.period_to IS NOT NULL) AS has_period,
            images.image_count, images.thumbnail_image_id,
+           images.thumbnail_attribution, images.thumbnail_licence,
            COALESCE(endorsements.endorsement_count, 0) AS endorsement_count
     FROM sites s
     CROSS JOIN origin
     CROSS JOIN LATERAL (
       SELECT count(*)::int AS image_count,
-             (array_agg(i.id ORDER BY i.sort_order, i.id))[1] AS thumbnail_image_id
+             (array_agg(i.id ORDER BY i.sort_order, i.id))[1] AS thumbnail_image_id,
+             (array_agg(i.attribution ORDER BY i.sort_order, i.id))[1] AS thumbnail_attribution,
+             (array_agg(i.licence ORDER BY i.sort_order, i.id))[1] AS thumbnail_licence
       FROM site_images i
       WHERE i.site_id = s.id AND i.status = 'approved'
         AND i.licence <> 'UNKNOWN' AND i.licence <> 'ARR'
@@ -123,6 +142,15 @@ export default defineEventHandler(async (event): Promise<FeaturedSiteSummary[]> 
       position: { lon: row.lon, lat: row.lat },
       distanceMetres: Math.round(row.distance_metres),
       thumbnailImageId: row.thumbnail_image_id as number,
+      summary: excerptSummary(row.summary, SUMMARY_EXCERPT_LENGTH),
+      periodFrom: row.period_from,
+      periodTo: row.period_to,
+      modernPlace: row.modern_place,
+      imageCount: Number(row.image_count),
+      endorsementCount: Number(row.endorsement_count),
+      thumbnailAttribution: row.thumbnail_attribution,
+      // The lateral only admits publishable licences, so this is set whenever an image is.
+      thumbnailLicence: row.thumbnail_licence ?? '',
     }))
 
   featuredRequestsTotal().inc({ outcome: featured.length > 0 ? 'results' : 'empty' })
