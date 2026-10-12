@@ -594,6 +594,56 @@
     "euLinkImpressum": "Legal notice",
     "euLinkLicence": "Data & licences"
   },
+  "partnersPage": {
+    "menuLabel": "Partners",
+    "title": "Partners",
+    "intro": "Some of the data on this map comes from organisations that have agreed terms with us and asked to be named. Here they are, in their own words.",
+    "exampleTitle": "Examples only",
+    "exampleBody": "The organisations on this page are invented, to show how a partner is presented. None of them exists, and no real organisation has agreed to be listed here.",
+    "exampleTag": "Example",
+    "promisesHeading": "What every partner can count on",
+    "promiseCredit": "Credit wherever their data is shown — in the map's credit line, in the key and in every info box — in the wording they ask for.",
+    "promiseApart": "Their data is kept apart from ours and left out of our open export, so their terms remain their terms.",
+    "promiseUnaltered": "Nothing is altered silently. A likely error goes back to them.",
+    "promiseWithdraw": "One email withdraws it: the layer, the mark and this entry come off.",
+    "listHeading": "Our partners",
+    "orderNote": "Listed alphabetically. The order says nothing about importance, and nobody pays to appear here.",
+    "emptyTitle": "No partners yet",
+    "emptyBody": "When a source agrees terms with us and asks to be named, it appears here in its own words. Until then, every source we draw on is credited on the Data & licences page.",
+    "kind": {
+      "database": "Database",
+      "association": "Association",
+      "museum": "Museum"
+    },
+    "inTheirWords": "In their words",
+    "drawnLabel": "Drawn on the map",
+    "recordCount": "{count} records",
+    "citeLabel": "How to cite",
+    "visitSite": "Visit {name}",
+    "opensInNewTab": "(opens in a new tab)",
+    "badgeHeading": "Seen on Vestigian",
+    "badgeBody": "A partner may show this badge on its own site and link back to us. Download it and host it yourself, so that your visitors' browsers never contact our server.",
+    "badgeAlt": "Seen on Vestigian",
+    "badgeDownload": "Download",
+    "badgeSnippet": "Markup to paste",
+    "howHeading": "Becoming a partner",
+    "howBody": "We write to sources, and we welcome a message from them. All we ask is whether, on what terms and in what words you would like to be named. How visible you are beyond the credit your licence requires is your choice, and a plain credit is always enough.",
+    "howContact": "Contact details and the full list of sources:",
+    "entries": {
+      "example-harbours": {
+        "about": "We have catalogued the harbours and anchorages of the inland sea since 1998. We are glad to see them on a map that sends readers back to the record.",
+        "drawn": "Harbours and anchorages of the inland sea, as points."
+      },
+      "example-frontier-society": {
+        "about": "We walk, survey and look after the frontier. Anyone following it on a map should know where to stand and whom to ask.",
+        "drawn": "The course of the frontier road and its watchtowers, as a line."
+      },
+      "example-coin-finds": {
+        "about": "Every coin here was found by someone, somewhere. We would like readers to see where — and to know the museum that keeps it.",
+        "drawn": "Single coin finds of the Roman period, as points at the precision we publish."
+      }
+    }
+  },
   "licence": {
     "title": "Data & licences",
     "intro": "Vestigian is built on data that others made freely reusable. Terms differ by layer — here is what applies to each.",

@@ -182,7 +182,7 @@ app/
   middleware/ authenticated.ts moderator.ts admin.ts (404s, not 403s)
   router.options.ts          scroll behaviour; the camera hash is not a selector
   pages/ index login register verify forgot-password reset-password
-         licence privacy impressum settings offline
+         licence privacy impressum settings offline partners
          notebook/index notebook/visits notebook/contributions
          contributor/[name]
          site/[slug] site/[slug]/edit tracing/[id] tracing/[id]/edit

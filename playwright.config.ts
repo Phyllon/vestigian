@@ -80,6 +80,9 @@ export default defineConfig({
       // against nothing adds noise to every failure trace.
       NUXT_TELEMETRY_OTLP_ENDPOINT: '',
       NUXT_TELEMETRY_LOG_LEVEL: 'warn',
+      // The partners page lists only invented example organisations until a real
+      // partner exists; the build shows none unless asked.
+      NUXT_PUBLIC_SHOW_EXAMPLE_PARTNERS: 'true',
       NUXT_DATABASE_URL: process.env.NUXT_DATABASE_URL ?? '',
       NUXT_REDIS_URL: process.env.NUXT_REDIS_URL ?? '',
       NUXT_SESSION_PASSWORD: process.env.NUXT_SESSION_PASSWORD ?? '',

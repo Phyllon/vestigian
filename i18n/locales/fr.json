@@ -376,6 +376,56 @@
     "euLinkImpressum": "Mentions légales",
     "euLinkLicence": "Données et licences"
   },
+  "partnersPage": {
+    "menuLabel": "Partenaires",
+    "title": "Partenaires",
+    "intro": "Une partie des données de cette carte provient d'organisations qui ont convenu de conditions avec nous et ont demandé à être nommées. Les voici, dans leurs propres mots.",
+    "exampleTitle": "Exemples seulement",
+    "exampleBody": "Les organisations de cette page sont inventées, pour montrer comment un partenaire est présenté. Aucune n'existe, et aucune organisation réelle n'a accepté d'y figurer.",
+    "exampleTag": "Exemple",
+    "promisesHeading": "Ce sur quoi chaque partenaire peut compter",
+    "promiseCredit": "Une mention partout où ses données apparaissent — dans la ligne de crédit de la carte, dans la légende et dans chaque fiche — dans la formulation qu'il demande.",
+    "promiseApart": "Ses données restent séparées des nôtres et hors de notre export ouvert, afin que ses conditions restent ses conditions.",
+    "promiseUnaltered": "Rien n'est modifié en silence. Une erreur probable lui est signalée.",
+    "promiseWithdraw": "Un courriel suffit à se retirer : la couche, le signe et cette entrée disparaissent.",
+    "listHeading": "Nos partenaires",
+    "orderNote": "Classement alphabétique. L'ordre n'indique aucune importance, et personne ne paie pour figurer ici.",
+    "emptyTitle": "Pas encore de partenaires",
+    "emptyBody": "Lorsqu'une source convient de conditions avec nous et demande à être nommée, elle apparaît ici dans ses propres mots. D'ici là, chaque source que nous utilisons est mentionnée sur la page « Données et licences ».",
+    "kind": {
+      "database": "Base de données",
+      "association": "Association",
+      "museum": "Musée"
+    },
+    "inTheirWords": "Dans leurs mots",
+    "drawnLabel": "Montré sur la carte",
+    "recordCount": "{count} notices",
+    "citeLabel": "Comment citer",
+    "visitSite": "Visiter {name}",
+    "opensInNewTab": "(s'ouvre dans un nouvel onglet)",
+    "badgeHeading": "Vu sur Vestigian",
+    "badgeBody": "Un partenaire peut afficher ce badge sur son propre site et renvoyer vers nous. Téléchargez-le et hébergez-le vous-même, pour que les navigateurs de vos visiteurs ne contactent jamais notre serveur.",
+    "badgeAlt": "Vu sur Vestigian",
+    "badgeDownload": "Télécharger",
+    "badgeSnippet": "Code à coller",
+    "howHeading": "Devenir partenaire",
+    "howBody": "Nous écrivons aux sources et accueillons volontiers leur message. Nous demandons seulement si, à quelles conditions et dans quels mots vous souhaitez que nous vous nommions. Votre visibilité au-delà de la mention que votre licence exige est votre choix, et une simple mention suffit toujours.",
+    "howContact": "Coordonnées et liste complète des sources :",
+    "entries": {
+      "example-harbours": {
+        "about": "Nous cataloguons depuis 1998 les ports et mouillages de la mer intérieure. Nous sommes heureux de les voir sur une carte qui renvoie le lecteur à la notice.",
+        "drawn": "Ports et mouillages de la mer intérieure, en points."
+      },
+      "example-frontier-society": {
+        "about": "Nous parcourons, relevons et entretenons la frontière. Qui la suit sur une carte doit savoir où se tenir et à qui s'adresser.",
+        "drawn": "Le tracé de la route frontalière et de ses tours de guet, en ligne."
+      },
+      "example-coin-finds": {
+        "about": "Chaque monnaie ici a été trouvée par quelqu'un, quelque part. Nous voulons que les lecteurs voient où — et connaissent le musée qui la conserve.",
+        "drawn": "Trouvailles isolées de monnaies d'époque romaine, en points, avec la précision que nous publions nous-mêmes."
+      }
+    }
+  },
   "licence": {
     "title": "Données et licences",
     "intro": "Vestigian s'appuie sur des données que d'autres ont rendues librement réutilisables. Les conditions diffèrent selon la couche — voici ce qui s'applique à chacune.",

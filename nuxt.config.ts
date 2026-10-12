@@ -484,6 +484,14 @@ export default defineNuxtConfig({
        * should show until someone has actually decided on it.
        */
       donateUrl: '',
+      /**
+       * Lets the partners page list its invented example organisations
+       * (`EXAMPLE_PARTNERS`). `nuxt dev` shows them regardless; every built
+       * deployment shows none unless this is set, because a page of made-up
+       * partners on a public site reads as a claim about real ones. The
+       * end-to-end build sets it so the page has something to look at.
+       */
+      showExamplePartners: false,
       basemap: {
         /** 'openfreemap' for zero-setup development, 'pmtiles' for production. */
         provider: 'openfreemap',

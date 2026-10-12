@@ -376,6 +376,56 @@
     "euLinkImpressum": "Colofon",
     "euLinkLicence": "Gegevens en licenties"
   },
+  "partnersPage": {
+    "menuLabel": "Partners",
+    "title": "Partners",
+    "intro": "Een deel van de gegevens op deze kaart komt van organisaties die met ons voorwaarden hebben afgesproken en genoemd willen worden. Hier zijn ze, in hun eigen woorden.",
+    "exampleTitle": "Alleen voorbeelden",
+    "exampleBody": "De organisaties op deze pagina zijn verzonnen, om te laten zien hoe een partner wordt gepresenteerd. Geen van hen bestaat, en geen echte organisatie heeft ermee ingestemd hier te staan.",
+    "exampleTag": "Voorbeeld",
+    "promisesHeading": "Waar elke partner op kan rekenen",
+    "promiseCredit": "Vermelding overal waar hun gegevens verschijnen — in de bronvermelding van de kaart, in de legenda en in elk infovak — in de bewoordingen die ze vragen.",
+    "promiseApart": "Hun gegevens blijven gescheiden van de onze en buiten onze open export, zodat hun voorwaarden hun voorwaarden blijven.",
+    "promiseUnaltered": "Er wordt niets stilletjes aangepast. Een waarschijnlijke fout gaat terug naar hen.",
+    "promiseWithdraw": "Eén e-mail volstaat om zich terug te trekken: de laag, het merkteken en deze vermelding verdwijnen.",
+    "listHeading": "Onze partners",
+    "orderNote": "Alfabetisch gesorteerd. De volgorde zegt niets over belang, en niemand betaalt om hier te staan.",
+    "emptyTitle": "Nog geen partners",
+    "emptyBody": "Wanneer een bron met ons voorwaarden afspreekt en genoemd wil worden, verschijnt ze hier in haar eigen woorden. Tot die tijd wordt elke bron die we gebruiken vermeld op de pagina ‘Gegevens & licenties’.",
+    "kind": {
+      "database": "Database",
+      "association": "Vereniging",
+      "museum": "Museum"
+    },
+    "inTheirWords": "In hun eigen woorden",
+    "drawnLabel": "Getoond op de kaart",
+    "recordCount": "{count} records",
+    "citeLabel": "Hoe te citeren",
+    "visitSite": "Bezoek {name}",
+    "opensInNewTab": "(opent in een nieuw tabblad)",
+    "badgeHeading": "Te zien op Vestigian",
+    "badgeBody": "Een partner mag deze badge op de eigen website tonen en naar ons linken. Download hem en host hem zelf, zodat de browsers van je bezoekers nooit contact met onze server maken.",
+    "badgeAlt": "Te zien op Vestigian",
+    "badgeDownload": "Downloaden",
+    "badgeSnippet": "Code om te plakken",
+    "howHeading": "Partner worden",
+    "howBody": "Wij schrijven bronnen aan en horen graag van hen. We vragen alleen of, onder welke voorwaarden en in welke woorden je genoemd wilt worden. Hoe zichtbaar je daarbovenop wilt zijn, is jouw keuze, en een gewone vermelding is altijd genoeg.",
+    "howContact": "Contactgegevens en de volledige lijst van bronnen:",
+    "entries": {
+      "example-harbours": {
+        "about": "Sinds 1998 catalogiseren we de havens en ankerplaatsen van de binnenzee. We zien ze graag op een kaart die lezers terugvoert naar het record.",
+        "drawn": "Havens en ankerplaatsen van de binnenzee, als punten."
+      },
+      "example-frontier-society": {
+        "about": "We lopen, meten en onderhouden de grens. Wie haar op een kaart volgt, moet weten waar je kunt staan en wie je kunt vragen.",
+        "drawn": "Het verloop van de grensweg en haar wachttorens, als lijn."
+      },
+      "example-coin-finds": {
+        "about": "Elke munt hier is door iemand ergens gevonden. We willen dat lezers zien waar — en het museum kennen dat haar bewaart.",
+        "drawn": "Losse muntvondsten uit de Romeinse tijd, als punten met de nauwkeurigheid die wij zelf publiceren."
+      }
+    }
+  },
   "licence": {
     "title": "Gegevens & licenties",
     "intro": "Vestigian is gebouwd op gegevens die anderen vrij herbruikbaar hebben gemaakt. Voorwaarden verschillen per laag — hier is wat op elk van toepassing is.",

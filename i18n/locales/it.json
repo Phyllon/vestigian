@@ -376,6 +376,56 @@
     "euLinkImpressum": "Note legali",
     "euLinkLicence": "Dati e licenze"
   },
+  "partnersPage": {
+    "menuLabel": "Partner",
+    "title": "Partner",
+    "intro": "Una parte dei dati di questa mappa proviene da organizzazioni che hanno concordato condizioni con noi e hanno chiesto di essere nominate. Eccole, con le loro parole.",
+    "exampleTitle": "Solo esempi",
+    "exampleBody": "Le organizzazioni di questa pagina sono inventate, per mostrare come viene presentato un partner. Nessuna esiste, e nessuna organizzazione reale ha accettato di comparire qui.",
+    "exampleTag": "Esempio",
+    "promisesHeading": "Su cosa può contare ogni partner",
+    "promiseCredit": "Una citazione ovunque compaiano i suoi dati — nella riga dei crediti della mappa, nella legenda e in ogni scheda — con la formulazione che richiede.",
+    "promiseApart": "I suoi dati restano separati dai nostri e fuori dalla nostra esportazione aperta, così le sue condizioni restano le sue condizioni.",
+    "promiseUnaltered": "Nulla viene modificato in silenzio. Un probabile errore gli viene segnalato.",
+    "promiseWithdraw": "Basta una e-mail per ritirarsi: il livello, il segno e questa voce vengono rimossi.",
+    "listHeading": "I nostri partner",
+    "orderNote": "In ordine alfabetico. L'ordine non dice nulla sull'importanza, e nessuno paga per comparire qui.",
+    "emptyTitle": "Ancora nessun partner",
+    "emptyBody": "Quando una fonte concorda condizioni con noi e chiede di essere nominata, compare qui con le sue parole. Fino ad allora, ogni fonte che usiamo è citata nella pagina «Dati e licenze».",
+    "kind": {
+      "database": "Banca dati",
+      "association": "Associazione",
+      "museum": "Museo"
+    },
+    "inTheirWords": "Con le loro parole",
+    "drawnLabel": "Mostrato sulla mappa",
+    "recordCount": "{count} record",
+    "citeLabel": "Come citare",
+    "visitSite": "Visita {name}",
+    "opensInNewTab": "(si apre in una nuova scheda)",
+    "badgeHeading": "Visto su Vestigian",
+    "badgeBody": "Un partner può mostrare questo distintivo sul proprio sito e collegarsi a noi. Va scaricato e ospitato sul proprio server, così che i browser dei visitatori non contattino mai il nostro.",
+    "badgeAlt": "Visto su Vestigian",
+    "badgeDownload": "Scarica",
+    "badgeSnippet": "Codice da incollare",
+    "howHeading": "Diventare partner",
+    "howBody": "Scriviamo alle fonti e accogliamo volentieri un loro messaggio. Chiediamo soltanto se, a quali condizioni e con quali parole desiderano essere nominate. Quanto essere visibili oltre alla citazione richiesta dalla licenza è una loro scelta, e una semplice citazione basta sempre.",
+    "howContact": "Recapiti ed elenco completo delle fonti:",
+    "entries": {
+      "example-harbours": {
+        "about": "Dal 1998 catalogiamo i porti e gli approdi del mare interno. Ci fa piacere vederli su una mappa che riporta il lettore alla scheda.",
+        "drawn": "Porti e approdi del mare interno, come punti."
+      },
+      "example-frontier-society": {
+        "about": "Percorriamo, rileviamo e curiamo il confine. Chi lo segue su una mappa deve sapere dove fermarsi e a chi rivolgersi.",
+        "drawn": "Il tracciato della strada di confine e delle sue torri di guardia, come linea."
+      },
+      "example-coin-finds": {
+        "about": "Ogni moneta qui è stata trovata da qualcuno, da qualche parte. Vorremmo che i lettori vedessero dove — e conoscessero il museo che la custodisce.",
+        "drawn": "Ritrovamenti singoli di monete di epoca romana, come punti con la precisione che noi stessi pubblichiamo."
+      }
+    }
+  },
   "licence": {
     "title": "Dati e licenze",
     "intro": "Vestigian è costruita su dati che altri hanno reso liberamente riutilizzabili. I termini differiscono per strato — qui è ciò che si applica a ciascuno.",

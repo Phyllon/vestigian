@@ -26,6 +26,7 @@
     [
       { type: 'label' as const, label: t('layout.menuGroupAbout') },
       { label: t('about.menuLabel'), icon: 'i-lucide-info', to: '/about' },
+      { label: t('partnersPage.menuLabel'), icon: 'i-lucide-handshake', to: '/partners' },
       // Quiet by design: a line in a menu, not a button on the map.
       { label: t('introTour.menuLabel'), icon: 'i-lucide-compass', onSelect: replayIntroduction },
     ],
