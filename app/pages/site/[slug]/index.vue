@@ -143,6 +143,13 @@
         class="mt-8"
       />
 
+      <TerrainTowerSightlines
+        v-if="site.subcategory === 'watchtower'"
+        :key="site.id"
+        :site-id="site.id"
+        class="mt-8"
+      />
+
       <EpigraphyNearbyInscriptions :id="site.id" kind="site" class="mt-8" />
       <EpigraphyNearbyAtticInscriptions :id="site.id" kind="site" class="mt-8" />
 

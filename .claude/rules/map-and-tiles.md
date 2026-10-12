@@ -1280,10 +1280,14 @@ a failure; a popup closed mid-request is left alone.
   something the reader asked for. A fix worse than 2 km or older than 10 min is ignored
   (`distanceFromFix`). The reader's position is computed on in the browser and is never
   sent: `/api/spot` receives only the mark's coordinate.
-- **Elevation is a surface model.** Read server-side from the same terrain tiles the
-  hillshade uses (`server/utils/terrain.ts`: the `terrain-z12-*.pmtiles` mirror, or
-  Mapterhorn's tiles in dev), Copernicus GLO-30 underneath, so towns and forests read a
-  few metres high. One tile is 50–150 KB, which is why it is not done in the browser.
+- **Elevation is a terrain model, bare earth in much of the limes' country.** Read
+  server-side from the same terrain tiles the hillshade uses (`server/utils/terrain.ts`: the
+  `terrain-z12-*.pmtiles` mirror, or Mapterhorn's tiles in dev). Mapterhorn blends national
+  lidar terrain models (Germany, Austria, Slovakia, Britain, the Netherlands, Romania…) and
+  falls back to Copernicus GLO-30, a _surface_ model, where none is open (Hungary, Serbia,
+  Bulgaria, Croatia…) — there towns and forests read a few metres high. This line used to say
+  "Copernicus GLO-30 underneath" without qualification; the catalogue was read on
+  12 Oct 2026, see `.claude/rules/sightlines.md`. One tile is 50–150 KB, which is why it is not done in the browser.
   Spot checks against remembered heights were within ~25 m at five of six points (the
   Zugspitze summit reads ~23 m low, pixel smoothing); not checked against a survey.
   The mirror covers 25°W–80°E, 12°N–66°N; outside it the row is simply absent.

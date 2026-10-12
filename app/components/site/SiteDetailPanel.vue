@@ -153,6 +153,18 @@
           class="mt-6"
         />
 
+        <!--
+          Only a record the source calls a watchtower: the calculation answers for
+          frontier towers and says nothing for the rest, and asking for every site
+          would be a request per opened record that is null 99 times in 100.
+        -->
+        <TerrainTowerSightlines
+          v-if="site.subcategory === 'watchtower'"
+          :key="site.id"
+          :site-id="site.id"
+          class="mt-6"
+        />
+
         <EpigraphyNearbyInscriptions :id="site.id" kind="site" class="mt-6" />
         <EpigraphyNearbyAtticInscriptions :id="site.id" kind="site" class="mt-6" />
 

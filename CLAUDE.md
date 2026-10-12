@@ -152,6 +152,8 @@ app/
                AdminImageQueue AdminAuditLog AdminSystemPanel AdminStepUpDialog
     epigraphy/ EpigraphyNearbyInscriptions EpigraphyNearbyAtticInscriptions
     limes/     LimesPanel
+    terrain/   TerrainTowerSightlines TerrainSightRose TerrainRaySection TerrainRayChart
+               TerrainSectorWatch TerrainTracingProfile TerrainProfileChart
     notebook/  NotebookControls MilestoneStamps
     columns/   ColumnTrajanGallery ColumnTrajanViewer.client
                ColumnMarcusAureliusViewer.client ColumnPlatePager
@@ -174,6 +176,7 @@ app/
     admin/ useAdminStepUp
     user/ useNotebook
     limes/ useLimes
+    terrain/ useTowerSightlines useTowerRay useSectorWatch useTracingProfile useTerrainFormat
     ui/   useColorScheme useUiLocale useBreakpoint useCountryName                      (+__test__/)
   layouts/ default.vue (map shell) reading.vue (documents)
   middleware/ authenticated.ts moderator.ts admin.ts (404s, not 403s)
@@ -196,7 +199,9 @@ server/
        tiles/reference/[layer]/[z]/[x]/[y]  tiles/antiquity-polities/[year]/[z]/[x]/[y]
        isicily-inscriptions/[isicilyId]
        tiles/limes/[z]/[x]/[y]  tiles/basemap/[z]/[x]/[y]
-       sites/ (+ [id]/endorse.post.ts endorse.delete.ts needs-work)  tracings/  contributions/  places/
+       sites/ (+ [id]/endorse.post.ts endorse.delete.ts sightlines.get.ts sightlines/ray.get.ts needs-work)
+       tracings/ (+ [id]/profile.get.ts)  contributions/  places/
+       limes/sectors/[slug]/ (+ sightlines.get.ts sightlines.geojson.get.ts)
        auth/ (+ account.delete.ts export.get.ts change-password.post.ts change-email.post.ts)
        me/ (index.get/patch contributions visits bookmarks map.geojson field-kit.gpx)
        contributors/[name]
@@ -218,13 +223,14 @@ server/
          concordance-sources translate logger metrics tracing sitemap
          totp two-factor sampling
          inscriptions attic-inscriptions battles ports orbis-routes
-         coin-hoards minor-features
+         coin-hoards minor-features terrain sightlines elevation-profile
                                                                             (+__test__/)
 shared/types/  vocabulary shared by both sides
 shared/utils/  password policy, authorization rules, the limes gazetteer, JSON-LD builders,
                tile enumeration and limits, offline-cache naming, byte formatting,
                milestones, Pleiades identifiers, Linked Places (Pelagios) builders,
-               record completeness                                                (+__test__/)
+               record completeness, line of sight (sightline, seen-grid, sightline-overlay,
+               sector-watch), elevation profile                                   (+__test__/)
 scripts/import/  four-stage vici.org import + vici-licences.ts (shared vocabulary)
                  guard.ts (upstream delta tripwire, +__test__/)
                  02c-geo-names.ts 04-mirror-basemap-tiles.ts 05-antiquity-atlas.ts
@@ -236,6 +242,7 @@ scripts/import/  four-stage vici.org import + vici-licences.ts (shared vocabular
                  21-itinere-roads.ts 22-nomisma-mints.ts 23-wikidata-monuments.ts
                  24-isicily-inscriptions.ts 25-cliopatria-polities.ts 26-hillforts-atlas.ts
                  atlas-cache.ts
+scripts/sightlines/build-sector-sightlines.ts  what a sector's towers see together (`pnpm sightlines:build`)
 scripts/generate-og-placeholders.ts  static per-category Open Graph cards, run by hand
 scripts/generate-brand-assets.ts  the V mark, favicon and partner badges; `pnpm brand:build` runs it with icons and OG cards
 scripts/brand/vestigian-mark.ts  the one definition of the mark

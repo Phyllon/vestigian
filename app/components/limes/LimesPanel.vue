@@ -402,6 +402,8 @@
             </NuxtLink>
           </div>
 
+          <TerrainSectorWatch :key="sector.slug" :slug="sector.slug" />
+
           <ol class="border-t border-paper-200 dark:border-night-700">
             <li
               v-for="installation in roll"

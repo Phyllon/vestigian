@@ -654,7 +654,7 @@ const resolveTerrainUrl = (source: BasemapSource): string =>
 const isPmtilesTerrainUrl = (url: string): boolean =>
   url.startsWith('pmtiles://') || /\.pmtiles(?:\?|$)/.test(url)
 
-const ELEVATION_ATTRIBUTION =
+export const ELEVATION_ATTRIBUTION =
   'Elevation: <a href="https://mapterhorn.com/attribution" target="_blank" rel="noopener">Mapterhorn</a> and the open elevation sources it lists'
 
 /**

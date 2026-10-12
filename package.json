@@ -60,6 +60,7 @@
     "import:basemap": "tsx --env-file-if-exists=.env scripts/import/04-mirror-basemap-tiles.ts",
     "import:atlas": "tsx --env-file-if-exists=.env scripts/import/05-antiquity-atlas.ts",
     "import:limes": "tsx --env-file-if-exists=.env scripts/import/06-limes.ts",
+    "sightlines:build": "tsx --env-file-if-exists=.env scripts/sightlines/build-sector-sightlines.ts",
     "import:tabula-peutingeriana": "tsx --env-file-if-exists=.env scripts/import/10-tabula-peutingeriana.ts",
     "import:column-reliefs": "tsx --env-file-if-exists=.env scripts/import/11-column-reliefs.ts",
     "import:edh-inscriptions": "tsx --env-file-if-exists=.env scripts/import/12-edh-inscriptions.ts",

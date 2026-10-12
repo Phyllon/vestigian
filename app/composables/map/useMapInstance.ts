@@ -51,6 +51,14 @@ export const useMapInstance = (): Ref<MapLibreMap | null> => {
   return map
 }
 
+/**
+ * The map when there is one above this component, `null` on a reading page that
+ * has none — for a control that is a convenience beside the map (a "fit the view"
+ * button) and must still render where there is no map to move.
+ */
+export const useOptionalMapInstance = (): Ref<MapLibreMap | null> | null =>
+  inject(MAP_INJECTION_KEY, null)
+
 const DEFAULT_CAMERA: CameraState = {
   // Centred on the Alps, which puts the densest part of the data on screen at
   // the opening zoom without favouring one modern country.

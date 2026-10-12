@@ -123,6 +123,13 @@
           </p>
         </div>
 
+        <TerrainTracingProfile
+          v-if="tracing.kind === 'line'"
+          :id="tracing.id"
+          :key="tracing.id"
+          class="mt-6"
+        />
+
         <EpigraphyNearbyInscriptions :id="tracing.id" kind="tracing" class="mt-6" />
         <EpigraphyNearbyAtticInscriptions :id="tracing.id" kind="tracing" class="mt-6" />
 

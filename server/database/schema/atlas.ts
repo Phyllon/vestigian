@@ -3,11 +3,13 @@ import {
   customType,
   index,
   integer,
+  jsonb,
   numeric,
   pgEnum,
   pgTable,
   serial,
   text,
+  timestamp,
   uniqueIndex,
   varchar,
 } from 'drizzle-orm/pg-core'
@@ -578,3 +580,33 @@ export const limesSegments = pgTable(
     index('limes_segments_sector_idx').on(table.sectorId),
   ],
 )
+
+/**
+ * What the towers of one frontier sector, taken together, could see — the chain
+ * of sight between them, the ground they overlook, the stretches of the line no
+ * tower watches. Derived: written by `pnpm sightlines:build`, never by a request,
+ * because it needs a viewshed from every tower and a sight line between every
+ * pair near enough to try (see `.claude/rules/sightlines.md`).
+ *
+ * **Keyed by the sector's slug, with no foreign key.** `import:limes` rebuilds
+ * `limes_sectors` and its serial ids; a result that hung off an id would be
+ * deleted by a re-import or, worse, attached to a different sector. The slug is
+ * the sector's name; `model_version` and `computed_at` say how old the answer is.
+ *
+ * `summary` is `SectorWatchSummary`, a few kilobytes; `layers` is a GeoJSON
+ * FeatureCollection (ground overlooked, ground watched by three or more, the
+ * blind stretches, the links), which can be several hundred kilobytes and is only
+ * ever read when the reader asks for it on the map. Both are jsonb because
+ * nothing asks a question of them in SQL: they are read whole and served.
+ *
+ * Licence: derived from ODbL sector geometry, CC BY-SA tower records and terrain
+ * models, kept in its own table and in no `/api/data` feed, like every other
+ * table in this file.
+ */
+export const limesSectorSightlines = pgTable('limes_sector_sightlines', {
+  sectorSlug: varchar('sector_slug', { length: 80 }).primaryKey(),
+  modelVersion: integer('model_version').notNull(),
+  computedAt: timestamp('computed_at', { withTimezone: true }).notNull().defaultNow(),
+  summary: jsonb('summary').notNull(),
+  layers: jsonb('layers').notNull(),
+})

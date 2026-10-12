@@ -558,6 +558,46 @@ Expect roughly: `osm` ~3.4k km, `vici` ~0.7k, `ohm` ~0.15k, `awmc` ~0.5k, `exten
 If `limes_segments.source` is missing the deploy's migration did not run — read the `migrate`
 container's log before restoring.
 
+## 14c. Sector sightlines — migration `0034` and a table dump
+
+What a sector's towers could see together (the chain, the overlooked ground, the blind stretches
+— `.claude/rules/sightlines.md`) is **derived**: `pnpm sightlines:build` walks the terrain from every
+tower, which is minutes of tile reads, so it is run where the terrain and the repository are and
+**shipped as a table**, the same way as §14b. Never run it on the VPS.
+
+**The schema half is automatic.** Migration `0034` creates `limes_sector_sightlines`
+(`sector_slug` primary key, no foreign key — `import:limes` rebuilds the sector ids — plus
+`model_version`, `computed_at`, `summary` jsonb, `layers` jsonb); additive, so the previous `app`
+keeps serving. Until the data is loaded the sector panel simply shows no "Watching the frontier"
+section: the endpoint answers `null`, which is an ordinary answer.
+
+```bash
+# 1. Local — after `pnpm import:limes`, with the terrain reachable.
+pnpm sightlines:build
+docker exec vestigian-dev-postgres-1 pg_dump -U vestigian -d vestigian \
+  -Fc --no-owner --no-acl --data-only -t limes_sector_sightlines > sightlines.dump
+rsync -avP sightlines.dump deploy@<vps-ip>:/tmp/
+
+# 2. VPS — after the deploy: confirm the table exists, then load.
+docker exec <postgres-container> psql -U vestigian -d vestigian -c '\d limes_sector_sightlines'
+docker exec <postgres-container> psql -U vestigian -d vestigian -c \
+  "TRUNCATE limes_sector_sightlines"
+docker exec -i <postgres-container> pg_restore --no-owner --no-acl --data-only \
+  -U vestigian -d vestigian < /tmp/sightlines.dump
+
+# 3. VPS — check: nine sectors on the 12 Oct 2026 import; the largest layers are the Upper German.
+docker exec <postgres-container> psql -U vestigian -d vestigian -c \
+  "SELECT sector_slug, model_version, computed_at::date,
+          (summary->>'towerCount')::int AS towers,
+          pg_column_size(layers) / 1024 AS layers_kb
+   FROM limes_sector_sightlines ORDER BY 1"
+```
+
+No cache to bump: the two routes read the table directly and answer `private, max-age=3600`.
+`limes_sector_sightlines` is derived from tables that are themselves restored from dumps, so a
+sector re-imported without re-running the script keeps the _old_ answer — the panel prints when it
+was worked out, and from how many towers, for exactly that reason.
+
 ## 15. Basemap (PMTiles)
 
 Production hard-codes `NUXT_PUBLIC_BASEMAP_PROVIDER: pmtiles` — the map is

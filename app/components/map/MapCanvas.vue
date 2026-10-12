@@ -105,6 +105,17 @@
   } = useNotebookOverlay()
   const { attachAtlasPlaceOverlay } = useAtlasPlaceOverlay()
   const {
+    collection: sightlineCollection,
+    attachSightlineOverlay,
+    keepSightlineThroughStyleChanges,
+    refreshSightlineOverlay,
+  } = useSightlineOverlay()
+  const {
+    layers: sectorWatchLayers,
+    syncSectorWatchOverlay,
+    keepSectorWatchThroughStyleChanges,
+  } = useSectorWatchOverlay()
+  const {
     isActive: isShowingTabulaPeutingerianaOverlay,
     load: loadTabulaPeutingerianaOverlay,
     attachTabulaPeutingerianaOverlay,
@@ -192,6 +203,16 @@
   // notebook keeps coordinates on every entry precisely so this needs no fetch.
   watch(notebookOverlay, () => {
     if (map.value) refreshNotebookOverlay(map.value)
+  })
+
+  // A tower's field of view, or the cursor on a profile, changing under an open panel.
+  watch(sightlineCollection, () => {
+    if (map.value) refreshSightlineOverlay(map.value)
+  })
+
+  // The ground a sector's towers overlook, switched on or off from its panel.
+  watch(sectorWatchLayers, () => {
+    if (map.value) syncSectorWatchOverlay(map.value)
   })
 
   watch(isShowingTabulaPeutingerianaOverlay, async (isActive) => {
@@ -390,6 +411,10 @@
       keepReferenceOverlaysThroughStyleChanges(instance)
       attachModernLabelsOverlay(instance)
       keepModernLabelsOverlayThroughStyleChanges(instance)
+      // Before the shared overlay, so the outline lies under the marks it surrounds.
+      keepSectorWatchThroughStyleChanges(instance)
+      attachSightlineOverlay(instance)
+      keepSightlineThroughStyleChanges(instance)
       attachOverlay(instance)
       keepOverlayThroughStyleChanges(instance)
       refreshLimesDimming(instance)

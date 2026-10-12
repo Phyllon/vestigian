@@ -32,6 +32,7 @@ export const loadSiteDetail = async (
       slug: string
       title: string
       category: SiteDetail['category']
+      subcategory: string | null
       summary: string | null
       description: string | null
       period_from: number | null
@@ -44,7 +45,7 @@ export const loadSiteDetail = async (
     }[]
   >`
     SELECT
-      s.id, s.slug, s.title, s.category, s.summary, s.description,
+      s.id, s.slug, s.title, s.category, s.subcategory, s.summary, s.description,
       s.period_from, s.period_to, s.modern_place, s.country_code,
       ST_X(s.geom) AS lon, ST_Y(s.geom) AS lat, s.updated_at
     FROM sites s
@@ -112,6 +113,7 @@ export const loadSiteDetail = async (
     slug: site.slug,
     title: site.title,
     category: site.category,
+    subcategory: site.subcategory,
     summary: site.summary,
     description: site.description,
     periodFrom: site.period_from,

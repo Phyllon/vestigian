@@ -149,6 +149,11 @@ export interface SiteImage {
 }
 
 export interface SiteDetail extends SiteSummary {
+  /**
+   * The source's own word for what this is (`watchtower`, `fort`, `milestone`…),
+   * where it had one. Free text — the vocabulary is the source's, not ours.
+   */
+  subcategory: string | null
   summary: string | null
   description: string | null
   periodFrom: number | null

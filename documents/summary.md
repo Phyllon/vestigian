@@ -663,6 +663,47 @@ source catalogue through a self-hosted LibreTranslate instance.
 
 ---
 
+### 5.11 Line of sight from the frontier towers, and the relief along a line
+
+Full narrative — the terrain it stands on (12 m pixels, accuracy, bare earth vs surface), the height
+model and where each figure was taken from, the three amendments, results and limits — is in
+[`line-of-sight-and-relief.md`](line-of-sight-and-relief.md).
+
+A limes watchtower's record now says what its guard platform could have seen, and every line tracing
+carries a profile of the ground along it. All of it is a **calculation over the elevation tiles the
+map already reads**, and the interface labels it so.
+
+- **The tower** (447 `watchtower` records within 1.5 km of a limes sector; the 5,720 Sardinian
+  nuraghi filed under the same word are excluded): the view at three assumed heights — the
+  _unbroken_ view and everything _seen_, which are different things for a tower on a rim (Turm
+  15-25b has 0.5 km² open and sees 28 km²) — drawn as a polar diagram with its figures written on
+  it, written out by compass point, and on the map as the same shapes with the same numbers. Pick a
+  direction and the panel explains it from the numbers of the ground: the crest that ends the open
+  view, the long shadow behind it ("dead ground") and where ground comes back.
+- **Both ways.** A toggle turns the view round: from where could this tower be seen? (Sight is
+  symmetric; the tower's whole height is the thing looked at.)
+- **Neighbours.** Whether each of the six nearest towers is in sight, at all three heights, with
+  the ground between them as a section.
+- **The sector** (a script, `pnpm sightlines:build`): the towers of a frontier sector taken
+  together — could a signal pass from tower to tower (83 % of the Raetian Limes's recorded chain, 93 %
+  of the Upper German), where it breaks, what share of the line and how much country is overlooked by
+  one tower and by three, and the stretches no tower watches — with the chain, the ground and the
+  gaps drawn on the map. About the towers _recorded_: where none is, the line is unrecorded, not
+  unwatched.
+- **The height is an estimate and says so.** No tower survives to its original height; the figure
+  (about 10 m overall, guard platform 6–8.5 m, eyes 1.6 m above it) is a convergence of heritage-site
+  handbooks, the Idstein-Dasbach replica and the Gask Ridge analysis, with its sources in
+  `.claude/rules/sightlines.md`. A measurement it is not.
+- **"No trees" is mostly a fact about the data, not an assumption.** Mapterhorn's tiles are national
+  lidar bare-earth models in Germany, Austria, Slovakia, Britain, the Netherlands and Romania, and a
+  surface model (Copernicus GLO-30) where none is open — the Hungarian, Serbian and Bulgarian Danube.
+  The panel prints a caution for the latter.
+- **The profile** gives elevation against distance, climb and fall (ignoring wobbles under 3 m), the
+  average slope and the steepest stretch, with a cursor that is also a dot on the map. For an
+  aqueduct the net fall is the meaningful figure; the terrain it crosses is not its channel.
+- **Geometry**: curvature and ordinary refraction are allowed for; the target is a standing person.
+  It is geometry, not eyesight — haze and the limit of the eye cut a real view short.
+
 ## 6. Cross-information, verification & enrichment
 
 Vestigian treats every borrowed identifier as **a lead, not a guarantee** —

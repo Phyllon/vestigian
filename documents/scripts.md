@@ -62,6 +62,20 @@ Stage **13** is genuinely shared by two scripts (`13-battles.ts` and
 `13-edh-inscription-images.ts`) — a real numbering collision in the repo, not
 a typo here; both run independently and neither depends on the other.
 
+### `sightlines/build-sector-sightlines.ts` — derived, not imported
+
+`pnpm sightlines:build [sector-slug …]` — what the recorded towers of each frontier sector could
+do together: the chain of sight between neighbouring towers and where it breaks, the ground
+overlooked by one tower and by three or more, the stretches of the line no tower watches. It reads
+`sites` (watchtowers on a sector), `limes_sectors` and the elevation tiles (the terrain mirror, or
+Mapterhorn when `NUXT_PUBLIC_BASEMAP_TERRAIN_URL` is empty) and writes **`limes_sector_sightlines`**
+(one row per sector: a summary and the GeoJSON layers). Run it after `pnpm import:limes`, after the
+tower records change in bulk, and when `SIGHTLINE_MODEL_VERSION` moves. About six minutes for every
+sector on the dev import (the Upper German Limes, 238 towers, about two), nearly all of it
+fetching terrain tiles. It is **not** a pipeline stage: it imports nothing, it does not touch the
+atlas generation, and the table is in the nightly dump like any other. Details, measured results and
+the licence reasoning: `.claude/rules/sightlines.md`.
+
 ### `guard.ts` — the upstream tripwire
 
 Not a stage; a module the stages call. Each guarded import records its row

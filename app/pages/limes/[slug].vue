@@ -118,6 +118,8 @@
       </div>
     </dl>
 
+    <TerrainSectorWatch :key="sector.slug" :slug="sector.slug" open class="mt-8" />
+
     <h2 class="mt-10 font-display text-xl text-ink-900 dark:text-paper-100">
       {{ t('limesSectorPage.alongTheLine') }}
     </h2>
