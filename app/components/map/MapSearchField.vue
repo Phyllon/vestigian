@@ -6,6 +6,7 @@
   const map = useMapInstance()
   const { term, results, isSearching } = useSiteSearch()
   const { selectSite } = useSiteQuery()
+  const { setSitesActive } = useBasemapStyle()
   const revealSearchLayer = useRevealSearchLayer()
   const { countryName } = useCountryName()
 
@@ -44,6 +45,12 @@
    * with its own extent. A reference-layer name (hillfort, port, monument…)
    * is a point of the same size, and also switches its layer on — see
    * `useRevealSearchLayer`.
+   *
+   * A site is drawn by the "Show sites" layer, which is off until a reader
+   * switches it on, so picking one turns it on as well — otherwise the camera
+   * arrives with the record open and nothing marking it (the featured list and
+   * the frontier panel do the same). Switched on before the selection is set,
+   * so `MapCanvas`'s watcher attaches the layer and rings the open record.
    */
   const RESULT_ZOOM: Record<MapSearchResult['kind'], number> = {
     site: 15,
@@ -71,7 +78,10 @@
       duration: 1200,
       essential: true,
     })
-    if (result.kind === 'site') selectSite(result.id)
+    if (result.kind === 'site') {
+      setSitesActive(true)
+      selectSite(result.id)
+    }
     if (result.kind === 'reference') revealSearchLayer(result.layer)
     term.value = ''
   }

@@ -1631,6 +1631,13 @@ have their own browse pages.
   (`useRevealSearchLayer`) — a reference row has no record panel, and without
   the layer on the camera would arrive at an empty map. A new layer needs an
   entry in `REFERENCE_SEARCH_SOURCES`, an index, and a reveal.
+- **Picking a _site_ switches "Show sites" on too** (`MapSearchField.goToResult`,
+  `setSitesActive(true)` before `selectSite`). The layer is off by default and the
+  panel opens regardless, so before this a searched fortification arrived as an
+  open record with no marker and no selection ring — `MapCanvas`'s `isShowingSites`
+  watcher attaches the layer and rings the record. Covered by `e2e/site-search.spec.ts`
+  (written, not run). **Not done:** an ancient-place result is only drawn on the
+  Barrington sheet, and it does not change the reader's basemap.
 - The input is `type="text" role="searchbox"`, not `type="search"`: the native
   search type draws its own clear button on hover, a second X beside ours.
 - Debounce is 450 ms (`SEARCH_DEBOUNCE_MS`) — four requests go out per search.
