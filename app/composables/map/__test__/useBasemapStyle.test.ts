@@ -11,10 +11,12 @@ import type {
 import type { BasemapSource } from '#shared/types'
 import {
   BASEMAP_VIEWS,
+  DEFAULT_BASEMAP_VIEW,
   LIMES_ATTRIBUTION,
   MAP_LABEL_FONT,
   buildBasemapStyle,
   isAntiquityView,
+  parseStoredBasemapView,
   resolveSheetTone,
 } from '../useBasemapStyle'
 
@@ -727,5 +729,32 @@ describe('the views on offer', () => {
       expect(style.sources.terrain).toBeDefined()
       expect(style.layers.some((layer) => layer.id === 'atlas-hillshade')).toBe(true)
     })
+  })
+})
+
+describe('parseStoredBasemapView', () => {
+  it('gives back every sheet on offer, exactly as it was written', () => {
+    for (const option of BASEMAP_VIEWS) {
+      expect(parseStoredBasemapView(option.value), option.value).toBe(option.value)
+    }
+  })
+
+  it('is null when nothing was ever stored, so the default applies', () => {
+    expect(parseStoredBasemapView(null)).toBeNull()
+    expect(DEFAULT_BASEMAP_VIEW).toBe('osm-standard')
+  })
+
+  it('refuses a sheet that is not on offer rather than opening on one with no way back', () => {
+    // `terrain` was a real sheet once; an old browser may still hold it.
+    for (const raw of [
+      'terrain',
+      'modern',
+      '',
+      ' satellite',
+      'SATELLITE',
+      '{"view":"satellite"}',
+    ]) {
+      expect(parseStoredBasemapView(raw), raw).toBeNull()
+    }
   })
 })

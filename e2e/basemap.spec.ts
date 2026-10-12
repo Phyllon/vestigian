@@ -25,6 +25,44 @@ const chooseBasemap = async (page: Parameters<typeof openMap>[0], label: string)
   await page.getByRole('menuitemradio', { name: label }).click()
 }
 
+test.describe('what the reader chose is still chosen after a reload', () => {
+  test('the map type', async ({ page }) => {
+    await openMap(page)
+    await expect(page.getByRole('button', { name: 'Basemap: Standard' })).toBeVisible()
+
+    await chooseBasemap(page, 'Satellite')
+    await expect(page.getByRole('button', { name: 'Basemap: Satellite' })).toBeVisible()
+
+    await page.reload()
+    await waitForMapReady(page)
+
+    await expect(page.getByRole('button', { name: 'Basemap: Satellite' })).toBeVisible()
+  })
+
+  test('is ignored when it names a sheet that is not on offer', async ({ page }) => {
+    // `terrain` was a sheet once; a browser that still holds it must open on the default.
+    await page.addInitScript(() => localStorage.setItem('vestigian-basemap-view', 'terrain'))
+    await openMap(page)
+
+    await expect(page.getByRole('button', { name: 'Basemap: Standard' })).toBeVisible()
+  })
+
+  test('the light or night notebook', async ({ page }) => {
+    await openMap(page)
+    const html = page.locator('html')
+    await expect(html).toHaveClass(/light/)
+
+    await page.getByRole('button', { name: 'Switch to night' }).click()
+    await expect(html).toHaveClass(/dark/)
+
+    await page.reload()
+    await waitForMapReady(page)
+
+    await expect(html).toHaveClass(/dark/)
+    await expect(page.getByRole('button', { name: 'Switch to day' })).toBeVisible()
+  })
+})
+
 test.describe('the basemap switcher', () => {
   test('offers the antiquity sheets in their own group', async ({ page }) => {
     await openMap(page)

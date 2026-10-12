@@ -1234,12 +1234,26 @@ labels" and the style still read it as if it were polygons.
 ## The default sheet is the standard OSM view, in light mode
 
 A first visit opens on `osm-standard` (`DEFAULT_BASEMAP_VIEW`), not `vestigian`,
-and `colorMode.preference` is `'light'` rather than `'system'`. Neither is
-persisted beyond what already was: the view lives in `useState` (the camera hash
-is the only durable map state), and a reader who switches to the night notebook
-keeps it through `vestigian-color-mode`. Nothing else keyed off the old default —
-`resolveSheetTone` already forces `osm-standard` light in both themes, so the
+and `colorMode.preference` is `'light'` rather than `'system'`. Nothing else keyed off the
+old default — `resolveSheetTone` already forces `osm-standard` light in both themes, so the
 sheet and the interface agree on a first visit.
+
+**Both choices are remembered (2026-10-11).** The colour mode always was: `@nuxt/color-mode`
+writes `vestigian-color-mode` and restores it before Vue mounts (re-verified: toggle, reload,
+`html.dark` and the stored value both stay). The **sheet was not** — it lived only in
+`useState`, so every reload went back to Standard. It is now `localStorage`
+`vestigian-basemap-view`, the view's own id: written by `setView`, read by `restoreView`,
+which `MapCanvas` calls in `onMounted` **before** it creates the map, so the map is built on
+the remembered sheet and does not draw Standard and swap (`styleAtCreation` keeps the
+`currentStyle` watcher from applying that same style a second time). Never read in a
+`useState` factory or the composable body — that runs in SSR and the client would hydrate
+from the server's answer. `parseStoredBasemapView` accepts only a view in `BASEMAP_VIEWS`, so
+a value from a sheet that was later dropped (`terrain`) or edited by hand falls back to the
+default instead of opening on something the switcher cannot show. **The overlays are still not
+remembered**, nor is the period — only the sheet and the colour mode were asked for. A
+shared `#map=` link carries a camera and no sheet, so its recipient sees their own.
+Same storage class as the other keys: `gdpr-legal.md` row and `privacy.cookiesBody` (six
+locales) — **if the key changes, change both.**
 
 ## "About this spot" in a reference mark's info box
 

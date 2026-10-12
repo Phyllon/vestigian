@@ -10,6 +10,7 @@
   const {
     currentStyle,
     view,
+    restoreView,
     isDark,
     periodYear,
     isClusteringSites,
@@ -172,7 +173,13 @@
     }
   }
 
+  /** What the map was created with, so the remembered sheet is not applied a second time. */
+  let styleAtCreation: typeof currentStyle.value | null = null
+
   watch(currentStyle, (style) => {
+    // Restoring the remembered sheet changes `currentStyle` in the same tick the
+    // map is built from it; the map already has this one.
+    if (style === styleAtCreation) return
     // setStyle keeps the camera; the overlay is restored by the styledata hook.
     map.value?.setStyle(style)
   })
@@ -336,6 +343,11 @@
 
   onMounted(() => {
     if (!container.value) return
+
+    // The remembered sheet, before the map exists: after hydration, so the
+    // server's markup (the default sheet) and the first client render agree.
+    restoreView()
+    styleAtCreation = currentStyle.value
 
     const instance = createMapInstance({
       container: container.value,

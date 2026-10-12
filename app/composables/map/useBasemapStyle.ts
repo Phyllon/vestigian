@@ -1972,9 +1972,24 @@ export const buildBasemapStyle = (request: StyleRequest): StyleSpecification => 
  * The sheet a first visit opens on: the familiar OpenStreetMap look, so a
  * reader meets a map they already know how to read before any of the atlas's
  * own layers are switched on. `vestigian` stays one tap away in the switcher.
- * Not persisted — the camera hash is the only durable map state.
+ * A reader who chose another sheet gets that one back (`BASEMAP_VIEW_STORAGE_KEY`);
+ * this is only where a browser with nothing stored starts.
  */
 export const DEFAULT_BASEMAP_VIEW: BasemapView = 'osm-standard'
+
+/**
+ * Which sheet the reader last chose, kept in `localStorage` as the view's own
+ * id and nothing else.
+ *
+ * Same class of storage as the colour mode, the intro tour's answer and the
+ * featured-list switches (`useFeaturedSites.ts`): the reader's own explicit act
+ * of picking a sheet writes it, it is a single word, it is never a cookie and
+ * never sent to us, so no consent banner is needed (§25(2) no. 2 TDDDG,
+ * `gdpr-legal.md`). If the key or its contents change, change the disclosure in
+ * `privacy.cookiesBody` in all six locales and the storage table in
+ * `gdpr-legal.md` with it.
+ */
+export const BASEMAP_VIEW_STORAGE_KEY = 'vestigian-basemap-view'
 
 /**
  * `label`/`hint` hold i18n key paths, not display text — this array is a
@@ -2017,6 +2032,32 @@ export const BASEMAP_VIEWS: BasemapOption[] = [
   },
 ]
 
+/**
+ * Reads what `setView` wrote, and only a sheet that is on offer. The stored
+ * value is whatever the browser hands back — including a sheet a later version
+ * dropped (`terrain` once was one) or a value somebody edited by hand — and a
+ * map that opens on a view the switcher cannot show would have no way to be
+ * switched away from it.
+ */
+export const parseStoredBasemapView = (raw: string | null): BasemapView | null =>
+  BASEMAP_VIEWS.find((option) => option.value === raw)?.value ?? null
+
+const readStoredBasemapView = (): BasemapView | null => {
+  try {
+    return parseStoredBasemapView(localStorage.getItem(BASEMAP_VIEW_STORAGE_KEY))
+  } catch {
+    return null
+  }
+}
+
+const writeStoredBasemapView = (next: BasemapView): void => {
+  try {
+    localStorage.setItem(BASEMAP_VIEW_STORAGE_KEY, next)
+  } catch {
+    // Private browsing / storage blocked: the choice lasts until the tab closes.
+  }
+}
+
 export const BASEMAP_GROUP_LABELS: Record<BasemapGroup, string> = {
   today: 'Today',
   antiquity: 'Antiquity',
@@ -2042,6 +2083,7 @@ export const useBasemapStyle = () => {
   const config = useRuntimeConfig()
   const colorMode = useColorMode()
   const view = useState<BasemapView>('basemap-view', () => DEFAULT_BASEMAP_VIEW)
+  const hasRestoredView = useState<boolean>('basemap-view-restored', () => false)
 
   /**
    * Tile URLs have to be absolute.
@@ -2365,6 +2407,21 @@ export const useBasemapStyle = () => {
 
   const setView = (next: BasemapView): void => {
     view.value = next
+    writeStoredBasemapView(next)
+  }
+
+  /**
+   * Client-only — `MapCanvas` calls it in `onMounted`, before it creates the map,
+   * so the map is built on the remembered sheet instead of drawing the default
+   * and swapping. Never from this composable's body or a `useState` factory:
+   * that runs during SSR, where there is no storage, and the client would
+   * hydrate from whatever the server answered. Idempotent.
+   */
+  const restoreView = (): void => {
+    if (hasRestoredView.value) return
+    hasRestoredView.value = true
+    const stored = readStoredBasemapView()
+    if (stored) view.value = stored
   }
 
   const setLimesActive = (next: boolean): void => {
@@ -2378,6 +2435,7 @@ export const useBasemapStyle = () => {
   return {
     view,
     setView,
+    restoreView,
     currentStyle,
     isDark,
     sheetTone,
