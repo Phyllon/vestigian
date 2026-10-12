@@ -25,6 +25,9 @@
     `${base}/api/data/sites.lp.json?${exampleQuery}&offset=100`,
   ]
 
+  const creditLine = computed(() => t('licence.reuseCreditBody', { url: base }))
+  const { copy, copied, isSupported } = useClipboard({ copiedDuring: 2000 })
+
   useHead({ title: t('licence.title') })
   useSeoMeta({ description: t('licence.intro') })
   useCanonicalUrl()
@@ -195,6 +198,32 @@
       <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
         {{ t('licence.reuseNotIncluded') }}
       </p>
+      <h3
+        id="credit"
+        class="mt-5 scroll-mt-6 font-display text-lg text-ink-900 dark:text-paper-100"
+      >
+        {{ t('licence.reuseCreditHeading') }}
+      </h3>
+      <div class="mt-1 flex items-start gap-3">
+        <blockquote
+          class="min-w-0 flex-1 rounded-r-sm border-l-2 border-paper-400 py-1 pl-3 text-sm leading-relaxed text-ink-700 transition-colors duration-300 dark:text-paper-200"
+          :class="copied ? 'bg-verdigris-100 dark:bg-verdigris-900/40' : 'bg-transparent'"
+        >
+          {{ creditLine }}
+        </blockquote>
+        <UButton
+          v-if="isSupported"
+          :icon="copied ? 'i-lucide-check' : 'i-lucide-copy'"
+          color="neutral"
+          variant="outline"
+          size="sm"
+          :aria-label="t('licence.reuseCreditCopy')"
+          @click="copy(creditLine)"
+        />
+        <span class="sr-only" role="status">{{
+          copied ? t('licence.reuseCreditCopied') : ''
+        }}</span>
+      </div>
       <ul class="mt-3 space-y-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
         <li>
           <a
