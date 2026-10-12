@@ -1087,6 +1087,11 @@ shows a correct `Set-Cookie`, but the same request through
 
 ## 19. Still open
 
+> **Permission requests.** The five bullets that ask a source for terms (OxREP, EDH
+> photographs, AFE, PAS, Verein Deutsche Limes-Straße) have drafted emails, a
+> visible-promotion proposal and a send checklist in
+> [`documents/source-permissions/`](source-permissions/README.md). None has been sent.
+
 - **Hillshade mirror (§15a).** Not run yet. Until `TERRAIN_URL` is set the
   Barrington antiquity view draws no relief — by design, because the public
   host is Cloudflare. Script: `scripts/ops/mirror-terrain.sh`.
