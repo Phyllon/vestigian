@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 40" width="220" height="40" role="img" aria-label="Seen on Vestigian">
+  <title>Seen on Vestigian</title>
+  <rect x="0.5" y="0.5" width="219" height="39" rx="3" fill="#f2ede1" stroke="#1c1815"/>
+  <g transform="translate(8 5) scale(0.4688)" fill="#7a1f2f"><path d="M35.5 58 L60 6 L48 6 L28.5 58 Z"/><path d="M25.57 58 L35.71 58 L26.43 38 L16.29 38 Z"/><path d="M15.2 34 L23.8 34 L18.23 22 L9.63 22 Z"/><path d="M8.54 18 L15.6 18 L12.35 11 L5.29 11 Z"/><path d="M4.67 8 L10.18 8 L9.02 5.5 L3.51 5.5 Z"/></g>
+  <text x="46" y="25.5" font-family="Georgia, 'Times New Roman', serif" font-size="15" fill="#1c1815">Seen on Vestigian</text>
+  <rect x="215" y="9" width="2" height="22" fill="#7a1f2f"/>
+</svg>

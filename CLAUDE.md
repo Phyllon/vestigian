@@ -237,6 +237,8 @@ scripts/import/  four-stage vici.org import + vici-licences.ts (shared vocabular
                  24-isicily-inscriptions.ts 25-cliopatria-polities.ts 26-hillforts-atlas.ts
                  atlas-cache.ts
 scripts/generate-og-placeholders.ts  static per-category Open Graph cards, run by hand
+scripts/generate-brand-assets.ts  the V mark, favicon and partner badges; `pnpm brand:build` runs it with icons and OG cards
+scripts/brand/vestigian-mark.ts  the one definition of the mark
 scripts/warm-tiles.ts snapshot-database.ts reconcile-images.ts build-glyphs.ts
                  strip-description-html.ts backfill-country-codes.ts verify-concordances.ts
 scripts/i18n/translate-locales.ts   bootstraps i18n/locales/{fr,es,de,it,nl}.json via LibreTranslate

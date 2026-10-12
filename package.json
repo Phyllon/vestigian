@@ -79,6 +79,7 @@
     "import:cliopatria-polities": "tsx --env-file-if-exists=.env scripts/import/25-cliopatria-polities.ts",
     "import:hillforts-atlas": "tsx --env-file-if-exists=.env scripts/import/26-hillforts-atlas.ts",
     "glyphs:build": "tsx scripts/build-glyphs.ts",
+    "brand:build": "tsx scripts/generate-brand-assets.ts && pnpm icons:build && pnpm og:build",
     "og:build": "tsx scripts/generate-og-placeholders.ts",
     "icons:build": "tsx scripts/generate-app-icons.ts",
     "dashboards:build": "tsx scripts/observability/build.ts",

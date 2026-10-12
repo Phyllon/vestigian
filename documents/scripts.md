@@ -156,11 +156,12 @@ Run on the production VPS, not part of the import pipeline.
 
 Run by hand, output committed to the repo — not part of any build step.
 
-| Script                        | Run with                       | What it does                                                                                                                           |
-| ----------------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `build-glyphs.ts`             | `pnpm glyphs:build <font.ttf>` | Renders SDF label glyphs for MapLibre from a TTF (currently Noto Sans, OFL 1.1) into `public/fonts/`. Only when the fontstack changes. |
-| `generate-og-placeholders.ts` | `pnpm og:build`                | Renders one static Open Graph card per site category (plus tracings and a default) via sharp, for entities with no photograph.         |
-| `generate-app-icons.ts`       | `pnpm icons:build`             | Rasterizes `public/favicon.svg` into the PWA icon files `manifest.webmanifest` references.                                             |
+| Script                        | Run with                       | What it does                                                                                                                                                            |
+| ----------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `build-glyphs.ts`             | `pnpm glyphs:build <font.ttf>` | Renders SDF label glyphs for MapLibre from a TTF (currently Noto Sans, OFL 1.1) into `public/fonts/`. Only when the fontstack changes.                                  |
+| `generate-brand-assets.ts`    | `pnpm brand:build`             | Writes every SVG that carries the V (mark, favicon, the six "Seen on Vestigian" badges) from `scripts/brand/vestigian-mark.ts`, then runs `icons:build` and `og:build`. |
+| `generate-og-placeholders.ts` | `pnpm og:build`                | Renders one static Open Graph card per site category (plus tracings and a default) via sharp, for entities with no photograph.                                          |
+| `generate-app-icons.ts`       | `pnpm icons:build`             | Rasterizes `public/favicon.svg` into the PWA icon files `manifest.webmanifest` references.                                                                              |
 
 ## Git hooks (`scripts/`, invoked by Husky — see `.husky/`)
 

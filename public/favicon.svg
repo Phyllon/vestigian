@@ -1,6 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Vestigian">
-  <rect width="64" height="64" rx="4" fill="#f2ede1"/>
-  <line x1="14" y1="6" x2="14" y2="58" stroke="#d38a72" stroke-width="1.5"/>
-  <path d="M24 16 L34 46 L44 16" fill="none" stroke="#9a3b22" stroke-width="5"
-        stroke-linecap="round" stroke-linejoin="round"/>
+  <title>Vestigian</title>
+  <rect width="64" height="64" rx="8" fill="#f2ede1"/>
+  <g transform="translate(6 6) scale(0.8125)" fill="#7a1f2f"><path d="M35.5 58 L60 6 L48 6 L28.5 58 Z"/><path d="M25.57 58 L35.71 58 L26.43 38 L16.29 38 Z"/><path d="M15.2 34 L23.8 34 L18.23 22 L9.63 22 Z"/><path d="M8.54 18 L15.6 18 L12.35 11 L5.29 11 Z"/><path d="M4.67 8 L10.18 8 L9.02 5.5 L3.51 5.5 Z"/></g>
 </svg>
