@@ -7,6 +7,7 @@ import {
   openPeriods,
   showSites,
   toggleOverlay,
+  waitForMapReady,
   waitForTiles,
 } from './helpers/map'
 
@@ -353,6 +354,40 @@ test.describe('the basemap switcher', () => {
 
     expect(problems.cspViolations).toEqual([])
     expect(problems.pageErrors).toEqual([])
+  })
+
+  test('the settings gear says a new option has appeared, until the reader has looked', async ({
+    page,
+  }) => {
+    await openMap(page)
+    const gear = page.getByRole('button', { name: 'Map settings' })
+    await expect(gear, 'nothing is new while the sites are off').toHaveAccessibleName(
+      'Map settings',
+    )
+
+    await showSites(page)
+    await expect(
+      gear,
+      'the row that sites bring is announced on the closed gear',
+    ).toHaveAccessibleName('Map settings, new option available')
+
+    await gear.click()
+    const toggle = page.getByRole('switch', { name: /Every site as its own marker/ })
+    await expect(toggle).toBeVisible()
+    await expect(toggle, 'the row itself says it is the new one').toHaveAccessibleName(
+      /marker\s+New$/,
+    )
+    await page.keyboard.press('Escape')
+    await expect(gear, 'closing the settings is what counts as having looked').toHaveAccessibleName(
+      'Map settings',
+    )
+
+    // Remembered: the sites are off again after a reload, and switching them on
+    // does not announce a row the reader has already met.
+    await page.reload()
+    await waitForMapReady(page)
+    await showSites(page)
+    await expect(gear).toHaveAccessibleName('Map settings')
   })
 
   test('keeps the site overlay across a style swap', async ({ page }) => {

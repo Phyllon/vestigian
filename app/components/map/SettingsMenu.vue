@@ -1,4 +1,7 @@
 <script setup lang="ts">
+  import { SETTINGS_OPTION_IDS } from '~/composables/map/useSettingsHints'
+  import type { SettingsOptionId } from '~/composables/map/useSettingsHints'
+
   /**
    * The switches that change how the map is read rather than what it shows —
    * the "featured nearby" list, and counted clusters against every site — in one
@@ -12,9 +15,21 @@
    * switch is flipped, because the change happens behind it and closing would hide
    * the only feedback that anything did. Its content is not rendered until it
    * opens, so the switches cost nothing until someone looks for them.
+   *
+   * A row that only exists while another feature is on is announced, because the
+   * closed gear gives no sign it has grown: a dot on the trigger while such an
+   * option is there and has not been seen, and a "New" tag on its row until the
+   * popover closes — which is what counts as having seen it. Remembered, so it
+   * is said once and not on every visit. See `useSettingsHints.ts`.
    */
-  const { isEnabled, restore, setEnabled } = useFeaturedSites()
+  const { isEnabled, restore: restoreFeatured, setEnabled } = useFeaturedSites()
   const { isShowingSites, isClusteringSites, setSitesClustered } = useBasemapStyle()
+  const {
+    seenOptions,
+    hasRestored: haveHintsRestored,
+    restore: restoreHints,
+    acknowledge,
+  } = useSettingsHints()
   const { t } = useI18n()
 
   const isOpen = ref(false)
@@ -31,6 +46,32 @@
     set: (showEverySite: boolean) => setSitesClustered(!showEverySite),
   })
 
+  // One entry per id in `SETTINGS_OPTION_IDS`: the row's `v-if` and the hint read the
+  // same fact, so a row cannot appear without being announced.
+  const isOptionAvailable = computed<Record<SettingsOptionId, boolean>>(() => ({
+    'every-site': isShowingSites.value,
+  }))
+
+  const availableOptions = computed(() =>
+    SETTINGS_OPTION_IDS.filter((id) => isOptionAvailable.value[id]),
+  )
+
+  // Held back until the saved answer is read, so someone who has met an option
+  // never gets its dot for the moment before that.
+  const newOptions = computed<SettingsOptionId[]>(() =>
+    haveHintsRestored.value
+      ? availableOptions.value.filter((id) => !seenOptions.value.includes(id))
+      : [],
+  )
+
+  // Not while the popover is open: the rows are in front of the reader then, and
+  // the tag on the new one says which it is.
+  const hasHint = computed(() => newOptions.value.length > 0 && !isOpen.value)
+
+  const triggerLabel = computed(() =>
+    hasHint.value ? t('mapSettings.labelWithNew') : t('mapSettings.label'),
+  )
+
   const popoverContent = { side: 'left', align: 'end', sideOffset: 8 } as const
 
   // Nuxt UI draws an off switch in `bg-accented`, a tint barely darker than the
@@ -43,9 +84,18 @@
     description: 'text-ink-500 dark:text-paper-400',
   }
 
+  // Closing is what counts as having looked: opening alone would clear the dot
+  // before the reader had found the row, and with it the tag that points to it.
+  watch(isOpen, (open) => {
+    if (!open) acknowledge(availableOptions.value)
+  })
+
   // The saved choice is applied here as well as by the list itself, so the
   // switches are right whichever of the two mounts first.
-  onMounted(restore)
+  onMounted(() => {
+    restoreFeatured()
+    restoreHints()
+  })
 </script>
 
 <template>
@@ -59,12 +109,21 @@
   >
     <button
       type="button"
-      class="leaf grid size-11 place-items-center text-ink-700 transition hover:bg-paper-200 dark:text-paper-200 dark:hover:bg-night-700"
-      :aria-label="t('mapSettings.label')"
-      :title="t('mapSettings.label')"
+      class="leaf relative grid size-11 place-items-center text-ink-700 transition hover:bg-paper-200 dark:text-paper-200 dark:hover:bg-night-700"
+      :aria-label="triggerLabel"
+      :title="triggerLabel"
       data-tour="settings"
     >
       <UIcon name="i-lucide-settings" class="size-5" aria-hidden="true" />
+      <!--
+        A shape, not only a colour, and said in words as well: the dot is
+        decoration for the eye, the label above carries it for everyone else.
+      -->
+      <span
+        v-if="hasHint"
+        class="absolute right-1.5 top-1.5 size-2.5 rounded-full bg-oxide-600 ring-2 ring-[var(--surface-raised)] dark:bg-oxide-300"
+        aria-hidden="true"
+      />
     </button>
 
     <template #content>
@@ -86,13 +145,23 @@
           </USwitch>
         </li>
 
-        <li v-if="isShowingSites" class="px-4 py-3">
+        <li v-if="isOptionAvailable['every-site']" class="px-4 py-3">
           <USwitch
             v-model="everySiteModel"
             :ui="switchUi"
-            :label="t('mapSettings.everySite')"
             aria-describedby="map-settings-every-site-hint"
           >
+            <template #label>
+              <span class="inline-flex flex-wrap items-center gap-x-2">
+                {{ t('mapSettings.everySite') }}
+                <span
+                  v-if="newOptions.includes('every-site')"
+                  class="rounded-full bg-oxide-600 px-1.5 font-mono text-xs leading-5 text-paper-50 dark:bg-oxide-300 dark:text-night-900"
+                >
+                  {{ t('mapSettings.newTag') }}
+                </span>
+              </span>
+            </template>
             <template #description>
               <span id="map-settings-every-site-hint">{{ t('mapSettings.everySiteHint') }}</span>
             </template>

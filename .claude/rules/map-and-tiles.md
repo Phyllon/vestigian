@@ -1698,6 +1698,24 @@ holds big picture (enlarge) and off.
 The tour anchors one step on it (`data-tour="settings"`, on the trigger inside the
 component — a `UPopover` root has no element for an attribute to fall through to).
 
+**A row that appears conditionally is announced** (2026-10-11): only _Every site as its own
+marker_ today. The closed gear gives no sign it has grown, so while such an option is available
+and unseen the trigger carries a 10px oxide dot, its accessible name/`title` becomes "Map
+settings, new option available" (`mapSettings.labelWithNew`), and the row carries a "New" tag.
+**Closing the popover is what marks it seen** — opening would clear the dot before the reader
+had found the row, and the tag with it; the dot is hidden while the popover is open, the tag is
+not. Remembered in `localStorage` `vestigian-settings-seen` (a JSON array of ids, only ids the
+build knows survive `parseSeenSettingsOptions`), so it is said once, not on every visit; read in
+`onMounted` and held back until then (`hasRestored`) so a reader who has met the option never
+sees its dot for a moment. Disclosed in `privacy.cookiesBody` (six locales) and the table in
+`gdpr-legal.md` — **if the key changes, change both.** `useSettingsHints.ts` holds the list:
+**a new conditional row takes an id in `SETTINGS_OPTION_IDS` and an entry in `SettingsMenu`'s
+`isOptionAvailable`** (the type makes the second follow from the first), and its row reads that
+same entry for its `v-if`, so it cannot appear without being announced. A row that is always
+there needs neither. Not covered: a switch elsewhere that changes what a _different_ control
+offers (the list's own big-picture button appears with the list, but it is in the list, not
+the gear).
+
 ## Raw SQL tile builders are guarded
 
 Every `build*TileSql` function returns a string run through `sql.unsafe`, so each
