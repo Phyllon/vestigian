@@ -158,7 +158,7 @@ app/
     columns/   ColumnTrajanGallery ColumnTrajanViewer.client
                ColumnMarcusAureliusViewer.client ColumnPlatePager
     tabula-peutingeriana/ TabulaPeutingerianaViewer.client
-    ui/        ThemeToggle LanguageSwitcher LanguageNotice RevisionHistory AppMenu
+    ui/        ThemeToggle LanguageSwitcher LanguageNotice RevisionHistory AppMenu AppWordmark
   composables/
     map/  useMapInstance useBasemapStyle useViewportTiles useGeolocation useSiteIcons
           useNotebookOverlay useOfflineAreas useTabulaPeutingerianaOverlay
@@ -245,7 +245,7 @@ scripts/import/  four-stage vici.org import + vici-licences.ts (shared vocabular
 scripts/sightlines/build-sector-sightlines.ts  what a sector's towers see together (`pnpm sightlines:build`)
 scripts/generate-og-placeholders.ts  static per-category Open Graph cards, run by hand
 scripts/generate-brand-assets.ts  the V mark, favicon and partner badges; `pnpm brand:build` runs it with icons and OG cards
-scripts/brand/vestigian-mark.ts  the one definition of the mark
+scripts/brand/vestigian-mark.ts  draws the V onto plates; its geometry is shared/utils/brand-mark.ts
 scripts/warm-tiles.ts snapshot-database.ts reconcile-images.ts build-glyphs.ts
                  strip-description-html.ts backfill-country-codes.ts verify-concordances.ts
 scripts/i18n/translate-locales.ts   bootstraps i18n/locales/{fr,es,de,it,nl}.json via LibreTranslate
@@ -263,8 +263,11 @@ application above the map: auth, contribution, moderation, revisions.
 
 1. `pnpm install`
 2. `pnpm stack:up && pnpm db:migrate && pnpm dev`
-3. Import — see "Import pipeline" below. The map is populated after
-   `import:convert`; photographs come later and cost someone else's bandwidth.
+3. Data. The atlas starts empty; loading it is the maintainers' step, not a setup
+   step, because the importers read other people's servers (vici.org's dumps and
+   images, Overpass, Pleiades, EDH…). Develop against an empty atlas or restore a
+   `pnpm db:snapshot`; the procedure and its etiquette are in
+   `.claude/rules/import-pipeline.md` ("Import pipeline").
 4. `pnpm check` — lint, typecheck, tests (with coverage floor), formatting, SAST,
    secrets, and Dockerfile / shell / workflow-and-config / migration checks, run in parallel by
    `concurrently` and reported under one exit code. It is the same gate CI
@@ -352,6 +355,6 @@ this project.
   check its licence tags, hit the real endpoint), not from memory or
   documentation alone. Also you are free to use NC licenses. Cite what was actually checked and
   how.
-- **Maintain documentation** Keep documentation up-to-date (documents/, .claude/rules/) after implementing a new feature
+- **Maintain documentation** Keep documentation up-to-date (documents/, .claude/rules/, sitemap.xml) after implementing a new feature
 - **commits** never commit code yourself, always wait for user instruction
 - **changesets** fill in changesets with brief descriptions of the current commit's changes

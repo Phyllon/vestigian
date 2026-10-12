@@ -42,15 +42,15 @@ local default), brings up the dev stack, and applies the database schema. It
 is safe to re-run: an existing `.env` is left untouched, and both the stack
 and the migrations are idempotent.
 
-It deliberately stops there. The next step — importing real data — is a
-multi-hour crawl of someone else's server and has no business running
-unattended from a setup script; see "Importing the vici.org data" below.
+It deliberately stops there: the atlas starts empty. Loading data is a
+separate step the maintainers run, not something a setup script does; see
+"Where the data comes from" below.
 
 ```bash
 pnpm dev   # → http://localhost:3000
 ```
 
-The map runs against OpenFreeMap out of the box, so nothing needs an API key to see it working. Site data will be empty until you run the import.
+The map runs against OpenFreeMap out of the box, so nothing needs an API key to see it working. The atlas will be empty until data is loaded.
 
 ### By hand, if you'd rather
 
@@ -64,59 +64,26 @@ pnpm db:generate && pnpm db:migrate
 pnpm dev
 ```
 
-## Importing the vici.org data
+## Where the data comes from
 
-Four resumable steps rather than one command, because the middle of it is a
-multi-hour crawl of someone else's server. Run them in order; each one is safe
-to re-run and picks up where it stopped. Beyond vici.org itself, the atlas
-also carries the limes frontier, Barrington-style antiquity cartography,
-Trajan's Column, the Tabula Peutingeriana, ancient ports, ORBIS routes,
-battles, Roman roads (Itiner-e), mints (Nomisma), Roman monuments (Wikidata),
-Sicilian inscriptions (I.Sicily), the Roman state's neighbours (Cliopatria), the hillforts of Britain and Ireland and more —
-each its own numbered, independently re-runnable import script. **Full list, sources and licences: [`documents/scripts.md`](documents/scripts.md).**
+The records are Vici.org's openly licensed data (CC BY-SA), the photographs
+carry the licences their authors gave them, and the atlas also carries the
+limes frontier, Barrington-style antiquity cartography, Trajan's Column, the
+Tabula Peutingeriana, ancient ports, ORBIS routes, battles, Roman roads
+(Itiner-e), mints (Nomisma), Roman monuments (Wikidata), Sicilian inscriptions
+(I.Sicily), the Roman state's neighbours (Cliopatria), the hillforts of Britain
+and Ireland and more. **Sources, licences and what each import does:
+[`documents/scripts.md`](documents/scripts.md).**
 
-```bash
-# The scratch MariaDB is NOT part of pnpm stack:up — the dumps are read once
-# and thrown away, so it lives outside the application's stack.
-docker run -d --name vici-mysql -p 3307:3306 \
-  -e MARIADB_ROOT_PASSWORD=root mariadb:11
+**The import is a maintainer's job, not a setup step, and please do not run it
+against the upstream servers.** The sources are run by individuals and small
+institutions, and every copy of this project that crawled them would be load
+on their systems. Everything below works against an empty atlas, or against a
+database snapshot restored from `pnpm db:snapshot` (see "Backups").
 
-pnpm import:fetch           # 1. dumps → scratch MariaDB
-pnpm import:convert         # 2. → sites, tracings, external_ids
-pnpm import:image-records   # 3. → site_images rows, no bytes fetched
-pnpm import:images          # 4. → photographs into object storage
-pnpm tiles:warm http://localhost:3000
-```
-
-| Step                   | Reaches                                                                                                                                                | Cost                      |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------- |
-| `import:fetch`         | `vici` and `geo` loaded into MariaDB on port 3307                                                                                                      | ~105 MB download, minutes |
-| `import:convert`       | **61,272 sites, 11,720 tracings, 8,692 concordances** in PostGIS — the map is fully usable at this point                                               | ~10 minutes               |
-| `import:image-records` | 39,212 `site_images` rows over **36,216 distinct objects**, with resolved licences, attribution and source URLs. Touches nothing outside your database | ~2 minutes                |
-| `import:images`        | the photographs themselves in object storage                                                                                                           | **~12 hours, ~10 GB**     |
-
-Step 1 skips the download entirely if the dumps are already present — drop
-`vici.sql.gz` and `geo.sql.gz` into `db_dumb/` (or set `VICI_DUMP_DIR`) and it
-uses those. Files are validated by their gzip magic number, because GitHub
-answers a _page_ URL with a perfectly ordinary 200 and an HTML body.
-
-### Where the photographs actually live
-
-Photographs are served from
-`images.vici.org` through a transform service, and originals are not exposed there at all.
-
-The mirror therefore requests `https://images.vici.org/size/w{width}/uploads/{file}`
-— **width only**. `size/w2400xh2400` and `crop/w2400xh2400` both return exactly
-that box and distort or crop anything that is not square. The width is capped at
-each image's recorded width so a small original is never upscaled.
-
-One consequence worth knowing: **2400px is a permanent ceiling** for imported
-photographs, because true originals cannot be fetched. That is forced by the
-source, not chosen.
-
-Images whose licence string cannot be resolved to a known licence are imported
-but left unpublished. That is deliberate — an ambiguous licence should never
-quietly appear on the public map under a guessed one.
+Images whose licence string cannot be resolved to a known licence are left
+unpublished. That is deliberate — an ambiguous licence should never quietly
+appear on the public map under a guessed one.
 
 ## How the map stays fast
 
@@ -282,8 +249,8 @@ in Valkey and fails open, so a cache outage silently removes every limit in
 ## Backups — two stores, restored together
 
 The database and the object store are separate, and they fail apart. The records
-are reproducible (`import:convert` rebuilds them in minutes); **the mirrored
-photographs are not** — losing them means refetching.
+can be rebuilt by the import pipeline; **the photographs in the object store
+cannot** — treat the bucket as the only copy.
 That inverts the moment the first real contribution lands, since accounts,
 revisions and uploads exist nowhere else.
 
@@ -338,11 +305,6 @@ docker run --rm -v "$PWD/image-archive:/out" minio/mc:latest sh -c \
 docker run --rm -v "$PWD/image-archive:/out" minio/mc:latest sh -c \
   "mc alias set dst https://<BUNNY_S3_ENDPOINT> <BUNNY_ACCESS_KEY_ID> <BUNNY_SECRET_ACCESS_KEY> && mc mirror /out dst/<BUNNY_BUCKET>"
 ```
-
-Re-running `import:images` after a database rebuild does **not** re-download
-anything. An object already in storage is adopted — read back locally,
-re-measured, marked approved — with no request to vici.org and no pause between
-items.
 
 **After every deploy or bulk import, warm the tile cache:**
 

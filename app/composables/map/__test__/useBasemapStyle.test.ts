@@ -255,11 +255,11 @@ describe('buildBasemapStyle, satellite view', () => {
     expect(satelliteSource().tiles?.[0]).toContain('tiles.maps.eox.at')
   })
 
-  it('carries the attribution the licence requires', () => {
+  it("credits the product, its publisher and the Sentinel notice in the operator's wording", () => {
     const attribution = satelliteSource().attribution ?? ''
-    expect(attribution).toContain('<a href=')
-    expect(attribution).toContain('EOX')
-    expect(attribution).toContain('CC BY-NC-SA')
+    expect(attribution).toContain('<a href="https://cloudless.eox.at"')
+    expect(attribution).toContain('>EOxCloudless</a> by EOX IT Services GmbH')
+    expect(attribution).toContain('(Contains modified Copernicus Sentinel data 2025)')
   })
 
   it('draws modern city names over the photograph, full strength', () => {

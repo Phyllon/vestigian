@@ -65,7 +65,11 @@ state of a new project, and still the page a source is pointed to.
 plate, a serif fallback stack — no web font is available on someone else's page). The page
 shows the reader's language, offers all six as downloads, and a `<pre>` of markup that is
 `select-all`. **It is downloaded and hosted by the partner, never hot-linked**: a hot-linked
-badge would make every visitor to their site send a request to ours. Add a language, and
+badge would make every visitor to their site send a request to ours. **So the snippet's `src` is
+the bare file name** (`seen-on-vestigian.de.svg`), which resolves only once the partner has saved
+the file beside their page — and so it opens with an HTML comment saying exactly that
+(`partnersPage.badgeSnippetNote`, six locales), which travels with the paste. Pasted unchanged
+onto vestigian.org itself it 404s, by design; reported once as "different from the badge's URL". Add a language, and
 a file, together. The files are **generated** (`pnpm brand:build`,
 `.claude/rules/brand-and-share-assets.md`) — never edited by hand — and their text must match
 `partnersPage.badgeAlt` in the same locale.

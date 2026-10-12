@@ -131,7 +131,7 @@ const TILESETS: Record<string, Tileset> = {
       'https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2025_3857/default/GoogleMapsCompatible/{z}/{y}/{x}.jpg',
     prefix: 'basemap/satellite',
     attribution:
-      'Sentinel-2 cloudless by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2025, CC BY-NC-SA 4.0)',
+      'EOxCloudless by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2025; CC BY-NC-SA 4.0)',
     format: 'jpeg',
     maxZoom: 13,
     envVar: 'NUXT_PUBLIC_BASEMAP_SATELLITE_URL',

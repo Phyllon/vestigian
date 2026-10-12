@@ -1,5 +1,7 @@
 ---
 paths:
+  - 'shared/utils/brand-mark.ts'
+  - 'app/components/ui/AppWordmark.vue'
   - 'scripts/brand/**'
   - 'scripts/generate-brand-assets.ts'
   - 'scripts/generate-og-placeholders.ts'
@@ -22,17 +24,20 @@ stripe. Rejected on the way: a V with a white dashed centre line (a motorway lan
 opposite of ancient) and a V whose dashes were cut square to the arm (an awkward vertex).
 
 **Wine red `#7a1f2f`, not the interface's oxide `#9a3b22`.** The interface keeps its one
-accent; this is the mark's own colour. It always sits on a plate of its own — the favicon, the
-share cards, the badge — so there is no dark-mode variant. If the mark is ever set straight onto
-the night ground it wants a lighter wine, which is a design decision, not an inversion. There is
-deliberately **no `--color-wine-*` theme token**: nothing in the interface uses it, and an unused
-token reads as an invitation to.
+accent; this is the mark's own colour. On its plates — the favicon, the share cards, the badge — it
+is always on paper. **In the header it sits on the page's own ground, so it has two colours:**
+`WINE_RED` (9.5:1 on the light header) and `WINE_RED_ON_NIGHT` `#d4707f` (5.1:1 on `night-800`,
+where the deep wine is 1.6:1). That is a decision, not an inversion, and it is made in the
+component, not in a theme token: there is deliberately **no `--color-wine-*` token**, because
+nothing but the wordmark uses the colour and an unused token reads as an invitation to.
 
 ### One definition, one command
 
-`scripts/brand/vestigian-mark.ts` holds the geometry (`buildMarkPaths`, `buildMarkGroup`,
-`buildMarkSvg`) and the three colours. Nothing else contains a path of the V. **`pnpm
-brand:build`** runs, in order:
+**`shared/utils/brand-mark.ts`** holds the geometry (`buildMarkPaths`, `MARK_VIEWBOX`,
+`MARK_LETTER_VIEWBOX`) and the two wines; it is in `shared/` because the app reads it as well as
+the build scripts. `scripts/brand/vestigian-mark.ts` re-exports it and adds what only a plate
+needs (`PAPER`, `INK`, `buildMarkGroup`, `buildMarkSvg`). Nothing else contains a path of the V.
+**`pnpm brand:build`** runs, in order:
 
 1. `scripts/generate-brand-assets.ts` — `public/brand/vestigian-mark.svg` (transparent),
    `public/favicon.svg` (on the paper plate), and the six `public/partner-assets/badge/*.svg`.
@@ -42,6 +47,19 @@ brand:build`** runs, in order:
 
 Run it after any change to the mark, the paper colour, or the wordmark. The outputs are
 committed, like the glyph PBFs.
+
+### The header wordmark (`UiAppWordmark`)
+
+The V of "Vestigian" **is** the mark, beside the burger menu on both layouts (`default.vue`,
+`reading.vue`): `<UiAppWordmark />` inside the existing link, the letters after it set in
+Fraunces by the caller. It is inline SVG from the same paths (no `v-html`, no image request), sized
+in `em` — **0.7em tall, the cap height as Fraunces is set here, standing on the baseline** — so it
+follows the font size of each layout (20 px and 18 px). `MARK_LETTER_VIEWBOX` crops the square's
+empty margins so the next letter is not pushed away. **The name is said once, in words:** the
+visible letters are `aria-hidden` and a `sr-only` span carries "Vestigian", so the link's name is
+the whole word and `getByRole('link', { name: 'Vestigian' })` still matches. Checked by
+screenshot at 1280 and 375 px, light and night. The mark is **not** drawn at the language-notice
+or any other place the word appears in running text: there it is a word.
 
 ### The share cards (`public/og/*.png`, 1200×630)
 
@@ -62,8 +80,6 @@ partner, never hot-linked (`.claude/rules/partners.md`).
 
 ### Not done, deliberately
 
-- **The mark is not in the page header.** The header still reads "Vestigian" in Fraunces; the
-  mark was asked for on the badge and the share images only. Putting it beside the wordmark is
-  one `<img>`, but it changes every page, so it is a decision.
-- **No wordmark lockup.** Mark and name are set separately wherever they meet.
+- **No wordmark lockup as an asset.** The header sets the name itself (below); there is no
+  exported SVG of mark plus name, and the badge and cards still use Georgia.
 - **No monochrome or reversed variants.** Nothing needs one yet.

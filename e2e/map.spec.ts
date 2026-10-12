@@ -21,6 +21,22 @@ test.describe('the map', () => {
     expect(problems.pageErrors, 'the page threw during boot').toEqual([])
   })
 
+  test('the header sets the atlas name with its own V, still one word to a reader', async ({
+    page,
+  }) => {
+    await openMap(page)
+
+    // The V is drawn (inline SVG) and its letters are hidden from assistive
+    // technology; a visually hidden span carries the whole name, so the link is
+    // still found by it.
+    const home = page.getByRole('banner').getByRole('link', { name: 'Vestigian' })
+    await expect(home).toBeVisible()
+
+    const mark = home.locator('svg')
+    await expect(mark).toBeVisible()
+    await expect(mark, 'the deep wine on the light header').toHaveCSS('fill', 'rgb(122, 31, 47)')
+  })
+
   test('serves vector tiles as binary, not as serialised JSON', async ({ page }) => {
     const tileResponses: { status: number; type: string; bytes: number }[] = []
 

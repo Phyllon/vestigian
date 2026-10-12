@@ -100,8 +100,15 @@ const DARE_ATTRIBUTION =
 const SATELLITE_TILES =
   'https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2025_3857/default/GoogleMapsCompatible/{z}/{y}/{x}.jpg'
 
+/**
+ * The credit line, in the wording the operator set: the product's own name,
+ * linked to its own site, then the publisher and the Sentinel notice with the
+ * year of the vintage in `SATELLITE_TILES`. **Change the year with the
+ * vintage.** The licence (CC BY-NC-SA 4.0) is not printed in the line — it is
+ * stated on `/licence` (`licence.satelliteBody`) and above.
+ */
 const SATELLITE_ATTRIBUTION =
-  'Satellite: <a href="https://s2maps.eu" target="_blank" rel="noopener">Sentinel-2 cloudless</a> by <a href="https://eox.at" target="_blank" rel="noopener">EOX IT Services GmbH</a> (Contains modified Copernicus Sentinel data 2025, CC BY-NC-SA 4.0)'
+  '<a href="https://cloudless.eox.at" target="_blank" rel="noopener">EOxCloudless</a> by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2025)'
 
 /**
  * Sentinel-2's real ground resolution is ~10 m/pixel, which lands at almost

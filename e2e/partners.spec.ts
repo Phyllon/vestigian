@@ -100,6 +100,8 @@ test.describe('the partners page', () => {
     const markup = page.locator('pre code')
     await expect(markup).toContainText('<a href=')
     await expect(markup).toContainText('seen-on-vestigian.en.svg')
+    // The file name is bare because the partner hosts the file; the comment says where it goes.
+    await expect(markup).toContainText('<!-- Save the badge file next to this page')
   })
 
   test.describe('on a phone', () => {

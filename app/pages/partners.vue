@@ -34,9 +34,15 @@
    * badge. The page shows the reader's own language and offers the rest as downloads.
    */
   const badgePath = (code: string): string => `/partner-assets/badge/seen-on-vestigian.${code}.svg`
+  /**
+   * The `src` is the bare file name on purpose: the badge is downloaded and hosted by
+   * the partner, never hot-linked, so there is no path on our server for it to name.
+   * A pasted snippet that pointed at our origin would make every visitor to their site
+   * request ours. The comment on top says where the file goes, and travels with the paste.
+   */
   const badgeSnippet = computed(
     () =>
-      `<a href="${base}/">\n  <img src="seen-on-vestigian.${locale.value}.svg" alt="${t('partnersPage.badgeAlt')}" width="220" height="40">\n</a>`,
+      `<!-- ${t('partnersPage.badgeSnippetNote')} -->\n<a href="${base}/">\n  <img src="seen-on-vestigian.${locale.value}.svg" alt="${t('partnersPage.badgeAlt')}" width="220" height="40">\n</a>`,
   )
 
   useHead({ title: t('partnersPage.title') })

@@ -13,18 +13,27 @@ docstring — this file is the index, not a duplicate of it. Grouped as the
 
 ## Import pipeline (`scripts/import/`)
 
-Run in numeric order on first setup; each is independently re-runnable
-afterward to refresh just that layer. Full detail, licensing rationale and
-row counts: `.claude/rules/import-pipeline.md` and
+Run in numeric order when loading an empty atlas; each is independently
+re-runnable afterward to refresh just that layer. Full detail, licensing
+rationale and row counts: `.claude/rules/import-pipeline.md` and
 `.claude/rules/antiquity-basemaps.md`.
+
+> **These are the maintainers' scripts, and most of them read other people's
+> servers** — vici.org's dump host and `images.vici.org`, Overpass, Pleiades,
+> EDH, Itiner-e and so on. Each source is run by an individual or a small
+> institution; a copy of this project that crawls them is load on their
+> systems. Do not run `import:fetch` or `import:images` as part of setting up
+> a development copy (use an empty atlas or a `pnpm db:snapshot` restore), and
+> do not run any of them at scale without the source's agreement. The rows
+> below say what each one reads so that agreement can be asked for.
 
 | #   | Script                         | Run with                             | Source → what it fills                                                                                                                                       |
 | --- | ------------------------------ | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 01  | `01-fetch-dump.ts`             | `pnpm import:fetch`                  | vici.org SQL dumps → scratch MariaDB (own machine only, ~3 GB)                                                                                               |
+| 01  | `01-fetch-dump.ts`             | `pnpm import:fetch`                  | vici.org SQL dumps → scratch MariaDB (maintainers; own machine only, ~3 GB)                                                                                  |
 | 02  | `02-mysql-to-postgres.ts`      | `pnpm import:convert`                | MariaDB → `sites`, `tracings`, `external_ids` (61,272 sites, 11,720 tracings)                                                                                |
 | 02b | `02b-image-records.ts`         | `pnpm import:image-records`          | vici image metadata → `site_images` rows (no bytes yet)                                                                                                      |
 | 02c | `02c-geo-names.ts`             | `pnpm import:geo-names`              | vici's `geo.sql.gz` (GeoNames-derived) → `geo_names` (447,053 rows, 5-country coverage)                                                                      |
-| 03  | `03-mirror-images.ts`          | `pnpm import:images`                 | vici.org originals → object storage, one at a time, ~a day. **Tell René Voorburg before running at scale.**                                                  |
+| 03  | `03-mirror-images.ts`          | `pnpm import:images`                 | vici.org originals → object storage, one at a time, ~a day. **Maintainers only, and only with René Voorburg's agreement.**                                   |
 | 04  | `04-mirror-basemap-tiles.ts`   | `pnpm import:basemap`                | DARE + EOX Sentinel-2 raster tiles → object storage                                                                                                          |
 | 05  | `05-antiquity-atlas.ts`        | `pnpm import:atlas`                  | AWMC (ODbL) + Pleiades (CC BY 3.0) → `antiquity_*` reference cartography                                                                                     |
 | 06  | `06-limes.ts`                  | `pnpm import:limes`                  | OSM + OpenHistoricalMap (Overpass) + vici tracings → the traced limes; AWMC (ODbL) fills the rest, dashed; needs `import:atlas` and `import:convert`         |

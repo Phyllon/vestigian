@@ -75,7 +75,11 @@ PMTiles basemap. **The 2025 vintage this app uses is CC BY-NC-SA 4.0** —
 EOX's older 2016/2017 vintage is unrestricted CC BY 4.0, but eight to nine
 years further from current; the 2025 vintage was chosen anyway, on the same
 "acceptable while nothing here is sold" trade-off DARE's own attribution
-above already documents, not a coincidence. **EOX's tile path is
+above already documents, not a coincidence. **The credit line reads "EOxCloudless
+by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2025)"**, with
+_EOxCloudless_ linked to `cloudless.eox.at` — the operator's wording
+(`SATELLITE_ATTRIBUTION`; change the year with the vintage). The licence is not in the
+line; `/licence` states it. **EOX's tile path is
 `{TileMatrix}/{TileRow}/{TileCol}` — `z/row/col`, not the `z/x/y` every other
 raster source in this file uses** — confirmed by fetching the same coordinate
 both ways and looking at the actual imagery: `z/x/y` landed on generic

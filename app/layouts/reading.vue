@@ -20,7 +20,7 @@
         <UiAppMenu />
 
         <NuxtLink to="/" class="font-display text-lg text-ink-900 dark:text-paper-100">
-          Vestigian
+          <UiAppWordmark />
         </NuxtLink>
         <nav class="ml-auto flex items-center gap-1" aria-label="Main">
           <UiLanguageSwitcher />

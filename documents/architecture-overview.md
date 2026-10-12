@@ -74,7 +74,9 @@ route so a reader who never asks for them pays nothing:
 ## Background work (not request-driven)
 
 - **Import pipeline** (`scripts/import/`): a resumable, numbered pipeline
-  (26 stages and growing) that pulls vici.org's MySQL dump, converts it to
+  (26 stages and growing), run by the maintainers rather than by every
+  copy of the project, since it reads other people's servers. It pulls
+  vici.org's MySQL dump, converts it to
   the Postgres schema, mirrors photographs and the DARE raster basemap,
   builds the Barrington/limes vector data, and imports every later overlay
   (battles, ports, routes, minor antiquities, coin hoards, empire extents,

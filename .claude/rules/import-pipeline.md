@@ -60,6 +60,15 @@ record and image stages so a licence cannot mean two things in one pipeline.
 
 ## Import pipeline
 
+> **A maintainer's procedure, recorded here so it can be repeated — not a setup
+> step.** Most of it reads other people's servers (vici.org's dumps and
+> `images.vici.org`, Overpass, Pleiades, EDH, Itiner-e…), run by individuals and
+> small institutions. A development copy does not need it: work against an empty
+> atlas or a `pnpm db:snapshot` restore. Do not run `import:fetch` or
+> `import:images` from a fork, from CI, or on a whim, and do not run any of it at
+> scale without the source's agreement; the figures below are what to quote when
+> asking.
+
 Order matters; each step is resumable. The scratch MariaDB is **not** part of
 `pnpm stack:up` — read once, thrown away.
 
@@ -217,13 +226,15 @@ Nothing new to import: `/api/atlas/places/search.get.ts` is a third sibling of
 it. `goToResult` zooms in closer for an ancient place (z14) than a modern town (z12): it
 marks one small point on the Barrington sheet, not a settlement with real extent.
 
-**Contact René Voorburg before mirroring images at scale.** The licences permit
-reuse; the bandwidth is his server's. Quote real figures — **36,216 requests**
-at 1.2 s apart, ~10 GB — and prove the setup with `MIRROR_LIMIT=5
-pnpm import:images` first. Re-running after rebuilding records does **not**
-re-download: an object already in storage is adopted (read back, re-measured,
-marked approved) with no request and no pause. Without that, every rebuild of
-`site_images` would cost him another 36,000 requests.
+**Do not mirror images without René Voorburg's agreement.** The licences permit
+reuse; the bandwidth is his server's. The maintainers' own run is done and its
+objects are the only copy that needs to exist — **a rebuild never needs to
+fetch them again.** Quote real figures when asking — **36,216 requests** at 1.2 s
+apart, ~10 GB — and prove any setup with `MIRROR_LIMIT=5 pnpm import:images`
+first. Re-running after rebuilding records does **not** re-download: an object
+already in storage is adopted (read back, re-measured, marked approved) with no
+request and no pause. Without that, every rebuild of `site_images` would cost
+him another 36,000 requests.
 
 ### Where the photographs live — verified, and counter-intuitive
 
