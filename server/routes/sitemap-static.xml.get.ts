@@ -1,24 +1,19 @@
 import { limesSectors } from '~~/server/database/schema'
 
 /**
- * The hand-written pages plus every limes sector — small and static enough
- * that pagination would be overkill, unlike the sites and tracings sitemaps.
+ * The hand-written pages (`SITEMAP_STATIC_PATHS`) plus every limes sector — small
+ * and static enough that pagination would be overkill, unlike the record sitemaps.
  */
 export default defineEventHandler(async (event) => {
   await enforceRateLimit(event, 'expensive')
-  const config = useRuntimeConfig()
   const database = useDatabase()
+  const base = useRuntimeConfig().public.siteUrl.replace(/\/$/, '')
 
   const sectors = await database.select({ slug: limesSectors.slug }).from(limesSectors)
-  const base = config.public.siteUrl.replace(/\/$/, '')
 
   const xml = buildUrlsetXml([
-    { loc: `${base}/` },
-    { loc: `${base}/licence` },
-    { loc: `${base}/privacy` },
-    { loc: `${base}/impressum` },
-    { loc: `${base}/limes` },
-    ...sectors.map((sector) => ({ loc: `${base}/limes/${sector.slug}` })),
+    ...SITEMAP_STATIC_PATHS.map((path) => ({ loc: path === '/' ? `${base}/` : `${base}${path}` })),
+    ...sectors.map((sector) => ({ loc: `${base}/limes/${encodeURIComponent(sector.slug)}` })),
   ])
 
   setResponseHeaders(event, {

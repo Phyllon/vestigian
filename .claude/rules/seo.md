@@ -7,6 +7,7 @@ paths:
   - 'shared/utils/structuredData.ts'
   - 'scripts/generate-og-placeholders.ts'
   - 'scripts/generate-app-icons.ts'
+  - 'server/utils/sitemap*'
 ---
 
 ## SEO
@@ -19,18 +20,58 @@ dynamic limes sectors), so wrapping that in a generic module's config shape
 would buy nothing and add a build-hook surface to reconcile with
 `nuxt-security`'s CSP.
 
-**Sitemap is an index, not one file.** `sitemap.xml.get.ts` returns a
-`<sitemapindex>` pointing at `sitemap-static.xml` (the hand-written pages and
-every limes sector), and `sitemap-sites/{page}` / `sitemap-tracings/{page}` —
-paginated at `SITEMAP_PAGE_SIZE` (`server/utils/sitemap.ts`) rows per file,
-comfortably under the sitemaps.org 50,000-URL/50MB cap per file. Sites alone
-(61k+) already exceeded a single file's cap; tracings (11.7k) were missing
-from the sitemap entirely before this. Pages are ordered `updated_at desc, id
-desc` — the `id` tiebreaker matters because bulk-imported rows routinely
-share a timestamp, and `updated_at` alone can skip or duplicate a row across
-a page boundary. `changefreq`/`priority` are deliberately not emitted —
-Google's own docs say both are largely ignored, and there's no honest
-frequency to invent for moderation-gated content.
+**Sitemap is an index, not one file.** `sitemap.xml.get.ts` returns a `<sitemapindex>`
+pointing at `sitemap-static.xml` (the hand-written pages in `SITEMAP_STATIC_PATHS`, plus every
+limes sector) and one paginated child per kind of record in `SITEMAP_SOURCES`
+(`server/utils/sitemap-sources.ts`):
+
+| Child                              | Rows                                   | Order, `lastmod`        |
+| ---------------------------------- | -------------------------------------- | ----------------------- |
+| `sitemap-sites/{n}`                | approved sites                         | `id`, from `updated_at` |
+| `sitemap-tracings/{n}`             | approved tracings                      | `id`, from `updated_at` |
+| `sitemap-inscriptions/{n}`         | EDH inscriptions (`/inscriptions/HD…`) | `id`, none              |
+| `sitemap-attic-inscriptions/{n}`   | Attic Inscriptions Online              | `id`, none              |
+| `sitemap-isicily-inscriptions/{n}` | I.Sicily                               | `id`, none              |
+
+**Where it stood (2026-10-12, dev database, which holds the full import):** 61,273 sites,
+11,496 tracings, 79,201 + 3,412 + 5,136 inscriptions, 17 limes sectors and 11 static pages —
+**160,546 URLs in 8 files**, the largest 4.1 MB and 40,000 URLs. Before this the inscriptions
+(about 88,000 URLs) and `/about`, `/partners`, `/columns`, `/tabula-peutingeriana`,
+`/inscriptions` and `/inscriptions/attic` were not listed at all.
+
+**Pages are fixed runs of the primary key, not `updated_at desc`.** The old order carried an
+edited row to page 0 and pushed 40,000 others across a file boundary; a page is now stable and
+`lastmod` is what says a row changed. The mirrored corpora carry **no `lastmod`**: their rows
+are written by an import, so any date they have is when it last ran, and one date on every URL
+is worse than none. `changefreq`/`priority` are still not emitted — Google ignores both.
+
+**A page past the last is a 404**, not an empty file; page 0 always exists. The index computes
+its children from live row counts (cached an hour), so a corpus that outgrows a file gains a
+page by itself.
+
+**The limits, and what to do at them** (sitemaps.org): a file holds at most **50,000 URLs and
+50 MiB uncompressed**; an index at most **50,000 sitemaps** and may not list another index.
+`SITEMAP_PAGE_SIZE` is 40,000, so a file is 4–10 MB. Nothing needs doing as the data grows —
+that is what the computed child list is for — until an index would hold 50,000 files, which is
+two billion URLs. Then a second index is submitted beside the first (Search Console takes up to
+500 per site) and `robots.txt` lists both. The realistic limits arrive much earlier and are not
+the protocol's: `OFFSET` paging gets slower as a corpus reaches millions of rows (move the
+sources to keyset paging on `id`), and a crawler's budget, not the sitemap, decides how fast
+160,000 URLs are read. `buildUrlsetXml` and `buildSitemapIndexXml` **throw** over 50,000
+entries rather than write a file a crawler would reject whole.
+
+**A new page cannot be forgotten.** `server/utils/__test__/sitemap-pages.test.ts` compares
+`app/pages/` with `server/utils/sitemap-pages.ts`: every page that is not `noindex` must be in
+`SITEMAP_STATIC_PATHS`, `SITEMAP_DYNAMIC_ROUTES` or `SITEMAP_LEFT_OUT` (with a reason), no
+`noindex` page may be listed, and nothing may name a page that no longer exists. A new kind of
+record takes a source in `SITEMAP_SOURCES`, a route file `sitemap-<name>/[page].get.ts`, and an
+entry in `SITEMAP_DYNAMIC_ROUTES`.
+
+**Left out on purpose:** contributor profiles (`/contributor/…`) — a person's page, reached from
+the record they contributed to, not enumerated for a crawler. They are not `noindex` either, so
+a crawler that follows a link still indexes one; whether people should be indexed at all is a
+privacy decision that has not been taken. Also out: every `noindex` page (`/nearby`, `/offline`,
+`/settings`, `/notebook/*`, the auth pages, `/moderation`, `/admin`, the editors).
 
 **robots.txt disallows crawling, page-level `noindex` disallows indexing.**
 These are different mechanisms and this app uses both: `robots.txt` keeps a

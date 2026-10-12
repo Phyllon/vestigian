@@ -1,41 +1,31 @@
-import { count, eq } from 'drizzle-orm'
-import { sites, tracings } from '~~/server/database/schema'
-
 /**
- * A sitemap index rather than one flat file — sites alone (61k+) already
- * exceed the sitemaps.org 50,000-URL cap per file, and tracings (11.7k) were
- * previously missing from the sitemap entirely. `sitemap-sites/{page}` and
- * `sitemap-tracings/{page}` are the paginated children; `sitemap-static.xml`
- * carries the small, non-paginated hand-written pages and limes sectors.
+ * A sitemap index rather than one flat file: the records alone are about 160,000
+ * URLs against sitemaps.org's cap of 50,000 per file. `sitemap-static.xml` carries
+ * the hand-written pages and the limes sectors; every other child is one kind of
+ * record, paginated by `SITEMAP_PAGE_SIZE` — see `SITEMAP_SOURCES`.
+ *
+ * The child list is computed from the row counts on every request (cached for an
+ * hour), so a corpus that grows past a file's worth gains a page by itself. Nothing
+ * here needs touching until an index would hold 50,000 files, which at 40,000 URLs
+ * each is two billion records.
  */
 export default defineEventHandler(async (event) => {
   await enforceRateLimit(event, 'expensive')
-  const config = useRuntimeConfig()
   const database = useDatabase()
-  const base = config.public.siteUrl.replace(/\/$/, '')
+  const base = useRuntimeConfig().public.siteUrl.replace(/\/$/, '')
 
-  const [siteTotal] = await database
-    .select({ total: count() })
-    .from(sites)
-    .where(eq(sites.status, 'approved'))
-  const [tracingTotal] = await database
-    .select({ total: count() })
-    .from(tracings)
-    .where(eq(tracings.status, 'approved'))
-
-  const sitePages = paginateOffsets(siteTotal!.total, SITEMAP_PAGE_SIZE).map(
-    (offset) => `${base}/sitemap-sites/${offset / SITEMAP_PAGE_SIZE}`,
+  const totals = await Promise.all(SITEMAP_SOURCES.map((source) => source.count(database)))
+  const children = SITEMAP_SOURCES.flatMap((source, index) =>
+    Array.from(
+      { length: sitemapPageCount(totals[index] ?? 0) },
+      (_, page) => `${base}/sitemap-${source.name}/${page}`,
+    ),
   )
-  const tracingPages = paginateOffsets(tracingTotal!.total, SITEMAP_PAGE_SIZE).map(
-    (offset) => `${base}/sitemap-tracings/${offset / SITEMAP_PAGE_SIZE}`,
-  )
-
-  const xml = buildSitemapIndexXml([`${base}/sitemap-static.xml`, ...sitePages, ...tracingPages])
 
   setResponseHeaders(event, {
     'content-type': 'application/xml; charset=utf-8',
     'cache-control': 'public, max-age=3600',
   })
 
-  return xml
+  return buildSitemapIndexXml([`${base}/sitemap-static.xml`, ...children])
 })

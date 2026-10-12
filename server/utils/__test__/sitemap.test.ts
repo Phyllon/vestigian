@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { buildSitemapIndexXml, buildUrlsetXml, paginateOffsets } from '../sitemap'
+import {
+  buildSitemapIndexXml,
+  buildUrlsetXml,
+  paginateOffsets,
+  SITEMAP_PAGE_SIZE,
+  SITEMAP_PROTOCOL_MAX_ENTRIES,
+  sitemapPageCount,
+} from '../sitemap'
 
 describe('paginateOffsets', () => {
   it('returns a single zero offset when there are no rows', () => {
@@ -55,5 +62,44 @@ describe('buildSitemapIndexXml', () => {
       '<sitemap><loc>https://vestigian.eu/sitemap-tracings-0.xml</loc></sitemap>',
     )
     expect(xml).toContain('<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')
+  })
+})
+
+describe('the protocol limits', () => {
+  it('keeps a page inside what a file may hold, with room to spare', () => {
+    expect(SITEMAP_PAGE_SIZE).toBeLessThan(SITEMAP_PROTOCOL_MAX_ENTRIES)
+  })
+
+  it('refuses to write a file a crawler would reject whole', () => {
+    const tooMany = Array.from({ length: SITEMAP_PROTOCOL_MAX_ENTRIES + 1 }, (_, index) => ({
+      loc: `https://vestigian.org/site/${index}`,
+    }))
+    expect(() => buildUrlsetXml(tooMany)).toThrow(/at most 50000/)
+    expect(() => buildUrlsetXml(tooMany.slice(0, SITEMAP_PROTOCOL_MAX_ENTRIES))).not.toThrow()
+  })
+
+  it('refuses an index of more than 50,000 sitemaps', () => {
+    const children = Array.from(
+      { length: SITEMAP_PROTOCOL_MAX_ENTRIES + 1 },
+      (_, index) => `https://vestigian.org/sitemap-sites/${index}`,
+    )
+    expect(() => buildSitemapIndexXml(children)).toThrow(/at most 50000/)
+  })
+})
+
+describe('sitemapPageCount', () => {
+  it('is at least one page, even over nothing', () => {
+    expect(sitemapPageCount(0)).toBe(1)
+  })
+
+  it('adds a page exactly when a file is full', () => {
+    expect(sitemapPageCount(SITEMAP_PAGE_SIZE)).toBe(1)
+    expect(sitemapPageCount(SITEMAP_PAGE_SIZE + 1)).toBe(2)
+  })
+
+  it('agrees with paginateOffsets', () => {
+    for (const total of [0, 1, 39_999, 40_000, 40_001, 160_000, 160_001]) {
+      expect(sitemapPageCount(total)).toBe(paginateOffsets(total, SITEMAP_PAGE_SIZE).length)
+    }
   })
 })

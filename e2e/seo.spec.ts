@@ -23,6 +23,53 @@ test.describe('sitemap', () => {
     expect(extractLocs(childXml).length).toBeGreaterThan(0)
   })
 
+  test('lists every kind of record, and every child stays inside the protocol limits', async ({
+    request,
+  }) => {
+    const indexXml = await (await request.get('/sitemap.xml')).text()
+    const children = extractLocs(indexXml)
+
+    for (const kind of [
+      'sitemap-static.xml',
+      'sitemap-sites/',
+      'sitemap-tracings/',
+      'sitemap-inscriptions/',
+      'sitemap-attic-inscriptions/',
+      'sitemap-isicily-inscriptions/',
+    ]) {
+      expect(
+        children.some((url) => url.includes(kind)),
+        `no ${kind} child listed in the index`,
+      ).toBe(true)
+    }
+
+    // sitemaps.org: at most 50,000 URLs in a file.
+    for (const child of children) {
+      const response = await request.get(new URL(child).pathname)
+      expect(response.status(), child).toBe(200)
+      expect(extractLocs(await response.text()).length, child).toBeLessThanOrEqual(50_000)
+    }
+  })
+
+  test('the static file carries the pages that were once missing, and no noindex page', async ({
+    request,
+  }) => {
+    const staticXml = await (await request.get('/sitemap-static.xml')).text()
+    const paths = extractLocs(staticXml).map((url) => new URL(url).pathname)
+
+    for (const path of ['/', '/about', '/partners', '/columns', '/inscriptions', '/limes']) {
+      expect(paths, path).toContain(path)
+    }
+    for (const path of ['/nearby', '/offline', '/settings', '/login', '/register', '/admin']) {
+      expect(paths, path).not.toContain(path)
+    }
+  })
+
+  test('a sitemap page past the last is a 404, not an empty file', async ({ request }) => {
+    const response = await request.get('/sitemap-sites/99999')
+    expect(response.status()).toBe(404)
+  })
+
   test('lists tracings, previously missing entirely', async ({ request }) => {
     const indexXml = await (await request.get('/sitemap.xml')).text()
     const tracingsSitemap = extractLocs(indexXml).find((url) => url.includes('sitemap-tracings'))
