@@ -50,6 +50,27 @@ test.describe('featured sites nearby', () => {
     expect(problems.pageErrors).toEqual([])
   })
 
+  test('draws its own scrollbar, in colours that stand out from the sheet', async ({ page }) => {
+    await page.goto(FEATURED_URL)
+    await waitForMapReady(page)
+    await switchFeaturedOn(page)
+
+    const rows = page.getByRole('region', { name: 'Featured nearby' }).getByRole('list')
+    await expect(rows).toBeVisible()
+
+    // Headless Chromium hides scrollbars outright, so what can be asserted is that
+    // the rules are on the list: a thumb and a track of two different, opaque
+    // colours. Without them a phone draws the platform's grey sliver and fades it.
+    const colours = await rows.evaluate((list) => ({
+      thumb: getComputedStyle(list, '::-webkit-scrollbar-thumb').backgroundColor,
+      track: getComputedStyle(list, '::-webkit-scrollbar-track').backgroundColor,
+    }))
+
+    expect(colours.thumb).toMatch(/^rgb\(/)
+    expect(colours.track).toMatch(/^rgb\(/)
+    expect(colours.thumb).not.toBe(colours.track)
+  })
+
   test('remembers the choice across a reload, and forgets it when turned off', async ({ page }) => {
     await page.goto(FEATURED_URL)
     await waitForMapReady(page)

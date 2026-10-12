@@ -201,7 +201,7 @@
 
     <ul
       v-else
-      class="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+      class="scrollbar-persistent min-h-0 flex-1 overflow-y-auto overscroll-contain"
       :class="isBigPicture ? 'snap-y snap-mandatory' : ''"
     >
       <li

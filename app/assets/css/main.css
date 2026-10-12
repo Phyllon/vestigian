@@ -119,6 +119,9 @@
     --text-body: var(--color-ink-700);
     --text-muted: var(--color-ink-500);
     --accent: var(--color-oxide-600);
+    /* Thumb 5.1:1 against its track and 6.3:1 against the raised ground. */
+    --scrollbar-thumb: var(--color-ink-500);
+    --scrollbar-track: var(--color-paper-200);
   }
 
   .dark {
@@ -130,6 +133,9 @@
     --text-body: var(--color-paper-200);
     --text-muted: var(--color-paper-400);
     --accent: var(--color-oxide-500);
+    /* Thumb 5.1:1 against its track and 7.4:1 against the raised ground. */
+    --scrollbar-thumb: var(--color-paper-400);
+    --scrollbar-track: var(--color-night-600);
   }
 
   html {
@@ -252,6 +258,40 @@
     letter-spacing: var(--text-eyebrow--letter-spacing);
     text-transform: uppercase;
     color: var(--text-muted);
+  }
+
+  /**
+   * A scrollbar that is there to be seen. The platform's own is a 3–4px sliver
+   * in the page's grey that a phone (and a Mac, by default) fades out a second
+   * after the last scroll — reported as barely visible on a list the reader
+   * has to scroll to find its end. Styling `::-webkit-scrollbar` is what makes
+   * Blink and WebKit draw a classic bar that takes its own width and stays;
+   * `scrollbar-color` does not do that, and where it is set Chrome ignores the
+   * pseudo-elements altogether, so it is given to Firefox alone. The bar is
+   * 0.75rem — a thumb a finger can hold — with the track's colour as an inset
+   * so the thumb reads as a pill rather than as a block against the edge.
+   */
+  .scrollbar-persistent::-webkit-scrollbar {
+    width: 0.75rem;
+  }
+
+  .scrollbar-persistent::-webkit-scrollbar-track {
+    background-color: var(--scrollbar-track);
+  }
+
+  .scrollbar-persistent::-webkit-scrollbar-thumb {
+    min-height: 2.5rem;
+    background-color: var(--scrollbar-thumb);
+    background-clip: padding-box;
+    border: 3px solid var(--scrollbar-track);
+    border-radius: 9999px;
+  }
+
+  @supports (-moz-appearance: none) {
+    .scrollbar-persistent {
+      scrollbar-width: auto;
+      scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+    }
   }
 
   /* Coordinates, identifiers and measurements are always set in the mono face. */

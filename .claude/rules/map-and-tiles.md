@@ -1662,6 +1662,17 @@ open on someone's first visit.
   banner; disclosed in `privacy.cookiesBody` (six locales) and the table in
   `gdpr-legal.md` — **if the key changes, change both.** Blocked storage degrades to
   "lasts until the tab closes".
+- **Its scrollbar is drawn, not the platform's** (`.scrollbar-persistent` in `main.css`).
+  Reported as barely visible in both modes and as vanishing after a moment — which is what a
+  phone (and a Mac by default) does to a native overlay bar. `::-webkit-scrollbar` styling makes
+  Blink and WebKit draw a classic 0.75rem bar that takes its own width and stays; it is
+  `--scrollbar-thumb` on `--scrollbar-track`, **5.1:1 against each other in both modes**
+  and 6.3:1 (light) / 7.4:1 (dark) against the sheet. Chrome ignores the pseudo-elements once
+  `scrollbar-color` is set, so that pair is given to Firefox alone (`@supports
+(-moz-appearance: none)`). **Cost:** 12px of the list's width, always. Seen at 375px and
+  1280px, light and dark; Firefox and Safari are not available here and are **unchecked**.
+  Playwright's headless Chromium passes `--hide-scrollbars`, so it must be launched with
+  `ignoreDefaultArgs: ['--hide-scrollbars']` to see the bar at all.
 - **Escape inside the list, or its × ("Turn off featured nearby"), is the switch** and
   is remembered like it. Nothing moves focus into the list when it turns on (the
   settings popover has to stay open, and a restored list must not take focus on page
