@@ -1,3 +1,4 @@
+import type { Locator, Page } from '@playwright/test'
 import { expect, test } from './helpers/fixtures'
 import { watchForProblems } from './helpers/console'
 import { openMap, openOverlays, showSites, toggleOverlay, waitForTiles } from './helpers/map'
@@ -172,5 +173,137 @@ test.describe('following the limes', () => {
 
     expect(problems.cspViolations).toEqual([])
     expect(problems.pageErrors).toEqual([])
+  })
+})
+
+/**
+ * True when the control is what a finger on its centre would actually hit — not
+ * something drawn over it. `toBeVisible` cannot say this: a button buried under
+ * another is still "visible", which is exactly how the folded frontier sheet's
+ * title and fold button went unnoticed under the key and the map credit.
+ */
+const isUncovered = (locator: Locator): Promise<boolean> =>
+  locator.evaluate((element) => {
+    const box = element.getBoundingClientRect()
+    const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2)
+    return hit !== null && element.contains(hit)
+  })
+
+/** MapLibre opens its compact credit on load; it covers the sheet until the first tap or move. */
+const closeMapCredit = async (page: Page): Promise<void> => {
+  const open = page.locator('.maplibregl-ctrl-attrib.maplibregl-compact-show')
+  if ((await open.count()) > 0) {
+    await open.locator('.maplibregl-ctrl-attrib-button').click()
+    await expect(open).toHaveCount(0)
+  }
+}
+
+test.describe('the frontier sheet on a phone', () => {
+  test.use({ viewport: { width: 375, height: 700 } })
+
+  const openFoldedSheet = async (page: Page) => {
+    await openMap(page)
+    await toggleLimes(page)
+    const panel = page.getByRole('complementary', { name: 'The Roman frontier' })
+    await expect(panel).toBeVisible()
+    await closeMapCredit(page)
+    await panel.getByRole('button', { name: 'Hide the frontier' }).click()
+    await expect(page.locator('#limes-body')).toBeHidden()
+    return panel
+  }
+
+  test('folded, its title and fold button are not under the key or the credit', async ({
+    page,
+  }) => {
+    const panel = await openFoldedSheet(page)
+
+    expect(await isUncovered(panel.getByText('The limes', { exact: true }))).toBe(true)
+    expect(await isUncovered(panel.getByRole('button', { name: 'Show the frontier' }))).toBe(true)
+
+    // The corner controls are still where they were, and still reachable.
+    expect(await isUncovered(page.getByRole('button', { name: 'Key' }))).toBe(true)
+    expect(await isUncovered(page.locator('.maplibregl-ctrl-attrib-button'))).toBe(true)
+    // The control column sits above the folded sheet instead of being cut by it.
+    expect(await isUncovered(page.getByRole('button', { name: 'Show your position' }))).toBe(true)
+  })
+
+  test('the key sits on one line with the map credit', async ({ page }) => {
+    await openMap(page)
+    await toggleLimes(page)
+    await closeMapCredit(page)
+
+    const key = (await page.getByRole('button', { name: 'Key' }).boundingBox())!
+    const credit = (await page.locator('.maplibregl-ctrl-attrib-button').boundingBox())!
+
+    expect(Math.abs(key.y + key.height - (credit.y + credit.height))).toBeLessThanOrEqual(1)
+  })
+
+  test('the fold button eases the sheet rather than jumping it', async ({ page }) => {
+    const panel = await openFoldedSheet(page)
+
+    // Sampled on every frame, started in the same breath as the click: a jump
+    // shows two heights, an ease shows the whole way between them.
+    const sampling = page.evaluate(
+      () =>
+        new Promise<number[]>((resolve) => {
+          const aside = document.querySelector('aside[aria-label="The Roman frontier"]')!
+          const heights: number[] = []
+          const start = performance.now()
+          const tick = (): void => {
+            heights.push(Math.round(aside.getBoundingClientRect().height))
+            if (performance.now() - start < 600) requestAnimationFrame(tick)
+            else resolve(heights)
+          }
+          requestAnimationFrame(tick)
+        }),
+    )
+    await panel.getByRole('button', { name: 'Show the frontier' }).click()
+
+    const distinct = new Set(await sampling)
+    expect(distinct.size, 'the sheet went from folded to open in one step').toBeGreaterThan(4)
+  })
+
+  test('the grey bar drags the sheet open and shut', async ({ page }) => {
+    const panel = await openFoldedSheet(page)
+    const body = page.locator('#limes-body')
+    const header = panel.locator(':scope > div').first()
+    const foldButton = panel.getByRole('button', { name: /the frontier$/ })
+
+    const drag = async (fromY: number, byY: number): Promise<void> => {
+      const box = (await header.boundingBox())!
+      const x = box.x + box.width / 2
+      await page.mouse.move(x, box.y + fromY)
+      await page.mouse.down()
+      await page.mouse.move(x, box.y + fromY + byY, { steps: 8 })
+      await page.mouse.up()
+    }
+
+    await drag(6, -180)
+    await expect(body).toBeVisible()
+    await expect(foldButton).toHaveAttribute('aria-expanded', 'true')
+
+    // From the title row this time: the whole header is the handle, not just the bar.
+    await drag(30, 180)
+    await expect(body).toBeHidden()
+    await expect(foldButton).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  test('a drag that starts on the fold button does not click it back', async ({ page }) => {
+    const panel = await openFoldedSheet(page)
+    const foldButton = panel.getByRole('button', { name: 'Show the frontier' })
+    const box = (await foldButton.boundingBox())!
+    const x = box.x + box.width / 2
+    const y = box.y + box.height / 2
+
+    await page.mouse.move(x, y)
+    await page.mouse.down()
+    await page.mouse.move(x, y - 90, { steps: 8 })
+    await page.mouse.up()
+
+    await expect(page.locator('#limes-body')).toBeVisible()
+    await expect(panel.getByRole('button', { name: 'Hide the frontier' })).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    )
   })
 })

@@ -106,10 +106,11 @@
       <!--
         `absolute` ignores the container's padding, so the frontier panel has to
         be cleared here as well as above — without this the key sits underneath
-        the panel on a wide screen and cannot be opened.
+        the panel on a wide screen and cannot be opened. `bottom-2.5` is
+        MapLibre's own 10px credit margin, so the key and the (i) share a line.
       -->
       <MapLegend
-        class="pointer-events-auto absolute bottom-4 left-3 z-30 md:left-4"
+        class="pointer-events-auto absolute bottom-2.5 left-3 z-30 md:left-4"
         data-tour="legend"
         :class="isFollowingLimes ? 'md:left-[23.5rem]' : ''"
       />
@@ -120,8 +121,14 @@
         10px margin, so anything below 34px from the bottom edge lands on top
         of it. It is not ours to move: the attribution has to stay reachable.
       -->
+      <!--
+        Above the frontier sheet's folded height on a phone (`LimesPanel`'s own
+        floor included): the sheet is `z-20` over this column, so at the usual
+        `bottom-12` the lowest button was half buried under it.
+      -->
       <div
         class="pointer-events-auto absolute bottom-12 right-3 flex flex-col items-end gap-2 md:right-4"
+        :class="isFollowingLimes ? 'max-md:bottom-28' : ''"
       >
         <MapSettingsMenu />
         <MapOfflineDownloadControl data-tour="offline" />

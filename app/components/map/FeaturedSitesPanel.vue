@@ -44,7 +44,7 @@
     setBigPicture,
   } = useFeaturedSites()
   const { selectSite, isPanelOpen, isTracingPanelOpen, isPickerOpen } = useSiteQuery()
-  const { setSitesActive } = useBasemapStyle()
+  const { setSitesActive, isFollowingLimes } = useBasemapStyle()
   const { buildCredit } = useImageUrl()
   const { countryName } = useCountryName()
   const { t } = useI18n()
@@ -58,6 +58,19 @@
   const isRecordPanelOpen = computed(
     () => isPanelOpen.value || isTracingPanelOpen.value || isPickerOpen.value,
   )
+
+  /**
+   * The frontier's sheet is 6.3rem tall on a phone even when folded
+   * (`LimesPanel`), `z-20` and later in the tree, so at the usual `5.5rem` the
+   * foot of this list was under it. Rests at `7rem`, where the control column
+   * does, and gives back the height it spent so the top stays clear.
+   */
+  const limesLift = computed(() => {
+    if (!isFollowingLimes.value) return ''
+    return isBigPicture.value
+      ? 'max-md:bottom-28 max-md:max-h-[calc(100%_-_11rem)]'
+      : 'max-md:bottom-28 max-md:max-h-[min(50dvh,calc(100%_-_11rem))]'
+  })
 
   const distanceLabel = (metres: number): string =>
     metres < 1000
@@ -144,6 +157,7 @@
         ? 'max-h-[calc(100%_-_9.5rem)] md:max-h-[calc(100%_-_7.5rem)] md:w-[26rem]'
         : 'max-h-[min(50dvh,calc(100%_-_9.5rem))] md:max-h-[50dvh] md:w-80',
       isRecordPanelOpen ? 'max-md:hidden md:right-[28rem]' : 'md:right-[4.75rem]',
+      limesLift,
     ]"
     @keydown.esc="setEnabled(false)"
   >

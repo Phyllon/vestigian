@@ -422,6 +422,48 @@ records that are not ODbL. It is computed **on read and never stored**, and
 `/api/data/sites.geojson` gains no field from it, so what leaves is a Produced
 Work with both attributions attached. See the docstring on that endpoint.
 
+### The frontier sheet on a phone (2026-10-11)
+
+`LimesPanel.vue` is a bottom sheet below `md` and a rail from it. Reported at 375px with
+the sheet folded: the **key** button sat on the title, MapLibre's **(i)** credit sat on the
+fold button, and the sheet itself clipped the geolocate button above them. Measured, not
+guessed: key `x12–69 y660–684`, credit `x341–365 y666–690`, fold button `x331–355
+y663–687` on a 700px screen — the folded sheet's whole row was under the two corner
+controls, and the credit is `z-35` on purpose (`main.css`) so no panel may bury it.
+
+- **The sheet has a floor of its own** — `pb-10` below `md`, a 40px strip that holds
+  nothing, so the key and the credit sit on the sheet instead of on its content, folded
+  or open. Folded height is **~97px** (it was 65). The key is `bottom-2.5` — MapLibre's
+  own 10px credit margin — so the two share one line (measured: both `y666–690` on a
+  700px screen; the key used to sit 6px higher). A locale-proof alternative —
+  indenting the title row to clear the key — was rejected: "Légende" and "Key" are
+  different widths.
+- **The control column and the featured list step up** (`max-md:bottom-28` on
+  `pages/index.vue`'s column and `FeaturedSitesPanel`'s `limesLift`) while the frontier
+  is followed, otherwise the sheet is drawn over their lowest 13–17px. They are still
+  hidden by the sheet when it is **open** (62dvh) — unchanged, fold it to reach them.
+- **The grey bar is a real handle.** The header (bar and title row) drags the sheet:
+  it follows the finger, and a release past 8px goes the way it was dragged (up opens,
+  down folds, under the threshold restores). The fold button stays — `aria-expanded` is
+  what a keyboard or a screen reader gets, and the bar is `aria-hidden`. The click a
+  browser sends to the button a drag started on is ignored for 60ms
+  (`isJustAfterDrag`, asked by the fold and back buttons), or a drag from the chevron
+  would toggle it back.
+  **`useDraggable`, not `usePointerSwipe`:** the latter writes `touch-action: pan-y` onto
+  its target inline (it is built for horizontal swipes), which beats the stylesheet's
+  `touch-none` and hands every vertical drag back to the browser — a `pointercancel`
+  after the first move, seen with touch emulation (CDP `Input.dispatchTouchEvent`).
+- **The fold button eases like a released drag** (`settleSheet`, a 200ms `max-height`
+  transition, `motion-reduce:transition-none`). A sheet at rest has no pixel height to
+  ease from — its `max-height` is the stylesheet's `62dvh` — so the button path pins it
+  where it stands, flushes the style, then sets the target; easing straight from `62dvh`
+  sat still until the value came down to the content. Measured per frame: 13 distinct
+  heights each way, 434 → 97px and back. The open target is the list's own height when
+  that is under the ceiling. Below `md` only; the rail toggles instantly.
+- Not covered: while MapLibre's credit is **expanded** (it opens on first load and
+  closes on the first map move) its text box is above the sheet and covers the title.
+  It is the credit's own panel and closes with a tap.
+
 ## The period scrubber — 51 steps from OpenHistoricalMap
 
 **The scrubber now moves through a continuous dated series, not three

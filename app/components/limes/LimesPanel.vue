@@ -1,4 +1,5 @@
 <script setup lang="ts">
+  import { breakpointsTailwind, useBreakpoints, useDraggable, useEventListener } from '@vueuse/core'
   import type { LimesInstallation } from '#shared/types'
 
   /**
@@ -9,6 +10,21 @@
    * a back button between them keeps one surface and one scroll position on a
    * phone. Same shell as `SiteDetailPanel` — a sheet on handhelds, a rail on
    * wide screens — because it competes for the same corner of the screen.
+   *
+   * **The sheet has a floor of its own** (`pb-10` below `md`). The key button and
+   * MapLibre's (i) credit sit in the bottom corners of the map at all times, on
+   * one line 10px up, and the credit is raised above every panel on purpose
+   * (`main.css`) so it can never be buried. Both used to lie on the sheet's last
+   * 40px: folded away, they covered the title and the fold button; open, they
+   * covered the end of the list. The padding is a strip nobody else's controls
+   * need, so nothing in the sheet is ever under them. `pages/index.vue` lifts
+   * the control column clear of the folded sheet while the frontier is followed.
+   *
+   * **The grey bar is a handle.** Below `md` the header (bar and title row) can
+   * be dragged: up opens the sheet, down folds it, and the sheet follows the
+   * finger meanwhile. The fold button stays — dragging is a pointer gesture and
+   * `aria-expanded` is what a keyboard or a screen reader gets — and it eases
+   * the sheet the way a released drag does (`settleSheet`).
    */
   const { t } = useI18n()
   const { sectors, sectorsStatus, sector, sectorStatus, selectedSectorSlug, selectSector } =
@@ -19,6 +35,165 @@
   const map = useMapInstance()
 
   const isCollapsed = ref(false)
+
+  /** Matches `max-h-[62dvh]` on the aside; the drag clamps to what the stylesheet allows. */
+  const SHEET_MAX_VIEWPORT_RATIO = 0.62
+  /** Over a finger's own wobble on a tap, under a deliberate drag. */
+  const DRAG_THRESHOLD_PX = 8
+  /** Matches `duration-200` on the aside. */
+  const SETTLE_MS = 200
+  /** The click a browser sends after a pointer is released over the control it was pressed on. */
+  const CLICK_AFTER_DRAG_MS = 60
+
+  /** Tailwind's own `md`: the width at which the sheet becomes a rail and there is nothing to drag. */
+  const isSheet = useBreakpoints(breakpointsTailwind).smaller('md')
+  const panel = useTemplateRef<HTMLElement>('panel')
+  const handle = useTemplateRef<HTMLElement>('handle')
+  const body = useTemplateRef<HTMLElement>('body')
+
+  const isDragging = ref(false)
+  /** The script, not the stylesheet, owns the sheet's height: a finger let go, or the button was pressed. */
+  const isSettling = ref(false)
+  /** `transition-[max-height]` is on. Off for the frame that pins the sheet where it stands. */
+  const isEasing = ref(false)
+  /** The sheet's `max-height` in px while a finger holds it or it settles; `null` leaves it to the stylesheet. */
+  const sheetHeight = ref<number | null>(null)
+  const isBodyShown = computed(() => !isCollapsed.value || isDragging.value || isSettling.value)
+
+  let pointerStartY = 0
+  let heightAtDragStart = 0
+  let foldedHeight = 0
+  let openHeight = 0
+  let settleTimer: number | undefined
+  let lastDragEndedAt = Number.NEGATIVE_INFINITY
+
+  /** Reads the sheet's two resting heights. Nothing to drag when it is not a sheet. */
+  const measureSheet = (): boolean => {
+    const sheet = panel.value
+    const grip = handle.value
+    if (!sheet || !grip || !isSheet.value) return false
+    heightAtDragStart = sheet.offsetHeight
+    foldedHeight = grip.offsetHeight + Number.parseFloat(getComputedStyle(sheet).paddingBottom)
+    openHeight = window.innerHeight * SHEET_MAX_VIEWPORT_RATIO
+    return true
+  }
+
+  /**
+   * Where an open sheet comes to rest: as tall as its list, or the ceiling when
+   * the list is longer. Easing towards the ceiling of a short list would run out
+   * of height half way and spend the rest of the 200ms standing still.
+   */
+  const openRestingHeight = (): number => {
+    const list = body.value
+    if (!list) return openHeight
+    const border = list.offsetHeight - list.clientHeight
+    return Math.min(openHeight, foldedHeight + list.scrollHeight + border)
+  }
+
+  /**
+   * Eases the sheet to its folded or open height — for a released drag, which
+   * is already held at a pixel height, and for the fold button, which is not.
+   *
+   * A transition needs a number to start from, and a sheet at rest has none:
+   * its `max-height` is the stylesheet's `62dvh`, far above its own content, so
+   * easing straight from that would sit still until the value came down to the
+   * content. The button path therefore pins the sheet at the height it has,
+   * lets that paint (a measurement, so the style is flushed), and only then
+   * sets the target.
+   */
+  const settleSheet = async (folded: boolean): Promise<void> => {
+    window.clearTimeout(settleTimer)
+    isCollapsed.value = folded
+    isSettling.value = true
+    if (sheetHeight.value === null) {
+      isEasing.value = false
+      sheetHeight.value = heightAtDragStart
+      await nextTick()
+      panel.value?.getBoundingClientRect()
+    }
+    isEasing.value = true
+    sheetHeight.value = folded ? foldedHeight : openRestingHeight()
+    settleTimer = window.setTimeout(() => {
+      isSettling.value = false
+      isEasing.value = false
+      sheetHeight.value = null
+    }, SETTLE_MS)
+  }
+
+  /** Where a released drag ends up: the way it was going, or back where it was. */
+  const isFoldedAfter = (upwardDistance: number): boolean => {
+    if (upwardDistance > DRAG_THRESHOLD_PX) return false
+    if (upwardDistance < -DRAG_THRESHOLD_PX) return true
+    return isCollapsed.value
+  }
+
+  const followDrag = (upwardDistance: number): void => {
+    if (!isDragging.value) {
+      if (Math.abs(upwardDistance) < DRAG_THRESHOLD_PX || !measureSheet()) return
+      window.clearTimeout(settleTimer)
+      isSettling.value = false
+      isEasing.value = false
+      isDragging.value = true
+    }
+    sheetHeight.value = Math.min(
+      Math.max(heightAtDragStart + upwardDistance, foldedHeight),
+      openHeight,
+    )
+  }
+
+  const releaseDrag = (upwardDistance: number): void => {
+    if (!isDragging.value) return
+    isDragging.value = false
+    lastDragEndedAt = performance.now()
+    void settleSheet(isFoldedAfter(upwardDistance))
+  }
+
+  /**
+   * A drag that starts on the fold or back button ends over it too, and the
+   * browser then clicks it — which would undo the gesture the moment it landed.
+   * The two buttons ask before acting on a click.
+   */
+  const isJustAfterDrag = (): boolean => performance.now() - lastDragEndedAt < CLICK_AFTER_DRAG_MS
+
+  const toggleCollapsed = (): void => {
+    if (isJustAfterDrag()) return
+    const folded = !isCollapsed.value
+    if (measureSheet()) {
+      void settleSheet(folded)
+      return
+    }
+    // The rail: a full-height column with nothing to ease.
+    isCollapsed.value = folded
+  }
+
+  const backToFrontier = (): void => {
+    if (isJustAfterDrag()) return
+    selectSector(null)
+  }
+
+  /**
+   * `useDraggable` and not `usePointerSwipe`: the latter sets `touch-action:
+   * pan-y` on its target, which is right for a horizontal swipe and hands the
+   * vertical gesture straight back to the browser — `pointercancel` after the
+   * first move, confirmed in a touch-emulated browser. This one leaves
+   * `touch-action` to the `touch-none` on the handle.
+   */
+  useDraggable(handle, {
+    axis: 'y',
+    onStart: (_position, event) => {
+      pointerStartY = event.clientY
+      return isSheet.value ? undefined : false
+    },
+    onMove: (_position, event) => {
+      // A pointer that stopped touching but never said so (no `pointerup`).
+      if (event.buttons === 0) return
+      followDrag(pointerStartY - event.clientY)
+    },
+    onEnd: (_position, event) => releaseDrag(pointerStartY - event.clientY),
+  })
+
+  // A system gesture can take the pointer away mid-drag, and no `pointerup` follows.
+  useEventListener(handle, 'pointercancel', () => releaseDrag(0))
 
   /**
    * The roll interleaved for reading, while the two halves stay separate in the
@@ -85,6 +260,8 @@
     setSitesActive(true)
     selectSite(installation.id)
   }
+
+  onBeforeUnmount(() => window.clearTimeout(settleTimer))
 </script>
 
 <template>
@@ -103,13 +280,30 @@
     needed no change: `bottom-0` never intersected the header either way.
   -->
   <aside
-    class="pointer-events-auto absolute inset-x-0 bottom-0 z-20 flex max-h-[62vh] flex-col rounded-t-lg bg-paper-50 shadow-lifted md:inset-y-0 md:right-auto md:left-0 md:max-h-none md:w-[22rem] md:rounded-none md:border-r md:border-paper-200 dark:bg-night-800 dark:md:border-night-700"
+    ref="panel"
+    class="pointer-events-auto absolute inset-x-0 bottom-0 z-20 flex max-h-[62dvh] flex-col rounded-t-lg bg-paper-50 pb-10 shadow-lifted md:inset-y-0 md:right-auto md:left-0 md:max-h-none md:w-[22rem] md:rounded-none md:border-r md:border-paper-200 md:pb-0 dark:bg-night-800 dark:md:border-night-700"
+    :class="
+      isEasing ? 'transition-[max-height] duration-200 ease-out motion-reduce:transition-none' : ''
+    "
+    :style="sheetHeight === null ? undefined : { maxHeight: `${sheetHeight}px` }"
     :aria-label="t('limesPanel.title')"
   >
-    <div class="sticky top-0 z-10 shrink-0 bg-paper-50 pt-2 dark:bg-night-800 md:pt-0">
-      <div class="mx-auto mb-1 h-1 w-10 rounded-full bg-paper-300 dark:bg-night-600 md:hidden" />
+    <!--
+      The drag handle below `md`: `touch-none` keeps the browser from taking the
+      gesture for a scroll, and the two buttons inside ignore the click a drag
+      ends with (`isJustAfterDrag`).
+    -->
+    <div
+      ref="handle"
+      class="sticky top-0 z-10 shrink-0 cursor-grab touch-none select-none bg-paper-50 pt-2 dark:bg-night-800 md:cursor-auto md:touch-auto md:select-auto md:pt-0"
+      :class="isDragging ? 'cursor-grabbing' : ''"
+    >
       <div
-        class="flex items-center gap-2 border-b border-paper-200 px-5 py-3 dark:border-night-700"
+        class="mx-auto mb-1 h-1 w-10 rounded-full bg-paper-300 dark:bg-night-600 md:hidden"
+        aria-hidden="true"
+      />
+      <div
+        class="flex items-center gap-2 border-b border-paper-200 px-5 py-2 dark:border-night-700 md:py-3"
       >
         <UButton
           v-if="selectedSectorSlug"
@@ -118,7 +312,7 @@
           color="neutral"
           size="xs"
           :aria-label="t('limesPanel.backToFrontier')"
-          @click="selectSector(null)"
+          @click="backToFrontier"
         />
         <p class="eyebrow">
           {{
@@ -137,12 +331,17 @@
           :aria-expanded="!isCollapsed"
           aria-controls="limes-body"
           :aria-label="isCollapsed ? t('limesPanel.showFrontier') : t('limesPanel.hideFrontier')"
-          @click="isCollapsed = !isCollapsed"
+          @click="toggleCollapsed"
         />
       </div>
     </div>
 
-    <div v-show="!isCollapsed" id="limes-body" class="min-h-0 flex-1 overflow-y-auto">
+    <div
+      v-show="isBodyShown"
+      id="limes-body"
+      ref="body"
+      class="min-h-0 flex-1 overflow-y-auto border-b border-paper-200 md:border-b-0 dark:border-night-700"
+    >
       <!-- The sector list. -->
       <div v-if="!selectedSectorSlug">
         <p class="px-5 py-3 text-sm leading-relaxed text-ink-600 dark:text-paper-300">
