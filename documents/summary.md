@@ -547,8 +547,9 @@ source catalogue through a self-hosted LibreTranslate instance.
 
 ### 5.8 SEO & discoverability
 
-- Hand-rolled, paginated **sitemap index** (sites, tracings, static pages,
-  limes sectors — each under the 50,000-URL/50 MB sitemaps.org cap).
+- Hand-rolled, paginated **sitemap index** (sites, tracings, the three inscription
+  corpora, static pages, limes sectors — about 160,500 URLs in 8 files, each under the
+  50,000-URL/50 MB sitemaps.org cap; a test keeps it in step with `app/pages/`).
 - `robots.txt` + page-level `noindex` (two distinct mechanisms, used
   together deliberately).
 - JSON-LD structured data (`schema.org/Place`) for sites and tracings.

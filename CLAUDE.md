@@ -206,7 +206,8 @@ server/
        images/[id]/[preset]  sites/[id]/enrichment  health ready metrics openapi.json
        column-reliefs/ (+ [id]/[preset])  tabula-peutingeriana/network.geojson
   routes/ robots.txt sitemap.xml sitemap-static.xml
-          sitemap-sites/[page]  sitemap-tracings/[page]
+          sitemap-sites/[page]  sitemap-tracings/[page]  sitemap-inscriptions/[page]
+          sitemap-attic-inscriptions/[page]  sitemap-isicily-inscriptions/[page]
   database/ schema/ (users sites notebook endorsements geo atlas imports) migrations/ migrate.ts
   utils/ mvt atlas limes openapi permissions ratelimit images images-order uploads tokens diff
          step-up retraction admin-audit disposable-email
