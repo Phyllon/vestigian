@@ -529,7 +529,16 @@ docker exec vestigian-dev-postgres-1 pg_dump -U vestigian -d vestigian \
   -Fc --no-owner --no-acl --data-only -t limes_sectors -t limes_segments > limes.dump
 rsync -avP limes.dump deploy@<vps-ip>:/tmp/
 
-# 2. VPS — after the deploy (migration applied: \d limes_segments shows `source`).
+# 2. VPS — after the deploy, first confirm migration 0033 ran. Do not restore until this
+#    shows a `source` column (character varying(16), not null, default 'extent').
+docker ps --format '{{.Names}}' | grep -i postgres          # the <postgres-container> name
+docker exec <postgres-container> psql -U vestigian -d vestigian -c '\d limes_segments'
+#    Same check in plain SQL — must return exactly one row:
+#    docker exec <postgres-container> psql -U vestigian -d vestigian -c \
+#      "SELECT column_name, data_type, column_default FROM information_schema.columns
+#       WHERE table_name = 'limes_segments' AND column_name = 'source'"
+#    No `source`: the migration did not run. Read the `migrate` container's log
+#    (`docker ps -a`, then `docker logs <migrate-container>`) and redeploy; never restore into it.
 docker exec <postgres-container> psql -U vestigian -d vestigian -c \
   "TRUNCATE limes_sectors, limes_segments RESTART IDENTITY CASCADE"
 docker exec -i <postgres-container> pg_restore --no-owner --no-acl --data-only \
