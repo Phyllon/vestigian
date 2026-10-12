@@ -103,3 +103,26 @@ test.describe('the map', () => {
     expect(new URL(page.url()).hash).toMatch(/^#map=\d+\.\d{2}\/-?\d+\.\d{5}\/-?\d+\.\d{5}$/)
   })
 })
+
+test.describe('the header menu on a short phone', () => {
+  // 375×420: shorter than the menu's twelve entries, which is every landscape phone.
+  test.use({ viewport: { width: 375, height: 420 } })
+
+  test('stays inside the screen and scrolls to its last entry', async ({ page }) => {
+    await page.goto('/')
+    await waitForMapReady(page)
+
+    await page.getByRole('button', { name: 'Menu' }).click()
+    const menu = page.getByRole('menu')
+    await expect(menu).toBeVisible()
+
+    // Nuxt UI puts no height on the menu itself, so it used to be as tall as its
+    // list and run off the bottom of the screen with nothing to scroll.
+    const box = (await menu.boundingBox())!
+    expect(box.y + box.height, 'the menu ends inside the viewport').toBeLessThanOrEqual(420)
+
+    const last = menu.getByRole('menuitem').last()
+    await last.scrollIntoViewIfNeeded()
+    await expect(last).toBeInViewport()
+  })
+})
