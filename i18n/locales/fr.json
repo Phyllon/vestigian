@@ -1,4 +1,7 @@
 {
+  "pageContents": {
+    "title": "Sur cette page"
+  },
   "layout": {
     "skipToMap": "Passer à la carte",
     "skipToContent": "Passer au contenu",
@@ -165,6 +168,7 @@
     "basemapCreditDare": "Antiquité : © Johan Åhlfeldt, Université de Göteborg, CC BY-SA 3.0.",
     "basemapCreditBarrington": "Antiquité (Barrington) : routes, côtes et lieux du Centre de cartographie du monde antique (ODbL 1.0) et des Pléiades (CC BY 3.0).",
     "tapForDetails": "Appuyez ou cliquez sur une marque sur la carte pour ouvrir ce qui est enregistré à ce sujet.",
+    "spreadMarks": "Les marques qui se superposent sont réparties en anneau ou en grille et dessinées plus petites. Un point et un trait fin indiquent où se trouve réellement chacune ; en zoomant, elles reprennent leur place.",
     "inscriptionsTitle": "Inscriptions",
     "inscriptionMark": "Inscription reproduite avec un lieu de découverte identifié",
     "atticInscriptionsTitle": "Inscriptions attiques",
@@ -475,7 +479,7 @@
     "reuseBody": "Vestigian est construit à partir de sources sous licence ouverte et republie ses propres fiches dans le même esprit. Les deux flux sont en lecture seule, bornés, paginés et ouverts aux requêtes multi-origines. Les textes sont sous CC BY-SA et les métadonnées sous CC0 ; les licences des images varient selon la fiche et ne sont pas incluses.",
     "reuseNotIncluded": "Les flux ne contiennent que les notices apportées ici. Les couches de référence énumérées plus haut (voies, ateliers, monuments, inscriptions et les autres) n'y sont pas republiées — prenez-les à leur source, sous leur propre licence.",
     "reuseCreditHeading": "Comment citer cet atlas",
-    "reuseCreditBody": "Vestigian ({url}), CC BY-SA 4.0. Les fiches proviennent de Vici.org (René Voorburg et ses contributeurs).",
+    "reuseCreditBody": "Vestigian ({url}), CC BY-SA 4.0. Les fiches proviennent de Vici.org (René Voorburg et ses contributeurs). Autres sources et licences : {url}/licence",
     "reuseCreditCopy": "Copier la mention",
     "reuseCreditCopied": "Mention copiée",
     "reuseGeojson": "GeoJSON simple, pour la cartographie et l'analyse",
@@ -694,7 +698,8 @@
   },
   "mapCanvas": {
     "ariaLabel": "Carte des sites archéologiques",
-    "loading": "Déplier la carte"
+    "loading": "Déplier la carte",
+    "scaleLabel": "Échelle de la carte"
   },
   "battlePopup": {
     "viewOnWikipedia": "Voir sur Wikipédia",
@@ -2004,6 +2009,33 @@
       "description": "description",
       "period": "datation",
       "summary": "résumé"
+    }
+  },
+  "compass": {
+    "turnOn": "Faire pivoter la carte avec ma boussole",
+    "turnOff": "Arrêter la rotation et remettre le nord en haut",
+    "denied": "L’accès à la boussole a été refusé. Autorisez l’accès aux capteurs de mouvement et d’orientation pour ce site dans les réglages du navigateur, puis réessayez.",
+    "unavailable": "Cet appareil ne fournit pas de lecture de boussole que le navigateur puisse utiliser."
+  },
+  "featuresPage": {
+    "menuLabel": "Fonctionnalités",
+    "title": "Fonctionnalités",
+    "description": "Un court tour de ce que cet atlas sait faire et qu’on manque facilement, chacune avec un bouton qui ouvre un vrai exemple sur la carte.",
+    "intro": "Certaines choses ici passent facilement inaperçues. Chaque entrée ci-dessous dit ce que c’est et ce que le bouton va activer, puis vous mène à une vraie fiche sur la carte, avec son repère en vue.",
+    "whatHappens": "Ce que fait le bouton",
+    "tryIt": "Me montrer sur la carte",
+    "missing": "La fiche d’exemple n’est pas dans cet atlas pour le moment ; rien n’a été modifié.",
+    "failed": "L’exemple n’a pas pu être ouvert. Rien n’a été modifié ; réessayez dans un instant.",
+    "features": {
+      "towerSightlines": {
+        "title": "Ce que voyait une tour de guet",
+        "summary": "Le long de la frontière romaine, un garde posté sur une tour de guet surveillait le terrain découvert. Ouvrez l’une de ces tours : l’atlas calcule, à partir du relief et d’une estimation de la hauteur de la tour, ce qu’on voyait depuis sa plate-forme, jusqu’où, et quelles tours voisines pouvaient être signalées — et le dessine sur la carte. C’est un calcul, et le panneau dit ce qu’il suppose.",
+        "steps": {
+          "sites": "Active la couche des sites, pour que les tours soient dessinées.",
+          "record": "Ouvre {record}, une tour de guet du limes de Germanie supérieure.",
+          "view": "Amène la carte sur son repère et dessine la vue calculée d’après le terrain alentour."
+        }
+      }
     }
   }
 }

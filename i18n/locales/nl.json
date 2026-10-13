@@ -1,4 +1,7 @@
 {
+  "pageContents": {
+    "title": "Op deze pagina"
+  },
   "layout": {
     "skipToMap": "Ga naar de kaart",
     "skipToContent": "Ga naar de inhoud",
@@ -165,6 +168,7 @@
     "basemapCreditDare": "Oudheid (DARE): © Johan Åhlfeldt, Universiteit Göteborg, CC BY-SA 3.0.",
     "basemapCreditBarrington": "Oudheid (Barrington): wegen, kustlijn en plaatsen vanaf het Oude Wereldkaartcentrum (ODbL 1.0) en Pleiades (CC BY 3.0).",
     "tapForDetails": "Tik op of klik op een teken op de kaart om te openen wat er over is opgenomen.",
+    "spreadMarks": "Markeringen die over elkaar liggen worden in een ring of raster uitgespreid en kleiner getekend. Een stip en een dunne lijn tonen waar elke markering werkelijk ligt; zoom in en ze vallen weer op hun plek.",
     "inscriptionsTitle": "Inscripties",
     "inscriptionMark": "Gespiegelde inscriptie met een geïdentificeerde vindplaats",
     "atticInscriptionsTitle": "Attische inscripties",
@@ -475,7 +479,7 @@
     "reuseBody": "Vestigian is opgebouwd uit open gelicentieerde bronnen en publiceert zijn eigen records in dezelfde geest terug. Beide feeds zijn alleen-lezen, begrensd, gepagineerd en open voor verzoeken vanaf andere domeinen. Teksten vallen onder CC BY-SA en metadata onder CC0; beeldlicenties verschillen per record en zijn niet inbegrepen.",
     "reuseNotIncluded": "De feeds bevatten alleen hier bijgedragen records. De hierboven genoemde referentielagen (wegen, munthuizen, monumenten, inscripties en de rest) worden daarin niet opnieuw gepubliceerd: haal ze bij hun eigen bronnen, onder hun eigen licenties.",
     "reuseCreditHeading": "Zo vermeldt u deze atlas",
-    "reuseCreditBody": "Vestigian ({url}), CC BY-SA 4.0. De records zijn afkomstig van Vici.org (René Voorburg en bijdragers).",
+    "reuseCreditBody": "Vestigian ({url}), CC BY-SA 4.0. De records zijn afkomstig van Vici.org (René Voorburg en bijdragers). Overige bronnen en licenties: {url}/licence",
     "reuseCreditCopy": "Bronvermelding kopiëren",
     "reuseCreditCopied": "Bronvermelding gekopieerd",
     "reuseGeojson": "eenvoudige GeoJSON, voor kaarten en analyse",
@@ -694,7 +698,8 @@
   },
   "mapCanvas": {
     "ariaLabel": "Kaart van archeologische sites",
-    "loading": "Ontvouwen van de kaart"
+    "loading": "Ontvouwen van de kaart",
+    "scaleLabel": "Kaartschaal"
   },
   "battlePopup": {
     "viewOnWikipedia": "Bekijken op Wikipedia",
@@ -2004,6 +2009,33 @@
       "description": "beschrijving",
       "period": "datering",
       "summary": "samenvatting"
+    }
+  },
+  "compass": {
+    "turnOn": "Draai de kaart mee met mijn kompas",
+    "turnOff": "Stop met draaien en zet het noorden weer boven",
+    "denied": "Toegang tot het kompas is geweigerd. Sta toegang tot bewegings- en oriëntatiesensoren voor deze site toe in de browserinstellingen en probeer het opnieuw.",
+    "unavailable": "Dit apparaat levert geen kompasmeting die de browser kan gebruiken."
+  },
+  "featuresPage": {
+    "menuLabel": "Functies",
+    "title": "Functies",
+    "description": "Een korte rondleiding langs wat deze atlas kan en wat makkelijk over het hoofd wordt gezien, elk met een knop die een echt voorbeeld op de kaart opent.",
+    "intro": "Een paar dingen hier zijn makkelijk te missen. Elk onderdeel hieronder zegt wat het is en wat de knop aanzet, en brengt je dan naar een echt record op de kaart met het teken in beeld.",
+    "whatHappens": "Wat de knop doet",
+    "tryIt": "Toon me op de kaart",
+    "missing": "Het voorbeeldrecord staat op dit moment niet in deze atlas, dus er is niets veranderd.",
+    "failed": "Het voorbeeld kon niet worden geopend. Er is niets veranderd; probeer het zo nog eens.",
+    "features": {
+      "towerSightlines": {
+        "title": "Wat een wachttoren kon zien",
+        "summary": "Langs de Romeinse grens keek een wacht op een wachttoren uit over open terrein. Open een van deze torens en de atlas berekent uit het terrein en een schatting van de hoogte van de toren wat er vanaf het platform te zien was, hoe ver, en welke naburige torens konden worden gesignaleerd — en tekent het op de kaart. Het is een berekening, en het paneel zegt wat ze aanneemt.",
+        "steps": {
+          "sites": "Zet de laag met vindplaatsen aan, zodat de torens getekend worden.",
+          "record": "Opent {record}, een wachttoren op de Boven-Germaanse limes.",
+          "view": "Springt naar het pictogram en tekent het zicht dat is berekend uit het omringende terrein."
+        }
+      }
     }
   }
 }

@@ -1,4 +1,7 @@
 {
+  "pageContents": {
+    "title": "On this page"
+  },
   "layout": {
     "skipToMap": "Skip to the map",
     "skipToContent": "Skip to the content",
@@ -357,6 +360,7 @@
   "legend": {
     "title": "What the marks mean",
     "tapForDetails": "Tap or click a mark on the map to open what is recorded about it.",
+    "spreadMarks": "Marks that lie on top of one another are spread into a ring or a grid and drawn smaller. A dot and a thin line show where each one really is; zoom in and they settle back into place.",
     "hideKey": "Hide key",
     "showKey": "Key",
     "referencedNote": "The same marks drawn as thin outlines, without a disc, are places referenced from the Barrington Atlas and Pleiades — not records contributed here.",
@@ -693,7 +697,7 @@
     "reuseBody": "Vestigian is built from openly licensed sources, so it publishes its own records back in the same spirit. Both feeds are read-only, bounded and paged, and open to cross-origin requests. Text is CC BY-SA and metadata CC0; image licences vary per record and are not included.",
     "reuseNotIncluded": "The feeds carry only records contributed here. The reference layers listed above (roads, mints, monuments, inscriptions and the rest) are not republished in them — take those from their own sources, under their own licences.",
     "reuseCreditHeading": "How to credit this atlas",
-    "reuseCreditBody": "Vestigian ({url}), CC BY-SA 4.0. Records originate from Vici.org (René Voorburg and contributors).",
+    "reuseCreditBody": "Vestigian ({url}), CC BY-SA 4.0. Records originate from Vici.org (René Voorburg and contributors). Further sources and licences: {url}/licence",
     "reuseCreditCopy": "Copy the credit line",
     "reuseCreditCopied": "Credit line copied",
     "reuseGeojson": "plain GeoJSON, for maps and analysis",
@@ -912,7 +916,8 @@
   },
   "mapCanvas": {
     "ariaLabel": "Map of archaeological sites",
-    "loading": "Unfolding the map"
+    "loading": "Unfolding the map",
+    "scaleLabel": "Map scale"
   },
   "battlePopup": {
     "viewOnWikipedia": "View on Wikipedia",
@@ -2004,6 +2009,33 @@
       "description": "description",
       "period": "period",
       "summary": "summary"
+    }
+  },
+  "compass": {
+    "turnOn": "Turn the map with my compass",
+    "turnOff": "Stop turning the map and put north back on top",
+    "denied": "Compass access was refused. Allow motion and orientation access for this site in your browser settings, then try again.",
+    "unavailable": "This device does not report a compass reading the browser can use."
+  },
+  "featuresPage": {
+    "menuLabel": "Features",
+    "title": "Features",
+    "description": "A short tour of the things this atlas can do that are easy to miss, each with a button that opens a real example on the map.",
+    "intro": "A few things here are easy to walk past. Each one below says what it is and what the button will switch on, then takes you to a real record on the map with the mark in view.",
+    "whatHappens": "What the button does",
+    "tryIt": "Show me on the map",
+    "missing": "The example record is not in this atlas at the moment, so nothing was changed.",
+    "failed": "The example could not be opened. Nothing was changed; try again in a moment.",
+    "features": {
+      "towerSightlines": {
+        "title": "What a watchtower could see",
+        "summary": "Along the Roman frontier a guard on a watchtower looked out over open ground. Open one of these towers and the atlas works out, from the terrain and an estimate of the tower's height, what could be seen from its platform, how far, and which neighbouring towers could be signalled — and draws it on the map. It is a calculation, and the panel says what it assumes.",
+        "steps": {
+          "sites": "Switches on the sites layer, so the towers are drawn.",
+          "record": "Opens {record}, a watchtower on the Upper German Limes.",
+          "view": "Jumps the map to its icon and draws the view calculated from the ground around it."
+        }
+      }
     }
   }
 }

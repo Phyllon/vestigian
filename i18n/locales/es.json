@@ -1,4 +1,7 @@
 {
+  "pageContents": {
+    "title": "En esta página"
+  },
   "layout": {
     "skipToMap": "Ir al mapa",
     "skipToContent": "Saltar al contenido",
@@ -165,6 +168,7 @@
     "basemapCreditDare": "Antigüedad (DARE): © Johan Åhlfeldt, Universidad de Gotemburgo, CC BY-SA 3.0.",
     "basemapCreditBarrington": "Antigüedad (Barrington): carreteras, costa y lugares del Centro de Mapping del Mundo Antiguo (ODbL 1.0) y Pléyades (CC BY 3.0).",
     "tapForDetails": "Pulse o haga clic en una marca en el mapa para abrir lo que se registra al respecto.",
+    "spreadMarks": "Las marcas que se superponen se reparten en un anillo o una cuadrícula y se dibujan más pequeñas. Un punto y una línea fina indican dónde está realmente cada una; al acercar el mapa vuelven a su sitio.",
     "inscriptionsTitle": "Inscripciones",
     "inscriptionMark": "Inscripción reflejada con un lugar de hallazgo identificado",
     "atticInscriptionsTitle": "Inscripciones áticas",
@@ -475,7 +479,7 @@
     "reuseBody": "Vestigian se construye a partir de fuentes con licencia abierta y publica sus propios registros con el mismo espíritu. Ambos canales son de solo lectura, acotados, paginados y abiertos a peticiones de otros dominios. Los textos están bajo CC BY-SA y los metadatos bajo CC0; las licencias de las imágenes varían según el registro y no se incluyen.",
     "reuseNotIncluded": "Los feeds solo contienen los registros aportados aquí. Las capas de referencia enumeradas arriba (calzadas, cecas, monumentos, inscripciones y las demás) no se republican en ellos: tómelas de sus propias fuentes, con sus propias licencias.",
     "reuseCreditHeading": "Cómo citar este atlas",
-    "reuseCreditBody": "Vestigian ({url}), CC BY-SA 4.0. Los registros proceden de Vici.org (René Voorburg y colaboradores).",
+    "reuseCreditBody": "Vestigian ({url}), CC BY-SA 4.0. Los registros proceden de Vici.org (René Voorburg y colaboradores). Otras fuentes y licencias: {url}/licence",
     "reuseCreditCopy": "Copiar la atribución",
     "reuseCreditCopied": "Atribución copiada",
     "reuseGeojson": "GeoJSON simple, para mapas y análisis",
@@ -694,7 +698,8 @@
   },
   "mapCanvas": {
     "ariaLabel": "Mapa de sitios arqueológicos",
-    "loading": "Desplegando el mapa"
+    "loading": "Desplegando el mapa",
+    "scaleLabel": "Escala del mapa"
   },
   "battlePopup": {
     "viewOnWikipedia": "Ver en Wikipedia",
@@ -2004,6 +2009,33 @@
       "description": "descripción",
       "period": "datación",
       "summary": "resumen"
+    }
+  },
+  "compass": {
+    "turnOn": "Girar el mapa con mi brújula",
+    "turnOff": "Dejar de girar el mapa y volver a poner el norte arriba",
+    "denied": "Se ha denegado el acceso a la brújula. Permite el acceso a los sensores de movimiento y orientación para este sitio en los ajustes del navegador e inténtalo de nuevo.",
+    "unavailable": "Este dispositivo no ofrece una lectura de brújula que el navegador pueda usar."
+  },
+  "featuresPage": {
+    "menuLabel": "Funciones",
+    "title": "Funciones",
+    "description": "Un breve recorrido por lo que este atlas puede hacer y es fácil pasar por alto, cada una con un botón que abre un ejemplo real en el mapa.",
+    "intro": "Algunas cosas aquí se pasan por alto con facilidad. Cada entrada de abajo dice qué es y qué activará el botón, y luego te lleva a una ficha real en el mapa con su marca a la vista.",
+    "whatHappens": "Qué hace el botón",
+    "tryIt": "Mostrármelo en el mapa",
+    "missing": "La ficha de ejemplo no está en este atlas por ahora, así que no se ha cambiado nada.",
+    "failed": "No se pudo abrir el ejemplo. No se ha cambiado nada; inténtalo de nuevo en un momento.",
+    "features": {
+      "towerSightlines": {
+        "title": "Lo que podía ver una torre de vigilancia",
+        "summary": "A lo largo de la frontera romana, un centinela en una torre de vigilancia dominaba el terreno abierto. Abre una de estas torres y el atlas calcula, a partir del relieve y de una estimación de la altura de la torre, qué se veía desde su plataforma, hasta dónde y a qué torres vecinas se podía hacer señales, y lo dibuja en el mapa. Es un cálculo, y el panel dice qué supone.",
+        "steps": {
+          "sites": "Activa la capa de sitios, para que se dibujen las torres.",
+          "record": "Abre {record}, una torre de vigilancia del limes de Germania Superior.",
+          "view": "Lleva el mapa a su icono y dibuja la vista calculada a partir del terreno que la rodea."
+        }
+      }
     }
   }
 }

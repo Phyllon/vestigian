@@ -3,6 +3,14 @@ import type { RouterConfig } from 'nuxt/schema'
 const elementHash = /^#[A-Za-z][\w-]*$/
 
 /**
+ * The reading layout's header is sticky and 3.5rem (56px) tall (`reading.vue`),
+ * so an anchored heading scrolled to the very top would sit underneath it. 64px
+ * leaves the heading clear with a little air. The map layout never scrolls and
+ * is unaffected.
+ */
+const STICKY_HEADER_OFFSET_PIXELS = 64
+
+/**
  * The camera lives in the hash — `#map=12.10/47.56319/10.73665` — so a view is
  * shareable without the coordinates ever reaching the server or the tile cache
  * key. Nuxt's default scroll behaviour assumes a hash names an element and
@@ -22,7 +30,7 @@ export default <RouterConfig>{
   scrollBehavior: (to, from, savedPosition) => {
     if (savedPosition) return savedPosition
 
-    if (elementHash.test(to.hash)) return { el: to.hash, top: 0 }
+    if (elementHash.test(to.hash)) return { el: to.hash, top: STICKY_HEADER_OFFSET_PIXELS }
 
     // Panning rewrites the hash many times a minute. The reader has not
     // changed page and must not be thrown back to the top of one.

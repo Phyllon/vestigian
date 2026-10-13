@@ -1,4 +1,7 @@
 {
+  "pageContents": {
+    "title": "Auf dieser Seite"
+  },
   "layout": {
     "skipToMap": "Skip zur Karte",
     "skipToContent": "Skip zum Inhalt",
@@ -165,6 +168,7 @@
     "basemapCreditDare": "Antike (DARE): © Johan Åhlfeldt, Universität Göteborg, CC BY-SA 3.0.",
     "basemapCreditBarrington": "Antike (Barrington): Straßen, Küsten und Orte vom Ancient World Mapping Center (ODbL 1.0) und Plejaden (CC BY 3.0).",
     "tapForDetails": "Tippen oder klicken Sie auf eine Markierung auf der Karte, um zu öffnen, was darüber aufgezeichnet ist.",
+    "spreadMarks": "Markierungen, die übereinanderliegen, werden zu einem Ring oder Raster aufgefächert und kleiner gezeichnet. Ein Punkt und eine feine Linie zeigen, wo die einzelne Markierung tatsächlich liegt; beim Hineinzoomen rücken sie an ihren Platz zurück.",
     "inscriptionsTitle": "Inschriften",
     "inscriptionMark": "Gespiegelte Inschrift mit bekannter Fundstelle",
     "atticInscriptionsTitle": "Attische Inschriften",
@@ -475,7 +479,7 @@
     "reuseBody": "Vestigian entsteht aus offen lizenzierten Quellen und veröffentlicht seine eigenen Einträge im selben Geist zurück. Beide Feeds sind schreibgeschützt, begrenzt, seitenweise abrufbar und für Anfragen von anderen Domains geöffnet. Texte stehen unter CC BY-SA, Metadaten unter CC0; Bildlizenzen unterscheiden sich je Eintrag und sind nicht enthalten.",
     "reuseNotIncluded": "Die Feeds enthalten nur hier beigetragene Einträge. Die oben genannten Referenzebenen (Straßen, Münzstätten, Bauwerke, Inschriften und die übrigen) werden darin nicht erneut veröffentlicht – beziehen Sie sie aus ihren eigenen Quellen, unter deren Lizenzen.",
     "reuseCreditHeading": "So nennen Sie diesen Atlas",
-    "reuseCreditBody": "Vestigian ({url}), CC BY-SA 4.0. Die Einträge stammen von Vici.org (René Voorburg und Mitwirkende).",
+    "reuseCreditBody": "Vestigian ({url}), CC BY-SA 4.0. Die Einträge stammen von Vici.org (René Voorburg und Mitwirkende). Weitere Quellen und Lizenzen: {url}/licence",
     "reuseCreditCopy": "Namensnennung kopieren",
     "reuseCreditCopied": "Namensnennung kopiert",
     "reuseGeojson": "einfaches GeoJSON, für Karten und Auswertungen",
@@ -694,7 +698,8 @@
   },
   "mapCanvas": {
     "ariaLabel": "Karte der archäologischen Stätten",
-    "loading": "Entfaltung der Karte"
+    "loading": "Entfaltung der Karte",
+    "scaleLabel": "Kartenmaßstab"
   },
   "battlePopup": {
     "viewOnWikipedia": "Auf Wikipedia ansehen",
@@ -2004,6 +2009,33 @@
       "description": "Beschreibung",
       "period": "Datierung",
       "summary": "Zusammenfassung"
+    }
+  },
+  "compass": {
+    "turnOn": "Karte mit dem Kompass mitdrehen",
+    "turnOff": "Karte nicht mehr drehen, Norden wieder oben",
+    "denied": "Der Zugriff auf den Kompass wurde verweigert. Erlaube den Zugriff auf Bewegungs- und Ausrichtungsdaten für diese Seite in den Browser-Einstellungen und versuche es erneut.",
+    "unavailable": "Dieses Gerät liefert keine Kompassdaten, die der Browser auslesen kann."
+  },
+  "featuresPage": {
+    "menuLabel": "Funktionen",
+    "title": "Funktionen",
+    "description": "Ein kurzer Rundgang durch Dinge, die dieser Atlas kann und die leicht übersehen werden – jeweils mit einer Schaltfläche, die ein echtes Beispiel auf der Karte öffnet.",
+    "intro": "Einiges hier übersieht man leicht. Jeder Eintrag unten sagt, was es ist und was die Schaltfläche einschaltet, und führt dich dann zu einem echten Eintrag auf der Karte, das Zeichen im Blick.",
+    "whatHappens": "Was die Schaltfläche tut",
+    "tryIt": "Auf der Karte zeigen",
+    "missing": "Der Beispieleintrag ist im Moment nicht in diesem Atlas, daher wurde nichts verändert.",
+    "failed": "Das Beispiel konnte nicht geöffnet werden. Es wurde nichts verändert; versuche es gleich noch einmal.",
+    "features": {
+      "towerSightlines": {
+        "title": "Was ein Wachturm sehen konnte",
+        "summary": "Entlang der römischen Grenze blickte eine Wache vom Wachturm über offenes Gelände. Öffnest du einen dieser Türme, berechnet der Atlas aus dem Gelände und einer Schätzung der Turmhöhe, was von seiner Plattform aus zu sehen war, wie weit und welche Nachbartürme sich ansignalisieren ließen – und zeichnet es auf die Karte. Es ist eine Berechnung, und das Feld nennt ihre Annahmen.",
+        "steps": {
+          "sites": "Schaltet die Fundstellen-Ebene ein, damit die Türme gezeichnet werden.",
+          "record": "Öffnet {record}, einen Wachturm am Obergermanischen Limes.",
+          "view": "Springt auf sein Zeichen und zeichnet die aus dem umgebenden Gelände berechnete Sicht ein."
+        }
+      }
     }
   }
 }

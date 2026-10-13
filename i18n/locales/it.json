@@ -1,4 +1,7 @@
 {
+  "pageContents": {
+    "title": "In questa pagina"
+  },
   "layout": {
     "skipToMap": "Vai alla mappa",
     "skipToContent": "Salta al contenuto",
@@ -165,6 +168,7 @@
     "basemapCreditDare": "Antichità (DARE): © Johan Åhlfeldt, Gothenburg University, CC BY-SA 3.0.",
     "basemapCreditBarrington": "Antichità (Barrington): strade, coste e luoghi dal centro di mappatura del mondo antico (ODbL 1.0) e Pleiades (CC BY 3.0).",
     "tapForDetails": "Toccare o fare clic su un segno sulla mappa per aprire ciò che è registrato su di esso.",
+    "spreadMarks": "I segni che si sovrappongono vengono disposti in un anello o in una griglia e disegnati più piccoli. Un punto e una linea sottile indicano dove si trova davvero ciascuno; ingrandendo la mappa tornano al loro posto.",
     "inscriptionsTitle": "Iscrizioni",
     "inscriptionMark": "Iscrizione specchiata con un luogo di rinvenimento identificato",
     "atticInscriptionsTitle": "Iscrizioni attiche",
@@ -475,7 +479,7 @@
     "reuseBody": "Vestigian nasce da fonti con licenza aperta e ripubblica le proprie schede nello stesso spirito. Entrambi i flussi sono in sola lettura, limitati, paginati e aperti alle richieste da altri domini. I testi sono CC BY-SA e i metadati CC0; le licenze delle immagini variano per scheda e non sono incluse.",
     "reuseNotIncluded": "I feed contengono solo le schede contribuite qui. I livelli di riferimento elencati sopra (strade, zecche, monumenti, iscrizioni e gli altri) non vi sono ripubblicati: prendeteli dalle loro fonti, con le loro licenze.",
     "reuseCreditHeading": "Come citare questo atlante",
-    "reuseCreditBody": "Vestigian ({url}), CC BY-SA 4.0. Le schede provengono da Vici.org (René Voorburg e collaboratori).",
+    "reuseCreditBody": "Vestigian ({url}), CC BY-SA 4.0. Le schede provengono da Vici.org (René Voorburg e collaboratori). Altre fonti e licenze: {url}/licence",
     "reuseCreditCopy": "Copia l’attribuzione",
     "reuseCreditCopied": "Attribuzione copiata",
     "reuseGeojson": "GeoJSON semplice, per mappe e analisi",
@@ -694,7 +698,8 @@
   },
   "mapCanvas": {
     "ariaLabel": "Mappa dei siti archeologici",
-    "loading": "Dispiegamento della mappa…"
+    "loading": "Dispiegamento della mappa…",
+    "scaleLabel": "Scala della mappa"
   },
   "battlePopup": {
     "viewOnWikipedia": "Visualizza su Wikipedia",
@@ -2004,6 +2009,33 @@
       "description": "descrizione",
       "period": "datazione",
       "summary": "sintesi"
+    }
+  },
+  "compass": {
+    "turnOn": "Ruota la mappa con la mia bussola",
+    "turnOff": "Smetti di ruotare la mappa e rimetti il nord in alto",
+    "denied": "L’accesso alla bussola è stato negato. Consenti l’accesso ai sensori di movimento e orientamento per questo sito nelle impostazioni del browser, poi riprova.",
+    "unavailable": "Questo dispositivo non fornisce una lettura della bussola che il browser possa usare."
+  },
+  "featuresPage": {
+    "menuLabel": "Funzioni",
+    "title": "Funzioni",
+    "description": "Un breve giro tra ciò che questo atlante sa fare e che è facile non notare, ciascuna con un pulsante che apre un esempio reale sulla mappa.",
+    "intro": "Qui alcune cose si notano con difficoltà. Ogni voce qui sotto dice che cos’è e che cosa attiverà il pulsante, poi ti porta a una scheda reale sulla mappa con il suo segno in vista.",
+    "whatHappens": "Che cosa fa il pulsante",
+    "tryIt": "Mostrami sulla mappa",
+    "missing": "La scheda di esempio al momento non è in questo atlante, quindi non è stato cambiato nulla.",
+    "failed": "Non è stato possibile aprire l’esempio. Non è stato cambiato nulla; riprova tra un momento.",
+    "features": {
+      "towerSightlines": {
+        "title": "Che cosa poteva vedere una torre di guardia",
+        "summary": "Lungo il confine romano una sentinella sulla torre di guardia dominava il terreno aperto. Apri una di queste torri e l’atlante calcola, dal rilievo e da una stima dell’altezza della torre, che cosa si vedeva dalla sua piattaforma, fino a dove e quali torri vicine si potevano segnalare, e lo disegna sulla mappa. È un calcolo, e il pannello dice che cosa presuppone.",
+        "steps": {
+          "sites": "Attiva il livello dei siti, così le torri vengono disegnate.",
+          "record": "Apre {record}, una torre di guardia del limes della Germania superiore.",
+          "view": "Porta la mappa sulla sua icona e disegna la vista calcolata dal terreno circostante."
+        }
+      }
     }
   }
 }

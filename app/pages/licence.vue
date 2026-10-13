@@ -42,7 +42,9 @@
 </script>
 
 <template>
-  <article>
+  <article class="relative">
+    <UiPageContents />
+
     <h1 class="font-display text-3xl text-ink-900 dark:text-paper-100">{{ t('licence.title') }}</h1>
 
     <p class="mt-4 text-base leading-relaxed text-ink-700 dark:text-paper-200">
@@ -50,7 +52,7 @@
     </p>
 
     <section class="mt-8 border-t border-paper-200 pt-4 dark:border-night-700">
-      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+      <h2 id="records" class="font-display text-xl text-ink-900 dark:text-paper-100">
         {{ t('licence.recordsHeading') }}
       </h2>
       <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
@@ -59,7 +61,7 @@
     </section>
 
     <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
-      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+      <h2 id="images" class="font-display text-xl text-ink-900 dark:text-paper-100">
         {{ t('licence.imagesHeading') }}
       </h2>
       <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
@@ -68,7 +70,7 @@
     </section>
 
     <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
-      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+      <h2 id="modern-map" class="font-display text-xl text-ink-900 dark:text-paper-100">
         {{ t('licence.modernMapHeading') }}
       </h2>
       <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
@@ -77,7 +79,7 @@
     </section>
 
     <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
-      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+      <h2 id="elevation" class="font-display text-xl text-ink-900 dark:text-paper-100">
         {{ t('licence.elevationHeading') }}
       </h2>
       <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
@@ -86,7 +88,7 @@
     </section>
 
     <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
-      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+      <h2 id="barrington" class="font-display text-xl text-ink-900 dark:text-paper-100">
         {{ t('licence.barringtonHeading') }}
       </h2>
       <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
@@ -95,7 +97,7 @@
     </section>
 
     <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
-      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+      <h2 id="dare" class="font-display text-xl text-ink-900 dark:text-paper-100">
         {{ t('licence.dareHeading') }}
       </h2>
       <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
@@ -104,7 +106,7 @@
     </section>
 
     <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
-      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+      <h2 id="satellite" class="font-display text-xl text-ink-900 dark:text-paper-100">
         {{ t('licence.satelliteHeading') }}
       </h2>
       <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
@@ -113,7 +115,7 @@
     </section>
 
     <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
-      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+      <h2 id="limes" class="font-display text-xl text-ink-900 dark:text-paper-100">
         {{ t('licence.limesHeading') }}
       </h2>
       <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
@@ -122,7 +124,7 @@
     </section>
 
     <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
-      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+      <h2 id="overlays" class="font-display text-xl text-ink-900 dark:text-paper-100">
         {{ t('licence.overlaysHeading') }}
       </h2>
       <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
@@ -148,7 +150,7 @@
     </section>
 
     <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
-      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+      <h2 id="column-relief" class="font-display text-xl text-ink-900 dark:text-paper-100">
         {{ t('licence.columnReliefHeading') }}
       </h2>
       <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
@@ -157,7 +159,7 @@
     </section>
 
     <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
-      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+      <h2 id="place-names" class="font-display text-xl text-ink-900 dark:text-paper-100">
         {{ t('licence.placeNamesHeading') }}
       </h2>
       <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
@@ -166,7 +168,7 @@
     </section>
 
     <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
-      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+      <h2 id="enrichment" class="font-display text-xl text-ink-900 dark:text-paper-100">
         {{ t('licence.enrichmentHeading') }}
       </h2>
       <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
@@ -175,7 +177,7 @@
     </section>
 
     <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
-      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+      <h2 id="icons" class="font-display text-xl text-ink-900 dark:text-paper-100">
         {{ t('licence.iconsHeading') }}
       </h2>
       <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
@@ -189,7 +191,7 @@
       documentation because reuse terms and the means of reuse belong together.
     -->
     <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
-      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+      <h2 id="reuse" class="font-display text-xl text-ink-900 dark:text-paper-100">
         {{ t('licence.reuseHeading') }}
       </h2>
       <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
@@ -200,7 +202,7 @@
       </p>
       <h3
         id="credit"
-        class="mt-5 scroll-mt-6 font-display text-lg text-ink-900 dark:text-paper-100"
+        class="mt-5 scroll-mt-20 font-display text-lg text-ink-900 dark:text-paper-100"
       >
         {{ t('licence.reuseCreditHeading') }}
       </h3>
