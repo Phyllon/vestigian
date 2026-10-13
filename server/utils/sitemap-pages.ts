@@ -11,6 +11,7 @@ export const SITEMAP_STATIC_PATHS = [
   '/',
   '/about',
   '/partners',
+  '/features',
   '/licence',
   '/privacy',
   '/impressum',

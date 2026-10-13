@@ -126,6 +126,7 @@
   const { chooseCandidate, offerOverlappingFeatures, clearSelection, selectedSiteId } =
     useSiteQuery()
 
+  const { takeRequest: takeFocusRequest } = useMapFocus()
   provideMapInstance(map)
 
   const readCamera = (instance: MapLibreMap): CameraState => ({
@@ -381,6 +382,18 @@
     // then the first moment every visible tile is drawn. `performance.now()` is
     // measured from navigation start, which is what a visitor waited.
     instance.once('load', () => queueVital('map-load', performance.now()))
+    // A page with no map of its own (the features page) asked for a place. Done
+    // before the first frame, so the map opens there rather than travelling.
+    const focusRequest = takeFocusRequest()
+    if (focusRequest) {
+      focusClearOfRecordSheet(instance, {
+        request: focusRequest,
+        // Tailwind's `md`, where `SiteDetailPanel` stops being a sheet from below
+        // and becomes a panel at the side — not `useBreakpoint`'s own 900px.
+        isSheetAtBottom: window.matchMedia('(max-width: 767.98px)').matches,
+      })
+    }
+
     instance.once('idle', () => queueVital('map-idle', performance.now()))
 
     instance.on('load', () => {
@@ -422,6 +435,9 @@
       // No `keep*ThroughStyleChanges` companion — see the composable's own
       // docstring for why a delegated listener needs registering only once.
       attachAtlasPlaceOverlay(instance)
+      // A record may be open before this map existed (the features page selects
+      // one and navigates here); the selection watcher has nothing to fire on.
+      highlightSelection(instance, selectedSiteId.value)
       // After the shared overlay, so the reader's rings draw above the markers
       // they annotate rather than under them.
       attachNotebookOverlay(instance)

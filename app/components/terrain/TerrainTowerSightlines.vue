@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import type { CompassPoint, SightlineVariant, TowerRaySection } from '#shared/types'
   import { cellsOfGrid, farthestSeenBySector } from '#shared/utils/seen-grid'
+  import { recordSheetPadding } from '#shared/utils/record-sheet'
   import { compassPointFor, destinationPoint } from '#shared/utils/sightline'
   import { buildRayLines, buildSightlineMapGeometry } from '#shared/utils/sightline-overlay'
   import type { SightlineMode } from '#shared/utils/sightline-overlay'
@@ -205,11 +206,11 @@
     const corners = [0, 90, 180, 270].map((bearing) =>
       destinationPoint(data.position, bearing, reach),
     )
-    const height = map.getContainer().clientHeight
     // The record sheet covers the lower part of a phone and the right of a desktop.
-    const padding = isCompact.value
-      ? { top: 70, left: 24, right: 24, bottom: Math.round(height * 0.76) }
-      : { top: 70, left: 24, right: 440, bottom: 24 }
+    const padding = recordSheetPadding({
+      mapHeight: map.getContainer().clientHeight,
+      isCompact: isCompact.value,
+    })
     map.fitBounds(
       [
         [Math.min(...corners.map((c) => c.lon)), Math.min(...corners.map((c) => c.lat))],
