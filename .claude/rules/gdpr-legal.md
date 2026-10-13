@@ -193,3 +193,13 @@ changes, change the page.
     MailerSend is Cloudflare; SMTP2GO is Akamai.
   - `api.crowdsec.net` is on AWS (Ireland) — see runbook §19.
   - Bunny's edge network is global.
+
+## Motion sensors — the compass button reads them and keeps nothing
+
+`CompassButton.vue` reads `deviceorientation(absolute)` only after the reader presses it (and, on
+iOS, only after the system permission prompt). The angles set the map's bearing and are discarded:
+no storage key, no request, no log line, nothing in the account. It is a function the reader
+explicitly asked for, so there is no consent banner and no `privacy.cookiesBody` change. If a
+"remember my choice" is ever added it becomes a localStorage key like the others in the table above
+and the two places have to change together. `Permissions-Policy` allows the three sensors for
+`'self'` only (`nuxt.config.ts`).

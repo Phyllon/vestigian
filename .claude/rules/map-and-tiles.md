@@ -741,6 +741,96 @@ registration (`registerSiteIcons`/`registerAtlasIcons`/`registerLimesIcons`/
 marks are drawn from that same registry and both can be switched on while
 "Show sites" itself stays off.
 
+## Overlapping sites are spread into rings and grids, in the browser
+
+Requested directly: where sites overlap visually, group them into a raster
+(circle or square) of their own icons, shrunk until the overlap is minimal and
+they can be told apart. The choice made with the user was an **always-on
+arrangement, a ring up to eight members and a square grid beyond, with a dot
+and a hairline back to the true coordinate** — not spiderfy-on-tap and not a
+style-only shrink ladder. The two open-source spiderfy plugins checked
+(`@nazka/map-gl-js-spiderfy` 2.0.0, BSD-3, published 2026-03-31;
+`maplibregl-spiderfier` 1.0.11, MIT, 2021 — both from the npm registry) fan
+out on tap only, shrink nothing, and read a **clustered GeoJSON source**; ours
+is a vector-tile source, so neither fits without rebuilding the tile pipeline.
+
+**Why the tile layers could not simply shrink.** `vestigian-sites` is
+`icon-allow-overlap` on purpose (a dropped site is a record nobody knows
+exists), so dense districts were piles of full-size discs with only the
+topmost readable or tappable. MapLibre has no per-feature "shrink until it
+fits", and a collision-ladder of layers cannot move icons off a coordinate
+two records share.
+
+**How it works** (`useSiteArrangement.ts`, layout in
+`shared/utils/marker-arrangement.ts`, wiring in `useViewportTiles.ts`):
+
+1. On the map's `idle` — after the last tile lands — every site MapLibre has
+   loaded for `vestigian-data`/`sites` is read with `querySourceFeatures`
+   (deduplicated by id; a point near a tile edge is in two tiles), projected
+   to screen pixels, and handed to `arrangeMarkers` with the pixel width of
+   one marker disc at the current zoom (`markerDiscPixelsAt`, from the same
+   stops as `MARKER_ICON_SIZE`, so geometry and drawing cannot drift).
+2. **Group** by reach from each group's first member (id order), not by
+   chaining; **lay out** a ring (≤ 8) or a grid (north to south, west to east)
+   centred on the group's centroid, shrinking icons until the members clear
+   each other; **merge** neighbouring groups whose footprints overlap, capped
+   at 25 members and 1.25 cells of true spread (an uncapped merge turned a
+   street of touching sites into one grid hundreds of pixels from the
+   street — found by a test, not by eye); then **relax**: push overlapping
+   icons apart, spring each back towards its slot, and shrink — locally, only
+   the icons still overlapping — down to `MIN_SCALE` 0.3.
+3. The result is a GeoJSON source `vestigian-arrangement` with a member point
+   (displaced, `scale`), an anchor point at the true coordinate and a leg
+   line for each arranged site. **The tile layers hide exactly those ids**
+   with `['match', ['id'], ids, false, true]` on the site icons, forts,
+   selection ring and labels — `match` is a hash lookup per feature, `in`
+   against a literal array is a scan and quadratic with thousands of ids.
+   Labels are dropped for arranged sites; a label stays with its icon only
+   while the icon is on its coordinate.
+4. `icon-size` for members is the shared curve with `['get', 'scale']` inside
+   every stop (`scaleMarkerIconSize`): MapLibre accepts `zoom` only as the
+   input of a top-level `interpolate`, so `['*', scale, MARKER_ICON_SIZE]` is
+   invalid.
+
+**Tap and selection go through the arranged layers.** `findFeaturesAtPoint`
+queries `vestigian-arranged-sites`/`-limes-forts` beside the tile layers, so
+the existing "N records here" picker works unchanged (distances are to the
+drawn icon). The selection ring has its own layer around the displaced icon;
+`highlightArrangedSite` keeps the open id and re-applies it after every
+redraw, because the source is rebuilt on a style change and the clustering
+switch and takes its feature state with it.
+
+**Limits, stated rather than hidden:**
+
+- Only from zoom 9 (`ARRANGEMENT_MIN_ZOOM`). Below it clustered tiles carry
+  counted discs; in the every-site mode a tile carries a continent's points
+  and arranging them would be arranging noise.
+- Past 8,000 loaded sites it stands down and markers overlap as before. The
+  densest 2.75° × 1.4° window in the import holds 5,406 (measured, Postgres).
+- A jammed spot still overlaps once icons reach 0.3 of full size — central
+  Rome at zoom 9.5 has ~550 of 1,450 icons at the floor. Zooming resolves it.
+- Layout is in screen pixels, so it is recomputed on `idle`, not mid-gesture:
+  during a pinch the groups scale with the map for a moment and then re-form.
+  Between the filter change and the new source data there can be one frame
+  with both or neither drawn (both are asynchronous in MapLibre's worker).
+- Pan alone recomputes nothing: the input key is zoom, bearing, pitch and the
+  set of loaded ids, and the layout is translation-invariant.
+
+**Measured, in a real browser against the local 61k-site import** (headless
+Chromium; each icon's drawn size and position reconstructed from the live
+source): central Rome, icons overlapping another by more than 40% of the
+smaller — zoom 13: 92 of 440 before the relaxation pass, **0** after; zoom
+11: 366 of 925 → **0**; zoom 9.5: 753 of 1,448 → 55. Worst remaining overlap
+1–4 px at zoom 11–13. Layout time (Node, synthetic clumps, JIT-warm): 1,500
+sites 78 ms, 5,400 sites 263 ms; **not measured on a phone** — mobile first
+makes that the first thing to check, and the layout is a pure function of
+plain arrays if it ever has to move to a worker.
+
+**Unverified:** dark mode and the satellite/DARE basemaps were not looked at
+(the anchor dot and hairline take the overlay palette's `ink`/`ring`/
+`siteHalo`, which already survive both); and `e2e/site-arrangement.spec.ts`
+was written, not run, per the project rule against running e2e unprompted.
+
 ## A nullable numeric property in an MVT tile arrives as `undefined`, not `null`
 
 Found building the inscriptions overlay (`.claude/rules/epigraphy.md`), but
@@ -1804,3 +1894,94 @@ modules). Things the audit found and what was done:
   −11 KB gzip preloaded. `USlider` (period scrubber) was **left eager**: its ref is
   poked for ARIA attributes and e2e waits on its `aria-valuemax`, so laziness there
   would trade a few KB for a timing hazard.
+
+## The distance scale — MapLibre's control, mounted by hand beside the key
+
+`Scale.vue` is MapLibre's own `ScaleControl` (`unit: 'metric'`, `maxWidth: 96`): it does the
+Web Mercator arithmetic, rounds to 1/2/5 × 10ⁿ and switches metres to kilometres, none of which
+is rewritten here. **It is not added with `map.addControl`**, which would put it in the canvas's
+bottom-left corner — exactly where the key button is. `onAdd(map)` returns the element and keeps
+updating it on `move`, so the component appends that element to its own host and calls
+`onRemove()` on cleanup. The host is `Legend.vue`'s `beside` slot, on the key button's own row,
+which is why it inherits the clearance of the frontier panel (`md:left-[23.5rem]`), the featured
+list and the credit, and **does not move when the key's panel opens** (the panel grows upward
+from that row; a sibling of the whole legend column would have shifted right by 16rem).
+Theming is `.maplibregl-ctrl-scale` in `main.css` (the library's white-on-#333 re-inked from the
+same tokens as the credit). Metric in all six languages — every one is read in a country that
+uses it. `ScaleControl` is exported from the SSR shim (`app/shims/maplibre-gl.server.ts`), as any
+new runtime import from `maplibre-gl` must be. Not verified: the row at 320px with the longest
+translated key label and the folded frontier sheet — only the geometry was reasoned about.
+
+## Turning the map with the compass — heading-up, opt-in, phones only
+
+`CompassButton.vue` (above the locate button) + `useCompassHeading.ts` + `shared/utils/compass.ts`.
+Rotation is otherwise **disabled** on this map (`dragRotate: false`, `disableRotation()`), so
+nothing competes for the bearing; this is the only thing that sets it. Shown only when
+`DeviceOrientationEvent` exists **and** `(pointer: coarse)` — decided in `onMounted`, so the server
+and the first client render agree.
+
+- **The arithmetic is tested; the phone was not.** `headingFromOrientation` takes alpha/beta/gamma
+  and returns a compass bearing from the rotation matrix Rz(α)·Rx(β)·Ry(γ), choosing between the
+  device's **top edge** (held flat) and its **back** (held upright), whichever lies more nearly
+  horizontal; at 45° of tilt with no roll they agree, so there is no jump. `screen.orientation.angle`
+  corrects the top-edge reading only (the back points the same way however the phone is rotated
+  about it). Unit tests cover flat, upright, 45°, landscape and incomplete readings. **No
+  handset was available**: the unit tests use synthetic angles, the e2e spec dispatches synthetic
+  events, and landscape on iOS in particular is unconfirmed.
+- **Which event.** Android Chrome's `deviceorientation` is _relative_ (zero is wherever the phone
+  pointed when the page opened); `deviceorientationabsolute` is north-referenced. iOS has no
+  absolute event and supplies `webkitCompassHeading` on the plain one, only after
+  `DeviceOrientationEvent.requestPermission()` from a tap. A reading that is neither is discarded
+  rather than turned into a wrong north, and **no reading in 3 s** reads as "this device does not
+  report a compass".
+- **North is magnetic**, on both platforms. Declination across Europe is about −1° to +10°; it is
+  not corrected (a world magnetic model on every phone for a few degrees). Said in the docstring.
+- **Smoothing and rate.** Exponential smoothing on the circle (`smoothHeading`, weight 0.25, short-way
+  delta — averaging 359° and 1° must give 0°, not 180°), emitted at most every 150 ms and only for a
+  change of 1.5° or more; the map eases for 200 ms, linear, so each ease is cancelled by the next
+  and MapLibre never goes `idle` between them (every `idle` runs the marker arrangement).
+- **Every move is stamped `compassHeading`** (`COMPASS_MOVE_FLAG`, `easeTo`'s event data) and three
+  listeners honour it: `GeolocateButton` (following ends on any move that is not ours — it would
+  have ended on the first reading), `MapCanvas`'s `moveend` (the hash carries no bearing, and Safari
+  refuses more than 100 `history.replaceState` calls in 30 s) and the featured list (refetching
+  because only the bearing changed). A new "moveend" listener has to decide the same.
+- **`Permissions-Policy` had the three sensors denied.** `security.strict` sets `accelerometer`,
+  `gyroscope` and `magnetometer` to `[]`, and Chrome gates both orientation events on all three —
+  the events are simply never delivered, no error, no prompt, so the button would have read as a
+  phone with no compass. `nuxt.config.ts` now allows `'self'` for each (same story as
+  `geolocation`, `.claude/rules/field-notebook.md`).
+- **Nothing is stored or sent.** The readings set the bearing and are discarded; no storage key, so
+  no `privacy.cookiesBody` or `gdpr-legal.md` row. Not persisted across reloads (iOS asks again
+  from a tap anyway).
+- **What rotating costs elsewhere:** `getBounds()` is the rotated viewport's bounding box (a larger
+  area for the featured list and an offline download); symbol layers stay upright
+  (`*-rotation-alignment: auto` resolves to `viewport` for point placement); raster sheets (DARE,
+  satellite) rotate with their own printed text. Not measured: battery over a long walk.
+
+## A page with no map asks the map for a place — `useMapFocus`
+
+`MapCanvas` provides the map by injection, so a page outside it (the features page) cannot reach
+it. It leaves a `MapFocusRequest` in `useState('map-focus-request')` and navigates to `/`; the
+canvas takes it **before the first frame** (after `createMapInstance`, `takeRequest()` reads and
+clears) and `focusClearOfRecordSheet` places the point in the part the record sheet leaves
+visible (`recordSheetPadding`, shared with the tower panel's "Fit it on the map").
+
+**Padding is used to measure, not to keep.** A `padding` on a camera move persists, so every later
+move (a search result, a cluster tap) would be centred in a region the closed sheet no longer
+covers. The function applies the padding, reads which ground lies under the middle of the whole
+viewport with `unproject`, then drops the padding and centres on that ground — the point lands where
+the padded move put it and the map is left unpadded.
+
+**Seen working, with one thing it did not settle** (dev server, headless Chromium, 2026-10-13). At
+1280×800 the tower's icon lands centred in the part left of the sheet, ringed, with the calculated
+view drawn. At 375×667 the sheet is 78% of the window and leaves a band of about 35px under the
+search field; the icon's centre is put in it (measured: page y 128 with the sheet closed, the sheet
+top at 147), so it sits half beside the search field — cramped, and the true answer for that
+screen. **Not settled:** with the sheet open at that size the top ~265px of the canvas was not
+_presented_ until the map received input (a 2px drag filled it in; the same blank appeared with
+`focusClearOfRecordSheet` disabled, so it is not this feature's). It looks like the old "an overlay
+did not redraw until the reader scrolled" report (above) caught reproducibly; the defensive
+`triggerRepaint()` after the sightline `setData` did not clear it and was removed. Worth looking at
+on a real phone before anyone rewrites the focus code. `MapCanvas` also calls `highlightSelection`
+at `load` now: a record selected before the map existed (this flow) had no `selectedSiteId`
+change to fire the ring on.

@@ -87,7 +87,26 @@ one that quietly stopped months ago. `backup.sh` prints one `backup.outcome=`
 line per stage per run, Alloy already ships every container's stdout to Loki, and
 `docker/observability/rules/fake/backup.yml` turns that into four alerts —
 nothing dumped in 26h, any stage failing, dumps succeeding but **not leaving the
-machine**, and no `restic check` passing in nine days.
+machine**, and no `restic check` passing in nine days — and three more about
+retention, below.
+
+**Does it fill the VPS up? No, by construction — and since 2026-10-13 it says so every night.**
+The local dumps are pruned by `find -mtime +14 -delete` after each successful dump (about 15
+files, ~60 MB each in the restore drill ≈ 0.9 GB on the `backup-data` volume); the restic
+repository is on the Storage Space, not the VPS disk, and `restic forget --keep-daily 14
+--keep-weekly 8 --prune` runs after every push (at most 22 snapshots, deduplicated). The restic
+cache lives in the container's own layer and is bounded by repository metadata. What was missing
+was any _check_ that the plateau holds, so `backup.sh` now prints one
+`backup.outcome=ok stage=retention scope=local files=N bytes=B` and one
+`... scope=offsite snapshots=N` per run, and three rules read them: `BackupLocalDumpsNotPruned`
+(> 17 files), `BackupLocalVolumeLarge` (> 4 GiB) and `BackupRepositoryNotPruned` (> 26 snapshots).
+They take the _latest_ report in 26 h and so clear themselves; with no report they stay quiet —
+`BackupNotRunning` is the rule for absence, and wrapping these in `or vector(0)` would page on it
+twice. Verified by loading the rules into a throwaway Loki 3.4.2 with the repo's `loki.yml` and
+evaluating each in three states (healthy, over the limit, no logs). **Not verified: the numbers on
+the real VPS** — nothing here can read that volume; `docker exec` into the backup container and
+`ls -l /backups` is the one-minute check. The daily alert is `BackupNotRunning` (no successful
+dump in 26 h, evaluated hourly).
 
 This needed a Loki **ruler**, which the deployment did not have: `alerts.yml` is
 Prometheus-only (PromQL), and the backup container has no scrape endpoint and no

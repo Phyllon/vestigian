@@ -378,3 +378,50 @@ the nominal one within 1.5% throughout. The columns and their partial index were
 exercised against the live database. Note the index is not yet _proven_ under
 load: at 208 revisions Postgres correctly prefers a sequential scan, so the plan
 that matters will only appear once the table is large.
+
+## Is the API supposed to be open? — audit of 2026-10-13
+
+Every route under `server/api` and `server/routes` was read for its guard, rate limit and what it
+returns. Result: **the public surface is the right one, and two things were open that should not
+have been.**
+
+**Open by design, and why that is right.** Reads of data that is already published under an open
+licence — tiles, `/api/sites/*` (approved only; `where status = 'approved'`), search, `/api/data/*`
+feeds, limes, inscriptions, sightlines, images (approved **and** a publishable licence, signed
+redirect), `/api/contributors/:name` (opt-in, 404 not 403, month-precision join date, no email/role/
+trust). Every one calls `enforceRateLimit`; the unrated exceptions are `health` (the container
+healthcheck must not 429), `openapi.json` (404 in production) and the site tile routes, which rate
+limit inside `serveSiteTile`. Writes and anything personal sit behind `requireActiveUser`,
+`requireModerator` or `requireAdmin` (re-read from the database, not the cookie); role changes,
+bans and retraction add `requireStepUp`. CORS is one origin, and CORP is `same-origin` on every
+`/api` response — so the "open" API is open to a server-side consumer and to the feeds' documented
+reuse, **not** to another site's browser JavaScript. That is a decision, not an accident
+(`## CORS` above); revisit it only if a third-party web client is a goal.
+
+**Closed now:**
+
+- **`/api/metrics` relied on a Traefik middleware nobody has confirmed is loaded.** The handler
+  answered anyone who reached it; `docker/traefik/dynamic.yml` itself says the file provider may not
+  be read. It now answers 404 unless the request has none of the headers a proxy adds
+  (`isDirectRequest`, `server/utils/internal-request.ts`): Alloy reaches it over the compose network
+  with none; every request from the internet carries `x-forwarded-*` and `x-origin-key`. `x-real-ip`
+  is deliberately not counted — the CDN and the e2e suite both send it. Behind the router rule as
+  before, not instead of it.
+- **`/api/columns/marcus-aurelius/tile/[...path]` appended the path to Heidelberg's host unchecked**,
+  and `fetch` resolves `..`, so any URL on that host could be read through our origin and
+  bandwidth. `isSafeIiifPath` (`server/utils/iiif-path.ts`) now allows only IIIF-shaped segments —
+  no dot-segments (decoded twice), no slashes inside a segment, no query, `@` or backslash, ≤ 8
+  segments, ≤ 300 characters. The host was never attacker-controlled (the prefix pins it).
+
+**Noticed and left for a decision (not changed):**
+
+- **`GET /api/sites/:id/revisions` and `/api/tracings/:id/revisions` return `authorName` and
+  `reviewerName` for every author, regardless of `users.public_profile`.** The setting's own help
+  text says the contributor page is opt-in because "a contributor page appearing unasked would
+  publish an association between a display name and a body of work nobody agreed to" — the revision
+  list publishes exactly that association, per record, unasked. It may be deliberate (provenance;
+  CC BY-SA attribution of the edit), in which case the setting's wording is what is wrong. Changing
+  it means choosing: attribute opted-out authors as "a contributor", or say plainly in the setting
+  that edits are always credited by display name.
+- `/api/health` returns process uptime. Harmless, and it is what the healthcheck reads.
+- `/api/ready` is public and rate limited; it reports two booleans.

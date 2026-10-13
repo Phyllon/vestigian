@@ -36,7 +36,7 @@ limes sector) and one paginated child per kind of record in `SITEMAP_SOURCES`
 **Where it stood (2026-10-12, dev database, which holds the full import):** 61,273 sites,
 11,496 tracings, 79,201 + 3,412 + 5,136 inscriptions, 17 limes sectors and 11 static pages —
 **160,546 URLs in 8 files**, the largest 4.1 MB and 40,000 URLs. Before this the inscriptions
-(about 88,000 URLs) and `/about`, `/partners`, `/columns`, `/tabula-peutingeriana`,
+(about 88,000 URLs) and `/about`, `/partners`, `/features`, `/columns`, `/tabula-peutingeriana`,
 `/inscriptions` and `/inscriptions/attic` were not listed at all.
 
 **Pages are fixed runs of the primary key, not `updated_at desc`.** The old order carried an

@@ -87,8 +87,11 @@ is itself the broken thing.
 
 - Nothing mounts `docker/traefik/`, so `deny-external@file` — which keeps
   `/api/metrics` off the public router — rests on the same unconfirmed
-  mechanism as `app-rate-limit@file`. Until that is checked on the box, treat
-  `/api/metrics` as reachable; it leaks route names and volumes, not data.
+  mechanism as `app-rate-limit@file`. **The handler no longer depends on it
+  (2026-10-13):** it answers 404 to any request carrying a proxy header
+  (`isDirectRequest`), and Alloy's in-network scrape carries none. The router
+  rule is still worth confirming, but `/api/metrics` is no longer reachable
+  through it either way. `app-rate-limit@file` is still unconfirmed.
 - Request logs contain IP addresses. 30 days on an EU box is the position, and
   `REDACTED_FIELDS` in `server/utils/logger.ts` is the rest of it.
 
