@@ -247,18 +247,6 @@
           </ul>
 
           <!--
-          Marks that lie on one another are spread out by `useSiteArrangement`;
-          the dot and hairline that join a displaced icon to its true place are
-          not self-explanatory, so the key says so — while the sites are drawn,
-          since nothing else is arranged.
-        -->
-          <p
-            class="mt-2.5 max-w-64 border-t border-paper-300 pt-2 text-xs leading-snug text-ink-500 dark:border-night-600 dark:text-paper-400"
-          >
-            {{ t('legend.spreadMarks') }}
-          </p>
-
-          <!--
           The antiquity sheet carries twenty-two thousand places borrowed from
           Pleiades alongside the records contributed here, and the borrowed ones
           outnumber them. Same glyphs, drawn without the disc — so the reader can

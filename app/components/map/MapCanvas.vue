@@ -34,6 +34,7 @@
     keepOverlayThroughStyleChanges,
     refreshLimesDimming,
     refreshSiteClustering,
+    highlightArrangedSite,
     findFeaturesAtPoint,
   } = useViewportTiles()
   const {
@@ -125,8 +126,8 @@
   } = useTabulaPeutingerianaOverlay()
   const { chooseCandidate, offerOverlappingFeatures, clearSelection, selectedSiteId } =
     useSiteQuery()
-
   const { takeRequest: takeFocusRequest } = useMapFocus()
+
   provideMapInstance(map)
 
   const readCamera = (instance: MapLibreMap): CameraState => ({
@@ -176,6 +177,9 @@
   }
 
   const highlightSelection = (instance: MapLibreMap, id: number | null): void => {
+    // Before the early return: the arrangement keeps the id for when its own
+    // source exists, so a record opened while the layer was off is still ringed.
+    highlightArrangedSite(instance, id)
     if (!instance.getSource(OVERLAY_SOURCE_ID)) return
     instance.removeFeatureState({ source: OVERLAY_SOURCE_ID, sourceLayer: 'sites' })
     if (id !== null) {
@@ -378,10 +382,6 @@
       camera: restoreCamera(),
     })
 
-    // Browser-side timings for the dashboards (`useWebVitals`): a usable canvas,
-    // then the first moment every visible tile is drawn. `performance.now()` is
-    // measured from navigation start, which is what a visitor waited.
-    instance.once('load', () => queueVital('map-load', performance.now()))
     // A page with no map of its own (the features page) asked for a place. Done
     // before the first frame, so the map opens there rather than travelling.
     const focusRequest = takeFocusRequest()
@@ -394,6 +394,10 @@
       })
     }
 
+    // Browser-side timings for the dashboards (`useWebVitals`): a usable canvas,
+    // then the first moment every visible tile is drawn. `performance.now()` is
+    // measured from navigation start, which is what a visitor waited.
+    instance.once('load', () => queueVital('map-load', performance.now()))
     instance.once('idle', () => queueVital('map-idle', performance.now()))
 
     instance.on('load', () => {
@@ -431,13 +435,13 @@
       keepSightlineThroughStyleChanges(instance)
       attachOverlay(instance)
       keepOverlayThroughStyleChanges(instance)
+      // A record may be open before this map existed (the features page selects
+      // one and navigates here); the selection watcher has nothing to fire on.
+      highlightSelection(instance, selectedSiteId.value)
       refreshLimesDimming(instance)
       // No `keep*ThroughStyleChanges` companion — see the composable's own
       // docstring for why a delegated listener needs registering only once.
       attachAtlasPlaceOverlay(instance)
-      // A record may be open before this map existed (the features page selects
-      // one and navigates here); the selection watcher has nothing to fire on.
-      highlightSelection(instance, selectedSiteId.value)
       // After the shared overlay, so the reader's rings draw above the markers
       // they annotate rather than under them.
       attachNotebookOverlay(instance)

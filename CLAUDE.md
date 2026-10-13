@@ -140,8 +140,8 @@ service-worker/sw.ts         offline caching; built separately via injectManifes
 app/
   assets/css/main.css        design tokens (Tailwind v4 @theme)
   components/
-    map/       MapCanvas BasemapSwitcher GeolocateButton MapSearchField Legend FeaturePicker
-               OfflineDownloadControl OverlaySwitcher PeriodSwitcher
+    map/       MapCanvas BasemapSwitcher GeolocateButton CompassButton Scale MapSearchField
+               Legend FeaturePicker OfflineDownloadControl OverlaySwitcher PeriodSwitcher
     site/      SiteDetailPanel SiteGallery SiteGalleryManager SiteMetaList
                SiteExternalLinks SiteEnrichment SiteEndorsementButton
     tracing/   TracingDetailPanel
@@ -165,7 +165,7 @@ app/
           useAtlasPlaceOverlay useLimesOverlay usePeriodOverlay useEmpirePeriods
           useBattleOverlay usePortOverlay useRouteOverlay useCoinHoardOverlay
           useMinorFeatureOverlay useInscriptionsOverlay useAtticInscriptionsOverlay
-          useReferenceOverlays useOverlayPopup
+          useReferenceOverlays useOverlayPopup useCompassHeading useMapFocus useSiteArrangement
                                                                                    (+__test__/)
     data/ useSiteQuery useSiteEnrichment useSiteEndorsement useImageUrl useCanonicalUrl
           useNoIndex useSocialMeta                                                     (+__test__/)
@@ -176,6 +176,7 @@ app/
     admin/ useAdminStepUp
     user/ useNotebook
     limes/ useLimes
+    features/ useFeatureExample
     terrain/ useTowerSightlines useTowerRay useSectorWatch useTracingProfile useTerrainFormat
     ui/   useColorScheme useUiLocale useBreakpoint useCountryName                      (+__test__/)
   layouts/ default.vue (map shell) reading.vue (documents)
@@ -191,7 +192,7 @@ app/
          inscriptions/attic/index inscriptions/attic/[aioKey]
          inscriptions/sicily/[isicilyId]
          moderation/index          admin/index (one station, sections in the query string)
-         tabula-peutingeriana columns nearby
+         tabula-peutingeriana columns nearby features
 server/
   plugins/ observability.ts   the only per-request hook: id, access log, span
   middleware/ content-language.ts   sets Content-Language from the locale cookie
@@ -215,7 +216,7 @@ server/
           sitemap-attic-inscriptions/[page]  sitemap-isicily-inscriptions/[page]
   database/ schema/ (users sites notebook endorsements geo atlas imports) migrations/ migrate.ts
   utils/ mvt atlas limes openapi permissions ratelimit images images-order uploads tokens diff
-         step-up retraction admin-audit disposable-email
+         step-up retraction admin-audit disposable-email internal-request iiif-path
          notebook gpx basemap-pmtiles endorsements
          site-record validation sanitize
          mail mail-template notifications
@@ -230,7 +231,8 @@ shared/utils/  password policy, authorization rules, the limes gazetteer, JSON-L
                tile enumeration and limits, offline-cache naming, byte formatting,
                milestones, Pleiades identifiers, Linked Places (Pelagios) builders,
                record completeness, line of sight (sightline, seen-grid, sightline-overlay,
-               sector-watch), elevation profile                                   (+__test__/)
+               sector-watch), elevation profile, compass heading, the features registry,
+               record-sheet padding                                               (+__test__/)
 scripts/import/  four-stage vici.org import + vici-licences.ts (shared vocabulary)
                  guard.ts (upstream delta tripwire, +__test__/)
                  02c-geo-names.ts 04-mirror-basemap-tiles.ts 05-antiquity-atlas.ts

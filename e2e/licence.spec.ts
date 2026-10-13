@@ -38,6 +38,24 @@ test.describe('the licence page', () => {
     ).toBeVisible()
   })
 
+  test('lists its sections in a legend that jumps to them', async ({ page }) => {
+    await page.setViewportSize({ width: 1400, height: 900 })
+    await page.goto('/licence')
+
+    const legend = page.getByRole('navigation', { name: 'On this page' })
+    await expect(legend).toBeVisible()
+
+    await legend.getByRole('link', { name: 'Reusing this data' }).click()
+    await expect(page).toHaveURL(/\/licence#reuse$/)
+    await expect(
+      page.getByRole('heading', { level: 2, name: 'Reusing this data' }),
+    ).toBeInViewport()
+    await expect(legend.getByRole('link', { name: 'Reusing this data' })).toHaveAttribute(
+      'aria-current',
+      'location',
+    )
+  })
+
   test('documents the query parameters of both public feeds, with working examples', async ({
     page,
     request,

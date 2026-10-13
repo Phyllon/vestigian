@@ -360,7 +360,6 @@
   "legend": {
     "title": "What the marks mean",
     "tapForDetails": "Tap or click a mark on the map to open what is recorded about it.",
-    "spreadMarks": "Marks that lie on top of one another are spread into a ring or a grid and drawn smaller. A dot and a thin line show where each one really is; zoom in and they settle back into place.",
     "hideKey": "Hide key",
     "showKey": "Key",
     "referencedNote": "The same marks drawn as thin outlines, without a disc, are places referenced from the Barrington Atlas and Pleiades — not records contributed here.",

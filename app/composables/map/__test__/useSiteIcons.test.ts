@@ -1,12 +1,17 @@
 import { describe, expect, it } from 'vitest'
 import {
+  MARKER_ICON_SIZE,
+  MARKER_ICON_SIZE_STOPS,
   SITE_CATEGORIES,
   SITE_ICON_GLYPHS,
   SITE_MARK_CATEGORY,
   SITE_MARK_ICON_GLYPHS,
   SITE_MARK_KINDS,
   buildSiteIconExpression,
+  markerDiscPixelsAt,
+  markerIconSizeAt,
   resolveSiteMark,
+  scaleMarkerIconSize,
   siteIconId,
   siteMarkIconId,
 } from '../useSiteIcons'
@@ -100,5 +105,39 @@ describe('buildSiteIconExpression', () => {
       expect(fallback).toContain(siteIconId(category))
     }
     expect(fallback[fallback.length - 1]).toBe(siteIconId('other'))
+  })
+})
+
+describe('the marker size curve', () => {
+  it('is the one MapLibre expression and the one function, from the same stops', () => {
+    const [, , , ...flatStops] = MARKER_ICON_SIZE as unknown as unknown[]
+    expect(flatStops).toEqual(MARKER_ICON_SIZE_STOPS.flat())
+  })
+
+  it('reads the stop values exactly and clamps outside them', () => {
+    MARKER_ICON_SIZE_STOPS.forEach(([zoom, size]) => {
+      expect(markerIconSizeAt(zoom)).toBeCloseTo(size)
+    })
+    expect(markerIconSizeAt(0)).toBe(MARKER_ICON_SIZE_STOPS[0]![1])
+    expect(markerIconSizeAt(22)).toBe(1)
+  })
+
+  it('interpolates linearly between stops, as the expression does', () => {
+    // Halfway between zoom 9 (0.62) and 13 (0.85).
+    expect(markerIconSizeAt(11)).toBeCloseTo((0.62 + 0.85) / 2)
+  })
+
+  it('puts the per-feature factor inside every stop, with zoom still the top-level input', () => {
+    const scaled = scaleMarkerIconSize(['get', 'scale']) as unknown as unknown[]
+    expect(scaled.slice(0, 3)).toEqual(['interpolate', ['linear'], ['zoom']])
+    expect(scaled.slice(3)).toEqual(
+      MARKER_ICON_SIZE_STOPS.flatMap(([zoom, size]) => [zoom, ['*', ['get', 'scale'], size]]),
+    )
+  })
+
+  it('measures the disc a marker draws, not the image around it', () => {
+    // 46px image, disc 20.8 of its 24 units wide, at the zoom-17 stop of 1.
+    expect(markerDiscPixelsAt(17)).toBeCloseTo(46 * (20.8 / 24))
+    expect(markerDiscPixelsAt(9)).toBeCloseTo(46 * (20.8 / 24) * 0.62)
   })
 })

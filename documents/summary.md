@@ -417,6 +417,12 @@ sequenceDiagram
 
 - **MapLibre-powered vector map** with clustered sites, tracings, category
   markers, and a legend that adapts to the active basemap.
+- **Overlapping sites are spread out, not piled.** From zoom 9, sites whose
+  markers would cover one another are drawn as a ring (up to eight) or a
+  square grid, each icon shrunk until they stop overlapping, with a dot and a
+  hairline back to its true coordinate; zooming in dissolves the groups. Worked
+  out in the browser from the loaded tiles (`useSiteArrangement`), so the tile
+  pipeline and its caches are untouched.
 - **Six basemap views**, in two switcher groups:
   - _Modern:_ **Vestigian** (recolored vector basemap) and **Satellite**
     (Sentinel-2 cloudless raster).
@@ -451,6 +457,18 @@ sequenceDiagram
   detail tiers), backed by a Service Worker precache and a measured, sampled
   size estimate before download — never a blanket "cache everything."
 - **Geolocation button**, mobile-first responsive layout.
+- **Distance scale** beside the key button: MapLibre's own control (metric, rounded to a round
+  distance, following zoom and latitude), mounted by hand into the key's row so it never sits under
+  another control and does not move when the key opens.
+- **"Turn the map with my compass"** on touch devices: heading-up while walking, from the phone's
+  magnetometer (`deviceorientationabsolute`, or `webkitCompassHeading` on iOS after its permission
+  prompt). Smoothed on the circle, rate-limited, north arrow while active, north back on top when
+  switched off. Nothing is stored or sent. Magnetic north, not true: not corrected (a few degrees
+  across Europe). Tested as arithmetic and as wiring with synthetic events — **not on a handset.**
+- **A Features page** (`/features`): the things that are easy to miss, each with the list of what
+  its button will switch on and a button that opens a real example on the map — switches the layers
+  on, selects the record and puts the camera on its icon clear of the record sheet. First entry:
+  what a frontier watchtower could see (§5.11).
 
 ### 5.2 Contribution & editing
 
@@ -929,6 +947,8 @@ contribution it makes still goes through the moderation pipeline in §2.3.
 | Response `cache-control` default     | Every route used to get **no `cache-control` at all** unless someone had already reasoned about that specific one — `/api/me`, `auth/export.get.ts` (a full GDPR export), `/api/moderation/**` and every page all shipped with nothing, leaving Bunny's own default edge TTL to decide whether a session-bearing response gets cached and handed to the next visitor. `server/middleware/security-defaults.ts` now defaults every response to `private, no-store` unless a route has already set its own. Pages get this too, for a second, sharper reason: each SSR render stamps a fresh CSP nonce into both the response header and the inline `<script nonce="...">` tags in the body, so a cache serving one response's body against a different response's headers would reproduce — via cache poisoning rather than a missing CSP allowlist entry — the exact blank-page bug already on record in `CLAUDE.md`. |
 | `Cross-Origin-Resource-Policy`       | Same delivery gap as HSTS above, same root cause: `nuxt-security` only ever applies CORP (and CSP, `Permissions-Policy`, COOP, COEP) to the rendered HTML document, never to `server/api/**`. Added via the same middleware — CORP is arguably more valuable on exactly those JSON/tile responses than on the HTML shell, since it exists specifically against a cross-origin subresource read (the Spectre-class threat model).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | Bunny cache-control trust boundary   | None of the above protects anything if the Bunny pull zone in front of the app has "override cache control" enabled — a dashboard setting, not something this repo controls, that would cache every 200 for the zone's own TTL regardless of what the origin sends. Recorded as a required operational check in `.claude/rules/deployment-and-releases.md` and the deployment runbook, since it cannot be verified from code.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Metrics endpoint                     | `/api/metrics` answers **404 to any request that carries a proxy header** (`x-forwarded-*`, `x-origin-key`) — in-network scrapes carry none — so it no longer rests on the Traefik `deny-external` middleware, which the deployment cannot confirm is loaded.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Upstream proxy path                  | The Heidelberg IIIF proxy accepts only IIIF-shaped path segments (no dot-segments, decoded twice; no query, `@`, backslash or slash inside a segment). The prefix pinned the host; it did not pin the path.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | Detection vs. enforcement            | CrowdSec reads the app's own structured audit logs and writes decisions; **nothing is enforced yet** — a decision requires a bouncer, deliberately placed at the CDN edge rather than this box, since a VPS provider's DDoS protection works at L3/L4 and does not absorb L7 HTTP floods.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | Alternatives considered and rejected | Fingerprinting (GDPR/ePrivacy exposure, redundant with ALTCHA + trust 0), fail2ban (bans CDN edge IPs, not real clients), SafeLine, Coraza, KrakenD, Wazuh, Zeek/Snort/Suricata — each with a documented, specific reason.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 
@@ -1247,9 +1267,18 @@ quietly stopped months ago.** `backup.sh` prints one `backup.outcome=` line per
 stage per run, and since Alloy already ships every container's stdout to Loki,
 four alerts sit on those lines: nothing dumped in 26 hours, any stage failing,
 dumps succeeding but **not leaving the machine**, and no integrity check
-passing in nine days. That needed a Loki **ruler**, which this deployment did
+passing in nine days — plus three on retention (below). That needed a Loki **ruler**, which this deployment did
 not have — `alerts.yml` is Prometheus-only, and the backup container has no
 scrape endpoint and no reason to grow one.
+
+**Retention is bounded, and checked.** The local dumps are pruned by age
+(about 15 files, under 1 GB at today's ~60 MB each) and the restic repository
+by `forget --keep-daily 14 --keep-weekly 8 --prune` (at most 22 snapshots, on
+the Storage Space, not the VPS disk). A plateau is a claim, so each run now logs
+what is actually held and three rules fire when it is not there: more than 17
+local dumps, more than 4 GiB of them, or more than 26 snapshots. They were
+loaded into a real Loki and evaluated in three states; the numbers on the
+production volume have not been read.
 
 ---
 

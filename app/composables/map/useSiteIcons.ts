@@ -202,6 +202,8 @@ const ICON_VIEWBOX = 24
  */
 const ICON_DISPLAY_PIXELS = 46
 const ICON_PIXEL_RATIO = 2
+/** The marker disc's radius in the 24-unit box — `rasteriseIcon` draws it and the layout reads it. */
+const ICON_DISC_RADIUS = 10.4
 const ICON_RASTER_PIXELS = ICON_DISPLAY_PIXELS * ICON_PIXEL_RATIO
 
 /**
@@ -213,21 +215,56 @@ const ICON_RASTER_PIXELS = ICON_DISPLAY_PIXELS * ICON_PIXEL_RATIO
  * stops, so switching an overlay on made its marks jump in size against the
  * sites beneath them. A new symbol layer takes this constant, not new stops.
  */
+export const MARKER_ICON_SIZE_STOPS: ReadonlyArray<readonly [zoom: number, size: number]> = [
+  [4, 0.3],
+  [6, 0.42],
+  [9, 0.62],
+  [13, 0.85],
+  [17, 1],
+]
+
 export const MARKER_ICON_SIZE: ExpressionSpecification = [
   'interpolate',
   ['linear'],
   ['zoom'],
-  4,
-  0.3,
-  6,
-  0.42,
-  9,
-  0.62,
-  13,
-  0.85,
-  17,
-  1,
-]
+  ...MARKER_ICON_SIZE_STOPS.flat(),
+] as unknown as ExpressionSpecification
+
+/**
+ * The same curve, each stop multiplied by `factor` — a per-feature expression
+ * such as `['get', 'scale']`. MapLibre only accepts `zoom` as the input of a
+ * top-level `interpolate`, so a data-driven size cannot be written as
+ * `['*', factor, MARKER_ICON_SIZE]`; the factor goes inside every stop instead.
+ */
+export const scaleMarkerIconSize = (factor: ExpressionSpecification): ExpressionSpecification =>
+  [
+    'interpolate',
+    ['linear'],
+    ['zoom'],
+    ...MARKER_ICON_SIZE_STOPS.flatMap(([zoom, size]) => [zoom, ['*', factor, size]]),
+  ] as unknown as ExpressionSpecification
+
+/** `MARKER_ICON_SIZE` evaluated in code, for geometry that has to agree with what is drawn. */
+export const markerIconSizeAt = (zoom: number): number => {
+  const first = MARKER_ICON_SIZE_STOPS[0]!
+  const last = MARKER_ICON_SIZE_STOPS[MARKER_ICON_SIZE_STOPS.length - 1]!
+  if (zoom <= first[0]) return first[1]
+  if (zoom >= last[0]) return last[1]
+
+  const upperIndex = MARKER_ICON_SIZE_STOPS.findIndex(([stopZoom]) => stopZoom >= zoom)
+  const [lowerZoom, lowerSize] = MARKER_ICON_SIZE_STOPS[upperIndex - 1]!
+  const [upperZoom, upperSize] = MARKER_ICON_SIZE_STOPS[upperIndex]!
+  const progress = (zoom - lowerZoom) / (upperZoom - lowerZoom)
+  return lowerSize + progress * (upperSize - lowerSize)
+}
+
+/**
+ * The width, in CSS pixels, of the disc a contributed site's marker draws at
+ * `zoom` — what two markers must be further apart than not to overlap. The
+ * disc, not the icon image: the image has transparent margin all round it.
+ */
+export const markerDiscPixelsAt = (zoom: number): number =>
+  ICON_DISPLAY_PIXELS * ((2 * ICON_DISC_RADIUS) / ICON_VIEWBOX) * markerIconSizeAt(zoom)
 
 /**
  * `museum`'s roofline reaches the very edge of its 24-unit box — Lucide
@@ -346,7 +383,7 @@ const rasteriseIcon = (request: IconRasterRequest): ImageData | null => {
 
   if (!request.reference) {
     context.beginPath()
-    context.arc(12, 12, 10.4, 0, Math.PI * 2)
+    context.arc(12, 12, ICON_DISC_RADIUS, 0, Math.PI * 2)
     context.fillStyle = request.palette.ground
     context.fill()
     context.strokeStyle = request.palette.ring

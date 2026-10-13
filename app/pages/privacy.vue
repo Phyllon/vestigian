@@ -61,7 +61,9 @@
 </script>
 
 <template>
-  <article>
+  <article class="relative">
+    <UiPageContents />
+
     <h1 class="font-display text-3xl text-ink-900 dark:text-paper-100">{{ t('privacy.title') }}</h1>
 
     <p class="mt-4 text-base leading-relaxed text-ink-700 dark:text-paper-200">
@@ -69,7 +71,7 @@
     </p>
 
     <section class="mt-8 border-t border-paper-200 pt-4 dark:border-night-700">
-      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+      <h2 id="controller" class="font-display text-xl text-ink-900 dark:text-paper-100">
         {{ t('privacy.controllerHeading') }}
       </h2>
       <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
@@ -78,7 +80,7 @@
     </section>
 
     <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
-      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+      <h2 id="account" class="font-display text-xl text-ink-900 dark:text-paper-100">
         {{ t('privacy.accountHeading') }}
       </h2>
       <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
@@ -87,7 +89,7 @@
     </section>
 
     <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
-      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+      <h2 id="contribution" class="font-display text-xl text-ink-900 dark:text-paper-100">
         {{ t('privacy.contributionHeading') }}
       </h2>
       <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
@@ -96,7 +98,7 @@
     </section>
 
     <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
-      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+      <h2 id="photograph" class="font-display text-xl text-ink-900 dark:text-paper-100">
         {{ t('privacy.photographHeading') }}
       </h2>
       <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
@@ -105,7 +107,7 @@
     </section>
 
     <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
-      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+      <h2 id="cookies" class="font-display text-xl text-ink-900 dark:text-paper-100">
         {{ t('privacy.cookiesHeading') }}
       </h2>
       <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
@@ -114,7 +116,7 @@
     </section>
 
     <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
-      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+      <h2 id="performance" class="font-display text-xl text-ink-900 dark:text-paper-100">
         {{ t('privacy.performanceHeading') }}
       </h2>
       <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
@@ -123,7 +125,7 @@
     </section>
 
     <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
-      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+      <h2 id="location" class="font-display text-xl text-ink-900 dark:text-paper-100">
         {{ t('privacy.locationHeading') }}
       </h2>
       <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
@@ -132,7 +134,7 @@
     </section>
 
     <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
-      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+      <h2 id="logs" class="font-display text-xl text-ink-900 dark:text-paper-100">
         {{ t('privacy.logsHeading') }}
       </h2>
       <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
@@ -141,7 +143,7 @@
     </section>
 
     <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
-      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+      <h2 id="recipients" class="font-display text-xl text-ink-900 dark:text-paper-100">
         {{ t('privacy.recipientsHeading') }}
       </h2>
       <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
@@ -161,7 +163,7 @@
     </section>
 
     <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
-      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+      <h2 id="rights" class="font-display text-xl text-ink-900 dark:text-paper-100">
         {{ t('privacy.rightsHeading') }}
       </h2>
       <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
@@ -203,7 +205,7 @@
     </section>
 
     <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
-      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+      <h2 id="supervisory" class="font-display text-xl text-ink-900 dark:text-paper-100">
         {{ t('privacy.supervisoryHeading') }}
       </h2>
       <p class="mt-2 whitespace-pre-line text-sm leading-relaxed text-ink-700 dark:text-paper-200">
@@ -212,7 +214,7 @@
     </section>
 
     <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
-      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+      <h2 id="minors" class="font-display text-xl text-ink-900 dark:text-paper-100">
         {{ t('privacy.minorsHeading') }}
       </h2>
       <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
@@ -221,7 +223,7 @@
     </section>
 
     <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
-      <h2 class="font-display text-xl text-ink-900 dark:text-paper-100">
+      <h2 id="changes" class="font-display text-xl text-ink-900 dark:text-paper-100">
         {{ t('privacy.changesHeading') }}
       </h2>
       <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
