@@ -1,5 +1,0 @@
----
-'vestigian': minor
----
-
-The map gains a distance scale beside the key button (metric, rounded to a round distance, changing with the zoom and kept clear of the other controls), and on a phone a "turn the map with my compass" button above the locate button: the map follows the way you are facing while you walk, an arrow shows where north went, and switching it off puts north back on top. The reading pages' header (menu, language, theme, account) now stays at the top of the window when you scroll. A new Features page, in the menu, lists the things that are easy to miss with a button that opens a real example on the map — first, what a watchtower on the Roman frontier could see: it switches on the sites layer, opens the tower and puts the map on its icon with the calculated view drawn. Hardening: `/api/metrics` now answers 404 to anything that came through a proxy, and the Marcus Aurelius plate proxy refuses paths that climb out of the image service. The backup job now reports what it holds and three new alerts fire when local dumps or restic snapshots stop being pruned.
