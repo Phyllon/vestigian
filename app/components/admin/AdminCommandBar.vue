@@ -146,7 +146,7 @@
 </script>
 
 <template>
-  <div class="leaf sticky top-2 z-10 px-3 py-3 sm:px-4">
+  <div class="leaf sticky top-16 z-10 px-3 py-3 sm:px-4">
     <div class="flex flex-wrap items-center gap-2">
       <!--
         Collapsed to an icon below `sm`: at 375px a full-width search field

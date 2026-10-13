@@ -105,7 +105,7 @@
       </p>
 
       <ul v-if="partners.length > 0" class="mt-4 space-y-5">
-        <li v-for="partner in partners" :id="partner.id" :key="partner.id" class="scroll-mt-6">
+        <li v-for="partner in partners" :id="partner.id" :key="partner.id" class="scroll-mt-20">
           <article class="leaf p-5" :aria-labelledby="`${partner.id}-name`">
             <header class="flex items-start gap-4">
               <!--
