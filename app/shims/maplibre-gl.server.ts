@@ -27,6 +27,7 @@ const browserOnlyClass = (name: string): ObjectConstructor =>
 const BrowserOnlyMap = browserOnlyClass('Map')
 export const Popup = browserOnlyClass('Popup')
 export const LngLat = browserOnlyClass('LngLat')
+export const ScaleControl = browserOnlyClass('ScaleControl')
 export const addProtocol = (): never => browserOnly('addProtocol')
 export const setWorkerUrl = (): never => browserOnly('setWorkerUrl')
 

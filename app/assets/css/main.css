@@ -323,6 +323,21 @@
 }
 
 /*
+ * The distance scale (`Scale.vue`): the library's white-on-#333 bar, re-inked
+ * from the same tokens as the credit beside it so it follows the theme. The
+ * ground is the notebook's raised sheet at the same translucency; the line is
+ * the body ink, which is what keeps it readable over a satellite photograph.
+ */
+.maplibregl-ctrl-scale {
+  background-color: color-mix(in srgb, var(--surface-raised) 88%, transparent);
+  border-color: var(--text-body);
+  color: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.3;
+}
+
+/*
  * The expanded (compact-show) attribution list has no height cap of its own
  * and `.maplibregl-map` sets `overflow:hidden`, so with several overlays
  * active at once — each contributing its own credit — the list grew taller

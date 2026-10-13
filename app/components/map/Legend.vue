@@ -247,6 +247,18 @@
           </ul>
 
           <!--
+          Marks that lie on one another are spread out by `useSiteArrangement`;
+          the dot and hairline that join a displaced icon to its true place are
+          not self-explanatory, so the key says so — while the sites are drawn,
+          since nothing else is arranged.
+        -->
+          <p
+            class="mt-2.5 max-w-64 border-t border-paper-300 pt-2 text-xs leading-snug text-ink-500 dark:border-night-600 dark:text-paper-400"
+          >
+            {{ t('legend.spreadMarks') }}
+          </p>
+
+          <!--
           The antiquity sheet carries twenty-two thousand places borrowed from
           Pleiades alongside the records contributed here, and the borrowed ones
           outnumber them. Same glyphs, drawn without the disc — so the reader can
@@ -710,17 +722,26 @@
       </div>
     </Transition>
 
-    <UButton
-      color="neutral"
-      variant="outline"
-      size="xs"
-      icon="i-lucide-key-round"
-      class="shadow-leaf"
-      :aria-expanded="isOpen"
-      aria-controls="map-legend"
-      @click="toggle"
-    >
-      {{ isOpen ? t('legend.hideKey') : t('legend.showKey') }}
-    </UButton>
+    <!--
+      Beside the button, not beside the panel: the panel opens upward from this
+      row, so whatever sits here keeps its place when the key is opened. The
+      distance scale lives in this slot (`index.vue`) for exactly that reason —
+      it shares the key's own clearance of the frontier panel and the credit.
+    -->
+    <div class="flex items-end gap-3">
+      <UButton
+        color="neutral"
+        variant="outline"
+        size="xs"
+        icon="i-lucide-key-round"
+        class="shadow-leaf"
+        :aria-expanded="isOpen"
+        aria-controls="map-legend"
+        @click="toggle"
+      >
+        {{ isOpen ? t('legend.hideKey') : t('legend.showKey') }}
+      </UButton>
+      <slot name="beside" />
+    </div>
   </div>
 </template>

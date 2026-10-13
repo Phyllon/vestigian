@@ -113,7 +113,16 @@
         class="pointer-events-auto absolute bottom-2.5 left-3 z-30 md:left-4"
         data-tour="legend"
         :class="isFollowingLimes ? 'md:left-[23.5rem]' : ''"
-      />
+      >
+        <!--
+          The scale rides the key's own row (and so its clearance of the
+          frontier panel, the featured list and the credit) rather than the
+          canvas corner MapLibre would put it in, where it would sit under the key.
+        -->
+        <template #beside>
+          <MapScale />
+        </template>
+      </MapLegend>
 
       <!--
         Clear of MapLibre's own chrome. The compact attribution control — the
