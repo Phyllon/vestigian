@@ -1,6 +1,8 @@
-# Vestigian
+<h1 align="center">
+  <img src="documents/Vestigian_logo.png" alt="Vestigian" width="320">
+</h1>
 
-An atlas of the traces antiquity left behind — settlements, roads, fortifications and findspots, recorded by the people who go and look at them.
+An atlas of the traces antiquity left behind — settlements, roads, fortifications and findspots and more, recorded by the people who go and look at them.
 
 Built on data contributed to [Vici.org](https://vici.org) by René Voorburg and its contributors, reused under CC BY-SA. Vestigian is an independent reimplementation, not a fork of the vici.org codebase.
 
