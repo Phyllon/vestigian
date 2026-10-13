@@ -257,6 +257,19 @@
       ><code>{{ badgeSnippet }}</code></pre>
     </section>
 
+    <section
+      class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700"
+      aria-labelledby="partners-credit-heading"
+    >
+      <h2
+        id="partners-credit-heading"
+        class="font-display text-xl text-ink-900 dark:text-paper-100"
+      >
+        {{ t('licence.reuseCreditHeading') }}
+      </h2>
+      <UiCreditLine class="mt-3" />
+    </section>
+
     <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
       <h2 id="how" class="font-display text-xl text-ink-900 dark:text-paper-100">
         {{ t('partnersPage.howHeading') }}

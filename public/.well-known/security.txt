@@ -14,7 +14,7 @@
 # should treat an expired file as absent, so this date has to be moved before
 # it passes or the file quietly stops counting. Set roughly a year out.
 
-Contact: mailto:vestigian@mail.online-impressum.de
+Contact: mailto:operator@vestigian.org
 Contact: https://mein.online-impressum.de/vestigian/#zweiterkontaktweg
 Expires: 2027-10-01T00:00:00.000Z
 Preferred-Languages: en, de

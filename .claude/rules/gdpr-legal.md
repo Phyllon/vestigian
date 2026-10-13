@@ -14,7 +14,7 @@ technical side, verified against the actual code rather than assumed.
 
 **`impressum.vue`'s identity, contact and supervisory-authority blocks are
 filled in (2026-09-30), not placeholders** — operator "Vestigian — Alex
-Lernbecher & René Voorburg", a c/o address via an Online-Impressum service
+Lernbecher & René Voorburg", a c/o address via an Online-Impressum service (contact email `operator@vestigian.org` since 2026-10-13, no longer the forwarding address)
 (`mein.online-impressum.de/vestigian`), and the DDG/MStV media-oversight
 authority (Bayerische Landeszentrale für neue Medien). All three real,
 provided by the operator directly, hand-translated into all six locales per
