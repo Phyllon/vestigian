@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import { useDebounceFn } from '@vueuse/core'
   import type { FeaturedSiteSummary } from '#shared/types'
+  import { COMPASS_MOVE_FLAG } from '~/composables/map/useCompassHeading'
 
   /**
    * Sites with a photograph around wherever the camera is (the endpoint's best
@@ -127,7 +128,9 @@
     ([instance, enabled], _previous, onCleanup) => {
       if (!instance || !enabled) return
       void loadAround(instance)
-      const onMoveEnd = (): void => {
+      const onMoveEnd = (event: object): void => {
+        // The list is for where the map is, and turning it moves nothing.
+        if (COMPASS_MOVE_FLAG in event) return
         void refreshDebounced(instance)
       }
       instance.on('moveend', onMoveEnd)

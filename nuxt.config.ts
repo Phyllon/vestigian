@@ -743,6 +743,19 @@ export default defineNuxtConfig({
       permissionsPolicy: {
         fullscreen: ['self'],
         geolocation: ['self'],
+        /**
+         * **The three motion sensors, for the same reason as `geolocation` above.**
+         * The strict preset sets `accelerometer`, `gyroscope` and `magnetometer`
+         * to `[]`, and Chrome gates `deviceorientation` and
+         * `deviceorientationabsolute` on all three — a denied policy means the
+         * events are simply never delivered, with no error and no prompt. The
+         * "turn the map with the compass" button (`useCompassHeading.ts`) would
+         * have read as a phone with no compass. Same-origin only: no embedded
+         * third party is given a sensor.
+         */
+        accelerometer: ['self'],
+        gyroscope: ['self'],
+        magnetometer: ['self'],
       },
     },
     rateLimiter: false,

@@ -141,6 +141,8 @@
       >
         <MapSettingsMenu />
         <MapOfflineDownloadControl data-tour="offline" />
+        <!-- Beside the locate button it works with: it turns the map, that one moves it. -->
+        <MapCompassButton />
         <MapGeolocateButton data-tour="geolocate" />
 
         <UButton

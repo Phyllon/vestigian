@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import type { Map as MapLibreMap } from 'maplibre-gl'
   import type { CameraState } from '#shared/types'
+  import { COMPASS_MOVE_FLAG } from '~/composables/map/useCompassHeading'
 
   const { t } = useI18n()
   const container = useTemplateRef<HTMLDivElement>('container')
@@ -429,7 +430,13 @@
       isReady.value = true
     })
 
-    instance.on('moveend', () => rememberCamera(readCamera(instance)))
+    // Not for a turn of the compass: it ends every few hundred ms and the hash
+    // carries no bearing, so the write would change nothing and could trip
+    // Safari's cap on `history.replaceState`.
+    instance.on('moveend', (event) => {
+      if (COMPASS_MOVE_FLAG in event) return
+      rememberCamera(readCamera(instance))
+    })
     instance.on('click', (event) => handleFeatureTap(instance, event.point))
 
     // Sites, and every overlay icon that opens a popup: the layers' own `mouseenter`

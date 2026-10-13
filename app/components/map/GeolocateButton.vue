@@ -1,5 +1,6 @@
 <script setup lang="ts">
   import type { GeoJSONSource } from 'maplibre-gl'
+  import { COMPASS_MOVE_FLAG } from '~/composables/map/useCompassHeading'
   import { buildAccuracyCircle } from '~/composables/map/useGeolocation'
 
   const { t } = useI18n()
@@ -92,13 +93,15 @@
    * or a picked feature, which would otherwise be undone by the next fix.
    * `easeTo`'s second argument is merged into the `movestart` event it fires
    * synchronously, so our own moves identify themselves by `FOLLOW_MOVE_FLAG`.
+   * Turning the map with the compass is not the reader steering it either, and
+   * would otherwise end following on the first reading.
    */
   watch(
     map,
     (instance, _previous, onCleanup) => {
       if (!instance) return
       const releaseOnUserMove = (event: object): void => {
-        if (!(FOLLOW_MOVE_FLAG in event)) releaseFollow()
+        if (!(FOLLOW_MOVE_FLAG in event) && !(COMPASS_MOVE_FLAG in event)) releaseFollow()
       }
       instance.on('movestart', releaseOnUserMove)
       onCleanup(() => instance.off('movestart', releaseOnUserMove))
