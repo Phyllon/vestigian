@@ -1995,3 +1995,16 @@ did not redraw until the reader scrolled" report (above) caught reproducibly; th
 on a real phone before anyone rewrites the focus code. `MapCanvas` also calls `highlightSelection`
 at `load` now: a record selected before the map existed (this flow) had no `selectedSiteId`
 change to fire the ring on.
+
+## A `public` response on a query-string route was served to every query (2026-10-13)
+
+Reported: the search could not find `turm-3-25` in production while `/api/sites/slug/turm-3-25`
+answered. Measured against production: `?q=zzzqqq` returned the Turm results and a cache-busted
+`&_=…` did not; the response carried `cdn-cache: EXPIRED`. **The Bunny pull zone ignores the query
+string in its cache key** (known for the site tiles, `## How the map stays fast`), and
+`/api/sites/search`, `/api/sites/needs-work`, `/api/data/sites.geojson` and `/api/data/sites.lp.json`
+were `public`, so the edge answered every `q`, `lon/lat` and `bbox/offset` with whichever it cached
+first — for the minute or five minutes of `max-age`, repeatedly. Dev has no CDN and never showed it.
+All four are `private` now (the browser keeps its own copy). **A new route that varies by query
+string must not be `public`** unless the value is in the path; the tile routes are the pattern
+(`/api/tiles/every/…`). Not re-measured on production after the change; re-run the `zzzqqq` check.

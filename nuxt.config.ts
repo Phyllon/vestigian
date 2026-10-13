@@ -991,17 +991,24 @@ export default defineNuxtConfig({
      * `/**` floor's `no-store` above, since this family is read often enough
      * (map panning re-requests the same site) that a browser-only 60s cache is
      * worth the trade. The two literal routes below are genuinely anonymous —
-     * neither reads a session — so they keep the public, CDN-cacheable header
-     * the wildcard used to give every route here.
+     * neither reads a session — but both vary by query string, so they are
+     * `private` too (see their own comment below).
      */
     '/api/sites/**': {
       headers: { 'cache-control': 'private, max-age=60' },
     },
+    /**
+     * `private`, not `public`: both vary by query string (`q`; `lon`/`lat`), and
+     * the Bunny pull zone ignores the query string in its cache key. As `public`
+     * it answered every search with whichever one it had cached first — a search
+     * for "zzzqqq" returned "Turm 3-25" in production (2026-10-13). A browser
+     * still keeps its own copy for a minute.
+     */
     '/api/sites/search': {
-      headers: { 'cache-control': 'public, max-age=60' },
+      headers: { 'cache-control': 'private, max-age=60' },
     },
     '/api/sites/needs-work': {
-      headers: { 'cache-control': 'public, max-age=60' },
+      headers: { 'cache-control': 'private, max-age=60' },
     },
     // `tracings/[id].get.ts` and its nested routes (`revisions`, `inscriptions`,
     // `attic-inscriptions`) don't currently read the viewer's session — checked

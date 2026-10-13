@@ -103,7 +103,8 @@ export default defineEventHandler(async (event) => {
   setResponseHeaders(event, {
     // LPF is GeoJSON-LD; the JSON-LD type is what a gazetteer content-negotiates on.
     'content-type': 'application/ld+json',
-    'cache-control': 'public, max-age=300',
+    // `private`: the pull zone ignores the query string (see sites.geojson.get.ts).
+    'cache-control': 'private, max-age=300',
     'access-control-allow-origin': '*',
   })
 

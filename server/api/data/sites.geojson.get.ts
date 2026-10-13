@@ -66,7 +66,9 @@ export default defineEventHandler(async (event) => {
 
   setResponseHeaders(event, {
     'content-type': 'application/geo+json',
-    'cache-control': 'public, max-age=300',
+    // `private`: the pull zone ignores the query string, so `public` served every
+    // bbox/page the first one cached (see `/api/sites/search` in nuxt.config.ts).
+    'cache-control': 'private, max-age=300',
     'access-control-allow-origin': '*',
   })
 

@@ -47,7 +47,7 @@ test.describe('security headers', () => {
     // handler that sets cache-control itself, and that the two mechanisms
     // resolve in the right order in the actual built server.
     const response = await request.get('/api/data/sites.geojson?limit=1')
-    expect(response.headers()['cache-control']).toBe('public, max-age=300')
+    expect(response.headers()['cache-control']).toBe('private, max-age=300')
     // Still gets HSTS and CORP — those aren't conditional on anything.
     expect(response.headers()['strict-transport-security']).toBe(
       'max-age=31536000; includeSubDomains',
