@@ -1517,7 +1517,8 @@
     "title": "Overlays",
     "menuLabel": "Overlays",
     "labelNone": "Overlays: geen actief",
-    "labelActive": "Overlays: {count} actief"
+    "labelActive": "Overlays: {count} actief",
+    "hideAll": "Alle overlays verbergen"
   },
   "periodSwitcher": {
     "label": "Antieke rijken: {state}",

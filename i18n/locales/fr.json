@@ -1517,7 +1517,8 @@
     "title": "Calques",
     "menuLabel": "Calques",
     "labelNone": "Calques : aucun actif",
-    "labelActive": "Calques : {count} actifs"
+    "labelActive": "Calques : {count} actifs",
+    "hideAll": "Masquer tous les calques"
   },
   "periodSwitcher": {
     "label": "Empires antiques : {state}",

@@ -1517,7 +1517,8 @@
     "title": "Capas",
     "menuLabel": "Capas",
     "labelNone": "Capas: ninguna activa",
-    "labelActive": "Capas: {count} activas"
+    "labelActive": "Capas: {count} activas",
+    "hideAll": "Ocultar todas las capas"
   },
   "periodSwitcher": {
     "label": "Imperios antiguos: {state}",

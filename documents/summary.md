@@ -440,7 +440,8 @@ sequenceDiagram
   Catalogue of Ancient Ports, ORBIS Roman routes, AWMC's minor antiquities
   (bridges, mines, quarries and more), and CHRR coin hoards — each off by
   default, each crediting its own source in the map's own attribution the
-  moment it's switched on.
+  moment it's switched on. A "Hide all overlays" action at the top of the
+  menu switches every shown layer off at once.
 - **Column reliefs** (`/columns`) — Trajan's Column, mirrored from Wikimedia
   Commons' Cichorius Plates into this project's own storage, and the Column
   of Marcus Aurelius, served live via a server-side IIIF proxy onto

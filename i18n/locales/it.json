@@ -1517,7 +1517,8 @@
     "title": "Livelli",
     "menuLabel": "Livelli",
     "labelNone": "Livelli: nessuno attivo",
-    "labelActive": "Livelli: {count} attivi"
+    "labelActive": "Livelli: {count} attivi",
+    "hideAll": "Nascondi tutti i livelli"
   },
   "periodSwitcher": {
     "label": "Imperi antichi: {state}",

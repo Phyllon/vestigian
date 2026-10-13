@@ -1517,7 +1517,8 @@
     "title": "Overlays",
     "menuLabel": "Overlays",
     "labelNone": "Overlays: keine aktiv",
-    "labelActive": "Overlays: {count} aktiv"
+    "labelActive": "Overlays: {count} aktiv",
+    "hideAll": "Alle Overlays ausblenden"
   },
   "periodSwitcher": {
     "label": "Antike Reiche: {state}",

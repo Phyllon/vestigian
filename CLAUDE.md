@@ -348,7 +348,7 @@ this project.
 - **Open source** look for established open source projects to solve some problem first instead of
   writing the logic yourself directly. Then ask for decision
 - **EU/GDPR compliance** all packages or code dealing with user data or which are user-related must be GDPR compliant
-- **e2e-tests** add e2e-tests when new features were added. do not run them on your own for checks.
+- **e2e-tests** add e2e-tests when new bigger and relevant features were added. do not run them on your own for checks.
 - **i18n** always use i18n for defined languages (de, en, fr, es, it, nl)
 - **Deep nesting** never use nested terneries
 - **Verify third-party sources before integrating them** — before mirroring or

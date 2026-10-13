@@ -195,7 +195,8 @@
     "title": "Overlays",
     "menuLabel": "Overlays",
     "labelNone": "Overlays: none on",
-    "labelActive": "Overlays: {count} on"
+    "labelActive": "Overlays: {count} on",
+    "hideAll": "Hide all overlays"
   },
   "periodSwitcher": {
     "label": "Ancient empires: {state}",

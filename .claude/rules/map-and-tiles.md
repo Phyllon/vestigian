@@ -689,6 +689,16 @@ keys across six catalogues buys nothing a reader can see.
 e2e reaches the toggles through `openOverlays`/`toggleOverlay`
 (`e2e/helpers/map.ts`), never through the basemap button.
 
+**"Hide all overlays"** is a plain text button pinned to the top of the menu
+(`role="menuitem"`, eye-off icon, no switch, no hint line) so it reads as an
+action beside the list, not as one more layer in it. It calls each listed entry's
+`setActive(false)` for those that are shown and `canShow`, i.e. exactly what the
+count on the trigger counts. It does **not** touch the period scrubber or the
+neighbouring realms (`PeriodSwitcher.vue`), and not the basemap. "Show sites"
+is one of the listed entries and goes off with the rest. It uses `aria-disabled` rather than `disabled`
+when nothing is on, because it is the focused element when the last layer goes
+off. Written into `e2e/reference-overlays.spec.ts`, not run.
+
 ## The vici-sourced site/tracing overlay is off by default
 
 `isShowingSites` (`useBasemapStyle.ts`) gates `OVERLAY_SOURCE_ID`

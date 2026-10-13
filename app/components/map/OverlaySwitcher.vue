@@ -87,7 +87,7 @@
     isActive: boolean
     label: string
     hint: string
-    toggle: () => void
+    setActive: (next: boolean) => void
   }
 
   const overlayToggles = computed<OverlayToggle[]>(() => [
@@ -97,7 +97,7 @@
       isActive: isShowingSites.value,
       label: t('basemapSwitcher.showSites'),
       hint: t('basemapSwitcher.showSitesHint'),
-      toggle: () => setSitesActive(!isShowingSites.value),
+      setActive: setSitesActive,
     },
     {
       key: 'limes',
@@ -105,7 +105,7 @@
       isActive: isFollowingLimes.value,
       label: t('basemapSwitcher.followLimes'),
       hint: t('basemapSwitcher.followLimesHint'),
-      toggle: () => setLimesActive(!isFollowingLimes.value),
+      setActive: setLimesActive,
     },
     {
       key: 'tabula-peutingeriana',
@@ -113,7 +113,7 @@
       isActive: isShowingTabulaPeutingerianaOverlay.value,
       label: t('basemapSwitcher.tabulaPeutingerianaOverlay'),
       hint: t('basemapSwitcher.tabulaPeutingerianaOverlayHint'),
-      toggle: () => setTabulaPeutingerianaOverlayActive(!isShowingTabulaPeutingerianaOverlay.value),
+      setActive: setTabulaPeutingerianaOverlayActive,
     },
     {
       key: 'modern-labels',
@@ -121,7 +121,7 @@
       isActive: isShowingModernLabels.value,
       label: t('basemapSwitcher.showModernLabels'),
       hint: t('basemapSwitcher.showModernLabelsHint'),
-      toggle: () => setModernLabelsActive(!isShowingModernLabels.value),
+      setActive: setModernLabelsActive,
     },
     {
       key: 'battles',
@@ -129,7 +129,7 @@
       isActive: isShowingBattles.value,
       label: t('basemapSwitcher.showBattles'),
       hint: t('basemapSwitcher.showBattlesHint'),
-      toggle: () => setBattlesActive(!isShowingBattles.value),
+      setActive: setBattlesActive,
     },
     {
       key: 'ports',
@@ -137,7 +137,7 @@
       isActive: isShowingPorts.value,
       label: t('basemapSwitcher.showPorts'),
       hint: t('basemapSwitcher.showPortsHint'),
-      toggle: () => setPortsActive(!isShowingPorts.value),
+      setActive: setPortsActive,
     },
     {
       key: 'routes',
@@ -145,7 +145,7 @@
       isActive: isShowingRoutes.value,
       label: t('basemapSwitcher.showRoutes'),
       hint: t('basemapSwitcher.showRoutesHint'),
-      toggle: () => setRoutesActive(!isShowingRoutes.value),
+      setActive: setRoutesActive,
     },
     {
       key: 'features',
@@ -153,7 +153,7 @@
       isActive: isShowingFeatures.value,
       label: t('basemapSwitcher.showFeatures'),
       hint: t('basemapSwitcher.showFeaturesHint'),
-      toggle: () => setFeaturesActive(!isShowingFeatures.value),
+      setActive: setFeaturesActive,
     },
     {
       key: 'coin-hoards',
@@ -161,7 +161,7 @@
       isActive: isShowingCoinHoards.value,
       label: t('basemapSwitcher.showCoinHoards'),
       hint: t('basemapSwitcher.showCoinHoardsHint'),
-      toggle: () => setCoinHoardsActive(!isShowingCoinHoards.value),
+      setActive: setCoinHoardsActive,
     },
     {
       key: 'inscriptions',
@@ -169,7 +169,7 @@
       isActive: isShowingInscriptions.value,
       label: t('basemapSwitcher.showInscriptions'),
       hint: t('basemapSwitcher.showInscriptionsHint'),
-      toggle: () => setInscriptionsActive(!isShowingInscriptions.value),
+      setActive: setInscriptionsActive,
     },
     {
       key: 'attic-inscriptions',
@@ -177,7 +177,7 @@
       isActive: isShowingAtticInscriptions.value,
       label: t('basemapSwitcher.showAtticInscriptions'),
       hint: t('basemapSwitcher.showAtticInscriptionsHint'),
-      toggle: () => setAtticInscriptionsActive(!isShowingAtticInscriptions.value),
+      setActive: setAtticInscriptionsActive,
     },
     {
       key: 'isicily',
@@ -185,7 +185,7 @@
       isActive: isShowingReferenceOverlay('isicily'),
       label: t('basemapSwitcher.showIsicily'),
       hint: t('basemapSwitcher.showIsicilyHint'),
-      toggle: () => setReferenceOverlayActive('isicily', !isShowingReferenceOverlay('isicily')),
+      setActive: (next) => setReferenceOverlayActive('isicily', next),
     },
     {
       key: 'roman-roads',
@@ -193,8 +193,7 @@
       isActive: isShowingReferenceOverlay('roman-roads'),
       label: t('basemapSwitcher.showRomanRoads'),
       hint: t('basemapSwitcher.showRomanRoadsHint'),
-      toggle: () =>
-        setReferenceOverlayActive('roman-roads', !isShowingReferenceOverlay('roman-roads')),
+      setActive: (next) => setReferenceOverlayActive('roman-roads', next),
     },
     {
       key: 'monuments',
@@ -202,7 +201,7 @@
       isActive: isShowingReferenceOverlay('monuments'),
       label: t('basemapSwitcher.showMonuments'),
       hint: t('basemapSwitcher.showMonumentsHint'),
-      toggle: () => setReferenceOverlayActive('monuments', !isShowingReferenceOverlay('monuments')),
+      setActive: (next) => setReferenceOverlayActive('monuments', next),
     },
     {
       key: 'mints',
@@ -210,7 +209,7 @@
       isActive: isShowingReferenceOverlay('mints'),
       label: t('basemapSwitcher.showMints'),
       hint: t('basemapSwitcher.showMintsHint'),
-      toggle: () => setReferenceOverlayActive('mints', !isShowingReferenceOverlay('mints')),
+      setActive: (next) => setReferenceOverlayActive('mints', next),
     },
     {
       key: 'hillforts',
@@ -218,13 +217,25 @@
       isActive: isShowingReferenceOverlay('hillforts'),
       label: t('basemapSwitcher.showHillforts'),
       hint: t('basemapSwitcher.showHillfortsHint'),
-      toggle: () => setReferenceOverlayActive('hillforts', !isShowingReferenceOverlay('hillforts')),
+      setActive: (next) => setReferenceOverlayActive('hillforts', next),
     },
   ])
 
   const activeCount = computed(
     () => overlayToggles.value.filter((entry) => entry.canShow && entry.isActive).length,
   )
+
+  /**
+   * Switches off every overlay this menu lists that is currently drawn, and
+   * only those: the period scrubber and its neighbouring realms are a
+   * separate control with their own state (`PeriodSwitcher.vue`), and a
+   * reading of the sheet itself, not a layer over it.
+   */
+  const hideAll = (): void => {
+    overlayToggles.value
+      .filter((entry) => entry.canShow && entry.isActive)
+      .forEach((entry) => entry.setActive(false))
+  }
 
   /**
    * The count is the whole point of naming the closed button: with the panel
@@ -301,6 +312,23 @@
           exist under the period scrubber, so their switch sits in its panel
           (`PeriodSwitcher.vue`).
         -->
+        <!--
+          An action, not a layer: no switch, no hint line, set apart by a plain
+          text button pinned above the list so it stays reachable while the
+          list scrolls. `aria-disabled` rather than `disabled` — the button is
+          what has focus when the last overlay goes off, and a disabled button
+          drops it back to the top of the document.
+        -->
+        <button
+          type="button"
+          role="menuitem"
+          :aria-disabled="activeCount === 0"
+          class="sticky top-0 z-10 flex w-full items-center gap-2 border-b border-paper-300 bg-paper-50 px-4 py-2 text-left text-sm text-ink-700 transition hover:underline aria-disabled:cursor-default aria-disabled:text-ink-500 aria-disabled:no-underline dark:border-night-600 dark:bg-night-800 dark:text-paper-200 dark:aria-disabled:text-paper-400"
+          @click="activeCount > 0 && hideAll()"
+        >
+          <UIcon name="i-lucide-eye-off" class="size-4 shrink-0" aria-hidden="true" />
+          {{ t('overlaySwitcher.hideAll') }}
+        </button>
         <template v-for="entry in overlayToggles" :key="entry.key">
           <button
             v-if="entry.canShow"
@@ -308,7 +336,7 @@
             role="menuitemcheckbox"
             :aria-checked="entry.isActive"
             class="flex w-full items-center gap-3 border-b border-paper-200 px-4 py-3 text-left transition last:border-b-0 hover:bg-paper-200 dark:border-night-700 dark:hover:bg-night-700"
-            @click="entry.toggle"
+            @click="entry.setActive(!entry.isActive)"
           >
             <span
               class="flex h-5 w-9 shrink-0 items-center rounded-full border transition"
