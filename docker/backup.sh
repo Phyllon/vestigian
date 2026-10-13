@@ -28,6 +28,29 @@ remote_configured() {
   [ -n "${RESTIC_REPOSITORY:-}" ] && [ -n "${RESTIC_PASSWORD:-}" ]
 }
 
+# What this machine is actually holding, one line per run. The dumps are pruned
+# by `find -mtime` and the remote by `restic forget`, and both are meant to
+# plateau — a plateau is a claim, and these two lines are how the Loki rules in
+# docker/observability/rules/fake/backup.yml check it instead of assuming it.
+# `du` rather than summing `wc -c` per file: one 60 MB read per file, per night,
+# for a number that only has to be right to the megabyte.
+report_local_retention() {
+  files=$(find "$BACKUP_DIR" -name 'vestigian-*.dump' | wc -l)
+  kilobytes=$(du -ck "$BACKUP_DIR"/vestigian-*.dump 2>/dev/null | tail -n 1 | cut -f1)
+  echo "backup.outcome=ok stage=retention scope=local files=${files} bytes=$((${kilobytes:-0} * 1024))"
+}
+
+# `restic snapshots --compact` ends with "N snapshots". Anything else (an older
+# restic, a locked repository) is left unreported rather than reported wrong —
+# the push itself has its own outcome line above.
+report_offsite_retention() {
+  snapshots=$(restic snapshots --tag nightly --host vestigian --compact 2>/dev/null | tail -n 1 | awk '{print $1}')
+  case "$snapshots" in
+    '' | *[!0-9]*) return 0 ;;
+  esac
+  echo "backup.outcome=ok stage=retention scope=offsite snapshots=${snapshots}"
+}
+
 run_backup() {
   STAMP=$(date -u +%Y%m%dT%H%M%SZ)
   DUMP="${BACKUP_DIR}/vestigian-${STAMP}.dump"
@@ -44,6 +67,7 @@ run_backup() {
 
   echo "backup.outcome=ok stage=dump file=${DUMP} bytes=$(wc -c <"$DUMP")"
   find "$BACKUP_DIR" -name 'vestigian-*.dump' -mtime "+${KEEP_DAYS}" -delete
+  report_local_retention
 
   if ! remote_configured; then
     echo "backup.outcome=skipped stage=offsite reason=no-restic-repository-configured"
@@ -84,6 +108,7 @@ run_backup() {
     echo "backup.outcome=failed stage=prune"
     return 1
   fi
+  report_offsite_retention
 
   # A repository that cannot be read is not a backup. Reading a sample rather
   # than everything keeps this affordable enough to run unattended; the full

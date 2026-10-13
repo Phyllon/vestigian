@@ -88,3 +88,62 @@ groups:
             backup.sh runs `restic check` every Sunday; none has passed in nine
             days. Snapshots are still being written, but nothing has confirmed
             they can be read back. Run docker/restore-drill.sh --offsite.
+
+      # The two stores are meant to plateau, not grow: the local volume is pruned
+      # with `find -mtime +14` and the remote with `restic forget --keep-daily 14
+      # --keep-weekly 8 --prune`. Each run now reports what is actually held
+      # (`stage=retention`), and these rules fire when the plateau is not there.
+      # They read the *latest* report in the window, so they clear on their own
+      # once pruning works again.
+      #
+      # Fifteen files is the steady state (today's plus fourteen days back); 17
+      # allows a missed night and a clock edge without paging anyone.
+      - alert: BackupLocalDumpsNotPruned
+        expr: |
+          max(max_over_time({service="backup"} |= "stage=retention" |= "scope=local" | logfmt | unwrap files [26h])) > 17
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: More local dumps are held than the retention allows
+          description: >
+            The backup volume on this VPS holds more than 17 dump files; the
+            policy keeps about 15 (14 days). The `find -mtime` prune in
+            docker/backup.sh is not removing them, so the volume will keep
+            growing until the disk fills — look at `docker compose logs backup`
+            and at the volume's ownership (the runbook's chown note).
+
+      # 4 GiB is roughly four times what 15 dumps weigh today (about 60 MB each
+      # in the restore drill). It is a ceiling for "something is wrong", not a
+      # budget: the count rule above catches pruning stopping; this one catches
+      # the dump itself ballooning, which the count cannot see.
+      - alert: BackupLocalVolumeLarge
+        expr: |
+          max(max_over_time({service="backup"} |= "stage=retention" |= "scope=local" | logfmt | unwrap bytes [26h])) > 4294967296
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: The local backup dumps exceed 4 GiB
+          description: >
+            The dumps held on this VPS total more than 4 GiB. Either the
+            database has grown far past what the restore drill measured or
+            something other than a dump is being written to the volume. Check
+            `du` on the backup-data volume before the disk-space alert does it
+            for you.
+
+      # 14 dailies plus 8 weeklies is at most 22; the margin is for a weekly that
+      # does not coincide with a daily being kept for a moment before the prune.
+      - alert: BackupRepositoryNotPruned
+        expr: |
+          max(max_over_time({service="backup"} |= "stage=retention" |= "scope=offsite" | logfmt | unwrap snapshots [26h])) > 26
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: The off-box restic repository holds more snapshots than the policy keeps
+          description: >
+            More than 26 nightly snapshots are in the restic repository; the
+            policy is 14 daily and 8 weekly. `restic forget --prune` is either
+            failing (see BackupFailing) or the retention flags changed. The
+            Storage Space fills slowly, then all at once.
