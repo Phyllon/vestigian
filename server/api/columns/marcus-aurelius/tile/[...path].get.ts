@@ -30,6 +30,11 @@ export default defineEventHandler(async (event) => {
   await enforceRateLimit(event, 'tiles')
   const path = getRouterParam(event, 'path')
   if (!path) throw createError({ statusCode: 400, message: 'Missing tile path.' })
+  // The prefix fixes the host, not the path: without this `../` read any URL on
+  // it through our origin. See `isSafeIiifPath`.
+  if (!isSafeIiifPath(path)) {
+    throw createError({ statusCode: 400, message: 'Not an image-service path.' })
+  }
 
   const response = await fetch(`${UPSTREAM_PREFIX}${path}`)
   if (!response.ok) {
