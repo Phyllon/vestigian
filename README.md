@@ -4,6 +4,8 @@
 
 An atlas of the traces antiquity left behind — settlements, roads, fortifications and findspots and more, recorded by the people who go and look at them.
 
+**Live at [vestigian.org](https://vestigian.org).**
+
 Built on data contributed to [Vici.org](https://vici.org) by René Voorburg and its contributors, reused under CC BY-SA. Vestigian is an independent reimplementation, not a fork of the vici.org codebase.
 
 ## Further documentation
