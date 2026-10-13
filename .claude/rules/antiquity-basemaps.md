@@ -457,6 +457,8 @@ controls, and the credit is `z-35` on purpose (`main.css`) so no panel may bury 
   its target inline (it is built for horizontal swipes), which beats the stylesheet's
   `touch-none` and hands every vertical drag back to the browser — a `pointercancel`
   after the first move, seen with touch emulation (CDP `Input.dispatchTouchEvent`).
+  The mechanism now lives in `useFoldableSheet` and is shared with the record sheets
+  (`map-and-tiles.md`, "Record sheets fold down to their handle").
 - **The fold button eases like a released drag** (`settleSheet`, a 200ms `max-height`
   transition, `motion-reduce:transition-none`). A sheet at rest has no pixel height to
   ease from — its `max-height` is the stylesheet's `62dvh` — so the button path pins it

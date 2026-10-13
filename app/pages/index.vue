@@ -20,6 +20,18 @@
   const isRecordPanelOpen = computed(
     () => isPanelOpen.value || isTracingPanelOpen.value || isPickerOpen.value,
   )
+
+  /**
+   * Phone only (the classes below are `max-md`): a record sheet folded to its
+   * handle is ~113px tall — row plus the 40px floor `pb-10` — which would sit
+   * over the lowest buttons, exactly as the folded frontier sheet did.
+   */
+  const isRecordSheetFolded = useIsRecordSheetFolded()
+  const controlColumnLift = computed(() => {
+    if (isRecordPanelOpen.value && isRecordSheetFolded.value) return 'max-md:bottom-32'
+    if (isFollowingLimes.value) return 'max-md:bottom-28'
+    return ''
+  })
   const config = useRuntimeConfig()
   const { isOpen: isIntroOpen, openIfNew: openIntroIfNew } = useIntroTour()
 
@@ -137,7 +149,7 @@
       -->
       <div
         class="pointer-events-auto absolute bottom-12 right-3 flex flex-col items-end gap-2 md:right-4"
-        :class="isFollowingLimes ? 'max-md:bottom-28' : ''"
+        :class="controlColumnLift"
       >
         <MapSettingsMenu />
         <MapOfflineDownloadControl data-tour="offline" />

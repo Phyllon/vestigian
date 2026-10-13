@@ -637,6 +637,10 @@
     "atTheStart": "bij het begin",
     "kmAlong": "{km} km langs de route"
   },
+  "recordSheet": {
+    "fold": "Paneel inklappen om de kaart te zien",
+    "unfold": "Paneel openen"
+  },
   "limesPanel": {
     "title": "De Romeinse grens",
     "backToFrontier": "Terug naar de hele grens",

@@ -2008,3 +2008,34 @@ first — for the minute or five minutes of `max-age`, repeatedly. Dev has no CD
 All four are `private` now (the browser keeps its own copy). **A new route that varies by query
 string must not be `public`** unless the value is in the path; the tile routes are the pattern
 (`/api/tiles/every/…`). Not re-measured on production after the change; re-run the `zzzqqq` check.
+
+## Record sheets fold down to their handle (2026-10-13)
+
+Reported on a phone: with a site open (a Turm, say) the 78% sheet could not be put
+away, so the map it was opened from was gone. The frontier panel already had a
+draggable grey bar; the three record panels (`SiteDetailPanel`, `TracingDetailPanel`,
+`FeaturePicker`) did not. The logic moved out of `LimesPanel` into
+`useFoldableSheet` (`composables/ui`), and `useRecordSheet` wraps it with one
+folded flag shared by the three (`useIsRecordSheetFolded`, read by `pages/index.vue`
+to lift the control column — `max-md:bottom-32` — clear of a folded sheet).
+
+- **The aside is its own scroller here**, unlike the frontier panel's list: the open
+  height is the aside's `scrollHeight`, the body is `v-show="isBodyShown"`, and the
+  folded height is the handle row plus `pb-10`. That 40px floor is for the same reason
+  as the frontier's: MapLibre's (i) credit is `z-35` and sits on the sheet's last
+  40px, over the close button, unless the sheet leaves it room.
+- **`vh` became `dvh` on the three asides** (78/70/78), because the drag clamps to
+  `window.innerHeight`; with `vh` the sheet jumped a few pixels at the end of a drag
+  while the browser's own bar was showing.
+- **A folded sheet is unfolded when the selection changes** (`watch(selectedSiteId, unfold)`,
+  likewise for tracing and the picker): the components stay mounted while the record
+  under them is replaced, and someone who tapped another marker wants to read it.
+- **The fold chevron is `md:hidden`** and carries `aria-expanded`; strings are
+  `recordSheet.fold` / `recordSheet.unfold` in six locales.
+- **Seen working** (dev server, headless Chromium with CDP touch events, Pixel 5 at
+  375×667): `turm-3-25` open 520px → dragged down 250px → 113px; dragged up → 520px;
+  the chevron toggles both ways; frontier panel still 414 → 97px by drag. Not checked:
+  a real handset, dark mode, the picker and the tracing panel (same code, not run).
+- **Not changed:** the key button is `z-30` like the sheet and later in the DOM loses,
+  so it is hidden behind a folded record sheet (the frontier sheet is `z-20`, which is
+  why the key shows there). Raising it would float it over an open sheet too.

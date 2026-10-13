@@ -637,6 +637,10 @@
     "atTheStart": "au début",
     "kmAlong": "{km} km le long"
   },
+  "recordSheet": {
+    "fold": "Replier le panneau pour voir la carte",
+    "unfold": "Ouvrir le panneau"
+  },
   "limesPanel": {
     "title": "La frontière romaine",
     "backToFrontier": "Retour à toute la frontière",

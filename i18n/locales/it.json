@@ -637,6 +637,10 @@
     "atTheStart": "all'inizio",
     "kmAlong": "{km} km lungo il percorso"
   },
+  "recordSheet": {
+    "fold": "Chiudi il pannello per vedere la mappa",
+    "unfold": "Apri il pannello"
+  },
   "limesPanel": {
     "title": "La frontiera romana",
     "backToFrontier": "Torna a tutta la frontiera",

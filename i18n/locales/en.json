@@ -856,6 +856,10 @@
     "atTheStart": "at the start",
     "kmAlong": "{km} km along"
   },
+  "recordSheet": {
+    "fold": "Fold the panel down to see the map",
+    "unfold": "Open the panel"
+  },
   "limesPanel": {
     "title": "The Roman frontier",
     "backToFrontier": "Back to the whole frontier",

@@ -20,6 +20,28 @@
   const { overlappingFeatures, isPickerOpen, chooseCandidate, clearSelection } = useSiteQuery()
   const { isCompact } = useBreakpoint()
 
+  const panel = useTemplateRef<HTMLElement>('panel')
+  const handle = useTemplateRef<HTMLElement>('handle')
+
+  const {
+    isCollapsed,
+    isDragging,
+    isEasing,
+    sheetHeight,
+    isBodyShown,
+    isJustAfterDrag,
+    toggleCollapsed,
+    unfold,
+  } = useRecordSheet({ panel, handle, maxViewportRatio: RECORD_SHEET_PHONE_MAX_VIEWPORT_SHARE })
+
+  const dismiss = (): void => {
+    if (isJustAfterDrag()) return
+    clearSelection()
+  }
+
+  // A new pile, or none: a folded sheet must not greet it folded.
+  watch([isPickerOpen, overlappingFeatures], unfold)
+
   /**
    * The same subcategory-first lookup `buildSiteIconExpression` draws on the
    * map itself — without it, a milestone or a museum tapped out of a pile
@@ -68,29 +90,66 @@
     -->
     <aside
       v-if="isPickerOpen"
-      class="pointer-events-auto absolute inset-x-0 bottom-0 z-30 max-h-[78vh] overflow-y-auto rounded-t-lg bg-paper-50 shadow-lifted md:inset-y-0 md:left-auto md:right-0 md:max-h-none md:w-[26rem] md:rounded-none md:border-l md:border-paper-200 dark:bg-night-800 dark:md:border-night-700"
+      ref="panel"
+      class="pointer-events-auto absolute inset-x-0 bottom-0 z-30 max-h-[78dvh] overflow-y-auto rounded-t-lg bg-paper-50 pb-10 shadow-lifted md:inset-y-0 md:left-auto md:right-0 md:max-h-none md:w-[26rem] md:rounded-none md:border-l md:border-paper-200 md:pb-0 dark:bg-night-800 dark:md:border-night-700"
+      :class="
+        isEasing
+          ? 'transition-[max-height] duration-200 ease-out motion-reduce:transition-none'
+          : ''
+      "
+      :style="sheetHeight === null ? undefined : { maxHeight: `${sheetHeight}px` }"
       aria-labelledby="feature-picker-heading"
     >
-      <div class="sticky top-0 z-10 bg-paper-50 pt-2 dark:bg-night-800 md:pt-0">
-        <div class="mx-auto mb-1 h-1 w-10 rounded-full bg-paper-300 dark:bg-night-600 md:hidden" />
+      <!--
+        Dragging the grey bar folds the sheet down to this row, so the map it
+        was opened from can be seen (`useFoldableSheet`). `touch-none` keeps the
+        browser from taking the gesture for a scroll; `pb-10` on the aside is the
+        strip the key and the map credit sit on — see `LimesPanel.vue`.
+      -->
+      <div
+        ref="handle"
+        class="sticky top-0 z-10 cursor-grab touch-none select-none bg-paper-50 pt-2 dark:bg-night-800 md:cursor-auto md:touch-auto md:select-auto md:pt-0"
+        :class="isDragging ? 'cursor-grabbing' : ''"
+      >
+        <div
+          class="mx-auto mb-1 h-1 w-10 rounded-full bg-paper-300 dark:bg-night-600 md:hidden"
+          aria-hidden="true"
+        />
         <div
           class="flex items-start justify-between gap-3 border-b border-paper-200 px-5 py-3 dark:border-night-700"
         >
           <h2 id="feature-picker-heading" class="eyebrow pt-1">
             {{ t('featurePicker.recordsHere', { count: overlappingFeatures.length }) }}
           </h2>
-          <button
-            type="button"
-            class="grid size-8 shrink-0 place-items-center rounded-notebook text-ink-500 transition hover:bg-paper-200 dark:text-paper-400 dark:hover:bg-night-700"
-            :aria-label="t('featurePicker.dismiss')"
-            @click="clearSelection"
-          >
-            <UIcon name="i-lucide-x" class="size-4" aria-hidden="true" />
-          </button>
+          <div class="flex items-center gap-1">
+            <!-- Dragging is a pointer gesture; this is what a keyboard or a screen reader gets. -->
+            <button
+              type="button"
+              class="grid size-8 shrink-0 place-items-center rounded-notebook text-ink-500 transition hover:bg-paper-200 md:hidden dark:text-paper-400 dark:hover:bg-night-700"
+              :aria-expanded="!isCollapsed"
+              :aria-label="isCollapsed ? t('recordSheet.unfold') : t('recordSheet.fold')"
+              @click="toggleCollapsed"
+            >
+              <UIcon
+                :name="isCollapsed ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
+                class="size-4"
+                aria-hidden="true"
+              />
+            </button>
+
+            <button
+              type="button"
+              class="grid size-8 shrink-0 place-items-center rounded-notebook text-ink-500 transition hover:bg-paper-200 dark:text-paper-400 dark:hover:bg-night-700"
+              :aria-label="t('featurePicker.dismiss')"
+              @click="dismiss"
+            >
+              <UIcon name="i-lucide-x" class="size-4" aria-hidden="true" />
+            </button>
+          </div>
         </div>
       </div>
 
-      <ul class="divide-y divide-paper-200 dark:divide-night-700">
+      <ul v-show="isBodyShown" class="divide-y divide-paper-200 dark:divide-night-700">
         <li v-for="candidate in overlappingFeatures" :key="`${candidate.kind}-${candidate.id}`">
           <button
             type="button"

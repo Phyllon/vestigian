@@ -637,6 +637,10 @@
     "atTheStart": "zu beginn",
     "kmAlong": "{km} km entlang"
   },
+  "recordSheet": {
+    "fold": "Panel einklappen, um die Karte zu sehen",
+    "unfold": "Panel öffnen"
+  },
   "limesPanel": {
     "title": "Die römische Grenze",
     "backToFrontier": "Zurück zur ganzen Grenze",

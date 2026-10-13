@@ -58,7 +58,7 @@ export interface RecordSheetClearanceInput {
   isSheetAtBottom: boolean
 }
 
-/** The sheet's `max-h-[78vh]` on a phone (`SiteDetailPanel.vue`) — of the window, not the map. */
+/** The sheet's `max-h-[78dvh]` on a phone (`SiteDetailPanel.vue`) — of the window, not the map. */
 export const RECORD_SHEET_PHONE_MAX_VIEWPORT_SHARE = 0.78
 /** The sheet's `md:w-[26rem]` at the side. */
 export const RECORD_SHEET_SIDE_WIDTH_PIXELS = 416

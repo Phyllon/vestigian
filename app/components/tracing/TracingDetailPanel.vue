@@ -3,6 +3,7 @@
   const {
     tracing,
     selectTracing,
+    selectedTracingId,
     isTracingPanelOpen,
     overlappingFeatures,
     hasOverlappingFeatures,
@@ -11,7 +12,32 @@
   const { loggedIn } = useSession()
   const { isCompact } = useBreakpoint()
 
-  const close = (): void => selectTracing(null)
+  const panel = useTemplateRef<HTMLElement>('panel')
+  const handle = useTemplateRef<HTMLElement>('handle')
+
+  const {
+    isCollapsed,
+    isDragging,
+    isEasing,
+    sheetHeight,
+    isBodyShown,
+    isJustAfterDrag,
+    toggleCollapsed,
+    unfold,
+  } = useRecordSheet({ panel, handle, maxViewportRatio: 0.7 })
+
+  const close = (): void => {
+    if (isJustAfterDrag()) return
+    selectTracing(null)
+  }
+
+  const showRecordsHere = (): void => {
+    if (isJustAfterDrag()) return
+    returnToOverlappingFeatures()
+  }
+
+  // See `SiteDetailPanel`: a folded sheet must not greet the next record folded.
+  watch(selectedTracingId, unfold)
 
   const length = computed(() => formatLength(tracing.value?.lengthMetres ?? null))
 
@@ -51,11 +77,31 @@
     -->
     <aside
       v-if="isTracingPanelOpen && tracing"
-      class="pointer-events-auto absolute inset-x-0 bottom-0 z-30 max-h-[70vh] overflow-y-auto rounded-t-lg bg-paper-50 shadow-lifted md:inset-y-0 md:left-auto md:right-0 md:max-h-none md:w-[26rem] md:rounded-none md:border-l md:border-paper-200 dark:bg-night-800 dark:md:border-night-700"
+      ref="panel"
+      class="pointer-events-auto absolute inset-x-0 bottom-0 z-30 max-h-[70dvh] overflow-y-auto rounded-t-lg bg-paper-50 pb-10 shadow-lifted md:inset-y-0 md:left-auto md:right-0 md:max-h-none md:w-[26rem] md:rounded-none md:border-l md:border-paper-200 md:pb-0 dark:bg-night-800 dark:md:border-night-700"
+      :class="
+        isEasing
+          ? 'transition-[max-height] duration-200 ease-out motion-reduce:transition-none'
+          : ''
+      "
+      :style="sheetHeight === null ? undefined : { maxHeight: `${sheetHeight}px` }"
       :aria-label="t('tracingDetail.panelLabel')"
     >
-      <div class="sticky top-0 z-10 bg-paper-50 pt-2 dark:bg-night-800 md:pt-0">
-        <div class="mx-auto mb-1 h-1 w-10 rounded-full bg-paper-300 dark:bg-night-600 md:hidden" />
+      <!--
+        Dragging the grey bar folds the sheet down to this row, so the map it
+        was opened from can be seen (`useFoldableSheet`). `touch-none` keeps the
+        browser from taking the gesture for a scroll; `pb-10` on the aside is the
+        strip the key and the map credit sit on — see `LimesPanel.vue`.
+      -->
+      <div
+        ref="handle"
+        class="sticky top-0 z-10 cursor-grab touch-none select-none bg-paper-50 pt-2 dark:bg-night-800 md:cursor-auto md:touch-auto md:select-auto md:pt-0"
+        :class="isDragging ? 'cursor-grabbing' : ''"
+      >
+        <div
+          class="mx-auto mb-1 h-1 w-10 rounded-full bg-paper-300 dark:bg-night-600 md:hidden"
+          aria-hidden="true"
+        />
         <div
           class="flex items-start gap-3 border-b border-paper-200 px-5 py-3 dark:border-night-700"
         >
@@ -69,10 +115,25 @@
               v-if="hasOverlappingFeatures"
               type="button"
               class="flex items-center gap-1 rounded-notebook px-2 py-1 text-xs text-ink-500 transition hover:bg-paper-200 dark:text-paper-400 dark:hover:bg-night-700"
-              @click="returnToOverlappingFeatures"
+              @click="showRecordsHere"
             >
               <UIcon name="i-lucide-chevron-left" class="size-3.5" aria-hidden="true" />
               {{ t('tracingDetail.recordsHere', { count: overlappingFeatures.length }) }}
+            </button>
+
+            <!-- Dragging is a pointer gesture; this is what a keyboard or a screen reader gets. -->
+            <button
+              type="button"
+              class="grid size-8 shrink-0 place-items-center rounded-notebook text-ink-500 transition hover:bg-paper-200 md:hidden dark:text-paper-400 dark:hover:bg-night-700"
+              :aria-expanded="!isCollapsed"
+              :aria-label="isCollapsed ? t('recordSheet.unfold') : t('recordSheet.fold')"
+              @click="toggleCollapsed"
+            >
+              <UIcon
+                :name="isCollapsed ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
+                class="size-4"
+                aria-hidden="true"
+              />
             </button>
 
             <button
@@ -87,7 +148,7 @@
         </div>
       </div>
 
-      <article class="px-5 py-5">
+      <article v-show="isBodyShown" class="px-5 py-5">
         <h2 class="text-2xl leading-tight">{{ tracing.title }}</h2>
 
         <dl
