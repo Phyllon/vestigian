@@ -16,7 +16,7 @@ said yes and chosen to be seen.
 
 **What the page promises is what the emails promised**, so a change to one is a change to
 the other: credit wherever the data is shown; the data kept apart from ours and out of the
-open export; nothing altered silently; withdrawal by one email; **alphabetical order, no
+open export **only if the partner opts in** (optional, never the default); nothing altered silently; withdrawal by one email; **alphabetical order, no
 ranking, no paid placement**. `listPartners` sorts by name whatever order the data file is
 in (`partners.test.ts` pins it) — a list that followed the file, or the date of agreement,
 would be a ranking by accident.

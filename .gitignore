@@ -32,3 +32,5 @@ tsconfig.e2e.tsbuildinfo
 # and the pinned host keys the backup service mounts. Both are per-machine.
 docker/backups/
 docker/offsite-unconfigured/
+
+documents/source-permissions/

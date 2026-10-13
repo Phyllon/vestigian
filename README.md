@@ -8,8 +8,6 @@ Built on data contributed to [Vici.org](https://vici.org) by René Voorburg and 
 
 This file covers what a new contributor needs first. Deeper, topic-scoped detail lives in:
 
-- **`CLAUDE.md`** — the full current project layout, code conventions, governance and security invariants; the source of truth kept up to date as the project changes.
-- **`.claude/rules/*.md`** — one file per area (import pipeline, antiquity basemaps, i18n, security, deployment, observability, and more), loaded only when that area is touched.
 - **[`documents/scripts.md`](documents/scripts.md)** — every script this project wrote itself: what it does and how to run it.
 - **[`documents/architecture-overview.md`](documents/architecture-overview.md)** — the system shape and data flow.
 - **[`documents/runbook_prod.deployment.md`](documents/runbook_prod.deployment.md)** — the production deployment runbook.
@@ -28,7 +26,7 @@ This file covers what a new contributor needs first. Deeper, topic-scoped detail
 
 No database, cache, or object store to install by hand — the entire dev stack is one `docker compose` file, and `NUXT_PUBLIC_BASEMAP_PROVIDER=openfreemap` (the default) means no map API key either.
 
-### One command
+### Two commands
 
 ```bash
 pnpm install
@@ -138,7 +136,7 @@ One VPS, Docker Compose, orchestrated by [Dokploy](https://dokploy.com):
 |                    |                                                                    |
 | ------------------ | ------------------------------------------------------------------ |
 | Netcup RS 4000 G12 | app, Postgres, Valkey, imgproxy, Traefik and the rest of the stack |
-| Bunny.net          | CDN and Edge Storage: photographs and the PMTiles basemap          |
+| Bunny.net          | CDN and Edge Storage: photographs and the PMTiles basemaps         |
 
 `docker/compose.prod.yml` is the deployment unit. GitHub Actions builds a multi-stage image to GHCR, and calls the Dokploy webhook.
 
@@ -171,11 +169,17 @@ Cutting a release is a deliberate action, not something every push triggers: run
 
 ## Testing
 
+### Unit-Tests
+
 ```bash
 pnpm test
 ```
 
-Coverage is intentionally narrow: tile planning, trust and permission rules, rate limiting, licence normalisation, slug transliteration and the geolocation geometry. These are the places where a silent bug is expensive.
+### E2E-Tests against local production build
+
+```bash
+pnpm test:e2e
+```
 
 ## Licensing
 
@@ -215,13 +219,43 @@ Licences are chosen from a closed list at upload time, since an image with an un
 
 `GET /api/data/sites.geojson?bbox=west,south,east,north` returns approved sites as GeoJSON with licence and attribution on every feature, CORS-open and bounded to 1000 records per request; `offset` pages through the rest in `id` order. `GET /api/data/sites.lp.json` serves the same atlas as Linked Places Format v1.3 (what Recogito, Peripleo and the World Historical Gazetteer read), with the same `bbox`, `category`, `limit` and `offset`, plus `dated=true` for only the dated records.
 
+## OpenAPI
+
+Every route under `server/api/` is documented, and the documentation is derived from the zod schema the handler validates with — not written beside it. **It exists in development only**: with `pnpm dev` running, the interactive reference (Scalar) is at <http://localhost:3000/_scalar> and the raw document at `/api/openapi.json`. Both 404 in production, where a machine-readable map of every route is withheld on purpose; `/api/data/sites.geojson` remains the documented public feed. To inspect a production shape, run the dev server and paste `/api/openapi.json` into Insomnia, Postman or any hosted reference.
+
+How the document is assembled:
+
+| Half                                                                                     | Source                                                                                                                           | Carries                                              |
+| ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| Nitro's generated base document, served internally at `/_nitro-base-openapi.json`        | `defineRouteMeta({ openAPI: { tags, summary, description } })` in each route file                                                | paths, methods, `tags`, `summary`, `description`     |
+| Request-time merge in [`server/api/openapi.json.get.ts`](server/api/openapi.json.get.ts) | `OPERATION_OVERRIDES`, keyed by path then method, built with the helpers in [`server/utils/openapi.ts`](server/utils/openapi.ts) | `parameters`, `requestBody`, `responses`, `security` |
+
+The split exists because `defineRouteMeta` is a build-time macro: only literals survive, so a call such as `paramsFromSchema(schema)` is silently dropped with no build error. Anything derived from a schema is therefore computed at request time in the merge route.
+
+Helpers in `server/utils/openapi.ts`:
+
+- `paramsFromSchema(schema, 'query' | 'path')` and `bodyFromSchema(schema)` — convert a route's exported zod schema with `zod-to-json-schema`.
+- `COMMON_RESPONSES` / `errorResponse` — the `{ statusCode, statusMessage, message }` error shape every `createError` produces.
+- `jsonResponse(description)` — a success body described in words, used where the handler returns a TypeScript type with no schema to derive from.
+- `TILE_PARAMS` / `TILE_RESPONSES` — the shared `z/x/y.mvt` contract of the tile routes.
+- `SESSION_SECURITY` — references the `sessionCookie` scheme, which is registered once through `$global` in [`server/api/auth/login.post.ts`](server/api/auth/login.post.ts).
+
+**Adding or changing a route:**
+
+1. Give the route a `defineRouteMeta` with string-literal `tags`, `summary` and `description`.
+2. `export` the zod schemas the handler validates with (`querySchema`, `paramsSchema`, …).
+3. Import them in `openapi.json.get.ts` and add the route to `OPERATION_OVERRIDES` under its OpenAPI path (`/api/sites/{id}`, not `[id]`).
+
+Two known limits: an `OPERATION_OVERRIDES` entry whose path no longer matches a route is skipped without warning, so a renamed route quietly loses its parameters; and no unit test covers the merge, so check `/_scalar` by hand after touching either file.
+
+Scalar and Swagger both load their renderer from `cdn.jsdelivr.net`, a third-party runtime request this project otherwise avoids. Swagger is off outright, Scalar is on only when `!isProduction`, and the CSP allowlists that host under the same condition. The rationale and the two independent production guards are in [`.claude/rules/openapi.md`](.claude/rules/openapi.md).
+
 ## Operations
 
 ### Observability
 
 Six containers — Grafana, Loki, Tempo, Prometheus, Alertmanager and Alloy —
-all writing to local disk. About 1.6 GB of RAM and under 20 GB of the 240 GB
-disk, on the same CPX41. No additional hosting cost.
+all writing to local disk, about 1.6 GB of RAM.
 
 Grafana is **not** exposed publicly. It holds request logs, which contain
 visitor IP addresses, so it binds to loopback and is reached over SSH:
@@ -305,14 +339,6 @@ docker run --rm -v "$PWD/image-archive:/out" minio/mc:latest sh -c \
 docker run --rm -v "$PWD/image-archive:/out" minio/mc:latest sh -c \
   "mc alias set dst https://<BUNNY_S3_ENDPOINT> <BUNNY_ACCESS_KEY_ID> <BUNNY_SECRET_ACCESS_KEY> && mc mirror /out dst/<BUNNY_BUCKET>"
 ```
-
-**After every deploy or bulk import, warm the tile cache:**
-
-```bash
-pnpm tiles:warm https://vestigian.org
-```
-
-The only predictable slow moment is the minutes after a data-version bump, when the low-zoom clustered tiles are all generated at once by real traffic. There are a few hundred of them over the data's extent, so warming takes seconds and removes the spike.
 
 `/robots.txt` and `/sitemap.xml` are generated from the database. Tiles and search are disallowed — crawling the tile pyramid would produce millions of requests for content worthless in an index.
 
