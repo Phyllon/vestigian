@@ -81,6 +81,7 @@
         isActive ? 'text-verdigris-600 dark:text-verdigris-400' : 'text-ink-700 dark:text-paper-200'
       "
       :aria-pressed="isActive"
+      data-tour="compass"
       :aria-label="buttonLabel"
       :title="buttonLabel"
       @click="toggle"

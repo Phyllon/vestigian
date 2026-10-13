@@ -1592,6 +1592,10 @@
         "body": "Speichert den sichtbaren Bereich auf diesem Gerät, damit sich der Atlas auch im Tal ohne Empfang öffnet. Gemacht für Geländebesuche.",
         "try": "Rahme das Gebiet ein, das du ablaufen willst, und wähle den Detailgrad."
       },
+      "compass": {
+        "title": "Kompass",
+        "body": "Dreht die Karte in die Richtung, in die du schaust, wie eine Navigations-App. Erscheint nur auf Handys, die einen Kompass melden. Schalte ihn aus, damit Norden wieder oben liegt."
+      },
       "geolocate": {
         "title": "Dein Standort",
         "body": "Zentriert die Karte auf deinen Standort und folgt dir, während du dich bewegst. Dein Browser fragt zuerst um Erlaubnis, und dein Standort wird nie an uns gesendet."
@@ -1599,6 +1603,11 @@
       "contribute": {
         "title": "Zum Atlas beitragen",
         "body": "Erfasse einen Fundort, den du besucht hast, oder zeichne eine Straße oder Mauer. Erste Beiträge werden zuerst geprüft; nach zwei angenommenen erscheinen deine sofort."
+      },
+      "attribution": {
+        "title": "Quellenangaben",
+        "body": "Jede Karte, jede Ebene und jeder Eintrag ist die Arbeit von jemandem. Öffne das (i), um zu sehen, wer was auf dem Bildschirm geschaffen hat und unter welcher Lizenz; die Liste wächst, wenn du Ebenen einschaltest.",
+        "try": "Schalte eine Ebene ein und öffne dann die Quellenangaben, um ihre Quelle zu finden."
       },
       "menu": {
         "title": "Menü",

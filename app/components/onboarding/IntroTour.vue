@@ -27,9 +27,12 @@
 
   const SPOTLIGHT_PADDING = 6
   const APP_ROOT_ID = '__nuxt'
+  const ATTRIBUTION_SELECTOR = '.maplibregl-ctrl-attrib'
+  const ATTRIBUTION_EXPANDED_CLASS = 'maplibregl-compact-show'
 
   const { t } = useI18n()
   const { close } = useIntroTour()
+  const map = useMapInstance()
   const isWide = useMediaQuery('(min-width: 640px)')
 
   const titleId = useId()
@@ -127,6 +130,12 @@
 
   useEventListener(window, 'keydown', handleKeydown)
 
+  // The control rows sit in a container whose padding eases back when a panel
+  // closes under the tour (`pages/index.vue`), so the controls are still moving
+  // when they are first measured. Nothing observes a parent's padding, so
+  // re-measure whenever any transition on the page settles.
+  useEventListener(document, 'transitionend', update, { passive: true })
+
   let previouslyFocused: Element | null = null
 
   const setPageInert = (isInert: boolean): void => {
@@ -135,8 +144,24 @@
     root.toggleAttribute('inert', isInert)
   }
 
+  /**
+   * MapLibre owns the credits control, so it gets its `data-tour` attribute here
+   * rather than in a template. On a phone it starts expanded (its own
+   * `_updateCompact`) and a long list of overlay credits would sit over the
+   * corner the step points at; dropping the class is what its own drag-to-
+   * minimise does, so the control is left in a state it already knows.
+   */
+  const prepareAttribution = (): void => {
+    const container = map.value?.getContainer()
+    const attribution = container?.querySelector<HTMLElement>(ATTRIBUTION_SELECTOR)
+    if (!attribution) return
+    attribution.classList.remove(ATTRIBUTION_EXPANDED_CLASS)
+    attribution.dataset.tour = 'attribution'
+  }
+
   onMounted(() => {
     previouslyFocused = document.activeElement
+    prepareAttribution()
     steps.value = resolveIntroSteps(INTRO_STEPS, isTargetOnScreen)
     setPageInert(true)
   })

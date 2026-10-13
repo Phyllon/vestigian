@@ -36,6 +36,23 @@ to once per page load. A shared link to a record (panel open) never triggers it.
   signed out) is dropped, not shown pointing at
   nothing (`resolveIntroSteps`). Adding a control to the tour = a `data-tour`
   attribute, an entry in `INTRO_STEPS`, and `introTour.steps.<id>.*` in six locales.
+- **Opening the tour closes everything that can sit over a target**, so no step
+  points at a hidden control, on a phone included. `pages/index.vue` has a pre-flush
+  watcher on `isOpen` that clears the record, tracing and overlap picker
+  (`clearSelection`), closes the contribution form and **switches the frontier
+  (limes) overlay off** — on a phone its sheet covers the legend, the control
+  column and the credits. `Legend.vue` shuts its own key panel on the same signal.
+  `IntroTour.vue` collapses MapLibre's credits (on a phone it starts expanded; the
+  class removed is the one its own drag-to-minimise removes). **Given up, and not
+  restored when the tour ends:** a contribution draft in progress, and the frontier
+  overlay the reader had chosen. The container's `transition-[padding]` eases back
+  after a panel goes, so `IntroTour.vue` re-measures on `transitionend`.
+- **Two targets belong to code this feature does not own.** The compass is a
+  `data-tour="compass"` on `CompassButton`'s button — present only on a touch device
+  that reports orientation, so the step is dropped elsewhere like any absent control.
+  The credits are MapLibre's `.maplibregl-ctrl-attrib`, tagged
+  `data-tour="attribution"` from `IntroTour.vue`'s `onMounted` (before the steps are
+  resolved), since the control is created by the library, not by a template.
 - **`#__nuxt` is made `inert` while open**, which is why the component teleports to
   `body`. Pointer, keyboard and screen reader are all contained with one attribute.
 - **Reka overrides `aria-labelledby` on its popover content** (pointing at a trigger

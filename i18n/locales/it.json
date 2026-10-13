@@ -1592,6 +1592,10 @@
         "body": "Salva su questo dispositivo l’area visibile, così l’atlante si apre anche in una valle senza segnale. Pensato per le uscite sul campo.",
         "try": "Inquadra il terreno che percorrerai e scegli un livello di dettaglio."
       },
+      "compass": {
+        "title": "Bussola",
+        "body": "Ruota la mappa nella direzione in cui guardi mentre cammini, come un’app di navigazione. Compare solo sui telefoni che forniscono una bussola. Disattivala per rimettere il nord in alto."
+      },
       "geolocate": {
         "title": "La tua posizione",
         "body": "Centra la mappa dove ti trovi e ti segue mentre ti muovi. Il browser chiede prima il permesso e la tua posizione non ci viene mai inviata."
@@ -1599,6 +1603,11 @@
       "contribute": {
         "title": "Aggiungi all’atlante",
         "body": "Registra un sito che hai visitato o disegna una strada o un muro. I primi contributi vengono prima controllati; dopo due accettati, i tuoi vengono pubblicati subito."
+      },
+      "attribution": {
+        "title": "Crediti",
+        "body": "Ogni mappa, livello e scheda è il lavoro di qualcuno. Apri la (i) per vedere chi ha realizzato ciò che è sullo schermo e con quale licenza; l’elenco cresce man mano che attivi livelli.",
+        "try": "Attiva un livello, poi apri i crediti per trovarne la fonte."
       },
       "menu": {
         "title": "Menu",

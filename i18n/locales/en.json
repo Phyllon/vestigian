@@ -92,6 +92,10 @@
         "body": "Saves the area on screen to this device, so the atlas still opens in a valley with no signal. Made for field visits.",
         "try": "Frame the ground you will walk, then choose a level of detail."
       },
+      "compass": {
+        "title": "Compass",
+        "body": "Turns the map to the way you are facing as you walk, like a navigation app. It appears only on phones that report a compass. Switch it off to put north back on top."
+      },
       "geolocate": {
         "title": "Your position",
         "body": "Centres the map on where you are and follows you as you move. Your browser asks permission first, and your position is never sent to us."
@@ -99,6 +103,11 @@
       "contribute": {
         "title": "Add to the atlas",
         "body": "Record a site you have visited, or draw a road or wall. Early contributions are reviewed first; after two are accepted, yours publish straight away."
+      },
+      "attribution": {
+        "title": "Credits",
+        "body": "Every map, overlay and record is someone’s work. Open the (i) to see who made what is on screen and under which licence; the list grows as you switch overlays on.",
+        "try": "Switch an overlay on, then open the credits to find its source."
       },
       "menu": {
         "title": "Menu",

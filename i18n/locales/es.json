@@ -1592,6 +1592,10 @@
         "body": "Guarda en este dispositivo la zona que ves, para que el atlas se abra incluso en un valle sin cobertura. Pensado para el trabajo de campo.",
         "try": "Encuadra el terreno que vas a recorrer y elige un nivel de detalle."
       },
+      "compass": {
+        "title": "Brújula",
+        "body": "Gira el mapa hacia donde miras mientras caminas, como una app de navegación. Solo aparece en teléfonos que informan de una brújula. Desactívala para volver a poner el norte arriba."
+      },
       "geolocate": {
         "title": "Tu posición",
         "body": "Centra el mapa donde estás y te sigue mientras te mueves. Tu navegador pide permiso primero, y tu posición nunca se nos envía."
@@ -1599,6 +1603,11 @@
       "contribute": {
         "title": "Añadir al atlas",
         "body": "Registra un sitio que hayas visitado o dibuja una vía o una muralla. Las primeras aportaciones se revisan antes; tras aceptarse dos, las tuyas se publican de inmediato."
+      },
+      "attribution": {
+        "title": "Créditos",
+        "body": "Cada mapa, capa y registro es obra de alguien. Abre la (i) para ver quién hizo lo que hay en pantalla y con qué licencia; la lista crece a medida que activas capas.",
+        "try": "Activa una capa y abre los créditos para encontrar su fuente."
       },
       "menu": {
         "title": "Menú",

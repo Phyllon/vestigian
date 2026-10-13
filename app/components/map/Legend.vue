@@ -34,6 +34,13 @@
   const { t } = useI18n()
   const isOpen = ref(false)
 
+  // The introduction points at the controls behind an open key; it is put away
+  // for the tour, and left shut afterwards.
+  const { isOpen: isIntroOpen } = useIntroTour()
+  watch(isIntroOpen, (isTourOpen) => {
+    if (isTourOpen) isOpen.value = false
+  })
+
   const isShowingAnyReferenceOverlay = computed(() =>
     REFERENCE_OVERLAY_IDS.some((id) => isShowingReferenceOverlay(id)),
   )

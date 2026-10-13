@@ -3,8 +3,9 @@
 
   const { t } = useI18n()
   const { loggedIn } = useSession()
-  const { isFollowingLimes } = useBasemapStyle()
-  const { selectSite, isPanelOpen, isTracingPanelOpen, isPickerOpen } = useSiteQuery()
+  const { isFollowingLimes, setLimesActive } = useBasemapStyle()
+  const { selectSite, clearSelection, isPanelOpen, isTracingPanelOpen, isPickerOpen } =
+    useSiteQuery()
 
   /**
    * `SiteDetailPanel`/`TracingDetailPanel`/`FeaturePicker` are `absolute`
@@ -64,6 +65,31 @@
   const stopContributing = (): void => {
     isContributing.value = false
   }
+
+  /**
+   * Everything that can sit over a control the tour points at is closed the
+   * moment it opens — a record, a tracing, the overlap picker, the contribution
+   * form and the frontier panel (the key and the expanded credits close
+   * themselves, `Legend.vue` and `IntroTour.vue`). A `z-30` panel hides the
+   * right-hand control column, and on a phone the frontier is a bottom sheet
+   * over the legend, the column and the credits; a replay from the menu is the
+   * usual way to hit this, since the first-visit offer already refuses to open
+   * over a record.
+   *
+   * A pre-flush watcher, so the panels are gone in the same render that mounts
+   * the tour and its `onMounted` measures the finished layout.
+   *
+   * Two things are given up, and neither comes back when the tour ends: a
+   * contribution draft in progress is discarded, and the frontier overlay is
+   * switched off (it is the reader's own choice; the tour does not turn it
+   * back on).
+   */
+  watch(isIntroOpen, (isOpen) => {
+    if (!isOpen) return
+    clearSelection()
+    isContributing.value = false
+    setLimesActive(false)
+  })
 
   /**
    * Offered once the map has had a moment to appear, so the first thing a new

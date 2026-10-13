@@ -1592,6 +1592,10 @@
         "body": "Bewaart het zichtbare gebied op dit apparaat, zodat de atlas ook opent in een dal zonder bereik. Gemaakt voor veldbezoeken.",
         "try": "Kader het terrein in dat je gaat lopen en kies een detailniveau."
       },
+      "compass": {
+        "title": "Kompas",
+        "body": "Draait de kaart mee in de richting waarin je kijkt terwijl je loopt, zoals een navigatie-app. Verschijnt alleen op telefoons die een kompas melden. Zet het uit om het noorden weer bovenaan te zetten."
+      },
       "geolocate": {
         "title": "Jouw positie",
         "body": "Centreert de kaart op waar je bent en volgt je onderweg. Je browser vraagt eerst toestemming en je positie wordt nooit naar ons gestuurd."
@@ -1599,6 +1603,11 @@
       "contribute": {
         "title": "Aan de atlas toevoegen",
         "body": "Leg een plek vast die je bezocht hebt, of teken een weg of muur. Eerste bijdragen worden eerst gecontroleerd; na twee goedgekeurde verschijnen de jouwe meteen."
+      },
+      "attribution": {
+        "title": "Bronvermelding",
+        "body": "Elke kaart, laag en vermelding is het werk van iemand. Open de (i) om te zien wie maakte wat er op het scherm staat en onder welke licentie; de lijst groeit naarmate je lagen aanzet.",
+        "try": "Zet een laag aan en open dan de bronvermelding om de bron te vinden."
       },
       "menu": {
         "title": "Menu",

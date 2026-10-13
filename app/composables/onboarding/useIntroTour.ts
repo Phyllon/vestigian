@@ -56,8 +56,10 @@ export const INTRO_STEPS: readonly IntroStep[] = [
   { id: 'legend', target: 'legend', side: 'top' },
   { id: 'settings', target: 'settings', side: 'left' },
   { id: 'offline', target: 'offline', side: 'left' },
+  { id: 'compass', target: 'compass', side: 'left' },
   { id: 'geolocate', target: 'geolocate', side: 'left' },
   { id: 'contribute', target: 'contribute', side: 'left' },
+  { id: 'attribution', target: 'attribution', side: 'top' },
   { id: 'menu', target: 'menu', side: 'bottom' },
 ]
 

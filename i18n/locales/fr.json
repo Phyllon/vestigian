@@ -1592,6 +1592,10 @@
         "body": "Enregistre la zone affichée sur cet appareil, pour que l’atlas s’ouvre même dans une vallée sans réseau. Conçu pour le terrain.",
         "try": "Cadrez le terrain que vous allez parcourir, puis choisissez un niveau de détail."
       },
+      "compass": {
+        "title": "Boussole",
+        "body": "Tourne la carte dans la direction où vous faites face pendant la marche, comme une application de navigation. Elle n’apparaît que sur les téléphones qui fournissent une boussole. Désactivez-la pour remettre le nord en haut."
+      },
       "geolocate": {
         "title": "Votre position",
         "body": "Centre la carte sur l’endroit où vous êtes et vous suit pendant vos déplacements. Votre navigateur demande d’abord l’autorisation, et votre position ne nous est jamais envoyée."
@@ -1599,6 +1603,11 @@
       "contribute": {
         "title": "Ajouter à l’atlas",
         "body": "Consignez un site que vous avez visité, ou tracez une route ou un mur. Les premières contributions sont relues d’abord ; après deux acceptées, les vôtres sont publiées aussitôt."
+      },
+      "attribution": {
+        "title": "Crédits",
+        "body": "Chaque carte, couche et fiche est le travail de quelqu’un. Ouvrez le (i) pour voir qui a produit ce qui est affiché et sous quelle licence ; la liste s’allonge à mesure que vous activez des couches.",
+        "try": "Activez une couche, puis ouvrez les crédits pour trouver sa source."
       },
       "menu": {
         "title": "Menu",
