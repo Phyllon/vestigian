@@ -75,7 +75,11 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add package.json CHANGELOG.md .changeset
           git commit -m "bump version to ${{ steps.package.outputs.version }}"
-          git tag "v${{ steps.package.outputs.version }}"
+          # Annotated (-a), not lightweight: `--follow-tags` below pushes only
+          # annotated tags, so a plain `git tag` stayed local and
+          # `gh release create` failed with "tag exists locally but has not
+          # been pushed" (the v1.0.0 release).
+          git tag -a "v${{ steps.package.outputs.version }}" -m "v${{ steps.package.outputs.version }}"
           git push origin main --follow-tags
 
       - name: extract this version's changelog section

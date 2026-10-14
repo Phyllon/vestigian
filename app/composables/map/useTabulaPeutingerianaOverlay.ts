@@ -1,8 +1,10 @@
 import type { Map as MapLibreMap } from 'maplibre-gl'
+import type { BasemapView } from '#shared/types'
 import { MAP_LABEL_FONT, TABULA_PEUTINGERIANA_ATTRIBUTION } from './useBasemapStyle'
 
 export const TABULA_PEUTINGERIANA_SOURCE_ID = 'vestigian-tabula-peutingeriana'
 const ROADS_LAYER_ID = 'vestigian-tabula-peutingeriana-roads'
+const ROADS_CASING_LAYER_ID = 'vestigian-tabula-peutingeriana-roads-casing'
 const PLACES_LAYER_ID = 'vestigian-tabula-peutingeriana-places'
 const PLACE_LABELS_LAYER_ID = 'vestigian-tabula-peutingeriana-place-labels'
 
@@ -19,6 +21,47 @@ const PLACE_LABELS_LAYER_ID = 'vestigian-tabula-peutingeriana-place-labels'
  */
 const TABULA_PEUTINGERIANA_COLOUR = '#3d6b5c'
 const TABULA_PEUTINGERIANA_LABEL_COLOUR = '#2c4d42'
+
+interface TabulaPeutingerianaColours {
+  line: string
+  /** Drawn under the road line only when set; `null` means no casing layer. */
+  casing: string | null
+  label: string
+  halo: string
+}
+
+const DEFAULT_TABULA_PEUTINGERIANA_COLOURS: TabulaPeutingerianaColours = {
+  line: TABULA_PEUTINGERIANA_COLOUR,
+  casing: null,
+  label: TABULA_PEUTINGERIANA_LABEL_COLOUR,
+  halo: '#faf7ef',
+}
+
+/**
+ * Verdigris disappears into forest canopy: on satellite imagery the network
+ * was green line on green wood. Photography has no stable ground tone, so —
+ * as `SATELLITE_POLITY_COLOURS` does — the line is a bright hue that no
+ * landcover is (yellow; the frontier is oxide red and reference marks are
+ * `SATELLITE_REFERENCE_INK` orange, so it stays distinguishable from both)
+ * and a near-black casing guarantees one of the pair contrasts with whatever
+ * pixel sits underneath, pale sand included.
+ */
+const SATELLITE_TABULA_PEUTINGERIANA_COLOURS: TabulaPeutingerianaColours = {
+  line: '#ffe14d',
+  casing: '#1a1208',
+  label: '#ffffff',
+  halo: '#1a1208',
+}
+
+/**
+ * Keyed to the basemap, not the reader's theme — the same "follows the sheet"
+ * rule as `resolvePolityColours`. Read fresh on every attach, so a basemap
+ * switch (which rebuilds overlays via `styledata`) picks up the right set.
+ */
+export const resolveTabulaPeutingerianaColours = (view: BasemapView): TabulaPeutingerianaColours =>
+  view === 'satellite'
+    ? SATELLITE_TABULA_PEUTINGERIANA_COLOURS
+    : DEFAULT_TABULA_PEUTINGERIANA_COLOURS
 
 /**
  * The Tabula Peutingeriana's places and roads, drawn over whatever basemap is
@@ -42,7 +85,7 @@ const TABULA_PEUTINGERIANA_LABEL_COLOUR = '#2c4d42'
  * `applyRevision()`; this is a citation, not a claim.
  */
 export const useTabulaPeutingerianaOverlay = () => {
-  const { isShowingTabulaPeutingerianaOverlay } = useBasemapStyle()
+  const { isShowingTabulaPeutingerianaOverlay, view } = useBasemapStyle()
 
   const data = shallowRef<GeoJSON.FeatureCollection | null>(null)
   const isLoading = ref(false)
@@ -74,6 +117,23 @@ export const useTabulaPeutingerianaOverlay = () => {
       attribution: TABULA_PEUTINGERIANA_ATTRIBUTION,
     })
 
+    const colours = resolveTabulaPeutingerianaColours(view.value)
+
+    if (colours.casing) {
+      map.addLayer({
+        id: ROADS_CASING_LAYER_ID,
+        type: 'line',
+        source: TABULA_PEUTINGERIANA_SOURCE_ID,
+        filter: ['==', ['get', 'kind'], 'road'],
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: {
+          'line-color': colours.casing,
+          'line-width': ['interpolate', ['linear'], ['zoom'], 4, 3, 10, 5.5],
+          'line-opacity': 0.8,
+        },
+      })
+    }
+
     map.addLayer({
       id: ROADS_LAYER_ID,
       type: 'line',
@@ -81,7 +141,7 @@ export const useTabulaPeutingerianaOverlay = () => {
       filter: ['==', ['get', 'kind'], 'road'],
       layout: { 'line-cap': 'round', 'line-join': 'round' },
       paint: {
-        'line-color': TABULA_PEUTINGERIANA_COLOUR,
+        'line-color': colours.line,
         'line-width': ['interpolate', ['linear'], ['zoom'], 4, 1.4, 10, 3],
         'line-opacity': 0.85,
         // A reconstructed leg (filled from the Itinerarium Antonini, not the
@@ -104,9 +164,9 @@ export const useTabulaPeutingerianaOverlay = () => {
       filter: ['==', ['get', 'kind'], 'place'],
       paint: {
         'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 2.5, 10, 6],
-        'circle-color': TABULA_PEUTINGERIANA_COLOUR,
-        'circle-opacity': 0.5,
-        'circle-stroke-color': TABULA_PEUTINGERIANA_COLOUR,
+        'circle-color': colours.line,
+        'circle-opacity': colours.casing ? 0.9 : 0.5,
+        'circle-stroke-color': colours.casing ?? colours.line,
         'circle-stroke-width': 1.5,
         'circle-stroke-opacity': 0.95,
       },
@@ -142,8 +202,8 @@ export const useTabulaPeutingerianaOverlay = () => {
         'text-optional': true,
       },
       paint: {
-        'text-color': TABULA_PEUTINGERIANA_LABEL_COLOUR,
-        'text-halo-color': '#faf7ef',
+        'text-color': colours.label,
+        'text-halo-color': colours.halo,
         'text-halo-width': 1.2,
       },
     })
@@ -156,6 +216,7 @@ export const useTabulaPeutingerianaOverlay = () => {
     if (map.getLayer(PLACE_LABELS_LAYER_ID)) map.removeLayer(PLACE_LABELS_LAYER_ID)
     if (map.getLayer(PLACES_LAYER_ID)) map.removeLayer(PLACES_LAYER_ID)
     if (map.getLayer(ROADS_LAYER_ID)) map.removeLayer(ROADS_LAYER_ID)
+    if (map.getLayer(ROADS_CASING_LAYER_ID)) map.removeLayer(ROADS_CASING_LAYER_ID)
     if (map.getSource(TABULA_PEUTINGERIANA_SOURCE_ID))
       map.removeSource(TABULA_PEUTINGERIANA_SOURCE_ID)
   }
