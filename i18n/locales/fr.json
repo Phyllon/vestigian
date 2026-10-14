@@ -93,6 +93,8 @@
     "showIsicilyHint": "Inscriptions de la Sicile antique d'après I.Sicily — grec, latin, élyme, sicule, punique",
     "showRomanRoads": "Voies romaines",
     "showRomanRoadsHint": "Le réseau d'Itiner-e — trait plein si relevé, tirets si supposé",
+    "showRoadAudit": "Contre-épreuve des routes",
+    "showRoadAuditHint": "Ce qui se trouve près de chaque route conjecturée — bornes, notices, pentes fortes — et les bornes loin de toute route",
     "showMonuments": "Monuments romains",
     "showMonumentsHint": "Théâtres, villas, forts, thermes et plus, d'après Wikidata",
     "showMints": "Ateliers monétaires",
@@ -178,6 +180,10 @@
       "conjectured": "Tracé supposé",
       "hypothetical": "Tracé hypothétique"
     },
+    "roadAuditTitle": "Contre-épreuve des routes",
+    "roadAuditSupported": "Route conjecturée avec une borne ou une notice de route à proximité",
+    "roadAuditSteep": "Tronçon à forte pente sur le modèle de terrain",
+    "roadAuditGap": "Borne éloignée de toute route",
     "isicilyTitle": "Inscriptions siciliennes",
     "isicilyMark": "Inscription d’I.Sicily, en un lieu approximatif",
     "monumentsTitle": "Monuments romains",
@@ -464,6 +470,7 @@
     "overlayIsicily": "Inscriptions siciliennes : I.Sicily, université d'Oxford (CC BY 4.0 ; six notices CC BY-NC 4.0 — usage non commercial uniquement). Les textes sont repris ici ; les photographies ne le sont pas, car elles ne sont pas sous licence de réutilisation.",
     "overlayPolities": "Royaumes voisins (Carthage, la Parthie, les royaumes séleucide et lagide, les Goths et d'autres) : Cliopatria, Seshat Global History Databank (CC BY 4.0) — une lecture savante d'une frontière approximative.",
     "overlayHillforts": "Enceintes de hauteur de Grande-Bretagne et d'Irlande : Atlas of Hillforts, Ralston & Lock (universités d'Oxford, d'Édimbourg et de Cork), via l'Archaeology Data Service (CC BY 4.0).",
+    "overlayRoadAudit": "Contre-épreuve des routes : calculée ici, sans source propre — à partir d’Itiner-e (CC BY 4.0), de l’Epigraphic Database Heidelberg (CC BY-SA 4.0), des notices de vici.org (CC BY-SA 3.0) et de modèles de terrain (Mapterhorn). Le classement de chaque route par Itiner-e n’est pas modifié.",
     "columnReliefHeading": "Allégements de colonnes",
     "columnReliefBody": "Les planches de la colonne de Trajan sont mises en miroir depuis la catégorie « Cichorius Plates » de Wikimedia Commons, où elles sont marquées domaine public. Les planches de la colonne de Marc Aurèle sont servies en direct depuis la numérisation par la bibliothèque universitaire de Heidelberg de l'étude de Petersen, Domaszewski & Calderini (1896) — également dans le domaine public ; rien n'est copié dans le stockage propre de ce projet pour cette colonne.",
     "placeNamesHeading": "Noms de lieux modernes",
@@ -703,6 +710,36 @@
     "ariaLabel": "Carte des sites archéologiques",
     "loading": "Déplier la carte",
     "scaleLabel": "Échelle de la carte"
+  },
+  "tabulaPopup": {
+    "noFigure": "Le manuscrit ne donne aucune distance pour ce tronçon",
+    "stated": "Un mille romain indiqué (≈ {km} km) | {n} milles romains indiqués (≈ {km} km)",
+    "straightLine": "Ligne droite entre les deux lieux, calculée ici : {km} km",
+    "shorterThanLine": "Plus court que cette ligne — une route ne le peut pas, donc le chiffre ou l’un des emplacements est faux.",
+    "roadWinds": "Une route serpente : elle est donc plus longue que la ligne droite.",
+    "overWater": "Traversée maritime",
+    "crossesMountains": "Traverse des montagnes",
+    "crossesRiver": "Traverse {river}",
+    "reconstructed": "Lacune comblée d’après l’Itinéraire d’Antonin, non lue sur le manuscrit"
+  },
+  "roadAudit": {
+    "edhMilestones": "Une borne de l’EDH | {n} bornes de l’EDH",
+    "viciMilestones": "Une borne sur vici.org | {n} bornes sur vici.org",
+    "viciRoadSites": "Une notice de route sur vici.org | {n} notices de route sur vici.org",
+    "within": "À moins de {metres} m : {list}",
+    "nothingNear": "Aucune borne ni notice de route à moins de {metres} m",
+    "certainEnds": "Une extrémité rejoint un tronçon établi | Les deux extrémités rejoignent des tronçons établis",
+    "gradient": "Tronçon de {metres} m le plus raide : {percent} % sur le modèle de terrain",
+    "steep": "Au-delà de {percent} %, une pente que peu de tronçons établis atteignent",
+    "caveat": "Le classement d’Itiner-e reste inchangé. Une trouvaille peut marquer le remploi d’une pierre plutôt que le tracé de la route, et un zéro dit seulement que rien n’est enregistré ici.",
+    "gapSource": {
+      "edh": "Borne, Epigraphic Database Heidelberg",
+      "vici": "Borne enregistrée sur vici.org"
+    },
+    "gapNoRoad": "Aucune route d’Itiner-e dans un rayon d’environ 5 km",
+    "gapNearest": "Route d’Itiner-e la plus proche : {kilometres} km",
+    "gapOpen": "Ouvrir la notice",
+    "gapCaveat": "À plus de {metres} m de toute route du modèle. Les lieux de découverte sont souvent ceux où une pierre a été transportée ou remployée : ce peut être une pierre déplacée, une route absente du modèle ou une coordonnée erronée."
   },
   "battlePopup": {
     "viewOnWikipedia": "Voir sur Wikipédia",

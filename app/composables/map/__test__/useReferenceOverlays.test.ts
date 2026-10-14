@@ -13,8 +13,12 @@ import {
   buildMonumentIconExpression,
   buildMonumentPopupHtml,
   buildRomanRoadLayers,
+  buildRoadAuditLayers,
+  buildRoadAuditPopupHtml,
   buildRomanRoadPopupHtml,
   isicilyPath,
+  roadAuditPath,
+  ROAD_AUDIT_LAYER_IDS,
 } from '../useReferenceOverlays'
 
 const t = (key: string, named?: Record<string, unknown>): string => {
@@ -44,18 +48,20 @@ describe('the overlay definitions', () => {
   })
 
   it('read the source layer the tile SQL writes, and only layers of their own source', () => {
-    const expected = {
-      'roman-roads': 'roman_roads',
-      mints: 'mints',
-      monuments: 'monuments',
-      isicily: 'isicily',
-      hillforts: 'hillforts',
+    // The road audit is the one overlay with two MVT layers in its tile.
+    const expected: Record<(typeof REFERENCE_OVERLAY_IDS)[number], string[]> = {
+      'roman-roads': ['roman_roads'],
+      mints: ['mints'],
+      monuments: ['monuments'],
+      isicily: ['isicily'],
+      hillforts: ['hillforts'],
+      'road-audit': ['audit_segments', 'audit_gaps'],
     }
     for (const id of REFERENCE_OVERLAY_IDS) {
       const definition = REFERENCE_OVERLAY_DEFINITIONS[id]
       for (const layer of definition.buildLayers()) {
         expect('source' in layer && layer.source).toBe(definition.sourceId)
-        expect('source-layer' in layer && layer['source-layer']).toBe(expected[id])
+        expect(expected[id]).toContain('source-layer' in layer ? layer['source-layer'] : undefined)
       }
     }
   })
@@ -277,5 +283,106 @@ describe('the monument marks', () => {
       expect(expression[at + 1]).toBe(monumentIconId(kind))
     }
     expect(expression.at(-1)).toBe(MONUMENT_ICON_ID)
+  })
+})
+
+describe('the road audit', () => {
+  /** Keeps each key with the values it was given, so a test reads what was asked for. */
+  const tAudit = (key: string, named?: Record<string, unknown>): string =>
+    named
+      ? `${key} ${Object.entries(named)
+          .map(([name, value]) => `${name}=${value}`)
+          .join(' ')}`
+      : key
+
+  const segment = {
+    name: 'Via Cassia',
+    certainty: 'conjectured',
+    itinerary: 'Itinerarium Antonini',
+    edh_milestones: 0,
+    vici_milestones: 0,
+    vici_road_sites: 0,
+    certain_ends: 0,
+    steepest_gradient_percent: 4.2,
+    is_supported: false,
+    is_steep: false,
+  }
+
+  it('lets one wide, invisible line take the click, not the drawn ones', () => {
+    const layers = buildRoadAuditLayers()
+    const hit = layers.find((layer) => layer.id === ROAD_AUDIT_LAYER_IDS.hit) as
+      LineLayerSpecification | undefined
+    expect(hit?.paint?.['line-opacity']).toBe(0)
+    expect(Number(hit?.paint?.['line-width'])).toBeGreaterThanOrEqual(12)
+    expect(REFERENCE_OVERLAY_DEFINITIONS['road-audit'].clickableLayerIds).toEqual([
+      ROAD_AUDIT_LAYER_IDS.hit,
+      ROAD_AUDIT_LAYER_IDS.gaps,
+    ])
+  })
+
+  it('says plainly when nothing stands near, and never names a verdict', () => {
+    const html = buildRoadAuditPopupHtml(segment, tAudit)
+    expect(html).toContain('roadAudit.nothingNear')
+    expect(html).toContain('roadAudit.caveat')
+    expect(html).not.toMatch(/implausible|wrong|doubtful|false/i)
+  })
+
+  it('lists each kind of find that is there, and only those', () => {
+    const html = buildRoadAuditPopupHtml(
+      { ...segment, edh_milestones: 2, vici_road_sites: 1 },
+      tAudit,
+    )
+    expect(html).toContain('roadAudit.edhMilestones n=2')
+    expect(html).toContain('roadAudit.viciRoadSites n=1')
+    expect(html).not.toContain('roadAudit.viciMilestones')
+    expect(html).not.toContain('roadAudit.nothingNear')
+  })
+
+  it('names the gradient with its window, and the threshold only for a steep stretch', () => {
+    const flat = buildRoadAuditPopupHtml(segment, tAudit)
+    expect(flat).toContain('roadAudit.gradient percent=4.2 metres=250')
+    expect(flat).not.toContain('roadAudit.steep ')
+
+    const steep = buildRoadAuditPopupHtml(
+      { ...segment, steepest_gradient_percent: 31.4, is_steep: true },
+      tAudit,
+    )
+    expect(steep).toContain('roadAudit.steep ')
+  })
+
+  it('omits the gradient where none could be read', () => {
+    const withoutGradient = { ...segment, steepest_gradient_percent: undefined }
+    expect(buildRoadAuditPopupHtml(withoutGradient, tAudit)).not.toContain('roadAudit.gradient')
+  })
+
+  it('reads a gap as a gap by its source, and links only an id it can vouch for', () => {
+    const gap = {
+      source: 'edh',
+      source_key: 'HD012345',
+      title: 'Milestone',
+      nearest_road_metres: 2400,
+    }
+    expect(roadAuditPath(gap)).toBe('/inscriptions/HD012345')
+    expect(buildRoadAuditPopupHtml(gap, tAudit)).toContain('kilometres=2.4')
+
+    expect(roadAuditPath({ ...gap, source_key: '../admin' })).toBeNull()
+    expect(roadAuditPath({ source: 'vici', source_key: 'miliarium-1' })).toBe('/site/miliarium-1')
+    expect(roadAuditPath(segment)).toBeNull()
+  })
+
+  it('says so when no road lies within reach of a gap', () => {
+    const html = buildRoadAuditPopupHtml(
+      { source: 'vici', source_key: 'x', title: 'Stone' },
+      tAudit,
+    )
+    expect(html).toContain('roadAudit.gapNoRoad')
+  })
+
+  it('escapes a title before it reaches setHTML', () => {
+    const html = buildRoadAuditPopupHtml(
+      { source: 'edh', source_key: 'HD1', title: '<img src=x onerror=1>' },
+      tAudit,
+    )
+    expect(html).not.toContain('<img')
   })
 })

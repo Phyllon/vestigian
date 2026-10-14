@@ -9,6 +9,7 @@ describe('reference overlay ids', () => {
       'isicily',
       'mints',
       'monuments',
+      'road-audit',
       'roman-roads',
     ])
   })

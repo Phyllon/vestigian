@@ -93,6 +93,8 @@
     "showIsicilyHint": "Inschriften des antiken Siziliens aus I.Sicily – Griechisch, Latein, Elymisch, Sikulisch, Punisch",
     "showRomanRoads": "Römerstraßen",
     "showRomanRoadsHint": "Das Netz von Itiner-e – durchgezogen, wo gesichert, gestrichelt, wo vermutet",
+    "showRoadAudit": "Straßen-Gegenprobe",
+    "showRoadAuditHint": "Was neben jeder vermuteten Straße liegt – Meilensteine, Einträge, steiles Gelände – und Meilensteine fern jeder Straße",
     "showMonuments": "Römische Bauwerke",
     "showMonumentsHint": "Theater, Villen, Kastelle, Thermen und mehr aus Wikidata",
     "showMints": "Münzstätten",
@@ -178,6 +180,10 @@
       "conjectured": "Verlauf vermutet",
       "hypothetical": "Verlauf hypothetisch"
     },
+    "roadAuditTitle": "Straßen-Gegenprobe",
+    "roadAuditSupported": "Vermutete Straße mit einem Meilenstein oder Straßeneintrag daneben",
+    "roadAuditSteep": "Steile Strecke im Geländemodell",
+    "roadAuditGap": "Meilenstein fern jeder Straße",
     "isicilyTitle": "Sizilische Inschriften",
     "isicilyMark": "Inschrift aus I.Sicily, an ungefährem Ort",
     "monumentsTitle": "Römische Bauwerke",
@@ -464,6 +470,7 @@
     "overlayIsicily": "Sizilische Inschriften: I.Sicily, Universität Oxford (CC BY 4.0; sechs Einträge CC BY-NC 4.0 – nur nichtkommerzielle Nutzung). Die Texte sind gespiegelt, die Fotos nicht, da sie nicht zur Weiterverwendung lizenziert sind.",
     "overlayPolities": "Nachbarreiche (Karthago, Parthien, die Reiche der Seleukiden und Ptolemäer, die Goten und andere): Cliopatria, Seshat Global History Databank (CC BY 4.0) – eine wissenschaftliche Lesart einer groben Grenze.",
     "overlayHillforts": "Höhenbefestigungen Britanniens und Irlands: Atlas of Hillforts, Ralston & Lock (Universitäten Oxford, Edinburgh und Cork), über den Archaeology Data Service (CC BY 4.0).",
+    "overlayRoadAudit": "Straßen-Gegenprobe: hier berechnet, keine eigene Quelle – aus Itiner-e (CC BY 4.0), der Epigraphischen Datenbank Heidelberg (CC BY-SA 4.0), Einträgen von vici.org (CC BY-SA 3.0) und Geländemodellen (Mapterhorn). Die Einstufung jeder Straße durch Itiner-e bleibt unverändert.",
     "columnReliefHeading": "Säulenreliefs",
     "columnReliefBody": "Die Tafeln der Trajanssäule sind aus der Kategorie „Cichorius Plates“ von Wikimedia Commons gespiegelt und dort als gemeinfrei gekennzeichnet. Die Tafeln der Marcus-Säule werden live aus der Digitalisierung der Universitätsbibliothek Heidelberg von Petersen, Domaszewski & Calderinis Studie von 1896 ausgeliefert – ebenfalls gemeinfrei; für diese Säule wird nichts im eigenen Speicher dieses Projekts gespiegelt.",
     "placeNamesHeading": "Moderne Ortsnamen",
@@ -703,6 +710,36 @@
     "ariaLabel": "Karte der archäologischen Stätten",
     "loading": "Entfaltung der Karte",
     "scaleLabel": "Kartenmaßstab"
+  },
+  "tabulaPopup": {
+    "noFigure": "Die Handschrift nennt für diese Strecke keine Entfernung",
+    "stated": "Eine römische Meile angegeben (≈ {km} km) | {n} römische Meilen angegeben (≈ {km} km)",
+    "straightLine": "Luftlinie zwischen den beiden Orten, hier berechnet: {km} km",
+    "shorterThanLine": "Kürzer als diese Linie – eine Straße kann das nicht sein, also stimmt die Angabe oder ein Ortspunkt nicht.",
+    "roadWinds": "Eine Straße windet sich und ist daher länger als die Luftlinie.",
+    "overWater": "Überfahrt über das Meer",
+    "crossesMountains": "Quert Gebirge",
+    "crossesRiver": "Quert {river}",
+    "reconstructed": "Lücke aus dem Itinerarium Antonini ergänzt, nicht von der Handschrift abgelesen"
+  },
+  "roadAudit": {
+    "edhMilestones": "Ein EDH-Meilenstein | {n} EDH-Meilensteine",
+    "viciMilestones": "Ein Meilenstein auf vici.org | {n} Meilensteine auf vici.org",
+    "viciRoadSites": "Ein Straßeneintrag auf vici.org | {n} Straßeneinträge auf vici.org",
+    "within": "Innerhalb von {metres} m: {list}",
+    "nothingNear": "Kein Meilenstein und kein Straßeneintrag innerhalb von {metres} m",
+    "certainEnds": "Ein Ende trifft auf ein gesichertes Segment | Beide Enden treffen auf gesicherte Segmente",
+    "gradient": "Steilste {metres}-m-Strecke: {percent} % im Geländemodell",
+    "steep": "Über {percent} % – ein Gefälle, das nur wenige gesicherte Segmente erreichen",
+    "caveat": "Die Einstufung durch Itiner-e bleibt unverändert. Ein Fund kann zeigen, wo ein Stein wiederverwendet wurde, nicht wo die Straße lief; und eine Null besagt nur, dass hier nichts verzeichnet ist.",
+    "gapSource": {
+      "edh": "Meilenstein, Epigraphische Datenbank Heidelberg",
+      "vici": "Meilenstein auf vici.org verzeichnet"
+    },
+    "gapNoRoad": "Keine Itiner-e-Straße im Umkreis von etwa 5 km",
+    "gapNearest": "Nächste Itiner-e-Straße: {kilometres} km",
+    "gapOpen": "Eintrag öffnen",
+    "gapCaveat": "Weiter als {metres} m von jeder Straße des Modells entfernt. Fundorte sind oft dort, wohin ein Stein gebracht oder wo er wiederverwendet wurde: Es kann ein verschleppter Stein sein, eine im Modell fehlende Straße oder eine falsche Koordinate."
   },
   "battlePopup": {
     "viewOnWikipedia": "Auf Wikipedia ansehen",

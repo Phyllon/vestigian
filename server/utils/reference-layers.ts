@@ -1,5 +1,6 @@
 import type { TileCoordinate } from '#shared/types'
 import { isReferenceOverlayId, type ReferenceOverlayId } from '#shared/utils/reference-overlays'
+import { ROAD_AUDIT_STEEP_GRADIENT_PERCENT } from '#shared/utils/road-audit'
 import { TILE_BUFFER, TILE_EXTENT } from './mvt'
 import { assertFiniteNumber, buildTileEnvelopeSql } from './sql-guard'
 
@@ -168,6 +169,73 @@ const hillfortTileSql = (tile: TileCoordinate): string => `
   WHERE hf.geom IS NOT NULL
 `
 
+/**
+ * The road audit: two MVT layers in one tile. `audit_segments` carries only the
+ * conjectured or hypothetical segments there is something to say about — a
+ * milestone or road record within the buffer, or a steep stretch — because the
+ * other 91% are already drawn by `roman-roads` and carrying them again would
+ * triple the tile for lines that add nothing. The evidence rows are the whole
+ * set, in the download. `audit_gaps` are milestones with no road within a
+ * kilometre.
+ */
+const roadAuditTileSql = (tile: TileCoordinate, simplifyTolerance: number): string => {
+  assertFiniteNumber(simplifyTolerance, 'simplifyTolerance')
+  assertFiniteNumber(ROAD_AUDIT_STEEP_GRADIENT_PERCENT, 'steepGradientPercent')
+
+  const segments = `
+    SELECT ST_AsMVT(sg, 'audit_segments', ${TILE_EXTENT}, 'geom', 'id') AS tile
+    FROM (
+      SELECT
+        road.id,
+        road.name,
+        road.certainty::text AS certainty,
+        road.itinerary,
+        audit.edh_milestones,
+        audit.vici_milestones,
+        audit.vici_road_sites,
+        audit.certain_ends,
+        round(audit.steepest_gradient_percent::numeric, 1)::float AS steepest_gradient_percent,
+        (audit.edh_milestones + audit.vici_milestones + audit.vici_road_sites > 0) AS is_supported,
+        (audit.steepest_gradient_percent >= ${ROAD_AUDIT_STEEP_GRADIENT_PERCENT}) AS is_steep,
+        ST_AsMVTGeom(
+          ST_Simplify(ST_Transform(road.geom, 3857), ${simplifyTolerance}),
+          b.env, ${TILE_EXTENT}, ${TILE_BUFFER}, true
+        ) AS geom
+      FROM road_audit_segments audit
+      JOIN antiquity_roman_roads road ON road.id = audit.road_id, bounds b
+      WHERE road.geom && b.env_wgs
+        AND (
+          audit.edh_milestones + audit.vici_milestones + audit.vici_road_sites > 0
+          OR audit.steepest_gradient_percent >= ${ROAD_AUDIT_STEEP_GRADIENT_PERCENT}
+        )
+    ) AS sg
+    WHERE sg.geom IS NOT NULL
+  `
+
+  const gaps = `
+    SELECT ST_AsMVT(gp, 'audit_gaps', ${TILE_EXTENT}, 'geom', 'id') AS tile
+    FROM (
+      SELECT
+        road_audit_gaps.id,
+        road_audit_gaps.source,
+        road_audit_gaps.source_key,
+        road_audit_gaps.title,
+        road_audit_gaps.nearest_road_metres,
+        ST_AsMVTGeom(
+          ST_Transform(road_audit_gaps.geom, 3857), b.env, ${TILE_EXTENT}, ${TILE_BUFFER}, true
+        ) AS geom
+      FROM road_audit_gaps, bounds b
+      WHERE road_audit_gaps.geom && b.env_wgs
+    ) AS gp
+    WHERE gp.geom IS NOT NULL
+  `
+
+  return `
+    ${BOUNDS_CTE(tile)}
+    SELECT ((${segments}) || (${gaps})) AS tile
+  `
+}
+
 export interface ReferenceTileQuery {
   layer: ReferenceLayerId
   tile: TileCoordinate
@@ -182,6 +250,7 @@ export const buildReferenceTileSql = (query: ReferenceTileQuery): string => {
   if (layer === 'mints') return mintTileSql(tile)
   if (layer === 'monuments') return monumentTileSql(tile)
   if (layer === 'hillforts') return hillfortTileSql(tile)
+  if (layer === 'road-audit') return roadAuditTileSql(tile, simplifyTolerance)
   return isicilyTileSql(tile)
 }
 

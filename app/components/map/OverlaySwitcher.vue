@@ -196,6 +196,14 @@
       setActive: (next) => setReferenceOverlayActive('roman-roads', next),
     },
     {
+      key: 'road-audit',
+      canShow: true,
+      isActive: isShowingReferenceOverlay('road-audit'),
+      label: t('basemapSwitcher.showRoadAudit'),
+      hint: t('basemapSwitcher.showRoadAuditHint'),
+      setActive: (next) => setReferenceOverlayActive('road-audit', next),
+    },
+    {
       key: 'monuments',
       canShow: true,
       isActive: isShowingReferenceOverlay('monuments'),

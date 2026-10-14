@@ -171,6 +171,8 @@
     "showIsicilyHint": "Inscriptions of ancient Sicily from I.Sicily — Greek, Latin, Elymian, Sikel, Punic",
     "showRomanRoads": "Roman roads",
     "showRomanRoadsHint": "Itiner-e's network — solid where surveyed, dashed where conjectured",
+    "showRoadAudit": "Road audit",
+    "showRoadAuditHint": "What stands beside each conjectured road — milestones, records, steep ground — and milestones far from any road",
     "showMonuments": "Roman monuments",
     "showMonumentsHint": "Theatres, villas, forts, baths and more, from Wikidata",
     "showMints": "Mints",
@@ -404,6 +406,10 @@
       "conjectured": "Course conjectured",
       "hypothetical": "Course hypothetical"
     },
+    "roadAuditTitle": "Road audit",
+    "roadAuditSupported": "Conjectured road with a milestone or road record beside it",
+    "roadAuditSteep": "Steep stretch on the terrain model",
+    "roadAuditGap": "Milestone far from every road",
     "isicilyTitle": "Sicilian inscriptions",
     "isicilyMark": "Inscription from I.Sicily, at an approximate place",
     "monumentsTitle": "Roman monuments",
@@ -694,6 +700,7 @@
     "overlayIsicily": "Sicilian inscriptions: I.Sicily, University of Oxford (CC BY 4.0; six records CC BY-NC 4.0 — non-commercial use only). The texts are mirrored; the photographs are not, because they are not licensed for reuse.",
     "overlayPolities": "Neighbouring realms (Carthage, Parthia, the Seleucid and Ptolemaic kingdoms, the Goths and others): Cliopatria, Seshat Global History Databank (CC BY 4.0) — one scholarly reading of a coarse boundary.",
     "overlayHillforts": "Hillforts of Britain and Ireland: the Atlas of Hillforts, Ralston & Lock (Universities of Oxford, Edinburgh and Cork), via the Archaeology Data Service (CC BY 4.0).",
+    "overlayRoadAudit": "Road audit: worked out here, not a source of its own — from Itiner-e (CC BY 4.0), the Epigraphic Database Heidelberg (CC BY-SA 4.0), vici.org records (CC BY-SA 3.0) and terrain models (Mapterhorn). Itiner-e's classification of each road is not changed.",
     "columnReliefHeading": "Column reliefs",
     "columnReliefBody": "Trajan's Column plates are mirrored from Wikimedia Commons' Cichorius Plates category, marked public domain there. The Column of Marcus Aurelius's plates are served live from Heidelberg University Library's digitisation of Petersen, Domaszewski & Calderini's 1896 study — also public domain; nothing is mirrored into this project's own storage for that column.",
     "placeNamesHeading": "Modern place names",
@@ -931,6 +938,36 @@
     "ariaLabel": "Map of archaeological sites",
     "loading": "Unfolding the map",
     "scaleLabel": "Map scale"
+  },
+  "tabulaPopup": {
+    "noFigure": "The manuscript gives no distance for this leg",
+    "stated": "One Roman mile stated (≈ {km} km) | {n} Roman miles stated (≈ {km} km)",
+    "straightLine": "Straight line between the two places, calculated here: {km} km",
+    "shorterThanLine": "Shorter than that line — a road cannot be, so the figure or one of the locations is off.",
+    "roadWinds": "A road winds, so it runs longer than the straight line.",
+    "overWater": "Sea crossing",
+    "crossesMountains": "Crosses mountains",
+    "crossesRiver": "Crosses {river}",
+    "reconstructed": "Gap filled from the Itinerarium Antonini, not read off the manuscript"
+  },
+  "roadAudit": {
+    "edhMilestones": "One EDH milestone | {n} EDH milestones",
+    "viciMilestones": "One vici.org milestone | {n} vici.org milestones",
+    "viciRoadSites": "One vici.org road record | {n} vici.org road records",
+    "within": "Within {metres} m: {list}",
+    "nothingNear": "No milestone or road record within {metres} m",
+    "certainEnds": "One end meets a surveyed segment | Both ends meet surveyed segments",
+    "gradient": "Steepest {metres} m stretch: {percent}% on the terrain model",
+    "steep": "Above {percent}%, a gradient few surveyed segments reach",
+    "caveat": "Itiner-e's own classification is unchanged. A find can mark where a stone was re-used rather than where the road ran, and a count of zero says only that nothing is recorded here.",
+    "gapSource": {
+      "edh": "Milestone, Epigraphic Database Heidelberg",
+      "vici": "Milestone recorded on vici.org"
+    },
+    "gapNoRoad": "No Itiner-e road within about 5 km",
+    "gapNearest": "Nearest Itiner-e road: {kilometres} km",
+    "gapOpen": "Open the record",
+    "gapCaveat": "Farther than {metres} m from every road in the model. Findspots are often where a stone was carried or re-used: this may be a stone that moved, a road the model lacks, or a misplaced coordinate."
   },
   "battlePopup": {
     "viewOnWikipedia": "View on Wikipedia",

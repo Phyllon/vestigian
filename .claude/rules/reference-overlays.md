@@ -15,6 +15,7 @@ paths:
   - 'server/api/isicily-inscriptions/**'
   - 'shared/utils/reference-overlays.ts'
   - 'app/composables/map/useReferenceOverlays.ts'
+  - 'shared/utils/road-audit.ts'
   - 'app/composables/map/usePeriodOverlay.ts'
   - 'app/pages/inscriptions/sicily/**'
   - 'e2e/reference-overlays.spec.ts'
@@ -41,6 +42,11 @@ Run them with `pnpm import:itinere-roads`, `import:nomisma-mints`,
 `import:wikidata-monuments`, `import:isicily-inscriptions`,
 `import:cliopatria-polities`, `import:hillforts-atlas` (each takes `-- --dry-run`). All are guarded
 (`scripts/import/guard.ts`), cached under `.import/`, and idempotent.
+
+**The road audit is a sixth id, `road-audit`, and the one overlay whose tile holds
+two MVT layers** (`audit_segments`, `audit_gaps`) — a calculated reading of Itiner-e
+against the atlas's other records rather than a source of its own. See
+`.claude/rules/road-audit.md`.
 
 ### Architecture, and why it is not four more copies of `useCoinHoardOverlay`
 

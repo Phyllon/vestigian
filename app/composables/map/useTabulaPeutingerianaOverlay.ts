@@ -1,10 +1,15 @@
-import type { Map as MapLibreMap } from 'maplibre-gl'
+import type { Map as MapLibreMap, MapLayerMouseEvent } from 'maplibre-gl'
 import type { BasemapView } from '#shared/types'
+import { measureTabulaLeg, romanMilesToMetres } from '#shared/utils/tabula-distance'
+import { bindOverlayListenersOnce } from './useMapInstance'
+import { escapeHtmlForPopup } from './popupHtml'
 import { MAP_LABEL_FONT, TABULA_PEUTINGERIANA_ATTRIBUTION } from './useBasemapStyle'
 
 export const TABULA_PEUTINGERIANA_SOURCE_ID = 'vestigian-tabula-peutingeriana'
 const ROADS_LAYER_ID = 'vestigian-tabula-peutingeriana-roads'
 const ROADS_CASING_LAYER_ID = 'vestigian-tabula-peutingeriana-roads-casing'
+/** Invisible and wide: the drawn line is 1.4–3 px, too thin to hit with a finger. */
+const ROADS_HIT_LAYER_ID = 'vestigian-tabula-peutingeriana-roads-hit'
 const PLACES_LAYER_ID = 'vestigian-tabula-peutingeriana-places'
 const PLACE_LABELS_LAYER_ID = 'vestigian-tabula-peutingeriana-place-labels'
 
@@ -63,6 +68,98 @@ export const resolveTabulaPeutingerianaColours = (view: BasemapView): TabulaPeut
     ? SATELLITE_TABULA_PEUTINGERIANA_COLOURS
     : DEFAULT_TABULA_PEUTINGERIANA_COLOURS
 
+export interface TabulaRoadFeatureProperties {
+  distanceRomanMiles: number | null
+  isReconstructed: boolean
+  overWater: boolean
+  crossesMountains: boolean
+  crossesRiver: string | null
+  fromLabel: string
+  fromModernName: string | null
+  toLabel: string
+  toModernName: string | null
+  straightLineMetres: number
+}
+
+export type TabulaPopupKey =
+  | 'tabulaPopup.noFigure'
+  | 'tabulaPopup.stated'
+  | 'tabulaPopup.straightLine'
+  | 'tabulaPopup.shorterThanLine'
+  | 'tabulaPopup.roadWinds'
+  | 'tabulaPopup.overWater'
+  | 'tabulaPopup.crossesMountains'
+  | 'tabulaPopup.crossesRiver'
+  | 'tabulaPopup.reconstructed'
+
+export interface TabulaPopupHelpers {
+  /** Plural-aware: `count` selects the form and is also available as `{n}`. */
+  t: (key: TabulaPopupKey, values?: Record<string, string | number>, count?: number) => string
+  formatKilometres: (kilometres: number) => string
+}
+
+const nameWithModern = (label: string, modernName: string | null): string => {
+  const classical = escapeHtmlForPopup(label)
+  if (!modernName) return classical
+  return `${classical} <span>(${escapeHtmlForPopup(modernName)})</span>`
+}
+
+/**
+ * Everything the leg's own record carries, and nothing it does not. The
+ * straight line is calculated here, from the endpoints, and said so — it is
+ * not what the manuscript or the compiler recorded. A road is longer than a
+ * straight line, so the note says that rather than leaving a stated figure
+ * over the line to read as an error; only the opposite case is flagged.
+ */
+export const buildTabulaRoadPopupHtml = (
+  properties: TabulaRoadFeatureProperties,
+  helpers: TabulaPopupHelpers,
+): string => {
+  const { t, formatKilometres } = helpers
+  const lines = [
+    `<strong>${nameWithModern(properties.fromLabel, properties.fromModernName)} → ${nameWithModern(properties.toLabel, properties.toModernName)}</strong>`,
+  ]
+
+  const miles = properties.distanceRomanMiles
+  const measure = measureTabulaLeg({
+    statedRomanMiles: miles,
+    straightLineMetres: properties.straightLineMetres,
+  })
+
+  if (miles === null) {
+    lines.push(escapeHtmlForPopup(t('tabulaPopup.noFigure')))
+  } else {
+    const statedKilometres = formatKilometres(romanMilesToMetres(miles) / 1000)
+    lines.push(
+      escapeHtmlForPopup(t('tabulaPopup.stated', { n: miles, km: statedKilometres }, miles)),
+    )
+  }
+
+  if (properties.straightLineMetres > 0) {
+    const lineKilometres = formatKilometres(properties.straightLineMetres / 1000)
+    lines.push(escapeHtmlForPopup(t('tabulaPopup.straightLine', { km: lineKilometres })))
+    const note =
+      measure?.reading === 'shorter-than-line'
+        ? 'tabulaPopup.shorterThanLine'
+        : 'tabulaPopup.roadWinds'
+    lines.push(`<em>${escapeHtmlForPopup(t(note))}</em>`)
+  }
+
+  const crossings: string[] = []
+  if (properties.overWater) crossings.push(t('tabulaPopup.overWater'))
+  if (properties.crossesMountains) crossings.push(t('tabulaPopup.crossesMountains'))
+  if (properties.crossesRiver) {
+    crossings.push(t('tabulaPopup.crossesRiver', { river: properties.crossesRiver }))
+  }
+  if (crossings.length > 0) lines.push(crossings.map(escapeHtmlForPopup).join(' · '))
+
+  if (properties.isReconstructed) {
+    lines.push(escapeHtmlForPopup(t('tabulaPopup.reconstructed')))
+  }
+
+  return lines.join('<br>')
+}
+
 /**
  * The Tabula Peutingeriana's places and roads, drawn over whatever basemap is
  * currently showing — a `geojson` source, not a tile source, for the same
@@ -86,6 +183,8 @@ export const resolveTabulaPeutingerianaColours = (view: BasemapView): TabulaPeut
  */
 export const useTabulaPeutingerianaOverlay = () => {
   const { isShowingTabulaPeutingerianaOverlay, view } = useBasemapStyle()
+  const { t, locale } = useI18n()
+  const { openOverlayPopup } = useOverlayPopup()
 
   const data = shallowRef<GeoJSON.FeatureCollection | null>(null)
   const isLoading = ref(false)
@@ -105,6 +204,24 @@ export const useTabulaPeutingerianaOverlay = () => {
     } finally {
       isLoading.value = false
     }
+  }
+
+  const showRoadPopup = (map: MapLibreMap, event: MapLayerMouseEvent): void => {
+    const feature = event.features?.[0]
+    if (!feature) return
+
+    const numberFormat = new Intl.NumberFormat(locale.value, { maximumFractionDigits: 1 })
+    openOverlayPopup({
+      map,
+      position: [event.lngLat.lng, event.lngLat.lat],
+      html: buildTabulaRoadPopupHtml(feature.properties as TabulaRoadFeatureProperties, {
+        t: (key, values, count) =>
+          count === undefined ? t(key, values ?? {}) : t(key, values ?? {}, count),
+        formatKilometres: (kilometres) => numberFormat.format(kilometres),
+      }),
+      maxWidth: '280px',
+      withRing: false,
+    })
   }
 
   const attachTabulaPeutingerianaOverlay = (map: MapLibreMap): void => {
@@ -133,6 +250,15 @@ export const useTabulaPeutingerianaOverlay = () => {
         },
       })
     }
+
+    map.addLayer({
+      id: ROADS_HIT_LAYER_ID,
+      type: 'line',
+      source: TABULA_PEUTINGERIANA_SOURCE_ID,
+      filter: ['==', ['get', 'kind'], 'road'],
+      layout: { 'line-cap': 'round' },
+      paint: { 'line-color': colours.line, 'line-width': 16, 'line-opacity': 0 },
+    })
 
     map.addLayer({
       id: ROADS_LAYER_ID,
@@ -210,12 +336,23 @@ export const useTabulaPeutingerianaOverlay = () => {
 
     // See `useLimesOverlay`'s `attachLimesOverlay` for why this call is needed.
     map.triggerRepaint()
+
+    bindOverlayListenersOnce(map, ROADS_HIT_LAYER_ID, () => {
+      map.on('click', ROADS_HIT_LAYER_ID, (event) => showRoadPopup(map, event))
+      map.on('mouseenter', ROADS_HIT_LAYER_ID, () => {
+        map.getCanvas().style.cursor = 'pointer'
+      })
+      map.on('mouseleave', ROADS_HIT_LAYER_ID, () => {
+        map.getCanvas().style.cursor = ''
+      })
+    })
   }
 
   const detachTabulaPeutingerianaOverlay = (map: MapLibreMap): void => {
     if (map.getLayer(PLACE_LABELS_LAYER_ID)) map.removeLayer(PLACE_LABELS_LAYER_ID)
     if (map.getLayer(PLACES_LAYER_ID)) map.removeLayer(PLACES_LAYER_ID)
     if (map.getLayer(ROADS_LAYER_ID)) map.removeLayer(ROADS_LAYER_ID)
+    if (map.getLayer(ROADS_HIT_LAYER_ID)) map.removeLayer(ROADS_HIT_LAYER_ID)
     if (map.getLayer(ROADS_CASING_LAYER_ID)) map.removeLayer(ROADS_CASING_LAYER_ID)
     if (map.getSource(TABULA_PEUTINGERIANA_SOURCE_ID))
       map.removeSource(TABULA_PEUTINGERIANA_SOURCE_ID)

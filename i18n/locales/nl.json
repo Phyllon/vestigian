@@ -93,6 +93,8 @@
     "showIsicilyHint": "Inscripties uit het antieke Sicilië van I.Sicily: Grieks, Latijn, Elymisch, Sikelisch, Punisch",
     "showRomanRoads": "Romeinse wegen",
     "showRomanRoadsHint": "Het netwerk van Itiner-e: doorgetrokken waar vastgesteld, gestreept waar vermoed",
+    "showRoadAudit": "Wegencontrole",
+    "showRoadAuditHint": "Wat er langs elke vermoede weg ligt — mijlpalen, vermeldingen, steil terrein — en mijlpalen ver van elke weg",
     "showMonuments": "Romeinse monumenten",
     "showMonumentsHint": "Theaters, villa’s, forten, baden en meer, uit Wikidata",
     "showMints": "Munthuizen",
@@ -178,6 +180,10 @@
       "conjectured": "Loop vermoed",
       "hypothetical": "Loop hypothetisch"
     },
+    "roadAuditTitle": "Wegencontrole",
+    "roadAuditSupported": "Vermoede weg met een mijlpaal of wegvermelding ernaast",
+    "roadAuditSteep": "Steil traject in het terreinmodel",
+    "roadAuditGap": "Mijlpaal ver van elke weg",
     "isicilyTitle": "Siciliaanse inscripties",
     "isicilyMark": "Inscriptie uit I.Sicily, op een bij benadering bepaalde plaats",
     "monumentsTitle": "Romeinse monumenten",
@@ -464,6 +470,7 @@
     "overlayIsicily": "Siciliaanse inscripties: I.Sicily, Universiteit van Oxford (CC BY 4.0; zes records CC BY-NC 4.0, alleen niet-commercieel gebruik). De teksten worden overgenomen; de foto's niet, omdat ze niet voor hergebruik zijn gelicentieerd.",
     "overlayPolities": "Naburige rijken (Carthago, Parthië, het Seleucidische en Ptolemaeïsche rijk, de Goten en anderen): Cliopatria, Seshat Global History Databank (CC BY 4.0), één wetenschappelijke lezing van een grove grens.",
     "overlayHillforts": "Heuvelvestingen van Groot-Brittannië en Ierland: de Atlas of Hillforts, Ralston & Lock (universiteiten van Oxford, Edinburgh en Cork), via de Archaeology Data Service (CC BY 4.0).",
+    "overlayRoadAudit": "Wegencontrole: hier berekend, geen eigen bron — uit Itiner-e (CC BY 4.0), de Epigraphic Database Heidelberg (CC BY-SA 4.0), vermeldingen van vici.org (CC BY-SA 3.0) en terreinmodellen (Mapterhorn). De indeling van elke weg door Itiner-e blijft ongewijzigd.",
     "columnReliefHeading": "Kolomreliëf",
     "columnReliefBody": "De platen van de Zuil van Trajanus zijn gespiegeld vanuit de categorie 'Cichorius Plates' op Wikimedia Commons, waar ze als publiek domein zijn gemarkeerd. De platen van de Kolom van Marcus Aurelius worden live geserveerd vanuit de digitalisering door de Universiteitsbibliotheek Heidelberg van Petersen, Domaszewski & Calderini's studie uit 1896 — eveneens publiek domein; voor deze zuil wordt niets naar de eigen opslag van dit project gekopieerd.",
     "placeNamesHeading": "Moderne plaatsnamen",
@@ -703,6 +710,36 @@
     "ariaLabel": "Kaart van archeologische sites",
     "loading": "Ontvouwen van de kaart",
     "scaleLabel": "Kaartschaal"
+  },
+  "tabulaPopup": {
+    "noFigure": "Het manuscript geeft voor dit traject geen afstand",
+    "stated": "Eén Romeinse mijl vermeld (≈ {km} km) | {n} Romeinse mijlen vermeld (≈ {km} km)",
+    "straightLine": "Hemelsbrede afstand tussen de twee plaatsen, hier berekend: {km} km",
+    "shorterThanLine": "Korter dan die lijn — een weg kan dat niet zijn, dus het getal of een van de locaties klopt niet.",
+    "roadWinds": "Een weg slingert en is dus langer dan de hemelsbrede afstand.",
+    "overWater": "Zeeoversteek",
+    "crossesMountains": "Doorkruist bergen",
+    "crossesRiver": "Steekt {river} over",
+    "reconstructed": "Hiaat aangevuld uit het Itinerarium Antonini, niet van het manuscript afgelezen"
+  },
+  "roadAudit": {
+    "edhMilestones": "Eén EDH-mijlpaal | {n} EDH-mijlpalen",
+    "viciMilestones": "Eén mijlpaal op vici.org | {n} mijlpalen op vici.org",
+    "viciRoadSites": "Eén wegvermelding op vici.org | {n} wegvermeldingen op vici.org",
+    "within": "Binnen {metres} m: {list}",
+    "nothingNear": "Geen mijlpaal of wegvermelding binnen {metres} m",
+    "certainEnds": "Eén uiteinde sluit aan op een vastgesteld segment | Beide uiteinden sluiten aan op vastgestelde segmenten",
+    "gradient": "Steilste traject van {metres} m: {percent}% in het terreinmodel",
+    "steep": "Boven {percent}%, een helling die weinig vastgestelde segmenten halen",
+    "caveat": "De indeling van Itiner-e blijft ongewijzigd. Een vondst kan aanwijzen waar een steen hergebruikt is en niet waar de weg liep, en een nul zegt alleen dat hier niets vermeld staat.",
+    "gapSource": {
+      "edh": "Mijlpaal, Epigraphic Database Heidelberg",
+      "vici": "Mijlpaal vermeld op vici.org"
+    },
+    "gapNoRoad": "Geen Itiner-e-weg binnen ongeveer 5 km",
+    "gapNearest": "Dichtstbijzijnde Itiner-e-weg: {kilometres} km",
+    "gapOpen": "Vermelding openen",
+    "gapCaveat": "Verder dan {metres} m van elke weg in het model. Vindplaatsen zijn vaak waar een steen heen is gebracht of hergebruikt: dit kan een verplaatste steen zijn, een weg die het model mist of een verkeerde coördinaat."
   },
   "battlePopup": {
     "viewOnWikipedia": "Bekijken op Wikipedia",

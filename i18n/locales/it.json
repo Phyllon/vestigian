@@ -93,6 +93,8 @@
     "showIsicilyHint": "Iscrizioni della Sicilia antica da I.Sicily: greco, latino, elimo, siculo, punico",
     "showRomanRoads": "Strade romane",
     "showRomanRoadsHint": "La rete di Itiner-e: linea continua se accertata, tratteggiata se ipotetica",
+    "showRoadAudit": "Verifica delle strade",
+    "showRoadAuditHint": "Che cosa sorge accanto a ogni strada congetturale — miliari, schede, terreno ripido — e i miliari lontani da ogni strada",
     "showMonuments": "Monumenti romani",
     "showMonumentsHint": "Teatri, ville, forti, terme e altro, da Wikidata",
     "showMints": "Zecche",
@@ -178,6 +180,10 @@
       "conjectured": "Tracciato ipotizzato",
       "hypothetical": "Tracciato ipotetico"
     },
+    "roadAuditTitle": "Verifica delle strade",
+    "roadAuditSupported": "Strada congetturale con un miliare o una scheda stradale accanto",
+    "roadAuditSteep": "Tratto ripido nel modello del terreno",
+    "roadAuditGap": "Miliare lontano da ogni strada",
     "isicilyTitle": "Iscrizioni siciliane",
     "isicilyMark": "Iscrizione da I.Sicily, in un luogo approssimativo",
     "monumentsTitle": "Monumenti romani",
@@ -464,6 +470,7 @@
     "overlayIsicily": "Iscrizioni siciliane: I.Sicily, Università di Oxford (CC BY 4.0; sei schede CC BY-NC 4.0, solo uso non commerciale). I testi sono riprodotti; le fotografie no, perché non sono concesse in licenza per il riuso.",
     "overlayPolities": "Regni confinanti (Cartagine, la Partia, i regni seleucide e tolemaico, i Goti e altri): Cliopatria, Seshat Global History Databank (CC BY 4.0), una lettura scientifica di un confine approssimativo.",
     "overlayHillforts": "Fortificazioni di altura di Gran Bretagna e Irlanda: Atlas of Hillforts, Ralston e Lock (università di Oxford, Edimburgo e Cork), tramite l'Archaeology Data Service (CC BY 4.0).",
+    "overlayRoadAudit": "Verifica delle strade: calcolata qui, non una fonte a sé — da Itiner-e (CC BY 4.0), dall’Epigraphic Database Heidelberg (CC BY-SA 4.0), dalle schede di vici.org (CC BY-SA 3.0) e da modelli del terreno (Mapterhorn). La classificazione di ogni strada di Itiner-e non è modificata.",
     "columnReliefHeading": "Rilievi della colonna",
     "columnReliefBody": "Le tavole della Colonna di Traiano sono rispecchiate dalla categoria «Cichorius Plates» di Wikimedia Commons, dove sono indicate come di pubblico dominio. Le tavole della Colonna di Marco Aurelio sono servite dal vivo dalla digitalizzazione della Biblioteca Universitaria di Heidelberg dello studio di Petersen, Domaszewski & Calderini del 1896 — anch'esso di pubblico dominio; nulla viene copiato nell'archivio proprio di questo progetto per questa colonna.",
     "placeNamesHeading": "Nomi locali moderni",
@@ -703,6 +710,36 @@
     "ariaLabel": "Mappa dei siti archeologici",
     "loading": "Dispiegamento della mappa…",
     "scaleLabel": "Scala della mappa"
+  },
+  "tabulaPopup": {
+    "noFigure": "Il manoscritto non indica alcuna distanza per questo tratto",
+    "stated": "Un miglio romano indicato (≈ {km} km) | {n} miglia romane indicate (≈ {km} km)",
+    "straightLine": "Linea retta tra i due luoghi, calcolata qui: {km} km",
+    "shorterThanLine": "Più breve di quella linea — una strada non può esserlo, quindi la cifra o una delle località non è corretta.",
+    "roadWinds": "Una strada serpeggia, quindi è più lunga della linea retta.",
+    "overWater": "Traversata marittima",
+    "crossesMountains": "Attraversa montagne",
+    "crossesRiver": "Attraversa {river}",
+    "reconstructed": "Lacuna colmata dall’Itinerarium Antonini, non letta sul manoscritto"
+  },
+  "roadAudit": {
+    "edhMilestones": "Un miliare dell’EDH | {n} miliari dell’EDH",
+    "viciMilestones": "Un miliare su vici.org | {n} miliari su vici.org",
+    "viciRoadSites": "Una scheda stradale su vici.org | {n} schede stradali su vici.org",
+    "within": "Entro {metres} m: {list}",
+    "nothingNear": "Nessun miliare né scheda stradale entro {metres} m",
+    "certainEnds": "Un’estremità incontra un tratto accertato | Entrambe le estremità incontrano tratti accertati",
+    "gradient": "Tratto di {metres} m più ripido: {percent}% sul modello del terreno",
+    "steep": "Oltre il {percent}%, una pendenza che pochi tratti accertati raggiungono",
+    "caveat": "La classificazione di Itiner-e resta invariata. Un ritrovamento può indicare dove una pietra fu reimpiegata e non dove correva la strada, e uno zero dice soltanto che qui non risulta nulla.",
+    "gapSource": {
+      "edh": "Miliare, Epigraphic Database Heidelberg",
+      "vici": "Miliare registrato su vici.org"
+    },
+    "gapNoRoad": "Nessuna strada di Itiner-e entro circa 5 km",
+    "gapNearest": "Strada di Itiner-e più vicina: {kilometres} km",
+    "gapOpen": "Apri la scheda",
+    "gapCaveat": "A più di {metres} m da ogni strada del modello. I luoghi di ritrovamento sono spesso quelli in cui una pietra fu portata o reimpiegata: può essere una pietra spostata, una strada assente dal modello o una coordinata errata."
   },
   "battlePopup": {
     "viewOnWikipedia": "Visualizza su Wikipedia",

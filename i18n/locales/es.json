@@ -93,6 +93,8 @@
     "showIsicilyHint": "Inscripciones de la Sicilia antigua de I.Sicily: griego, latín, élimo, sículo, púnico",
     "showRomanRoads": "Calzadas romanas",
     "showRomanRoadsHint": "La red de Itiner-e: línea continua si está comprobada, discontinua si es conjetural",
+    "showRoadAudit": "Contraste de calzadas",
+    "showRoadAuditHint": "Qué hay junto a cada calzada conjeturada —miliarios, registros, terreno escarpado— y miliarios lejos de toda calzada",
     "showMonuments": "Monumentos romanos",
     "showMonumentsHint": "Teatros, villas, fuertes, termas y más, de Wikidata",
     "showMints": "Cecas",
@@ -178,6 +180,10 @@
       "conjectured": "Trazado conjetural",
       "hypothetical": "Trazado hipotético"
     },
+    "roadAuditTitle": "Contraste de calzadas",
+    "roadAuditSupported": "Calzada conjeturada con un miliario o un registro de calzada al lado",
+    "roadAuditSteep": "Tramo escarpado en el modelo de terreno",
+    "roadAuditGap": "Miliario lejos de toda calzada",
     "isicilyTitle": "Inscripciones sicilianas",
     "isicilyMark": "Inscripción de I.Sicily, en un lugar aproximado",
     "monumentsTitle": "Monumentos romanos",
@@ -464,6 +470,7 @@
     "overlayIsicily": "Inscripciones sicilianas: I.Sicily, Universidad de Oxford (CC BY 4.0; seis registros CC BY-NC 4.0, solo uso no comercial). Los textos se reproducen; las fotografías no, porque no tienen licencia de reutilización.",
     "overlayPolities": "Reinos vecinos (Cartago, Partia, los reinos seléucida y ptolemaico, los godos y otros): Cliopatria, Seshat Global History Databank (CC BY 4.0), una lectura académica de un límite aproximado.",
     "overlayHillforts": "Recintos fortificados de Gran Bretaña e Irlanda: Atlas of Hillforts, Ralston y Lock (universidades de Oxford, Edimburgo y Cork), a través del Archaeology Data Service (CC BY 4.0).",
+    "overlayRoadAudit": "Contraste de calzadas: calculado aquí, sin fuente propia — a partir de Itiner-e (CC BY 4.0), la Epigraphic Database Heidelberg (CC BY-SA 4.0), los registros de vici.org (CC BY-SA 3.0) y modelos de terreno (Mapterhorn). La clasificación de cada calzada por Itiner-e no se modifica.",
     "columnReliefHeading": "Relieves de columna",
     "columnReliefBody": "Las placas de la Columna de Trajano están reflejadas desde la categoría «Cichorius Plates» de Wikimedia Commons, marcadas allí como dominio público. Las placas de la Columna de Marco Aurelio se sirven en directo desde la digitalización de la Biblioteca de la Universidad de Heidelberg del estudio de Petersen, Domaszewski & Calderini de 1896 — también dominio público; nada se copia en el almacenamiento propio de este proyecto para esa columna.",
     "placeNamesHeading": "Nombres de lugar modernos",
@@ -703,6 +710,36 @@
     "ariaLabel": "Mapa de sitios arqueológicos",
     "loading": "Desplegando el mapa",
     "scaleLabel": "Escala del mapa"
+  },
+  "tabulaPopup": {
+    "noFigure": "El manuscrito no da ninguna distancia para este tramo",
+    "stated": "Una milla romana indicada (≈ {km} km) | {n} millas romanas indicadas (≈ {km} km)",
+    "straightLine": "Línea recta entre los dos lugares, calculada aquí: {km} km",
+    "shorterThanLine": "Más corta que esa línea — una calzada no puede serlo, así que la cifra o uno de los emplazamientos no es correcto.",
+    "roadWinds": "Una calzada serpentea, así que es más larga que la línea recta.",
+    "overWater": "Travesía marítima",
+    "crossesMountains": "Atraviesa montañas",
+    "crossesRiver": "Cruza {river}",
+    "reconstructed": "Laguna rellenada con el Itinerario de Antonino, no leída en el manuscrito"
+  },
+  "roadAudit": {
+    "edhMilestones": "Un miliario de la EDH | {n} miliarios de la EDH",
+    "viciMilestones": "Un miliario en vici.org | {n} miliarios en vici.org",
+    "viciRoadSites": "Un registro de calzada en vici.org | {n} registros de calzada en vici.org",
+    "within": "A menos de {metres} m: {list}",
+    "nothingNear": "Ningún miliario ni registro de calzada a menos de {metres} m",
+    "certainEnds": "Un extremo enlaza con un tramo establecido | Ambos extremos enlazan con tramos establecidos",
+    "gradient": "Tramo de {metres} m más empinado: {percent} % en el modelo de terreno",
+    "steep": "Por encima del {percent} %, una pendiente que pocos tramos establecidos alcanzan",
+    "caveat": "La clasificación de Itiner-e no cambia. Un hallazgo puede señalar dónde se reutilizó una piedra y no por dónde iba la calzada, y un cero solo dice que aquí no consta nada.",
+    "gapSource": {
+      "edh": "Miliario, Epigraphic Database Heidelberg",
+      "vici": "Miliario registrado en vici.org"
+    },
+    "gapNoRoad": "Ninguna calzada de Itiner-e en unos 5 km",
+    "gapNearest": "Calzada de Itiner-e más cercana: {kilometres} km",
+    "gapOpen": "Abrir el registro",
+    "gapCaveat": "A más de {metres} m de toda calzada del modelo. Los lugares de hallazgo suelen ser donde una piedra fue trasladada o reutilizada: puede ser una piedra movida, una calzada que falta en el modelo o una coordenada errónea."
   },
   "battlePopup": {
     "viewOnWikipedia": "Ver en Wikipedia",

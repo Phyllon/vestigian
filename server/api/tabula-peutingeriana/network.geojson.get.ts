@@ -56,14 +56,25 @@ export default defineEventHandler(async (event) => {
       overWater: boolean
       crossesMountains: boolean
       crossesRiver: string | null
+      fromLabel: string
+      fromModernName: string | null
+      toLabel: string
+      toModernName: string | null
+      straightLineMetres: number
       geojson: string
     }[]
   >`
     SELECT
-      id, distance_roman_miles AS "distanceRomanMiles", is_reconstructed AS "isReconstructed",
-      over_water AS "overWater", crosses_mountains AS "crossesMountains", crosses_river AS "crossesRiver",
-      ST_AsGeoJSON(geom) AS geojson
-    FROM tabula_peutingeriana_roads
+      road.id, road.distance_roman_miles AS "distanceRomanMiles",
+      road.is_reconstructed AS "isReconstructed", road.over_water AS "overWater",
+      road.crosses_mountains AS "crossesMountains", road.crosses_river AS "crossesRiver",
+      origin.label AS "fromLabel", origin.modern_name AS "fromModernName",
+      destination.label AS "toLabel", destination.modern_name AS "toModernName",
+      ST_Length(road.geom::geography) AS "straightLineMetres",
+      ST_AsGeoJSON(road.geom) AS geojson
+    FROM tabula_peutingeriana_roads road
+    JOIN tabula_peutingeriana_places origin ON origin.id = road.from_place_id
+    JOIN tabula_peutingeriana_places destination ON destination.id = road.to_place_id
   `
 
   setResponseHeaders(event, {
@@ -98,6 +109,13 @@ export default defineEventHandler(async (event) => {
           overWater: road.overWater,
           crossesMountains: road.crossesMountains,
           crossesRiver: road.crossesRiver,
+          fromLabel: road.fromLabel,
+          fromModernName: road.fromModernName,
+          toLabel: road.toLabel,
+          toModernName: road.toModernName,
+          // Calculated, not recorded: the leg's geometry is an endpoint pair,
+          // so this is the straight line between the two places.
+          straightLineMetres: Math.round(road.straightLineMetres),
         },
       })),
     ],

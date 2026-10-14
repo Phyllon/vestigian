@@ -3,7 +3,7 @@ import { openMap, openOverlays, openPeriods, showSites, toggleOverlay } from './
 
 /**
  * The reference layers added with Itiner-e, Nomisma, the Wikidata monuments,
- * I.Sicily, the Atlas of Hillforts and Cliopatria. Each is a third party's data under its own licence, so
+ * I.Sicily, the Atlas of Hillforts, the road audit and Cliopatria. Each is a third party's data under its own licence, so
  * what is asserted here is the part that is a legal obligation as much as a feature:
  * the credit appears with the layer and leaves with it, and the one thing deliberately
  * left out (I.Sicily's photographs) stays out.
@@ -14,6 +14,7 @@ const OVERLAYS = [
   { label: 'Roman monuments', credit: 'Wikidata' },
   { label: 'Mints', credit: 'Nomisma' },
   { label: 'Hillforts', credit: 'Atlas of Hillforts' },
+  { label: 'Road audit', credit: 'calculated here from' },
 ]
 
 test.describe('the reference overlays', () => {

@@ -82,6 +82,8 @@ describe('every raw-SQL tile builder refuses a non-integer coordinate', () => {
       buildReferenceTileSql({ layer: 'roman-roads', tile: bad, simplifyTolerance: 10 }),
     'buildReferenceTileSql (mints)': (bad) =>
       buildReferenceTileSql({ layer: 'mints', tile: bad, simplifyTolerance: 10 }),
+    'buildReferenceTileSql (road audit)': (bad) =>
+      buildReferenceTileSql({ layer: 'road-audit', tile: bad, simplifyTolerance: 10 }),
     buildPortTileSql,
     buildBattleTileSql,
     buildRouteTileSql,

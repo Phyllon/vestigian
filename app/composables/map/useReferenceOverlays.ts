@@ -17,6 +17,7 @@ import {
   MAP_LABEL_FONT,
   MINT_ATTRIBUTION,
   MONUMENT_ATTRIBUTION,
+  ROAD_AUDIT_ATTRIBUTION,
   ROMAN_ROAD_ATTRIBUTION,
 } from './useBasemapStyle'
 import { escapeHtmlForPopup } from './popupHtml'
@@ -30,6 +31,12 @@ import {
   monumentIconId,
 } from './useSiteIcons'
 import { formatPeriod } from '../data/useSiteQuery'
+import {
+  ROAD_AUDIT_BUFFER_METRES,
+  ROAD_AUDIT_GRADIENT_WINDOW_METRES,
+  ROAD_AUDIT_STEEP_GRADIENT_PERCENT,
+  ROAD_GAP_DISTANCE_METRES,
+} from '#shared/utils/road-audit'
 
 /**
  * The five reference overlays that share one tile endpoint — Itiner-e roads,
@@ -40,7 +47,11 @@ import { formatPeriod } from '../data/useSiteQuery'
  * and its siblings wrote out by hand.
  */
 
-export type ReferencePopupTranslate = (key: string, named?: Record<string, unknown>) => string
+export type ReferencePopupTranslate = (
+  key: string,
+  named?: Record<string, unknown>,
+  plural?: number,
+) => string
 
 export interface ReferenceOverlayDefinition {
   id: ReferenceOverlayId
@@ -53,6 +64,11 @@ export interface ReferenceOverlayDefinition {
   buildPopupHtml: (properties: Record<string, unknown>, t: ReferencePopupTranslate) => string
   /** Where a popup's own link goes inside the app, so it navigates without a reload. */
   internalPath?: (properties: Record<string, unknown>) => string | null
+  /**
+   * True when another overlay's popup answers this click better — the road
+   * audit's does, over the same line, and two popups would otherwise race.
+   */
+  isAnsweredElsewhere?: (map: MapLibreMap, event: MapLayerMouseEvent) => boolean
   /**
    * Whose records these are, for the "about this spot" block. Absent for a layer
    * whose features are lines (the roads): a line has no coordinate of its own.
@@ -469,6 +485,214 @@ export const buildHillfortPopupHtml = (
   return lines.join('<br>')
 }
 
+// --- The road audit -----------------------------------------------------------
+
+export const ROAD_AUDIT_SOURCE_ID = 'road-audit'
+export const ROAD_AUDIT_LAYER_IDS = {
+  casing: 'vestigian-road-audit-casing',
+  steep: 'vestigian-road-audit-steep',
+  supported: 'vestigian-road-audit-supported',
+  hit: 'vestigian-road-audit-hit',
+  gaps: 'vestigian-road-audit-gaps',
+} as const
+
+/** Verdigris is this app's colour for a confirmed state; here, a road something stands beside. */
+const AUDIT_SUPPORTED_INK = '#3d6b5c'
+const AUDIT_STEEP_INK = '#2b2621'
+const AUDIT_GAP_INK = '#5d5237'
+const AUDIT_CASING = '#faf7ef'
+
+/**
+ * Three things drawn over Itiner-e's own lines, none of them a verdict:
+ *
+ * - a verdigris line where a milestone or road record stands within the buffer;
+ * - a dark, dotted line where the steepest stretch passes the calibrated
+ *   threshold — dotted rather than a colour of its own, because the supported
+ *   colour must not be read as "good" and this as "bad";
+ * - a bronze ring at each milestone far from every road.
+ *
+ * A wide, invisible line takes the click, because the drawn ones are 1.5–3 px.
+ * The tile carries only the segments one of the first two applies to; the rest
+ * are Itiner-e's own, drawn by `roman-roads`.
+ */
+export const buildRoadAuditLayers = (): LayerSpecification[] => {
+  const width: ExpressionSpecification = ['interpolate', ['linear'], ['zoom'], 3, 1.2, 10, 3]
+  const casingWidth: ExpressionSpecification = [
+    'interpolate',
+    ['linear'],
+    ['zoom'],
+    3,
+    2.6,
+    10,
+    5.2,
+  ]
+
+  return [
+    {
+      id: ROAD_AUDIT_LAYER_IDS.casing,
+      type: 'line',
+      source: ROAD_AUDIT_SOURCE_ID,
+      'source-layer': 'audit_segments',
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: { 'line-color': AUDIT_CASING, 'line-opacity': 0.8, 'line-width': casingWidth },
+    },
+    {
+      id: ROAD_AUDIT_LAYER_IDS.steep,
+      type: 'line',
+      source: ROAD_AUDIT_SOURCE_ID,
+      'source-layer': 'audit_segments',
+      filter: ['==', ['get', 'is_steep'], true],
+      layout: { 'line-cap': 'butt', 'line-join': 'round' },
+      paint: {
+        'line-color': AUDIT_STEEP_INK,
+        'line-width': ['interpolate', ['linear'], ['zoom'], 3, 2.2, 10, 4.6],
+        'line-dasharray': [0.6, 1.6],
+      },
+    },
+    {
+      id: ROAD_AUDIT_LAYER_IDS.supported,
+      type: 'line',
+      source: ROAD_AUDIT_SOURCE_ID,
+      'source-layer': 'audit_segments',
+      filter: ['==', ['get', 'is_supported'], true],
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: { 'line-color': AUDIT_SUPPORTED_INK, 'line-width': width },
+    },
+    {
+      id: ROAD_AUDIT_LAYER_IDS.hit,
+      type: 'line',
+      source: ROAD_AUDIT_SOURCE_ID,
+      'source-layer': 'audit_segments',
+      layout: { 'line-cap': 'round' },
+      paint: { 'line-color': AUDIT_SUPPORTED_INK, 'line-opacity': 0, 'line-width': 16 },
+    },
+    {
+      id: ROAD_AUDIT_LAYER_IDS.gaps,
+      type: 'circle',
+      source: ROAD_AUDIT_SOURCE_ID,
+      'source-layer': 'audit_gaps',
+      paint: {
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 3, 10, 6],
+        'circle-color': AUDIT_CASING,
+        'circle-opacity': 0.9,
+        'circle-stroke-color': AUDIT_GAP_INK,
+        'circle-stroke-width': 2,
+      },
+    },
+  ]
+}
+
+const EDH_ID_PATTERN = /^HD\d{1,8}$/
+const SITE_SLUG_PATTERN = /^[\w.-]{1,160}$/
+
+/** Where a gap's own link goes inside the app; a segment has none. */
+export const roadAuditPath = (properties: Record<string, unknown>): string | null => {
+  const key = text(properties.source_key)
+  if (text(properties.source) === 'edh' && EDH_ID_PATTERN.test(key)) return `/inscriptions/${key}`
+  if (text(properties.source) === 'vici' && SITE_SLUG_PATTERN.test(key)) {
+    return `/site/${encodeURIComponent(key)}`
+  }
+  return null
+}
+
+const countOf = (value: unknown): number => numberOrNull(value) ?? 0
+
+const buildRoadAuditSegmentHtml = (
+  properties: Record<string, unknown>,
+  t: ReferencePopupTranslate,
+): string => {
+  const certainty = text(properties.certainty)
+  const name = text(properties.name) || t('referencePopup.road.unnamed')
+  const lines = [`<strong>${escapeHtmlForPopup(name)}</strong>`]
+
+  if (certainty === 'conjectured' || certainty === 'hypothetical') {
+    lines.push(escapeHtmlForPopup(t(`referencePopup.road.certainty.${certainty}`)))
+  }
+
+  const edh = countOf(properties.edh_milestones)
+  const vici = countOf(properties.vici_milestones)
+  const sites = countOf(properties.vici_road_sites)
+  const near: string[] = []
+  if (edh > 0) near.push(t('roadAudit.edhMilestones', { n: edh }, edh))
+  if (vici > 0) near.push(t('roadAudit.viciMilestones', { n: vici }, vici))
+  if (sites > 0) near.push(t('roadAudit.viciRoadSites', { n: sites }, sites))
+
+  if (near.length > 0) {
+    lines.push(
+      escapeHtmlForPopup(
+        t('roadAudit.within', { metres: ROAD_AUDIT_BUFFER_METRES, list: near.join(' · ') }),
+      ),
+    )
+  } else {
+    lines.push(escapeHtmlForPopup(t('roadAudit.nothingNear', { metres: ROAD_AUDIT_BUFFER_METRES })))
+  }
+
+  const ends = countOf(properties.certain_ends)
+  if (ends > 0) lines.push(escapeHtmlForPopup(t('roadAudit.certainEnds', { n: ends }, ends)))
+
+  const gradient = numberOrNull(properties.steepest_gradient_percent)
+  if (gradient !== null) {
+    lines.push(
+      escapeHtmlForPopup(
+        t('roadAudit.gradient', {
+          percent: gradient.toFixed(1),
+          metres: ROAD_AUDIT_GRADIENT_WINDOW_METRES,
+        }),
+      ),
+    )
+    if (properties.is_steep === true) {
+      lines.push(
+        escapeHtmlForPopup(
+          t('roadAudit.steep', {
+            percent: ROAD_AUDIT_STEEP_GRADIENT_PERCENT,
+          }),
+        ),
+      )
+    }
+  }
+
+  lines.push(`<em>${escapeHtmlForPopup(t('roadAudit.caveat'))}</em>`)
+  return lines.join('<br>')
+}
+
+const buildRoadAuditGapHtml = (
+  properties: Record<string, unknown>,
+  t: ReferencePopupTranslate,
+): string => {
+  const lines = [`<strong>${escapeHtmlForPopup(text(properties.title))}</strong>`]
+  const source = text(properties.source) === 'edh' ? 'edh' : 'vici'
+  lines.push(escapeHtmlForPopup(t(`roadAudit.gapSource.${source}`)))
+
+  const metres = numberOrNull(properties.nearest_road_metres)
+  if (metres === null) {
+    lines.push(escapeHtmlForPopup(t('roadAudit.gapNoRoad')))
+  } else {
+    lines.push(
+      escapeHtmlForPopup(t('roadAudit.gapNearest', { kilometres: (metres / 1000).toFixed(1) })),
+    )
+  }
+
+  const path = roadAuditPath(properties)
+  if (path) {
+    lines.push(
+      `<a href="${escapeHtmlForPopup(path)}">${escapeHtmlForPopup(t('roadAudit.gapOpen'))} →</a>`,
+    )
+  }
+  lines.push(
+    `<em>${escapeHtmlForPopup(t('roadAudit.gapCaveat', { metres: ROAD_GAP_DISTANCE_METRES }))}</em>`,
+  )
+  return lines.join('<br>')
+}
+
+/** A gap carries `source`; a segment never does — that is the whole difference between the two. */
+export const buildRoadAuditPopupHtml = (
+  properties: Record<string, unknown>,
+  t: ReferencePopupTranslate,
+): string =>
+  text(properties.source).length > 0
+    ? buildRoadAuditGapHtml(properties, t)
+    : buildRoadAuditSegmentHtml(properties, t)
+
 // --- the definitions ----------------------------------------------------------
 
 export const REFERENCE_OVERLAY_DEFINITIONS: Record<ReferenceOverlayId, ReferenceOverlayDefinition> =
@@ -484,6 +708,10 @@ export const REFERENCE_OVERLAY_DEFINITIONS: Record<ReferenceOverlayId, Reference
         ROMAN_ROAD_LAYER_IDS.hypothetical,
       ],
       buildPopupHtml: buildRomanRoadPopupHtml,
+      // The audit's popup is the road's own record plus what stands beside it.
+      isAnsweredElsewhere: (map, event) =>
+        map.getLayer(ROAD_AUDIT_LAYER_IDS.hit) !== undefined &&
+        map.queryRenderedFeatures(event.point, { layers: [ROAD_AUDIT_LAYER_IDS.hit] }).length > 0,
     },
     mints: {
       id: 'mints',
@@ -522,6 +750,15 @@ export const REFERENCE_OVERLAY_DEFINITIONS: Record<ReferenceOverlayId, Reference
       buildPopupHtml: buildHillfortPopupHtml,
       spotSourceId: 'hillforts-atlas',
     },
+    'road-audit': {
+      id: 'road-audit',
+      sourceId: ROAD_AUDIT_SOURCE_ID,
+      attribution: ROAD_AUDIT_ATTRIBUTION,
+      buildLayers: buildRoadAuditLayers,
+      clickableLayerIds: [ROAD_AUDIT_LAYER_IDS.hit, ROAD_AUDIT_LAYER_IDS.gaps],
+      buildPopupHtml: buildRoadAuditPopupHtml,
+      internalPath: roadAuditPath,
+    },
   }
 
 export const useReferenceOverlays = () => {
@@ -536,6 +773,7 @@ export const useReferenceOverlays = () => {
   ): void => {
     const feature = event.features?.[0]
     if (!feature) return
+    if (definition.isAnsweredElsewhere?.(map, event)) return
 
     const properties = feature.properties as Record<string, unknown>
     const isPoint = feature.geometry.type === 'Point'

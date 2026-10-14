@@ -189,7 +189,8 @@ const main = async (): Promise<void> => {
     return
   }
 
-  await sql`TRUNCATE antiquity_roman_roads RESTART IDENTITY`
+  // The audit is keyed by road id, which RESTART IDENTITY reassigns — see `road-audit.ts`.
+  await sql`TRUNCATE antiquity_roman_roads, road_audit_segments RESTART IDENTITY`
   for (let start = 0; start < rows.length; start += BATCH_SIZE) {
     await insertBatch(rows.slice(start, start + BATCH_SIZE))
     if ((start / BATCH_SIZE) % 10 === 9) console.log(`· roads ${start + BATCH_SIZE}/${rows.length}`)

@@ -4,6 +4,8 @@ paths:
   - 'app/components/tabula-peutingeriana/**'
   - 'scripts/import/10-tabula-peutingeriana.ts'
   - 'server/api/tabula-peutingeriana/**'
+  - 'app/composables/map/useTabulaPeutingerianaOverlay.ts'
+  - 'shared/utils/tabula-distance.ts'
 ---
 
 ## The Tabula Peutingeriana — a viewer, not a sixth basemap
@@ -213,3 +215,34 @@ share an `@id`** — two distance readings filed under the same generated
 from/to id, since the id carries no reading-variant suffix. `source_id` is
 this table's own unique key, so `parseRoads` deduplicates, keeping whichever
 reading actually carries a distance.
+
+## The overlay's roads open a popup — miles, crossings and a calculated straight line (2026-10-14)
+
+Until now the network shipped `distanceRomanMiles`, `crossesMountains`,
+`crossesRiver` and `overWater` to the browser and drew none of them — only
+`isReconstructed` (a dash) was read, and the overlay had no click handler at
+all. A road now opens an info box (`buildTabulaRoadPopupHtml`, through
+`openOverlayPopup` like every other overlay): both places by their classical
+name with the modern one beside it, the stated Roman miles with their length
+in kilometres, the straight line between the two places, the crossings, and
+the reconstructed flag. Strings are `tabulaPopup.*`, six locales.
+
+- **The straight line is calculated, and says so.** `straightLineMetres` is
+  `ST_Length(geom::geography)` in `network.geojson`; the leg's geometry is an
+  endpoint pair, so it is the line between the places and nothing about the
+  road. A road is longer than that line, so a stated figure over it is the
+  ordinary case and gets a neutral note. **Only a figure more than 10% under
+  the line is flagged** (`shorterThanLine`, `SHORTER_THAN_LINE_TOLERANCE`) —
+  a road cannot be shorter, so the figure or a location is off, and the box
+  does not say which. Arithmetic in `shared/utils/tabula-distance.ts`; the mile
+  is `ROMAN_MILE_METRES = 1480`.
+- **A transparent 16 px line layer carries the click**, under the drawn road
+  (1.4–3 px, not hittable with a finger). Listeners go through
+  `bindOverlayListenersOnce`, as every overlay's must.
+- **The place dots are still not clickable.** `symbol` (the manuscript's
+  drawing-symbol code) is imported and still shown nowhere; it is the one
+  unused column left on this dataset.
+- **Measured against Itiner-e, not built** (dev DB, 2,397 legs, 14 Oct 2026):
+  see `documents/cross-data-feature-plan.md` B2. Nothing from that is in the
+  popup; a measured road length belongs there only once it can carry its
+  certainty share.

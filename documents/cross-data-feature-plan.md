@@ -1,7 +1,7 @@
 # Cross-data features — plan for a fresh session
 
 Written 2026-10-14 after a brainstorm on what the imported datasets can answer
-together, in the way the limes tower sightlines do. **A is built (14 Oct 2026);
+together, in the way the limes tower sightlines do. **A, B1 and C are built (14 Oct 2026);
 the rest is not.**
 Schema columns were checked against `server/database/schema/`; row quality and
 match rates were **not** measured — each item says what to measure first.
@@ -108,7 +108,58 @@ an established open-source package first (project rule), then ask.
 
 ---
 
+### B1 built; B2 measured, not built (14 Oct 2026)
+
+**B1** is the Tabula road popup (stated miles → km, the calculated straight
+line, crossings, reconstructed flag) — see `.claude/rules/tabula-peutingeriana.md`.
+It needs no road network. Of 2,397 legs, 1,105 (46%) sit within −20%/+25% of
+stated × 1,480 m against that line; the straight line is a lower bound.
+
+**B2 measurements** (throwaway Dijkstra over every vertex of
+`antiquity_roman_roads`, nodes rounded to ~11 m; endpoints snapped to the
+nearest vertex; **the script was not kept**):
+
+|                                                              | legs                                               |
+| ------------------------------------------------------------ | -------------------------------------------------- |
+| both places within 5 km of the network                       | 2,111 (88%); within 1 km: 1,445 (60%)              |
+| a path exists between the snapped nodes                      | 2,086 (87%)                                        |
+| path at least half `certain`                                 | **105 (4.4%)**                                     |
+| path length by certainty                                     | 5.5% certain, 93.7% conjectured, 0.8% hypothetical |
+| with a figure, not reconstructed, not over water, path found | 1,931                                              |
+| …of those, path / stated miles, median                       | 1.15 (47% within 0.8–1.25)                         |
+| …the 99 whose path is mostly certain, median                 | 1.07                                               |
+
+Read as: the network connects and snaps well enough to measure, but almost
+nothing it measures along is road the dataset itself calls certain, so the
+headline must be the smaller claim the plan already names. A 5 km snap
+tolerance on a median 24 km leg is large; a build would need to report snap
+distance and drop or flag legs beyond ~2 km (1,850 legs pass at 2 km).
+**No pgRouting needed:** the whole graph (995k nodes) solves 2,400 legs in
+under 4 s in plain Node, so B2 would be a script that writes a table, not an
+extension in the Postgres image.
+
+**ORBIS does not raise certainty.** Matching ORBIS road edges to Itiner-e was
+measured: 37% of ORBIS road length (627 edges, 60,186 km) lies within ~500 m
+of Itiner-e, only 3% within 500 m of `certain` segments — but 88% lies within
+~500 m of Barrington roads (`antiquity_lines`, kind `road`), and 77–83% of
+Itiner-e segments touch a Barrington road too. Proximity is not proof of
+derivation, but the two share a base, so agreement between them is not
+independent corroboration. Not verified: ORBIS's own documentation of how its
+roads were drawn.
+
 ## C. Conjectured-road plausibility audit
+
+**Built 14 Oct 2026** — see `.claude/rules/road-audit.md` for what was counted,
+every parameter and why, and what was left out (river crossings: no river
+geometry in the database; Tabula legs: endpoint pairs behind an operator switch).
+Measured first, as asked: only 160 of 1,683 EDH milestones are located; with
+vici.org's 1,003 there are 1,163, of which 73% lie within 1 km of an Itiner-e
+road and 5 EDH ones within 500 m of a `certain` segment. 1,209 of 13,729
+conjectured or hypothetical segments have a milestone or road record within
+300 m; 376 milestones are farther than 1 km from every road. On a 54 m terrain
+model even surveyed roads read 24% at the 95th percentile of their steepest
+250 m, so the steep threshold is that distribution's 99th (36%), not a number.
+The original brief follows.
 
 **Question.** Which conjectured/hypothetical Itiner-e segments look wrong, and
 which have independent support?

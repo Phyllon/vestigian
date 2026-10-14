@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { ROAD_AUDIT_STEEP_GRADIENT_PERCENT } from '#shared/utils/road-audit'
 import {
   ROAD_SECONDARY_MINIMUM_ZOOM,
   buildPolityCacheKey,
@@ -11,8 +12,8 @@ import {
 const tile = { z: 8, x: 134, y: 86 }
 
 describe('isReferenceLayerId', () => {
-  it('accepts the four layers and nothing else', () => {
-    for (const id of ['roman-roads', 'mints', 'monuments', 'isicily', 'hillforts']) {
+  it('accepts the six layers and nothing else', () => {
+    for (const id of ['roman-roads', 'mints', 'monuments', 'isicily', 'hillforts', 'road-audit']) {
       expect(isReferenceLayerId(id)).toBe(true)
     }
     // The path segment is user input; it must never reach a table name unchecked.
@@ -88,6 +89,36 @@ describe('buildReferenceTileSql', () => {
 
   it('links an I.Sicily mark by its stable identifier, not the serial id', () => {
     expect(sqlFor('isicily')).toContain('isicily_inscriptions.isicily_id')
+  })
+})
+
+describe('buildReferenceTileSql — road audit', () => {
+  const sql = buildReferenceTileSql({ layer: 'road-audit', tile, simplifyTolerance: 100 })
+
+  it('carries a segment and a gap layer in one tile', () => {
+    expect(sql).toContain("'audit_segments'")
+    expect(sql).toContain("'audit_gaps'")
+    expect(sql).toContain(' || ')
+  })
+
+  it('filters in 4326 against the envelope, like every other layer', () => {
+    expect(sql).toContain('road.geom && b.env_wgs')
+    expect(sql).toContain('road_audit_gaps.geom && b.env_wgs')
+  })
+
+  it('draws only the segments there is something to say about', () => {
+    // 91% of segments have neither a find nearby nor a steep stretch; `roman-roads` already draws them.
+    expect(sql).toMatch(
+      /audit\.edh_milestones \+ audit\.vici_milestones \+ audit\.vici_road_sites > 0\s+OR audit\.steepest_gradient_percent >= \d/,
+    )
+  })
+
+  it('states the steep threshold from the one constant, so the style and the tile agree', () => {
+    expect(sql).toContain(`>= ${ROAD_AUDIT_STEEP_GRADIENT_PERCENT}`)
+  })
+
+  it('never reads a certain segment: surveyed roads have no audit row', () => {
+    expect(sql).toContain('FROM road_audit_segments audit')
   })
 })
 

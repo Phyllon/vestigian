@@ -1,7 +1,8 @@
 /**
- * The four overlays that share one tile endpoint (`/api/tiles/reference/:layer`):
+ * The overlays that share one tile endpoint (`/api/tiles/reference/:layer`):
  * Itiner-e Roman roads, Nomisma mints, the Wikidata monuments, I.Sicily
- * inscriptions and the Atlas of Hillforts. One list, read by both the server (which validates the path
+ * inscriptions, the Atlas of Hillforts and the road audit (a calculated reading
+ * of Itiner-e against the atlas's other records). One list, read by both the server (which validates the path
  * segment against it) and the interface (which keeps one switch per entry), so
  * a layer cannot exist on one side only.
  */
@@ -11,6 +12,7 @@ export const REFERENCE_OVERLAY_IDS = [
   'monuments',
   'isicily',
   'hillforts',
+  'road-audit',
 ] as const
 
 export type ReferenceOverlayId = (typeof REFERENCE_OVERLAY_IDS)[number]

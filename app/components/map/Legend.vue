@@ -605,6 +605,45 @@
         </template>
 
         <!--
+          The road audit draws over Itiner-e's own lines, so its key says what
+          each of the three additions is and — in the same breath — that none of
+          them is a grade: the supported colour is not "good", the dotted line
+          not "bad".
+        -->
+        <template v-if="isShowingReferenceOverlay('road-audit')">
+          <h2 class="eyebrow mb-2 mt-3 border-t border-paper-300 pt-2.5 dark:border-night-600">
+            {{ t('legend.roadAuditTitle') }}
+          </h2>
+
+          <ul class="flex flex-col gap-1.5">
+            <li class="flex items-center gap-2">
+              <svg class="h-2 w-8 shrink-0" viewBox="0 0 32 8" aria-hidden="true">
+                <path d="M0 4h32" stroke="#3d6b5c" stroke-width="2.4" stroke-linecap="round" />
+              </svg>
+              <span class="text-xs text-ink-700 dark:text-paper-200">
+                {{ t('legend.roadAuditSupported') }}
+              </span>
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="h-2 w-8 shrink-0" viewBox="0 0 32 8" aria-hidden="true">
+                <path d="M0 4h32" stroke="#2b2621" stroke-width="3" stroke-dasharray="1 3" />
+              </svg>
+              <span class="text-xs text-ink-700 dark:text-paper-200">
+                {{ t('legend.roadAuditSteep') }}
+              </span>
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="size-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="5" fill="#faf7ef" stroke="#5d5237" stroke-width="2" />
+              </svg>
+              <span class="text-xs text-ink-700 dark:text-paper-200">
+                {{ t('legend.roadAuditGap') }}
+              </span>
+            </li>
+          </ul>
+        </template>
+
+        <!--
           Monuments carry a mark per kind, so the key lists every one. Marks the atlas
           already draws elsewhere (villa, temple, fort, bridge, aqueduct) are the same
           glyphs; see `MONUMENT_ICON_GLYPHS`.
