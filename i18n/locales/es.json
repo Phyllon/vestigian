@@ -1059,7 +1059,21 @@
     "basis": "Calculado el {date} a partir de {count} torres registradas ({folded} registros gemelos fusionados). Es un cálculo sobre el mismo terreno y las mismas estimaciones de altura que la vista de cada torre, y trata de las torres registradas: donde no hay ninguna, la línea no está documentada, no desvigilada.",
     "gaps": "{count} tramos entre torres vecinas superan {range} km: huecos en los registros, no probados.",
     "headlineNoChain": "Constan {count} torres; {seen} de la línea a su alcance está vigilada.",
-    "chainSparse": "Aquí no hay dos torres vecinas registradas a menos de {range} km una de otra, así que no hay cadena que leer: los registros son demasiado escasos para decir si una señal podía pasar."
+    "chainSparse": "Aquí no hay dos torres vecinas registradas a menos de {range} km una de otra, así que no hay cadena que leer: los registros son demasiado escasos para decir si una señal podía pasar.",
+    "spacingHeading": "¿Tan separadas como el terreno permitía?",
+    "spacingBody": "Las torres vecinas distan entre sí una mediana de {length}. Desde el mismo puesto, una torre de la misma altura habría podido alzarse a {reach} y seguir siendo vista; están a {ratio} de eso ({low} si las torres eran más bajas, {high} si más altas).",
+    "spacingFew": "Aquí solo se pudieron leer {count} pares vecinos, demasiado pocos para decir cómo se sitúan las torres respecto al terreno.",
+    "spacingChartLabel": "Torres vecinas según la parte de su alcance a la que se encuentran, en décimas de 0 a 100 %",
+    "spacingBinItem": "{from} a {to}: {count} pares",
+    "spacingChartLow": "mucho más cerca de lo necesario",
+    "spacingChartHigh": "tan lejos como el terreno permitía",
+    "spacingOutOfSight": "{count} de {total} pares vecinos no podían verse a la altura media: más separados de lo que el terreno permite.",
+    "spacingCapped": "En {count} pares el terreno quedó despejado hasta el límite de {range} del cálculo, así que su alcance es un mínimo y su proporción un techo.",
+    "spacingDropped": "Se dejaron fuera {count} pares vecinos: no se pudo leer el terreno bajo ellos, o los dos registros distan menos de {range} y son un solo puesto.",
+    "spacingNearestHeading": "Más cerca de su límite:",
+    "spacingFarthestHeading": "Mucho más juntas de lo necesario:",
+    "spacingItem": "{from} a {to} — a {length} una de otra, {share} de un alcance de {reach}",
+    "spacingMeaning": "Una proporción cercana al 100 % encaja con torres colocadas para transmitir una señal a la mayor distancia, pero no lo demuestra. Una torre en una cresta o un borde, como la mayoría, se halla cerca del final de lo que ve simplemente porque el terreno cae tras ella; los puestos también se alzan donde había una calzada, un manantial o un paso; y una proporción baja es tan compatible con la cobertura mutua del terreno entre ellas como con el descuido. El alcance se mide a lo largo de la línea entre dos torres, sobre el terreno actual, con un único modelo de altura."
   },
   "tracingDetail": {
     "area": "Zona",
@@ -2047,6 +2061,15 @@
           "sites": "Activa la capa de sitios, para que se dibujen las torres.",
           "record": "Abre {record}, una torre de vigilancia del limes de Germania Superior.",
           "view": "Lleva el mapa a su icono y dibuja la vista calculada a partir del terreno que la rodea."
+        }
+      },
+      "sectorWatch": {
+        "title": "Lo que las torres de una frontera hacían juntas",
+        "summary": "Una torre de vigilancia es una vista; las torres registradas de un sector fronterizo son un sistema. Abra un sector y el atlas hace tres preguntas a sus torres en conjunto: si una señal podía pasar de torre en torre a lo largo de la línea, si el terreno contiguo está vigilado y si las torres se situaron tan separadas como el terreno permitía. Puede dibujar la cadena y el terreno visto en el mapa. Es un cálculo sobre las torres registradas, y el panel dice qué supone.",
+        "steps": {
+          "frontier": "Activa la línea de la frontera, para que se dibujen los sectores.",
+          "sector": "Abre el sector «{record}» en el panel de la frontera y lleva el mapa hasta él.",
+          "watch": "Despliega «Vigilar la frontera», con el interruptor que dibuja la cadena y el terreno en el mapa arriba del todo."
         }
       }
     }

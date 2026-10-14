@@ -1287,7 +1287,21 @@
     "basis": "Worked out {date} from {count} recorded towers ({folded} twin records folded). It is a calculation over the same terrain and height estimates as each tower’s own view, and it concerns the towers that are recorded: where none is, the line is unrecorded rather than unwatched.",
     "gaps": "{count} stretches between neighbouring towers are longer than {range} km: gaps in the records, not tried.",
     "headlineNoChain": "{count} towers are recorded; {seen} of the line within their reach is overlooked.",
-    "chainSparse": "No two neighbouring towers recorded here are within {range} km of each other, so there is no chain to read: the records are too sparse to say whether a signal could pass."
+    "chainSparse": "No two neighbouring towers recorded here are within {range} km of each other, so there is no chain to read: the records are too sparse to say whether a signal could pass.",
+    "spacingHeading": "Spaced as far apart as the ground allowed?",
+    "spacingBody": "Neighbouring towers stand a median {length} apart. From the same post a tower of the same height could have stood {reach} away and still been seen; they stand at {ratio} of that ({low} if the towers were lower, {high} if taller).",
+    "spacingFew": "Only {count} neighbouring pairs could be read here, too few to say how the towers sit against the ground.",
+    "spacingChartLabel": "Neighbouring towers by the share of their reach they stand at, in tenths from 0 to 100 %",
+    "spacingBinItem": "{from} to {to}: {count} pairs",
+    "spacingChartLow": "far closer than needed",
+    "spacingChartHigh": "as far as the ground allowed",
+    "spacingOutOfSight": "{count} of {total} neighbouring pairs could not see each other at the middle height: set farther apart than the ground allows.",
+    "spacingCapped": "For {count} pairs the ground stayed open to the {range} limit of the calculation, so their reach is a minimum and their share a ceiling.",
+    "spacingDropped": "{count} neighbouring pairs were left out: the terrain under them could not be read, or the two records stand within {range} of each other and are one post.",
+    "spacingNearestHeading": "Standing closest to their limit:",
+    "spacingFarthestHeading": "Standing much closer than they needed:",
+    "spacingItem": "{from} to {to} — {length} apart, {share} of a {reach} reach",
+    "spacingMeaning": "A share near 100 % fits towers placed to pass a signal at the greatest span, but it does not prove it. A tower on a crest or a brow, as most are, stands near the end of what it can see simply because ground falls away behind it; posts also stand where a road, a spring or a crossing was; and a low share is as likely mutual cover of the ground between as carelessness. The reach is measured along the line between two towers, over today’s ground, with one height model."
   },
   "tracingDetail": {
     "area": "Area",
@@ -2047,6 +2061,15 @@
           "sites": "Switches on the sites layer, so the towers are drawn.",
           "record": "Opens {record}, a watchtower on the Upper German Limes.",
           "view": "Jumps the map to its icon and draws the view calculated from the ground around it."
+        }
+      },
+      "sectorWatch": {
+        "title": "What a frontier’s towers did together",
+        "summary": "One watchtower is a view; the recorded towers of a frontier sector are a system. Open a sector and the atlas asks three things of its towers taken together: could a signal pass from tower to tower along the line, is the ground beside it overlooked, and were the towers set as far apart as the ground allowed. It can draw the chain and the seen ground on the map. It is a calculation over the towers that are recorded, and the panel says what it assumes.",
+        "steps": {
+          "frontier": "Switches on the frontier line, so the sectors are drawn.",
+          "sector": "Opens the sector “{record}” in the frontier panel and moves the map to it.",
+          "watch": "Expands “Watching the frontier”, with the switch that draws the chain and the ground on the map at the top."
         }
       }
     }

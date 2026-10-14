@@ -9,13 +9,15 @@
  * if showing it needs a switch the example does not already flip — a line in
  * `useFeatureExample`. The page itself needs no change.
  */
-export const FEATURE_IDS = ['towerSightlines'] as const
+export const FEATURE_IDS = ['towerSightlines', 'sectorWatch'] as const
 export type FeatureId = (typeof FEATURE_IDS)[number]
 
 /** What the button turns on before it opens the example, named so the page can say so. */
-export type FeatureStepId = 'sites' | 'record' | 'view'
+export type FeatureStepId = 'sites' | 'record' | 'view' | 'frontier' | 'sector' | 'watch'
 
-export interface FeatureExample {
+/** An example that opens one record, by slug. */
+export interface SiteFeatureExample {
+  kind: 'site'
   /**
    * The record the example opens, by slug: ids are reassigned by a re-import,
    * slugs never change on edit. Resolved through `/api/sites/slug/:slug`.
@@ -26,6 +28,23 @@ export interface FeatureExample {
   /** How close the camera goes — close enough that the record's icon is the thing in view. */
   zoom: number
 }
+
+/** An example that opens one frontier sector in the frontier panel. */
+export interface SectorFeatureExample {
+  kind: 'sector'
+  /** The sector's slug, found in `/api/limes/sectors`; slugs are stable across `import:limes`. */
+  sectorSlug: string
+  /** The sector's own name, for the sentence that names it. */
+  sectorTitle: string
+  /** A zoom at which the sector's stretch fills a phone's width. */
+  zoom: number
+}
+
+export type FeatureExample = SiteFeatureExample | SectorFeatureExample
+
+/** What the sentence that names the example calls it. */
+export const featureExampleTitle = (example: FeatureExample): string =>
+  example.kind === 'site' ? example.siteTitle : example.sectorTitle
 
 export interface FeatureEntry {
   id: FeatureId
@@ -42,7 +61,20 @@ export const FEATURES: readonly FeatureEntry[] = [
     icon: 'i-lucide-eye',
     // A tower on the Upper German Limes, in the Taunus — the one the end-to-end
     // suite already reads. It is on a sector, so the calculation answers for it.
-    example: { siteSlug: 'turm-3-25', siteTitle: 'Turm 3-25', zoom: 15 },
+    example: { kind: 'site', siteSlug: 'turm-3-25', siteTitle: 'Turm 3-25', zoom: 15 },
     steps: ['sites', 'record', 'view'],
+  },
+  {
+    id: 'sectorWatch',
+    icon: 'i-lucide-radar',
+    // Bavaria, 55 recorded towers and the spacing reading — large enough to
+    // have a chain, breaks and blind stretches, small enough to build quickly.
+    example: {
+      kind: 'sector',
+      sectorSlug: 'limes-raeticus',
+      sectorTitle: 'Raetian Limes',
+      zoom: 8,
+    },
+    steps: ['frontier', 'sector', 'watch'],
   },
 ]

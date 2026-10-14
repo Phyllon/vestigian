@@ -1059,7 +1059,21 @@
     "basis": "Berekend op {date} uit {count} bekende torens ({folded} dubbele vermeldingen samengevoegd). Het is een berekening over hetzelfde terrein en dezelfde hoogteschattingen als het uitzicht van elke toren, en ze gaat over de bekende torens: waar er geen is, is de lijn niet vastgelegd, niet onbewaakt.",
     "gaps": "{count} stukken tussen naburige torens zijn langer dan {range} km: hiaten in de gegevens, niet geprobeerd.",
     "headlineNoChain": "Er zijn {count} torens bekend; {seen} van de lijn binnen hun bereik wordt overzien.",
-    "chainSparse": "Geen twee naburige torens liggen hier binnen {range} km van elkaar, dus er is geen keten om te lezen: de gegevens zijn te schaars om te zeggen of een signaal kon doorgeven."
+    "chainSparse": "Geen twee naburige torens liggen hier binnen {range} km van elkaar, dus er is geen keten om te lezen: de gegevens zijn te schaars om te zeggen of een signaal kon doorgeven.",
+    "spacingHeading": "Zo ver uit elkaar als het terrein toeliet?",
+    "spacingBody": "Naburige torens staan mediaan {length} van elkaar. Vanaf dezelfde post had een toren van dezelfde hoogte {reach} verder kunnen staan en toch gezien kunnen worden; ze staan op {ratio} daarvan ({low} als de torens lager waren, {high} als hoger).",
+    "spacingFew": "Hier konden slechts {count} naburige paren worden gelezen, te weinig om te zeggen hoe de torens zich tot het terrein verhouden.",
+    "spacingChartLabel": "Naburige torens naar het deel van hun bereik waarop ze staan, in tienden van 0 tot 100 %",
+    "spacingBinItem": "{from} tot {to}: {count} paren",
+    "spacingChartLow": "veel dichterbij dan nodig",
+    "spacingChartHigh": "zo ver als het terrein toeliet",
+    "spacingOutOfSight": "{count} van de {total} naburige paren konden elkaar op middelhoogte niet zien: verder uit elkaar gezet dan het terrein toelaat.",
+    "spacingCapped": "Bij {count} paren bleef het terrein open tot de grens van {range} van de berekening, dus hun bereik is een minimum en hun aandeel een plafond.",
+    "spacingDropped": "{count} naburige paren zijn weggelaten: het terrein eronder kon niet gelezen worden, of de twee records liggen binnen {range} van elkaar en zijn één post.",
+    "spacingNearestHeading": "Het dichtst bij hun grens:",
+    "spacingFarthestHeading": "Veel dichter bij elkaar dan nodig:",
+    "spacingItem": "{from} tot {to} — {length} uit elkaar, {share} van een bereik van {reach}",
+    "spacingMeaning": "Een aandeel dicht bij 100 % past bij torens die zijn geplaatst om een signaal over de grootste afstand door te geven, maar bewijst dat niet. Een toren op een kam of een rand, zoals de meeste, staat al dicht bij het einde van wat hij ziet doordat het terrein erachter afvalt; posten staan ook waar een weg, een bron of een oversteek was; en een laag aandeel past even goed bij onderlinge dekking van het terrein ertussen als bij slordigheid. Het bereik is gemeten langs de lijn tussen twee torens, over het huidige terrein, met één hoogtemodel."
   },
   "tracingDetail": {
     "area": "Gebied",
@@ -2047,6 +2061,15 @@
           "sites": "Zet de laag met vindplaatsen aan, zodat de torens getekend worden.",
           "record": "Opent {record}, een wachttoren op de Boven-Germaanse limes.",
           "view": "Springt naar het pictogram en tekent het zicht dat is berekend uit het omringende terrein."
+        }
+      },
+      "sectorWatch": {
+        "title": "Wat de torens van een grens samen deden",
+        "summary": "Eén wachttoren is een uitzicht; de vastgelegde torens van een grenssector vormen een stelsel. Open een sector en de atlas stelt zijn torens samen drie vragen: kon een signaal van toren naar toren langs de lijn gaan, wordt het terrein ernaast overzien, en stonden de torens zo ver uit elkaar als het terrein toeliet. De keten en het geziene terrein kunnen op de kaart worden getekend. Het is een berekening over de vastgelegde torens, en het paneel zegt wat het veronderstelt.",
+        "steps": {
+          "frontier": "Zet de grenslijn aan, zodat de sectoren getekend worden.",
+          "sector": "Opent de sector „{record}” in het grenspaneel en brengt de kaart erheen.",
+          "watch": "Klapt „De grens in het oog houden” open, met bovenaan de schakelaar die de keten en het terrein op de kaart tekent."
         }
       }
     }

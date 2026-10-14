@@ -46,8 +46,8 @@ shifts are a known pairing on iOS).
 ## The Features page
 
 `/features` (`app/pages/features.vue`), in the menu's first group and in `SITEMAP_STATIC_PATHS`.
-Entries are data (`shared/utils/features.ts`: id, icon, the example record's slug and title, camera
-zoom, the ordered `steps` the button performs); the words are `featuresPage.features.<id>.*` in six
+Entries are data (`shared/utils/features.ts`: id, icon, an `example` that is either a `site` (slug,
+title, zoom) or a `sector` (slug, title, zoom), the ordered `steps` the button performs); the words are `featuresPage.features.<id>.*` in six
 locales. Each card says what the feature is, **lists what the button will switch on before it is
 pressed**, and has one button (`useFeatureExample`):
 
@@ -61,7 +61,12 @@ pressed**, and has one button (`useFeatureExample`):
 
 The first entry is **what a watchtower could see**: `turm-3-25`, an Upper German Limes tower the
 e2e suite already reads. The calculated view needs no further switch — `TerrainTowerSightlines`
-draws it on the map by default once its panel is open. **Adding a feature** is a registry entry,
+draws it on the map by default once its panel is open. The second entry is **what a frontier's towers did together**: `limes-raeticus`, a `sector` example.
+Its button looks the sector up in `/api/limes/sectors` first (absent → `missing`, nothing changed),
+then `setLimesActive(true)`, `selectSector`, `requestSectorWatchOpen(slug)` and a camera request at
+the sector's bounds centre. `TerrainSectorWatch` is a closed `<details>` on the map, so the request
+(`useSectorWatchOpenRequest`, answered once and by slug) opens it; inside it the map switch is the
+first control, above the lead paragraph. **Adding a feature** is a registry entry,
 six catalogue entries, and a line in `useFeatureExample` if showing it needs a switch the example
 does not already flip. Verified: unit tests for the padding helper; the e2e spec
 (`e2e/features.spec.ts`) is written, not run. Not verified on a phone: that the icon lands in the

@@ -252,6 +252,67 @@ export interface SectorWatchBlind {
 }
 
 /**
+ * How far apart two neighbouring towers stand against how far apart they could
+ * have stood and still been in sight of each other, at each estimate of the
+ * height. See `readSpanReach` in `shared/utils/tower-spacing.ts`.
+ */
+export interface TowerSpacingPair {
+  fromSiteId: number
+  fromTitle: string
+  toSiteId: number
+  toTitle: string
+  position: LonLat
+  /** The distance the two towers actually stand apart. */
+  lengthMetres: number
+  /**
+   * The farthest along the same line from the first tower that a tower of the
+   * same height would still have been in sight, ground unbroken out to it.
+   * Shorter than `lengthMetres` when the two cannot see each other.
+   */
+  reachMetres: Record<SightlineVariant, number>
+  /** True where the reach ran to the end of the calculation, so it is "at least". */
+  isReachCapped: Record<SightlineVariant, boolean>
+  /** The middle estimate: could the two see each other at all? */
+  isInSight: boolean
+}
+
+export interface TowerSpacingBin {
+  /** Lower edge of the bin, as a ratio of actual spacing to reach; each bin is a tenth wide. */
+  fromRatio: number
+  count: number
+}
+
+/**
+ * The spacing of a sector's towers read against the ground. A ratio of 1 is
+ * towers standing as far apart as the ground allowed; 0.5 is half that. It says
+ * how the posts sit against the relief — it does not say why they sit there.
+ */
+export interface TowerSpacingSummary {
+  /** Neighbouring pairs (the chain's spanning edges within range). */
+  pairCount: number
+  /** Pairs read — the ones where the terrain under the line was available. */
+  readCount: number
+  /** Pairs left out: the terrain under the line was not available, or the two records are one post. */
+  droppedCount: number
+  /** False when too few pairs were read to say anything about the sector. */
+  isReadable: boolean
+  /** Median of actual spacing ÷ reach, at each estimate of the height. */
+  medianRatio: Record<SightlineVariant, number>
+  /** Pairs not in sight of each other at the middle estimate: spacing beyond the ground's allowance. */
+  outOfSightCount: number
+  /** Pairs whose reach ran to the end of the calculation at the middle estimate. */
+  cappedCount: number
+  /** Histogram of the middle-estimate ratio over the pairs in sight of each other; 1.0 falls in the last bin. */
+  bins: TowerSpacingBin[]
+  /** Pairs standing closest to their reach, then the farthest from it. */
+  nearestToLimit: TowerSpacingPair[]
+  farthestFromLimit: TowerSpacingPair[]
+  /** Median actual spacing and median reach at the middle estimate, in metres. */
+  medianLengthMetres: number
+  medianReachMetres: number
+}
+
+/**
  * What the towers of one frontier sector, taken together, could see — worked
  * out ahead of time by `pnpm sightlines:build` because it needs a viewshed from
  * every tower and a sight line between every pair near enough to try.
@@ -293,6 +354,8 @@ export interface SectorWatchSummary {
   lineSeenShare: number
   lineWatchedShare: number
   blindStretches: SectorWatchBlind[]
+  /** Absent on answers worked out before the spacing reading existed. */
+  spacing?: TowerSpacingSummary
   overlookedAreaSquareKm: number
   watchedAreaSquareKm: number
   towers: SectorWatchTower[]

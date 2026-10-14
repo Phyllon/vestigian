@@ -9,6 +9,7 @@ paths:
   - 'shared/utils/seen-grid.ts'
   - 'shared/utils/sightline-overlay.ts'
   - 'shared/utils/sector-watch.ts'
+  - 'shared/utils/tower-spacing.ts'
   - 'server/api/sites/[id]/sightlines.get.ts'
   - 'server/api/sites/[id]/sightlines/**'
   - 'server/api/tracings/[id]/profile.get.ts'
@@ -35,7 +36,7 @@ the interface says so before it says anything else (a "Calculated" tag; "How thi
 | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
 | `GET /api/sites/:id/sightlines`                   | the view from a limes watchtower's guard platform at three heights — unbroken, and everything seen — the reverse (where it is seen from), sight to nearby towers | `TerrainTowerSightlines` in the site panel and page       |
 | `GET /api/sites/:id/sightlines/ray?compass=`      | the ground along one of eight compass lines against the sentry's eyes: what hides what, and where ground returns                                                 | `TerrainRaySection`, under a chosen direction             |
-| `GET /api/limes/sectors/:slug/sightlines`         | a sector's towers together: the chain, the overlooked line, the breaks and blind stretches (**computed by a script**)                                            | `TerrainSectorWatch` in the limes panel and on `/limes/…` |
+| `GET /api/limes/sectors/:slug/sightlines`         | a sector's towers together: the chain, spacing against reach, the overlooked line, the breaks and blind stretches (**computed by a script**)                     | `TerrainSectorWatch` in the limes panel and on `/limes/…` |
 | `GET /api/limes/sectors/:slug/sightlines.geojson` | the ground, the blind stretches and the links, for the map                                                                                                       | the sector switch in `TerrainSectorWatch`                 |
 | `GET /api/tracings/:id/profile`                   | elevation against distance along a line, climb, fall, average and steepest slope                                                                                 | `TerrainTracingProfile` in the tracing panel and page     |
 
@@ -251,6 +252,29 @@ jsonb).
   least one tower" and "from three or more". The line itself is sampled every 100 m, **only where a
   tower could reach it** — beyond 10 km of every recorded tower it is _unrecorded_, not blind, and is
   left out of the shares. A stretch under 300 m is noise in the terrain model.
+
+- **Spacing against reach.** The same script reads, for each stretch of the chain, how much farther
+  along the same line a tower of the same height would still have been seen (`readSpanReach`,
+  `shared/utils/tower-spacing.ts`; summary field `spacing`, absent on rows built before it). One
+  `traceRay` per height estimate from the first tower along the bearing to the second, platform
+  height at both ends. **In sight:** the reach is the first sample not seen at or beyond the second
+  tower, never less than the span. **Not in sight:** the first sample not seen from the start (ratio
+  above 1). A hollow between two towers that see each other is not held against them. A ray that
+  ends on missing terrain claims nothing and the pair is counted as left out; one open to the 10 km
+  limit is `isReachCapped` ("at least"; its share is a ceiling and it is kept out of the "closest to
+  limit" list). **Records under `TOWER_SPACING_MINIMUM_SPAN_METRES` (100 m) are one post** — a
+  reconstruction stands 71 m from Turm 14-48 — and are left out like unreadable ones; the number is a
+  parameter, not a finding. Fewer than `TOWER_SPACING_MINIMUM_PAIRS` (5) read pairs and the panel
+  says so rather than printing a median.
+
+  **What a high share does not prove.** Medians sit at 75–90 % almost everywhere, and the cause is
+  as much geometry as intent: a tower on a crest or a brow has ground falling away behind it, so the
+  end of its unbroken view is a short way past it whether or not anyone planned the spacing. The
+  panel says so in `sectorWatch.spacingMeaning`. **No null model was run** (the same reading for
+  points on the same line at random, or for the sector's ridgeline) — until one is, the figure
+  describes how the posts sit against the relief and nothing about why. Medians of 0.75–0.90 across
+  the three large sectors, against 2.4 on the Dacian Limes (five of six recorded pairs cannot see
+  each other: the records are sparse), is the extent of what was measured (14 Oct 2026).
 
 - **A seam is two samples at one distance.** The sector's line is a MultiLineString of nineteen
   parts for the Raetian Limes, and the last sample of one part and the first of the next carry the

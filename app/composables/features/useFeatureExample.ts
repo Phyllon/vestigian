@@ -1,10 +1,10 @@
-import type { SiteDetail } from '#shared/types'
-import type { FeatureEntry } from '#shared/utils/features'
+import type { LimesSector, SiteDetail } from '#shared/types'
+import type { FeatureEntry, SectorFeatureExample, SiteFeatureExample } from '#shared/utils/features'
 
 export type FeatureExampleStatus = 'idle' | 'opening' | 'missing' | 'failed'
 
 /**
- * Opens a feature on a real record: switches on what has to be on to see it,
+ * Opens a feature on a real record (or, for a frontier feature, a real sector): switches on what has to be on to see it,
  * selects the record, asks the camera for its icon, and goes to the map.
  *
  * The order is the point. The record is fetched **first** and nothing is
@@ -20,21 +20,18 @@ export type FeatureExampleStatus = 'idle' | 'opening' | 'missing' | 'failed'
  * address a reader copies from here is one they can send.
  */
 export const useFeatureExample = () => {
-  const { setSitesActive } = useBasemapStyle()
+  const { setSitesActive, setLimesActive } = useBasemapStyle()
+  const { selectSector } = useLimes()
+  const { requestSectorWatchOpen } = useSectorWatchOpenRequest()
   const { selectSite } = useSiteQuery()
   const { requestFocus } = useMapFocus()
 
   const status = ref<FeatureExampleStatus>('idle')
 
-  const open = async (feature: FeatureEntry): Promise<void> => {
-    if (status.value === 'opening') return
-    status.value = 'opening'
-
+  const openSite = async (example: SiteFeatureExample): Promise<void> => {
     let site: SiteDetail
     try {
-      site = await $fetch<SiteDetail>(
-        `/api/sites/slug/${encodeURIComponent(feature.example.siteSlug)}`,
-      )
+      site = await $fetch<SiteDetail>(`/api/sites/slug/${encodeURIComponent(example.siteSlug)}`)
     } catch (error) {
       const statusCode = (error as { statusCode?: number }).statusCode
       status.value = statusCode === 404 ? 'missing' : 'failed'
@@ -42,7 +39,7 @@ export const useFeatureExample = () => {
     }
 
     const { lat, lon } = site.position
-    const { zoom } = feature.example
+    const { zoom } = example
 
     // Everything the feature needs to be visible. Each is the switch a reader
     // would reach by hand; none is persisted, so a reload returns to a clean map.
@@ -52,6 +49,48 @@ export const useFeatureExample = () => {
 
     await navigateTo(`/#map=${zoom.toFixed(2)}/${lat.toFixed(5)}/${lon.toFixed(5)}`)
     status.value = 'idle'
+  }
+
+  /**
+   * The sector is looked up in the list **before** anything is switched on, for
+   * the same reason a record is fetched first: a sector absent from this atlas
+   * (a database without `import:limes`) leaves the map as it was.
+   */
+  const openSector = async (example: SectorFeatureExample): Promise<void> => {
+    let sectors: LimesSector[]
+    try {
+      sectors = await $fetch<LimesSector[]>('/api/limes/sectors')
+    } catch {
+      status.value = 'failed'
+      return
+    }
+    const sector = sectors.find((entry) => entry.slug === example.sectorSlug)
+    if (!sector) {
+      status.value = 'missing'
+      return
+    }
+
+    const lat = (sector.bounds.north + sector.bounds.south) / 2
+    const lon = (sector.bounds.east + sector.bounds.west) / 2
+    const { zoom } = example
+
+    setLimesActive(true)
+    selectSector(sector.slug)
+    // The panel's own sector section is closed on the map; the example is about it.
+    requestSectorWatchOpen(sector.slug)
+    requestFocus({ center: { lat, lon }, zoom })
+
+    await navigateTo(`/#map=${zoom.toFixed(2)}/${lat.toFixed(5)}/${lon.toFixed(5)}`)
+    status.value = 'idle'
+  }
+
+  const open = async (feature: FeatureEntry): Promise<void> => {
+    if (status.value === 'opening') return
+    status.value = 'opening'
+
+    const { example } = feature
+    if (example.kind === 'site') await openSite(example)
+    else await openSector(example)
   }
 
   return { status: readonly(status), open }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import { FEATURES } from '#shared/utils/features'
+  import { FEATURES, featureExampleTitle } from '#shared/utils/features'
 
   /**
    * The things this atlas does that are easy to walk past, one entry each: what
@@ -85,7 +85,7 @@
             <li v-for="step in feature.steps" :key="step">
               {{
                 t(`featuresPage.features.${feature.id}.steps.${step}`, {
-                  record: feature.example.siteTitle,
+                  record: featureExampleTitle(feature.example),
                 })
               }}
             </li>

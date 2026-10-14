@@ -1059,7 +1059,21 @@
     "basis": "Berechnet am {date} aus {count} verzeichneten Türmen ({folded} Zwillingseinträge zusammengefasst). Es ist eine Rechnung über dasselbe Gelände und dieselben Höhenschätzungen wie die Sicht jedes einzelnen Turms, und sie betrifft die verzeichneten Türme: wo keiner verzeichnet ist, ist die Linie unerfasst, nicht unbewacht.",
     "gaps": "{count} Abschnitte zwischen benachbarten Türmen sind länger als {range} km: Lücken in den Daten, nicht geprüft.",
     "headlineNoChain": "{count} Türme sind verzeichnet; {seen} der Linie in ihrer Reichweite werden überblickt.",
-    "chainSparse": "Keine zwei benachbarten verzeichneten Türme liegen hier näher als {range} km beieinander; es gibt keine Kette zu lesen: die Daten sind zu lückenhaft, um zu sagen, ob ein Signal hätte laufen können."
+    "chainSparse": "Keine zwei benachbarten verzeichneten Türme liegen hier näher als {range} km beieinander; es gibt keine Kette zu lesen: die Daten sind zu lückenhaft, um zu sagen, ob ein Signal hätte laufen können.",
+    "spacingHeading": "So weit auseinander, wie das Gelände erlaubte?",
+    "spacingBody": "Benachbarte Türme stehen im Mittel {length} voneinander entfernt. Vom selben Posten aus hätte ein Turm gleicher Höhe {reach} entfernt stehen und noch gesehen werden können; sie stehen bei {ratio} davon ({low}, wenn die Türme niedriger waren, {high}, wenn höher).",
+    "spacingFew": "Hier konnten nur {count} benachbarte Paare gelesen werden, zu wenige, um zu sagen, wie die Türme zum Gelände stehen.",
+    "spacingChartLabel": "Benachbarte Türme nach dem Anteil ihrer Reichweite, bei dem sie stehen, in Zehnteln von 0 bis 100 %",
+    "spacingBinItem": "{from} bis {to}: {count} Paare",
+    "spacingChartLow": "weit näher als nötig",
+    "spacingChartHigh": "so weit, wie das Gelände erlaubte",
+    "spacingOutOfSight": "{count} von {total} benachbarten Paaren konnten einander in mittlerer Höhe nicht sehen: weiter auseinander gesetzt, als das Gelände zulässt.",
+    "spacingCapped": "Bei {count} Paaren blieb das Gelände bis zur Grenze der Berechnung von {range} offen; ihre Reichweite ist daher ein Mindestwert und ihr Anteil eine Obergrenze.",
+    "spacingDropped": "{count} benachbarte Paare wurden ausgelassen: das Gelände unter ihnen konnte nicht gelesen werden, oder die beiden Einträge liegen innerhalb von {range} und sind ein Posten.",
+    "spacingNearestHeading": "Am nächsten an ihrer Grenze:",
+    "spacingFarthestHeading": "Weit näher beieinander als nötig:",
+    "spacingItem": "{from} bis {to} — {length} auseinander, {share} einer Reichweite von {reach}",
+    "spacingMeaning": "Ein Anteil nahe 100 % passt zu Türmen, die für größte Signalweiten gesetzt wurden, beweist es aber nicht. Ein Turm auf einem Kamm oder einer Kante, wie die meisten, steht schon deshalb nahe am Ende seiner Sicht, weil das Gelände hinter ihm abfällt; Posten stehen auch dort, wo eine Straße, eine Quelle oder ein Übergang war; und ein niedriger Anteil spricht ebenso für gegenseitige Deckung des Geländes dazwischen wie für Nachlässigkeit. Die Reichweite wird entlang der Linie zwischen zwei Türmen gemessen, über dem heutigen Gelände, mit einem einzigen Höhenmodell."
   },
   "tracingDetail": {
     "area": "Fläche",
@@ -2047,6 +2061,15 @@
           "sites": "Schaltet die Fundstellen-Ebene ein, damit die Türme gezeichnet werden.",
           "record": "Öffnet {record}, einen Wachturm am Obergermanischen Limes.",
           "view": "Springt auf sein Zeichen und zeichnet die aus dem umgebenden Gelände berechnete Sicht ein."
+        }
+      },
+      "sectorWatch": {
+        "title": "Was die Türme einer Grenze gemeinsam leisteten",
+        "summary": "Ein Wachturm ist eine Aussicht; die verzeichneten Türme eines Grenzabschnitts sind ein System. Öffnen Sie einen Abschnitt, und der Atlas stellt seinen Türmen zusammen drei Fragen: ob ein Signal von Turm zu Turm entlang der Linie laufen konnte, ob das Gelände daneben überblickt wird und ob die Türme so weit auseinander standen, wie das Gelände erlaubte. Die Kette und das gesehene Gelände lassen sich auf der Karte zeichnen. Es ist eine Berechnung über die verzeichneten Türme, und das Bedienfeld sagt, was sie voraussetzt.",
+        "steps": {
+          "frontier": "Schaltet die Grenzlinie ein, damit die Abschnitte gezeichnet werden.",
+          "sector": "Öffnet den Abschnitt „{record}“ im Grenzbedienfeld und bewegt die Karte dorthin.",
+          "watch": "Klappt „Die Grenze im Blick“ auf, mit dem Schalter, der Kette und Gelände auf der Karte zeichnet, ganz oben."
         }
       }
     }

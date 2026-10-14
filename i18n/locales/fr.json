@@ -1059,7 +1059,21 @@
     "basis": "Calculé le {date} à partir de {count} tours recensées ({folded} doublons fusionnés). C’est un calcul sur le même terrain et les mêmes estimations de hauteur que la vue de chaque tour, et il porte sur les tours recensées : là où il n’y en a pas, la ligne est non documentée, non pas non surveillée.",
     "gaps": "{count} tronçons entre tours voisines dépassent {range} km : des lacunes dans les données, non testées.",
     "headlineNoChain": "{count} tours sont recensées ; {seen} de la ligne à leur portée est surveillée.",
-    "chainSparse": "Aucune paire de tours voisines recensées ici n’est à moins de {range} km : il n’y a pas de chaîne à lire, les données sont trop éparses pour dire si un signal pouvait passer."
+    "chainSparse": "Aucune paire de tours voisines recensées ici n’est à moins de {range} km : il n’y a pas de chaîne à lire, les données sont trop éparses pour dire si un signal pouvait passer.",
+    "spacingHeading": "Aussi espacées que le terrain le permettait ?",
+    "spacingBody": "Les tours voisines se tiennent à {length} de distance en médiane. Depuis le même poste, une tour de même hauteur aurait pu se dresser à {reach} et rester visible ; elles se tiennent à {ratio} de cette portée ({low} si les tours étaient plus basses, {high} si plus hautes).",
+    "spacingFew": "Seules {count} paires voisines ont pu être lues ici, trop peu pour dire comment les tours se placent par rapport au terrain.",
+    "spacingChartLabel": "Tours voisines selon la part de leur portée à laquelle elles se tiennent, par dixièmes de 0 à 100 %",
+    "spacingBinItem": "{from} à {to} : {count} paires",
+    "spacingChartLow": "bien plus proches que nécessaire",
+    "spacingChartHigh": "aussi loin que le terrain le permettait",
+    "spacingOutOfSight": "{count} paires voisines sur {total} ne pouvaient pas se voir à la hauteur moyenne : plus éloignées que le terrain ne le permet.",
+    "spacingCapped": "Pour {count} paires, le terrain est resté dégagé jusqu’à la limite de {range} du calcul ; leur portée est donc un minimum et leur part un plafond.",
+    "spacingDropped": "{count} paires voisines ont été écartées : le relief sous elles n’a pas pu être lu, ou les deux fiches se trouvent à moins de {range} l’une de l’autre et forment un seul poste.",
+    "spacingNearestHeading": "Au plus près de leur limite :",
+    "spacingFarthestHeading": "Bien plus rapprochées que nécessaire :",
+    "spacingItem": "{from} à {to} — à {length} l’une de l’autre, {share} d’une portée de {reach}",
+    "spacingMeaning": "Une part proche de 100 % convient à des tours placées pour transmettre un signal à la plus grande distance, sans le prouver. Une tour sur une crête ou un rebord, comme la plupart, se tient près de la fin de ce qu’elle voit simplement parce que le terrain tombe derrière elle ; les postes se trouvent aussi là où passait une route, une source ou un gué ; et une faible part est tout aussi compatible avec une couverture mutuelle du terrain entre elles qu’avec de la négligence. La portée est mesurée le long de la ligne entre deux tours, sur le terrain actuel, avec un seul modèle de hauteur."
   },
   "tracingDetail": {
     "area": "Zone",
@@ -2047,6 +2061,15 @@
           "sites": "Active la couche des sites, pour que les tours soient dessinées.",
           "record": "Ouvre {record}, une tour de guet du limes de Germanie supérieure.",
           "view": "Amène la carte sur son repère et dessine la vue calculée d’après le terrain alentour."
+        }
+      },
+      "sectorWatch": {
+        "title": "Ce que les tours d’une frontière faisaient ensemble",
+        "summary": "Une tour de guet est une vue ; les tours recensées d’un secteur de frontière forment un système. Ouvrez un secteur et l’atlas pose trois questions à ses tours prises ensemble : un signal pouvait-il passer de tour en tour le long de la ligne, le terrain voisin est-il surveillé, et les tours étaient-elles aussi espacées que le terrain le permettait. La chaîne et le terrain vu peuvent être tracés sur la carte. C’est un calcul sur les tours recensées, et le panneau dit ce qu’il suppose.",
+        "steps": {
+          "frontier": "Active la ligne de la frontière, pour que les secteurs soient tracés.",
+          "sector": "Ouvre le secteur « {record} » dans le panneau de la frontière et amène la carte dessus.",
+          "watch": "Déplie « Surveiller la frontière », avec en haut l’interrupteur qui trace la chaîne et le terrain sur la carte."
         }
       }
     }

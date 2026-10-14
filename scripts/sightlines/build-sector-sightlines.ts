@@ -31,6 +31,8 @@ import type {
   SectorWatchSummary,
   SectorWatchTower,
   SightlineVariant,
+  TowerSpacingPair,
+  TowerSpacingSummary,
 } from '../../shared/types'
 import { SIGHTLINE_VARIANTS } from '../../shared/types'
 import { samplePolyline } from '../../shared/utils/elevation-profile'
@@ -43,9 +45,16 @@ import {
   SIGHTLINE_STEP_METRES,
   TOWER_HEIGHT_MODEL,
   castSightlines,
+  initialBearingDegrees,
   towerEyeHeights,
+  traceRay,
   traceSightLine,
 } from '../../shared/utils/sightline'
+import {
+  TOWER_SPACING_MINIMUM_SPAN_METRES,
+  readSpanReach,
+  summariseTowerSpacing,
+} from '../../shared/utils/tower-spacing'
 import {
   addTowerCoverage,
   componentsOf,
@@ -368,6 +377,97 @@ const readChainOfTowers = (works: readonly Work[], links: readonly PairResult[])
   }
 }
 
+const midpoint = (first: LonLat, second: LonLat): LonLat => ({
+  lon: roundTo((first.lon + second.lon) / 2, 5),
+  lat: roundTo((first.lat + second.lat) / 2, 5),
+})
+
+/**
+ * Were the towers set as far apart as the ground allowed? For each stretch of
+ * the chain, a ray from the first tower along the bearing to the second, with
+ * both platforms at the same height, says how much farther a tower could have
+ * stood and still been seen (`readSpanReach`). Read once per estimate of the
+ * height, so the answer carries the same low–high range as the chain.
+ *
+ * A second pass, after the walk, because the chain's edges are only known once
+ * the towers whose ground could not be read have dropped out; the terrain tiles
+ * are mostly still in the field cache, as the edges are taken in walk order.
+ */
+const measureSpacing = async (
+  works: readonly Work[],
+  edges: readonly TowerEdge[],
+): Promise<TowerSpacingSummary> => {
+  const eyes = towerEyeHeights()
+  const pairs: TowerSpacingPair[] = []
+  let droppedCount = 0
+
+  const ordered = [...edges].sort((first, second) => first.from - second.from)
+  for (const edge of ordered) {
+    const from = works[edge.from]!
+    const to = works[edge.to]!
+    if (edge.lengthMetres < TOWER_SPACING_MINIMUM_SPAN_METRES) {
+      droppedCount++
+      continue
+    }
+    const field = await loadTerrainField({
+      area: { bounds: boundsAround([from.position], SIGHTLINE_RADIUS_METRES + 300) },
+      terrainUrl: TERRAIN_URL,
+    })
+    const ground = field.elevationAt(from.position.lon, from.position.lat)
+    if (ground === null) {
+      droppedCount++
+      continue
+    }
+
+    const bearingDegrees = initialBearingDegrees(from.position, to.position)
+    const reachMetres = {} as Record<SightlineVariant, number>
+    const isReachCapped = {} as Record<SightlineVariant, boolean>
+    let isInSight = false
+    let isRead = true
+
+    for (const variant of SIGHTLINE_VARIANTS) {
+      const reach = readSpanReach({
+        trace: traceRay({
+          origin: from.position,
+          originElevationMetres: ground,
+          bearingDegrees,
+          eyeHeightMetres: eyes[variant],
+          targetHeightMetres: eyes[variant],
+          radiusMetres: SIGHTLINE_RADIUS_METRES,
+          stepMetres: SIGHTLINE_STEP_METRES,
+          sampler: field.elevationAt,
+        }),
+        spanMetres: edge.lengthMetres,
+        stepMetres: SIGHTLINE_STEP_METRES,
+      })
+      if (reach === null) {
+        isRead = false
+        break
+      }
+      reachMetres[variant] = Math.round(reach.reachMetres)
+      isReachCapped[variant] = reach.isCapped
+      if (variant === 'central') isInSight = reach.isInSight
+    }
+    if (!isRead) {
+      droppedCount++
+      continue
+    }
+
+    pairs.push({
+      fromSiteId: from.id,
+      fromTitle: from.title,
+      toSiteId: to.id,
+      toTitle: to.title,
+      position: midpoint(from.position, to.position),
+      lengthMetres: Math.round(edge.lengthMetres),
+      reachMetres,
+      isReachCapped,
+      isInSight,
+    })
+  }
+  return summariseTowerSpacing({ pairs, droppedCount })
+}
+
 interface GroundResult {
   grid: CoverageGrid
   counts: Uint8Array
@@ -600,10 +700,14 @@ const buildLayers = (inputs: LayerInputs): GeoJSON.FeatureCollection => {
   return { type: 'FeatureCollection', features }
 }
 
-const midpoint = (first: LonLat, second: LonLat): LonLat => ({
-  lon: roundTo((first.lon + second.lon) / 2, 5),
-  lat: roundTo((first.lat + second.lat) / 2, 5),
-})
+const describeSpacing = (spacing: TowerSpacingSummary): string => {
+  if (!spacing.isReadable) return `unread (${spacing.readCount} of ${spacing.pairCount} pairs)`
+  const { low, central, high } = spacing.medianRatio
+  return (
+    `${central} of reach (${low}–${high}) over ${spacing.readCount} pairs, ` +
+    `${spacing.outOfSightCount} out of sight, ${spacing.cappedCount} capped`
+  )
+}
 
 const analyseSector = async (sector: SectorRow): Promise<boolean> => {
   const rows = await loadTowers(sector.slug)
@@ -631,6 +735,7 @@ const analyseSector = async (sector: SectorRow): Promise<boolean> => {
   }
 
   const chain = readChainOfTowers(works, links)
+  const spacing = await measureSpacing(works, chain.edges)
   const ground = await readGround(works)
   const line = readLine(sector.geometry, works, ground)
 
@@ -683,6 +788,7 @@ const analyseSector = async (sector: SectorRow): Promise<boolean> => {
     lineSeenShare: line.seenShare,
     lineWatchedShare: line.watchedShare,
     blindStretches,
+    spacing,
     overlookedAreaSquareKm: ground.overlookedAreaSquareKm,
     watchedAreaSquareKm: ground.watchedAreaSquareKm,
     towers,
@@ -708,6 +814,7 @@ const analyseSector = async (sector: SectorRow): Promise<boolean> => {
   const { chainCoverage } = chain
   console.log(
     `  chain ${percent(chainCoverage.central)} (${percent(chainCoverage.low)}–${percent(chainCoverage.high)}) over ${Math.round(chain.chainLengthMetres / 1000)} km, ${chainBreaks.length} break(s), ${chain.gapEdges.length} record gap(s); ` +
+      `spacing ${describeSpacing(spacing)}; ` +
       `line ${Math.round(line.lengthMetres / 1000)} km in reach: seen ${percent(line.seenShare)}, 3+ ${percent(line.watchedShare)}, ${blindStretches.length} blind; ` +
       `overlooked ${ground.overlookedAreaSquareKm} km², layers ${Math.round(JSON.stringify(layers).length / 1024)} KB`,
   )

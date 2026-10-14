@@ -202,7 +202,7 @@ end, breaks recorded); missing readings are interpolated and the share present i
 
 ---
 
-## 5. The three amendments, one by one
+## 5. The four amendments, one by one
 
 ### 5.1 Amendment 1 — the chain: could a signal pass along the line?
 
@@ -237,6 +237,25 @@ reverse view is the same walk with the **tower's overall height** as the eye and
 (1.6 m)** as the thing looked at: one more column of comparisons, not another walk. On Turm 15-25b the
 two figures are 28.1 km² and 28.3 km², as they should be — the heights are close.
 
+### 5.4 Amendment 4 — the spacing: as far apart as the ground allowed?
+
+For each stretch of the chain (the spanning edges within 6 km), a ray from the first tower along the
+bearing to the second, at the middle height at both ends, says how far past the second tower a tower
+could still have stood and been seen: **the reach**. Actual spacing ÷ reach is the share a pair uses; 1
+is as far as the ground allowed, and above 1 the two cannot see each other. Run at the low and high
+height estimates too, so the median carries the same range as the chain. `shared/utils/tower-spacing.ts`,
+tested on synthetic terrain; stored in the sector summary (`spacing`), shown in `TerrainSectorWatch`
+as a ten-bin histogram, the median, the pairs nearest the limit and the pairs far inside it.
+
+Two decisions worth knowing. A pair that sees each other across a hollow is **not** penalised for the
+hollow: the reach is counted outward from the second tower, which stands where ground returns. And
+records within 100 m are one post (a reconstruction at 71 m was the third-lowest ratio on the Raetian
+Limes) and drop out.
+
+**What the figure cannot tell.** A tower on a crest has ground falling away behind it, so its reach ends a
+short way past it however the spacing was chosen; the 75–90 % medians below are partly that. No null
+model has been run. The figure says how the posts sit against the relief, not why.
+
 ---
 
 ## 6. Results on the dev import (12 Oct 2026)
@@ -254,6 +273,20 @@ Lower German 2, Antonine 1).
 | Danube, Noricum–Pannonia |          13 (0) |             42 % (27–42) |      3 |        152 km |   47 % / 5 % |    39 |    360 km² |
 | Dacian Limes             |          11 (0) |                      5 % |      5 |         90 km |   24 % / 4 % |    18 |    310 km² |
 | Limes Tripolitanus       |           4 (0) |                     55 % |      1 |         12 km |  68 % / 12 % |     4 |    169 km² |
+
+**Spacing against reach** (14 Oct 2026; median share of reach, middle estimate, low–high in
+brackets, pairs read / out of sight / reach capped at 10 km):
+
+| Sector                   | Median share (low–high) | Read | Out of sight | Capped | Median spacing / reach |
+| ------------------------ | ----------------------: | ---: | -----------: | -----: | ---------------------- |
+| Upper German Limes       |            78 % (82–77) |  220 |           23 |      3 | see panel              |
+| Raetian Limes            |            75 % (78–74) |   43 |            4 |      0 | 1,210 m / 1,733 m      |
+| Hadrian's Wall           |            89 % (96–87) |   23 |            5 |      0 | see panel              |
+| Danube, Noricum–Pannonia |            77 % (98–72) |    8 |            3 |      0 | see panel              |
+| Dacian Limes             |         237 % (244–230) |    6 |            5 |      0 | records too sparse     |
+
+Claustra Alpium, Lower German, Transalutanus and Tripolitanus have fewer than five readable pairs and
+print no median.
 
 **Read these as what was recorded, not as the frontier.** Eleven recorded towers on a 600 km line say
 what was recorded. Hadrian's Wall had about 160 turrets (two between each of eighty milecastles); 27
@@ -341,6 +374,7 @@ shared/utils/sightline.ts        height model, castSightlines, traceRay, describ
 shared/utils/seen-grid.ts        the polar grid: pack, runs, lookup, wedge rings
 shared/utils/sightline-overlay.ts what the map draws, with the figures at their places
 shared/utils/sector-watch.ts     twins, spanning tree, components, coverage grid, rectangles
+shared/utils/tower-spacing.ts    reach of a span, spacing ratio, the sector's spacing summary
 shared/utils/elevation-profile.ts sampling a polyline, statistics
 server/utils/terrain.ts          tiles → elevationAt(lon, lat), 48-tile LRU, bilinear across seams
 server/utils/sightlines.ts       which sites are towers, neighbours, assembling the answer
@@ -374,5 +408,7 @@ spanning tree, components and coverage rectangles.
   only the printed date and tower count say so.
 - **A measured vertical check** of the z12 tiles against a survey near a limes tower would turn §2.3
   from "general documentation" into a number.
+- **A null model for spacing** (§5.4): the same reading for random points along the line or along the
+  ridgeline would say how much of the 75–90 % is siting on crests and how much is intent.
 - **Forts as relay targets** need a sourced height first.
 - **Layer size** (1.4 MB for the Upper German Limes) is tunable by `SIMPLIFY_DEGREES` in the script.

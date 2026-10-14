@@ -1059,7 +1059,21 @@
     "basis": "Calcolato il {date} da {count} torri registrate ({folded} registrazioni gemelle unite). È un calcolo sullo stesso terreno e sulle stesse stime di altezza della vista di ogni torre, e riguarda le torri registrate: dove non ce n’è nessuna, la linea è non documentata, non sguarnita.",
     "gaps": "{count} tratti tra torri vicine superano {range} km: lacune nei dati, non provati.",
     "headlineNoChain": "Sono registrate {count} torri; {seen} della linea a loro portata è sorvegliata.",
-    "chainSparse": "Qui non ci sono due torri vicine registrate a meno di {range} km l’una dall’altra, quindi non c’è una catena da leggere: i dati sono troppo scarsi per dire se un segnale potesse passare."
+    "chainSparse": "Qui non ci sono due torri vicine registrate a meno di {range} km l’una dall’altra, quindi non c’è una catena da leggere: i dati sono troppo scarsi per dire se un segnale potesse passare.",
+    "spacingHeading": "Distanziate quanto il terreno consentiva?",
+    "spacingBody": "Le torri vicine distano tra loro una mediana di {length}. Dallo stesso posto una torre della stessa altezza avrebbe potuto sorgere a {reach} ed essere ancora vista; esse stanno a {ratio} di quella distanza ({low} se le torri erano più basse, {high} se più alte).",
+    "spacingFew": "Qui si sono potute leggere solo {count} coppie vicine, troppo poche per dire come le torri si collochino rispetto al terreno.",
+    "spacingChartLabel": "Torri vicine secondo la parte della loro portata a cui si trovano, in decimi da 0 a 100 %",
+    "spacingBinItem": "da {from} a {to}: {count} coppie",
+    "spacingChartLow": "molto più vicine del necessario",
+    "spacingChartHigh": "lontane quanto il terreno consentiva",
+    "spacingOutOfSight": "{count} coppie vicine su {total} non potevano vedersi all’altezza media: poste più lontano di quanto il terreno permetta.",
+    "spacingCapped": "Per {count} coppie il terreno è rimasto aperto fino al limite di {range} del calcolo, quindi la loro portata è un minimo e la loro quota un tetto.",
+    "spacingDropped": "{count} coppie vicine sono state escluse: il terreno sotto di esse non ha potuto essere letto, oppure i due record distano meno di {range} e sono un solo posto.",
+    "spacingNearestHeading": "Più vicine al loro limite:",
+    "spacingFarthestHeading": "Molto più ravvicinate del necessario:",
+    "spacingItem": "da {from} a {to} — a {length} l’una dall’altra, {share} di una portata di {reach}",
+    "spacingMeaning": "Una quota vicina al 100 % si accorda con torri collocate per trasmettere un segnale alla massima distanza, ma non lo dimostra. Una torre su una cresta o un ciglio, come la maggior parte, sta presso la fine di ciò che vede semplicemente perché il terreno cade dietro di essa; i posti sorgono anche dove c’era una strada, una sorgente o un guado; e una quota bassa è compatibile quanto la negligenza con la copertura reciproca del terreno tra le torri. La portata è misurata lungo la linea tra due torri, sul terreno di oggi, con un unico modello di altezza."
   },
   "tracingDetail": {
     "area": "Settore",
@@ -2047,6 +2061,15 @@
           "sites": "Attiva il livello dei siti, così le torri vengono disegnate.",
           "record": "Apre {record}, una torre di guardia del limes della Germania superiore.",
           "view": "Porta la mappa sulla sua icona e disegna la vista calcolata dal terreno circostante."
+        }
+      },
+      "sectorWatch": {
+        "title": "Ciò che le torri di una frontiera facevano insieme",
+        "summary": "Una torre di guardia è una veduta; le torri registrate di un settore di frontiera sono un sistema. Aprite un settore e l’atlante pone tre domande alle sue torri prese insieme: se un segnale potesse passare di torre in torre lungo la linea, se il terreno accanto sia sorvegliato e se le torri fossero poste tanto distanti quanto il terreno consentiva. Può disegnare sulla mappa la catena e il terreno visto. È un calcolo sulle torri registrate, e il pannello dice che cosa presuppone.",
+        "steps": {
+          "frontier": "Attiva la linea della frontiera, così che i settori siano disegnati.",
+          "sector": "Apre il settore «{record}» nel pannello della frontiera e porta la mappa su di esso.",
+          "watch": "Espande «Sorvegliare la frontiera», con in alto l’interruttore che disegna sulla mappa la catena e il terreno."
         }
       }
     }

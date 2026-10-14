@@ -30,7 +30,10 @@ test.describe('the features page', () => {
       ;(window as unknown as { __stillHere: boolean }).__stillHere = true
     })
 
-    await page.getByRole('button', { name: 'Show me on the map' }).click()
+    await page
+      .locator('[data-feature="towerSightlines"]')
+      .getByRole('button', { name: 'Show me on the map' })
+      .click()
     await waitForMapReady(page)
 
     expect(
@@ -52,7 +55,46 @@ test.describe('the features page', () => {
     )
     await page.goto('/features')
 
-    await page.getByRole('button', { name: 'Show me on the map' }).click()
+    await page
+      .locator('[data-feature="towerSightlines"]')
+      .getByRole('button', { name: 'Show me on the map' })
+      .click()
+
+    await expect(page.getByRole('alert')).toContainText('not in this atlas')
+    await expect(page).toHaveURL(/\/features$/)
+  })
+
+  test('opens the Raetian Limes with its watch section expanded and the map switch first', async ({
+    page,
+  }) => {
+    await page.goto('/features')
+    const entry = page.locator('[data-feature="sectorWatch"]')
+    await expect(entry.getByText(/Opens the sector “Raetian Limes”/)).toBeVisible()
+
+    await entry.getByRole('button', { name: 'Show me on the map' }).click()
+    await waitForMapReady(page)
+
+    // The section is open without a click, and the switch is its first control.
+    const toggle = page.getByRole('switch', {
+      name: 'Show the towers’ chain and ground on the map',
+    })
+    await expect(toggle).toBeVisible({ timeout: 30_000 })
+    await expect(page.getByRole('heading', { name: 'Could a signal pass along it?' })).toBeVisible()
+    const toggleBox = await toggle.boundingBox()
+    const headingBox = await page
+      .getByRole('heading', { name: 'Could a signal pass along it?' })
+      .boundingBox()
+    expect(toggleBox!.y).toBeLessThan(headingBox!.y)
+  })
+
+  test('leaves the map alone when the example sector is not there', async ({ page }) => {
+    await page.route('**/api/limes/sectors', (route) => route.fulfill({ status: 200, json: [] }))
+    await page.goto('/features')
+
+    await page
+      .locator('[data-feature="sectorWatch"]')
+      .getByRole('button', { name: 'Show me on the map' })
+      .click()
 
     await expect(page.getByRole('alert')).toContainText('not in this atlas')
     await expect(page).toHaveURL(/\/features$/)

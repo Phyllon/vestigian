@@ -1,7 +1,8 @@
 # Cross-data features — plan for a fresh session
 
 Written 2026-10-14 after a brainstorm on what the imported datasets can answer
-together, in the way the limes tower sightlines do. **Nothing here is built.**
+together, in the way the limes tower sightlines do. **A is built (14 Oct 2026);
+the rest is not.**
 Schema columns were checked against `server/database/schema/`; row quality and
 match rates were **not** measured — each item says what to measure first.
 
@@ -29,6 +30,16 @@ D–J below are lower priority; scope against the data before building.
 ---
 
 ## A. Was tower spacing chosen for intervisibility?
+
+**Built 14 Oct 2026** — `shared/utils/tower-spacing.ts`, the `spacing` field of
+the sector summary, a section in `TerrainSectorWatch`; narrative in
+`documents/line-of-sight-and-relief.md` §5.4, rules in `.claude/rules/sightlines.md`.
+Deviations from the plan below: reach is counted _outward from the second
+tower_ (the unbroken ground past it), not the farthest point seen at all, which
+would be a far hillside; pairs under 100 m are one post; and the "sourced height"
+precondition turned out to be only terrain readability — every tower uses the one
+height model. **Medians 75–90 %, with an unmeasured crest-siting confound** — see
+the rules file before quoting a number.
 
 **Question.** For each limes sector, is the distance between consecutive towers
 close to the maximum distance at which they are still intervisible?

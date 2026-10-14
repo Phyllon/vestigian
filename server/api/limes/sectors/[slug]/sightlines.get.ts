@@ -19,7 +19,7 @@ defineRouteMeta({
     tags: ['limes'],
     summary: 'What a limes sector’s towers could see together',
     description:
-      'Chain coverage between neighbouring towers, breaks, the share of the line overlooked by one or by three towers, and the stretches nothing overlooks. A calculation over recorded towers, worked out by a script; null when none has been run for the sector.',
+      'Chain coverage between neighbouring towers, how far apart they stand against how far apart the ground allowed, breaks, the share of the line overlooked by one or by three towers, and the stretches nothing overlooks. A calculation over recorded towers, worked out by a script; null when none has been run for the sector.',
   },
 })
 
