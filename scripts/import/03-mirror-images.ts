@@ -21,7 +21,7 @@ import { detectImageFormat } from '../../server/utils/uploads'
 import { requireDatabaseUrl } from '../../server/database/database-url'
 
 /** Pause between requests to the source server, in milliseconds. */
-const REQUEST_INTERVAL = 1200
+const REQUEST_INTERVAL = 600
 const MAX_SOURCE_BYTES = 25 * 1024 * 1024
 
 /**

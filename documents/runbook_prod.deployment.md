@@ -598,6 +598,118 @@ No cache to bump: the two routes read the table directly and answer `private, ma
 sector re-imported without re-running the script keeps the _old_ answer — the panel prints when it
 was worked out, and from how many towers, for exactly that reason.
 
+## 14d. Refreshing the vici.org records
+
+Two routes. Which one applies is a fact about the VPS, not a preference:
+
+| The VPS database…                                                                             | Route                                   |
+| --------------------------------------------------------------------------------------------- | --------------------------------------- |
+| holds nothing nobody has edited (**cold**: no contributions, visits, bookmarks, endorsements) | **A — mirror**, below. Overwrites.      |
+| holds real contributions                                                                      | **B — additive merge** (end of section) |
+
+Check before choosing: `SELECT (SELECT count(*) FROM revisions) r, (SELECT count(*) FROM site_visits) v,
+(SELECT count(*) FROM site_bookmarks) b, (SELECT count(*) FROM site_endorsements) e` — all zero means cold.
+
+### A — mirror (cold database)
+
+`pnpm import:convert --refresh` makes the dev database equal to the dump: every vici row is
+overwritten (slug excepted — slugs never change), rows the dump no longer publishes are deleted
+(cascading to their images, identifiers, visits…), and vici's own concordance schemes are
+resynchronised. Rows are updated in place, so ids, mirrored photographs and verification results
+survive. The VPS then receives the dev tables whole.
+
+```bash
+# 0. Local — leave account data out before anything is loaded. These tables hold e-mail
+#    addresses, password hashes and live reset/confirmation codes; no importer reads them.
+mkdir -p .import/vici-2026-10
+grep -v '^INSERT INTO `\(accounts\|resetpw\|unconfirmedaccs\)` ' .import/vestigian_dump.sql \
+  | gzip -9 > .import/vici-2026-10/vici.sql.gz
+
+# 1. Local — scratch MariaDB, load, mirror. Do NOT use `pnpm import:fetch`: it prefers
+#    .import/vici.sql.gz (the old dump) whenever that file exists, whatever VICI_DUMP_DIR says.
+docker run -d --name vici-mysql -p 3307:3306 -e MARIADB_ROOT_PASSWORD=root mariadb:11
+zcat .import/vici-2026-10/vici.sql.gz | docker exec -i vici-mysql mariadb -uroot -proot --max-allowed-packet=512M
+export VICI_DUMP_DIR="$PWD/.import/vici-2026-10/"      # the guard's checksum
+pnpm exec tsx --env-file-if-exists=.env scripts/import/02-mysql-to-postgres.ts --refresh   # ~3 min
+pnpm import:image-records            # additive: new links as 'pending'
+pnpm exec tsx --env-file-if-exists=.env scripts/strip-description-html.ts --repair   # the dump stores escaped HTML; ~37k rows after a mirror, ~3 min
+pnpm exec tsx --env-file-if-exists=.env scripts/backfill-country-codes.ts --repair   # moved sites change country
+
+# 2. Local — photographs. Only the ~40.6k images linked to a published site are fetched
+#    (the dump has 44.4k; 3.8k hang off hidden points or nothing). ~4.4k are new: tell
+#    René Voorburg the number first.
+MIRROR_LIMIT=5 pnpm import:images && pnpm import:images
+pnpm images:reconcile                 # DB and bucket agree?
+#    Only when .env points at local MinIO. If NUXT_STORAGE_ENDPOINT is already Bunny, the mirror
+#    wrote there directly and this step is a no-op (rclone reports 0 B transferred) — skip it.
+#    `rclone size minio:vestigian/vici` vs `rclone size bunny:<zone>/vici` tells which case you are in.
+rclone copy minio:vestigian/vici bunny:vestigian-images/vici --progress --checksum   # copy, never sync
+#    (Whole-bucket `minio:vestigian bunny:<zone>` is for the one-time initial load, §10.)
+#    The reverse case — the mirror wrote straight to Bunny and local MinIO (dev imgproxy) lacks the
+#    new photographs. Pull them down so the dev map shows them:
+rclone copy bunny:vestigian-images/vici minio:vestigian/vici --progress
+
+# 3. Local — derived layers that read vici tracings or sites (re-run, then they ship below).
+pnpm import:limes
+pnpm sightlines:build
+pnpm roads:audit
+
+# 4. Local — dump the vici-bearing tables whole, in one file.
+docker exec vestigian-dev-postgres-1 pg_dump -U vestigian -d vestigian -Fc --no-owner --no-acl --data-only \
+  -t sites -t tracings -t site_images -t external_ids -t external_id_verifications \
+  -t limes_sectors -t limes_segments -t limes_sector_sightlines \
+  > vici-refresh.dump
+docker exec -i vestigian-dev-postgres-1 pg_restore --list < vici-refresh.dump | grep -c 'TABLE DATA'   # expect 10
+rsync -avP vici-refresh.dump deploy@<vps-ip>:/tmp/
+
+# 5. VPS — after the deploy (migrations applied, §14a). One transaction: a failure changes nothing.
+docker exec <postgres-container> psql -U vestigian -d vestigian -v ON_ERROR_STOP=1 -c \
+  "TRUNCATE sites, tracings, site_images, external_ids, external_id_verifications,
+            limes_sectors, limes_segments, limes_sector_sightlines, road_audit_segments,
+            road_audit_gaps, site_visits, site_bookmarks, site_endorsements RESTART IDENTITY CASCADE"
+docker exec -i <postgres-container> pg_restore --no-owner --no-acl --data-only \
+  -U vestigian -d vestigian < /tmp/vici-refresh.dump
+docker exec <postgres-container> psql -U vestigian -d vestigian -c \
+  "SELECT setval(pg_get_serial_sequence('sites','id'), (SELECT max(id) FROM sites)),
+          setval(pg_get_serial_sequence('tracings','id'), (SELECT max(id) FROM tracings)),
+          setval(pg_get_serial_sequence('site_images','id'), (SELECT max(id) FROM site_images)),
+          setval(pg_get_serial_sequence('external_ids','id'), (SELECT max(id) FROM external_ids))"
+
+# 6. VPS — check, then invalidate. Site tiles ride data-version, atlas/limes tiles atlas-version.
+docker exec <postgres-container> psql -U vestigian -d vestigian -c \
+  "SELECT (SELECT count(*) FROM sites) sites, (SELECT count(*) FROM tracings) tracings,
+          (SELECT count(*) FROM site_images WHERE status='approved') approved_images"
+docker exec <valkey-container> valkey-cli INCR vestigian:data-version
+docker exec <valkey-container> valkey-cli INCRBY vestigian:atlas-version 2
+#    Bunny: purge /api/tiles/ and the sitemap pages. Then `docker compose restart app`.
+```
+
+The sequence resets in step 5 matter: a data-only restore leaves the sequences where `RESTART
+IDENTITY` put them (1), and the first contribution would try to take id 1.
+
+### B — additive merge (a database with real contributions)
+
+Never overwrites, never deletes; keyed on `source_ref`, idempotent, one transaction. Steps 0–3 as
+above but run `import:convert` **without** `--refresh` against a scratch copy of the dev database
+(an existing record is then left alone). Then stage and ship only vici-derived rows:
+
+```bash
+docker exec -i vestigian-dev-postgres-1 psql -U vestigian -d vestigian -v ON_ERROR_STOP=1 < scripts/import/sql/vici-stage.sql
+docker exec vestigian-dev-postgres-1 pg_dump -U vestigian -d vestigian -Fc --no-owner --no-acl -n vici_stage > vici-stage.dump
+rsync -avP vici-stage.dump scripts/import/sql/vici-merge.sql deploy@<vps-ip>:/tmp/
+docker exec -i <postgres-container> pg_restore --no-owner --no-acl -U vestigian -d vestigian < /tmp/vici-stage.dump
+docker exec -i <postgres-container> psql -U vestigian -d vestigian -v ON_ERROR_STOP=1 < /tmp/vici-merge.sql
+docker exec <postgres-container> psql -U vestigian -d vestigian -c 'DROP SCHEMA vici_stage CASCADE'
+```
+
+It adds new sites, tracings, identifiers and images only. A slug already taken by another row
+gets `-<vici id>`. It does not update records that exist or withdraw ones vici has hidden — a
+record edited here must not revert.
+
+_Rehearsed 14 Oct 2026 on scratch clones of the dev database. A: 61,272 → 74,202 sites, 11,720 →
+13,156 tracings, 212 sites and 865 tracings removed. B: 61,274 → 74,416 sites with one VPS-only
+site whose slug collided; second run a no-op, no duplicate `source_ref`._
+
 ## 15. Basemap (PMTiles)
 
 Production hard-codes `NUXT_PUBLIC_BASEMAP_PROVIDER: pmtiles` — the map is

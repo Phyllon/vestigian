@@ -252,6 +252,19 @@ him another 36,000 requests.
 - Therefore **2400px is a permanent ceiling** for imported photographs, and
   "one original stored per image" cannot hold for this content.
 
+**Refreshing from a newer dump (October 2026 dump, verified on scratch clones).** The convert
+step is additive by design: `ON CONFLICT (source_ref) DO NOTHING`, so an existing record is never
+updated and one vici has since hidden stays published (212 sites, 865 tracings on the 2026 dump).
+Three traps: **`import:fetch` silently reuses `.import/vici.sql.gz`** when it exists, whatever
+`VICI_DUMP_DIR` says — load the new dump into MariaDB by hand; **`usedSlugs` was empty on a re-run**,
+so a new site whose title was already taken crashed the whole batch on `sites_slug_idx` (now seeded
+from `sites`); and **the dump stores descriptions HTML-escaped** — `strip-description-html.ts
+--repair` is a required step after convert (4,713 rows). The account tables are not read by any
+importer and are stripped from the dump before it is loaded. `02-mysql-to-postgres.ts --refresh`
+mirrors the dump (overwrite in place, delete what vici no longer publishes, resync vici's
+concordance schemes) for a database nobody has edited; a database with contributions takes the
+additive merge instead. Both routes: `documents/runbook_prod.deployment.md` §14d.
+
 ## Import guards — a tripwire between an upstream and the atlas
 
 Twenty-four scripts here fetch somebody else's data and write it into tables the

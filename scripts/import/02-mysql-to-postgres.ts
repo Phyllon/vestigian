@@ -41,6 +41,16 @@ import { requireDatabaseUrl } from '../../server/database/database-url'
 
 const BATCH_SIZE = 500
 
+/**
+ * `--refresh` makes the run a mirror of the dump rather than an addition to
+ * what is already here. Without it an existing row is never touched — right on
+ * an instance where records have been edited since the import. With it, every
+ * vici-derived row is overwritten from the dump (slug excepted: slugs never
+ * change), rows the dump no longer publishes are deleted, and vici's own
+ * concordances are resynchronised. Only for a database nobody has edited.
+ */
+const refresh = process.argv.includes('--refresh')
+
 const source = await mysql.createConnection(
   process.env.MYSQL_URL ?? 'mysql://root:root@127.0.0.1:3307/vici',
 )
@@ -108,6 +118,10 @@ const SITE_LICENCE = 'CC-BY-SA-3.0'
 
 const unmatchedKinds = new Set<string>()
 
+/** Every record this run wrote, for `--refresh` to delete the rest by. */
+const seenSiteRefs: string[] = []
+const seenTracingRefs: string[] = []
+
 /**
  * Vici's own word for what a site is, kept beside the category it maps to.
  *
@@ -155,7 +169,15 @@ const readPeriod = (from: number | null, to: number | null): [number | null, num
 }
 
 const importPoints = async (): Promise<number> => {
-  const usedSlugs = new Set<string>()
+  /**
+   * Seeded from the table, not empty: slugs never change on edit, so a re-run
+   * against a dump that has grown meets titles already taken by rows imported
+   * earlier. An empty set let `sites_slug_idx` reject the whole batch — on the
+   * October 2026 dump that was a `boles-awiec` collision on the first new row.
+   * A taken slug takes the same `-<pointId>` suffix an in-run duplicate does.
+   */
+  const existing = await target<{ slug: string }[]>`SELECT slug FROM sites`
+  const usedSlugs = new Set<string>(existing.map((row) => row.slug))
   let lastPointId = 0
   let imported = 0
 
@@ -224,9 +246,20 @@ const importPoints = async (): Promise<number> => {
             'Vici.org contributors'
           )
           ON CONFLICT (source_ref) WHERE source_ref IS NOT NULL
-          DO UPDATE SET subcategory = EXCLUDED.subcategory
-          WHERE sites.subcategory IS NULL
+          ${
+            refresh
+              ? tx`DO UPDATE SET
+                    title = EXCLUDED.title, category = EXCLUDED.category,
+                    subcategory = EXCLUDED.subcategory, summary = EXCLUDED.summary,
+                    description = EXCLUDED.description, geom = EXCLUDED.geom,
+                    period_from = EXCLUDED.period_from, period_to = EXCLUDED.period_to,
+                    status = 'approved', licence = EXCLUDED.licence,
+                    attribution = EXCLUDED.attribution`
+              : tx`DO UPDATE SET subcategory = EXCLUDED.subcategory
+                   WHERE sites.subcategory IS NULL`
+          }
         `
+        seenSiteRefs.push(`vici.org#${point.pointId}`)
         imported += 1
       }
     })
@@ -297,8 +330,17 @@ const importTracings = async (): Promise<number> => {
             ${`vici.org-line#${line.lineId}`}, ${licence},
             ${line.attribution?.trim() || line.owner?.trim() || 'Vici.org contributors'}
           )
-          ON CONFLICT (source_ref) WHERE source_ref IS NOT NULL DO NOTHING
+          ON CONFLICT (source_ref) WHERE source_ref IS NOT NULL
+          ${
+            refresh
+              ? tx`DO UPDATE SET
+                    title = EXCLUDED.title, category = EXCLUDED.category,
+                    geom = EXCLUDED.geom, status = EXCLUDED.status,
+                    licence = EXCLUDED.licence, attribution = EXCLUDED.attribution`
+              : tx`DO NOTHING`
+          }
         `
+        seenTracingRefs.push(`vici.org-line#${line.lineId}`)
         imported += 1
       }
     })
@@ -572,6 +614,20 @@ const importExternalIdentifiers = async (): Promise<number> => {
           identifiers.push({ scheme: entry.scheme, value: String(value).trim().slice(0, 120) })
         }
 
+        if (refresh) {
+          // Only schemes vici itself supplies: the ones `verify-concordances.ts`
+          // discovers (edh, idai-gazetteer, historic-england) are not ours to drop.
+          await tx`
+            DELETE FROM external_ids e USING sites s
+            WHERE s.id = e.site_id AND s.source_ref = ${`vici.org#${row.pmeta_pnt_id}`}
+              AND e.scheme = ANY(${KNOWN_SCHEMES})
+              AND NOT EXISTS (
+                SELECT 1 FROM unnest(${identifiers.map((entry) => entry.scheme)}::text[],
+                                     ${identifiers.map((entry) => entry.value)}::text[]) AS fresh(scheme, value)
+                WHERE fresh.scheme = e.scheme AND fresh.value = e.value)
+          `
+        }
+
         for (const identifier of identifiers) {
           const inserted = await tx`
             INSERT INTO external_ids (site_id, scheme, value)
@@ -664,6 +720,24 @@ const main = async (): Promise<void> => {
   const points = await importPoints()
   const tracings = await importTracings()
   const concordances = await importExternalIdentifiers()
+
+  if (refresh) {
+    // An empty list would delete everything; the guard already refuses an
+    // empty source, but this is the line that would do the damage.
+    if (seenSiteRefs.length === 0 || seenTracingRefs.length === 0) {
+      throw new Error('--refresh wrote nothing; refusing to delete what the dump no longer lists.')
+    }
+    const removedSites = await target`
+      DELETE FROM sites WHERE source_ref LIKE 'vici.org#%' AND source_ref <> ALL(${seenSiteRefs})
+    `
+    const removedTracings = await target`
+      DELETE FROM tracings
+      WHERE source_ref LIKE 'vici.org-line#%' AND source_ref <> ALL(${seenTracingRefs})
+    `
+    console.log(
+      `· refresh removed ${removedSites.count} sites and ${removedTracings.count} tracings the dump no longer publishes`,
+    )
+  }
 
   // After the writes, so a run that dies partway leaves no baseline claiming
   // rows it never wrote.
