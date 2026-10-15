@@ -124,7 +124,7 @@ test.describe('the reference tile endpoints', () => {
   test('serve the dated survey sites as a feed that states its own licence', async ({
     request,
   }) => {
-    const response = await request.get('/api/survey-sites/sites.geojson?limit=3')
+    const response = await request.get('/api/odbl/survey-sites.geojson?limit=3')
     expect(response.status()).toBe(200)
     expect(response.headers()['content-type']).toContain('application/geo+json')
     const feed = await response.json()
@@ -135,7 +135,7 @@ test.describe('the reference tile endpoints', () => {
       expect(feature.properties.source).toBeTruthy()
     }
     // A kind outside the vocabulary is a 400, not a cast error reaching the database.
-    expect((await request.get('/api/survey-sites/sites.geojson?kind=nonsense')).status()).toBe(400)
+    expect((await request.get('/api/odbl/survey-sites.geojson?kind=nonsense')).status()).toBe(400)
   })
 
   test('serve the neighbouring realms for a year, and refuse one outside the imported span', async ({

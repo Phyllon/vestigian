@@ -161,8 +161,10 @@ Postgres.
 its own `antiquity_*` table and is never joined to `sites`.** ODbL's share-alike
 attaches to a derivative _database_: folding these into the tables behind
 `/api/data/sites.geojson` would arguably pull that feed under ODbL and
-contradict the CC BY-SA / CC0 the contributed data carries. Rendered tiles are a
-Produced Work and need only the attribution the style carries. Do not merge them.
+contradict the CC BY-SA / CC0 the contributed data carries. Do not merge them.
+**Keeping them apart is not the whole duty:** ODbL §4.6 also asks that a derivative database,
+or a produced work from one (the tiles), come with an offer of the database in machine-readable
+form. That offer is `/api/odbl/awmc-*.{geojson,ttl}` — see `open-data-feeds.md`.
 
 Four things about these views that are not obvious:
 
@@ -959,11 +961,12 @@ Roman Republican coin-hoard findspots from `numismatics.org/chrr`'s
 `geonames_url`, `geom`).
 
 **CHRR states two different licences.** Its human-readable pages and its
-machine-readable VoID description disagree — ODbL in one place, CC BY-NC-SA
-in another. The stricter, machine-readable statement was treated as
+machine-readable VoID description disagree — ODbL 1.0 in one place, CC BY-NC 3.0
+in another (re-fetched 15 Oct 2026; the `/licence` page and the map credit had said CC BY-NC-SA 4.0,
+which matches neither and was corrected). The stricter, machine-readable statement was treated as
 authoritative, and the layer is isolated accordingly: its own table, no
 foreign key to `sites`/`tracings`, its own tile endpoint, out of
-`/api/data/sites.geojson`. That is the same isolation the ODbL data already
+`/api/data/sites.geojson` — and offered back, under both terms, at `/api/odbl/coin-hoards.*`. That is the same isolation the ODbL data already
 gets, for the same reason — see the note at the top of
 `server/database/schema/atlas.ts`.
 

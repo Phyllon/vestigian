@@ -55,7 +55,6 @@
   const { plates, startIndex } = defineProps<Props>()
 
   const { t } = useI18n()
-  const { buildCredit } = useImageUrl()
 
   const currentPage = ref(startIndex)
   const failedToOpen = ref(false)
@@ -197,7 +196,7 @@
       <p v-if="currentPlate.description" class="text-sm text-ink-600 dark:text-paper-300">
         {{ currentPlate.description }}
       </p>
-      <p class="datum text-[0.6875rem]">{{ buildCredit(currentPlate) }}</p>
+      <UiImageCredit :attribution="currentPlate.attribution" :licence="currentPlate.licence" />
     </figcaption>
   </figure>
 </template>

@@ -467,7 +467,7 @@
     "overlayPorts": "Ports anciens: Catalogue des ports anciens, Arthur de Graauw (CC BY 4.0), également publié sous le nom de DARMC Scholarly Data Series (Harvard).",
     "overlayRoutes": "Routes : ORBIS v2, Meeks, Scheidel, Weiland et Arcenas, Université de Stanford (CC BY 3.0).",
     "overlayMinorFeatures": "Les antiquités mineures (ponts, mines, carrières, etc.): Ancient World Mapping Center (ODbL 1.0).",
-    "overlayCoinHoards": "Trésors monétaires : Coin Hoards of the Roman Republic, American Numismatic Society (CC BY-NC-SA 4.0) — usage non commercial uniquement.",
+    "overlayCoinHoards": "Trésors monétaires : Coin Hoards of the Roman Republic, American Numismatic Society (ODbL 1.0 sur son site, CC BY-NC 3.0 dans sa description lisible par machine) — usage non commercial uniquement.",
     "overlayEmpireExtents": "Ampleur de l'Empire au fil du temps : contributeurs OpenHistoricalMap (CC0 1.0).",
     "overlayInscriptions": "Inscriptions : Epigraphic Database Heidelberg (CC BY-SA 4.0).",
     "overlayAtticInscriptions": "Inscriptions attiques : Attic Inscriptions Online (CC BY-SA 3.0).",
@@ -490,24 +490,41 @@
     "satelliteHeading": "Fond de carte satellite",
     "satelliteBody": "La vue satellite est une image Sentinel-2 sans nuages d'EOX IT Services (Vienne), construite à partir de données ouvertes ESA Copernicus Sentinel-2. Le millésime utilisé par cette application est en CC BY-NC-SA 4.0 — usage non commercial uniquement, et toute réutilisation doit être partagée sous la même licence.",
     "reuseHeading": "Réutiliser ces données",
-    "reuseBody": "Vestigian est construit à partir de sources sous licence ouverte et republie ses propres fiches dans le même esprit. Les deux flux sont en lecture seule, bornés, paginés et ouverts aux requêtes multi-origines. Les textes sont sous CC BY-SA et les métadonnées sous CC0 ; les licences des images varient selon la fiche et ne sont pas incluses.",
-    "reuseNotIncluded": "Les flux ne contiennent que les notices apportées ici. Les couches de référence énumérées plus haut (voies, ateliers, monuments, inscriptions et les autres) n'y sont pas republiées — prenez-les à leur source, sous leur propre licence. Les sites datés du recensement font exception : ils ont leur propre flux, sous leur propre licence.",
+    "reuseBody": "Vestigian repose sur des sources sous licence ouverte ; il publie donc en retour ses propres notices et les données de référence qu'il a adaptées. Les flux sont regroupés selon la licence qui les régit. Tous sont en lecture seule, bornés et paginés, ouverts aux requêtes cross-origin, et proposés en GeoJSON et en RDF (Turtle).",
+    "reuseNotIncluded": "Ces flux ne contiennent que les notices contribuées ici. Les couches que d'autres projets ne licencient que contre mention de la source (routes, ateliers monétaires, monuments, inscriptions, royaumes voisins et le reste) ne sont pas republiées — à prendre auprès de leurs propres sources, sous leurs propres licences. Les fonds de carte ne sont que des tuiles et ne sont pas proposés comme données.",
     "reuseCreditHeading": "Comment citer cet atlas",
     "reuseCreditBody": "Vestigian ({url}), CC BY-SA 4.0. Sources et licences : {url}/licence",
     "reuseCreditCopy": "Copier la mention",
     "reuseCreditCopied": "Mention copiée",
     "reuseGeojson": "GeoJSON simple, pour la cartographie et l'analyse",
     "reuseLinkedPlaces": "Linked Places Format, la norme de répertoire géographique du réseau Pelagios, avec des liens closeMatch vers Pleiades et Wikidata",
-    "reuseSurveyFeed": "les sites datés du recensement, en GeoJSON. ODbL 1.0 sur l'Ancient Sites and Monuments Survey : conservez la mention et partagez toute base adaptée sous la même licence. Chaque objet nomme sa source et la licence de celle-ci. Paramètres : bbox, kind, source, limit, offset.",
     "reuseParamsHeading": "Paramètres de requête",
-    "reuseParamsIntro": "Les deux flux acceptent les mêmes paramètres, tous facultatifs. Les notices arrivent dans un ordre stable, et les requêtes sont limitées en débit.",
-    "reuseParamBbox": "Ouest,sud,est,nord en degrés (WGS 84), par exemple 6,50,8,52. Seulement les sites dans le rectangle. Par défaut : le monde entier.",
-    "reuseParamCategory": "L'une des valeurs settlement, fortification, sanctuary, burial, infrastructure, villa, production, findspot, other. Toute autre valeur est refusée avec 400.",
-    "reuseParamLimit": "Notices par page, de 1 à 1000. Par défaut : 500.",
+    "reuseParamsIntro": "Tous les flux acceptent bbox, limit et offset ; les autres paramètres indiquent les flux auxquels ils s'appliquent. Les enregistrements arrivent dans un ordre stable et les requêtes sont limitées en débit.",
+    "reuseParamBbox": "Ouest,sud,est,nord en degrés (WGS 84), par exemple 6,50,8,52. Seuls les objets dans le cadre. Par défaut : le monde entier.",
+    "reuseParamCategory": "Flux de sites uniquement. L'une de settlement, fortification, sanctuary, burial, infrastructure, villa, production, findspot, other. Toute autre valeur est refusée avec 400.",
+    "reuseParamLimit": "Enregistrements par page, de 1 à 1000. Par défaut : 500. Les couches ODbL à géométrie lourde (eau, limes) sont à 100 par défaut et plafonnées à 250 ; une valeur supérieure est refusée avec 400 plutôt que raccourcie.",
     "reuseParamOffset": "Notices à ignorer. Pour tout récupérer, augmentez-le de limit à chaque fois jusqu'à ce qu'une page renvoie moins de notices que limit.",
-    "reuseParamDated": "Flux Linked Places uniquement. true ne renvoie que les notices qui portent une période ; les autres n'ont aucune datation.",
+    "reuseParamDated": "Flux de sites Linked Places et Turtle uniquement. true ne renvoie que les notices qui portent une période ; les autres n'ont aucune datation.",
     "reuseExampleLabel": "Exemple : fortifications autour de Cologne, deuxième page de 100",
-    "overlaySurveySites": "Sites datés du recensement : extraits de l'{survey} (Jensine Andresen ; ODbL 1.0) — Villages to Empires, Levant sud (Titolo, université de Turin), tombes à chambre syro-palestiniennes (Gwiazda), Marmarica (Laguna-Palma) et le LuwianSiteAtlas (Aşınmaz, Mutlu et Zangger), tous CC BY 4.0 ; le Piano Paesaggistico Regionale de Sardaigne (CC BY 4.0) ; le Historic Environment Record de Cornouailles et des Sorlingues (Cornwall Council), Canmore (Historic Environment Scotland) et la National Heritage List for England (Historic England 2026), sous Open Government Licence."
+    "overlaySurveySites": "Sites datés du recensement : extraits de l'{survey} (Jensine Andresen ; ODbL 1.0) — Villages to Empires, Levant sud (Titolo, université de Turin), tombes à chambre syro-palestiniennes (Gwiazda), Marmarica (Laguna-Palma) et le LuwianSiteAtlas (Aşınmaz, Mutlu et Zangger), tous CC BY 4.0 ; le Piano Paesaggistico Regionale de Sardaigne (CC BY 4.0) ; le Historic Environment Record de Cornouailles et des Sorlingues (Cornwall Council), Canmore (Historic Environment Scotland) et la National Heritage List for England (Historic England 2026), sous Open Government Licence.",
+    "reuseGroupSharedHeading": "Notices contribuées — CC BY-SA et CC0",
+    "reuseGroupSharedBody": "Notices de sites rédigées et modifiées ici, issues de vici.org et de ses contributeurs. Le texte est sous CC BY-SA et les métadonnées structurées sous CC0. Les licences des images varient selon la notice et ne sont pas incluses.",
+    "reuseGroupOdblHeading": "Données de référence — ODbL 1.0",
+    "reuseGroupOdblBody": "L'Open Database Licence demande qu'une base adaptée de sources ODbL soit partagée sous la même licence, sous une forme lisible par machine. Ces couches sont extraites de l'Ancient World Mapping Center, d'OpenStreetMap et de l'Ancient Sites and Monuments Survey, et ces flux sont cette offre. Conservez la mention de la source, partagez toute base adaptée sous ODbL et respectez la licence indiquée sur un objet lorsqu'elle diffère. Chaque flux indique dans son champ alterations ce qui a été modifié à l'import. Les trésors monétaires portent une seconde condition, CC BY-NC 3.0, d'après la description propre de CHRR : usage non commercial uniquement.",
+    "reuseTurtle": "RDF en Turtle : les mêmes notices avec une géométrie GeoSPARQL et des liens skos:closeMatch vers Pleiades et Wikidata, pour un triplestore",
+    "reuseLayers": {
+      "awmcWater": "Mers et eaux intérieures de l'Antiquité, de l'Ancient World Mapping Center. Les polygones marins sont simplifiés à environ 20 m ; les pages sont limitées à 250.",
+      "awmcLines": "Routes, aqueducs, canaux, murs, rivages et centuriation, de l'Ancient World Mapping Center. Filtre : kind.",
+      "awmcAreas": "Emprises urbaines et blocs de centuriation, de l'Ancient World Mapping Center. Filtre : kind.",
+      "awmcRegions": "Étendues de régions et de peuples, tracées comme lignes de limite, de l'Ancient World Mapping Center.",
+      "awmcFeatures": "Ponts, mines et carrières, barrages, cimetières, forts et tumulus, de l'Ancient World Mapping Center. Filtre : kind.",
+      "coinHoards": "Lieux de découverte de trésors monétaires, de Coin Hoards of the Roman Republic (ODbL 1.0 et CC BY-NC 3.0 ; usage non commercial uniquement).",
+      "limes": "Les tronçons de la frontière, par secteur : tracés d'après OpenStreetMap (ODbL) et OpenHistoricalMap (CC0), d'après les tracés de vici.org, et approchés d'après l'Ancient World Mapping Center. Chaque objet indique sa source et sa licence. Filtres : kind et source.",
+      "surveySites": "Sites de prospection datés, sélectionnés dans l'Ancient Sites and Monuments Survey (ODbL 1.0) à partir de quatre sources amont. Chaque objet indique sa propre source et sa licence. Filtres : kind et source."
+    },
+    "reuseParamKind": "Flux ODbL qui en ont un : une valeur parmi les types propres à la couche, par exemple road ou aqueduct pour awmc-lines. Une valeur inconnue est refusée avec 400.",
+    "reuseParamSource": "limes et survey-sites uniquement : la source amont d'un objet, par exemple osm, awmc ou cornwall-her.",
+    "reuseExampleOdblLabel": "Exemples : routes romaines autour de Cologne d'après l'Ancient World Mapping Center ; la frontière tracée d'après OpenStreetMap, en Turtle"
   },
   "impressum": {
     "title": "Avis juridique",
@@ -2213,5 +2230,8 @@
         }
       }
     }
+  },
+  "imageCredit": {
+    "unknown": "Crédit inconnu"
   }
 }

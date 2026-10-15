@@ -4,7 +4,7 @@
   const props = defineProps<{ images: SiteImage[] }>()
 
   const { t } = useI18n()
-  const { buildUrl, buildCredit } = useImageUrl()
+  const { buildUrl } = useImageUrl()
   const activeIndex = ref(0)
 
   const activeImage = computed(() => props.images[activeIndex.value] ?? null)
@@ -41,7 +41,7 @@
         </p>
         <!-- Attribution is a licence obligation, not a nicety, so it is never
              collapsed behind an interaction. -->
-        <p class="datum text-[0.6875rem]">{{ buildCredit(activeImage) }}</p>
+        <UiImageCredit :attribution="activeImage.attribution" :licence="activeImage.licence" />
       </figcaption>
     </figure>
 

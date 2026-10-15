@@ -6,24 +6,49 @@
    * "non-commercial" the way the DARE basemap specifically is, per its own
    * NC-credited source layers (see CLAUDE.md's antiquity-basemaps section).
    */
+  import { ODBL_FEED_LAYERS, odblFeedPath } from '#shared/utils/odbl-feeds'
+
   const { t } = useI18n()
   const config = useRuntimeConfig()
   const base = config.public.siteUrl.replace(/\/$/, '')
 
-  /** The query schema of `/api/data/sites.geojson` and `/api/data/sites.lp.json`, as one list. */
+  /**
+   * The parameters of the feeds, as one list: `bbox`, `limit` and `offset` are
+   * common to all of them; the rest say in their own hint which feeds take them.
+   */
   const feedParameters = [
     { name: 'bbox', hint: 'licence.reuseParamBbox' },
     { name: 'category', hint: 'licence.reuseParamCategory' },
     { name: 'limit', hint: 'licence.reuseParamLimit' },
     { name: 'offset', hint: 'licence.reuseParamOffset' },
     { name: 'dated', hint: 'licence.reuseParamDated' },
+    { name: 'kind', hint: 'licence.reuseParamKind' },
+    { name: 'source', hint: 'licence.reuseParamSource' },
   ]
 
   const exampleQuery = 'bbox=6,50,8,52&category=fortification&limit=100'
   const exampleUrls = [
     `${base}/api/data/sites.geojson?${exampleQuery}&offset=100`,
     `${base}/api/data/sites.lp.json?${exampleQuery}&offset=100`,
+    `${base}/api/data/sites.ttl?${exampleQuery}&offset=100`,
   ]
+  const odblExampleUrls = [
+    `${base}/api/odbl/awmc-lines.geojson?bbox=6,50,8,52&kind=road&limit=100`,
+    `${base}/api/odbl/limes.ttl?source=osm&limit=100`,
+  ]
+
+  /**
+   * The ODbL feeds, in the order they are listed. The layer ids come from
+   * `shared/utils/odbl-feeds.ts`, which the endpoint reads too, so the page and
+   * the route cannot disagree about what exists; `i18nKey` is the camelCase of
+   * each id because a hyphen is not safe in a message path.
+   */
+  const odblFeeds = ODBL_FEED_LAYERS.map((layer) => ({
+    layer,
+    i18nKey: `licence.reuseLayers.${layer.replace(/-(\w)/g, (_, letter: string) => letter.toUpperCase())}`,
+    geojsonPath: odblFeedPath(layer, 'geojson'),
+    turtlePath: odblFeedPath(layer, 'ttl'),
+  }))
 
   useHead({ title: t('licence.title') })
   useSeoMeta({ description: t('licence.intro') })
@@ -198,9 +223,11 @@
     </section>
 
     <!--
-      This atlas takes from the open-data commons; the two feeds below are what
-      it gives back. Listed on the licence page rather than hidden in the API
-      documentation because reuse terms and the means of reuse belong together.
+      This atlas takes from the open-data commons; the feeds below are what it
+      gives back, grouped by the licence that governs them. Listed on the licence
+      page rather than hidden in the API documentation because reuse terms and
+      the means of reuse belong together. For the ODbL group it is also a duty:
+      ODbL §4.6 asks that an adapted database be offered in a machine-readable form.
     -->
     <section class="mt-6 border-t border-paper-200 pt-4 dark:border-night-700">
       <h2 id="reuse" class="font-display text-xl text-ink-900 dark:text-paper-100">
@@ -209,35 +236,71 @@
       <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
         {{ t('licence.reuseBody') }}
       </p>
-      <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
-        {{ t('licence.reuseNotIncluded') }}
-      </p>
-      <ul class="mt-3 space-y-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
-        <li>
-          <a
-            href="/api/data/sites.geojson"
-            class="font-mono text-ink-900 underline decoration-paper-400 underline-offset-2 dark:text-paper-100"
-            >/api/data/sites.geojson</a
-          >
-          — {{ t('licence.reuseGeojson') }}
-        </li>
-        <li>
-          <a
-            href="/api/data/sites.lp.json"
-            class="font-mono text-ink-900 underline decoration-paper-400 underline-offset-2 dark:text-paper-100"
-            >/api/data/sites.lp.json</a
-          >
-          — {{ t('licence.reuseLinkedPlaces') }}
-        </li>
-        <li>
-          <a
-            href="/api/survey-sites/sites.geojson"
-            class="font-mono text-ink-900 underline decoration-paper-400 underline-offset-2 dark:text-paper-100"
-            >/api/survey-sites/sites.geojson</a
-          >
-          — {{ t('licence.reuseSurveyFeed') }}
-        </li>
-      </ul>
+
+      <!-- One block per licence, so the terms a feed is under sit directly above it. -->
+      <section class="leaf mt-4 p-4" aria-labelledby="reuse-shared">
+        <h3 id="reuse-shared" class="font-display text-lg text-ink-900 dark:text-paper-100">
+          {{ t('licence.reuseGroupSharedHeading') }}
+        </h3>
+        <p class="mt-1 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
+          {{ t('licence.reuseGroupSharedBody') }}
+        </p>
+        <p class="mt-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
+          {{ t('licence.reuseNotIncluded') }}
+        </p>
+        <ul class="mt-3 space-y-2 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
+          <li>
+            <a
+              href="/api/data/sites.geojson"
+              class="font-mono text-ink-900 underline decoration-paper-400 underline-offset-2 dark:text-paper-100"
+              >/api/data/sites.geojson</a
+            >
+            — {{ t('licence.reuseGeojson') }}
+          </li>
+          <li>
+            <a
+              href="/api/data/sites.lp.json"
+              class="font-mono text-ink-900 underline decoration-paper-400 underline-offset-2 dark:text-paper-100"
+              >/api/data/sites.lp.json</a
+            >
+            — {{ t('licence.reuseLinkedPlaces') }}
+          </li>
+          <li>
+            <a
+              href="/api/data/sites.ttl"
+              class="font-mono text-ink-900 underline decoration-paper-400 underline-offset-2 dark:text-paper-100"
+              >/api/data/sites.ttl</a
+            >
+            — {{ t('licence.reuseTurtle') }}
+          </li>
+        </ul>
+      </section>
+
+      <section class="leaf mt-4 p-4" aria-labelledby="reuse-odbl">
+        <h3 id="reuse-odbl" class="font-display text-lg text-ink-900 dark:text-paper-100">
+          {{ t('licence.reuseGroupOdblHeading') }}
+        </h3>
+        <p class="mt-1 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
+          {{ t('licence.reuseGroupOdblBody') }}
+        </p>
+        <ul class="mt-3 space-y-3 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
+          <li v-for="feed in odblFeeds" :key="feed.layer">
+            {{ t(feed.i18nKey) }}
+            <span class="mt-1 flex flex-wrap gap-x-4 gap-y-1 font-mono text-xs">
+              <a
+                :href="feed.geojsonPath"
+                class="font-mono text-ink-900 underline decoration-paper-400 underline-offset-2 dark:text-paper-100"
+                >{{ feed.geojsonPath }}</a
+              >
+              <a
+                :href="feed.turtlePath"
+                class="font-mono text-ink-900 underline decoration-paper-400 underline-offset-2 dark:text-paper-100"
+                >{{ feed.turtlePath }}</a
+              >
+            </span>
+          </li>
+        </ul>
+      </section>
 
       <h3 class="mt-5 font-display text-lg text-ink-900 dark:text-paper-100">
         {{ t('licence.reuseParamsHeading') }}
@@ -261,6 +324,18 @@
       </p>
       <ul class="mt-1 space-y-1 text-xs">
         <li v-for="url in exampleUrls" :key="url">
+          <a
+            :href="url"
+            class="block break-all font-mono text-ink-900 underline decoration-paper-400 underline-offset-2 dark:text-paper-100"
+            >{{ url }}</a
+          >
+        </li>
+      </ul>
+      <p class="mt-4 text-sm leading-relaxed text-ink-700 dark:text-paper-200">
+        {{ t('licence.reuseExampleOdblLabel') }}
+      </p>
+      <ul class="mt-1 space-y-1 text-xs">
+        <li v-for="url in odblExampleUrls" :key="url">
           <a
             :href="url"
             class="block break-all font-mono text-ink-900 underline decoration-paper-400 underline-offset-2 dark:text-paper-100"

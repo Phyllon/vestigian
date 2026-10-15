@@ -288,7 +288,7 @@ over h3 1.15; read `corsHandler.js` and h3's `createOriginHeaders` too):
   which there are none by design; not changed.
 - Preflights from a disallowed origin still answer `204` with `allow-methods` and an
   echo of the requested headers, but without ACAO, so the browser refuses the request.
-- `/api/data/sites.geojson` and `sites.lp.json` send an explicit `ACAO: *` — public,
+- `/api/data/sites.geojson`, `sites.lp.json`, `sites.ttl` and `/api/odbl/*` send an explicit `ACAO: *` — public,
   read-only, bounded; intended.
 - The CDN pull zone that serves PMTiles (basemap, terrain) is configured in Bunny, not
   here: it must answer `206` to ranges and allow the site origin (runbook §15a step 5).

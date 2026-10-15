@@ -467,7 +467,7 @@
     "overlayPorts": "Porti antichi: Catalogo dei Porti Antichi, Arthur de Graauw (CC BY 4.0), pubblicato anche come DARMC Scholarly Data Series (Harvard).",
     "overlayRoutes": "Percorsi: ORBIS v2, Meeks, Scheidel, Weiland & Arcenas, Stanford University (CC BY 3.0).",
     "overlayMinorFeatures": "Antichità minori (ponti, miniere, cave e altro): Ancient World Mapping Center (ODbL 1.0).",
-    "overlayCoinHoards": "Ripostigli monetari: Coin Hoards of the Roman Republic, American Numismatic Society (CC BY-NC-SA 4.0) — solo uso non commerciale.",
+    "overlayCoinHoards": "Ripostigli monetari: Coin Hoards of the Roman Republic, American Numismatic Society (ODbL 1.0 sul sito, CC BY-NC 3.0 nella descrizione leggibile da macchina) — solo uso non commerciale.",
     "overlayEmpireExtents": "Estensione dell'impero nel tempo: collaboratori di OpenHistoricalMap (CC0 1.0).",
     "overlayInscriptions": "Iscrizioni: Epigraphic Database Heidelberg (CC BY-SA 4.0).",
     "overlayAtticInscriptions": "Iscrizioni attiche: Attic Inscriptions Online (CC BY-SA 3.0).",
@@ -490,24 +490,41 @@
     "satelliteHeading": "Mappa base satellitare",
     "satelliteBody": "La vista satellitare mostra immagini Sentinel-2 senza nuvole di EOX IT Services (Vienna), costruite a partire dai dati aperti ESA Copernicus Sentinel-2. La versione usata da questa app è CC BY-NC-SA 4.0 — solo uso non commerciale, e ogni riutilizzo deve essere condiviso con la stessa licenza.",
     "reuseHeading": "Riutilizzare questi dati",
-    "reuseBody": "Vestigian nasce da fonti con licenza aperta e ripubblica le proprie schede nello stesso spirito. Entrambi i flussi sono in sola lettura, limitati, paginati e aperti alle richieste da altri domini. I testi sono CC BY-SA e i metadati CC0; le licenze delle immagini variano per scheda e non sono incluse.",
-    "reuseNotIncluded": "I feed contengono solo le schede contribuite qui. I livelli di riferimento elencati sopra (strade, zecche, monumenti, iscrizioni e gli altri) non vi sono ripubblicati: prendeteli dalle loro fonti, con le loro licenze. I siti datati del censimento fanno eccezione: hanno un feed proprio, con la propria licenza.",
+    "reuseBody": "Vestigian si basa su fonti con licenza aperta, perciò restituisce i propri record e i dati di riferimento che ha adattato. I feed sono raggruppati per la licenza che li governa. Tutti sono in sola lettura, limitati e paginati, aperti alle richieste cross-origin e offerti in GeoJSON e in RDF (Turtle).",
+    "reuseNotIncluded": "Questi feed contengono solo i record contribuiti qui. I livelli che altri progetti licenziano solo con attribuzione (strade, zecche, monumenti, iscrizioni, i regni confinanti e il resto) non sono ripubblicati: vanno presi dalle loro fonti, con le loro licenze. Le mappe di base sono solo tessere e non sono offerte come dati.",
     "reuseCreditHeading": "Come citare questo atlante",
     "reuseCreditBody": "Vestigian ({url}), CC BY-SA 4.0. Fonti e licenze: {url}/licence",
     "reuseCreditCopy": "Copia l’attribuzione",
     "reuseCreditCopied": "Attribuzione copiata",
     "reuseGeojson": "GeoJSON semplice, per mappe e analisi",
     "reuseLinkedPlaces": "Linked Places Format, lo standard di repertorio geografico della rete Pelagios, con collegamenti closeMatch a Pleiades e Wikidata",
-    "reuseSurveyFeed": "i siti datati del censimento, in GeoJSON. ODbL 1.0 sull'Ancient Sites and Monuments Survey: mantenere il credito e condividere ogni database adattato con la stessa licenza. Ogni elemento nomina la propria fonte e la licenza di questa. Parametri: bbox, kind, source, limit, offset.",
     "reuseParamsHeading": "Parametri di richiesta",
-    "reuseParamsIntro": "Entrambi i feed accettano gli stessi parametri, tutti facoltativi. Le schede arrivano in un ordine stabile e le richieste sono limitate in frequenza.",
-    "reuseParamBbox": "Ovest,sud,est,nord in gradi (WGS 84), per esempio 6,50,8,52. Solo i siti dentro il riquadro. Predefinito: tutto il mondo.",
-    "reuseParamCategory": "Uno tra settlement, fortification, sanctuary, burial, infrastructure, villa, production, findspot, other. Qualsiasi altro valore è rifiutato con 400.",
-    "reuseParamLimit": "Schede per pagina, da 1 a 1000. Predefinito: 500.",
+    "reuseParamsIntro": "Tutti i feed accettano bbox, limit e offset; gli altri parametri indicano a quali feed si applicano. I record arrivano in ordine stabile e le richieste hanno un limite di frequenza.",
+    "reuseParamBbox": "Ovest,sud,est,nord in gradi (WGS 84), per esempio 6,50,8,52. Solo elementi dentro il riquadro. Predefinito: il mondo intero.",
+    "reuseParamCategory": "Solo feed di siti. Una tra settlement, fortification, sanctuary, burial, infrastructure, villa, production, findspot, other. Qualsiasi altro valore è rifiutato con 400.",
+    "reuseParamLimit": "Record per pagina, da 1 a 1000. Predefinito: 500. I livelli ODbL con geometria pesante (acqua, limes) hanno 100 come predefinito e ammettono al massimo 250; un valore maggiore è rifiutato con 400 invece di essere accorciato.",
     "reuseParamOffset": "Schede da saltare. Per ottenere tutto, aumentalo ogni volta di limit finché una pagina restituisce meno schede di limit.",
-    "reuseParamDated": "Solo il feed Linked Places. true restituisce solo le schede con un periodo; le altre non hanno alcuna datazione.",
-    "reuseExampleLabel": "Esempio: fortificazioni attorno a Colonia, seconda pagina da 100",
-    "overlaySurveySites": "Siti datati del censimento: selezionati dall'{survey} (Jensine Andresen; ODbL 1.0) — Villages to Empires, Levante meridionale (Titolo, Università di Torino), tombe a camera siro-palestinesi (Gwiazda), Marmarica (Laguna-Palma) e il LuwianSiteAtlas (Aşınmaz, Mutlu e Zangger), tutti CC BY 4.0; il Piano Paesaggistico Regionale della Sardegna (CC BY 4.0); il Historic Environment Record di Cornovaglia e Scilly (Cornwall Council), Canmore (Historic Environment Scotland) e la National Heritage List for England (Historic England 2026), con Open Government Licence."
+    "reuseParamDated": "Solo feed di siti in Linked Places e Turtle. true restituisce solo i record con un periodo; gli altri non hanno alcuna datazione.",
+    "reuseExampleLabel": "Esempio: fortificazioni intorno a Colonia, seconda pagina da 100",
+    "overlaySurveySites": "Siti datati del censimento: selezionati dall'{survey} (Jensine Andresen; ODbL 1.0) — Villages to Empires, Levante meridionale (Titolo, Università di Torino), tombe a camera siro-palestinesi (Gwiazda), Marmarica (Laguna-Palma) e il LuwianSiteAtlas (Aşınmaz, Mutlu e Zangger), tutti CC BY 4.0; il Piano Paesaggistico Regionale della Sardegna (CC BY 4.0); il Historic Environment Record di Cornovaglia e Scilly (Cornwall Council), Canmore (Historic Environment Scotland) e la National Heritage List for England (Historic England 2026), con Open Government Licence.",
+    "reuseGroupSharedHeading": "Record contribuiti — CC BY-SA e CC0",
+    "reuseGroupSharedBody": "Record di siti scritti e modificati qui, a partire da vici.org e dai suoi collaboratori. Il testo è CC BY-SA e i metadati strutturati sono CC0. Le licenze delle immagini variano per record e non sono incluse.",
+    "reuseGroupOdblHeading": "Dati di riferimento — ODbL 1.0",
+    "reuseGroupOdblBody": "La Open Database Licence chiede che una banca dati adattata da fonti ODbL sia condivisa con la stessa licenza, in forma leggibile da macchina. Questi livelli sono estratti dall'Ancient World Mapping Center, da OpenStreetMap e dall'Ancient Sites and Monuments Survey, e questi feed sono quell'offerta. Mantieni l'attribuzione, condividi ogni banca dati adattata con ODbL e rispetta la licenza indicata su un elemento quando è diversa. Ogni feed indica nel campo alterations che cosa è stato modificato all'importazione. I ripostigli monetari hanno una seconda condizione, CC BY-NC 3.0, secondo la descrizione propria di CHRR: solo uso non commerciale.",
+    "reuseTurtle": "RDF in Turtle: gli stessi record con geometria GeoSPARQL e collegamenti skos:closeMatch a Pleiades e Wikidata, per un triplestore",
+    "reuseLayers": {
+      "awmcWater": "Mari e acque interne dell'antichità, dall'Ancient World Mapping Center. I poligoni marini sono semplificati a circa 20 m; le pagine sono limitate a 250.",
+      "awmcLines": "Strade, acquedotti, canali, mura, linee di costa e centuriazione, dall'Ancient World Mapping Center. Filtro: kind.",
+      "awmcAreas": "Impronte urbane e blocchi di centuriazione, dall'Ancient World Mapping Center. Filtro: kind.",
+      "awmcRegions": "Estensioni di regioni e popoli, disegnate come linee di confine, dall'Ancient World Mapping Center.",
+      "awmcFeatures": "Ponti, miniere e cave, dighe, cimiteri, forti e tumuli, dall'Ancient World Mapping Center. Filtro: kind.",
+      "coinHoards": "Luoghi di ritrovamento di ripostigli monetari, da Coin Hoards of the Roman Republic (ODbL 1.0 e CC BY-NC 3.0; solo uso non commerciale).",
+      "limes": "I tratti della frontiera, per settore: tracciati da OpenStreetMap (ODbL) e OpenHistoricalMap (CC0), dai tracciati di vici.org e approssimati dall'Ancient World Mapping Center. Ogni elemento indica la propria fonte e licenza. Filtri: kind e source.",
+      "surveySites": "Siti di ricognizione datati, selezionati dall'Ancient Sites and Monuments Survey (ODbL 1.0) da quattro fonti a monte. Ogni elemento indica la propria fonte e licenza. Filtri: kind e source."
+    },
+    "reuseParamKind": "Feed ODbL che lo prevedono: un valore tra i tipi propri del livello, come road o aqueduct per awmc-lines. Un valore sconosciuto è rifiutato con 400.",
+    "reuseParamSource": "Solo limes e survey-sites: la fonte a monte di un elemento, come osm, awmc o cornwall-her.",
+    "reuseExampleOdblLabel": "Esempi: strade romane intorno a Colonia dall'Ancient World Mapping Center; la frontiera tracciata da OpenStreetMap, in Turtle"
   },
   "impressum": {
     "title": "Avviso legale",
@@ -2213,5 +2230,8 @@
         }
       }
     }
+  },
+  "imageCredit": {
+    "unknown": "Autore sconosciuto"
   }
 }

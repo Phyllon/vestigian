@@ -354,7 +354,7 @@ because the survey has no period column and a regex over every note matched bibl
   credit (`SURVEY_SITE_ATTRIBUTION`), the popup, and `/licence`. The address given was a Google redirect
   wrapper; its target, `survey.jensineandresen.com`, is what is linked (answers 200 over https).
   The Survey also says: credit the sources, and **share any adapted database under the same licence** (ODbL).
-- **Also exported, apart, and searchable.** `/api/survey-sites/sites.geojson` (see `open-data-feeds.md`
+- **Also exported, apart, and searchable.** `/api/odbl/survey-sites.{geojson,ttl}` (see `open-data-feeds.md`
   for why it is not in the CC BY-SA / CC0 feeds); the names are found by the map search bar
   (`REFERENCE_SEARCH_SOURCES`, `0037_survey_sites_search.sql`, reveal switches the layer on). The
   sitemap needs nothing — there is no page per site.
@@ -363,8 +363,9 @@ because the survey has no period column and a regex over every note matched bibl
 - **No "About this spot" block** (`spotSourceId` unset): `REFERENCE_SOURCES` holds one source per layer
   and this layer has four; the popup carries its own source line and dataset link instead.
 - **ODbL.** The survey file is share-alike; what is stored is four upstream rows' fields as the survey
-  passes them on, each under its own checked licence. Whether the combined layer must itself be offered under
-  ODbL is **not settled** — the maintainer's call, as for the basemap's OSM data.
+  passes them on, each under its own checked licence. The combined layer is offered under ODbL as the
+  Survey asks (and §4.6 requires): `/api/odbl/survey-sites.*`, one of eight such feeds — see
+  `open-data-feeds.md`.
 - **Not seen in a browser.** Tiles verified over HTTP (Levant z7 64 KB, Cornwall z7 150 KB, both `200`);
   the layer, popup and key were typechecked and linted but not looked at. `e2e/reference-overlays.spec.ts`
   lists the layer (written, not run). Cornwall z7 at 150 KB is the heaviest tile of any reference layer —

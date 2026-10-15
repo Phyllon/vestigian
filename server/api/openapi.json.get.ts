@@ -31,6 +31,7 @@ import { contributionSchema } from './contributions/index.post'
 import { querySchema as geojsonQuerySchema } from './data/sites.geojson.get'
 import { paramsSchema as imagePresetParams } from './images/[id]/[preset].get'
 import { paramsSchema as limesSectorParams } from './limes/sectors/[slug].get'
+import { paramsSchema as odblFeedParams, querySchema as odblFeedQuery } from './odbl/[feed].get'
 import { querySchema as moderationQueueQuery } from './moderation/queue.get'
 import { revertSchema } from './moderation/revert.post'
 import { batchSchema } from './moderation/review-batch.post'
@@ -276,6 +277,26 @@ const OPERATION_OVERRIDES: Record<
   },
   '/api/health': {
     get: { responses: { 200: jsonResponse('{ status: "ok", uptime: number }') } },
+  },
+  '/api/odbl/{feed}': {
+    get: {
+      parameters: [
+        ...paramsFromSchema(odblFeedParams, 'path'),
+        ...paramsFromSchema(odblFeedQuery, 'query'),
+      ],
+      responses: {
+        200: {
+          description: 'A GeoJSON FeatureCollection (.geojson) or RDF in Turtle (.ttl).',
+          content: {
+            'application/geo+json': { schema: { type: 'object' } },
+            'text/turtle': { schema: { type: 'string' } },
+          },
+        },
+        400: COMMON_RESPONSES[400],
+        404: errorResponse('No such layer or format.'),
+        429: COMMON_RESPONSES[429],
+      },
+    },
   },
   '/api/images/{id}/{preset}': {
     get: {

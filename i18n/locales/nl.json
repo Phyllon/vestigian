@@ -467,7 +467,7 @@
     "overlayPorts": "Oude havens: Catalogus van oude havens, Arthur de Graauw (CC BY 4.0), ook gepubliceerd als de DARMC Scholarly Data Series (Harvard).",
     "overlayRoutes": "Routes: ORBIS v2, Meeks, Scheidel, Weiland & Arcenas, Stanford University (CC BY 3.0).",
     "overlayMinorFeatures": "Kleine antiquiteiten (bruggen, mijnen, steengroeven en meer): Ancient World Mapping Center (ODbL 1.0).",
-    "overlayCoinHoards": "Muntschatten: Coin Hoards of the Roman Republic, American Numismatic Society (CC BY-NC-SA 4.0) — uitsluitend niet-commercieel gebruik.",
+    "overlayCoinHoards": "Muntschatten: Coin Hoards of the Roman Republic, American Numismatic Society (ODbL 1.0 op de site, CC BY-NC 3.0 in de machineleesbare beschrijving) — uitsluitend niet-commercieel gebruik.",
     "overlayEmpireExtents": "Omvang van het rijk in de tijd: bijdragers van OpenHistoricalMap (CC0 1.0).",
     "overlayInscriptions": "Inscripties: Epigraphic Database Heidelberg (CC BY-SA 4.0).",
     "overlayAtticInscriptions": "Attische inscripties: Attic Inscriptions Online (CC BY-SA 3.0).",
@@ -490,24 +490,41 @@
     "satelliteHeading": "Satelliet-basiskaart",
     "satelliteBody": "De satellietweergave toont wolkenloze Sentinel-2-beelden van EOX IT Services (Wenen), opgebouwd uit open data van ESA Copernicus Sentinel-2. De versie die deze app gebruikt is CC BY-NC-SA 4.0 — alleen niet-commercieel gebruik, en elk hergebruik moet onder dezelfde licentie worden gedeeld.",
     "reuseHeading": "Deze gegevens hergebruiken",
-    "reuseBody": "Vestigian is opgebouwd uit open gelicentieerde bronnen en publiceert zijn eigen records in dezelfde geest terug. Beide feeds zijn alleen-lezen, begrensd, gepagineerd en open voor verzoeken vanaf andere domeinen. Teksten vallen onder CC BY-SA en metadata onder CC0; beeldlicenties verschillen per record en zijn niet inbegrepen.",
-    "reuseNotIncluded": "De feeds bevatten alleen hier bijgedragen records. De hierboven genoemde referentielagen (wegen, munthuizen, monumenten, inscripties en de rest) worden daarin niet opnieuw gepubliceerd: haal ze bij hun eigen bronnen, onder hun eigen licenties. De gedateerde surveylocaties zijn de uitzondering: zij hebben een eigen feed onder hun eigen licentie.",
+    "reuseBody": "Vestigian is gebouwd op open gelicentieerde bronnen en publiceert daarom zijn eigen records en de aangepaste referentiegegevens terug. De feeds zijn gegroepeerd naar de licentie die erop van toepassing is. Alle zijn alleen-lezen, begrensd en gepagineerd, open voor cross-origin-verzoeken en beschikbaar als GeoJSON en als RDF (Turtle).",
+    "reuseNotIncluded": "Deze feeds bevatten alleen hier bijgedragen records. Lagen die andere projecten alleen tegen naamsvermelding licentiëren (wegen, muntplaatsen, monumenten, inscripties, de naburige rijken en de rest) worden niet opnieuw gepubliceerd — haal die bij hun eigen bronnen, onder hun eigen licenties. De basiskaarten zijn alleen kaarttegels en worden niet als gegevens aangeboden.",
     "reuseCreditHeading": "Zo vermeldt u deze atlas",
     "reuseCreditBody": "Vestigian ({url}), CC BY-SA 4.0. Bronnen en licenties: {url}/licence",
     "reuseCreditCopy": "Bronvermelding kopiëren",
     "reuseCreditCopied": "Bronvermelding gekopieerd",
     "reuseGeojson": "eenvoudige GeoJSON, voor kaarten en analyse",
     "reuseLinkedPlaces": "Linked Places Format, de gazetteer-standaard van het Pelagios-netwerk, met closeMatch-verwijzingen naar Pleiades en Wikidata",
-    "reuseSurveyFeed": "de gedateerde surveylocaties, als GeoJSON. ODbL 1.0 over de Ancient Sites and Monuments Survey: behoud de naamsvermelding en deel elke bewerkte database onder dezelfde licentie. Elk object noemt zijn eigen bron en de licentie daarvan. Parameters: bbox, kind, source, limit, offset.",
     "reuseParamsHeading": "Queryparameters",
-    "reuseParamsIntro": "Beide feeds nemen dezelfde parameters, allemaal optioneel. Records komen in een vaste volgorde en verzoeken zijn aan een limiet gebonden.",
-    "reuseParamBbox": "West,zuid,oost,noord in graden (WGS 84), bijvoorbeeld 6,50,8,52. Alleen sites binnen het kader. Standaard: de hele wereld.",
-    "reuseParamCategory": "Eén van settlement, fortification, sanctuary, burial, infrastructure, villa, production, findspot, other. Elke andere waarde wordt met 400 geweigerd.",
-    "reuseParamLimit": "Records per pagina, 1 tot 1000. Standaard: 500.",
+    "reuseParamsIntro": "Alle feeds accepteren bbox, limit en offset; de overige parameters zeggen voor welke feeds ze gelden. Records komen in een vaste volgorde en verzoeken zijn aan een limiet gebonden.",
+    "reuseParamBbox": "West,zuid,oost,noord in graden (WGS 84), bijvoorbeeld 6,50,8,52. Alleen objecten binnen het kader. Standaard: de hele wereld.",
+    "reuseParamCategory": "Alleen site-feeds. Een van settlement, fortification, sanctuary, burial, infrastructure, villa, production, findspot, other. Elke andere waarde wordt met 400 geweigerd.",
+    "reuseParamLimit": "Records per pagina, 1 tot 1000. Standaard: 500. De ODbL-lagen met zware geometrie (water, limes) staan standaard op 100 en staan hooguit 250 toe; een hogere waarde wordt met 400 geweigerd in plaats van ingekort.",
     "reuseParamOffset": "Over te slaan records. Om alles op te halen, verhoogt u het telkens met limit totdat een pagina minder records geeft dan limit.",
-    "reuseParamDated": "Alleen de Linked Places-feed. true geeft alleen records met een periode; de rest heeft helemaal geen datering.",
-    "reuseExampleLabel": "Voorbeeld: vestingwerken rond Keulen, tweede pagina van 100",
-    "overlaySurveySites": "Gedateerde surveylocaties: geselecteerd uit de {survey} (Jensine Andresen; ODbL 1.0) — Villages to Empires, zuidelijke Levant (Titolo, Universiteit van Turijn), Syrisch-Palestijnse kamergraven (Gwiazda), Marmarica (Laguna-Palma) en de LuwianSiteAtlas (Aşınmaz, Mutlu en Zangger), allemaal CC BY 4.0; het Piano Paesaggistico Regionale van Sardinië (CC BY 4.0); het Historic Environment Record van Cornwall en Scilly (Cornwall Council), Canmore (Historic Environment Scotland) en de National Heritage List for England (Historic England 2026), onder de Open Government Licence."
+    "reuseParamDated": "Alleen site-feeds in Linked Places en Turtle. true geeft alleen records met een periode; de andere hebben helemaal geen datering.",
+    "reuseExampleLabel": "Voorbeeld: versterkingen rond Keulen, tweede pagina van 100",
+    "overlaySurveySites": "Gedateerde surveylocaties: geselecteerd uit de {survey} (Jensine Andresen; ODbL 1.0) — Villages to Empires, zuidelijke Levant (Titolo, Universiteit van Turijn), Syrisch-Palestijnse kamergraven (Gwiazda), Marmarica (Laguna-Palma) en de LuwianSiteAtlas (Aşınmaz, Mutlu en Zangger), allemaal CC BY 4.0; het Piano Paesaggistico Regionale van Sardinië (CC BY 4.0); het Historic Environment Record van Cornwall en Scilly (Cornwall Council), Canmore (Historic Environment Scotland) en de National Heritage List for England (Historic England 2026), onder de Open Government Licence.",
+    "reuseGroupSharedHeading": "Bijgedragen records — CC BY-SA en CC0",
+    "reuseGroupSharedBody": "Hier geschreven en bewerkte sitebeschrijvingen, afkomstig van vici.org en zijn bijdragers. De tekst valt onder CC BY-SA en de gestructureerde metadata onder CC0. Beeldlicenties verschillen per record en zijn niet inbegrepen.",
+    "reuseGroupOdblHeading": "Referentiegegevens — ODbL 1.0",
+    "reuseGroupOdblBody": "De Open Database Licence vraagt dat een database die uit ODbL-bronnen is aangepast onder dezelfde licentie en in machineleesbare vorm wordt gedeeld. Deze lagen zijn onttrokken aan het Ancient World Mapping Center, OpenStreetMap en de Ancient Sites and Monuments Survey, en deze feeds zijn dat aanbod. Behoud de naamsvermelding, deel elke aangepaste database onder ODbL en houd je aan de licentie die bij een object staat waar die afwijkt. Elke feed vermeldt in het veld alterations wat bij het importeren is gewijzigd. De muntschatten dragen een tweede voorwaarde, CC BY-NC 3.0, volgens de eigen beschrijving van CHRR: uitsluitend niet-commercieel gebruik.",
+    "reuseTurtle": "RDF in Turtle: dezelfde records met GeoSPARQL-geometrie en skos:closeMatch-koppelingen naar Pleiades en Wikidata, voor een triplestore",
+    "reuseLayers": {
+      "awmcWater": "Zeeën en binnenwateren uit de oudheid, van het Ancient World Mapping Center. Zeepolygonen zijn vereenvoudigd tot ongeveer 20 m; pagina's zijn beperkt tot 250.",
+      "awmcLines": "Wegen, aquaducten, kanalen, muren, kustlijnen en centuriatie, van het Ancient World Mapping Center. Filter: kind.",
+      "awmcAreas": "Stedelijke vlakken en centuriatieblokken, van het Ancient World Mapping Center. Filter: kind.",
+      "awmcRegions": "Uitgestrektheid van regio's en volken, getekend als grenslijnen, van het Ancient World Mapping Center.",
+      "awmcFeatures": "Bruggen, mijnen en steengroeven, dammen, begraafplaatsen, forten en grafheuvels, van het Ancient World Mapping Center. Filter: kind.",
+      "coinHoards": "Vindplaatsen van muntschatten, uit Coin Hoards of the Roman Republic (ODbL 1.0 en CC BY-NC 3.0; uitsluitend niet-commercieel gebruik).",
+      "limes": "De segmenten van de grens, per sector: nagetekend uit OpenStreetMap (ODbL) en OpenHistoricalMap (CC0), uit tracés van vici.org en benaderd uit het Ancient World Mapping Center. Elk object noemt zijn bron en licentie. Filters: kind en source.",
+      "surveySites": "Gedateerde survey-vindplaatsen, geselecteerd uit de Ancient Sites and Monuments Survey (ODbL 1.0) uit vier onderliggende bronnen. Elk object noemt zijn eigen bron en licentie. Filters: kind en source."
+    },
+    "reuseParamKind": "ODbL-feeds die het hebben: een waarde uit de eigen soorten van de laag, zoals road of aqueduct voor awmc-lines. Een onbekende waarde wordt met 400 geweigerd.",
+    "reuseParamSource": "Alleen limes en survey-sites: de onderliggende bron van een object, zoals osm, awmc of cornwall-her.",
+    "reuseExampleOdblLabel": "Voorbeelden: Romeinse wegen rond Keulen uit het Ancient World Mapping Center; de uit OpenStreetMap nagetekende grens, als Turtle"
   },
   "impressum": {
     "title": "Mededeling",
@@ -2213,5 +2230,8 @@
         }
       }
     }
+  },
+  "imageCredit": {
+    "unknown": "Maker onbekend"
   }
 }

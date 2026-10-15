@@ -906,15 +906,15 @@ own Postgres so a visitor's browser asks nobody else for anything (no new CSP or
 no new third-party request). Sources, licences and the facts behind each are in
 `.claude/rules/reference-overlays.md`; the credits are on `/licence`.
 
-| Table                    | Rows (dev, 4 Oct 2026) | Layer / page                                                                 |
-| ------------------------ | ---------------------- | ---------------------------------------------------------------------------- |
-| `antiquity_roman_roads`  | 14,769                 | Overlays → Roman roads                                                       |
-| `antiquity_mints`        | 2,194                  | Overlays → Mints                                                             |
-| `antiquity_monuments`    | 3,437                  | Overlays → Roman monuments                                                   |
-| `antiquity_polities`     | 655 (87 realms)        | Ancient empires → Neighbouring realms (under the slider)                     |
-| `isicily_inscriptions`   | 5,136 (5,009 located)  | Overlays → Sicilian inscriptions, and `/inscriptions/sicily/:id`             |
-| `antiquity_hillforts`    | 4,147                  | Overlays → Hillforts                                                         |
-| `antiquity_survey_sites` | 4,671 (15 Oct 2026)    | Overlays → Dated survey sites; `/api/survey-sites/sites.geojson`; map search |
+| Table                    | Rows (dev, 4 Oct 2026) | Layer / page                                                                      |
+| ------------------------ | ---------------------- | --------------------------------------------------------------------------------- |
+| `antiquity_roman_roads`  | 14,769                 | Overlays → Roman roads                                                            |
+| `antiquity_mints`        | 2,194                  | Overlays → Mints                                                                  |
+| `antiquity_monuments`    | 3,437                  | Overlays → Roman monuments                                                        |
+| `antiquity_polities`     | 655 (87 realms)        | Ancient empires → Neighbouring realms (under the slider)                          |
+| `isicily_inscriptions`   | 5,136 (5,009 located)  | Overlays → Sicilian inscriptions, and `/inscriptions/sicily/:id`                  |
+| `antiquity_hillforts`    | 4,147                  | Overlays → Hillforts                                                              |
+| `antiquity_survey_sites` | 4,671 (15 Oct 2026)    | Overlays → Dated survey sites; `/api/odbl/survey-sites.{geojson,ttl}`; map search |
 
 **Release order — everything in the reference-layers release, in sequence.** The order
 matters: restoring before the deploy finds no tables, and skipping step 5 can serve

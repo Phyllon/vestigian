@@ -457,7 +457,7 @@ test.describe('the basemap switcher', () => {
 
   /**
    * Attribution is the licence condition itself for most of these sources —
-   * de Graauw's ports are CC BY 4.0, ORBIS CC BY 3.0, CHRR CC BY-NC-SA, AWMC
+   * de Graauw's ports are CC BY 4.0, ORBIS CC BY 3.0, CHRR ODbL and CC BY-NC (its sources disagree), AWMC
    * ODbL — and every one of them shipped without any. The gap was invisible
    * until the vici site overlay went off by default, taking with it the one
    * credit line the others were leaning on.

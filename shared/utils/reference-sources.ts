@@ -22,7 +22,8 @@ export const REFERENCE_SOURCES: Record<SpotSourceId, ReferenceSource> = {
   chrr: {
     name: 'Coin Hoards of the Roman Republic',
     url: 'https://numismatics.org/chrr/',
-    licence: 'CC BY-NC-SA 4.0',
+    // The site says ODbL 1.0; its machine-readable VoID says CC BY-NC 3.0. Both are credited.
+    licence: 'ODbL 1.0; CC BY-NC 3.0',
   },
   awmc: {
     name: 'Ancient World Mapping Center',

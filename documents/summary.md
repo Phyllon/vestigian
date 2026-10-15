@@ -286,7 +286,7 @@ mindmap
       Wikidata battles (CC0)
       Catalogue of Ancient Ports (CC BY)
       ORBIS v2 routes (CC BY)
-      CHRR coin hoards (CC BY-NC-SA)
+      CHRR coin hoards (ODbL 1.0 and CC BY-NC 3.0)
       OpenHistoricalMap empire extents (CC0)
       Wikimedia Commons Cichorius Plates, mirrored (public domain)
       Heidelberg UL IIIF, Column of Marcus Aurelius, live proxy (public domain)
@@ -575,6 +575,9 @@ source catalogue through a self-hosted LibreTranslate instance.
 - JSON-LD structured data (`schema.org/Place`) for sites and tracings.
 - Open Graph images: real photo when available, one of eleven static
   category cards otherwise.
+- A **Turtle feed** at `/api/data/sites.ttl` and, for the reference layers adapted from
+  ODbL sources, the **ODbL feeds** at `/api/odbl/<layer>.{geojson,ttl}` — an offer
+  ODbL §4.6 requires (see `.claude/rules/open-data-feeds.md`).
 - A **Linked Places Format feed** at `/api/data/sites.lp.json`, alongside the
   existing GeoJSON one. This project consumes vici.org, EDH, AWMC, OHM, CHRR
   and ORBIS and previously gave back only raw GeoJSON; LPF is what Recogito,
@@ -1176,7 +1179,7 @@ a footnote:
 - **Every later overlay (battles, ports, routes, minor antiquities, coin
   hoards) got the same own-table, own-attribution treatment from the start**
   — and for four of them (ports CC BY, routes CC BY, minor antiquities
-  ODbL, coin hoards CC BY-NC-SA) crediting the source on the map is the
+  ODbL, coin hoards ODbL and CC BY-NC) crediting the source on the map is the
   licence condition itself, not a courtesy. This was missed on first build
   — none of the seven newer overlay sources set a MapLibre `attribution` at
   all — and surfaced only once the vici-sourced site overlay went off by

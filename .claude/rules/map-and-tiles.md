@@ -653,7 +653,7 @@ switched on"), both directions.
 
 **None of them had one.** For four of these sources attribution is the
 licence condition itself — de Graauw's ports are CC BY 4.0, ORBIS CC BY 3.0,
-CHRR CC BY-NC-SA 4.0, AWMC's minor antiquities ODbL 1.0 — so this was a
+CHRR ODbL 1.0 and CC BY-NC 3.0 (its sources disagree; was written here as CC BY-NC-SA 4.0), AWMC's minor antiquities ODbL 1.0 — so this was a
 licence breach, not a polish item. It was invisible while the vici site
 overlay was on by default, because that source carried the one credit line
 (`useViewportTiles`) everything else was silently leaning on; switching it

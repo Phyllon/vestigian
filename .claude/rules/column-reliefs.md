@@ -211,7 +211,10 @@ routes separate from `sites` ones. `useImageUrl.ts`'s `buildCredit` was
 loosened from a `SiteImage`-specific parameter to a small structural
 `CreditedImage` interface (`{ attribution, licence }`) so both the site
 gallery and this feature's plate credit line share one implementation
-rather than two copies of the same three lines. `server/api/columns/
+rather than two copies of the same three lines. That string is now only for
+places a link cannot go (a featured-site card is itself a button); under a
+photograph `UiImageCredit` renders attribution and the licence as a link to
+its text, which the CC licences ask for (`shared/utils/licence-uris.ts`). `server/api/columns/
 marcus-aurelius/manifest.get.ts` and `tile/[...path].get.ts` are a
 different shape entirely — a live pass-through proxy, not a redirect to a
 signed rendition — because nothing about the Marcus Aurelius plates is

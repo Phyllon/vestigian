@@ -1,4 +1,5 @@
 import { IMAGE_PRESETS } from '#shared/types'
+import { licenceLabel } from '#shared/utils/licence-uris'
 import type { ImagePreset, SiteImage } from '#shared/types'
 
 export type { ImagePreset }
@@ -25,9 +26,15 @@ export const useImageUrl = () => {
   const buildUrl = (image: SiteImage, preset: ImagePreset): string =>
     `/api/images/${image.id}/${preset}`
 
-  /** Attribution line rendered under every image, as the licences require. */
+  /**
+   * Attribution as plain text, for the places a link cannot go — a card that is
+   * itself a button. Under a photograph on its own page, `UiImageCredit` renders
+   * the same credit with the licence as a link to its text.
+   */
   const buildCredit = (image: CreditedImage): string => {
-    const parts = [image.attribution, image.licence].filter(Boolean)
+    const parts = [image.attribution, image.licence ? licenceLabel(image.licence) : null].filter(
+      Boolean,
+    )
     return parts.length > 0 ? parts.join(' · ') : 'Credit unknown'
   }
 

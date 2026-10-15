@@ -182,7 +182,7 @@ export const EMPIRE_EXTENT_ATTRIBUTION =
  *
  * **These were missing entirely, and for four of these sources attribution is
  * the licence condition itself** — de Graauw's ports and ORBIS are CC BY,
- * CHRR is CC BY-NC-SA, AWMC's minor antiquities are ODbL, all four requiring
+ * CHRR is ODbL on its site and CC BY-NC 3.0 in its machine-readable description (both are credited), AWMC's minor antiquities are ODbL, all four requiring
  * credit on any produced work. The gap only became visible once the
  * vici-sourced site overlay was switched off by default (see
  * `.claude/rules/map-and-tiles.md`): that source carried the one credit line
@@ -209,7 +209,7 @@ export const MINOR_FEATURE_ATTRIBUTION =
   'Minor antiquities: <a href="https://github.com/AWMC/geodata" target="_blank" rel="noopener">Ancient World Mapping Center</a> (ODbL 1.0)'
 
 export const COIN_HOARD_ATTRIBUTION =
-  'Coin hoards: <a href="https://numismatics.org/chrr/" target="_blank" rel="noopener">Coin Hoards of the Roman Republic</a>, American Numismatic Society (CC BY-NC-SA 4.0)'
+  'Coin hoards: <a href="https://numismatics.org/chrr/" target="_blank" rel="noopener">Coin Hoards of the Roman Republic</a>, American Numismatic Society (ODbL 1.0; CC BY-NC 3.0)'
 
 export const INSCRIPTION_ATTRIBUTION =
   'Inscriptions: <a href="https://edh.ub.uni-heidelberg.de/" target="_blank" rel="noopener">Epigraphic Database Heidelberg</a> (CC BY-SA 4.0)'

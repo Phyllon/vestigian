@@ -738,7 +738,7 @@
     "overlayPorts": "Ancient ports: Catalogue of Ancient Ports, Arthur de Graauw (CC BY 4.0), also published as the DARMC Scholarly Data Series (Harvard).",
     "overlayRoutes": "Routes: ORBIS v2, Meeks, Scheidel, Weiland & Arcenas, Stanford University (CC BY 3.0).",
     "overlayMinorFeatures": "Minor antiquities (bridges, mines, quarries and more): Ancient World Mapping Center (ODbL 1.0).",
-    "overlayCoinHoards": "Coin hoards: Coin Hoards of the Roman Republic, American Numismatic Society (CC BY-NC-SA 4.0) — non-commercial use only.",
+    "overlayCoinHoards": "Coin hoards: Coin Hoards of the Roman Republic, American Numismatic Society (ODbL 1.0 on its site, CC BY-NC 3.0 in its machine-readable description) — non-commercial use only.",
     "overlayEmpireExtents": "Empire extent over time: OpenHistoricalMap contributors (CC0 1.0).",
     "overlayInscriptions": "Inscriptions: Epigraphic Database Heidelberg (CC BY-SA 4.0).",
     "overlayAtticInscriptions": "Attic inscriptions: Attic Inscriptions Online (CC BY-SA 3.0).",
@@ -759,24 +759,41 @@
     "iconsHeading": "Symbols and typefaces",
     "iconsBody": "Several map symbols are from game-icons.net (CC BY 3.0): icons made by Delapouite and Lorc, available on https://game-icons.net. The others are Lucide icons (ISC licence). The typefaces — Fraunces, IBM Plex Sans, IBM Plex Mono and, for map labels, Noto Sans — are under the SIL Open Font Licence 1.1 and are served from this site, not from a font service.",
     "reuseHeading": "Reusing this data",
-    "reuseBody": "Vestigian is built from openly licensed sources, so it publishes its own records back in the same spirit. Both feeds are read-only, bounded and paged, and open to cross-origin requests. Text is CC BY-SA and metadata CC0; image licences vary per record and are not included.",
-    "reuseNotIncluded": "The feeds carry only records contributed here. The reference layers listed above (roads, mints, monuments, inscriptions and the rest) are not republished in them — take those from their own sources, under their own licences. The dated survey sites are the one exception, in a feed of their own under their own licence.",
+    "reuseBody": "Vestigian is built from openly licensed sources, so it publishes back its own records and the reference data it adapted. The feeds are grouped by the licence that governs them. All are read-only, bounded and paged, open to cross-origin requests, and offered as GeoJSON and as RDF (Turtle).",
+    "reuseNotIncluded": "These feeds carry only records contributed here. Layers that other projects licence for credit alone (roads, mints, monuments, inscriptions, the neighbouring realms and the rest) are not republished — take those from their own sources, under their own licences. The basemaps are map tiles only and are not offered as data.",
     "reuseCreditHeading": "How to credit this atlas",
     "reuseCreditBody": "Vestigian ({url}), CC BY-SA 4.0. Sources and licences: {url}/licence",
     "reuseCreditCopy": "Copy the credit line",
     "reuseCreditCopied": "Credit line copied",
     "reuseGeojson": "plain GeoJSON, for maps and analysis",
     "reuseLinkedPlaces": "Linked Places Format, the gazetteer standard read by the Pelagios Network, with closeMatch links to Pleiades and Wikidata",
-    "reuseSurveyFeed": "the dated survey sites, as GeoJSON. ODbL 1.0 over the Ancient Sites and Monuments Survey: keep the credit and share any adapted database under the same licence. Each feature names its own source and that source's licence. Parameters: bbox, kind, source, limit, offset.",
     "reuseParamsHeading": "Query parameters",
-    "reuseParamsIntro": "Both feeds take the same parameters, all optional. Records come back in a stable order, and requests are rate-limited.",
-    "reuseParamBbox": "West,south,east,north in degrees (WGS 84), for example 6,50,8,52. Only sites inside the box. Default: the whole world.",
-    "reuseParamCategory": "One of settlement, fortification, sanctuary, burial, infrastructure, villa, production, findspot, other. Any other value is refused with 400.",
-    "reuseParamLimit": "Records per page, 1 to 1000. Default: 500.",
+    "reuseParamsIntro": "All feeds take bbox, limit and offset; the other parameters say which feeds they apply to. Records come back in a stable order, and requests are rate-limited.",
+    "reuseParamBbox": "West,south,east,north in degrees (WGS 84), for example 6,50,8,52. Only features inside the box. Default: the whole world.",
+    "reuseParamCategory": "Site feeds only. One of settlement, fortification, sanctuary, burial, infrastructure, villa, production, findspot, other. Any other value is refused with 400.",
+    "reuseParamLimit": "Records per page, 1 to 1000. Default: 500. The ODbL layers with heavy geometry (water, limes) default to 100 and allow at most 250; a larger limit is refused with 400 rather than shortened.",
     "reuseParamOffset": "Records to skip. To fetch everything, raise it by limit each time until a page comes back with fewer records than limit.",
-    "reuseParamDated": "Linked Places feed only. true returns only records that carry a period; the others have no dating at all.",
+    "reuseParamDated": "Linked Places and Turtle site feeds only. true returns only records that carry a period; the others have no dating at all.",
     "reuseExampleLabel": "Example: fortifications around Cologne, second page of 100",
-    "overlaySurveySites": "Dated survey sites: selected from the {survey} (Jensine Andresen; ODbL 1.0) — Villages to Empires, South Levant (Titolo, University of Turin), Syro-Palestinian chamber tombs (Gwiazda), Marmarica (Laguna-Palma) and the LuwianSiteAtlas (Aşınmaz, Mutlu and Zangger), all CC BY 4.0; the Sardinian Piano Paesaggistico Regionale (CC BY 4.0); the Cornwall and Scilly Historic Environment Record (Cornwall Council), Canmore (Historic Environment Scotland) and the National Heritage List for England (Historic England 2026), under the Open Government Licence."
+    "overlaySurveySites": "Dated survey sites: selected from the {survey} (Jensine Andresen; ODbL 1.0) — Villages to Empires, South Levant (Titolo, University of Turin), Syro-Palestinian chamber tombs (Gwiazda), Marmarica (Laguna-Palma) and the LuwianSiteAtlas (Aşınmaz, Mutlu and Zangger), all CC BY 4.0; the Sardinian Piano Paesaggistico Regionale (CC BY 4.0); the Cornwall and Scilly Historic Environment Record (Cornwall Council), Canmore (Historic Environment Scotland) and the National Heritage List for England (Historic England 2026), under the Open Government Licence.",
+    "reuseGroupSharedHeading": "Contributed records — CC BY-SA and CC0",
+    "reuseGroupSharedBody": "Site records written and edited here, from vici.org and its contributors. Text is CC BY-SA and structured metadata is CC0. Image licences vary per record and are not included.",
+    "reuseGroupOdblHeading": "Reference data — ODbL 1.0",
+    "reuseGroupOdblBody": "The Open Database Licence asks that a database adapted from ODbL sources is shared under the same licence, in a machine-readable form. These layers are extracted from the Ancient World Mapping Center, OpenStreetMap and the Ancient Sites and Monuments Survey, and these feeds are that offer. Keep the credit, share any adapted database under ODbL, and respect the licence named on a feature where it differs. Each feed says in its alterations field what was changed on the way in. The coin hoards carry a second term, CC BY-NC 3.0, from CHRR's own description: non-commercial use only.",
+    "reuseTurtle": "RDF in Turtle: the same records with GeoSPARQL geometry and skos:closeMatch links to Pleiades and Wikidata, for a triple store",
+    "reuseLayers": {
+      "awmcWater": "Ancient seas and inland water, from the Ancient World Mapping Center. Sea polygons are simplified to about 20 m; pages are limited to 250.",
+      "awmcLines": "Roads, aqueducts, canals, walls, shorelines and centuriation, from the Ancient World Mapping Center. Filter with kind.",
+      "awmcAreas": "Urban footprints and centuriation blocks, from the Ancient World Mapping Center. Filter with kind.",
+      "awmcRegions": "Extents of regions and peoples, drawn as boundary lines, from the Ancient World Mapping Center.",
+      "awmcFeatures": "Bridges, mines and quarries, dams, cemeteries, forts and tumuli, from the Ancient World Mapping Center. Filter with kind.",
+      "coinHoards": "Coin-hoard findspots, from Coin Hoards of the Roman Republic (ODbL 1.0 and CC BY-NC 3.0; non-commercial use only).",
+      "limes": "The frontier's segments, by sector: traced from OpenStreetMap (ODbL) and OpenHistoricalMap (CC0), from vici.org tracings, and approximated from the Ancient World Mapping Center. Each feature names its source and licence. Filter with kind and source.",
+      "surveySites": "Dated survey sites, selected from the Ancient Sites and Monuments Survey (ODbL 1.0) over four upstream sources. Each feature names its own source and licence. Filter with kind and source."
+    },
+    "reuseParamKind": "ODbL feeds that have one: a value from that layer's own kinds, such as road or aqueduct for awmc-lines. An unknown value is refused with 400.",
+    "reuseParamSource": "limes and survey-sites only: the upstream source a feature came through, such as osm, awmc or cornwall-her.",
+    "reuseExampleOdblLabel": "Examples: Roman roads around Cologne from the Ancient World Mapping Center; the frontier traced from OpenStreetMap, as Turtle"
   },
   "impressum": {
     "title": "Legal notice",
@@ -2213,5 +2230,8 @@
         }
       }
     }
+  },
+  "imageCredit": {
+    "unknown": "Credit unknown"
   }
 }
