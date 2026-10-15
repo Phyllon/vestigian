@@ -485,7 +485,7 @@
     "reuseBody": "Vestigian entsteht aus offen lizenzierten Quellen und veröffentlicht seine eigenen Einträge im selben Geist zurück. Beide Feeds sind schreibgeschützt, begrenzt, seitenweise abrufbar und für Anfragen von anderen Domains geöffnet. Texte stehen unter CC BY-SA, Metadaten unter CC0; Bildlizenzen unterscheiden sich je Eintrag und sind nicht enthalten.",
     "reuseNotIncluded": "Die Feeds enthalten nur hier beigetragene Einträge. Die oben genannten Referenzebenen (Straßen, Münzstätten, Bauwerke, Inschriften und die übrigen) werden darin nicht erneut veröffentlicht – beziehen Sie sie aus ihren eigenen Quellen, unter deren Lizenzen.",
     "reuseCreditHeading": "So nennen Sie diesen Atlas",
-    "reuseCreditBody": "Vestigian ({url}), CC BY-SA 4.0. Die Einträge stammen von Vici.org (René Voorburg und Mitwirkende). Weitere Quellen und Lizenzen: {url}/licence",
+    "reuseCreditBody": "Vestigian ({url}), CC BY-SA 4.0. Quellen und Lizenzen: {url}/licence",
     "reuseCreditCopy": "Namensnennung kopieren",
     "reuseCreditCopied": "Namensnennung kopiert",
     "reuseGeojson": "einfaches GeoJSON, für Karten und Auswertungen",

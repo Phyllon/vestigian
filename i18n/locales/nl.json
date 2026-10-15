@@ -485,7 +485,7 @@
     "reuseBody": "Vestigian is opgebouwd uit open gelicentieerde bronnen en publiceert zijn eigen records in dezelfde geest terug. Beide feeds zijn alleen-lezen, begrensd, gepagineerd en open voor verzoeken vanaf andere domeinen. Teksten vallen onder CC BY-SA en metadata onder CC0; beeldlicenties verschillen per record en zijn niet inbegrepen.",
     "reuseNotIncluded": "De feeds bevatten alleen hier bijgedragen records. De hierboven genoemde referentielagen (wegen, munthuizen, monumenten, inscripties en de rest) worden daarin niet opnieuw gepubliceerd: haal ze bij hun eigen bronnen, onder hun eigen licenties.",
     "reuseCreditHeading": "Zo vermeldt u deze atlas",
-    "reuseCreditBody": "Vestigian ({url}), CC BY-SA 4.0. De records zijn afkomstig van Vici.org (René Voorburg en bijdragers). Overige bronnen en licenties: {url}/licence",
+    "reuseCreditBody": "Vestigian ({url}), CC BY-SA 4.0. Bronnen en licenties: {url}/licence",
     "reuseCreditCopy": "Bronvermelding kopiëren",
     "reuseCreditCopied": "Bronvermelding gekopieerd",
     "reuseGeojson": "eenvoudige GeoJSON, voor kaarten en analyse",

@@ -485,7 +485,7 @@
     "reuseBody": "Vestigian se construye a partir de fuentes con licencia abierta y publica sus propios registros con el mismo espíritu. Ambos canales son de solo lectura, acotados, paginados y abiertos a peticiones de otros dominios. Los textos están bajo CC BY-SA y los metadatos bajo CC0; las licencias de las imágenes varían según el registro y no se incluyen.",
     "reuseNotIncluded": "Los feeds solo contienen los registros aportados aquí. Las capas de referencia enumeradas arriba (calzadas, cecas, monumentos, inscripciones y las demás) no se republican en ellos: tómelas de sus propias fuentes, con sus propias licencias.",
     "reuseCreditHeading": "Cómo citar este atlas",
-    "reuseCreditBody": "Vestigian ({url}), CC BY-SA 4.0. Los registros proceden de Vici.org (René Voorburg y colaboradores). Otras fuentes y licencias: {url}/licence",
+    "reuseCreditBody": "Vestigian ({url}), CC BY-SA 4.0. Fuentes y licencias: {url}/licence",
     "reuseCreditCopy": "Copiar la atribución",
     "reuseCreditCopied": "Atribución copiada",
     "reuseGeojson": "GeoJSON simple, para mapas y análisis",
