@@ -14,7 +14,6 @@
     restoreView,
     isDark,
     periodYear,
-    isClusteringSites,
     referenceOverlaysActive,
     isShowingPolities,
   } = useBasemapStyle()
@@ -33,10 +32,13 @@
     attachOverlayIcons,
     keepOverlayThroughStyleChanges,
     refreshLimesDimming,
+    refreshSiteTypeFilter,
+    isShowingClusters,
     refreshSiteClustering,
     highlightArrangedSite,
     findFeaturesAtPoint,
   } = useViewportTiles()
+  const { siteFilter: siteTypeFilter } = useSiteTypeFilter()
   const {
     isActive: isFollowingLimes,
     attachLimesOverlay,
@@ -299,10 +301,18 @@
 
   // Changes the tile URL, not the style, so no `styledata` follows to carry it. The
   // rebuilt source has no feature state, so the open record's ring is put back.
-  watch(isClusteringSites, () => {
+  // Follows the setting *and* the site-type filter, which draws every site.
+  watch(isShowingClusters, () => {
     if (!map.value) return
     refreshSiteClustering(map.value)
     highlightSelection(map.value, selectedSiteId.value)
+  })
+
+  // The reader's choice of site kinds. Not a style change either, so nothing
+  // else would put it on layers that are already there.
+  watch(siteTypeFilter, () => {
+    if (!map.value) return
+    refreshSiteTypeFilter(map.value)
   })
 
   watch(isShowingPorts, (isActive) => {

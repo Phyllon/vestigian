@@ -3,7 +3,7 @@
 
   const { t } = useI18n()
   const { loggedIn } = useSession()
-  const { isFollowingLimes, setLimesActive } = useBasemapStyle()
+  const { isFollowingLimes, isShowingSites, setLimesActive } = useBasemapStyle()
   const { selectSite, clearSelection, isPanelOpen, isTracingPanelOpen, isPickerOpen } =
     useSiteQuery()
 
@@ -177,6 +177,12 @@
         class="pointer-events-auto absolute bottom-12 right-3 flex flex-col items-end gap-2 md:right-4"
         :class="controlColumnLift"
       >
+        <!--
+          Lazy and only while the sites are drawn: it narrows a layer that is off
+          by default, so most visitors never download it. Above the gear, so the
+          buttons below it stay where they were when it appears.
+        -->
+        <LazyMapSiteTypeFilter v-if="isShowingSites" />
         <MapSettingsMenu />
         <MapOfflineDownloadControl data-tour="offline" />
         <!-- Beside the locate button it works with: it turns the map, that one moves it. -->

@@ -1,5 +1,10 @@
 import { LngLat } from 'maplibre-gl'
-import type { FilterSpecification, Map as MapLibreMap, MapGeoJSONFeature } from 'maplibre-gl'
+import type {
+  FilterSpecification,
+  GeoJSONSource,
+  Map as MapLibreMap,
+  MapGeoJSONFeature,
+} from 'maplibre-gl'
 
 export const OVERLAY_SOURCE_ID = 'vestigian-data'
 export const SITE_LAYER_ID = 'vestigian-sites'
@@ -73,6 +78,21 @@ export const useViewportTiles = () => {
   const { sheetTone, isFollowingLimes, isShowingSites, isClusteringSites, view } = useBasemapStyle()
   const { getArrangedIds, resetArrangement, refreshArrangement, selectArrangedSite } =
     useSiteArrangement()
+  const {
+    isFiltering: isFilteringSiteTypes,
+    siteFilter: siteTypeFilter,
+    tracingFilter: tracingTypeFilter,
+  } = useSiteTypeFilter()
+
+  /**
+   * Counted clusters, unless the reader has asked for every site or has
+   * narrowed the map to some kinds of site. A cluster counts everything under
+   * it and the tile cannot say how many are of the chosen kinds, so a filtered
+   * map is drawn from the every-site tiles and filtered in the browser. The
+   * "every site" setting is not touched; it applies again when the filter is
+   * cleared. See `useSiteTypeFilter`.
+   */
+  const isShowingClusters = computed(() => isClusteringSites.value && !isFilteringSiteTypes.value)
 
   /**
    * Keyed on the sheet, not the theme. Over an antiquity raster the ground is
@@ -207,7 +227,7 @@ export const useViewportTiles = () => {
    * clusters left every-site markers drawn among them.
    */
   const buildSiteTilesUrl = (): string =>
-    `${window.location.origin}/api/tiles${isClusteringSites.value ? '' : '/every'}/{z}/{x}/{y}.mvt`
+    `${window.location.origin}/api/tiles${isShowingClusters.value ? '' : '/every'}/{z}/{x}/{y}.mvt`
 
   /**
    * The ids the arrangement draws itself (`useSiteArrangement`), left out of
@@ -219,17 +239,29 @@ export const useViewportTiles = () => {
     buildArrangedExclusionFilter(getArrangedIds())
 
   const buildSiteLayerFilter = (): FilterSpecification | null =>
-    combineFilters(isFollowingLimes.value ? IS_NOT_FORTIFICATION : null, buildArrangedExclusion())
+    combineFilters(
+      isFollowingLimes.value ? IS_NOT_FORTIFICATION : null,
+      siteTypeFilter.value,
+      buildArrangedExclusion(),
+    )
 
   const buildFortLayerFilter = (): FilterSpecification | null =>
-    combineFilters(IS_FORTIFICATION, buildArrangedExclusion())
+    combineFilters(IS_FORTIFICATION, siteTypeFilter.value, buildArrangedExclusion())
+
+  /** The selection ring and the labels: whatever the icon layer draws, and no more. */
+  const buildAccompanimentLayerFilter = (): FilterSpecification | null =>
+    combineFilters(siteTypeFilter.value, buildArrangedExclusion())
+
+  /** `filter` is left off a layer that has none: MapLibre rejects a literal `undefined`. */
+  const withFilter = (filter: FilterSpecification | null): { filter?: FilterSpecification } =>
+    filter ? { filter } : {}
 
   const applyArrangedExclusion = (map: MapLibreMap): void => {
     if (!map.getLayer(SITE_LAYER_ID)) return
     map.setFilter(SITE_LAYER_ID, buildSiteLayerFilter())
     map.setFilter(LIMES_FORT_LAYER_ID, buildFortLayerFilter())
-    map.setFilter(SITE_HALO_LAYER_ID, buildArrangedExclusion())
-    map.setFilter(SITE_LABEL_LAYER_ID, buildArrangedExclusion())
+    map.setFilter(SITE_HALO_LAYER_ID, buildAccompanimentLayerFilter())
+    map.setFilter(SITE_LABEL_LAYER_ID, buildAccompanimentLayerFilter())
   }
 
   /**
@@ -244,6 +276,7 @@ export const useViewportTiles = () => {
     const arrangedLayers = buildArrangementLayers({
       palette: colours,
       isFollowingLimes: isFollowingLimes.value,
+      typeFilter: siteTypeFilter.value,
     })
 
     // The arrangement's source is new and empty, so what the last one hid is
@@ -266,6 +299,7 @@ export const useViewportTiles = () => {
       type: 'line',
       source: OVERLAY_SOURCE_ID,
       'source-layer': 'tracings',
+      ...withFilter(tracingTypeFilter.value),
       layout: { 'line-cap': 'round', 'line-join': 'round' },
       paint: {
         'line-color': colours.tracing,
@@ -282,7 +316,7 @@ export const useViewportTiles = () => {
       type: 'circle',
       source: OVERLAY_SOURCE_ID,
       'source-layer': 'clusters',
-      layout: { visibility: isClusteringSites.value ? 'visible' : 'none' },
+      layout: { visibility: isShowingClusters.value ? 'visible' : 'none' },
       paint: {
         'circle-color': colours.cluster,
         // Counted clusters are the loudest thing on the sheet below zoom 9, and
@@ -317,7 +351,7 @@ export const useViewportTiles = () => {
         'text-font': [MAP_LABEL_FONT],
         'text-size': 12,
         'text-allow-overlap': true,
-        visibility: isClusteringSites.value ? 'visible' : 'none',
+        visibility: isShowingClusters.value ? 'visible' : 'none',
       },
       paint: {
         'text-color': colours.clusterText,
@@ -335,6 +369,7 @@ export const useViewportTiles = () => {
       type: 'circle',
       source: OVERLAY_SOURCE_ID,
       'source-layer': 'sites',
+      ...withFilter(siteTypeFilter.value),
       paint: {
         // Doubled alongside `ICON_DISPLAY_PIXELS` in `useSiteIcons.ts` — left
         // at the old radius once already, the ring sat inside the now-larger
@@ -360,9 +395,12 @@ export const useViewportTiles = () => {
       /**
        * While the frontier is showing, the fortifications are drawn by the
        * layer below instead. Without this they are drawn by both and every fort
-       * on the Rhine carries two stacked glyphs.
+       * on the Rhine carries two stacked glyphs. The reader's choice of site
+       * kinds narrows it further.
        */
-      ...(isFollowingLimes.value ? { filter: IS_NOT_FORTIFICATION } : {}),
+      ...withFilter(
+        combineFilters(isFollowingLimes.value ? IS_NOT_FORTIFICATION : null, siteTypeFilter.value),
+      ),
       layout: {
         'icon-image': buildSiteIconExpression(),
         'icon-size': MARKER_ICON_SIZE,
@@ -398,7 +436,7 @@ export const useViewportTiles = () => {
       source: OVERLAY_SOURCE_ID,
       'source-layer': 'sites',
       minzoom: 7,
-      filter: IS_FORTIFICATION,
+      filter: combineFilters(IS_FORTIFICATION, siteTypeFilter.value) ?? IS_FORTIFICATION,
       layout: {
         visibility: isFollowingLimes.value ? 'visible' : 'none',
         'icon-image': buildLimesRecordIconExpression(),
@@ -417,6 +455,7 @@ export const useViewportTiles = () => {
       type: 'symbol',
       source: OVERLAY_SOURCE_ID,
       'source-layer': 'sites',
+      ...withFilter(siteTypeFilter.value),
       minzoom: 12,
       layout: {
         'text-field': ['get', 'title'],
@@ -511,12 +550,42 @@ export const useViewportTiles = () => {
     map.setPaintProperty(CLUSTER_COUNT_LAYER_ID, 'text-opacity', following ? 0.45 : 1)
     map.setFilter(SITE_LAYER_ID, buildSiteLayerFilter())
     map.setLayoutProperty(LIMES_FORT_LAYER_ID, 'visibility', following ? 'visible' : 'none')
-    map.setFilter(ARRANGED_SITE_LAYER_ID, buildArrangedSiteFilter(following))
+    map.setFilter(ARRANGED_SITE_LAYER_ID, buildArrangedSiteFilter(following, siteTypeFilter.value))
     map.setLayoutProperty(
       ARRANGED_LIMES_FORT_LAYER_ID,
       'visibility',
       following ? 'visible' : 'none',
     )
+  }
+
+  /**
+   * Puts the reader's choice of site kinds on every layer that draws a site or
+   * a tracing, live, without a style reload — the same reason as
+   * `refreshLimesDimming` above: a filter is not part of what a style swap
+   * carries, so nothing else would deliver it to layers already on the map.
+   *
+   * The arrangement is cleared first. Its members were laid out among sites
+   * that may no longer be shown, and a ring with gaps in it is worse than a
+   * moment with the markers at their true coordinates; the next `idle` lays it
+   * out again from what is left.
+   */
+  const refreshSiteTypeFilter = (map: MapLibreMap): void => {
+    if (!map.getSource(OVERLAY_SOURCE_ID)) return
+
+    resetArrangement()
+    const arrangement = map.getSource<GeoJSONSource>(ARRANGEMENT_SOURCE_ID)
+    arrangement?.setData({ type: 'FeatureCollection', features: [] })
+
+    map.setFilter(TRACING_LAYER_ID, tracingTypeFilter.value)
+    map.setFilter(SITE_LAYER_ID, buildSiteLayerFilter())
+    map.setFilter(LIMES_FORT_LAYER_ID, buildFortLayerFilter())
+    map.setFilter(SITE_HALO_LAYER_ID, buildAccompanimentLayerFilter())
+    map.setFilter(SITE_LABEL_LAYER_ID, buildAccompanimentLayerFilter())
+    map.setFilter(
+      ARRANGED_SITE_LAYER_ID,
+      buildArrangedSiteFilter(isFollowingLimes.value, siteTypeFilter.value),
+    )
+    map.setFilter(ARRANGED_LIMES_FORT_LAYER_ID, buildArrangedLimesFortFilter(siteTypeFilter.value))
   }
 
   /**
@@ -530,6 +599,7 @@ export const useViewportTiles = () => {
     const hasChanged = refreshArrangement(map, {
       sourceId: OVERLAY_SOURCE_ID,
       sourceLayer: 'sites',
+      filter: siteTypeFilter.value,
     })
     if (hasChanged) applyArrangedExclusion(map)
   }
@@ -613,6 +683,8 @@ export const useViewportTiles = () => {
     attachOverlayIcons,
     keepOverlayThroughStyleChanges,
     refreshLimesDimming,
+    refreshSiteTypeFilter,
+    isShowingClusters,
     refreshSiteClustering,
     refreshSiteArrangement,
     highlightArrangedSite: selectArrangedSite,

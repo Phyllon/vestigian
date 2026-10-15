@@ -86,12 +86,19 @@ export interface ArrangementLayers {
 export interface ArrangementLayerRequest {
   palette: ArrangementPalette
   isFollowingLimes: boolean
+  /** The reader's choice of site kinds (`useSiteTypeFilter`); `null` shows all. */
+  typeFilter?: FilterSpecification | null
 }
 
 export interface ArrangementRefreshRequest {
   /** The vector source the sites are read from. */
   sourceId: string
   sourceLayer: string
+  /**
+   * Sites the reader has filtered out are not read, so they neither take a
+   * slot in a ring nor push a visible neighbour out of its own.
+   */
+  filter?: FilterSpecification | null
 }
 
 interface LoadedSite {
@@ -113,14 +120,23 @@ const IS_FORTIFICATION: FilterSpecification = ['==', ['get', 'category'], 'forti
  * followed, fortifications are drawn as plans by their own layer and the
  * general one leaves them out, or every fort carries two glyphs.
  */
-export const buildArrangedSiteFilter = (isFollowingLimes: boolean): FilterSpecification =>
-  isFollowingLimes ? ['all', IS_MEMBER, ['!=', ['get', 'category'], 'fortification']] : IS_MEMBER
+export const buildArrangedSiteFilter = (
+  isFollowingLimes: boolean,
+  typeFilter: FilterSpecification | null = null,
+): FilterSpecification => {
+  const clauses: FilterSpecification[] = [IS_MEMBER]
+  if (isFollowingLimes)
+    clauses.push(['!=', ['get', 'category'], 'fortification'] as FilterSpecification)
+  if (typeFilter) clauses.push(typeFilter)
+  return clauses.length === 1 ? IS_MEMBER : (['all', ...clauses] as FilterSpecification)
+}
 
-export const buildArrangedLimesFortFilter = (): FilterSpecification => [
-  'all',
-  IS_MEMBER,
-  IS_FORTIFICATION,
-]
+export const buildArrangedLimesFortFilter = (
+  typeFilter: FilterSpecification | null = null,
+): FilterSpecification =>
+  (typeFilter
+    ? ['all', IS_MEMBER, IS_FORTIFICATION, typeFilter]
+    : ['all', IS_MEMBER, IS_FORTIFICATION]) as FilterSpecification
 
 /**
  * What the tile layers must not draw: the ids this module draws instead.
@@ -187,7 +203,7 @@ export const buildArrangementLayers = (request: ArrangementLayerRequest): Arrang
       id: ARRANGED_SITE_LAYER_ID,
       type: 'symbol',
       source: ARRANGEMENT_SOURCE_ID,
-      filter: buildArrangedSiteFilter(request.isFollowingLimes),
+      filter: buildArrangedSiteFilter(request.isFollowingLimes, request.typeFilter),
       layout: {
         'icon-image': buildSiteIconExpression(),
         'icon-size': scaleMarkerIconSize(['get', 'scale']),
@@ -199,7 +215,7 @@ export const buildArrangementLayers = (request: ArrangementLayerRequest): Arrang
       id: ARRANGED_LIMES_FORT_LAYER_ID,
       type: 'symbol',
       source: ARRANGEMENT_SOURCE_ID,
-      filter: buildArrangedLimesFortFilter(),
+      filter: buildArrangedLimesFortFilter(request.typeFilter),
       layout: {
         visibility: request.isFollowingLimes ? 'visible' : 'none',
         'icon-image': buildLimesRecordIconExpression(),
@@ -217,6 +233,7 @@ const readLoadedSites = (map: MapLibreMap, request: ArrangementRefreshRequest): 
 
   for (const feature of map.querySourceFeatures(request.sourceId, {
     sourceLayer: request.sourceLayer,
+    ...(request.filter ? { filter: request.filter } : {}),
   })) {
     if (typeof feature.id !== 'number' || sites.has(feature.id)) continue
     if (feature.geometry.type !== 'Point') continue

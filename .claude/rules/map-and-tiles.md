@@ -759,6 +759,51 @@ registration (`registerSiteIcons`/`registerAtlasIcons`/`registerLimesIcons`/
 marks are drawn from that same registry and both can be switched on while
 "Show sites" itself stays off.
 
+## Filtering the sites by kind (2026-10-15)
+
+`SiteTypeFilter.vue` (bottom-right column, above the settings gear, lazy-mounted
+by `pages/index.vue` only while "Sites" is on) narrows the vici sites to the kinds
+the reader picks. **It is not in the overlay list** — an overlay adds a layer, this
+changes which of an existing layer's sites are drawn — and not in the top row, which
+is already search plus three menus on a phone.
+
+- **Model** (`shared/utils/site-type-filter.ts`, tested): a selection is a list of
+  keys, `fortification` (whole category) or `fortification:fort` (one vici kind).
+  **Empty means no filter**, so it is something added, not nine switches that start
+  on. Choosing every listed kind of a category stores the category key, which also
+  keeps records whose kind vici left blank. `SITE_TYPE_GROUPS` is the 25 kinds in
+  `CATEGORY_BY_KIND` (`02-mysql-to-postgres.ts`); a kind added there needs an entry
+  and a `siteTypeFilter.subtypes.<kind>` string in six locales.
+- **Client-side filter, no tile change.** `category` and `subcategory` are already in
+  every site tile, so the filter is a `match` expression on `to-string` of each
+  (a missing kind reads `''`, not a type error). Applied by `useViewportTiles` to the
+  site, fort, halo and label layers, the arranged layers, and — via
+  `querySourceFeatures`' `filter` — to what the arrangement reads, so a hidden site
+  neither takes a ring slot nor pushes a visible one. `refreshSiteTypeFilter` sets
+  them live (a filter is not part of a style swap) and clears the arrangement first.
+- **Tracings follow the categories the selection touches** (they carry a category and
+  no kind): choosing a temple keeps sanctuary tracings and hides the rest.
+- **Clusters cannot be filtered**, so while a selection is held `isShowingClusters`
+  is false and the source is the `/api/tiles/every/…` tiles at every zoom. The
+  "Every site as its own marker" setting is left as it was and applies again after
+  "Clear". **Cost, unmeasured:** payload at zoom 3–5 on the full 61k-site import
+  (the same open question the every-site mode already carries). The server-side
+  alternative — a category-aware cluster tile — would mean a cache key per
+  selection and was not built.
+- **Not remembered**, like the overlay switches: nothing in storage, so no
+  `privacy.cookiesBody` or `gdpr-legal.md` row. **A hint that the button exists** shows
+  every time the sites are on, until the button is opened in that page load: an oxide
+  outline (an outline, not a ring — `.leaf` owns `box-shadow`) and a dot, label "…, new",
+  `useState('site-type-filter-opened')`. A first version stored "seen" in the gear's
+  `vestigian-settings-seen` list; it was dropped because one look ended the hint for
+  good and the reader reported it as missing. It does mean a returning reader sees it
+  again each visit. It appears with the gear's own dot, so two oxide marks at once.
+- **Seen working** (dev server, headless Chromium, Rome at zoom 11, light mode):
+  375×667 touch and 1280×800 — three kinds chosen, only temples/altars/milestones
+  drawn, tile source switched to `/every/`, ring arrangement intact. **Not checked:**
+  dark mode, the frontier (limes) combination, a real handset, screen-reader output.
+  `e2e/site-type-filter.spec.ts` is written, not run.
+
 ## Overlapping sites are spread into rings and grids, in the browser
 
 Requested directly: where sites overlap visually, group them into a raster
