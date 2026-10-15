@@ -43,6 +43,18 @@ The 56px is a number three places depend on — **change them together**:
 Not checked on a phone with the on-screen keyboard open (a sticky header and `visualViewport`
 shifts are a known pairing on iOS).
 
+## The limes in the menu, and "Show on the map" on a sector page
+
+`/limes` is the last entry of the menu's Reference group (after Inscriptions). `/limes/[slug]`
+has one button, `useShowSectorOnMap` — the steps the features page's sector example already did
+(`setLimesActive(true)`, `selectSector`, `requestFocus`, `navigateTo('/#map=…')`), now shared:
+`useFeatureExample` calls it too and passes its curated zoom. The sector page passes none, so the
+map fits the sector itself: the request carries `bounds` (`MapFocusRequest`), and `MapCanvas`
+calls `fitBounds` with `sectorFitPadding` — the same padding and so the same frame as a tap in
+`LimesPanel`'s list. An earlier version computed a zoom on the page for a nominal 700 px viewport and
+was visibly off; `cameraForSectorBounds` survives only to write the `#map=` hash. Verified: unit
+tests, `vue-tsc`. **Not verified in a browser.**
+
 ## The Features page
 
 `/features` (`app/pages/features.vue`), in the menu's first group and in `SITEMAP_STATIC_PATHS`.

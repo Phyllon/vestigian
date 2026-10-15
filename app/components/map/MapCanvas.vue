@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import type { Map as MapLibreMap } from 'maplibre-gl'
   import type { CameraState } from '#shared/types'
+  import { sectorFitPadding } from '#shared/utils/sector-camera'
   import { COMPASS_MOVE_FLAG } from '~/composables/map/useCompassHeading'
 
   const { t } = useI18n()
@@ -129,6 +130,9 @@
   const { chooseCandidate, offerOverlappingFeatures, clearSelection, selectedSiteId } =
     useSiteQuery()
   const { takeRequest: takeFocusRequest } = useMapFocus()
+  // The sector panel's own breakpoint, so a requested sector is framed for the
+  // layout it will actually be shown in.
+  const { isCompact } = useBreakpoint()
 
   provideMapInstance(map)
 
@@ -395,7 +399,22 @@
     // A page with no map of its own (the features page) asked for a place. Done
     // before the first frame, so the map opens there rather than travelling.
     const focusRequest = takeFocusRequest()
-    if (focusRequest) {
+    if (focusRequest?.bounds) {
+      const { west, south, east, north } = focusRequest.bounds
+      instance.fitBounds(
+        [
+          [west, south],
+          [east, north],
+        ],
+        {
+          padding: sectorFitPadding({
+            isCompact: isCompact.value,
+            mapHeight: instance.getContainer().clientHeight,
+          }),
+          duration: 0,
+        },
+      )
+    } else if (focusRequest) {
       focusClearOfRecordSheet(instance, {
         request: focusRequest,
         // Tailwind's `md`, where `SiteDetailPanel` stops being a sheet from below

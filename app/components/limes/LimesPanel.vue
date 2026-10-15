@@ -1,4 +1,5 @@
 <script setup lang="ts">
+  import { sectorFitPadding } from '#shared/utils/sector-camera'
   import type { LimesInstallation } from '#shared/types'
 
   /**
@@ -87,9 +88,7 @@
         [found.bounds.east, found.bounds.north],
       ],
       {
-        padding: isCompact.value
-          ? { top: 24, right: 24, bottom: Math.round(height * 0.58) + 16, left: 24 }
-          : { top: 32, right: 32, bottom: 32, left: 384 },
+        padding: sectorFitPadding({ isCompact: isCompact.value, mapHeight: height }),
         duration: 900,
       },
     )

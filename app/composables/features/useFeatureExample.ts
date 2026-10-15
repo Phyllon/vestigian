@@ -20,9 +20,9 @@ export type FeatureExampleStatus = 'idle' | 'opening' | 'missing' | 'failed'
  * address a reader copies from here is one they can send.
  */
 export const useFeatureExample = () => {
-  const { setSitesActive, setLimesActive } = useBasemapStyle()
-  const { selectSector } = useLimes()
+  const { setSitesActive } = useBasemapStyle()
   const { requestSectorWatchOpen } = useSectorWatchOpenRequest()
+  const { showSectorOnMap } = useShowSectorOnMap()
   const { selectSite } = useSiteQuery()
   const { requestFocus } = useMapFocus()
 
@@ -70,17 +70,9 @@ export const useFeatureExample = () => {
       return
     }
 
-    const lat = (sector.bounds.north + sector.bounds.south) / 2
-    const lon = (sector.bounds.east + sector.bounds.west) / 2
-    const { zoom } = example
-
-    setLimesActive(true)
-    selectSector(sector.slug)
     // The panel's own sector section is closed on the map; the example is about it.
     requestSectorWatchOpen(sector.slug)
-    requestFocus({ center: { lat, lon }, zoom })
-
-    await navigateTo(`/#map=${zoom.toFixed(2)}/${lat.toFixed(5)}/${lon.toFixed(5)}`)
+    await showSectorOnMap({ sector, zoom: example.zoom })
     status.value = 'idle'
   }
 

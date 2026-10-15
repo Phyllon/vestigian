@@ -663,6 +663,7 @@
     "referenced": "waarnaar verwezen"
   },
   "limesSectorPage": {
+    "showOnMap": "Toon op de kaart",
     "breadcrumb": "Kruimelpad",
     "theLimes": "De limes",
     "length": "Lengte",
@@ -677,6 +678,7 @@
     "notFound": "Dit stuk grens bestaat niet."
   },
   "limesIndexPage": {
+    "menuLabel": "De limes",
     "title": "De limes",
     "description": "De grens van het Romeinse rijk, sector per sector: zijn muren, zijn rivieren en de forten en wachttorens langs hen.",
     "intro": "De rand van de Romeinse wereld, van de Solway tot de Eufraat. Het was nooit één ding: een gemetselde muur over het Reto-plateau, een rivier gepatrouilleerd vanaf zijn westelijke oever, een reeks forten bij het laatste betrouwbare water voor de woestijn. Wat volgt is die rand in de stukken die de bronnen benoemen, ontleend aan de overblijfselen waar die in kaart zijn gebracht en nagetrokken en – gestippeld – aan de omvang van het rijk rond 200 n.Chr. volgens het Ancient World Mapping Center en zijn registratie van de muren, waar dat niet zo is.",

@@ -663,6 +663,7 @@
     "referenced": "bezug genommen"
   },
   "limesSectorPage": {
+    "showOnMap": "Auf der Karte zeigen",
     "breadcrumb": "Navigationspfad",
     "theLimes": "Der Limes",
     "length": "Länge",
@@ -677,6 +678,7 @@
     "notFound": "Keine solche Grenze."
   },
   "limesIndexPage": {
+    "menuLabel": "Der Limes",
     "title": "Der Limes",
     "description": "Die Grenze des römischen Reiches, Sektor für Sektor: seine Mauern, seine Flüsse und die Festungen und Wachtürme entlang ihnen.",
     "intro": "Der Rand der römischen Welt, vom Solway bis zum Euphrat. Er war nie ein Einzelnes: eine gemauerte Mauer über das rätische Plateau, ein Fluss, patrouilliert von seinem Westufer, eine Reihe von Kastellen am letzten verlässlichen Wasser vor der Wüste. Was folgt, ist dieser Rand in den Abschnitten, die die Quellen benennen, gezogen nach den Überresten, wo sie kartiert und nachgezeichnet sind, und – gestrichelt – nach dem Ausmaß des Imperiums um 200 n. Chr. des Ancient World Mapping Center und dessen Aufzeichnung der Mauern, wo das nicht der Fall ist.",

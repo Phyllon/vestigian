@@ -932,6 +932,7 @@
     "referenced": "referenced"
   },
   "limesSectorPage": {
+    "showOnMap": "Show on the map",
     "breadcrumb": "Breadcrumb",
     "theLimes": "The limes",
     "length": "Length",
@@ -946,6 +947,7 @@
     "notFound": "No such stretch of frontier."
   },
   "limesIndexPage": {
+    "menuLabel": "The limes",
     "title": "The limes",
     "description": "The frontier of the Roman empire, sector by sector: its walls, its rivers and the forts and watchtowers along them.",
     "intro": "The edge of the Roman world, from the Solway to the Euphrates. It was never one thing: a mortared wall across the Raetian plateau, a river patrolled from its western bank, a line of forts at the last reliable water before the desert. What follows is that edge in the stretches the sources name, drawn from the remains where they have been traced and mapped, and — dashed — from the Ancient World Mapping Center's extent of the empire at 200 CE and its record of the walls, where they have not.",

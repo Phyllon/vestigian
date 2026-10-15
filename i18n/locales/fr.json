@@ -663,6 +663,7 @@
     "referenced": "référencé"
   },
   "limesSectorPage": {
+    "showOnMap": "Afficher sur la carte",
     "breadcrumb": "Fil d'Ariane",
     "theLimes": "Le limes",
     "length": "Longueur",
@@ -677,6 +678,7 @@
     "notFound": "Aucun tel tronçon de frontière."
   },
   "limesIndexPage": {
+    "menuLabel": "Le limes",
     "title": "Le limes",
     "description": "La frontière de l'empire romain, secteur par secteur: ses murs, ses rivières et les forts et tours de guet le long d'eux.",
     "intro": "Le bord du monde romain, du Solway à l'Euphrate. Ce n'était jamais une chose unique : un mur maçonné sur le plateau rhétique, un fleuve patrouillé depuis sa rive occidentale, une ligne de forts au dernier point d'eau fiable avant le désert. Ce qui suit est ce bord dans les tronçons que les sources nomment, tiré des vestiges là où ils ont été relevés et cartographiés et, en pointillé, de l'étendue de l'empire à 200 apr. J.-C. selon l'Ancient World Mapping Center et de son relevé des murs, là où ils ne l'ont pas été.",

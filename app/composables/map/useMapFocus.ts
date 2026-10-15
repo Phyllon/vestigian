@@ -1,5 +1,5 @@
 import type { Map as MapLibreMap } from 'maplibre-gl'
-import type { LonLat } from '#shared/types'
+import type { BoundingBox, LonLat } from '#shared/types'
 import { recordSheetClearance } from '#shared/utils/record-sheet'
 
 /**
@@ -14,6 +14,13 @@ import { recordSheetClearance } from '#shared/utils/record-sheet'
 export interface MapFocusRequest {
   center: LonLat
   zoom: number
+  /**
+   * Frame this box instead of standing at `center`/`zoom`. The map fits it to
+   * its real viewport and the sector panel's padding, which no page can
+   * calculate for it; `center` and `zoom` are then only the fallback and the
+   * hash.
+   */
+  bounds?: BoundingBox
 }
 
 export const useMapFocus = () => {

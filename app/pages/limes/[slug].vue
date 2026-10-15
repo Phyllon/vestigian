@@ -32,6 +32,8 @@
     ),
   )
 
+  const { showSectorOnMap } = useShowSectorOnMap()
+
   const config = useRuntimeConfig()
   const base = config.public.siteUrl.replace(/\/$/, '')
 
@@ -117,6 +119,14 @@
         </dd>
       </div>
     </dl>
+
+    <!--
+      The one action on a page that is otherwise a document: the same overlay
+      and sector sheet a reader would reach by hand from the map.
+    -->
+    <UButton class="mt-6" icon="i-lucide-map" color="primary" @click="showSectorOnMap({ sector })">
+      {{ t('limesSectorPage.showOnMap') }}
+    </UButton>
 
     <TerrainSectorWatch :key="sector.slug" :slug="sector.slug" open class="mt-8" />
 

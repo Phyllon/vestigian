@@ -663,6 +663,7 @@
     "referenced": "referenciado"
   },
   "limesSectorPage": {
+    "showOnMap": "Mostrar en el mapa",
     "breadcrumb": "Ruta de navegación",
     "theLimes": "El limes",
     "length": "Longitud",
@@ -677,6 +678,7 @@
     "notFound": "No hay tal extensión de frontera."
   },
   "limesIndexPage": {
+    "menuLabel": "El limes",
     "title": "El limes",
     "description": "La frontera del imperio romano, sector por sector: sus muros, sus ríos y las fortalezas y torres a lo largo de ellos.",
     "intro": "El límite del mundo romano, desde el Solway hasta el Éufrates. Nunca fue una sola cosa: un muro de mampostería a través de la meseta rética, un río patrullado desde su orilla occidental, una línea de fuertes en el último punto de agua fiable antes del desierto. Lo que sigue es ese límite en los tramos que las fuentes nombran, extraído de los restos donde se han cartografiado y trazado y, en línea discontinua, de la extensión del imperio hacia el 200 d. C. según el Ancient World Mapping Center y de su registro de los muros, donde no ha sido así.",

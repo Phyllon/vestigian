@@ -43,6 +43,7 @@
         to: '/tabula-peutingeriana',
       },
       { label: t('epigraphy.menuLabel'), icon: 'i-lucide-landmark', to: '/inscriptions' },
+      { label: t('limesIndexPage.menuLabel'), icon: 'i-lucide-castle', to: '/limes' },
     ],
     [
       { type: 'label' as const, label: t('layout.menuGroupLegal') },
