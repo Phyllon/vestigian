@@ -82,7 +82,7 @@ route so a reader who never asks for them pays nothing:
   (battles, ports, routes, minor antiquities, coin hoards, empire extents,
   Tabula Peutingeriana, column relief plates, modern cities, three inscription
   corpora, Itiner-e roads, Nomisma mints, Wikidata monuments, Cliopatria realms, the
-  Atlas of Hillforts). Run once per environment, not per request.
+  Atlas of Hillforts, dated survey sites). Run once per environment, not per request.
 - **`pnpm tiles:warm`**: pre-populates the Valkey tile cache after a deploy or
   bulk import so the first visitors don't pay for cold PostGIS renders.
   Each guarded stage records its row count and a checksum in `import_runs`

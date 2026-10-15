@@ -100,7 +100,9 @@
     "showMints": "Münzstätten",
     "showMintsHint": "Wo Münzen geprägt wurden, aus Nomisma",
     "showHillforts": "Höhenbefestigungen",
-    "showHillfortsHint": "Höhenbefestigungen Britanniens und Irlands, viele unter Rom wiederbesiedelt"
+    "showHillfortsHint": "Höhenbefestigungen Britanniens und Irlands, viele unter Rom wiederbesiedelt",
+    "showSurveySites": "Datierte Survey-Stätten",
+    "showSurveySitesHint": "Siedlungen der Levante, Kammergräber und Cornwalls römisch-britische Einhegungen aus dem Ancient Sites and Monuments Survey"
   },
   "tabulaPeutingeriana": {
     "title": "Tabula Peutingeriana",
@@ -194,7 +196,9 @@
     "emptyHint": "Der Schlüssel ist vorerst leer. Sobald Sie eine Überlagerung einschalten, werden ihre Zeichen hier erklärt.",
     "politiesMark": "Umriss eines Reichs im gewählten Jahr",
     "hillfortsTitle": "Höhenbefestigungen",
-    "hillfortMark": "Höhenbefestigung, aus dem Atlas of Hillforts"
+    "hillfortMark": "Höhenbefestigung, aus dem Atlas of Hillforts",
+    "surveySitesTitle": "Datierte Survey-Stätten",
+    "surveySiteMark": "Stätte, hellenistisch bis byzantinisch datiert; blass, wenn zerstört oder nur aus Unterlagen bekannt"
   },
   "siteDetail": {
     "loading": "Wird geladen…",
@@ -433,6 +437,10 @@
       "example-coin-finds": {
         "about": "Jede Münze hier wurde von jemandem irgendwo gefunden. Wir möchten, dass Lesende sehen, wo — und das Museum kennen, das sie bewahrt.",
         "drawn": "Einzelfunde römischer Münzen als Punkte, in der Genauigkeit, die wir selbst veröffentlichen."
+      },
+      "ancient-sites-monuments-survey": {
+        "about": "Stone, timber, and earth.",
+        "drawn": "Die aus dem Survey ausgewählten datierten Stätten — darunter Siedlungen der Levante, Kammergräber und kornische Einhegungen — als Punkte, blass, wo zerstört."
       }
     }
   },
@@ -483,13 +491,14 @@
     "satelliteBody": "Die Satellitenansicht zeigt wolkenlose Sentinel-2-Aufnahmen von EOX IT Services (Wien), erstellt aus offenen Daten von ESA Copernicus Sentinel-2. Die hier verwendete Aufnahme ist CC BY-NC-SA 4.0 — nur nicht-kommerzielle Nutzung, und jede Weiterverwendung muss unter derselben Lizenz geteilt werden.",
     "reuseHeading": "Diese Daten weiterverwenden",
     "reuseBody": "Vestigian entsteht aus offen lizenzierten Quellen und veröffentlicht seine eigenen Einträge im selben Geist zurück. Beide Feeds sind schreibgeschützt, begrenzt, seitenweise abrufbar und für Anfragen von anderen Domains geöffnet. Texte stehen unter CC BY-SA, Metadaten unter CC0; Bildlizenzen unterscheiden sich je Eintrag und sind nicht enthalten.",
-    "reuseNotIncluded": "Die Feeds enthalten nur hier beigetragene Einträge. Die oben genannten Referenzebenen (Straßen, Münzstätten, Bauwerke, Inschriften und die übrigen) werden darin nicht erneut veröffentlicht – beziehen Sie sie aus ihren eigenen Quellen, unter deren Lizenzen.",
+    "reuseNotIncluded": "Die Feeds enthalten nur hier beigetragene Einträge. Die oben genannten Referenzebenen (Straßen, Münzstätten, Bauwerke, Inschriften und die übrigen) werden darin nicht erneut veröffentlicht – beziehen Sie sie aus ihren eigenen Quellen, unter deren Lizenzen. Ausnahme sind die datierten Survey-Stätten: Sie haben einen eigenen Feed unter ihrer eigenen Lizenz.",
     "reuseCreditHeading": "So nennen Sie diesen Atlas",
     "reuseCreditBody": "Vestigian ({url}), CC BY-SA 4.0. Quellen und Lizenzen: {url}/licence",
     "reuseCreditCopy": "Namensnennung kopieren",
     "reuseCreditCopied": "Namensnennung kopiert",
     "reuseGeojson": "einfaches GeoJSON, für Karten und Auswertungen",
     "reuseLinkedPlaces": "Linked Places Format, der Gazetteer-Standard des Pelagios-Netzwerks, mit closeMatch-Verknüpfungen zu Pleiades und Wikidata",
+    "reuseSurveyFeed": "die datierten Survey-Stätten als GeoJSON. ODbL 1.0 über dem Ancient Sites and Monuments Survey: Namensnennung beibehalten und jede bearbeitete Datenbank unter derselben Lizenz weitergeben. Jedes Feature nennt seine Quelle und deren Lizenz. Parameter: bbox, kind, source, limit, offset.",
     "reuseParamsHeading": "Abfrageparameter",
     "reuseParamsIntro": "Beide Feeds akzeptieren dieselben, jeweils optionalen Parameter. Die Einträge kommen in stabiler Reihenfolge, Anfragen sind ratenbegrenzt.",
     "reuseParamBbox": "West,Süd,Ost,Nord in Grad (WGS 84), zum Beispiel 6,50,8,52. Nur Fundorte innerhalb des Rechtecks. Standard: die ganze Welt.",
@@ -497,7 +506,8 @@
     "reuseParamLimit": "Einträge pro Seite, 1 bis 1000. Standard: 500.",
     "reuseParamOffset": "Zu überspringende Einträge. Um alles abzurufen, erhöhen Sie den Wert jeweils um limit, bis eine Seite weniger Einträge als limit liefert.",
     "reuseParamDated": "Nur Linked-Places-Feed. true liefert nur Einträge mit Zeitangabe; die übrigen haben gar keine Datierung.",
-    "reuseExampleLabel": "Beispiel: Befestigungen im Raum Köln, zweite Seite zu je 100"
+    "reuseExampleLabel": "Beispiel: Befestigungen im Raum Köln, zweite Seite zu je 100",
+    "overlaySurveySites": "Datierte Survey-Stätten: ausgewählt aus dem {survey} (Jensine Andresen; ODbL 1.0) — Villages to Empires, Südlevante (Titolo, Universität Turin), syro-palästinensische Kammergräber (Gwiazda), Marmarica (Laguna-Palma) und der LuwianSiteAtlas (Aşınmaz, Mutlu und Zangger), alle CC BY 4.0; der Piano Paesaggistico Regionale Sardiniens (CC BY 4.0); das Historic Environment Record von Cornwall und Scilly (Cornwall Council), Canmore (Historic Environment Scotland) und die National Heritage List for England (Historic England 2026) unter der Open Government Licence."
   },
   "impressum": {
     "title": "Rechtliche Hinweise",
@@ -704,7 +714,8 @@
       "battle": "Schlacht",
       "coin-hoard": "Münzhort",
       "feature": "Kleineres Altertum",
-      "tabula-place": "Ort der Tabula Peutingeriana"
+      "tabula-place": "Ort der Tabula Peutingeriana",
+      "survey-site": "Datierte Survey-Stätte"
     },
     "clear": "Suche leeren"
   },
@@ -835,6 +846,55 @@
       "altitude": "{metres} m über dem Meeresspiegel",
       "dated": "Datierungsbelege: {periods}",
       "viewDataset": "Atlas of Hillforts (Archaeology Data Service)"
+    },
+    "surveySite": {
+      "kind": {
+        "settlement": "Siedlung",
+        "enclosed-settlement": "Umfriedete Siedlung (Round)",
+        "hut-circle": "Hüttenkreis",
+        "courtyard-house": "Hofhaus",
+        "fogou": "Fogou",
+        "hillfort": "Höhenburg",
+        "fortification": "Befestigung",
+        "burial": "Grabstätte",
+        "building": "Gebäude",
+        "harbour": "Hafen",
+        "site": "Stätte"
+      },
+      "period": {
+        "early-iron-age": "Frühe Eisenzeit",
+        "middle-iron-age": "Mittlere Eisenzeit",
+        "late-iron-age": "Späte Eisenzeit",
+        "iron-age": "Eisenzeit",
+        "punic": "Punisch",
+        "hellenistic": "Hellenistisch",
+        "early-roman": "Frühe römische Zeit",
+        "roman": "Römisch",
+        "late-roman": "Spätrömisch",
+        "romano-british": "Römisch-britisch",
+        "byzantine": "Byzantinisch"
+      },
+      "evidence": {
+        "cropmarks": "Beruht auf Bewuchsmerkmalen (aus der Luft gesehen)",
+        "documents": "Beruht auf Urkunden",
+        "place-names": "Beruht auf Flurnamen",
+        "demolished-structure": "Beruht auf einem abgerissenen Bauwerk"
+      },
+      "source": {
+        "villages-to-empires": "Datensatz Villages to Empires (CC BY 4.0)",
+        "cornwall-her": "Historic Environment Record von Cornwall und Scilly (OGL v3)",
+        "gwiazda-chamber-tombs": "Syro-palästinensische Kammergräber, Gwiazda (CC BY 4.0)",
+        "marmarica": "Marmarica-Fundstellendatenbank, Laguna-Palma (CC BY 4.0)",
+        "canmore": "Canmore, Historic Environment Scotland (OGL)",
+        "historic-england": "National Heritage List for England, Historic England (OGL v3)",
+        "sardinia-ppr": "Piano Paesaggistico Regionale, Sardinien (CC BY 4.0)",
+        "luwian-studies": "LuwianSiteAtlas, Luwian Studies (CC BY 4.0)"
+      },
+      "dated": "{periods} ({years})",
+      "basisConvention": "Die Quelle nennt die Perioden, aber keine Jahre; die Daten sind die in der Region übliche Konvention.",
+      "destroyed": "Zerstört oder nur aus Unterlagen bekannt.",
+      "uncertain": "Unsicher: Das Register markiert diesen Eintrag mit einem Fragezeichen.",
+      "viewDataset": "Datensatz ansehen"
     }
   },
   "polityPopup": {

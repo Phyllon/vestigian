@@ -100,7 +100,9 @@
     "showMints": "Munthuizen",
     "showMintsHint": "Waar munten geslagen werden, uit Nomisma",
     "showHillforts": "Heuvelvestingen",
-    "showHillfortsHint": "Heuvelvestingen van Groot-Brittannië en Ierland, veel opnieuw bewoond onder Rome"
+    "showHillfortsHint": "Heuvelvestingen van Groot-Brittannië en Ierland, veel opnieuw bewoond onder Rome",
+    "showSurveySites": "Gedateerde surveylocaties",
+    "showSurveySitesHint": "Nederzettingen in de Levant, kamergraven en Cornwalls Romeins-Britse omheiningen, uit de Ancient Sites and Monuments Survey"
   },
   "tabulaPeutingeriana": {
     "title": "Tabula Peutingeriana",
@@ -194,7 +196,9 @@
     "emptyHint": "De legenda is voorlopig leeg. Zet een laag aan en de tekens ervan worden hier uitgelegd.",
     "politiesMark": "Omtrek van een rijk in het gekozen jaar",
     "hillfortsTitle": "Heuvelvestingen",
-    "hillfortMark": "Heuvelvestiging, uit de Atlas of Hillforts"
+    "hillfortMark": "Heuvelvestiging, uit de Atlas of Hillforts",
+    "surveySitesTitle": "Gedateerde surveylocaties",
+    "surveySiteMark": "Locatie gedateerd van hellenistisch tot Byzantijns; vervaagd als verwoest of alleen uit archieven bekend"
   },
   "siteDetail": {
     "loading": "Laden",
@@ -433,6 +437,10 @@
       "example-coin-finds": {
         "about": "Elke munt hier is door iemand ergens gevonden. We willen dat lezers zien waar — en het museum kennen dat haar bewaart.",
         "drawn": "Losse muntvondsten uit de Romeinse tijd, als punten met de nauwkeurigheid die wij zelf publiceren."
+      },
+      "ancient-sites-monuments-survey": {
+        "about": "Stone, timber, and earth.",
+        "drawn": "De gedateerde locaties die we eruit hebben gekozen — waaronder nederzettingen in de Levant, kamergraven en Cornish omheiningen — als punten, vervaagd wanneer verwoest."
       }
     }
   },
@@ -483,13 +491,14 @@
     "satelliteBody": "De satellietweergave toont wolkenloze Sentinel-2-beelden van EOX IT Services (Wenen), opgebouwd uit open data van ESA Copernicus Sentinel-2. De versie die deze app gebruikt is CC BY-NC-SA 4.0 — alleen niet-commercieel gebruik, en elk hergebruik moet onder dezelfde licentie worden gedeeld.",
     "reuseHeading": "Deze gegevens hergebruiken",
     "reuseBody": "Vestigian is opgebouwd uit open gelicentieerde bronnen en publiceert zijn eigen records in dezelfde geest terug. Beide feeds zijn alleen-lezen, begrensd, gepagineerd en open voor verzoeken vanaf andere domeinen. Teksten vallen onder CC BY-SA en metadata onder CC0; beeldlicenties verschillen per record en zijn niet inbegrepen.",
-    "reuseNotIncluded": "De feeds bevatten alleen hier bijgedragen records. De hierboven genoemde referentielagen (wegen, munthuizen, monumenten, inscripties en de rest) worden daarin niet opnieuw gepubliceerd: haal ze bij hun eigen bronnen, onder hun eigen licenties.",
+    "reuseNotIncluded": "De feeds bevatten alleen hier bijgedragen records. De hierboven genoemde referentielagen (wegen, munthuizen, monumenten, inscripties en de rest) worden daarin niet opnieuw gepubliceerd: haal ze bij hun eigen bronnen, onder hun eigen licenties. De gedateerde surveylocaties zijn de uitzondering: zij hebben een eigen feed onder hun eigen licentie.",
     "reuseCreditHeading": "Zo vermeldt u deze atlas",
     "reuseCreditBody": "Vestigian ({url}), CC BY-SA 4.0. Bronnen en licenties: {url}/licence",
     "reuseCreditCopy": "Bronvermelding kopiëren",
     "reuseCreditCopied": "Bronvermelding gekopieerd",
     "reuseGeojson": "eenvoudige GeoJSON, voor kaarten en analyse",
     "reuseLinkedPlaces": "Linked Places Format, de gazetteer-standaard van het Pelagios-netwerk, met closeMatch-verwijzingen naar Pleiades en Wikidata",
+    "reuseSurveyFeed": "de gedateerde surveylocaties, als GeoJSON. ODbL 1.0 over de Ancient Sites and Monuments Survey: behoud de naamsvermelding en deel elke bewerkte database onder dezelfde licentie. Elk object noemt zijn eigen bron en de licentie daarvan. Parameters: bbox, kind, source, limit, offset.",
     "reuseParamsHeading": "Queryparameters",
     "reuseParamsIntro": "Beide feeds nemen dezelfde parameters, allemaal optioneel. Records komen in een vaste volgorde en verzoeken zijn aan een limiet gebonden.",
     "reuseParamBbox": "West,zuid,oost,noord in graden (WGS 84), bijvoorbeeld 6,50,8,52. Alleen sites binnen het kader. Standaard: de hele wereld.",
@@ -497,7 +506,8 @@
     "reuseParamLimit": "Records per pagina, 1 tot 1000. Standaard: 500.",
     "reuseParamOffset": "Over te slaan records. Om alles op te halen, verhoogt u het telkens met limit totdat een pagina minder records geeft dan limit.",
     "reuseParamDated": "Alleen de Linked Places-feed. true geeft alleen records met een periode; de rest heeft helemaal geen datering.",
-    "reuseExampleLabel": "Voorbeeld: vestingwerken rond Keulen, tweede pagina van 100"
+    "reuseExampleLabel": "Voorbeeld: vestingwerken rond Keulen, tweede pagina van 100",
+    "overlaySurveySites": "Gedateerde surveylocaties: geselecteerd uit de {survey} (Jensine Andresen; ODbL 1.0) — Villages to Empires, zuidelijke Levant (Titolo, Universiteit van Turijn), Syrisch-Palestijnse kamergraven (Gwiazda), Marmarica (Laguna-Palma) en de LuwianSiteAtlas (Aşınmaz, Mutlu en Zangger), allemaal CC BY 4.0; het Piano Paesaggistico Regionale van Sardinië (CC BY 4.0); het Historic Environment Record van Cornwall en Scilly (Cornwall Council), Canmore (Historic Environment Scotland) en de National Heritage List for England (Historic England 2026), onder de Open Government Licence."
   },
   "impressum": {
     "title": "Mededeling",
@@ -704,7 +714,8 @@
       "battle": "Slag",
       "coin-hoard": "Muntschat",
       "feature": "Kleine oudheid",
-      "tabula-place": "Plaats op de Tabula Peutingeriana"
+      "tabula-place": "Plaats op de Tabula Peutingeriana",
+      "survey-site": "Gedateerde surveylocatie"
     },
     "clear": "Zoekopdracht wissen"
   },
@@ -835,6 +846,55 @@
       "altitude": "{metres} m boven zeeniveau",
       "dated": "Dateringsgegevens: {periods}",
       "viewDataset": "Atlas of Hillforts (Archaeology Data Service)"
+    },
+    "surveySite": {
+      "kind": {
+        "settlement": "Nederzetting",
+        "enclosed-settlement": "Omheinde nederzetting (round)",
+        "hut-circle": "Hutcirkel",
+        "courtyard-house": "Hofhuis",
+        "fogou": "Fogou",
+        "hillfort": "Heuvelfort",
+        "fortification": "Versterking",
+        "burial": "Graf",
+        "building": "Gebouw",
+        "harbour": "Haven",
+        "site": "Locatie"
+      },
+      "period": {
+        "early-iron-age": "Vroege ijzertijd",
+        "middle-iron-age": "Midden-ijzertijd",
+        "late-iron-age": "Late ijzertijd",
+        "iron-age": "IJzertijd",
+        "punic": "Punisch",
+        "hellenistic": "Hellenistisch",
+        "early-roman": "Vroeg-Romeins",
+        "roman": "Romeins",
+        "late-roman": "Laat-Romeins",
+        "romano-british": "Romeins-Brits",
+        "byzantine": "Byzantijns"
+      },
+      "evidence": {
+        "cropmarks": "Berust op cropmarks (vanuit de lucht gezien)",
+        "documents": "Berust op documenten",
+        "place-names": "Berust op plaatsnamen",
+        "demolished-structure": "Berust op een gesloopte constructie"
+      },
+      "source": {
+        "villages-to-empires": "Dataset Villages to Empires (CC BY 4.0)",
+        "cornwall-her": "Historic Environment Record van Cornwall en Scilly (OGL v3)",
+        "gwiazda-chamber-tombs": "Syrisch-Palestijnse kamergraven, Gwiazda (CC BY 4.0)",
+        "marmarica": "Sitedatabase van Marmarica, Laguna-Palma (CC BY 4.0)",
+        "canmore": "Canmore, Historic Environment Scotland (OGL)",
+        "historic-england": "National Heritage List for England, Historic England (OGL v3)",
+        "sardinia-ppr": "Piano Paesaggistico Regionale, Sardinië (CC BY 4.0)",
+        "luwian-studies": "LuwianSiteAtlas, Luwian Studies (CC BY 4.0)"
+      },
+      "dated": "{periods} ({years})",
+      "basisConvention": "De bron noemt de perioden maar geeft geen jaartallen; de data volgen de gebruikelijke conventie van de regio.",
+      "destroyed": "Verwoest, of alleen uit archieven bekend.",
+      "uncertain": "Onzeker: het register markeert dit record met een vraagteken.",
+      "viewDataset": "Bekijk de dataset"
     }
   },
   "polityPopup": {

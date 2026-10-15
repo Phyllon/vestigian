@@ -52,7 +52,7 @@ export const serveSiteTile = async (event: H3Event, options: SiteTileOptions) =>
 
   setResponseHeaders(event, {
     'content-type': 'application/vnd.mapbox-vector-tile',
-    'cache-control': 'public, max-age=3600, stale-while-revalidate=86400',
+    'cache-control': siteTileCacheControl(),
     'x-data-version': String(dataVersion),
   })
 

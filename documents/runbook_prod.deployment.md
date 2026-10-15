@@ -906,14 +906,15 @@ own Postgres so a visitor's browser asks nobody else for anything (no new CSP or
 no new third-party request). Sources, licences and the facts behind each are in
 `.claude/rules/reference-overlays.md`; the credits are on `/licence`.
 
-| Table                   | Rows (dev, 4 Oct 2026) | Layer / page                                                     |
-| ----------------------- | ---------------------- | ---------------------------------------------------------------- |
-| `antiquity_roman_roads` | 14,769                 | Overlays → Roman roads                                           |
-| `antiquity_mints`       | 2,194                  | Overlays → Mints                                                 |
-| `antiquity_monuments`   | 3,437                  | Overlays → Roman monuments                                       |
-| `antiquity_polities`    | 655 (87 realms)        | Ancient empires → Neighbouring realms (under the slider)         |
-| `isicily_inscriptions`  | 5,136 (5,009 located)  | Overlays → Sicilian inscriptions, and `/inscriptions/sicily/:id` |
-| `antiquity_hillforts`   | 4,147                  | Overlays → Hillforts                                             |
+| Table                    | Rows (dev, 4 Oct 2026) | Layer / page                                                                 |
+| ------------------------ | ---------------------- | ---------------------------------------------------------------------------- |
+| `antiquity_roman_roads`  | 14,769                 | Overlays → Roman roads                                                       |
+| `antiquity_mints`        | 2,194                  | Overlays → Mints                                                             |
+| `antiquity_monuments`    | 3,437                  | Overlays → Roman monuments                                                   |
+| `antiquity_polities`     | 655 (87 realms)        | Ancient empires → Neighbouring realms (under the slider)                     |
+| `isicily_inscriptions`   | 5,136 (5,009 located)  | Overlays → Sicilian inscriptions, and `/inscriptions/sicily/:id`             |
+| `antiquity_hillforts`    | 4,147                  | Overlays → Hillforts                                                         |
+| `antiquity_survey_sites` | 4,671 (15 Oct 2026)    | Overlays → Dated survey sites; `/api/survey-sites/sites.geojson`; map search |
 
 **Release order — everything in the reference-layers release, in sequence.** The order
 matters: restoring before the deploy finds no tables, and skipping step 5 can serve
@@ -923,7 +924,8 @@ empty tiles cached before the data arrived.
    (the compose default is now `true`) or `true`. An explicit `false` left over from
    before keeps the overlay off. Nothing else is new: no secret, no pull zone, no CSP origin.
 2. **Deploy the new build** (Dokploy → Deploy). Its `migrate` service creates the tables
-   (§14a: `0030` five tables, `0031` hillforts) before the app starts; the `migrate`
+   (§14a: `0030` five tables, `0031` hillforts, `0036` + `0037` the dated survey sites and their
+   search index — additive, `IF NOT EXISTS` where raw) before the app starts; the `migrate`
    container's log ends in `Migrations applied.`. If you already deployed an older image
    that lacks the service and applied the SQL by hand with the tracking rows (§14a fallback),
    the service finds nothing to do.

@@ -143,6 +143,20 @@
         <li>{{ t('licence.overlayIsicily') }}</li>
         <li>{{ t('licence.overlayPolities') }}</li>
         <li>{{ t('licence.overlayHillforts') }}</li>
+        <li>
+          <i18n-t keypath="licence.overlaySurveySites" scope="global">
+            <template #survey>
+              <a
+                href="https://survey.jensineandresen.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-ink-900 underline decoration-paper-400 underline-offset-2 dark:text-paper-100"
+              >
+                Ancient Sites and Monuments Survey
+              </a>
+            </template>
+          </i18n-t>
+        </li>
         <li>{{ t('licence.overlayRoadAudit') }}</li>
       </ul>
     </section>
@@ -214,6 +228,14 @@
             >/api/data/sites.lp.json</a
           >
           — {{ t('licence.reuseLinkedPlaces') }}
+        </li>
+        <li>
+          <a
+            href="/api/survey-sites/sites.geojson"
+            class="font-mono text-ink-900 underline decoration-paper-400 underline-offset-2 dark:text-paper-100"
+            >/api/survey-sites/sites.geojson</a
+          >
+          — {{ t('licence.reuseSurveyFeed') }}
         </li>
       </ul>
 

@@ -252,6 +252,14 @@
       hint: t('basemapSwitcher.showHillfortsHint'),
       setActive: (next) => setReferenceOverlayActive('hillforts', next),
     },
+    {
+      key: 'survey-sites',
+      canShow: true,
+      isActive: isShowingReferenceOverlay('survey-sites'),
+      label: t('basemapSwitcher.showSurveySites'),
+      hint: t('basemapSwitcher.showSurveySitesHint'),
+      setActive: (next) => setReferenceOverlayActive('survey-sites', next),
+    },
   ])
 
   const activeCount = computed(

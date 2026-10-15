@@ -253,6 +253,20 @@
       "when": 1791976896653,
       "tag": "0035_magenta_butterfly",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1792068640813,
+      "tag": "0036_majestic_vampiro",
+      "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1792072520913,
+      "tag": "0037_survey_sites_search",
+      "breakpoints": true
     }
   ]
 }

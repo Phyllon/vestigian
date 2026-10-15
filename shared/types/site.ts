@@ -120,7 +120,15 @@ export interface AncientPlaceSummary {
  * result is picked.
  */
 export type ReferenceSearchLayer =
-  'hillfort' | 'port' | 'monument' | 'mint' | 'battle' | 'coin-hoard' | 'feature' | 'tabula-place'
+  | 'hillfort'
+  | 'port'
+  | 'monument'
+  | 'mint'
+  | 'battle'
+  | 'coin-hoard'
+  | 'feature'
+  | 'tabula-place'
+  | 'survey-site'
 
 /**
  * A named point from one of the reference layers (hillforts, ports, monuments

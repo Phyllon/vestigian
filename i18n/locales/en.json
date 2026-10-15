@@ -178,7 +178,9 @@
     "showMints": "Mints",
     "showMintsHint": "Where coins were struck, from Nomisma",
     "showHillforts": "Hillforts",
-    "showHillfortsHint": "Hillforts of Britain and Ireland, many reoccupied under Rome"
+    "showHillfortsHint": "Hillforts of Britain and Ireland, many reoccupied under Rome",
+    "showSurveySites": "Dated survey sites",
+    "showSurveySitesHint": "Levant settlements, chamber tombs and Cornwall's Romano-British enclosures, from the Ancient Sites and Monuments Survey"
   },
   "featuredSites": {
     "title": "Featured nearby",
@@ -463,7 +465,9 @@
     "hillfortsTitle": "Hillforts",
     "hillfortMark": "Hillfort, from the Atlas of Hillforts",
     "basemapCreditDare": "Antiquity (DARE): © Johan Åhlfeldt, Gothenburg University, CC BY-SA 3.0.",
-    "basemapCreditBarrington": "Antiquity (Barrington): roads, coastline and places from the Ancient World Mapping Center (ODbL 1.0) and Pleiades (CC BY 3.0)."
+    "basemapCreditBarrington": "Antiquity (Barrington): roads, coastline and places from the Ancient World Mapping Center (ODbL 1.0) and Pleiades (CC BY 3.0).",
+    "surveySitesTitle": "Dated survey sites",
+    "surveySiteMark": "Site dated Hellenistic to Byzantine; faded where destroyed or known only from records"
   },
   "siteDetail": {
     "loading": "Loading",
@@ -702,6 +706,10 @@
       "example-coin-finds": {
         "about": "Every coin here was found by someone, somewhere. We would like readers to see where — and to know the museum that keeps it.",
         "drawn": "Single coin finds of the Roman period, as points at the precision we publish."
+      },
+      "ancient-sites-monuments-survey": {
+        "about": "Stone, timber, and earth.",
+        "drawn": "The dated sites we selected from the Survey — Levant settlements, chamber tombs and Cornish enclosures among them — as points, faded where destroyed."
       }
     }
   },
@@ -752,13 +760,14 @@
     "iconsBody": "Several map symbols are from game-icons.net (CC BY 3.0): icons made by Delapouite and Lorc, available on https://game-icons.net. The others are Lucide icons (ISC licence). The typefaces — Fraunces, IBM Plex Sans, IBM Plex Mono and, for map labels, Noto Sans — are under the SIL Open Font Licence 1.1 and are served from this site, not from a font service.",
     "reuseHeading": "Reusing this data",
     "reuseBody": "Vestigian is built from openly licensed sources, so it publishes its own records back in the same spirit. Both feeds are read-only, bounded and paged, and open to cross-origin requests. Text is CC BY-SA and metadata CC0; image licences vary per record and are not included.",
-    "reuseNotIncluded": "The feeds carry only records contributed here. The reference layers listed above (roads, mints, monuments, inscriptions and the rest) are not republished in them — take those from their own sources, under their own licences.",
+    "reuseNotIncluded": "The feeds carry only records contributed here. The reference layers listed above (roads, mints, monuments, inscriptions and the rest) are not republished in them — take those from their own sources, under their own licences. The dated survey sites are the one exception, in a feed of their own under their own licence.",
     "reuseCreditHeading": "How to credit this atlas",
     "reuseCreditBody": "Vestigian ({url}), CC BY-SA 4.0. Sources and licences: {url}/licence",
     "reuseCreditCopy": "Copy the credit line",
     "reuseCreditCopied": "Credit line copied",
     "reuseGeojson": "plain GeoJSON, for maps and analysis",
     "reuseLinkedPlaces": "Linked Places Format, the gazetteer standard read by the Pelagios Network, with closeMatch links to Pleiades and Wikidata",
+    "reuseSurveyFeed": "the dated survey sites, as GeoJSON. ODbL 1.0 over the Ancient Sites and Monuments Survey: keep the credit and share any adapted database under the same licence. Each feature names its own source and that source's licence. Parameters: bbox, kind, source, limit, offset.",
     "reuseParamsHeading": "Query parameters",
     "reuseParamsIntro": "Both feeds take the same parameters, all optional. Records come back in a stable order, and requests are rate-limited.",
     "reuseParamBbox": "West,south,east,north in degrees (WGS 84), for example 6,50,8,52. Only sites inside the box. Default: the whole world.",
@@ -766,7 +775,8 @@
     "reuseParamLimit": "Records per page, 1 to 1000. Default: 500.",
     "reuseParamOffset": "Records to skip. To fetch everything, raise it by limit each time until a page comes back with fewer records than limit.",
     "reuseParamDated": "Linked Places feed only. true returns only records that carry a period; the others have no dating at all.",
-    "reuseExampleLabel": "Example: fortifications around Cologne, second page of 100"
+    "reuseExampleLabel": "Example: fortifications around Cologne, second page of 100",
+    "overlaySurveySites": "Dated survey sites: selected from the {survey} (Jensine Andresen; ODbL 1.0) — Villages to Empires, South Levant (Titolo, University of Turin), Syro-Palestinian chamber tombs (Gwiazda), Marmarica (Laguna-Palma) and the LuwianSiteAtlas (Aşınmaz, Mutlu and Zangger), all CC BY 4.0; the Sardinian Piano Paesaggistico Regionale (CC BY 4.0); the Cornwall and Scilly Historic Environment Record (Cornwall Council), Canmore (Historic Environment Scotland) and the National Heritage List for England (Historic England 2026), under the Open Government Licence."
   },
   "impressum": {
     "title": "Legal notice",
@@ -973,7 +983,8 @@
       "battle": "Battle",
       "coin-hoard": "Coin hoard",
       "feature": "Minor antiquity",
-      "tabula-place": "Place on the Tabula Peutingeriana"
+      "tabula-place": "Place on the Tabula Peutingeriana",
+      "survey-site": "Dated survey site"
     },
     "clear": "Clear search"
   },
@@ -1104,6 +1115,55 @@
       "altitude": "{metres} m above sea level",
       "dated": "Dating evidence: {periods}",
       "viewDataset": "Atlas of Hillforts (Archaeology Data Service)"
+    },
+    "surveySite": {
+      "kind": {
+        "settlement": "Settlement",
+        "enclosed-settlement": "Enclosed settlement (round)",
+        "hut-circle": "Hut circle",
+        "courtyard-house": "Courtyard house",
+        "fogou": "Fogou",
+        "hillfort": "Hillfort",
+        "fortification": "Fortification",
+        "burial": "Burial",
+        "building": "Building",
+        "harbour": "Harbour",
+        "site": "Site"
+      },
+      "period": {
+        "early-iron-age": "Early Iron Age",
+        "middle-iron-age": "Middle Iron Age",
+        "late-iron-age": "Late Iron Age",
+        "iron-age": "Iron Age",
+        "punic": "Punic",
+        "hellenistic": "Hellenistic",
+        "early-roman": "Early Roman",
+        "roman": "Roman",
+        "late-roman": "Late Roman",
+        "romano-british": "Romano-British",
+        "byzantine": "Byzantine"
+      },
+      "evidence": {
+        "cropmarks": "Rests on cropmarks (seen from the air)",
+        "documents": "Rests on documents",
+        "place-names": "Rests on place names",
+        "demolished-structure": "Rests on a demolished structure"
+      },
+      "source": {
+        "villages-to-empires": "Villages to Empires dataset (CC BY 4.0)",
+        "cornwall-her": "Cornwall and Scilly Historic Environment Record (OGL v3)",
+        "gwiazda-chamber-tombs": "Syro-Palestinian chamber tombs, Gwiazda (CC BY 4.0)",
+        "marmarica": "Marmarica sites database, Laguna-Palma (CC BY 4.0)",
+        "canmore": "Canmore, Historic Environment Scotland (OGL)",
+        "historic-england": "National Heritage List for England, Historic England (OGL v3)",
+        "sardinia-ppr": "Piano Paesaggistico Regionale, Sardinia (CC BY 4.0)",
+        "luwian-studies": "LuwianSiteAtlas, Luwian Studies (CC BY 4.0)"
+      },
+      "dated": "{periods} ({years})",
+      "basisConvention": "The source names the periods but gives no years; the dates are the usual convention for the region.",
+      "destroyed": "Destroyed, or known only from records.",
+      "uncertain": "Uncertain: the register marks this record with a question mark.",
+      "viewDataset": "View the dataset"
     }
   },
   "polityPopup": {

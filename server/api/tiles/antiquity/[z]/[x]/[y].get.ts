@@ -41,7 +41,7 @@ export default defineEventHandler(async (event) => {
     'content-type': 'application/vnd.mapbox-vector-tile',
     // Longer than the site pyramid's hour: this changes only when someone runs
     // the import, and the version prefix is what makes that visible.
-    'cache-control': 'public, max-age=86400, stale-while-revalidate=604800',
+    'cache-control': atlasTileCacheControl(),
     'x-atlas-version': String(atlasVersion),
   })
 

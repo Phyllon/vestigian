@@ -111,7 +111,7 @@ test.describe('the reference tile endpoints', () => {
     expect(roads.headers()['content-type']).toContain('application/vnd.mapbox-vector-tile')
     expect((await roads.body()).length).toBeGreaterThan(0)
 
-    for (const layer of ['mints', 'monuments', 'isicily', 'hillforts']) {
+    for (const layer of ['mints', 'monuments', 'isicily', 'hillforts', 'survey-sites']) {
       const response = await request.get(`/api/tiles/reference/${layer}/4/8/5.mvt`)
       expect([200, 204]).toContain(response.status())
     }
@@ -119,6 +119,23 @@ test.describe('the reference tile endpoints', () => {
     // The layer name is a path segment, so it must never reach a table name unchecked.
     expect((await request.get('/api/tiles/reference/sites/4/8/5.mvt')).status()).toBe(404)
     expect((await request.get('/api/tiles/reference/mints/99/0/0.mvt')).status()).toBe(400)
+  })
+
+  test('serve the dated survey sites as a feed that states its own licence', async ({
+    request,
+  }) => {
+    const response = await request.get('/api/survey-sites/sites.geojson?limit=3')
+    expect(response.status()).toBe(200)
+    expect(response.headers()['content-type']).toContain('application/geo+json')
+    const feed = await response.json()
+    expect(feed.licence).toBe('ODbL 1.0')
+    expect(feed.survey.url).toBe('https://survey.jensineandresen.com')
+    for (const feature of feed.features) {
+      expect(feature.properties.sourceLicence).toBeTruthy()
+      expect(feature.properties.source).toBeTruthy()
+    }
+    // A kind outside the vocabulary is a 400, not a cast error reaching the database.
+    expect((await request.get('/api/survey-sites/sites.geojson?kind=nonsense')).status()).toBe(400)
   })
 
   test('serve the neighbouring realms for a year, and refuse one outside the imported span', async ({

@@ -55,6 +55,7 @@ describe('the overlay definitions', () => {
       monuments: ['monuments'],
       isicily: ['isicily'],
       hillforts: ['hillforts'],
+      'survey-sites': ['survey_sites'],
       'road-audit': ['audit_segments', 'audit_gaps'],
     }
     for (const id of REFERENCE_OVERLAY_IDS) {

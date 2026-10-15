@@ -44,6 +44,14 @@ invented, and each card carries an "Example" tag, so one card in a screenshot ca
 for an organisation that agreed to anything. No real organisation is imitated; do not name
 one in an example.
 
+**First real entry (15 Oct 2026): the Ancient Sites and Monuments Survey** (`ancient-sites-monuments-survey`,
+`database`, Jensine Andresen). Added on the maintainer's instruction with the words "Stone, timber, and
+earth."; the maintainer confirmed (15 Oct 2026) that the page's promises — credit, withdrawal by one
+email, no ranking — **have been agreed with them**; no reply document is filed under
+`documents/source-permissions/replies/` (none was supplied to this repository), so file theirs there
+when it is to hand. `about` is their words **verbatim in English in all six locales** (a quotation is not
+translated for them); `recordCount` is omitted, per "Not built" below.
+
 With no real partner the page shows an empty state and the principles — which is the honest
 state of a new project, and still the page a source is pointed to.
 

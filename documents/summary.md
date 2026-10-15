@@ -280,6 +280,7 @@ mindmap
       I.Sicily inscriptions (CC BY 4.0; 6 records CC BY-NC 4.0; text only)
       Cliopatria neighbouring realms (CC BY 4.0)
       Atlas of Hillforts of Britain and Ireland (CC BY 4.0)
+      Dated survey sites, via the Ancient Sites and Monuments Survey (ODbL 1.0; per source CC BY 4.0 / OGL)
       Natural Earth country boundaries (public domain)
       OmnesViae / Tabula Peutingeriana (no stated licence; compiler confirmed reuse)
       Wikidata battles (CC0)

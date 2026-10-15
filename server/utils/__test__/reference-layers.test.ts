@@ -13,7 +13,15 @@ const tile = { z: 8, x: 134, y: 86 }
 
 describe('isReferenceLayerId', () => {
   it('accepts the six layers and nothing else', () => {
-    for (const id of ['roman-roads', 'mints', 'monuments', 'isicily', 'hillforts', 'road-audit']) {
+    for (const id of [
+      'roman-roads',
+      'mints',
+      'monuments',
+      'isicily',
+      'hillforts',
+      'survey-sites',
+      'road-audit',
+    ]) {
       expect(isReferenceLayerId(id)).toBe(true)
     }
     // The path segment is user input; it must never reach a table name unchecked.
@@ -58,6 +66,7 @@ describe('buildReferenceTileSql', () => {
     expect(sqlFor('monuments')).toContain("'monuments'")
     expect(sqlFor('isicily')).toContain("'isicily'")
     expect(sqlFor('hillforts')).toContain("'hillforts'")
+    expect(sqlFor('survey-sites')).toContain("'survey_sites'")
   })
 
   it('draws only main roads below the secondary-road zoom, then everything', () => {
@@ -81,6 +90,16 @@ describe('buildReferenceTileSql', () => {
     expect(sqlFor('hillforts')).toContain("array_to_string(antiquity_hillforts.types, ',')")
     expect(sqlFor('hillforts')).toContain("array_to_string(antiquity_hillforts.dated_periods, ',')")
     expect(sqlFor('hillforts')).not.toContain('summary')
+  })
+
+  it('keeps destroyed and uncertain survey sites in the tile, and sends their periods as a string', () => {
+    // They are drawn faded, not filtered: a levelled round is still evidence of settlement.
+    expect(sqlFor('survey-sites')).toContain('antiquity_survey_sites.destroyed')
+    expect(sqlFor('survey-sites')).toContain('antiquity_survey_sites.uncertain')
+    expect(sqlFor('survey-sites')).not.toMatch(/WHERE[^)]*destroyed/)
+    expect(sqlFor('survey-sites')).toContain(
+      "array_to_string(antiquity_survey_sites.period_keys, ',')",
+    )
   })
 
   it('skips an inscription with no position rather than placing it at 0,0', () => {

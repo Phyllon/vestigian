@@ -2,6 +2,7 @@ import type { ExpressionSpecification, Map as MapLibreMap } from 'maplibre-gl'
 import type { LimesMark, SiteCategory } from '#shared/types'
 import { LIMES_MARKS, VICI_MARKS } from '#shared/utils/limes'
 import { MONUMENT_KINDS, type MonumentKind } from '#shared/utils/reference-overlays'
+import { SURVEY_SITE_KINDS, type SurveySiteKind } from '#shared/utils/survey-sites'
 
 /**
  * A drawn mark per category, so a fort reads as a fort at a glance rather than
@@ -1106,6 +1107,54 @@ export const HILLFORT_ICON_ID = 'vestigian-hillfort'
 export const HILLFORT_ICON_PATH =
   'M3 19.5h18M4.5 19.5c1.2-6 4-10.5 7.5-10.5s6.3 4.5 7.5 10.5M8 19.5c.8-3.2 2.3-5.3 4-5.3s3.2 2.1 4 5.3'
 
+export const SURVEY_SITE_ICON_ID = 'vestigian-survey-site'
+
+/** An enclosure ring with a dot at its centre: a place, not a building. 24-unit outline space. */
+export const SURVEY_SITE_ICON_PATH =
+  'M12 5a7 7 0 1 0 0 14a7 7 0 1 0 0-14M12 11a1 1 0 1 0 0 2a1 1 0 1 0 0-2'
+
+/**
+ * What a survey site is, drawn with the mark the atlas already uses for that kind of thing — a
+ * reader who has learnt the sites' village, castle and pyramid meets the same shapes here. The
+ * enclosure ring stays for `enclosed-settlement`, the Cornish round it was drawn for.
+ *
+ * Several kinds share a glyph on purpose: a hut circle is drawn as the enclosure ring, being the
+ * same Cornish settlement pattern one scale down; a courtyard house and an unspecified building are houses (the villa's gabled front), and a fogou
+ * or an unclassified site has no mark of its own (the atlas's generic standing stone). The key
+ * still lists each kind by name.
+ */
+export const SURVEY_SITE_KIND_GLYPHS: Record<SurveySiteKind, IconGlyph> = {
+  settlement: SITE_ICON_GLYPHS.settlement,
+  'enclosed-settlement': outline(SURVEY_SITE_ICON_PATH),
+  'hut-circle': outline(SURVEY_SITE_ICON_PATH),
+  'courtyard-house': SITE_ICON_GLYPHS.villa,
+  building: SITE_ICON_GLYPHS.villa,
+  hillfort: outline(HILLFORT_ICON_PATH),
+  fortification: SITE_ICON_GLYPHS.fortification,
+  burial: SITE_ICON_GLYPHS.burial,
+  harbour: outline(PORT_ICON_PATH),
+  fogou: SITE_ICON_GLYPHS.other,
+  site: SITE_ICON_GLYPHS.other,
+}
+
+/**
+ * The ring keeps the id it was registered under before kinds had marks of their own, and a hut
+ * circle is the same image: one canvas, not two that could drift.
+ */
+export const surveySiteIconId = (kind: SurveySiteKind): string =>
+  kind === 'enclosed-settlement' || kind === 'hut-circle'
+    ? SURVEY_SITE_ICON_ID
+    : `${SURVEY_SITE_ICON_ID}-${kind}`
+
+/** An unrecognised kind draws the ring, never nothing: a dated record is not hidden by a typo. */
+export const buildSurveySiteIconExpression = (): ExpressionSpecification =>
+  [
+    'match',
+    ['get', 'kind'],
+    ...SURVEY_SITE_KINDS.flatMap((kind) => [kind, surveySiteIconId(kind)]),
+    SURVEY_SITE_ICON_ID,
+  ] as unknown as ExpressionSpecification
+
 /**
  * Registered with the other reference marks, for the same reason as
  * `registerCoinHoardIcon`: four more canvases, cheaper than a hook that has to
@@ -1125,6 +1174,10 @@ export const registerReferenceIcons = (map: MapLibreMap, palette: SiteIconPalett
       id: monumentIconId(kind),
       glyph: MONUMENT_ICON_GLYPHS[kind],
     })),
+    ...[...new Set(SURVEY_SITE_KINDS.map((kind) => surveySiteIconId(kind)))].map((id) => {
+      const kind = SURVEY_SITE_KINDS.find((candidate) => surveySiteIconId(candidate) === id)!
+      return { id, glyph: SURVEY_SITE_KIND_GLYPHS[kind] }
+    }),
   ]
 
   for (const entry of glyphs) {

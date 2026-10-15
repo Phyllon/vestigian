@@ -141,3 +141,28 @@ describe('the marker size curve', () => {
     expect(markerDiscPixelsAt(9)).toBeCloseTo(46 * (20.8 / 24) * 0.62)
   })
 })
+
+describe('survey site marks', () => {
+  it('gives every survey kind a glyph and an image id, and keeps the ring for enclosed settlements', async () => {
+    const { SURVEY_SITE_KINDS } = await import('#shared/utils/survey-sites')
+    const { SURVEY_SITE_ICON_ID, SURVEY_SITE_KIND_GLYPHS, surveySiteIconId } =
+      await import('../useSiteIcons')
+    for (const kind of SURVEY_SITE_KINDS) {
+      expect(SURVEY_SITE_KIND_GLYPHS[kind].path.length).toBeGreaterThan(0)
+    }
+    expect(surveySiteIconId('enclosed-settlement')).toBe(SURVEY_SITE_ICON_ID)
+    // A hut circle is drawn as the same ring, not a second look-alike.
+    expect(surveySiteIconId('hut-circle')).toBe(SURVEY_SITE_ICON_ID)
+    expect(SURVEY_SITE_KIND_GLYPHS['hut-circle']).toEqual(
+      SURVEY_SITE_KIND_GLYPHS['enclosed-settlement'],
+    )
+    expect(surveySiteIconId('settlement')).not.toBe(SURVEY_SITE_ICON_ID)
+  })
+
+  it('draws the ring for a kind it does not know', async () => {
+    const { SURVEY_SITE_ICON_ID, buildSurveySiteIconExpression } = await import('../useSiteIcons')
+    const expression = buildSurveySiteIconExpression() as unknown as unknown[]
+    expect(expression[0]).toBe('match')
+    expect(expression[expression.length - 1]).toBe(SURVEY_SITE_ICON_ID)
+  })
+})

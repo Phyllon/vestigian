@@ -262,7 +262,7 @@ query. After deploying such a change, `INCRBY 2 vestigian:atlas-version` — **n
 | **EDH photographs**                                                                                         | **Rights reserved** — all 43,199 records carry Europeana `rr-f`; 2,000 local files re-checked 3 Oct 2026, none different.                                                                                                      | Metadata only.                                                                                                                                                                                                                 | **Not usable without EDH's permission.** Open TODO in the runbook (§19).                                                                                                                                                             |
 | **Pleiades**                                                                                                | CC BY 3.0                                                                                                                                                                                                                      | Already imported (29,457 places); Pleiades also publishes RDF dumps.                                                                                                                                                           | Done — and relevant if an RDF export is ever wanted.                                                                                                                                                                                 |
 
-### Ancient Sites and Monuments Survey — evaluated, not built (15 Oct 2026)
+### Ancient Sites and Monuments Survey — evaluated, then two slices built (15 Oct 2026)
 
 `.import/ancient-monuments-survey-2026-09-30.csv`: 1,313,286 points, 228 countries, 695 MB, **ODbL 1.0**
 (share-alike) over some 190 sources whose own licences are listed in the file's `#` header line. Columns:
@@ -283,10 +283,103 @@ unmatched rows: T1 classical core 1,064 (tombs, necropolis, building remains in 
 anchored by Wikidata/vici/Fasti or classical wording — **noisy**: it still holds prehistoric hypogea and
 medieval chapels), T2 classical wording 3,551 (mostly Villages to Empires, Levant), T3 Cornwall HER
 "Romano British" enclosures 2,065, T4 Fasti Online excavation records 3,931 (finds list only, no period),
-T5 nuraghi/brochs/taulas 822 (scope decision), T6 pre-classical/Pharaonic 39. **Nothing was imported.**
+T5 nuraghi/brochs/taulas 822 (scope decision), T6 pre-classical/Pharaonic 39. Two slices of it were then
+built — see "Dated survey sites" below; nothing else from the file is imported.
 
 If a source from it is ever wanted, take it **by source, not by file**: Fasti Online (CC BY-SA 4.0), the
 Villages to Empires South Levant set (CC BY 4.0), or Sardinia PPR (CC BY 4.0, "selected and converted")
 each have their own licence and can be checked against their upstream, as every other importer here is.
 Importing the combined file would put an ODbL layer, with its share-alike, into a database whose other
 layers are CC0/CC BY — a licence decision for the maintainer, not a default.
+
+What the four slices actually are (measured 15 Oct 2026, same run):
+
+- **UNESCO** — 949 unmatched rows with a `World Heritage property N` note are 66 % Spanish prehistoric
+  cave art (property 874, 627 rows), then Swiss pile dwellings; only ~10 are `ancient city`. The usable
+  value is the property number on the 145 rows that _do_ match a site we hold, not the new points.
+- **Fasti** — rows are excavation _plots_ ("Athens 2011"), not monuments; 2,152 of 4,335 record zero
+  seasons, none carry a period, 4,229 carry a deep link to a season report on fastionline.org.
+- **Roman-text** — 6,009 unmatched rows: Villages to Empires 2,269 (Levant surveys, multi-period),
+  Cornwall HER 2,072, Kwok & Peters 773 (bibliographic).
+- **Cornwall** — 1,756 of 2,065 are `round (enclosed settlement)`, which the survey files under
+  "Hillfort"; **71 % are "destroyed or known from records"** (levelled cropmarks) and 70 % "uncertain".
+  We hold 100 sites in the whole Cornwall bbox today.
+
+### Dated survey sites — `survey-sites`, built (15 Oct 2026)
+
+`pnpm import:survey-sites` → `antiquity_survey_sites`, **4,671 rows**; overlay `survey-sites` ("Dated survey
+sites"). The reader is `shared/utils/survey-sites.ts` (tested): one small grammar per upstream source,
+because the survey has no period column and a regex over every note matched bibliography titles
+("Journal of Roman Archaeology"), a surname ("Francisco Romano") and Baltic "Pre-Roman Iron Age".
+
+| Source (as the survey's `note` names it) |  Rows | Licence — fetched, 15 Oct 2026         | Period read from                                                                                                                                                                               |
+| ---------------------------------------- | ----: | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Villages to Empires, South Levant        | 2,190 | CC BY 4.0, Zenodo 17285091             | `; periods A; B; Roman-Byzantine (…);` against the dataset's own `Period`→`StartDate`/`EndDate`                                                                                                |
+| Cornwall & Scilly HER                    | 2,060 | OGL v3, data.gov.uk (Cornwall Council) | last clause, e.g. `Early Iron Age to Romano British`, against Historic England's period vocabulary (`purl.org/heritagedata/schemes/eh_period`, OGL v3: Roman 43–410, Early Iron Age −800…−300) |
+| Gwiazda, Syro-Palestinian chamber tombs  |   200 | CC BY 4.0, Zenodo 4156221              | explicit years: `BCE 63-700 CE`, `100–1 BCE`, several per shared point                                                                                                                         |
+| Marmarica (Laguna-Palma)                 |    12 | CC BY 4.0, Zenodo 7678852              | period names; **numbers are a convention** (`period_basis = 'convention'`)                                                                                                                     |
+
+- **Window −800…640.** Periods are clipped to it: "Palaeolithic to Romano British" is stored from −800.
+  Levant rows keep only Hellenistic→Byzantine atoms (Persian and earlier are not antiquity here);
+  Britain's Iron Age counts because it is the contemporary of Hellenistic/Roman Europe.
+- **Left out, counted by the run:** vici.org rows (12,891); spot-height labels such as `Elevation Point 577`
+  (91 — the `[n]` running index in a name is stripped). **Checked against the Survey's own credits page
+  (survey.jensineandresen.com, 15 Oct 2026) and still out:** Kwok & Peters (CC0, but "Roman" only in
+  bibliography titles), Latvia (CC0, but every dating is "Pre-Roman Iron Age"), the Italian GNA (**no licence
+  stated**), IPHAN (terms "being confirmed"), Portugal (CC BY-NC and absent from the Survey's own download),
+  OSM limes points (own layer). Luwian Studies **was** missing from the CSV's `#` header but the credits page
+  states CC BY 4.0, and Zenodo 17128262 agrees — so it is in.
+  Canmore and Historic England answer 403 to a script (as the PAS does); their OGL rests on the Survey's page.
+  Cornwall's Iron-Age-only and prehistoric records are also out: the ask was Romano-British.
+- **One mark per kind, from glyphs the atlas already has** (`SURVEY_SITE_KIND_GLYPHS`, `useSiteIcons.ts`):
+  settlement → the village; hut circle → the enclosure ring (the same Cornish settlement pattern at a
+  smaller scale; one image id, `surveySiteIconId`); courtyard house and building → the villa's gabled front;
+  fortification → the castle; hillfort → the hillfort hill; burial → the pyramid; harbour → the port anchor;
+  fogou and unclassified site → the generic standing stone; **enclosed settlement keeps the ring** it was
+  first drawn with. The popup and key name each kind (`referencePopup.surveySite.kind.*`), so shared marks
+  stay distinguishable by text. Names show from zoom 12: the HER titles are long ("CHYTODDEN - Iron Age
+  round, Romano British") and collide below it. Seen in a headless browser at Cornwall and the Levant
+  (rings, villages, a castle); the intro tour covered both shots, so the key panel itself was **not** viewed.
+- **Destroyed and uncertain are kept** (Cornwall: 1,483 destroyed / "known from records", 1,468 uncertain,
+  of 2,060). The tile carries `destroyed`, `uncertain`, `evidence` (cropmarks / documents / place names /
+  demolished structure); the layer fades a destroyed record to 0.45 and the popup says why. A levelled
+  round is still evidence that the place was settled.
+- **Deduplicated against the atlas at import time**: anything within 500 m of `sites`, `antiquity_places`,
+  `_hillforts`, `_monuments`, `_ports`, `_battles` or `_mints` is removed after loading (449 + 121 + … on
+  the first run), so re-running against a bigger atlas shrinks the table instead of doubling a pin.
+- **Not in `sites`** and not editable: a read-only reference layer like the hillforts. The numeric ids are
+  reassigned on every re-import; `survey_id` (the survey's `MS-…`) is the stable key.
+- **Attribution** names the Survey with its author and links the name, as its credit asks:
+  "[Ancient Sites and Monuments Survey](https://survey.jensineandresen.com) (Jensine Andresen)" — in the map
+  credit (`SURVEY_SITE_ATTRIBUTION`), the popup, and `/licence`. The address given was a Google redirect
+  wrapper; its target, `survey.jensineandresen.com`, is what is linked (answers 200 over https).
+  The Survey also says: credit the sources, and **share any adapted database under the same licence** (ODbL).
+- **Also exported, apart, and searchable.** `/api/survey-sites/sites.geojson` (see `open-data-feeds.md`
+  for why it is not in the CC BY-SA / CC0 feeds); the names are found by the map search bar
+  (`REFERENCE_SEARCH_SOURCES`, `0037_survey_sites_search.sql`, reveal switches the layer on). The
+  sitemap needs nothing — there is no page per site.
+- **A partner.** The Survey is the first real entry on `/partners` (`PARTNERS`, kind `database`, "Stone,
+  timber, and earth." in its words, no mark supplied). See `partners.md` for what that page promises.
+- **No "About this spot" block** (`spotSourceId` unset): `REFERENCE_SOURCES` holds one source per layer
+  and this layer has four; the popup carries its own source line and dataset link instead.
+- **ODbL.** The survey file is share-alike; what is stored is four upstream rows' fields as the survey
+  passes them on, each under its own checked licence. Whether the combined layer must itself be offered under
+  ODbL is **not settled** — the maintainer's call, as for the basemap's OSM data.
+- **Not seen in a browser.** Tiles verified over HTTP (Levant z7 64 KB, Cornwall z7 150 KB, both `200`);
+  the layer, popup and key were typechecked and linted but not looked at. `e2e/reference-overlays.spec.ts`
+  lists the layer (written, not run). Cornwall z7 at 150 KB is the heaviest tile of any reference layer —
+  worth measuring at z5–6 before anything is built on it.
+
+- **"Missing at low zoom, present when zoomed in" is a stale tile, not missing data** (reported 15 Oct 2026
+  after several re-imports). A tile URL carries no data generation and the route answers `max-age=86400,
+stale-while-revalidate=604800`, so a browser keeps tiles it fetched _before_ a later import: the
+  report listed exactly the first import's sources (Cornwall, the Levant, Egypt) at zoom 4 and the
+  later ones (Scotland, northern England, Anatolia, Sardinia) only at zooms never visited before.
+  Checked: every zoom-2 tile pair holds all 4,671 rows, the zoom 4 tiles over Scotland, northern
+  England, Sardinia and Anatolia hold their rows, and a fresh browser draws them at zoom 4. **Under
+  `nuxt dev` every tile route now sends `no-cache`** (`server/utils/tile-cache-control.ts`:
+  `atlasTileCacheControl()` for the atlas, reference and overlay routes and the basemap,
+  `siteTileCacheControl()` for the contributed site and tracing tiles via `site-tile.ts`); production
+  keeps the one-day and one-hour lifetimes, so after a production import purge the pull zone as the
+  runbook's "A layer is missing at some zooms only" describes. A new tile route takes the helper, not
+  a literal.

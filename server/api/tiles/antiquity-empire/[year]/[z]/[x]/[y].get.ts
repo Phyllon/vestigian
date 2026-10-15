@@ -56,7 +56,7 @@ export default defineEventHandler(async (event) => {
 
   setResponseHeaders(event, {
     'content-type': 'application/vnd.mapbox-vector-tile',
-    'cache-control': 'public, max-age=86400, stale-while-revalidate=604800',
+    'cache-control': atlasTileCacheControl(),
     'x-atlas-version': String(atlasVersion),
   })
 

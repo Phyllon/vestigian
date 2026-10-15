@@ -12,6 +12,13 @@ import {
   type ReferenceOverlayId,
 } from '#shared/utils/reference-overlays'
 import {
+  SURVEY_PERIOD_KEYS,
+  SURVEY_PROJECT,
+  SURVEY_SITE_KINDS,
+  SURVEY_SITE_SOURCES,
+  SURVEY_SITE_SOURCE_META,
+} from '#shared/utils/survey-sites'
+import {
   HILLFORT_ATTRIBUTION,
   ISICILY_ATTRIBUTION,
   MAP_LABEL_FONT,
@@ -19,6 +26,7 @@ import {
   MONUMENT_ATTRIBUTION,
   ROAD_AUDIT_ATTRIBUTION,
   ROMAN_ROAD_ATTRIBUTION,
+  SURVEY_SITE_ATTRIBUTION,
 } from './useBasemapStyle'
 import { escapeHtmlForPopup } from './popupHtml'
 import { bindOverlayListenersOnce } from './useMapInstance'
@@ -29,6 +37,7 @@ import {
   MINT_ICON_ID,
   MONUMENT_ICON_ID,
   monumentIconId,
+  buildSurveySiteIconExpression,
 } from './useSiteIcons'
 import { formatPeriod } from '../data/useSiteQuery'
 import {
@@ -485,6 +494,104 @@ export const buildHillfortPopupHtml = (
   return lines.join('<br>')
 }
 
+// --- Dated survey sites -----------------------------------------------------------
+
+export const SURVEY_SITE_SOURCE_ID = 'survey-sites'
+export const SURVEY_SITE_LAYER_ID = 'vestigian-survey-sites'
+
+/** Where each upstream dataset can be read, from the one table the export feed also uses. */
+export const SURVEY_SITE_SOURCE_LINKS: Readonly<Record<string, string>> = Object.fromEntries(
+  SURVEY_SITE_SOURCES.map((source) => [source, SURVEY_SITE_SOURCE_META[source].url]),
+)
+
+export const SURVEY_URL = SURVEY_PROJECT.url
+export const SURVEY_NAME = SURVEY_PROJECT.name
+export const SURVEY_AUTHOR = SURVEY_PROJECT.author
+
+/**
+ * A destroyed or levelled record is drawn, not dropped: it is evidence that the place was settled.
+ * It is faded rather than given a second mark, so the key stays one line longer, not one mark longer.
+ */
+export const buildSurveySiteLayers = (): LayerSpecification[] => [
+  {
+    id: SURVEY_SITE_LAYER_ID,
+    type: 'symbol',
+    source: SURVEY_SITE_SOURCE_ID,
+    'source-layer': 'survey_sites',
+    layout: {
+      'icon-image': buildSurveySiteIconExpression(),
+      'icon-size': MARKER_ICON_SIZE,
+      'icon-allow-overlap': true,
+      'text-field': ['step', ['zoom'], '', 12, ['get', 'name']],
+      'text-font': [MAP_LABEL_FONT],
+      'text-size': 11,
+      'text-offset': [0, 1.1],
+      'text-anchor': 'top',
+      'text-optional': true,
+    },
+    paint: {
+      'icon-opacity': ['case', ['to-boolean', ['get', 'destroyed']], 0.45, 1],
+      'text-color': '#35424b',
+      'text-halo-color': '#faf7ef',
+      'text-halo-width': 1.2,
+    },
+  },
+]
+
+export const buildSurveySitePopupHtml = (
+  properties: Record<string, unknown>,
+  t: ReferencePopupTranslate,
+): string => {
+  const lines = [`<strong>${escapeHtmlForPopup(text(properties.name))}</strong>`]
+
+  const kind = text(properties.kind)
+  if ((SURVEY_SITE_KINDS as readonly string[]).includes(kind)) {
+    lines.push(escapeHtmlForPopup(t(`referencePopup.surveySite.kind.${kind}`)))
+  }
+
+  // Normalised with `?? null`: a NULL column is absent from an MVT feature, not null.
+  const from = numberOrNull(properties.period_from ?? null)
+  const to = numberOrNull(properties.period_to ?? null)
+  const periods = commaList(properties.period_keys)
+    .filter((key) => (SURVEY_PERIOD_KEYS as readonly string[]).includes(key))
+    .map((key) => t(`referencePopup.surveySite.period.${key}`))
+  if (from !== null && to !== null) {
+    lines.push(
+      escapeHtmlForPopup(
+        t('referencePopup.surveySite.dated', {
+          years: formatPeriod(from, to, t),
+          periods: periods.join(', '),
+        }),
+      ),
+    )
+  }
+  if (text(properties.period_basis) === 'convention') {
+    lines.push(escapeHtmlForPopup(t('referencePopup.surveySite.basisConvention')))
+  }
+
+  if (properties.destroyed === true) {
+    lines.push(escapeHtmlForPopup(t('referencePopup.surveySite.destroyed')))
+  }
+  if (properties.uncertain === true) {
+    lines.push(escapeHtmlForPopup(t('referencePopup.surveySite.uncertain')))
+  }
+  const evidence = text(properties.evidence)
+  if (['cropmarks', 'documents', 'place-names', 'demolished-structure'].includes(evidence)) {
+    lines.push(escapeHtmlForPopup(t(`referencePopup.surveySite.evidence.${evidence}`)))
+  }
+
+  const source = text(properties.source)
+  if ((SURVEY_SITE_SOURCES as readonly string[]).includes(source)) {
+    lines.push(escapeHtmlForPopup(t(`referencePopup.surveySite.source.${source}`)))
+    const href = SURVEY_SITE_SOURCE_LINKS[source]
+    if (href) lines.push(link(href, t('referencePopup.surveySite.viewDataset')))
+  }
+  // The survey's name is the link, with its author after it, as its own credit asks.
+  lines.push(`${link(SURVEY_URL, SURVEY_NAME)} (${escapeHtmlForPopup(SURVEY_AUTHOR)})`)
+
+  return lines.join('<br>')
+}
+
 // --- The road audit -----------------------------------------------------------
 
 export const ROAD_AUDIT_SOURCE_ID = 'road-audit'
@@ -749,6 +856,14 @@ export const REFERENCE_OVERLAY_DEFINITIONS: Record<ReferenceOverlayId, Reference
       clickableLayerIds: [HILLFORT_LAYER_ID],
       buildPopupHtml: buildHillfortPopupHtml,
       spotSourceId: 'hillforts-atlas',
+    },
+    'survey-sites': {
+      id: 'survey-sites',
+      sourceId: SURVEY_SITE_SOURCE_ID,
+      attribution: SURVEY_SITE_ATTRIBUTION,
+      buildLayers: buildSurveySiteLayers,
+      clickableLayerIds: [SURVEY_SITE_LAYER_ID],
+      buildPopupHtml: buildSurveySitePopupHtml,
     },
     'road-audit': {
       id: 'road-audit',

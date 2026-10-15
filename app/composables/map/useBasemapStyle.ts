@@ -235,6 +235,9 @@ export const ISICILY_ATTRIBUTION =
 export const HILLFORT_ATTRIBUTION =
   'Hillforts: <a href="https://doi.org/10.5284/1118744" target="_blank" rel="noopener">Atlas of Hillforts</a>, Ralston &amp; Lock, via the Archaeology Data Service (CC BY 4.0)'
 
+export const SURVEY_SITE_ATTRIBUTION =
+  'Dated sites: <a href="https://survey.jensineandresen.com" target="_blank" rel="noopener">Ancient Sites and Monuments Survey</a> (Jensine Andresen; ODbL 1.0), from <a href="https://zenodo.org/records/17285091" target="_blank" rel="noopener">Villages to Empires</a>, <a href="https://zenodo.org/records/4156221" target="_blank" rel="noopener">Gwiazda</a>, <a href="https://zenodo.org/records/7678852" target="_blank" rel="noopener">Marmarica</a> and <a href="https://doi.org/10.5281/zenodo.17128262" target="_blank" rel="noopener">LuwianSiteAtlas</a> (CC BY 4.0), the Sardinian Piano Paesaggistico Regionale (CC BY 4.0), Cornwall and Scilly HER, Canmore (Historic Environment Scotland) and Historic England (OGL)'
+
 export const ROAD_AUDIT_ATTRIBUTION =
   'Road audit: calculated here from <a href="https://itiner-e.org" target="_blank" rel="noopener">Itiner-e</a> (CC BY 4.0), <a href="https://edh.ub.uni-heidelberg.de/" target="_blank" rel="noopener">Epigraphic Database Heidelberg</a> (CC BY-SA 4.0), vici.org (CC BY-SA 3.0) and terrain models'
 
@@ -2381,6 +2384,7 @@ export const useBasemapStyle = () => {
       monuments: false,
       isicily: false,
       hillforts: false,
+      'survey-sites': false,
       'road-audit': false,
     }),
   )

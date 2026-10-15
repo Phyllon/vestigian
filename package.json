@@ -80,6 +80,7 @@
     "import:isicily-inscriptions": "tsx --env-file-if-exists=.env scripts/import/24-isicily-inscriptions.ts",
     "import:cliopatria-polities": "tsx --env-file-if-exists=.env scripts/import/25-cliopatria-polities.ts",
     "import:hillforts-atlas": "tsx --env-file-if-exists=.env scripts/import/26-hillforts-atlas.ts",
+    "import:survey-sites": "tsx --env-file-if-exists=.env scripts/import/27-survey-sites.ts",
     "glyphs:build": "tsx scripts/build-glyphs.ts",
     "brand:build": "tsx scripts/generate-brand-assets.ts && pnpm icons:build && pnpm og:build",
     "og:build": "tsx scripts/generate-og-placeholders.ts",

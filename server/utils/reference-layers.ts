@@ -170,6 +170,36 @@ const hillfortTileSql = (tile: TileCoordinate): string => `
 `
 
 /**
+ * `period_keys` is a small key array and an MVT property cannot be an array, so it travels
+ * comma-joined, as `types` does for the hillforts. `evidence` is NULL for most rows and a NULL
+ * property is simply absent from the tile — the popup reads that as "not stated".
+ */
+const surveySiteTileSql = (tile: TileCoordinate): string => `
+  ${BOUNDS_CTE(tile)}
+  SELECT ST_AsMVT(ss, 'survey_sites', ${TILE_EXTENT}, 'geom', 'id') AS tile
+  FROM (
+    SELECT
+      antiquity_survey_sites.id,
+      antiquity_survey_sites.name,
+      antiquity_survey_sites.source,
+      antiquity_survey_sites.kind,
+      array_to_string(antiquity_survey_sites.period_keys, ',') AS period_keys,
+      antiquity_survey_sites.period_from,
+      antiquity_survey_sites.period_to,
+      antiquity_survey_sites.period_basis,
+      antiquity_survey_sites.destroyed,
+      antiquity_survey_sites.uncertain,
+      antiquity_survey_sites.evidence,
+      ST_AsMVTGeom(
+        ST_Transform(antiquity_survey_sites.geom, 3857), b.env, ${TILE_EXTENT}, ${TILE_BUFFER}, true
+      ) AS geom
+    FROM antiquity_survey_sites, bounds b
+    WHERE antiquity_survey_sites.geom && b.env_wgs
+  ) AS ss
+  WHERE ss.geom IS NOT NULL
+`
+
+/**
  * The road audit: two MVT layers in one tile. `audit_segments` carries only the
  * conjectured or hypothetical segments there is something to say about — a
  * milestone or road record within the buffer, or a steep stretch — because the
@@ -250,6 +280,7 @@ export const buildReferenceTileSql = (query: ReferenceTileQuery): string => {
   if (layer === 'mints') return mintTileSql(tile)
   if (layer === 'monuments') return monumentTileSql(tile)
   if (layer === 'hillforts') return hillfortTileSql(tile)
+  if (layer === 'survey-sites') return surveySiteTileSql(tile)
   if (layer === 'road-audit') return roadAuditTileSql(tile, simplifyTolerance)
   return isicilyTileSql(tile)
 }

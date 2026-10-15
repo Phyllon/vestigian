@@ -50,7 +50,7 @@ export default defineEventHandler(async (event) => {
   // Cached generously: the archive is a deploy-time asset that changes only
   // when someone re-runs the basemap import, unlike the contributed-data
   // tiles this route sits beside.
-  setResponseHeader(event, 'cache-control', 'public, max-age=86400, stale-while-revalidate=604800')
+  setResponseHeader(event, 'cache-control', atlasTileCacheControl())
 
   if (!tileResult) {
     setResponseStatus(event, 204)

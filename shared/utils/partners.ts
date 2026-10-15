@@ -44,7 +44,18 @@ export interface PartnerRecord {
  * takes an entry here and `about` + `drawn` under `partnersPage.entries.<id>` in
  * all six locales, the wording approved by the partner.
  */
-export const PARTNERS: readonly PartnerRecord[] = []
+export const PARTNERS: readonly PartnerRecord[] = [
+  {
+    id: 'ancient-sites-monuments-survey',
+    name: 'Ancient Sites and Monuments Survey',
+    url: 'https://survey.jensineandresen.com',
+    kind: 'database',
+    // No mark was supplied, so none is drawn (a name beside an invented logo would be worse).
+    // The count is left out on purpose: see "Not built" in `.claude/rules/partners.md`.
+    citation:
+      'Ancient Sites and Monuments Survey (Jensine Andresen), http://survey.jensineandresen.com',
+  },
+]
 
 /**
  * Invented organisations, on `example.org` (reserved for documentation), so the page

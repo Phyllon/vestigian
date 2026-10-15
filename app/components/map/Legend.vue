@@ -1,5 +1,6 @@
 <script setup lang="ts">
   import { MONUMENT_KINDS, REFERENCE_OVERLAY_IDS } from '#shared/utils/reference-overlays'
+  import { SURVEY_SITE_KINDS } from '#shared/utils/survey-sites'
   import type { IconGlyph } from '~/composables/map/useSiteIcons'
 
   /**
@@ -673,6 +674,44 @@
               </svg>
               <span class="text-xs text-ink-700 dark:text-paper-200">
                 {{ t(`referencePopup.monument.kind.${kind}`) }}
+              </span>
+            </li>
+          </ul>
+        </template>
+
+        <!--
+          Survey sites carry a mark per kind, drawn with glyphs the atlas already uses
+          (`SURVEY_SITE_KIND_GLYPHS`), so the key lists every kind. The sentence says what
+          fading means: a destroyed record is drawn, not dropped.
+        -->
+        <template v-if="isShowingReferenceOverlay('survey-sites')">
+          <h2 class="eyebrow mb-2 mt-3 border-t border-paper-300 pt-2.5 dark:border-night-600">
+            {{ t('legend.surveySitesTitle') }}
+          </h2>
+          <p class="mb-2 text-xs text-ink-700 dark:text-paper-200">
+            {{ t('legend.surveySiteMark') }}
+          </p>
+
+          <ul class="grid grid-cols-2 gap-x-4 gap-y-1.5">
+            <li v-for="kind in SURVEY_SITE_KINDS" :key="kind" class="flex items-center gap-2">
+              <svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  v-if="SURVEY_SITE_KIND_GLYPHS[kind].filled"
+                  :d="SURVEY_SITE_KIND_GLYPHS[kind].path"
+                  :transform="`translate(${GAME_ICON_OFFSET} ${GAME_ICON_OFFSET}) scale(${GAME_ICON_SCALE})`"
+                  fill="currentColor"
+                />
+                <path
+                  v-else
+                  :d="SURVEY_SITE_KIND_GLYPHS[kind].path"
+                  stroke="currentColor"
+                  stroke-width="1.1"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              <span class="text-xs text-ink-700 dark:text-paper-200">
+                {{ t(`referencePopup.surveySite.kind.${kind}`) }}
               </span>
             </li>
           </ul>

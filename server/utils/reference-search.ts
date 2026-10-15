@@ -28,6 +28,7 @@ export const REFERENCE_SEARCH_SOURCES: readonly {
   { layer: 'coin-hoard', table: 'antiquity_coin_hoards', column: 'name' },
   { layer: 'feature', table: 'antiquity_features', column: 'name' },
   { layer: 'tabula-place', table: 'tabula_peutingeriana_places', column: 'label' },
+  { layer: 'survey-site', table: 'antiquity_survey_sites', column: 'name' },
 ]
 
 const MAX_TOKENS = 6

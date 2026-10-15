@@ -74,7 +74,7 @@ limes frontier, Barrington-style antiquity cartography, Trajan's Column, the
 Tabula Peutingeriana, ancient ports, ORBIS routes, battles, Roman roads
 (Itiner-e), mints (Nomisma), Roman monuments (Wikidata), Sicilian inscriptions
 (I.Sicily), the Roman state's neighbours (Cliopatria), the hillforts of Britain
-and Ireland and more. **Sources, licences and what each import does:
+and Ireland, dated sites from the Ancient Sites and Monuments Survey and more. **Sources, licences and what each import does:
 [`documents/scripts.md`](documents/scripts.md).**
 
 **The import is a maintainer's job, not a setup step, and please do not run it

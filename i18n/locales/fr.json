@@ -100,7 +100,9 @@
     "showMints": "Ateliers monétaires",
     "showMintsHint": "Où les monnaies furent frappées, d'après Nomisma",
     "showHillforts": "Enceintes de hauteur",
-    "showHillfortsHint": "Enceintes de hauteur de Grande-Bretagne et d'Irlande, souvent réoccupées sous Rome"
+    "showHillfortsHint": "Enceintes de hauteur de Grande-Bretagne et d'Irlande, souvent réoccupées sous Rome",
+    "showSurveySites": "Sites datés du recensement",
+    "showSurveySitesHint": "Établissements du Levant, tombes à chambre et enclos romano-britanniques de Cornouailles, issus de l'Ancient Sites and Monuments Survey"
   },
   "tabulaPeutingeriana": {
     "title": "Tabula Peutingeriana",
@@ -194,7 +196,9 @@
     "emptyHint": "La légende est vide pour l'instant. Activez une couche et ses marques seront expliquées ici.",
     "politiesMark": "Contour d'un royaume pour l'année choisie",
     "hillfortsTitle": "Enceintes de hauteur",
-    "hillfortMark": "Enceinte de hauteur, de l'Atlas of Hillforts"
+    "hillfortMark": "Enceinte de hauteur, de l'Atlas of Hillforts",
+    "surveySitesTitle": "Sites datés du recensement",
+    "surveySiteMark": "Site daté de l'époque hellénistique à byzantine ; atténué s'il est détruit ou connu seulement par les archives"
   },
   "siteDetail": {
     "loading": "Chargement",
@@ -433,6 +437,10 @@
       "example-coin-finds": {
         "about": "Chaque monnaie ici a été trouvée par quelqu'un, quelque part. Nous voulons que les lecteurs voient où — et connaissent le musée qui la conserve.",
         "drawn": "Trouvailles isolées de monnaies d'époque romaine, en points, avec la précision que nous publions nous-mêmes."
+      },
+      "ancient-sites-monuments-survey": {
+        "about": "Stone, timber, and earth.",
+        "drawn": "Les sites datés que nous en avons retenus — dont des établissements du Levant, des tombes à chambre et des enclos de Cornouailles — en points, atténués lorsqu'ils sont détruits."
       }
     }
   },
@@ -483,13 +491,14 @@
     "satelliteBody": "La vue satellite est une image Sentinel-2 sans nuages d'EOX IT Services (Vienne), construite à partir de données ouvertes ESA Copernicus Sentinel-2. Le millésime utilisé par cette application est en CC BY-NC-SA 4.0 — usage non commercial uniquement, et toute réutilisation doit être partagée sous la même licence.",
     "reuseHeading": "Réutiliser ces données",
     "reuseBody": "Vestigian est construit à partir de sources sous licence ouverte et republie ses propres fiches dans le même esprit. Les deux flux sont en lecture seule, bornés, paginés et ouverts aux requêtes multi-origines. Les textes sont sous CC BY-SA et les métadonnées sous CC0 ; les licences des images varient selon la fiche et ne sont pas incluses.",
-    "reuseNotIncluded": "Les flux ne contiennent que les notices apportées ici. Les couches de référence énumérées plus haut (voies, ateliers, monuments, inscriptions et les autres) n'y sont pas republiées — prenez-les à leur source, sous leur propre licence.",
+    "reuseNotIncluded": "Les flux ne contiennent que les notices apportées ici. Les couches de référence énumérées plus haut (voies, ateliers, monuments, inscriptions et les autres) n'y sont pas republiées — prenez-les à leur source, sous leur propre licence. Les sites datés du recensement font exception : ils ont leur propre flux, sous leur propre licence.",
     "reuseCreditHeading": "Comment citer cet atlas",
     "reuseCreditBody": "Vestigian ({url}), CC BY-SA 4.0. Sources et licences : {url}/licence",
     "reuseCreditCopy": "Copier la mention",
     "reuseCreditCopied": "Mention copiée",
     "reuseGeojson": "GeoJSON simple, pour la cartographie et l'analyse",
     "reuseLinkedPlaces": "Linked Places Format, la norme de répertoire géographique du réseau Pelagios, avec des liens closeMatch vers Pleiades et Wikidata",
+    "reuseSurveyFeed": "les sites datés du recensement, en GeoJSON. ODbL 1.0 sur l'Ancient Sites and Monuments Survey : conservez la mention et partagez toute base adaptée sous la même licence. Chaque objet nomme sa source et la licence de celle-ci. Paramètres : bbox, kind, source, limit, offset.",
     "reuseParamsHeading": "Paramètres de requête",
     "reuseParamsIntro": "Les deux flux acceptent les mêmes paramètres, tous facultatifs. Les notices arrivent dans un ordre stable, et les requêtes sont limitées en débit.",
     "reuseParamBbox": "Ouest,sud,est,nord en degrés (WGS 84), par exemple 6,50,8,52. Seulement les sites dans le rectangle. Par défaut : le monde entier.",
@@ -497,7 +506,8 @@
     "reuseParamLimit": "Notices par page, de 1 à 1000. Par défaut : 500.",
     "reuseParamOffset": "Notices à ignorer. Pour tout récupérer, augmentez-le de limit à chaque fois jusqu'à ce qu'une page renvoie moins de notices que limit.",
     "reuseParamDated": "Flux Linked Places uniquement. true ne renvoie que les notices qui portent une période ; les autres n'ont aucune datation.",
-    "reuseExampleLabel": "Exemple : fortifications autour de Cologne, deuxième page de 100"
+    "reuseExampleLabel": "Exemple : fortifications autour de Cologne, deuxième page de 100",
+    "overlaySurveySites": "Sites datés du recensement : extraits de l'{survey} (Jensine Andresen ; ODbL 1.0) — Villages to Empires, Levant sud (Titolo, université de Turin), tombes à chambre syro-palestiniennes (Gwiazda), Marmarica (Laguna-Palma) et le LuwianSiteAtlas (Aşınmaz, Mutlu et Zangger), tous CC BY 4.0 ; le Piano Paesaggistico Regionale de Sardaigne (CC BY 4.0) ; le Historic Environment Record de Cornouailles et des Sorlingues (Cornwall Council), Canmore (Historic Environment Scotland) et la National Heritage List for England (Historic England 2026), sous Open Government Licence."
   },
   "impressum": {
     "title": "Avis juridique",
@@ -704,7 +714,8 @@
       "battle": "Bataille",
       "coin-hoard": "Trésor monétaire",
       "feature": "Petit vestige",
-      "tabula-place": "Lieu de la Table de Peutinger"
+      "tabula-place": "Lieu de la Table de Peutinger",
+      "survey-site": "Site daté du recensement"
     },
     "clear": "Effacer la recherche"
   },
@@ -835,6 +846,55 @@
       "altitude": "{metres} m au-dessus du niveau de la mer",
       "dated": "Éléments de datation : {periods}",
       "viewDataset": "Atlas of Hillforts (Archaeology Data Service)"
+    },
+    "surveySite": {
+      "kind": {
+        "settlement": "Habitat",
+        "enclosed-settlement": "Habitat enclos (round)",
+        "hut-circle": "Cercle de huttes",
+        "courtyard-house": "Maison à cour",
+        "fogou": "Fogou",
+        "hillfort": "Fort de hauteur",
+        "fortification": "Fortification",
+        "burial": "Sépulture",
+        "building": "Bâtiment",
+        "harbour": "Port",
+        "site": "Site"
+      },
+      "period": {
+        "early-iron-age": "Premier âge du Fer",
+        "middle-iron-age": "Âge du Fer moyen",
+        "late-iron-age": "Dernier âge du Fer",
+        "iron-age": "Âge du Fer",
+        "punic": "Punique",
+        "hellenistic": "Hellénistique",
+        "early-roman": "Haut-Empire précoce",
+        "roman": "Romain",
+        "late-roman": "Antiquité tardive",
+        "romano-british": "Romano-britannique",
+        "byzantine": "Byzantin"
+      },
+      "evidence": {
+        "cropmarks": "Repose sur des traces végétales (vues du ciel)",
+        "documents": "Repose sur des documents",
+        "place-names": "Repose sur la toponymie",
+        "demolished-structure": "Repose sur une structure démolie"
+      },
+      "source": {
+        "villages-to-empires": "Jeu de données Villages to Empires (CC BY 4.0)",
+        "cornwall-her": "Historic Environment Record de Cornouailles et des Sorlingues (OGL v3)",
+        "gwiazda-chamber-tombs": "Tombes à chambre syro-palestiniennes, Gwiazda (CC BY 4.0)",
+        "marmarica": "Base de sites de Marmarique, Laguna-Palma (CC BY 4.0)",
+        "canmore": "Canmore, Historic Environment Scotland (OGL)",
+        "historic-england": "National Heritage List for England, Historic England (OGL v3)",
+        "sardinia-ppr": "Piano Paesaggistico Regionale, Sardaigne (CC BY 4.0)",
+        "luwian-studies": "LuwianSiteAtlas, Luwian Studies (CC BY 4.0)"
+      },
+      "dated": "{periods} ({years})",
+      "basisConvention": "La source nomme les périodes sans donner d'années ; les dates suivent la convention usuelle de la région.",
+      "destroyed": "Détruit, ou connu seulement par les archives.",
+      "uncertain": "Incertain : le registre marque cette notice d'un point d'interrogation.",
+      "viewDataset": "Voir le jeu de données"
     }
   },
   "polityPopup": {

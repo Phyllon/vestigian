@@ -524,6 +524,45 @@ export const antiquityHillforts = pgTable(
   (table) => [index('antiquity_hillforts_geom_idx').using('gist', table.geom)],
 )
 
+/**
+ * Sites read out of the Ancient Sites and Monuments Survey (ODbL 1.0, 1.3 M points) that the
+ * survey itself does not date in a column: four of its upstream sources — Villages to Empires
+ * (South Levant, CC BY 4.0), Gwiazda's chamber tombs (CC BY 4.0), Marmarica (CC BY 4.0) and
+ * the Cornwall & Scilly HER (OGL v3) — state a Hellenistic-to-Byzantine period in prose, which
+ * `shared/utils/survey-sites.ts` reads. Own table, never joined to `sites`; the importer
+ * (`scripts/import/27-survey-sites.ts`) keeps only what lies more than 500 m from anything the
+ * atlas already holds.
+ *
+ * `periodFrom`/`periodTo` are years (BCE negative) clipped to −800…640; `periodKeys` are the
+ * named periods inside that window, in the vocabulary of `SURVEY_PERIOD_KEYS`. `periodBasis` says
+ * whether the numbers come from the source's own vocabulary, its explicit dates, or a convention.
+ *
+ * `destroyed` and `uncertain` are the HER's own judgements ("known from records", "the HER marks
+ * this type with a question mark") and are **kept, not filtered**: a levelled round is still
+ * evidence that the place was settled, and the interface draws it hollow. `evidence` is what the
+ * record rests on (cropmarks, documents, place names, a demolished structure).
+ */
+export const antiquitySurveySites = pgTable(
+  'antiquity_survey_sites',
+  {
+    id: serial('id').primaryKey(),
+    /** The survey's own id ("MS-004712"); the natural key and the audit trail back to the CSV. */
+    surveyId: varchar('survey_id', { length: 16 }).notNull().unique(),
+    source: varchar('source', { length: 32 }).notNull(),
+    name: varchar('name', { length: 240 }).notNull(),
+    kind: varchar('kind', { length: 24 }).notNull(),
+    periodKeys: text('period_keys').array().notNull().default([]),
+    periodFrom: integer('period_from').notNull(),
+    periodTo: integer('period_to').notNull(),
+    periodBasis: varchar('period_basis', { length: 24 }).notNull(),
+    destroyed: boolean('destroyed').notNull().default(false),
+    uncertain: boolean('uncertain').notNull().default(false),
+    evidence: varchar('evidence', { length: 24 }),
+    geom: pointGeometry('geom').notNull(),
+  },
+  (table) => [index('antiquity_survey_sites_geom_idx').using('gist', table.geom)],
+)
+
 export const limesSegmentKindEnum = pgEnum('limes_segment_kind', ['barrier', 'river', 'notional'])
 
 /**

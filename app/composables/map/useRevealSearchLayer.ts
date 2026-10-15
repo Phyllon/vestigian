@@ -18,6 +18,7 @@ export const useRevealSearchLayer = () => {
 
   const reveal = new Map<ReferenceSearchLayer, () => void>([
     ['hillfort', () => setReferenceOverlayActive('hillforts', true)],
+    ['survey-site', () => setReferenceOverlayActive('survey-sites', true)],
     ['monument', () => setReferenceOverlayActive('monuments', true)],
     ['mint', () => setReferenceOverlayActive('mints', true)],
     ['port', () => setPortsActive(true)],

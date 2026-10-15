@@ -101,6 +101,7 @@ pnpm import:wikidata-monuments  # → 3,437 Roman monuments, Wikidata, CC0, ~30 
 pnpm import:isicily-inscriptions # → 5,136 Sicilian inscriptions, I.Sicily, CC BY 4.0 (6 × CC BY-NC), ~15 s
 pnpm import:cliopatria-polities # → 655 slices of 87 neighbouring realms, Cliopatria, CC BY 4.0, ~15 s
 pnpm import:hillforts-atlas     # → 4,147 hillforts of Britain and Ireland, Atlas of Hillforts, CC BY 4.0, ~10 s
+pnpm import:survey-sites        # → 4,671 dated sites out of .import/ancient-monuments-survey-*.csv (695 MB, read once, ~2 min)
 pnpm tiles:warm <url>
 ```
 

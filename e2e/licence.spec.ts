@@ -32,6 +32,11 @@ test.describe('the licence page', () => {
       page.getByText('Cliopatria, Seshat Global History Databank (CC BY 4.0)'),
     ).toBeVisible()
     await expect(page.getByText('the Atlas of Hillforts, Ralston & Lock')).toBeVisible()
+    // The survey is named, linked, and its feed is listed beside the two site feeds.
+    await expect(
+      page.getByRole('link', { name: 'Ancient Sites and Monuments Survey' }),
+    ).toHaveAttribute('href', 'https://survey.jensineandresen.com')
+    await expect(page.getByRole('link', { name: '/api/survey-sites/sites.geojson' })).toBeVisible()
     // The photographs are the one thing left out, and the page says why.
     await expect(
       page.getByText('the photographs are not, because they are not licensed'),

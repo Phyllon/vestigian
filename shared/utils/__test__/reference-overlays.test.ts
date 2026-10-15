@@ -11,6 +11,7 @@ describe('reference overlay ids', () => {
       'monuments',
       'road-audit',
       'roman-roads',
+      'survey-sites',
     ])
   })
 

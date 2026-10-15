@@ -100,7 +100,9 @@
     "showMints": "Zecche",
     "showMintsHint": "Dove si batteva moneta, da Nomisma",
     "showHillforts": "Fortificazioni di altura",
-    "showHillfortsHint": "Fortificazioni di altura di Gran Bretagna e Irlanda, molte rioccupate sotto Roma"
+    "showHillfortsHint": "Fortificazioni di altura di Gran Bretagna e Irlanda, molte rioccupate sotto Roma",
+    "showSurveySites": "Siti datati del censimento",
+    "showSurveySitesHint": "Insediamenti del Levante, tombe a camera e recinti romano-britannici della Cornovaglia, dall'Ancient Sites and Monuments Survey"
   },
   "tabulaPeutingeriana": {
     "title": "Tabula Peutingeriana",
@@ -194,7 +196,9 @@
     "emptyHint": "La legenda per ora è vuota. Attivi un livello e i suoi segni verranno spiegati qui.",
     "politiesMark": "Contorno di un regno nell'anno scelto",
     "hillfortsTitle": "Fortificazioni di altura",
-    "hillfortMark": "Fortificazione di altura, dall'Atlas of Hillforts"
+    "hillfortMark": "Fortificazione di altura, dall'Atlas of Hillforts",
+    "surveySitesTitle": "Siti datati del censimento",
+    "surveySiteMark": "Sito datato dall'età ellenistica a quella bizantina; attenuato se distrutto o noto solo da documenti"
   },
   "siteDetail": {
     "loading": "Caricamento",
@@ -433,6 +437,10 @@
       "example-coin-finds": {
         "about": "Ogni moneta qui è stata trovata da qualcuno, da qualche parte. Vorremmo che i lettori vedessero dove — e conoscessero il museo che la custodisce.",
         "drawn": "Ritrovamenti singoli di monete di epoca romana, come punti con la precisione che noi stessi pubblichiamo."
+      },
+      "ancient-sites-monuments-survey": {
+        "about": "Stone, timber, and earth.",
+        "drawn": "I siti datati che ne abbiamo selezionato — tra cui insediamenti del Levante, tombe a camera e recinti della Cornovaglia — come punti, attenuati se distrutti."
       }
     }
   },
@@ -483,13 +491,14 @@
     "satelliteBody": "La vista satellitare mostra immagini Sentinel-2 senza nuvole di EOX IT Services (Vienna), costruite a partire dai dati aperti ESA Copernicus Sentinel-2. La versione usata da questa app è CC BY-NC-SA 4.0 — solo uso non commerciale, e ogni riutilizzo deve essere condiviso con la stessa licenza.",
     "reuseHeading": "Riutilizzare questi dati",
     "reuseBody": "Vestigian nasce da fonti con licenza aperta e ripubblica le proprie schede nello stesso spirito. Entrambi i flussi sono in sola lettura, limitati, paginati e aperti alle richieste da altri domini. I testi sono CC BY-SA e i metadati CC0; le licenze delle immagini variano per scheda e non sono incluse.",
-    "reuseNotIncluded": "I feed contengono solo le schede contribuite qui. I livelli di riferimento elencati sopra (strade, zecche, monumenti, iscrizioni e gli altri) non vi sono ripubblicati: prendeteli dalle loro fonti, con le loro licenze.",
+    "reuseNotIncluded": "I feed contengono solo le schede contribuite qui. I livelli di riferimento elencati sopra (strade, zecche, monumenti, iscrizioni e gli altri) non vi sono ripubblicati: prendeteli dalle loro fonti, con le loro licenze. I siti datati del censimento fanno eccezione: hanno un feed proprio, con la propria licenza.",
     "reuseCreditHeading": "Come citare questo atlante",
     "reuseCreditBody": "Vestigian ({url}), CC BY-SA 4.0. Fonti e licenze: {url}/licence",
     "reuseCreditCopy": "Copia l’attribuzione",
     "reuseCreditCopied": "Attribuzione copiata",
     "reuseGeojson": "GeoJSON semplice, per mappe e analisi",
     "reuseLinkedPlaces": "Linked Places Format, lo standard di repertorio geografico della rete Pelagios, con collegamenti closeMatch a Pleiades e Wikidata",
+    "reuseSurveyFeed": "i siti datati del censimento, in GeoJSON. ODbL 1.0 sull'Ancient Sites and Monuments Survey: mantenere il credito e condividere ogni database adattato con la stessa licenza. Ogni elemento nomina la propria fonte e la licenza di questa. Parametri: bbox, kind, source, limit, offset.",
     "reuseParamsHeading": "Parametri di richiesta",
     "reuseParamsIntro": "Entrambi i feed accettano gli stessi parametri, tutti facoltativi. Le schede arrivano in un ordine stabile e le richieste sono limitate in frequenza.",
     "reuseParamBbox": "Ovest,sud,est,nord in gradi (WGS 84), per esempio 6,50,8,52. Solo i siti dentro il riquadro. Predefinito: tutto il mondo.",
@@ -497,7 +506,8 @@
     "reuseParamLimit": "Schede per pagina, da 1 a 1000. Predefinito: 500.",
     "reuseParamOffset": "Schede da saltare. Per ottenere tutto, aumentalo ogni volta di limit finché una pagina restituisce meno schede di limit.",
     "reuseParamDated": "Solo il feed Linked Places. true restituisce solo le schede con un periodo; le altre non hanno alcuna datazione.",
-    "reuseExampleLabel": "Esempio: fortificazioni attorno a Colonia, seconda pagina da 100"
+    "reuseExampleLabel": "Esempio: fortificazioni attorno a Colonia, seconda pagina da 100",
+    "overlaySurveySites": "Siti datati del censimento: selezionati dall'{survey} (Jensine Andresen; ODbL 1.0) — Villages to Empires, Levante meridionale (Titolo, Università di Torino), tombe a camera siro-palestinesi (Gwiazda), Marmarica (Laguna-Palma) e il LuwianSiteAtlas (Aşınmaz, Mutlu e Zangger), tutti CC BY 4.0; il Piano Paesaggistico Regionale della Sardegna (CC BY 4.0); il Historic Environment Record di Cornovaglia e Scilly (Cornwall Council), Canmore (Historic Environment Scotland) e la National Heritage List for England (Historic England 2026), con Open Government Licence."
   },
   "impressum": {
     "title": "Avviso legale",
@@ -704,7 +714,8 @@
       "battle": "Battaglia",
       "coin-hoard": "Ripostiglio monetale",
       "feature": "Testimonianza minore",
-      "tabula-place": "Luogo della Tabula Peutingeriana"
+      "tabula-place": "Luogo della Tabula Peutingeriana",
+      "survey-site": "Sito datato del censimento"
     },
     "clear": "Cancella ricerca"
   },
@@ -835,6 +846,55 @@
       "altitude": "{metres} m sul livello del mare",
       "dated": "Elementi di datazione: {periods}",
       "viewDataset": "Atlas of Hillforts (Archaeology Data Service)"
+    },
+    "surveySite": {
+      "kind": {
+        "settlement": "Insediamento",
+        "enclosed-settlement": "Insediamento recintato (round)",
+        "hut-circle": "Cerchio di capanne",
+        "courtyard-house": "Casa a corte",
+        "fogou": "Fogou",
+        "hillfort": "Fortificazione d'altura",
+        "fortification": "Fortificazione",
+        "burial": "Sepoltura",
+        "building": "Edificio",
+        "harbour": "Porto",
+        "site": "Sito"
+      },
+      "period": {
+        "early-iron-age": "Prima età del Ferro",
+        "middle-iron-age": "Media età del Ferro",
+        "late-iron-age": "Tarda età del Ferro",
+        "iron-age": "Età del Ferro",
+        "punic": "Punico",
+        "hellenistic": "Ellenistico",
+        "early-roman": "Prima età romana",
+        "roman": "Romano",
+        "late-roman": "Tardo romano",
+        "romano-british": "Romano-britannico",
+        "byzantine": "Bizantino"
+      },
+      "evidence": {
+        "cropmarks": "Si basa su tracce da vegetazione (viste dall'alto)",
+        "documents": "Si basa su documenti",
+        "place-names": "Si basa su toponimi",
+        "demolished-structure": "Si basa su una struttura demolita"
+      },
+      "source": {
+        "villages-to-empires": "Dataset Villages to Empires (CC BY 4.0)",
+        "cornwall-her": "Historic Environment Record di Cornovaglia e Scilly (OGL v3)",
+        "gwiazda-chamber-tombs": "Tombe a camera siro-palestinesi, Gwiazda (CC BY 4.0)",
+        "marmarica": "Database dei siti della Marmarica, Laguna-Palma (CC BY 4.0)",
+        "canmore": "Canmore, Historic Environment Scotland (OGL)",
+        "historic-england": "National Heritage List for England, Historic England (OGL v3)",
+        "sardinia-ppr": "Piano Paesaggistico Regionale, Sardegna (CC BY 4.0)",
+        "luwian-studies": "LuwianSiteAtlas, Luwian Studies (CC BY 4.0)"
+      },
+      "dated": "{periods} ({years})",
+      "basisConvention": "La fonte indica i periodi ma non gli anni; le date seguono la convenzione abituale della regione.",
+      "destroyed": "Distrutto, o noto solo da documenti.",
+      "uncertain": "Incerto: il registro contrassegna questa scheda con un punto interrogativo.",
+      "viewDataset": "Vedi il dataset"
     }
   },
   "polityPopup": {
