@@ -431,6 +431,7 @@ harder-to-diagnose outage.
 ## 14. Database migration
 
 ```bash
+PG=<postgres-container>
 # local: full dump, not pnpm db:snapshot (which excludes antiquity_* —
 # correct for nightly backups, wrong for a one-time initial load)
 pg_dump "$NUXT_DATABASE_URL" -Fc --no-owner --no-acl -f vestigian-full.dump
@@ -441,7 +442,7 @@ rsync -avP vestigian-full.dump deploy@<vps-ip>:/tmp/   # apt install rsync first
 # on the VPS, restore into the already-running container — --clean --if-exists
 # makes this safe against tables that already exist (a restored dump is the schema at
 # that moment; later migrations are applied by the `migrate` service, §14a)
-docker exec -i <postgres-container> pg_restore \
+docker exec -i $PG pg_restore \
   --no-owner --no-acl --clean --if-exists \
   -U vestigian -d vestigian < /tmp/vestigian-full.dump
 docker compose -f <compose-path> restart app   # reconnect cleanly, not against dropped/recreated objects
@@ -475,8 +476,9 @@ emergency), apply the SQL by hand. The tracking rows matter: Drizzle's record is
 inserting them keeps the automatic service consistent afterwards.
 
 ```bash
+PG=<postgres-container>
 # 1. VPS — what does production already have? The newest created_at is the cut-off.
-docker exec <postgres-container> psql -U vestigian -d vestigian -At -c \
+docker exec $PG psql -U vestigian -d vestigian -At -c \
   "SELECT max(created_at) FROM drizzle.__drizzle_migrations"
 #   → e.g. 1789328264139 (0029). If the schema "drizzle" does not exist at all, stop and
 #   look: production was not built from a dump of a migrated database.
@@ -498,7 +500,7 @@ grep -c "^CREATE TABLE" pending-migrations.sql      # 6 for 0030 + 0031
 rsync -avP pending-migrations.sql deploy@<vps-ip>:/tmp/
 
 # 3. VPS — apply it. One transaction: a failure leaves the database untouched.
-docker exec -i <postgres-container> psql -U vestigian -d vestigian \
+docker exec -i $PG psql -U vestigian -d vestigian \
   -v ON_ERROR_STOP=1 < /tmp/pending-migrations.sql
 ```
 
@@ -523,6 +525,9 @@ Until the data is loaded, every existing production row reads as `source = 'exte
 the new app draws the **old** geometry, all dashed (approximate) — safe, just not better.
 
 ```bash
+PG=<postgres-container>
+MG=<migrate-container>
+VK=<valkey-container>
 # 1. Local — re-run the import (needs import:atlas and import:convert already done), then dump.
 pnpm import:limes
 docker exec vestigian-dev-postgres-1 pg_dump -U vestigian -d vestigian \
@@ -531,25 +536,25 @@ rsync -avP limes.dump deploy@<vps-ip>:/tmp/
 
 # 2. VPS — after the deploy, first confirm migration 0033 ran. Do not restore until this
 #    shows a `source` column (character varying(16), not null, default 'extent').
-docker ps --format '{{.Names}}' | grep -i postgres          # the <postgres-container> name
-docker exec <postgres-container> psql -U vestigian -d vestigian -c '\d limes_segments'
+docker ps --format '{{.Names}}' | grep -i postgres          # the $PG name
+docker exec $PG psql -U vestigian -d vestigian -c '\d limes_segments'
 #    Same check in plain SQL — must return exactly one row:
-#    docker exec <postgres-container> psql -U vestigian -d vestigian -c \
+#    docker exec $PG psql -U vestigian -d vestigian -c \
 #      "SELECT column_name, data_type, column_default FROM information_schema.columns
 #       WHERE table_name = 'limes_segments' AND column_name = 'source'"
 #    No `source`: the migration did not run. Read the `migrate` container's log
-#    (`docker ps -a`, then `docker logs <migrate-container>`) and redeploy; never restore into it.
-docker exec <postgres-container> psql -U vestigian -d vestigian -c \
+#    (`docker ps -a`, then `docker logs $MG`) and redeploy; never restore into it.
+docker exec $PG psql -U vestigian -d vestigian -c \
   "TRUNCATE limes_sectors, limes_segments RESTART IDENTITY CASCADE"
-docker exec -i <postgres-container> pg_restore --no-owner --no-acl --data-only \
+docker exec -i $PG pg_restore --no-owner --no-acl --data-only \
   -U vestigian -d vestigian < /tmp/limes.dump
 
 # 3. VPS — check: 24 rows over five sources, none of them only 'extent'.
-docker exec <postgres-container> psql -U vestigian -d vestigian -c \
+docker exec $PG psql -U vestigian -d vestigian -c \
   "SELECT source, count(*), round(sum(ST_Length(geom::geography))/1000) AS km FROM limes_segments GROUP BY 1"
 
 # 4. VPS — bump the atlas generation (the limes tiles ride it), then purge the CDN.
-docker exec <valkey-container> valkey-cli INCRBY vestigian:atlas-version 2
+docker exec $VK valkey-cli INCRBY vestigian:atlas-version 2
 #    Bunny: purge the pull zone's cache for /api/tiles/limes/ (query strings are ignored in
 #    the cache key, and these tiles carry no version in the path).
 ```
@@ -572,6 +577,7 @@ keeps serving. Until the data is loaded the sector panel simply shows no "Watchi
 section: the endpoint answers `null`, which is an ordinary answer.
 
 ```bash
+PG=<postgres-container>
 # 1. Local — after `pnpm import:limes`, with the terrain reachable.
 pnpm sightlines:build
 docker exec vestigian-dev-postgres-1 pg_dump -U vestigian -d vestigian \
@@ -579,14 +585,14 @@ docker exec vestigian-dev-postgres-1 pg_dump -U vestigian -d vestigian \
 rsync -avP sightlines.dump deploy@<vps-ip>:/tmp/
 
 # 2. VPS — after the deploy: confirm the table exists, then load.
-docker exec <postgres-container> psql -U vestigian -d vestigian -c '\d limes_sector_sightlines'
-docker exec <postgres-container> psql -U vestigian -d vestigian -c \
+docker exec $PG psql -U vestigian -d vestigian -c '\d limes_sector_sightlines'
+docker exec $PG psql -U vestigian -d vestigian -c \
   "TRUNCATE limes_sector_sightlines"
-docker exec -i <postgres-container> pg_restore --no-owner --no-acl --data-only \
+docker exec -i $PG pg_restore --no-owner --no-acl --data-only \
   -U vestigian -d vestigian < /tmp/sightlines.dump
 
 # 3. VPS — check: nine sectors on the 12 Oct 2026 import; the largest layers are the Upper German.
-docker exec <postgres-container> psql -U vestigian -d vestigian -c \
+docker exec $PG psql -U vestigian -d vestigian -c \
   "SELECT sector_slug, model_version, computed_at::date,
           (summary->>'towerCount')::int AS towers,
           pg_column_size(layers) / 1024 AS layers_kb
@@ -619,6 +625,8 @@ resynchronised. Rows are updated in place, so ids, mirrored photographs and veri
 survive. The VPS then receives the dev tables whole.
 
 ```bash
+PG=<postgres-container>
+VK=<valkey-container>
 # 0. Local — leave account data out before anything is loaded. These tables hold e-mail
 #    addresses, password hashes and live reset/confirmation codes; no importer reads them.
 mkdir -p .import/vici-2026-10
@@ -654,33 +662,43 @@ pnpm import:limes
 pnpm sightlines:build
 pnpm roads:audit
 
-# 4. Local — dump the vici-bearing tables whole, in one file.
-docker exec vestigian-dev-postgres-1 pg_dump -U vestigian -d vestigian -Fc --no-owner --no-acl --data-only \
+# 4. Local — dump the vici-bearing tables whole, from a throwaway copy with the dev-only rows
+#    removed. Dev test records carry created_by = <dev user id>; the VPS has no such user, and a
+#    failed COPY rolls back the whole table (sites), taking its dependants with it.
+docker exec vestigian-dev-postgres-1 psql -U vestigian -d postgres -c "CREATE DATABASE vici_ship TEMPLATE vestigian"
+docker exec vestigian-dev-postgres-1 psql -U vestigian -d vici_ship -c \
+  "DELETE FROM sites WHERE source_ref IS NULL; DELETE FROM tracings WHERE source_ref IS NULL"
+docker exec vestigian-dev-postgres-1 pg_dump -U vestigian -d vici_ship -Fc --no-owner --no-acl --data-only \
   -t sites -t tracings -t site_images -t external_ids -t external_id_verifications \
   -t limes_sectors -t limes_segments -t limes_sector_sightlines \
+  -t road_audit_segments -t road_audit_gaps \
   > vici-refresh.dump
+docker exec vestigian-dev-postgres-1 psql -U vestigian -d postgres -c "DROP DATABASE vici_ship"
 docker exec -i vestigian-dev-postgres-1 pg_restore --list < vici-refresh.dump | grep -c 'TABLE DATA'   # expect 10
 rsync -avP vici-refresh.dump deploy@<vps-ip>:/tmp/
 
-# 5. VPS — after the deploy (migrations applied, §14a). One transaction: a failure changes nothing.
-docker exec <postgres-container> psql -U vestigian -d vestigian -v ON_ERROR_STOP=1 -c \
+# 5. VPS — after the deploy (migrations applied, §14a). TRUNCATE and restore are separate commands:
+#    a failed restore leaves a half-loaded database — re-run the TRUNCATE, then the restore.
+docker exec $PG psql -U vestigian -d vestigian -v ON_ERROR_STOP=1 -c \
   "TRUNCATE sites, tracings, site_images, external_ids, external_id_verifications,
             limes_sectors, limes_segments, limes_sector_sightlines, road_audit_segments,
             road_audit_gaps, site_visits, site_bookmarks, site_endorsements RESTART IDENTITY CASCADE"
-docker exec -i <postgres-container> pg_restore --no-owner --no-acl --data-only \
+docker exec -i $PG pg_restore --no-owner --no-acl --data-only --exit-on-error \
   -U vestigian -d vestigian < /tmp/vici-refresh.dump
-docker exec <postgres-container> psql -U vestigian -d vestigian -c \
+#    If a restore fails midway, run the TRUNCATE above again before retrying: tables that did
+#    load would otherwise be doubled.
+docker exec $PG psql -U vestigian -d vestigian -c \
   "SELECT setval(pg_get_serial_sequence('sites','id'), (SELECT max(id) FROM sites)),
           setval(pg_get_serial_sequence('tracings','id'), (SELECT max(id) FROM tracings)),
           setval(pg_get_serial_sequence('site_images','id'), (SELECT max(id) FROM site_images)),
           setval(pg_get_serial_sequence('external_ids','id'), (SELECT max(id) FROM external_ids))"
 
 # 6. VPS — check, then invalidate. Site tiles ride data-version, atlas/limes tiles atlas-version.
-docker exec <postgres-container> psql -U vestigian -d vestigian -c \
+docker exec $PG psql -U vestigian -d vestigian -c \
   "SELECT (SELECT count(*) FROM sites) sites, (SELECT count(*) FROM tracings) tracings,
           (SELECT count(*) FROM site_images WHERE status='approved') approved_images"
-docker exec <valkey-container> valkey-cli INCR vestigian:data-version
-docker exec <valkey-container> valkey-cli INCRBY vestigian:atlas-version 2
+docker exec $VK valkey-cli INCR vestigian:data-version
+docker exec $VK valkey-cli INCRBY vestigian:atlas-version 2
 #    Bunny: purge /api/tiles/ and the sitemap pages. Then `docker compose restart app`.
 ```
 
@@ -694,12 +712,13 @@ above but run `import:convert` **without** `--refresh` against a scratch copy of
 (an existing record is then left alone). Then stage and ship only vici-derived rows:
 
 ```bash
+PG=<postgres-container>
 docker exec -i vestigian-dev-postgres-1 psql -U vestigian -d vestigian -v ON_ERROR_STOP=1 < scripts/import/sql/vici-stage.sql
 docker exec vestigian-dev-postgres-1 pg_dump -U vestigian -d vestigian -Fc --no-owner --no-acl -n vici_stage > vici-stage.dump
 rsync -avP vici-stage.dump scripts/import/sql/vici-merge.sql deploy@<vps-ip>:/tmp/
-docker exec -i <postgres-container> pg_restore --no-owner --no-acl -U vestigian -d vestigian < /tmp/vici-stage.dump
-docker exec -i <postgres-container> psql -U vestigian -d vestigian -v ON_ERROR_STOP=1 < /tmp/vici-merge.sql
-docker exec <postgres-container> psql -U vestigian -d vestigian -c 'DROP SCHEMA vici_stage CASCADE'
+docker exec -i $PG pg_restore --no-owner --no-acl -U vestigian -d vestigian < /tmp/vici-stage.dump
+docker exec -i $PG psql -U vestigian -d vestigian -v ON_ERROR_STOP=1 < /tmp/vici-merge.sql
+docker exec $PG psql -U vestigian -d vestigian -c 'DROP SCHEMA vici_stage CASCADE'
 ```
 
 It adds new sites, tracings, identifiers and images only. A slug already taken by another row
@@ -909,7 +928,7 @@ empty tiles cached before the data arrived.
    that lacks the service and applied the SQL by hand with the tracking rows (§14a fallback),
    the service finds nothing to do.
 3. **Confirm the tables exist and are empty:**
-   `docker exec <postgres-container> psql -U vestigian -d vestigian -c "SELECT count(*) FROM antiquity_hillforts"`
+   `docker exec $PG psql -U vestigian -d vestigian -c "SELECT count(*) FROM antiquity_hillforts"` (`PG=<postgres-container>`)
    → `0`.
 4. **Load the data** — "Load the data" below, steps 1–3 (local imports, data-only dump,
    restore, count check).
@@ -934,6 +953,8 @@ Postgres. Do **not** run the import scripts on the VPS: they need the repository
 Node and the `.import/` caches, and the dump is the route §14 already established.
 
 ```bash
+PG=<postgres-container>
+VK=<valkey-container>
 # 1. Local — the dev database already holds the data (counts in the table above); re-run
 #    the six `pnpm import:*` scripts first only when refreshing. There is no local
 #    pg_dump, so dump through the dev container (PostgreSQL 17, same as production).
@@ -948,14 +969,14 @@ docker exec -i vestigian-dev-postgres-1 pg_restore --list < reference-layers.dum
 rsync -avP reference-layers.dump deploy@<vps-ip>:/tmp/
 
 # 2. VPS — the deploy must be done (migrations applied, §14a), so the tables exist and are empty.
-docker exec <postgres-container> psql -U vestigian -d vestigian -c \
+docker exec $PG psql -U vestigian -d vestigian -c \
   "TRUNCATE antiquity_roman_roads, antiquity_mints, antiquity_monuments,
             antiquity_polities, isicily_inscriptions, antiquity_hillforts RESTART IDENTITY"
-docker exec -i <postgres-container> pg_restore \
+docker exec -i $PG pg_restore \
   --no-owner --no-acl --data-only -U vestigian -d vestigian < /tmp/reference-layers.dump
 
 # 3. VPS — check the counts against the table above.
-docker exec <postgres-container> psql -U vestigian -d vestigian -c "
+docker exec $PG psql -U vestigian -d vestigian -c "
   SELECT 'roads' AS t, count(*) FROM antiquity_roman_roads UNION ALL
   SELECT 'mints', count(*) FROM antiquity_mints UNION ALL
   SELECT 'monuments', count(*) FROM antiquity_monuments UNION ALL
@@ -969,7 +990,7 @@ docker exec <postgres-container> psql -U vestigian -d vestigian -c "
 #    INCRBY 2, never plain INCR: an unset counter already reads as 1, and INCR on a missing
 #    key creates it at 1 — the generation would not move and every cached tile (including
 #    the empty ones) would stay valid. INCRBY 2 lands on 2 when unset, N+2 otherwise.
-docker exec <valkey-container> valkey-cli INCRBY vestigian:atlas-version 2
+docker exec $VK valkey-cli INCRBY vestigian:atlas-version 2
 #    Check: any tile response must now carry x-atlas-version of 2 or more, never 1.
 curl -sI https://<domain>/api/tiles/reference/hillforts/9/252/170.mvt | grep -i x-atlas-version
 ```
@@ -1200,7 +1221,8 @@ verification, unlike Telegram.
 Test:
 
 ```bash
-docker exec <alertmanager-container> wget -qO- \
+AM=<alertmanager-container>
+docker exec $AM wget -qO- \
   --post-data='[{"labels":{"alertname":"test","severity":"warning"}}]' \
   --header='Content-Type: application/json' http://localhost:9093/api/v2/alerts
 ```
@@ -1215,7 +1237,8 @@ role-escalation endpoint would be worse than one manual SQL statement.
 
 1. Register normally, confirm the email.
 2. ```bash
-   docker exec -it <postgres-container> psql -U vestigian -d vestigian \
+   PG=<postgres-container>
+   docker exec -it $PG psql -U vestigian -d vestigian \
      -c "UPDATE users SET role = 'admin' WHERE email = '<your-email>';"
    ```
 3. Reload the site — role is re-read from the DB on every request, no
@@ -1226,7 +1249,8 @@ first suspect is §9's "Strip response cookies" setting on Bunny, not the app.
 Confirmed with:
 
 ```bash
-docker exec <app-container> node -e '
+AP=<app-container>
+docker exec $AP node -e '
 fetch("http://127.0.0.1:3000/api/auth/login", {
   method: "POST", headers: { "content-type": "application/json" },
   body: JSON.stringify({ email: "...", password: "..." }),
@@ -1400,9 +1424,3 @@ backup container needs no ssh client, key or known_hosts.
    ```bash
    RESTIC_REPOSITORY=/mnt/netcup-backup/restic RESTIC_PASSWORD=... docker/restore-drill.sh --offsite
    ```
-
-**Known weakening.** A previous SFTP design could restrict the key to one path;
-an NFS mount is writable by anything on the VPS that can reach it, so a
-compromised host can delete the repository as well as write it. Treat the Storage
-Space as a second copy, keep the local 14-day dumps, and consider a periodic copy
-to a second, unrelated target.

@@ -60,6 +60,31 @@
   const isOpen = ref(false)
   const root = useTemplateRef('root')
   const trigger = useTemplateRef('trigger')
+  const menu = useTemplateRef('menu')
+
+  /**
+   * Where the list was last scrolled to. The menu is `v-if`, so closing it —
+   * or leaving the map for a record page and coming back — destroys the
+   * scroller, and every reopening started at "Show sites" again, which is the
+   * wrong end of a list the reader had scrolled down to reach a layer near its
+   * bottom. `useState` outlives the component across client-side navigations;
+   * a hard reload forgets it, like the switches themselves.
+   */
+  const savedScrollTop = useState<number>('overlay-menu-scroll-top', () => 0)
+
+  const rememberScroll = (): void => {
+    savedScrollTop.value = menu.value?.scrollTop ?? 0
+  }
+
+  watch(
+    isOpen,
+    async (open) => {
+      if (!open) return
+      await nextTick()
+      if (menu.value) menu.value.scrollTop = savedScrollTop.value
+    },
+    { flush: 'post' },
+  )
 
   const close = (): void => {
     isOpen.value = false
@@ -140,14 +165,6 @@
       setActive: setPortsActive,
     },
     {
-      key: 'routes',
-      canShow: canShowRoutes.value,
-      isActive: isShowingRoutes.value,
-      label: t('basemapSwitcher.showRoutes'),
-      hint: t('basemapSwitcher.showRoutesHint'),
-      setActive: setRoutesActive,
-    },
-    {
       key: 'features',
       canShow: canShowFeatures.value,
       isActive: isShowingFeatures.value,
@@ -186,6 +203,14 @@
       label: t('basemapSwitcher.showIsicily'),
       hint: t('basemapSwitcher.showIsicilyHint'),
       setActive: (next) => setReferenceOverlayActive('isicily', next),
+    },
+    {
+      key: 'routes',
+      canShow: canShowRoutes.value,
+      isActive: isShowingRoutes.value,
+      label: t('basemapSwitcher.showRoutes'),
+      hint: t('basemapSwitcher.showRoutesHint'),
+      setActive: setRoutesActive,
     },
     {
       key: 'roman-roads',
@@ -309,9 +334,11 @@
       <div
         v-if="isOpen"
         id="overlay-choices"
+        ref="menu"
         role="menu"
         :aria-label="t('overlaySwitcher.menuLabel')"
         class="leaf absolute right-0 top-full z-20 mt-2 max-h-[70vh] w-64 overflow-y-auto shadow-lifted"
+        @scroll.passive="rememberScroll"
       >
         <!--
           A toggle whose own `canShow` is false (the Tabula Peutingeriana

@@ -699,6 +699,14 @@ is one of the listed entries and goes off with the rest. It uses `aria-disabled`
 when nothing is on, because it is the focused element when the last layer goes
 off. Written into `e2e/reference-overlays.spec.ts`, not run.
 
+**Scroll position and order (2026-10-15).** The menu is `v-if`, so its scroller was destroyed on every
+close and the list reopened at the top. `OverlaySwitcher.vue` keeps `scrollTop` in
+`useState('overlay-menu-scroll-top')` (written on `@scroll`, restored after `nextTick` on open): it
+survives closing and client-side navigation, not a hard reload — same as the switches. Not
+`localStorage`, which would need a `privacy.cookiesBody` and `gdpr-legal.md` row for a pixel offset.
+"Ancient routes" is listed directly above "Roman roads" and "Road audit" (the three line layers
+together); the order is the array order in `overlayToggles`.
+
 ## The vici-sourced site/tracing overlay is off by default
 
 `isShowingSites` (`useBasemapStyle.ts`) gates `OVERLAY_SOURCE_ID`
