@@ -1789,8 +1789,15 @@ have their own browse pages.
   panel opens regardless, so before this a searched fortification arrived as an
   open record with no marker and no selection ring — `MapCanvas`'s `isShowingSites`
   watcher attaches the layer and rings the record. Covered by `e2e/site-search.spec.ts`
-  (written, not run). **Not done:** an ancient-place result is only drawn on the
-  Barrington sheet, and it does not change the reader's basemap.
+  (written, not run).
+- **Picking an ancient place switches the basemap to Barrington** (`setView('antiquity-awmc')`
+  when it is not already showing) — the name exists only in that sheet's data, so on any other
+  basemap the camera arrived at nothing. Goes through `setView`, so the sheet is remembered
+  (`vestigian-basemap-view`) like any switch of it. It also **opens the place's info box**
+  (`revealAtlasPlace`, `useAtlasPlaceOverlay.ts`): the feature is read from the loaded `atlas`
+  tiles with `querySourceFeatures` by id (not `queryRenderedFeatures` — a label lost to
+  collision is still in the tile), retried on each `idle` up to six times while the camera
+  flies and the sheet swaps. Not run in a browser.
 - The input is `type="text" role="searchbox"`, not `type="search"`: the native
   search type draws its own clear button on hover, a second X beside ours.
 - Debounce is 450 ms (`SEARCH_DEBOUNCE_MS`) — four requests go out per search.

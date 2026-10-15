@@ -261,3 +261,32 @@ query. After deploying such a change, `INCRBY 2 vestigian:atlas-version` — **n
 | **Oxford Roman Economy Project** databases (shipwrecks, mines, quarries, presses, cities, water technology) | **None stated** on the pages ("Content: OXREP, 2005–2026").                                                                                                                                                                    | Pages reachable.                                                                                                                                                                                                               | **Not usable without permission.** Open TODO in the runbook (§19).                                                                                                                                                                   |
 | **EDH photographs**                                                                                         | **Rights reserved** — all 43,199 records carry Europeana `rr-f`; 2,000 local files re-checked 3 Oct 2026, none different.                                                                                                      | Metadata only.                                                                                                                                                                                                                 | **Not usable without EDH's permission.** Open TODO in the runbook (§19).                                                                                                                                                             |
 | **Pleiades**                                                                                                | CC BY 3.0                                                                                                                                                                                                                      | Already imported (29,457 places); Pleiades also publishes RDF dumps.                                                                                                                                                           | Done — and relevant if an RDF export is ever wanted.                                                                                                                                                                                 |
+
+### Ancient Sites and Monuments Survey — evaluated, not built (15 Oct 2026)
+
+`.import/ancient-monuments-survey-2026-09-30.csv`: 1,313,286 points, 228 countries, 695 MB, **ODbL 1.0**
+(share-alike) over some 190 sources whose own licences are listed in the file's `#` header line. Columns:
+`survey_id, wikidata_id, name, category, type_in_source, country, lat, lon, note, sources, register_id,
+osm_id` — **no period column**; dating lives only in `note` free text (vici `(city; 1200 BC to later)`,
+Sardinian `Età Romano imperiale`, Cornwall `Early Iron Age to Romano British`, Canmore `(ROMAN)`).
+Header says IPHAN and Portugal are "terms to confirm"; ~1 km-rounded locations are marked in `note`.
+
+It is overwhelmingly prehistoric northern Europe (barrows, cairns, stone settings: Sweden, UK, Ireland,
+Denmark). Matched against `sites` + `external_ids` + the `antiquity_*` tables + the local Pleiades CSV
+(id match, then ≤150 m with a name token in common): **95.3 % is farther than 500 m from anything we
+hold**, 0.7 % an id duplicate. Atlas of Hillforts rows are 96 % duplicates of `antiquity_hillforts` — skip.
+Vici.org rows are 67 % id duplicates; the ~1,000 unmatched were not in the 2026 dump (not investigated).
+Pleiades links in it (546) are all already ours.
+
+A tiered review set (11,472 rows, `.import/review/antiquity-review-set.csv`, gitignored) was cut from the
+unmatched rows: T1 classical core 1,064 (tombs, necropolis, building remains in Roman-world countries,
+anchored by Wikidata/vici/Fasti or classical wording — **noisy**: it still holds prehistoric hypogea and
+medieval chapels), T2 classical wording 3,551 (mostly Villages to Empires, Levant), T3 Cornwall HER
+"Romano British" enclosures 2,065, T4 Fasti Online excavation records 3,931 (finds list only, no period),
+T5 nuraghi/brochs/taulas 822 (scope decision), T6 pre-classical/Pharaonic 39. **Nothing was imported.**
+
+If a source from it is ever wanted, take it **by source, not by file**: Fasti Online (CC BY-SA 4.0), the
+Villages to Empires South Levant set (CC BY 4.0), or Sardinia PPR (CC BY 4.0, "selected and converted")
+each have their own licence and can be checked against their upstream, as every other importer here is.
+Importing the combined file would put an ODbL layer, with its share-alike, into a database whose other
+layers are CC0/CC BY — a licence decision for the maintainer, not a default.

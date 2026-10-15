@@ -6,8 +6,9 @@
   const map = useMapInstance()
   const { term, results, isSearching } = useSiteSearch()
   const { selectSite } = useSiteQuery()
-  const { setSitesActive } = useBasemapStyle()
+  const { view, setView, setSitesActive } = useBasemapStyle()
   const revealSearchLayer = useRevealSearchLayer()
+  const { revealAtlasPlace } = useAtlasPlaceOverlay()
   const { countryName } = useCountryName()
 
   /**
@@ -46,6 +47,11 @@
    * is a point of the same size, and also switches its layer on — see
    * `useRevealSearchLayer`.
    *
+   * An ancient place is drawn only by the Barrington sheet, so picking one
+   * from any other basemap switches to it — otherwise the camera arrives at
+   * a spot with no mark and no name — and its info box is opened as well,
+   * because the name is all the reader asked for.
+   *
    * A site is drawn by the "Show sites" layer, which is off until a reader
    * switches it on, so picking one turns it on as well — otherwise the camera
    * arrives with the record open and nothing marking it (the featured list and
@@ -83,6 +89,10 @@
       selectSite(result.id)
     }
     if (result.kind === 'reference') revealSearchLayer(result.layer)
+    if (result.kind === 'ancient-place') {
+      if (view.value !== 'antiquity-awmc') setView('antiquity-awmc')
+      if (map.value) revealAtlasPlace(map.value, { id: result.id, position: result.position })
+    }
     term.value = ''
   }
 
